@@ -25,6 +25,9 @@
     <Filter Include="ThirdParty\pugixml">
       <UniqueIdentifier>{e14183e9-a79d-4332-be2d-695acb69bfed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{4e7f3267-14e0-42dc-af1e-94e1a811f20a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\VulkanManager.h">
@@ -36,7 +39,19 @@
     <ClInclude Include="..\ThirdParty\pugixml\pugiconfig.hpp">
       <Filter>ThirdParty\pugixml</Filter>
     </ClInclude>
-    <ClInclude Include="Core\XMLStream.h">
+    <ClInclude Include="Common\HString.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ConsoleDebug.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Common.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\XMLStream.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\VulkanRenderer.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,7 +65,13 @@
     <ClCompile Include="..\ThirdParty\pugixml\pugixml.cpp">
       <Filter>ThirdParty\pugixml</Filter>
     </ClCompile>
-    <ClCompile Include="Core\XMLStream.cpp">
+    <ClCompile Include="Common\ConsoleDebug.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\XMLStream.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\VulkanRenderer.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
   </ItemGroup>
