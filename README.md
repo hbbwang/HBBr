@@ -13,8 +13,8 @@ Hbb Renderer.
 2.编辑器使用了assimp作为资产的导入导出  
 3.使用pugixml辅助外部配置  
    
-最终打包的独立渲染器:
-1.Imgui,pugixml保留
-2.不会带有QT的内容  
-3.不会带有assimp
+最终打包的独立渲染器: 
+1.Imgui,pugixml保留 
+2.不会带有QT的内容   
+3.不会带有assimp 
 
