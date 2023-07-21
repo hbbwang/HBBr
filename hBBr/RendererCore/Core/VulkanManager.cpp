@@ -4,6 +4,7 @@
 #include "pugixml.hpp"
 #include "HString.h"
 #include "ConsoleDebug.h"
+
 //导入Vulkan静态库
 #pragma comment(lib ,"vulkan-1.lib")
 
@@ -55,7 +56,7 @@ VulkanDebugCallback(
 	ConsoleDebug::print_endl(title + HString("@[") + layer_prefix + "]", color);
 	ConsoleDebug::print_endl(msg, color);
 	if(bError)
-		MessageOut(HString(title + HString("@[") + layer_prefix + "]\n" + msg).c_str());
+		MessageOut(HString(title + HString("@[") + layer_prefix + "]\n" + msg).c_str(),false,true);
 	return false;
 }
 
@@ -580,6 +581,74 @@ void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain)
 	}
 }
 
+void VulkanManager::CreateImage(uint32_t width , uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image)
+{
+	VkExtent2D texSize = {};
+	texSize.width = width;
+	texSize.height = height;
+	VkImageCreateInfo	create_info{};
+	create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+	create_info.flags = 0;
+	create_info.format = format;
+	create_info.imageType = VK_IMAGE_TYPE_2D;
+	create_info.usage = usageFlags;
+	create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+	create_info.arrayLayers = 1;
+	create_info.mipLevels = 1;
+	create_info.extent.depth = 1;
+	create_info.extent.width = texSize.width;
+	create_info.extent.height = texSize.height;
+	create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	create_info.queueFamilyIndexCount = VK_QUEUE_FAMILY_IGNORED;
+	create_info.pQueueFamilyIndices = nullptr;
+	create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	create_info.samples = VK_SAMPLE_COUNT_1_BIT;
+	auto result = vkCreateImage(_device, &create_info, nullptr, &image);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut("Create vulkan image failed.",false,false);
+	}
+}
+
+void VulkanManager::CreateImageViewAndMemory(VkImage& inImage, VkFormat format, VkImageAspectFlags aspectFlags, VkDeviceMemory& imageViewMemory, VkImageView& imageView, VkMemoryPropertyFlags memoryPropertyFlag)
+{
+	if (inImage == VK_NULL_HANDLE)
+	{
+		MessageOut("Create vulkan image view failed.VkImage is NULL.", false, false);
+		return;
+	}
+	VkMemoryRequirements mem_requirement;
+	vkGetImageMemoryRequirements(_device, inImage, &mem_requirement);
+	VkMemoryAllocateInfo memory_allocate_info{};
+	memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	memory_allocate_info.allocationSize = mem_requirement.size;
+	memory_allocate_info.memoryTypeIndex = FindMemoryTypeIndex(&mem_requirement, memoryPropertyFlag);
+	auto err = vkAllocateMemory(_device, &memory_allocate_info, nullptr, &imageViewMemory);
+	if (VK_SUCCESS != err) {
+		MessageOut("Create vulkan image view failed.VkImage is NULL.", false, false);
+	}
+	err = vkBindImageMemory(_device, inImage, imageViewMemory, 0);
+	if (VK_SUCCESS != err) {
+		MessageOut("Create vulkan image view failed.VkImage is NULL.", false, false);
+	}
+	VkImageViewCreateInfo image_view_create_info{};
+	image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	image_view_create_info.flags = 0;
+	image_view_create_info.image = inImage;
+	image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	image_view_create_info.format = format;
+	image_view_create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+	image_view_create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+	image_view_create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+	image_view_create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+	image_view_create_info.subresourceRange.aspectMask = aspectFlags;
+	image_view_create_info.subresourceRange.baseArrayLayer = 0;
+	image_view_create_info.subresourceRange.baseMipLevel = 0;
+	image_view_create_info.subresourceRange.layerCount = 1;
+	image_view_create_info.subresourceRange.levelCount = 1;
+	vkCreateImageView(_device, &image_view_create_info, nullptr, &imageView);
+}
+
 HString VulkanManager::GetVkResult(VkResult code)
 {
 	HString text = "Code: ";
@@ -706,10 +775,12 @@ HString VulkanManager::GetVkResult(VkResult code)
 	return text;
 }
 
-void MessageOut(const char* msg, bool bExit)
+void MessageOut(const char* msg, bool bExit, bool bMessageBox)
 {
 #if defined(_WIN32)
-	MessageBoxA(NULL, msg, "message", MB_ICONERROR);
+	printf(msg);
+	if(bMessageBox)
+		MessageBoxA(NULL, msg, "message", MB_ICONERROR);
 #else
 	printf(msg);
 	fflush(stdout);

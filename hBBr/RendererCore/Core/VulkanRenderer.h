@@ -19,6 +19,13 @@ public:
 		return _surface;
 	}
 
+	__forceinline static int GetSwapchainBufferIndex() {
+		return _swapchainBufferIndex;
+	}
+
+	/* 帧渲染函数 */
+	void Render();
+
 private:
 	
 	static VulkanManager* _vulkanManager;
@@ -28,4 +35,6 @@ private:
 	VkSurfaceFormatKHR _surfaceFormat{};
 
 	VkSwapchainKHR _swapchain;
+
+	static int _swapchainBufferIndex;
 };

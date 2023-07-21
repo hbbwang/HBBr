@@ -1,7 +1,7 @@
 ﻿#include "VulkanRenderer.h"
 
 VulkanManager* VulkanRenderer::_vulkanManager = NULL;
-
+int  VulkanRenderer::_swapchainBufferIndex = 0;
 
 VulkanRenderer::VulkanRenderer(void* windowHandle , bool bDebug)
 {
@@ -31,4 +31,9 @@ VulkanRenderer::~VulkanRenderer()
 		delete _vulkanManager;
 		_vulkanManager = NULL;
 	}
+}
+
+void VulkanRenderer::Render()
+{
+
 }

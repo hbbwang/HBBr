@@ -54,6 +54,12 @@ public:
 	/* 释放Swapchain */
 	void DestroySwapchain(VkSwapchainKHR& swapchain);
 
+	/* 创建Vulkan image ,但是不带 mipmaps */
+	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image);
+
+	/* 根据VkImageView ,创建Vulkan image view*/
+	void CreateImageViewAndMemory(VkImage& inImage, VkFormat format, VkImageAspectFlags aspectFlags, VkDeviceMemory& imageViewMemory , VkImageView& imageView, VkMemoryPropertyFlags memoryPropertyFlag = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
 	/* 获取平台 */
 	__forceinline EPlatform GetPlatform()const {
 		return _currentPlatform;
@@ -120,4 +126,4 @@ private:
 
 };
 
-void MessageOut(const char* msg, bool bExit = false);
+void MessageOut(const char* msg, bool bExit = false, bool bMessageBox = false);

@@ -5,25 +5,39 @@
 #include <vector>
 #include <iostream>
 #include "HString.h"
-
-#include "vulkan.h"
+//Vulkan api
+#include "vulkan/vulkan.h"
 
 class Texture
 {
 public:
-	Texture();
+	Texture() {}
 	__forceinline VkImage GetTexture()const {
-		return _iamge;
+		return _image;
 	}
+	__forceinline VkImageView GetTextureView()const {
+		return _imageView;
+	}
+	static std::shared_ptr<Texture> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags);
+
 private:
-	VkImage _iamge;
+	VkImage _image;
+	VkImageView _imageView;
+	VkDeviceMemory _imageViewMemory;
+	VkFormat _format;
+	VkImageUsageFlags _usageFlags;
 };
 
 class FrameBufferTexture
 {
 public:
 
-	FrameBufferTexture();
+	FrameBufferTexture() {}
 
-	std::vector<Texture*> _frameBufferTextures;
+	static std::shared_ptr<FrameBufferTexture> CreateFrameBuffer(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags);
+
+	std::shared_ptr<Texture> GetBuffer();
+
+private:
+	std::vector<std::shared_ptr<Texture>> _frameBufferTextures;
 };
