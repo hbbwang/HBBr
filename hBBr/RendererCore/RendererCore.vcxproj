@@ -163,6 +163,7 @@
     <ClInclude Include="Common\ConsoleDebug.h" />
     <ClInclude Include="Common\HString.h" />
     <ClInclude Include="Common\XMLStream.h" />
+    <ClInclude Include="Core\Texture.h" />
     <ClInclude Include="Core\VulkanManager.h" />
     <ClInclude Include="Core\VulkanRenderer.h" />
   </ItemGroup>
@@ -170,6 +171,7 @@
     <ClCompile Include="..\ThirdParty\pugixml\pugixml.cpp" />
     <ClCompile Include="Common\ConsoleDebug.cpp" />
     <ClCompile Include="Common\XMLStream.cpp" />
+    <ClCompile Include="Core\Texture.cpp" />
     <ClCompile Include="Core\VulkanManager.cpp" />
     <ClCompile Include="Core\VulkanRenderer.cpp" />
     <ClCompile Include="main.cpp" />

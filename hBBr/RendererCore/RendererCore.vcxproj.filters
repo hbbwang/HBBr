@@ -54,6 +54,9 @@
     <ClInclude Include="Core\VulkanRenderer.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Texture.h">
+      <Filter>Renderer\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -72,6 +75,9 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Core\VulkanRenderer.cpp">
+      <Filter>Renderer\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Texture.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
   </ItemGroup>

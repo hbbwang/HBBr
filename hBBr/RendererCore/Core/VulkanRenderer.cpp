@@ -10,7 +10,7 @@ VulkanRenderer::VulkanRenderer(void* windowHandle , bool bDebug)
 
 	if(_vulkanManager==NULL)
 		_vulkanManager = (new VulkanManager());
-
+	
 	//Init
 	_vulkanManager->InitInstance(bDebug);
 	_vulkanManager->CreateSurface(windowHandle, _surface);
