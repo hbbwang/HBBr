@@ -19,6 +19,7 @@ VulkanRenderer::VulkanRenderer(void* windowHandle , bool bDebug)
 	_vulkanManager->InitDebug();
 	_vulkanManager->CreateCommandPool();
 	//Swapchain
+	_vulkanManager->CreateRenderSemaphores(_presentSemaphore);
 	_vulkanManager->CheckSurfaceFormat(_surface , _surfaceFormat);
 	_surfaceSize = _vulkanManager->CreateSwapchain(_surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
 }
@@ -39,6 +40,7 @@ VulkanRenderer::~VulkanRenderer()
 
 void VulkanRenderer::Render()
 {
-	_vulkanManager->GetNextSwapchainIndex(_swapchain, _swapchainBufferIndex);
-	_vulkanManager->Present(_swapchain, _swapchainBufferIndex);
+	_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_swapchainBufferIndex], _swapchainBufferIndex);
+	_vulkanManager->Present(_swapchain, _presentSemaphore[_swapchainBufferIndex], _swapchainBufferIndex);
 }
+

@@ -95,13 +95,22 @@ public:
 
 	void EndCommandBuffer(VkCommandBuffer cmdBuf);
 
-	void GetNextSwapchainIndex(VkSwapchainKHR swapchain, uint32_t& swapchainIndex);
+	void GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainIndex);
 
-	void Present(VkSwapchainKHR swapchain , uint32_t& swapchainIndex);
+	void Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainIndex);
 
 	/* Image 布局转换 */
 	void Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1);
 
+	void CreateSemaphore(VkSemaphore& semaphore);
+
+	void DestroySemaphore(VkSemaphore semaphore);
+
+	void CreateRenderSemaphores(std::vector<VkSemaphore>& semaphore);
+
+	void DestroyRenderSemaphores(std::vector<VkSemaphore>& semaphore);
+
+	void CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info , VkPipeline& pipeline);
 
 	/* 获取平台 */
 	__forceinline EPlatform GetPlatform()const {

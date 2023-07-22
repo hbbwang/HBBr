@@ -849,7 +849,6 @@ void VulkanManager::DestroyCommandBuffers(VkCommandPool commandPool, std::vector
 	if (cmdBufs.size() > 0)
 	{
 		vkFreeCommandBuffers(_device, commandPool, cmdBufs.size(), cmdBufs.data());
-		cmdBufs.clear();
 	}
 }
 
@@ -871,12 +870,12 @@ void VulkanManager::EndCommandBuffer(VkCommandBuffer cmdBuf)
 	vkEndCommandBuffer(cmdBuf);
 }
 
-void VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, uint32_t& swapchainIndex)
+void VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainIndex)
 {
-	vkAcquireNextImageKHR(_device, swapchain, UINT16_MAX, VK_NULL_HANDLE, VK_NULL_HANDLE, &swapchainIndex);
+	vkAcquireNextImageKHR(_device, swapchain, UINT16_MAX, semaphore, VK_NULL_HANDLE, &swapchainIndex);
 }
 
-void VulkanManager::Present(VkSwapchainKHR swapchain, uint32_t& swapchainIndex)
+void VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainIndex)
 {
 	VkPresentInfoKHR presentInfo = {};
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -885,7 +884,8 @@ void VulkanManager::Present(VkSwapchainKHR swapchain, uint32_t& swapchainIndex)
 	presentInfo.pSwapchains = &swapchain;
 	presentInfo.pImageIndices = &swapchainIndex;
 	presentInfo.pResults = nullptr; // Optional
-
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = &semaphore;
 	auto result = vkQueuePresentKHR(_graphicsQueue, &presentInfo);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR)
 	{
@@ -894,6 +894,52 @@ void VulkanManager::Present(VkSwapchainKHR swapchain, uint32_t& swapchainIndex)
 	else if (result != VK_SUCCESS)
 	{
 		MessageOut("Create Command Buffer error.", false, true);
+	}
+}
+
+void VulkanManager::CreateSemaphore(VkSemaphore& semaphore)
+{
+	VkSemaphoreCreateInfo semaphoreCreateInfo = {};
+	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	semaphoreCreateInfo.pNext = nullptr;
+	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &semaphore);
+}
+
+void VulkanManager::DestroySemaphore(VkSemaphore semaphore)
+{
+	if (semaphore  != VK_NULL_HANDLE)
+	{
+		vkDestroySemaphore(_device, semaphore, nullptr);
+	}
+}
+
+void VulkanManager::CreateRenderSemaphores(std::vector<VkSemaphore>& semaphore)
+{
+	semaphore.resize(_swapchainBufferCount);
+	for (int i = 0; i < semaphore.size(); i++)
+	{
+		CreateSemaphore(semaphore[i]);
+	}
+}
+
+void VulkanManager::DestroyRenderSemaphores(std::vector<VkSemaphore>& semaphore)
+{
+	for (int i = 0; i < semaphore.size(); i++)
+	{
+		if (semaphore[i] != VK_NULL_HANDLE)
+		{
+			DestroySemaphore(semaphore[i]);
+		}
+	}
+	semaphore.clear();
+}
+
+void VulkanManager::CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info, VkPipeline& pipeline)
+{
+	auto result = vkCreateGraphicsPipelines(_device, nullptr, 1, &info, nullptr, &pipeline);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut("Create Graphics Pipelines Error.", true, true);
 	}
 }
 

@@ -18,10 +18,6 @@ public:
 		return _vulkanManager;
 	}
 
-	HBBR_API __forceinline VkSurfaceKHR GetSurface()const{
-		return _surface;
-	}
-
 	HBBR_API __forceinline static int GetSwapchainBufferIndex() {
 		return _swapchainBufferIndex;
 	}
@@ -45,9 +41,9 @@ private:
 
 	std::vector<VkImageView> _swapchainImageViews;
 
-	std::vector<VkFramebuffer> _swapchainFrameBuffers;
-
 	std::shared_ptr<FrameBufferTexture> _swapchainRenderTarget;
+
+	std::vector<VkSemaphore> _presentSemaphore;
 
 	static uint32_t _swapchainBufferIndex;
 };
