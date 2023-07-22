@@ -1,6 +1,13 @@
 ﻿#include "Texture.h"
 #include "VulkanRenderer.h"
 
+Texture::~Texture()
+{
+	VulkanRenderer::GetManager()->DestroyImageMemory(_imageViewMemory);
+	VulkanRenderer::GetManager()->DestroyImageView(_imageView);
+	VulkanRenderer::GetManager()->DestroyImage(_image);
+}
+
 std::shared_ptr<Texture> Texture::CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags)
 {
 	std::shared_ptr<Texture> newTexture = std::make_shared<Texture>();
@@ -12,10 +19,19 @@ std::shared_ptr<Texture> Texture::CreateTexture2D(uint32_t width, uint32_t heigh
 		aspectFlag = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
 	else
 		aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
-	VulkanRenderer::GetManager()->CreateImageViewAndMemory(newTexture->_image, format, aspectFlag, newTexture->_imageViewMemory, newTexture->_imageView);
+	VulkanRenderer::GetManager()->CreateImageView(newTexture->_image, format, aspectFlag, newTexture->_imageView);
+	if (!newTexture->_bNoMemory)
+	{
+		VulkanRenderer::GetManager()->CreateImageMemory(newTexture->_image, newTexture->_imageViewMemory);
+	}
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
 	return std::move(newTexture);
+}
+
+FrameBufferTexture::~FrameBufferTexture()
+{
+	_frameBufferTextures.clear();
 }
 
 std::shared_ptr<FrameBufferTexture> FrameBufferTexture::CreateFrameBuffer(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags)
@@ -25,7 +41,7 @@ std::shared_ptr<FrameBufferTexture> FrameBufferTexture::CreateFrameBuffer(uint32
 	{
 		newTexture->_frameBufferTextures.push_back(Texture::CreateTexture2D(width,height,format,usageFlags));
 	}
-	return newTexture;
+	return std::move(newTexture);
 }
 
 std::shared_ptr<Texture> FrameBufferTexture::GetBuffer()

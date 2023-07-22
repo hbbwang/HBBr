@@ -57,6 +57,9 @@
     <ClInclude Include="Core\Texture.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\RenderPass.h">
+      <Filter>Renderer\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -78,6 +81,9 @@
       <Filter>Renderer\Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\Texture.cpp">
+      <Filter>Renderer\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\RenderPass.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
   </ItemGroup>

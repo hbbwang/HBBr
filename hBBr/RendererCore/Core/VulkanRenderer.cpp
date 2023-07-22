@@ -1,7 +1,8 @@
 ﻿#include "VulkanRenderer.h"
+#include "Texture.h"
 
 VulkanManager* VulkanRenderer::_vulkanManager = NULL;
-int  VulkanRenderer::_swapchainBufferIndex = 0;
+uint32_t  VulkanRenderer::_swapchainBufferIndex = 0;
 
 VulkanRenderer::VulkanRenderer(void* windowHandle , bool bDebug)
 {
@@ -16,16 +17,19 @@ VulkanRenderer::VulkanRenderer(void* windowHandle , bool bDebug)
 	_vulkanManager->CreateSurface(windowHandle, _surface);
 	_vulkanManager->InitDevice(_surface);
 	_vulkanManager->InitDebug();
+	_vulkanManager->CreateCommandPool();
 	//Swapchain
-	_vulkanManager->CheckSurfaceSupport(_surface , _surfaceFormat);
-	_vulkanManager->CreateSwapchain(_surface, _surfaceFormat, _swapchain);
+	_vulkanManager->CheckSurfaceFormat(_surface , _surfaceFormat);
+	_surfaceSize = _vulkanManager->CreateSwapchain(_surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
 }
 
 VulkanRenderer::~VulkanRenderer()
 {
 	if (_vulkanManager)
 	{
-		_vulkanManager->DestroySwapchain(_swapchain);
+		vkDeviceWaitIdle(_vulkanManager->GetDevice());
+		_vulkanManager->DestroyCommandPool();
+		_vulkanManager->DestroySwapchain(_swapchain, _swapchainImages, _swapchainImageViews);
 		_vulkanManager->DestroySurface(_surface);
 		//
 		delete _vulkanManager;
@@ -35,5 +39,6 @@ VulkanRenderer::~VulkanRenderer()
 
 void VulkanRenderer::Render()
 {
-
+	_vulkanManager->GetNextSwapchainIndex(_swapchain, _swapchainBufferIndex);
+	_vulkanManager->Present(_swapchain, _swapchainBufferIndex);
 }

@@ -12,15 +12,19 @@ class Texture
 {
 public:
 	Texture() {}
+	Texture(bool bNoMemory) {_bNoMemory = bNoMemory;}
+	~Texture();
 	__forceinline VkImage GetTexture()const {
 		return _image;
 	}
 	__forceinline VkImageView GetTextureView()const {
 		return _imageView;
 	}
+
 	static std::shared_ptr<Texture> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags);
 
 private:
+	bool _bNoMemory = false;
 	VkImage _image;
 	VkImageView _imageView;
 	VkDeviceMemory _imageViewMemory;
@@ -33,7 +37,7 @@ class FrameBufferTexture
 public:
 
 	FrameBufferTexture() {}
-
+	~FrameBufferTexture();
 	static std::shared_ptr<FrameBufferTexture> CreateFrameBuffer(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags);
 
 	std::shared_ptr<Texture> GetBuffer();

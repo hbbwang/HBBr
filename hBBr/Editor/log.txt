@@ -1230,3 +1230,717 @@
 [2023-07-21 03:03:35]	VK_EXT_validation_cache
 [2023-07-21 03:03:35]	VK_EXT_debug_marker
 [2023-07-21 03:03:35]	------------------
+[2023-07-22 17:19:37]----------Instance Layer Properties---------
+[2023-07-22 17:19:37]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	VK_EXT_debug_utils
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]VK_LAYER_ROCKSTAR_GAMES_social_club  |  Rockstar Games Social Club Layer
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	VK_EXT_debug_report
+[2023-07-22 17:19:37]	VK_EXT_debug_utils
+[2023-07-22 17:19:37]	VK_EXT_validation_features
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-22 17:19:37]	Instance Extension Properties---------
+[2023-07-22 17:19:37]	------------------
+[2023-07-22 17:19:37]ERROR: @[Loader Message]
+[2023-07-22 17:19:37]loader_get_json: Failed to open JSON file C:\Program Files\NVIDIA Corporation\Nsight Systems 2019.4.3\Target-Windows\x86_64\VkLayers\VkLayer_nsight-sys_windows.json
+[2023-07-22 17:19:51]-----------GPU List-----------
+[2023-07-22 17:19:51]Found 1 GPU(s)
+[2023-07-22 17:19:51]Device Name:NVIDIA GeForce RTX 3080
+[2023-07-22 17:19:51]Device ID:8726
+[2023-07-22 17:19:51]---------------------------
+[2023-07-22 17:19:51]----------Device Layer Properties---------
+[2023-07-22 17:19:51]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:19:51]	Instance Extension Properties---------
+[2023-07-22 17:19:51]	------------------
+[2023-07-22 17:19:51]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:19:51]	Instance Extension Properties---------
+[2023-07-22 17:19:51]	VK_EXT_validation_cache
+[2023-07-22 17:19:51]	VK_EXT_debug_marker
+[2023-07-22 17:19:51]	------------------
+[2023-07-22 17:19:52]ERROR: @[Validation]
+[2023-07-22 17:19:52]Validation Error: [ VUID-vkBeginCommandBuffer-commandBuffer-00049 ] Object 0: handle = 0x1b7c440e9f0, type = VK_OBJECT_TYPE_COMMAND_BUFFER; | MessageID = 0x84029a9f | vkBeginCommandBuffer(): Cannot call Begin on VkCommandBuffer 0x1b7c440e9f0[] in the RECORDING state. Must first call vkEndCommandBuffer(). The Vulkan spec states: commandBuffer must not be in the recording or pending state (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkBeginCommandBuffer-commandBuffer-00049)
+[2023-07-22 17:20:49]----------Instance Layer Properties---------
+[2023-07-22 17:20:49]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	VK_EXT_debug_utils
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]VK_LAYER_ROCKSTAR_GAMES_social_club  |  Rockstar Games Social Club Layer
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	VK_EXT_debug_report
+[2023-07-22 17:20:49]	VK_EXT_debug_utils
+[2023-07-22 17:20:49]	VK_EXT_validation_features
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-22 17:20:49]	Instance Extension Properties---------
+[2023-07-22 17:20:49]	------------------
+[2023-07-22 17:20:49]ERROR: @[Loader Message]
+[2023-07-22 17:20:49]loader_get_json: Failed to open JSON file C:\Program Files\NVIDIA Corporation\Nsight Systems 2019.4.3\Target-Windows\x86_64\VkLayers\VkLayer_nsight-sys_windows.json
+[2023-07-22 17:21:09]----------Instance Layer Properties---------
+[2023-07-22 17:21:09]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:21:09]	Instance Extension Properties---------
+[2023-07-22 17:21:09]	------------------
+[2023-07-22 17:21:09]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-22 17:21:09]	Instance Extension Properties---------
+[2023-07-22 17:21:09]	------------------
+[2023-07-22 17:21:09]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-22 17:21:09]	Instance Extension Properties---------
+[2023-07-22 17:21:09]	------------------
+[2023-07-22 17:21:09]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-22 17:21:09]	Instance Extension Properties---------
+[2023-07-22 17:21:09]	VK_EXT_debug_utils
+[2023-07-22 17:21:09]	------------------
+[2023-07-22 17:21:09]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:21:09]	Instance Extension Properties---------
+[2023-07-22 17:21:09]	------------------
+[2023-07-22 17:21:09]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:21:09]	Instance Extension Properties---------
+[2023-07-22 17:21:09]	------------------
+[2023-07-22 17:21:09]VK_LAYER_ROCKSTAR_GAMES_social_club  |  Rockstar Games Social Club Layer
+[2023-07-22 17:21:09]	Instance Extension Properties---------
+[2023-07-22 17:21:09]	------------------
+[2023-07-22 17:21:09]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-22 17:21:09]	Instance Extension Properties---------
+[2023-07-22 17:21:09]	------------------
+[2023-07-22 17:21:09]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-22 17:21:09]	Instance Extension Properties---------
+[2023-07-22 17:21:09]	------------------
+[2023-07-22 17:21:09]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-22 17:21:09]	Instance Extension Properties---------
+[2023-07-22 17:21:09]	------------------
+[2023-07-22 17:21:09]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:21:09]	Instance Extension Properties---------
+[2023-07-22 17:21:09]	VK_EXT_debug_report
+[2023-07-22 17:21:09]	VK_EXT_debug_utils
+[2023-07-22 17:21:09]	VK_EXT_validation_features
+[2023-07-22 17:21:09]	------------------
+[2023-07-22 17:21:09]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-22 17:21:10]	Instance Extension Properties---------
+[2023-07-22 17:21:10]	------------------
+[2023-07-22 17:21:10]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-22 17:21:10]	Instance Extension Properties---------
+[2023-07-22 17:21:10]	------------------
+[2023-07-22 17:21:10]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-22 17:21:10]	Instance Extension Properties---------
+[2023-07-22 17:21:10]	------------------
+[2023-07-22 17:21:10]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-22 17:21:10]	Instance Extension Properties---------
+[2023-07-22 17:21:10]	------------------
+[2023-07-22 17:21:10]ERROR: @[Loader Message]
+[2023-07-22 17:21:10]loader_get_json: Failed to open JSON file C:\Program Files\NVIDIA Corporation\Nsight Systems 2019.4.3\Target-Windows\x86_64\VkLayers\VkLayer_nsight-sys_windows.json
+[2023-07-22 17:21:10]-----------GPU List-----------
+[2023-07-22 17:21:10]Found 1 GPU(s)
+[2023-07-22 17:21:10]Device Name:NVIDIA GeForce RTX 3080
+[2023-07-22 17:21:10]Device ID:8726
+[2023-07-22 17:21:10]---------------------------
+[2023-07-22 17:21:10]----------Device Layer Properties---------
+[2023-07-22 17:21:10]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:21:10]	Instance Extension Properties---------
+[2023-07-22 17:21:10]	------------------
+[2023-07-22 17:21:10]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:21:10]	Instance Extension Properties---------
+[2023-07-22 17:21:10]	VK_EXT_validation_cache
+[2023-07-22 17:21:10]	VK_EXT_debug_marker
+[2023-07-22 17:21:10]	------------------
+[2023-07-22 17:22:02]----------Instance Layer Properties---------
+[2023-07-22 17:22:02]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	VK_EXT_debug_utils
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]VK_LAYER_ROCKSTAR_GAMES_social_club  |  Rockstar Games Social Club Layer
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	VK_EXT_debug_report
+[2023-07-22 17:22:02]	VK_EXT_debug_utils
+[2023-07-22 17:22:02]	VK_EXT_validation_features
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-22 17:22:02]	Instance Extension Properties---------
+[2023-07-22 17:22:02]	------------------
+[2023-07-22 17:22:02]ERROR: @[Loader Message]
+[2023-07-22 17:22:02]loader_get_json: Failed to open JSON file C:\Program Files\NVIDIA Corporation\Nsight Systems 2019.4.3\Target-Windows\x86_64\VkLayers\VkLayer_nsight-sys_windows.json
+[2023-07-22 17:25:12]----------Instance Layer Properties---------
+[2023-07-22 17:25:12]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	VK_EXT_debug_utils
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]VK_LAYER_ROCKSTAR_GAMES_social_club  |  Rockstar Games Social Club Layer
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	VK_EXT_debug_report
+[2023-07-22 17:25:12]	VK_EXT_debug_utils
+[2023-07-22 17:25:12]	VK_EXT_validation_features
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-22 17:25:12]	Instance Extension Properties---------
+[2023-07-22 17:25:12]	------------------
+[2023-07-22 17:25:12]ERROR: @[Loader Message]
+[2023-07-22 17:25:12]loader_get_json: Failed to open JSON file C:\Program Files\NVIDIA Corporation\Nsight Systems 2019.4.3\Target-Windows\x86_64\VkLayers\VkLayer_nsight-sys_windows.json
+[2023-07-22 17:25:15]-----------GPU List-----------
+[2023-07-22 17:25:15]Found 1 GPU(s)
+[2023-07-22 17:25:15]Device Name:NVIDIA GeForce RTX 3080
+[2023-07-22 17:25:15]Device ID:8726
+[2023-07-22 17:25:15]---------------------------
+[2023-07-22 17:25:15]----------Device Layer Properties---------
+[2023-07-22 17:25:15]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:25:15]	Instance Extension Properties---------
+[2023-07-22 17:25:15]	------------------
+[2023-07-22 17:25:15]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:25:15]	Instance Extension Properties---------
+[2023-07-22 17:25:15]	VK_EXT_validation_cache
+[2023-07-22 17:25:15]	VK_EXT_debug_marker
+[2023-07-22 17:25:15]	------------------
+[2023-07-22 17:25:43]ERROR: @[Validation]
+[2023-07-22 17:25:43]Validation Error: [ VUID-vkBeginCommandBuffer-commandBuffer-00049 ] Object 0: handle = 0x1b1f6071c30, type = VK_OBJECT_TYPE_COMMAND_BUFFER; | MessageID = 0x84029a9f | vkBeginCommandBuffer(): Cannot call Begin on VkCommandBuffer 0x1b1f6071c30[] in the RECORDING state. Must first call vkEndCommandBuffer(). The Vulkan spec states: commandBuffer must not be in the recording or pending state (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkBeginCommandBuffer-commandBuffer-00049)
+[2023-07-22 17:28:04]----------Instance Layer Properties---------
+[2023-07-22 17:28:04]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	VK_EXT_debug_utils
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]VK_LAYER_ROCKSTAR_GAMES_social_club  |  Rockstar Games Social Club Layer
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	VK_EXT_debug_report
+[2023-07-22 17:28:04]	VK_EXT_debug_utils
+[2023-07-22 17:28:04]	VK_EXT_validation_features
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-22 17:28:04]	Instance Extension Properties---------
+[2023-07-22 17:28:04]	------------------
+[2023-07-22 17:28:04]ERROR: @[Loader Message]
+[2023-07-22 17:28:04]loader_get_json: Failed to open JSON file C:\Program Files\NVIDIA Corporation\Nsight Systems 2019.4.3\Target-Windows\x86_64\VkLayers\VkLayer_nsight-sys_windows.json
+[2023-07-22 17:28:06]-----------GPU List-----------
+[2023-07-22 17:28:06]Found 1 GPU(s)
+[2023-07-22 17:28:06]Device Name:NVIDIA GeForce RTX 3080
+[2023-07-22 17:28:06]Device ID:8726
+[2023-07-22 17:28:06]---------------------------
+[2023-07-22 17:28:06]----------Device Layer Properties---------
+[2023-07-22 17:28:06]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:28:06]	Instance Extension Properties---------
+[2023-07-22 17:28:06]	------------------
+[2023-07-22 17:28:06]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:28:06]	Instance Extension Properties---------
+[2023-07-22 17:28:06]	VK_EXT_validation_cache
+[2023-07-22 17:28:06]	VK_EXT_debug_marker
+[2023-07-22 17:28:06]	------------------
+[2023-07-22 17:28:12]ERROR: @[Validation]
+[2023-07-22 17:28:12]Validation Error: [ VUID-vkCmdPipelineBarrier-srcAccessMask-02815 ] Object 0: handle = 0x1ba0e889d10, type = VK_OBJECT_TYPE_COMMAND_BUFFER; | MessageID = 0x24d88c2b | vkCmdPipelineBarrier(): .pImageMemoryBarriers[0].srcAccessMask bit VK_ACCESS_TRANSFER_WRITE_BIT is not supported by stage mask (VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT). The Vulkan spec states: The srcAccessMask member of each element of pMemoryBarriers must only include access flags that are supported by one or more of the pipeline stages in srcStageMask, as specified in the table of supported access types (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkCmdPipelineBarrier-srcAccessMask-02815)
+[2023-07-22 17:34:56]----------Instance Layer Properties---------
+[2023-07-22 17:34:56]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:34:56]	Instance Extension Properties---------
+[2023-07-22 17:34:56]	------------------
+[2023-07-22 17:34:56]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-22 17:34:56]	Instance Extension Properties---------
+[2023-07-22 17:34:56]	------------------
+[2023-07-22 17:34:56]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-22 17:34:56]	Instance Extension Properties---------
+[2023-07-22 17:34:56]	------------------
+[2023-07-22 17:34:56]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-22 17:34:56]	Instance Extension Properties---------
+[2023-07-22 17:34:56]	VK_EXT_debug_utils
+[2023-07-22 17:34:56]	------------------
+[2023-07-22 17:34:56]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:34:56]	Instance Extension Properties---------
+[2023-07-22 17:34:56]	------------------
+[2023-07-22 17:34:56]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:34:57]	Instance Extension Properties---------
+[2023-07-22 17:34:57]	------------------
+[2023-07-22 17:34:57]VK_LAYER_ROCKSTAR_GAMES_social_club  |  Rockstar Games Social Club Layer
+[2023-07-22 17:34:57]	Instance Extension Properties---------
+[2023-07-22 17:34:57]	------------------
+[2023-07-22 17:34:57]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-22 17:34:57]	Instance Extension Properties---------
+[2023-07-22 17:34:57]	------------------
+[2023-07-22 17:34:57]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-22 17:34:57]	Instance Extension Properties---------
+[2023-07-22 17:34:57]	------------------
+[2023-07-22 17:34:57]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-22 17:34:57]	Instance Extension Properties---------
+[2023-07-22 17:34:57]	------------------
+[2023-07-22 17:34:57]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:34:57]	Instance Extension Properties---------
+[2023-07-22 17:34:57]	VK_EXT_debug_report
+[2023-07-22 17:34:57]	VK_EXT_debug_utils
+[2023-07-22 17:34:57]	VK_EXT_validation_features
+[2023-07-22 17:34:57]	------------------
+[2023-07-22 17:34:57]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-22 17:34:57]	Instance Extension Properties---------
+[2023-07-22 17:34:57]	------------------
+[2023-07-22 17:34:57]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-22 17:34:57]	Instance Extension Properties---------
+[2023-07-22 17:34:57]	------------------
+[2023-07-22 17:34:57]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-22 17:34:57]	Instance Extension Properties---------
+[2023-07-22 17:34:57]	------------------
+[2023-07-22 17:34:57]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-22 17:34:57]	Instance Extension Properties---------
+[2023-07-22 17:34:57]	------------------
+[2023-07-22 17:34:57]ERROR: @[Loader Message]
+[2023-07-22 17:34:57]loader_get_json: Failed to open JSON file C:\Program Files\NVIDIA Corporation\Nsight Systems 2019.4.3\Target-Windows\x86_64\VkLayers\VkLayer_nsight-sys_windows.json
+[2023-07-22 17:34:58]-----------GPU List-----------
+[2023-07-22 17:34:58]Found 1 GPU(s)
+[2023-07-22 17:34:58]Device Name:NVIDIA GeForce RTX 3080
+[2023-07-22 17:34:58]Device ID:8726
+[2023-07-22 17:34:58]---------------------------
+[2023-07-22 17:34:58]----------Device Layer Properties---------
+[2023-07-22 17:34:58]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:34:58]	Instance Extension Properties---------
+[2023-07-22 17:34:58]	------------------
+[2023-07-22 17:34:58]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:34:58]	Instance Extension Properties---------
+[2023-07-22 17:34:58]	VK_EXT_validation_cache
+[2023-07-22 17:34:58]	VK_EXT_debug_marker
+[2023-07-22 17:34:58]	------------------
+[2023-07-22 17:35:02]ERROR: @[Validation]
+[2023-07-22 17:35:02]Validation Error: [ VUID-vkCmdPipelineBarrier-srcAccessMask-02815 ] Object 0: handle = 0x27c683d5120, type = VK_OBJECT_TYPE_COMMAND_BUFFER; | MessageID = 0x24d88c2b | vkCmdPipelineBarrier(): .pImageMemoryBarriers[0].srcAccessMask bit VK_ACCESS_TRANSFER_READ_BIT is not supported by stage mask (VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT). The Vulkan spec states: The srcAccessMask member of each element of pMemoryBarriers must only include access flags that are supported by one or more of the pipeline stages in srcStageMask, as specified in the table of supported access types (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkCmdPipelineBarrier-srcAccessMask-02815)
+[2023-07-22 17:48:28]----------Instance Layer Properties---------
+[2023-07-22 17:48:28]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:48:28]	Instance Extension Properties---------
+[2023-07-22 17:48:28]	------------------
+[2023-07-22 17:48:28]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-22 17:48:28]	Instance Extension Properties---------
+[2023-07-22 17:48:28]	------------------
+[2023-07-22 17:48:28]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-22 17:48:28]	Instance Extension Properties---------
+[2023-07-22 17:48:28]	------------------
+[2023-07-22 17:48:28]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-22 17:48:28]	Instance Extension Properties---------
+[2023-07-22 17:48:28]	VK_EXT_debug_utils
+[2023-07-22 17:48:28]	------------------
+[2023-07-22 17:48:28]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:48:28]	Instance Extension Properties---------
+[2023-07-22 17:48:28]	------------------
+[2023-07-22 17:48:28]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:48:28]	Instance Extension Properties---------
+[2023-07-22 17:48:28]	------------------
+[2023-07-22 17:48:28]VK_LAYER_ROCKSTAR_GAMES_social_club  |  Rockstar Games Social Club Layer
+[2023-07-22 17:48:28]	Instance Extension Properties---------
+[2023-07-22 17:48:28]	------------------
+[2023-07-22 17:48:28]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-22 17:48:28]	Instance Extension Properties---------
+[2023-07-22 17:48:28]	------------------
+[2023-07-22 17:48:28]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-22 17:48:28]	Instance Extension Properties---------
+[2023-07-22 17:48:28]	------------------
+[2023-07-22 17:48:28]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-22 17:48:28]	Instance Extension Properties---------
+[2023-07-22 17:48:28]	------------------
+[2023-07-22 17:48:28]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:48:28]	Instance Extension Properties---------
+[2023-07-22 17:48:28]	VK_EXT_debug_report
+[2023-07-22 17:48:28]	VK_EXT_debug_utils
+[2023-07-22 17:48:28]	VK_EXT_validation_features
+[2023-07-22 17:48:28]	------------------
+[2023-07-22 17:48:28]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-22 17:48:28]	Instance Extension Properties---------
+[2023-07-22 17:48:28]	------------------
+[2023-07-22 17:48:29]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-22 17:48:29]	Instance Extension Properties---------
+[2023-07-22 17:48:29]	------------------
+[2023-07-22 17:48:29]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-22 17:48:29]	Instance Extension Properties---------
+[2023-07-22 17:48:29]	------------------
+[2023-07-22 17:48:29]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-22 17:48:29]	Instance Extension Properties---------
+[2023-07-22 17:48:29]	------------------
+[2023-07-22 17:48:29]ERROR: @[Loader Message]
+[2023-07-22 17:48:29]loader_get_json: Failed to open JSON file C:\Program Files\NVIDIA Corporation\Nsight Systems 2019.4.3\Target-Windows\x86_64\VkLayers\VkLayer_nsight-sys_windows.json
+[2023-07-22 17:48:30]-----------GPU List-----------
+[2023-07-22 17:48:30]Found 1 GPU(s)
+[2023-07-22 17:48:30]Device Name:NVIDIA GeForce RTX 3080
+[2023-07-22 17:48:30]Device ID:8726
+[2023-07-22 17:48:30]---------------------------
+[2023-07-22 17:48:30]----------Device Layer Properties---------
+[2023-07-22 17:48:30]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:48:30]	Instance Extension Properties---------
+[2023-07-22 17:48:30]	------------------
+[2023-07-22 17:48:30]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:48:30]	Instance Extension Properties---------
+[2023-07-22 17:48:30]	VK_EXT_validation_cache
+[2023-07-22 17:48:30]	VK_EXT_debug_marker
+[2023-07-22 17:48:30]	------------------
+[2023-07-22 17:48:59]ERROR: @[Validation]
+[2023-07-22 17:48:59]Validation Error: [ VUID-vkDestroyImage-image-parameter ] Object 0: handle = 0x2462656c840, type = VK_OBJECT_TYPE_INSTANCE; | MessageID = 0x18c56777 | Invalid VkImage Object 0xe7f79a0000000005. The Vulkan spec states: If image is not VK_NULL_HANDLE, image must be a valid VkImage handle (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkDestroyImage-image-parameter)
+[2023-07-22 17:50:29]----------Instance Layer Properties---------
+[2023-07-22 17:50:29]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	VK_EXT_debug_utils
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]VK_LAYER_ROCKSTAR_GAMES_social_club  |  Rockstar Games Social Club Layer
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	VK_EXT_debug_report
+[2023-07-22 17:50:29]	VK_EXT_debug_utils
+[2023-07-22 17:50:29]	VK_EXT_validation_features
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-22 17:50:29]	Instance Extension Properties---------
+[2023-07-22 17:50:29]	------------------
+[2023-07-22 17:50:29]ERROR: @[Loader Message]
+[2023-07-22 17:50:29]loader_get_json: Failed to open JSON file C:\Program Files\NVIDIA Corporation\Nsight Systems 2019.4.3\Target-Windows\x86_64\VkLayers\VkLayer_nsight-sys_windows.json
+[2023-07-22 17:50:31]-----------GPU List-----------
+[2023-07-22 17:50:31]Found 1 GPU(s)
+[2023-07-22 17:50:31]Device Name:NVIDIA GeForce RTX 3080
+[2023-07-22 17:50:31]Device ID:8726
+[2023-07-22 17:50:31]---------------------------
+[2023-07-22 17:50:31]----------Device Layer Properties---------
+[2023-07-22 17:50:31]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:50:31]	Instance Extension Properties---------
+[2023-07-22 17:50:31]	------------------
+[2023-07-22 17:50:31]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:50:31]	Instance Extension Properties---------
+[2023-07-22 17:50:31]	VK_EXT_validation_cache
+[2023-07-22 17:50:31]	VK_EXT_debug_marker
+[2023-07-22 17:50:31]	------------------
+[2023-07-22 17:51:36]----------Instance Layer Properties---------
+[2023-07-22 17:51:36]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	VK_EXT_debug_utils
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]VK_LAYER_ROCKSTAR_GAMES_social_club  |  Rockstar Games Social Club Layer
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	VK_EXT_debug_report
+[2023-07-22 17:51:36]	VK_EXT_debug_utils
+[2023-07-22 17:51:36]	VK_EXT_validation_features
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-22 17:51:36]	Instance Extension Properties---------
+[2023-07-22 17:51:36]	------------------
+[2023-07-22 17:51:36]ERROR: @[Loader Message]
+[2023-07-22 17:51:36]loader_get_json: Failed to open JSON file C:\Program Files\NVIDIA Corporation\Nsight Systems 2019.4.3\Target-Windows\x86_64\VkLayers\VkLayer_nsight-sys_windows.json
+[2023-07-22 17:51:39]-----------GPU List-----------
+[2023-07-22 17:51:39]Found 1 GPU(s)
+[2023-07-22 17:51:39]Device Name:NVIDIA GeForce RTX 3080
+[2023-07-22 17:51:39]Device ID:8726
+[2023-07-22 17:51:39]---------------------------
+[2023-07-22 17:51:39]----------Device Layer Properties---------
+[2023-07-22 17:51:39]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:51:39]	Instance Extension Properties---------
+[2023-07-22 17:51:39]	------------------
+[2023-07-22 17:51:39]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:51:39]	Instance Extension Properties---------
+[2023-07-22 17:51:39]	VK_EXT_validation_cache
+[2023-07-22 17:51:39]	VK_EXT_debug_marker
+[2023-07-22 17:51:39]	------------------
+[2023-07-22 17:54:38]----------Instance Layer Properties---------
+[2023-07-22 17:54:38]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	VK_EXT_debug_utils
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]VK_LAYER_ROCKSTAR_GAMES_social_club  |  Rockstar Games Social Club Layer
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	VK_EXT_debug_report
+[2023-07-22 17:54:38]	VK_EXT_debug_utils
+[2023-07-22 17:54:38]	VK_EXT_validation_features
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-22 17:54:38]	Instance Extension Properties---------
+[2023-07-22 17:54:38]	------------------
+[2023-07-22 17:54:38]ERROR: @[Loader Message]
+[2023-07-22 17:54:38]loader_get_json: Failed to open JSON file C:\Program Files\NVIDIA Corporation\Nsight Systems 2019.4.3\Target-Windows\x86_64\VkLayers\VkLayer_nsight-sys_windows.json
+[2023-07-22 17:54:38]ERROR: @[Loader Message]
+loader_get_json: Failed to open JSON file C:\Program Files\NVIDIA Corporation\Nsight Systems 2019.4.3\Target-Windows\x86_64\VkLayers\VkLayer_nsight-sys_windows.json
+[2023-07-22 17:54:40]-----------GPU List-----------
+[2023-07-22 17:54:40]Found 1 GPU(s)
+[2023-07-22 17:54:40]Device Name:NVIDIA GeForce RTX 3080
+[2023-07-22 17:54:40]Device ID:8726
+[2023-07-22 17:54:40]---------------------------
+[2023-07-22 17:54:40]----------Device Layer Properties---------
+[2023-07-22 17:54:40]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-22 17:54:40]	Instance Extension Properties---------
+[2023-07-22 17:54:40]	------------------
+[2023-07-22 17:54:40]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-22 17:54:40]	Instance Extension Properties---------
+[2023-07-22 17:54:40]	VK_EXT_validation_cache
+[2023-07-22 17:54:40]	VK_EXT_debug_marker
+[2023-07-22 17:54:40]	------------------
+[2023-07-22 17:54:42]ERROR: @[Validation]
+[2023-07-22 17:54:42]Validation Error: [ VUID-vkAcquireNextImageKHR-semaphore-01780 ] Object 0: handle = 0xf56c9b0000000004, type = VK_OBJECT_TYPE_SWAPCHAIN_KHR; | MessageID = 0x94557523 | vkAcquireNextImageKHR: semaphore and fence are both VK_NULL_HANDLE. The Vulkan spec states: semaphore and fence must not both be equal to VK_NULL_HANDLE (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkAcquireNextImageKHR-semaphore-01780)
+[2023-07-22 17:54:42]ERROR: @[Validation]
+Validation Error: [ VUID-vkAcquireNextImageKHR-semaphore-01780 ] Object 0: handle = 0xf56c9b0000000004, type = VK_OBJECT_TYPE_SWAPCHAIN_KHR; | MessageID = 0x94557523 | vkAcquireNextImageKHR: semaphore and fence are both VK_NULL_HANDLE. The Vulkan spec states: semaphore and fence must not both be equal to VK_NULL_HANDLE (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkAcquireNextImageKHR-semaphore-01780)

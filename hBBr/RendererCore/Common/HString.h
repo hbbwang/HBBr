@@ -10,9 +10,6 @@
 #include <math.h>
 #include <vector>
 #pragma comment(lib, "comsuppw.lib")
-#ifndef DE_ASSERT
-#define DE_ASSERT(exp_, msgw_) _ASSERT_EXPR((exp_), HString(HString("\r\nMessage: ")+ HString(msgw_)).c_wstr());
-#endif
 class  HString
 {
 public:
@@ -125,7 +122,7 @@ public:
 	{
 		if (obj._str == nullptr)
 		{
-			DE_ASSERT(obj._str == nullptr,"HString Error");
+			//DE_ASSERT(obj._str == nullptr,"HString Error");
 			return false;
 		}
 		if (obj.length <= 0)
