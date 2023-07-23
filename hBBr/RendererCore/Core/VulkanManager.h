@@ -9,15 +9,10 @@
 	#include <stdlib.h>
 	#include <Windows.h>
 	#include <vulkan/vulkan_win32.h>
-	#define DE_ASSERT(exp_, msgw_) _ASSERT_EXPR((exp_), HString(HString("\r\nMessage: ")+ HString(msgw_)).c_wstr());
 #elif defined(__ANDROID__)
 	#include <vulkan/vulkan_android.h>
 #elif defined(__linux__)
 	#include <vulkan/vulkan_xcb.h>
-#endif
-
-#ifndef DE_ASSERT
-	#define DE_ASSERT ;
 #endif
 
 enum class EPlatform :uint8_t
@@ -95,7 +90,7 @@ public:
 
 	void EndCommandBuffer(VkCommandBuffer cmdBuf);
 
-	void GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainIndex);
+	void GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t* swapchainIndex);
 
 	void Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainIndex);
 
@@ -111,6 +106,9 @@ public:
 	void DestroyRenderSemaphores(std::vector<VkSemaphore>& semaphore);
 
 	void CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info , VkPipeline& pipeline);
+
+	/* 立刻序列提交,为保证运行安全,会执行一次等待运行结束 */
+	void SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
 
 	/* 获取平台 */
 	__forceinline EPlatform GetPlatform()const {
@@ -187,5 +185,3 @@ private:
 	static PFN_vkCmdDebugMarkerInsertEXT vkCmdDebugMarkerInsert;
 
 };
-
-void MessageOut(const char* msg, bool bExit = false, bool bMessageBox = false);

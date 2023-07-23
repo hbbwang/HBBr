@@ -4,6 +4,7 @@
 #include "pugixml.hpp"
 #include "HString.h"
 #include "ConsoleDebug.h"
+#include "RendererConfig.h"
 
 //导入Vulkan静态库
 #pragma comment(lib ,"vulkan-1.lib")
@@ -171,15 +172,10 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 
 	VkResult result = vkCreateInstance(&createInfo, nullptr, &_instance);
 	if (result == VK_ERROR_INCOMPATIBLE_DRIVER) {
-		MessageOut(
-			"Cannot find a compatible Vulkan installable client "
-			"driver (ICD). Please make sure your driver supports "
-			"Vulkan before continuing. The call to vkCreateInstance failed.", true, true);
+		MessageOut( RendererLauguage::GetText("A000000").c_str() , true, true);
 	}
 	else if (result != VK_SUCCESS) {
-		MessageOut(
-			"The call to vkCreateInstance failed. Please make sure "
-			"you have a Vulkan installable client driver (ICD) before continuing.", true, true);
+		MessageOut(RendererLauguage::GetText("A000001").c_str(), true, true);
 	}
 }
 
@@ -210,7 +206,7 @@ void VulkanManager::InitDevice(VkSurfaceKHR surface)
 		ConsoleDebug::print_endl("---------------------------", "0,255,0");
 		if (_gpuDevice == VK_NULL_HANDLE)
 		{
-			MessageOut("Can not find any gpu device.exit.",true, true);
+			MessageOut(RendererLauguage::GetText("A000002").c_str(),true, true);
 		}
 		vkGetPhysicalDeviceProperties2(_gpuDevice, &_gpuProperties);
 		vkGetPhysicalDeviceMemoryProperties(_gpuDevice, &_gpuMemoryProperties);
@@ -253,7 +249,7 @@ void VulkanManager::InitDevice(VkSurfaceKHR surface)
 		//if (!bFound_Graphics && !bFound_Transfer)
 		if (!bFound_Graphics)
 		{
-			MessageOut("Vulkan ERROR: Queue family supporting graphics not found.Exit.",true, true);
+			MessageOut(RendererLauguage::GetText("A000003").c_str(),true, true);
 		}
 	}
 	std::vector <const char*> layers;
@@ -347,7 +343,7 @@ void VulkanManager::InitDevice(VkSurfaceKHR surface)
 	device_create_info.pNext = &_gpuVk12Features;
 	auto result = vkCreateDevice(_gpuDevice, &device_create_info, nullptr, &_device);
 	if(result!= VK_SUCCESS) 
-		MessageOut((HString("Create Device Failed.") + GetVkResult(result)).c_str() , true, true);
+		MessageOut((RendererLauguage::GetText("A000004") + GetVkResult(result)).c_str() , true, true);
 	vkGetDeviceQueue(_device, _graphicsQueueFamilyIndex, 0, &_graphicsQueue);
 	//vkGetDeviceQueue(_device, _transferQueueFamilyIndex, 0, &_transfer_Queue);
 	if (_enable_VK_KHR_display)
@@ -431,7 +427,7 @@ void VulkanManager::CreateSurface(void* hWnd , VkSurfaceKHR& newSurface)
 	auto result = vkCreateWin32SurfaceKHR(_instance, &info, nullptr, &newSurface);
 	if (result != VK_SUCCESS)
 	{
-		MessageOut("Create Win32 surface failed.exit.",true, true);
+		MessageOut(RendererLauguage::GetText("A000005").c_str(),true, true);
 	}
 #endif
 }
@@ -472,7 +468,7 @@ void VulkanManager::CheckSurfaceFormat(VkSurfaceKHR surface, VkSurfaceFormatKHR&
 	vkGetPhysicalDeviceSurfaceSupportKHR(_gpuDevice, _graphicsQueueFamilyIndex, surface, &IsSupportSurface);
 	if (!IsSupportSurface)
 	{
-		MessageOut("Vulkan ERROR: The GPU is Not Support Surface.",true, true);
+		MessageOut(RendererLauguage::GetText("A000006").c_str(),true, true);
 	}
 	{
 		const VkFormat requestSurfaceImageFormat[] = { VK_FORMAT_B8G8R8A8_UNORM,VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8_UNORM };
@@ -565,22 +561,27 @@ VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatK
 	auto result = vkCreateSwapchainKHR(_device, &info, nullptr, &newSwapchain);
 	if (result != VK_SUCCESS)
 	{
-		MessageOut((HString("Create Swapchain KHR fail.") + GetVkResult(result)).c_str(), true, true);
+		MessageOut((RendererLauguage::GetText("A000007").c_str() + GetVkResult(result)).c_str(), true, true);
 	}
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, nullptr);
 	swapchainImages.resize(_swapchainBufferCount);
 	swapchainImageViews.resize(_swapchainBufferCount);
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, swapchainImages.data());
-	//创建ImageView并把Swapchain转换到呈现模式
+	//创建ImageView
+	for (int i = 0; i < _swapchainBufferCount; i++)
+	{
+		CreateImageView(swapchainImages[i], surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, swapchainImageViews[i]);
+	}
+	//Swapchain转换到呈现模式
 	VkCommandBuffer buf;
 	CreateCommandBuffer(_commandPool, buf);
 	BeginCommandBuffer(buf, 0);
 	for (int i = 0; i < _swapchainBufferCount; i++)
 	{
-		CreateImageView(swapchainImages[i], surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, swapchainImageViews[i]);
-		Transition(buf, swapchainImages[i],VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		Transition(buf, swapchainImages[i], VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	}
 	EndCommandBuffer(buf);
+	SubmitQueueImmediate({buf});
 	DestroyCommandBuffers(_commandPool, { buf });
 	//
 	return _surfaceSize;
@@ -840,7 +841,7 @@ void VulkanManager::CreateCommandBuffer(VkCommandPool commandPool, VkCommandBuff
 	VkResult result = vkAllocateCommandBuffers(_device, &cmdBufAllocInfo,&cmdBuf);
 	if (result != VK_SUCCESS)
 	{
-		MessageOut("Create Command Allocate error.", true, true);
+		MessageOut(RendererLauguage::GetText("A000008").c_str(), true, true);
 	}
 }
 
@@ -870,9 +871,17 @@ void VulkanManager::EndCommandBuffer(VkCommandBuffer cmdBuf)
 	vkEndCommandBuffer(cmdBuf);
 }
 
-void VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainIndex)
+void VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t* swapchainIndex)
 {
-	vkAcquireNextImageKHR(_device, swapchain, UINT16_MAX, semaphore, VK_NULL_HANDLE, &swapchainIndex);
+	VkResult result = vkAcquireNextImageKHR(_device, swapchain, UINT16_MAX, semaphore, VK_NULL_HANDLE, swapchainIndex);
+	if (result == VK_ERROR_OUT_OF_DATE_KHR)
+	{
+		MessageOut(RendererLauguage::GetText("A000009").c_str(), false, true);
+	}
+	else if (result != VK_SUCCESS) 
+	{
+		MessageOut(RendererLauguage::GetText("A000010").c_str(), false, true);
+	}
 }
 
 void VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainIndex)
@@ -893,7 +902,7 @@ void VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uin
 	}
 	else if (result != VK_SUCCESS)
 	{
-		MessageOut("Create Command Buffer error.", false, true);
+		MessageOut(RendererLauguage::GetText("A000011").c_str(), false, true);
 	}
 }
 
@@ -939,8 +948,33 @@ void VulkanManager::CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info, V
 	auto result = vkCreateGraphicsPipelines(_device, nullptr, 1, &info, nullptr, &pipeline);
 	if (result != VK_SUCCESS)
 	{
-		MessageOut("Create Graphics Pipelines Error.", true, true);
+		MessageOut(RendererLauguage::GetText("A000012").c_str(), true, true);
 	}
+}
+
+void VulkanManager::SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask, VkQueue queue)
+{
+	if (cmdBufs.size() <= 0)
+	{
+		MessageOut(RendererLauguage::GetText("A000013").c_str(), true, true);
+	}
+	VkSubmitInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	info.waitSemaphoreCount = 0;
+	info.pWaitSemaphores = NULL;
+	info.pWaitDstStageMask = NULL;
+	info.signalSemaphoreCount = 0;
+	info.pSignalSemaphores = NULL;
+	info.commandBufferCount = static_cast<uint32_t>(cmdBufs.size());
+	info.pCommandBuffers = cmdBufs.data();
+	VkResult result;
+	if (queue == VK_NULL_HANDLE)
+		result = vkQueueSubmit(_graphicsQueue, 1, &info, VK_NULL_HANDLE);
+	else
+		result = vkQueueSubmit(queue, 1, &info, VK_NULL_HANDLE);
+	if(result != VK_SUCCESS)
+		MessageOut(" [Submit Queue Immediate]vkQueueSubmit error", false, false);
+	vkQueueWaitIdle(_graphicsQueue);
 }
 
 HString VulkanManager::GetVkResult(VkResult code)
@@ -1067,22 +1101,4 @@ HString VulkanManager::GetVkResult(VkResult code)
 		break;
 	}
 	return text;
-}
-
-void MessageOut(const char* msg, bool bExit, bool bMessageBox)
-{
-#if defined(_WIN32)
-	if (bMessageBox)
-	{
-		//MessageBoxA(NULL, msg, "message", MB_ICONERROR);
-		//assert( 0 && msg);
-		ConsoleDebug::print_endl(msg);
-		DE_ASSERT(0, msg);
-	}
-#else
-	printf(msg);
-	fflush(stdout);
-#endif
-	if (bExit)
-		exit(EXIT_FAILURE);
 }

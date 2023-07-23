@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <Language path="./Internationalization/zh_CN.xml"/>
+    <BaseSetting>
+        <Language path="Config/Internationalization/zh_CN.xml"/>
+    </BaseSetting>
 </root>

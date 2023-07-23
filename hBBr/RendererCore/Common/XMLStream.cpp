@@ -1,8 +1,8 @@
 ﻿#include "XMLStream.h"
 
-bool XMLStream::LoadXML(const char* path, pugi::xml_document& doc)
+bool XMLStream::LoadXML(const wchar_t* path, pugi::xml_document& doc)
 {
-	auto result = doc.load_file(path);
+	auto result = doc.load_file(path, pugi::parse_default, pugi::encoding_utf8);
 	if (result.status != pugi::status_ok)
 	{
 		return false;
@@ -10,7 +10,7 @@ bool XMLStream::LoadXML(const char* path, pugi::xml_document& doc)
 	return true;
 }
 
-bool XMLStream::LoadXMLNode(pugi::xml_document& doc, const char* nodeName, pugi::xml_node& node)
+bool XMLStream::LoadXMLNode(pugi::xml_document& doc, const wchar_t* nodeName, pugi::xml_node& node)
 {
 	HString nodeStr = nodeName;
 	auto nodeArray = nodeStr.Split("/");
@@ -25,7 +25,7 @@ bool XMLStream::LoadXMLNode(pugi::xml_document& doc, const char* nodeName, pugi:
 			}
 			else if (i == 0)
 				node = doc.first_child();
-			node = node.child(nodeArray[i].c_str());
+			node = node.child(nodeArray[i].c_wstr());
 		}
 	}
 	else
@@ -36,7 +36,7 @@ bool XMLStream::LoadXMLNode(pugi::xml_document& doc, const char* nodeName, pugi:
 		return true;
 }
 
-bool XMLStream::LoadXMLAttributeString(pugi::xml_node& node, const char* attributeName, HString& attri)
+bool XMLStream::LoadXMLAttributeString(pugi::xml_node& node, const wchar_t* attributeName, HString& attri)
 {
 	if (node.empty() || node == nullptr)
 		return false;
@@ -49,7 +49,7 @@ bool XMLStream::LoadXMLAttributeString(pugi::xml_node& node, const char* attribu
 	return false;
 }
 
-bool XMLStream::LoadXMLAttributeInt(pugi::xml_node& node, const char* attributeName, int& attri)
+bool XMLStream::LoadXMLAttributeInt(pugi::xml_node& node, const wchar_t* attributeName, int& attri)
 {
 	if (node.empty() || node == nullptr)
 		return false;
@@ -62,7 +62,7 @@ bool XMLStream::LoadXMLAttributeInt(pugi::xml_node& node, const char* attributeN
 	return false;
 }
 
-bool XMLStream::LoadXMLAttributeBool(pugi::xml_node& node, const char* attributeName, bool& attri)
+bool XMLStream::LoadXMLAttributeBool(pugi::xml_node& node, const wchar_t* attributeName, bool& attri)
 {
 	if (node.empty() || node == nullptr)
 		return false;
@@ -75,7 +75,7 @@ bool XMLStream::LoadXMLAttributeBool(pugi::xml_node& node, const char* attribute
 	return false;
 }
 
-bool XMLStream::LoadXMLAttributeFloat(pugi::xml_node& node, const char* attributeName, float& attri)
+bool XMLStream::LoadXMLAttributeFloat(pugi::xml_node& node, const wchar_t* attributeName, float& attri)
 {
 	if (node.empty() || node == nullptr)
 		return false;

@@ -299,7 +299,7 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
         }
         SetConsoleTextAttribute(hOut, wr2);
 
-        Data = "[" + Data + "]";
+        Data = "[" + Data + "] ";
         printf((Data+in).c_str());
         printf("\n");
 

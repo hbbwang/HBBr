@@ -46,5 +46,5 @@ std::shared_ptr<FrameBufferTexture> FrameBufferTexture::CreateFrameBuffer(uint32
 
 std::shared_ptr<Texture> FrameBufferTexture::GetBuffer()
 {
-	return _frameBufferTextures[VulkanRenderer::GetSwapchainBufferIndex()];
+	return _frameBufferTextures[VulkanRenderer::GetCurrentFrameIndex()];
 }

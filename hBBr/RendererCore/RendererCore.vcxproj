@@ -134,6 +134,9 @@
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /c /f /y $(solutiondir)DependencyCopy\$(Configuration)\*.dll $(solutiondir)$(Platform)\$(Configuration)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -155,6 +158,9 @@
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /c /f /y $(solutiondir)DependencyCopy\$(Configuration)\*.dll $(solutiondir)$(Platform)\$(Configuration)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\ThirdParty\pugixml\pugiconfig.hpp" />
@@ -163,6 +169,8 @@
     <ClInclude Include="Common\ConsoleDebug.h" />
     <ClInclude Include="Common\HString.h" />
     <ClInclude Include="Common\XMLStream.h" />
+    <ClInclude Include="Core\Pipeline.h" />
+    <ClInclude Include="Core\RendererConfig.h" />
     <ClInclude Include="Core\RenderPass.h" />
     <ClInclude Include="Core\Texture.h" />
     <ClInclude Include="Core\VulkanManager.h" />
@@ -170,8 +178,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\ThirdParty\pugixml\pugixml.cpp" />
+    <ClCompile Include="Common\Common.cpp" />
     <ClCompile Include="Common\ConsoleDebug.cpp" />
     <ClCompile Include="Common\XMLStream.cpp" />
+    <ClCompile Include="Core\Pipeline.cpp" />
+    <ClCompile Include="Core\RendererConfig.cpp" />
     <ClCompile Include="Core\RenderPass.cpp" />
     <ClCompile Include="Core\Texture.cpp" />
     <ClCompile Include="Core\VulkanManager.cpp" />

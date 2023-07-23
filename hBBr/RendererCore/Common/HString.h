@@ -548,14 +548,15 @@ public:
 	}
 
 	/*  路径斜杠格式纠正,目前window和Linux都支持“/”，不过window还是用“\\”吧 */
-	FORCEINLINE HString  CorrectionPath()
+	FORCEINLINE  HString  CorrectionPath()
 	{
+		HString result = *this;
 #ifdef WIN32
-		this->Replace("/", "\\");
+		result.Replace("/", "\\");
 #else
-		this->Replace("\\", "/");
+		result.Replace("\\", "/");
 #endif
-		return *this;
+		return result;
 	}
 
 	/* 转换成纯字符串形式的路径 */

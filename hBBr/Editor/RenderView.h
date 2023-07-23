@@ -13,7 +13,14 @@ public:
 	RenderView(QWidget *parent);
 
 	~RenderView();
+
+protected:
+	virtual void showEvent(QShowEvent* event)override;
+
+	virtual void resizeEvent(QResizeEvent* event)override;
+
 private:
+
 	QTimer* _renderTimer = NULL;
 
 private slots:

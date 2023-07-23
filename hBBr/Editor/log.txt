@@ -1944,3 +1944,2175 @@ loader_get_json: Failed to open JSON file C:\Program Files\NVIDIA Corporation\Ns
 [2023-07-22 17:54:42]Validation Error: [ VUID-vkAcquireNextImageKHR-semaphore-01780 ] Object 0: handle = 0xf56c9b0000000004, type = VK_OBJECT_TYPE_SWAPCHAIN_KHR; | MessageID = 0x94557523 | vkAcquireNextImageKHR: semaphore and fence are both VK_NULL_HANDLE. The Vulkan spec states: semaphore and fence must not both be equal to VK_NULL_HANDLE (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkAcquireNextImageKHR-semaphore-01780)
 [2023-07-22 17:54:42]ERROR: @[Validation]
 Validation Error: [ VUID-vkAcquireNextImageKHR-semaphore-01780 ] Object 0: handle = 0xf56c9b0000000004, type = VK_OBJECT_TYPE_SWAPCHAIN_KHR; | MessageID = 0x94557523 | vkAcquireNextImageKHR: semaphore and fence are both VK_NULL_HANDLE. The Vulkan spec states: semaphore and fence must not both be equal to VK_NULL_HANDLE (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkAcquireNextImageKHR-semaphore-01780)
+[2023-07-23 12:07:27]----------Instance Layer Properties---------
+[2023-07-23 12:07:27]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 12:07:27]	Instance Extension Properties---------
+[2023-07-23 12:07:27]	------------------
+[2023-07-23 12:07:27]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 12:07:27]	Instance Extension Properties---------
+[2023-07-23 12:07:27]	------------------
+[2023-07-23 12:07:27]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 12:07:27]	Instance Extension Properties---------
+[2023-07-23 12:07:27]	------------------
+[2023-07-23 12:07:27]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	VK_EXT_debug_utils
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	VK_EXT_debug_report
+[2023-07-23 12:07:28]	VK_EXT_debug_utils
+[2023-07-23 12:07:28]	VK_EXT_validation_features
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]WARNING: @[Loader Message]
+[2023-07-23 12:07:28]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 12:07:28]-----------GPU List-----------
+[2023-07-23 12:07:28]Found 2 GPU(s)
+[2023-07-23 12:07:28]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 12:07:28]Device ID:9860
+[2023-07-23 12:07:28]---------------------------
+[2023-07-23 12:07:28]----------Device Layer Properties---------
+[2023-07-23 12:07:28]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:28]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 12:07:28]	Instance Extension Properties---------
+[2023-07-23 12:07:28]	VK_EXT_validation_cache
+[2023-07-23 12:07:28]	VK_EXT_debug_marker
+[2023-07-23 12:07:28]	------------------
+[2023-07-23 12:07:29]ERROR: @[Validation]
+[2023-07-23 12:07:29]Validation Error: [ VUID-vkAcquireNextImageKHR-semaphore-01780 ] Object 0: handle = 0x967dd1000000000e, type = VK_OBJECT_TYPE_SWAPCHAIN_KHR; | MessageID = 0x94557523 | vkAcquireNextImageKHR: semaphore and fence are both VK_NULL_HANDLE. The Vulkan spec states: semaphore and fence must not both be equal to VK_NULL_HANDLE (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkAcquireNextImageKHR-semaphore-01780)
+[2023-07-23 12:07:29]ERROR: @[Validation]
+Validation Error: [ VUID-vkAcquireNextImageKHR-semaphore-01780 ] Object 0: handle = 0x967dd1000000000e, type = VK_OBJECT_TYPE_SWAPCHAIN_KHR; | MessageID = 0x94557523 | vkAcquireNextImageKHR: semaphore and fence are both VK_NULL_HANDLE. The Vulkan spec states: semaphore and fence must not both be equal to VK_NULL_HANDLE (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkAcquireNextImageKHR-semaphore-01780)
+[2023-07-23 12:07:50]----------Instance Layer Properties---------
+[2023-07-23 12:07:50]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	VK_EXT_debug_utils
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	VK_EXT_debug_report
+[2023-07-23 12:07:50]	VK_EXT_debug_utils
+[2023-07-23 12:07:50]	VK_EXT_validation_features
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 12:07:50]	Instance Extension Properties---------
+[2023-07-23 12:07:50]	------------------
+[2023-07-23 12:07:50]WARNING: @[Loader Message]
+[2023-07-23 12:07:50]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 12:07:51]-----------GPU List-----------
+[2023-07-23 12:07:51]Found 2 GPU(s)
+[2023-07-23 12:07:51]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 12:07:51]Device ID:9860
+[2023-07-23 12:07:51]---------------------------
+[2023-07-23 12:07:51]----------Device Layer Properties---------
+[2023-07-23 12:07:51]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 12:07:51]	Instance Extension Properties---------
+[2023-07-23 12:07:51]	------------------
+[2023-07-23 12:07:51]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 12:07:51]	Instance Extension Properties---------
+[2023-07-23 12:07:51]	------------------
+[2023-07-23 12:07:51]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 12:07:51]	Instance Extension Properties---------
+[2023-07-23 12:07:51]	------------------
+[2023-07-23 12:07:51]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 12:07:51]	Instance Extension Properties---------
+[2023-07-23 12:07:51]	------------------
+[2023-07-23 12:07:51]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 12:07:51]	Instance Extension Properties---------
+[2023-07-23 12:07:51]	VK_EXT_validation_cache
+[2023-07-23 12:07:51]	VK_EXT_debug_marker
+[2023-07-23 12:07:51]	------------------
+[2023-07-23 12:08:03]ERROR: @[Validation]
+[2023-07-23 12:08:03]Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x14f60604480, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0xc7aabc16 | vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
+[2023-07-23 12:08:03]ERROR: @[Validation]
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x14f60604480, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0xc7aabc16 | vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
+[2023-07-23 12:09:05]----------Instance Layer Properties---------
+[2023-07-23 12:09:05]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	VK_EXT_debug_utils
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	VK_EXT_debug_report
+[2023-07-23 12:09:05]	VK_EXT_debug_utils
+[2023-07-23 12:09:05]	VK_EXT_validation_features
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]WARNING: @[Loader Message]
+[2023-07-23 12:09:05]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 12:09:05]-----------GPU List-----------
+[2023-07-23 12:09:05]Found 2 GPU(s)
+[2023-07-23 12:09:05]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 12:09:05]Device ID:9860
+[2023-07-23 12:09:05]---------------------------
+[2023-07-23 12:09:05]----------Device Layer Properties---------
+[2023-07-23 12:09:05]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:09:05]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 12:09:05]	Instance Extension Properties---------
+[2023-07-23 12:09:05]	VK_EXT_validation_cache
+[2023-07-23 12:09:05]	VK_EXT_debug_marker
+[2023-07-23 12:09:05]	------------------
+[2023-07-23 12:11:21]----------Instance Layer Properties---------
+[2023-07-23 12:11:21]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	VK_EXT_debug_utils
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	VK_EXT_debug_report
+[2023-07-23 12:11:21]	VK_EXT_debug_utils
+[2023-07-23 12:11:21]	VK_EXT_validation_features
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]WARNING: @[Loader Message]
+[2023-07-23 12:11:21]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 12:11:21]-----------GPU List-----------
+[2023-07-23 12:11:21]Found 2 GPU(s)
+[2023-07-23 12:11:21]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 12:11:21]Device ID:9860
+[2023-07-23 12:11:21]---------------------------
+[2023-07-23 12:11:21]----------Device Layer Properties---------
+[2023-07-23 12:11:21]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:21]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 12:11:21]	Instance Extension Properties---------
+[2023-07-23 12:11:21]	VK_EXT_validation_cache
+[2023-07-23 12:11:21]	VK_EXT_debug_marker
+[2023-07-23 12:11:21]	------------------
+[2023-07-23 12:11:41]----------Instance Layer Properties---------
+[2023-07-23 12:11:41]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	VK_EXT_debug_utils
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	VK_EXT_debug_report
+[2023-07-23 12:11:41]	VK_EXT_debug_utils
+[2023-07-23 12:11:41]	VK_EXT_validation_features
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:41]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 12:11:41]	Instance Extension Properties---------
+[2023-07-23 12:11:41]	------------------
+[2023-07-23 12:11:42]WARNING: @[Loader Message]
+[2023-07-23 12:11:42]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 12:11:42]-----------GPU List-----------
+[2023-07-23 12:11:42]Found 2 GPU(s)
+[2023-07-23 12:11:42]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 12:11:42]Device ID:9860
+[2023-07-23 12:11:42]---------------------------
+[2023-07-23 12:11:42]----------Device Layer Properties---------
+[2023-07-23 12:11:42]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 12:11:42]	Instance Extension Properties---------
+[2023-07-23 12:11:42]	------------------
+[2023-07-23 12:11:42]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 12:11:42]	Instance Extension Properties---------
+[2023-07-23 12:11:42]	------------------
+[2023-07-23 12:11:42]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 12:11:42]	Instance Extension Properties---------
+[2023-07-23 12:11:42]	------------------
+[2023-07-23 12:11:42]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 12:11:42]	Instance Extension Properties---------
+[2023-07-23 12:11:42]	------------------
+[2023-07-23 12:11:42]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 12:11:42]	Instance Extension Properties---------
+[2023-07-23 12:11:42]	VK_EXT_validation_cache
+[2023-07-23 12:11:42]	VK_EXT_debug_marker
+[2023-07-23 12:11:42]	------------------
+[2023-07-23 12:12:08]ERROR: @[Validation]
+[2023-07-23 12:12:08]Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x28941bf6450, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0xc7aabc16 | vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
+[2023-07-23 12:12:08]ERROR: @[Validation]
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x28941bf6450, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0xc7aabc16 | vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
+[2023-07-23 13:23:09]----------Instance Layer Properties---------
+[2023-07-23 13:23:09]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	VK_EXT_debug_utils
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	VK_EXT_debug_report
+[2023-07-23 13:23:09]	VK_EXT_debug_utils
+[2023-07-23 13:23:09]	VK_EXT_validation_features
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]WARNING: @[Loader Message]
+[2023-07-23 13:23:09]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 13:23:09]-----------GPU List-----------
+[2023-07-23 13:23:09]Found 2 GPU(s)
+[2023-07-23 13:23:09]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 13:23:09]Device ID:9860
+[2023-07-23 13:23:09]---------------------------
+[2023-07-23 13:23:09]----------Device Layer Properties---------
+[2023-07-23 13:23:09]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:09]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 13:23:09]	Instance Extension Properties---------
+[2023-07-23 13:23:09]	VK_EXT_validation_cache
+[2023-07-23 13:23:09]	VK_EXT_debug_marker
+[2023-07-23 13:23:09]	------------------
+[2023-07-23 13:23:28]ERROR: @[Validation]
+[2023-07-23 13:23:28]Validation Error: [ VUID-vkQueuePresentKHR-pWaitSemaphores-03268 ] Object 0: handle = 0x967dd1000000000e, type = VK_OBJECT_TYPE_SEMAPHORE; Object 1: handle = 0x1641a5a64c0, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0x251f8f7a | vkQueuePresentKHR(): .pWaitSemaphores[0] Queue VkQueue 0x1641a5a64c0[] is waiting on semaphore (VkSemaphore 0x967dd1000000000e[]) that has no way to be signaled. The Vulkan spec states: All elements of the pWaitSemaphores member of pPresentInfo must reference a semaphore signal operation that has been submitted for execution and any semaphore signal operations on which it depends (if any) must have also been submitted for execution (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkQueuePresentKHR-pWaitSemaphores-03268)
+[2023-07-23 13:23:28]ERROR: @[Validation]
+Validation Error: [ VUID-vkQueuePresentKHR-pWaitSemaphores-03268 ] Object 0: handle = 0x967dd1000000000e, type = VK_OBJECT_TYPE_SEMAPHORE; Object 1: handle = 0x1641a5a64c0, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0x251f8f7a | vkQueuePresentKHR(): .pWaitSemaphores[0] Queue VkQueue 0x1641a5a64c0[] is waiting on semaphore (VkSemaphore 0x967dd1000000000e[]) that has no way to be signaled. The Vulkan spec states: All elements of the pWaitSemaphores member of pPresentInfo must reference a semaphore signal operation that has been submitted for execution and any semaphore signal operations on which it depends (if any) must have also been submitted for execution (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkQueuePresentKHR-pWaitSemaphores-03268)
+[2023-07-23 13:24:13]----------Instance Layer Properties---------
+[2023-07-23 13:24:13]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	VK_EXT_debug_utils
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	VK_EXT_debug_report
+[2023-07-23 13:24:13]	VK_EXT_debug_utils
+[2023-07-23 13:24:13]	VK_EXT_validation_features
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]WARNING: @[Loader Message]
+[2023-07-23 13:24:13]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 13:24:13]-----------GPU List-----------
+[2023-07-23 13:24:13]Found 2 GPU(s)
+[2023-07-23 13:24:13]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 13:24:13]Device ID:9860
+[2023-07-23 13:24:13]---------------------------
+[2023-07-23 13:24:13]----------Device Layer Properties---------
+[2023-07-23 13:24:13]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:24:13]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 13:24:13]	Instance Extension Properties---------
+[2023-07-23 13:24:13]	VK_EXT_validation_cache
+[2023-07-23 13:24:13]	VK_EXT_debug_marker
+[2023-07-23 13:24:13]	------------------
+[2023-07-23 13:41:55]----------Instance Layer Properties---------
+[2023-07-23 13:41:55]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	VK_EXT_debug_utils
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	VK_EXT_debug_report
+[2023-07-23 13:41:55]	VK_EXT_debug_utils
+[2023-07-23 13:41:55]	VK_EXT_validation_features
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 13:41:55]	Instance Extension Properties---------
+[2023-07-23 13:41:55]	------------------
+[2023-07-23 13:41:55]WARNING: @[Loader Message]
+[2023-07-23 13:41:55]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 13:41:56]-----------GPU List-----------
+[2023-07-23 13:41:56]Found 2 GPU(s)
+[2023-07-23 13:41:56]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 13:41:56]Device ID:9860
+[2023-07-23 13:41:56]---------------------------
+[2023-07-23 13:41:56]----------Device Layer Properties---------
+[2023-07-23 13:41:56]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 13:41:56]	Instance Extension Properties---------
+[2023-07-23 13:41:56]	------------------
+[2023-07-23 13:41:56]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 13:41:56]	Instance Extension Properties---------
+[2023-07-23 13:41:56]	------------------
+[2023-07-23 13:41:56]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 13:41:56]	Instance Extension Properties---------
+[2023-07-23 13:41:56]	------------------
+[2023-07-23 13:41:56]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 13:41:56]	Instance Extension Properties---------
+[2023-07-23 13:41:56]	------------------
+[2023-07-23 13:41:56]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 13:41:56]	Instance Extension Properties---------
+[2023-07-23 13:41:56]	VK_EXT_validation_cache
+[2023-07-23 13:41:56]	VK_EXT_debug_marker
+[2023-07-23 13:41:56]	------------------
+[2023-07-23 13:52:40]----------Instance Layer Properties---------
+[2023-07-23 13:52:40]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 13:52:40]	Instance Extension Properties---------
+[2023-07-23 13:52:40]	------------------
+[2023-07-23 13:52:40]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 13:52:40]	Instance Extension Properties---------
+[2023-07-23 13:52:40]	------------------
+[2023-07-23 13:52:40]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 13:52:40]	Instance Extension Properties---------
+[2023-07-23 13:52:40]	------------------
+[2023-07-23 13:52:40]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 13:52:40]	Instance Extension Properties---------
+[2023-07-23 13:52:40]	VK_EXT_debug_utils
+[2023-07-23 13:52:40]	------------------
+[2023-07-23 13:52:40]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 13:52:40]	Instance Extension Properties---------
+[2023-07-23 13:52:40]	------------------
+[2023-07-23 13:52:40]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 13:52:40]	Instance Extension Properties---------
+[2023-07-23 13:52:40]	------------------
+[2023-07-23 13:52:40]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 13:52:40]	Instance Extension Properties---------
+[2023-07-23 13:52:40]	------------------
+[2023-07-23 13:52:40]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 13:52:40]	Instance Extension Properties---------
+[2023-07-23 13:52:40]	------------------
+[2023-07-23 13:52:40]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 13:52:40]	Instance Extension Properties---------
+[2023-07-23 13:52:40]	------------------
+[2023-07-23 13:52:40]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 13:52:40]	Instance Extension Properties---------
+[2023-07-23 13:52:40]	------------------
+[2023-07-23 13:52:40]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 13:52:40]	Instance Extension Properties---------
+[2023-07-23 13:52:40]	------------------
+[2023-07-23 13:52:41]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 13:52:41]	Instance Extension Properties---------
+[2023-07-23 13:52:41]	------------------
+[2023-07-23 13:52:41]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 13:52:41]	Instance Extension Properties---------
+[2023-07-23 13:52:41]	VK_EXT_debug_report
+[2023-07-23 13:52:41]	VK_EXT_debug_utils
+[2023-07-23 13:52:41]	VK_EXT_validation_features
+[2023-07-23 13:52:41]	------------------
+[2023-07-23 13:52:41]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 13:52:41]	Instance Extension Properties---------
+[2023-07-23 13:52:41]	------------------
+[2023-07-23 13:52:41]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 13:52:41]	Instance Extension Properties---------
+[2023-07-23 13:52:41]	------------------
+[2023-07-23 13:52:41]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 13:52:41]	Instance Extension Properties---------
+[2023-07-23 13:52:41]	------------------
+[2023-07-23 13:52:41]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 13:52:41]	Instance Extension Properties---------
+[2023-07-23 13:52:41]	------------------
+[2023-07-23 13:52:41]WARNING: @[Loader Message]
+[2023-07-23 13:52:41]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 13:52:41]-----------GPU List-----------
+[2023-07-23 13:52:41]Found 2 GPU(s)
+[2023-07-23 13:52:41]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 13:52:41]Device ID:9860
+[2023-07-23 13:52:41]---------------------------
+[2023-07-23 13:52:41]----------Device Layer Properties---------
+[2023-07-23 13:52:41]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 13:52:41]	Instance Extension Properties---------
+[2023-07-23 13:52:41]	------------------
+[2023-07-23 13:52:41]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 13:52:41]	Instance Extension Properties---------
+[2023-07-23 13:52:41]	------------------
+[2023-07-23 13:52:41]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 13:52:41]	Instance Extension Properties---------
+[2023-07-23 13:52:41]	------------------
+[2023-07-23 13:52:41]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 13:52:41]	Instance Extension Properties---------
+[2023-07-23 13:52:41]	------------------
+[2023-07-23 13:52:41]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 13:52:41]	Instance Extension Properties---------
+[2023-07-23 13:52:41]	VK_EXT_validation_cache
+[2023-07-23 13:52:41]	VK_EXT_debug_marker
+[2023-07-23 13:52:41]	------------------
+[2023-07-23 13:53:14]Acquire Next Image Error.
+[2023-07-23 13:55:16]----------Instance Layer Properties---------
+[2023-07-23 13:55:16]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 13:55:16]	Instance Extension Properties---------
+[2023-07-23 13:55:16]	------------------
+[2023-07-23 13:55:16]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 13:55:16]	Instance Extension Properties---------
+[2023-07-23 13:55:16]	------------------
+[2023-07-23 13:55:16]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 13:55:16]	Instance Extension Properties---------
+[2023-07-23 13:55:16]	------------------
+[2023-07-23 13:55:16]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 13:55:16]	Instance Extension Properties---------
+[2023-07-23 13:55:16]	VK_EXT_debug_utils
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	VK_EXT_debug_report
+[2023-07-23 13:55:17]	VK_EXT_debug_utils
+[2023-07-23 13:55:17]	VK_EXT_validation_features
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]WARNING: @[Loader Message]
+[2023-07-23 13:55:17]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 13:55:17]-----------GPU List-----------
+[2023-07-23 13:55:17]Found 2 GPU(s)
+[2023-07-23 13:55:17]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 13:55:17]Device ID:9860
+[2023-07-23 13:55:17]---------------------------
+[2023-07-23 13:55:17]----------Device Layer Properties---------
+[2023-07-23 13:55:17]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:17]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 13:55:17]	Instance Extension Properties---------
+[2023-07-23 13:55:17]	VK_EXT_validation_cache
+[2023-07-23 13:55:17]	VK_EXT_debug_marker
+[2023-07-23 13:55:17]	------------------
+[2023-07-23 13:55:20]Acquire Next Image Error.code: VK_ERROR_OUT_OF_DATE_KHR
+[2023-07-23 14:31:11]----------Instance Layer Properties---------
+[2023-07-23 14:31:11]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	VK_EXT_debug_utils
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	VK_EXT_debug_report
+[2023-07-23 14:31:11]	VK_EXT_debug_utils
+[2023-07-23 14:31:11]	VK_EXT_validation_features
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]WARNING: @[Loader Message]
+[2023-07-23 14:31:11]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 14:31:11]-----------GPU List-----------
+[2023-07-23 14:31:11]Found 2 GPU(s)
+[2023-07-23 14:31:11]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 14:31:11]Device ID:9860
+[2023-07-23 14:31:11]---------------------------
+[2023-07-23 14:31:11]----------Device Layer Properties---------
+[2023-07-23 14:31:11]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:11]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 14:31:11]	Instance Extension Properties---------
+[2023-07-23 14:31:11]	VK_EXT_validation_cache
+[2023-07-23 14:31:11]	VK_EXT_debug_marker
+[2023-07-23 14:31:11]	------------------
+[2023-07-23 14:31:34]Acquire Next Image Error.code: VK_ERROR_OUT_OF_DATE_KHR
+[2023-07-23 14:33:11]----------Instance Layer Properties---------
+[2023-07-23 14:33:11]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	VK_EXT_debug_utils
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	VK_EXT_debug_report
+[2023-07-23 14:33:11]	VK_EXT_debug_utils
+[2023-07-23 14:33:11]	VK_EXT_validation_features
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 14:33:11]	Instance Extension Properties---------
+[2023-07-23 14:33:11]	------------------
+[2023-07-23 14:33:11]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 14:33:12]	Instance Extension Properties---------
+[2023-07-23 14:33:12]	------------------
+[2023-07-23 14:33:12]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 14:33:12]	Instance Extension Properties---------
+[2023-07-23 14:33:12]	------------------
+[2023-07-23 14:33:12]WARNING: @[Loader Message]
+[2023-07-23 14:33:12]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 14:33:12]-----------GPU List-----------
+[2023-07-23 14:33:12]Found 2 GPU(s)
+[2023-07-23 14:33:12]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 14:33:12]Device ID:9860
+[2023-07-23 14:33:12]---------------------------
+[2023-07-23 14:33:12]----------Device Layer Properties---------
+[2023-07-23 14:33:12]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 14:33:12]	Instance Extension Properties---------
+[2023-07-23 14:33:12]	------------------
+[2023-07-23 14:33:12]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 14:33:12]	Instance Extension Properties---------
+[2023-07-23 14:33:12]	------------------
+[2023-07-23 14:33:12]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 14:33:12]	Instance Extension Properties---------
+[2023-07-23 14:33:12]	------------------
+[2023-07-23 14:33:12]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 14:33:12]	Instance Extension Properties---------
+[2023-07-23 14:33:12]	------------------
+[2023-07-23 14:33:12]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 14:33:12]	Instance Extension Properties---------
+[2023-07-23 14:33:12]	VK_EXT_validation_cache
+[2023-07-23 14:33:12]	VK_EXT_debug_marker
+[2023-07-23 14:33:12]	------------------
+[2023-07-23 14:33:48]ERROR: @[Validation]
+[2023-07-23 14:33:48]Validation Error: [ VUID-vkQueuePresentKHR-pWaitSemaphores-03268 ] Object 0: handle = 0xe7e6d0000000000f, type = VK_OBJECT_TYPE_SEMAPHORE; Object 1: handle = 0x1cb05a2a430, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0x251f8f7a | vkQueuePresentKHR(): .pWaitSemaphores[0] Queue VkQueue 0x1cb05a2a430[] is waiting on semaphore (VkSemaphore 0xe7e6d0000000000f[]) that has no way to be signaled. The Vulkan spec states: All elements of the pWaitSemaphores member of pPresentInfo must reference a semaphore signal operation that has been submitted for execution and any semaphore signal operations on which it depends (if any) must have also been submitted for execution (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkQueuePresentKHR-pWaitSemaphores-03268)
+[2023-07-23 14:33:48]ERROR: @[Validation]
+Validation Error: [ VUID-vkQueuePresentKHR-pWaitSemaphores-03268 ] Object 0: handle = 0xe7e6d0000000000f, type = VK_OBJECT_TYPE_SEMAPHORE; Object 1: handle = 0x1cb05a2a430, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0x251f8f7a | vkQueuePresentKHR(): .pWaitSemaphores[0] Queue VkQueue 0x1cb05a2a430[] is waiting on semaphore (VkSemaphore 0xe7e6d0000000000f[]) that has no way to be signaled. The Vulkan spec states: All elements of the pWaitSemaphores member of pPresentInfo must reference a semaphore signal operation that has been submitted for execution and any semaphore signal operations on which it depends (if any) must have also been submitted for execution (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkQueuePresentKHR-pWaitSemaphores-03268)
+[2023-07-23 14:33:55]----------Instance Layer Properties---------
+[2023-07-23 14:33:55]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	VK_EXT_debug_utils
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	VK_EXT_debug_report
+[2023-07-23 14:33:55]	VK_EXT_debug_utils
+[2023-07-23 14:33:55]	VK_EXT_validation_features
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]WARNING: @[Loader Message]
+[2023-07-23 14:33:55]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 14:33:55]-----------GPU List-----------
+[2023-07-23 14:33:55]Found 2 GPU(s)
+[2023-07-23 14:33:55]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 14:33:55]Device ID:9860
+[2023-07-23 14:33:55]---------------------------
+[2023-07-23 14:33:55]----------Device Layer Properties---------
+[2023-07-23 14:33:55]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:33:55]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 14:33:55]	Instance Extension Properties---------
+[2023-07-23 14:33:55]	VK_EXT_validation_cache
+[2023-07-23 14:33:55]	VK_EXT_debug_marker
+[2023-07-23 14:33:55]	------------------
+[2023-07-23 14:34:36]ERROR: @[Validation]
+[2023-07-23 14:34:36]Validation Error: [ VUID-vkQueuePresentKHR-pWaitSemaphores-03268 ] Object 0: handle = 0xe7e6d0000000000f, type = VK_OBJECT_TYPE_SEMAPHORE; Object 1: handle = 0x2280d1104f0, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0x251f8f7a | vkQueuePresentKHR(): .pWaitSemaphores[0] Queue VkQueue 0x2280d1104f0[] is waiting on semaphore (VkSemaphore 0xe7e6d0000000000f[]) that has no way to be signaled. The Vulkan spec states: All elements of the pWaitSemaphores member of pPresentInfo must reference a semaphore signal operation that has been submitted for execution and any semaphore signal operations on which it depends (if any) must have also been submitted for execution (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkQueuePresentKHR-pWaitSemaphores-03268)
+[2023-07-23 14:34:36]ERROR: @[Validation]
+Validation Error: [ VUID-vkQueuePresentKHR-pWaitSemaphores-03268 ] Object 0: handle = 0xe7e6d0000000000f, type = VK_OBJECT_TYPE_SEMAPHORE; Object 1: handle = 0x2280d1104f0, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0x251f8f7a | vkQueuePresentKHR(): .pWaitSemaphores[0] Queue VkQueue 0x2280d1104f0[] is waiting on semaphore (VkSemaphore 0xe7e6d0000000000f[]) that has no way to be signaled. The Vulkan spec states: All elements of the pWaitSemaphores member of pPresentInfo must reference a semaphore signal operation that has been submitted for execution and any semaphore signal operations on which it depends (if any) must have also been submitted for execution (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkQueuePresentKHR-pWaitSemaphores-03268)
+[2023-07-23 14:49:16]----------Instance Layer Properties---------
+[2023-07-23 14:49:16]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	VK_EXT_debug_utils
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	VK_EXT_debug_report
+[2023-07-23 14:49:16]	VK_EXT_debug_utils
+[2023-07-23 14:49:16]	VK_EXT_validation_features
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]WARNING: @[Loader Message]
+[2023-07-23 14:49:16]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 14:49:16]-----------GPU List-----------
+[2023-07-23 14:49:16]Found 2 GPU(s)
+[2023-07-23 14:49:16]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 14:49:16]Device ID:9860
+[2023-07-23 14:49:16]---------------------------
+[2023-07-23 14:49:16]----------Device Layer Properties---------
+[2023-07-23 14:49:16]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:49:16]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 14:49:16]	Instance Extension Properties---------
+[2023-07-23 14:49:16]	VK_EXT_validation_cache
+[2023-07-23 14:49:16]	VK_EXT_debug_marker
+[2023-07-23 14:49:16]	------------------
+[2023-07-23 14:50:08]----------Instance Layer Properties---------
+[2023-07-23 14:50:08]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	VK_EXT_debug_utils
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	VK_EXT_debug_report
+[2023-07-23 14:50:08]	VK_EXT_debug_utils
+[2023-07-23 14:50:08]	VK_EXT_validation_features
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]WARNING: @[Loader Message]
+[2023-07-23 14:50:08]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 14:50:08]-----------GPU List-----------
+[2023-07-23 14:50:08]Found 2 GPU(s)
+[2023-07-23 14:50:08]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 14:50:08]Device ID:9860
+[2023-07-23 14:50:08]---------------------------
+[2023-07-23 14:50:08]----------Device Layer Properties---------
+[2023-07-23 14:50:08]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:50:08]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 14:50:08]	Instance Extension Properties---------
+[2023-07-23 14:50:08]	VK_EXT_validation_cache
+[2023-07-23 14:50:08]	VK_EXT_debug_marker
+[2023-07-23 14:50:08]	------------------
+[2023-07-23 14:55:30]ERROR: @[Validation]
+[2023-07-23 14:55:30]Validation Error: [ VUID-vkQueuePresentKHR-pWaitSemaphores-03268 ] Object 0: handle = 0xe7e6d0000000000f, type = VK_OBJECT_TYPE_SEMAPHORE; Object 1: handle = 0x1ddbc5f3650, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0x251f8f7a | vkQueuePresentKHR(): .pWaitSemaphores[0] Queue VkQueue 0x1ddbc5f3650[] is waiting on semaphore (VkSemaphore 0xe7e6d0000000000f[]) that has no way to be signaled. The Vulkan spec states: All elements of the pWaitSemaphores member of pPresentInfo must reference a semaphore signal operation that has been submitted for execution and any semaphore signal operations on which it depends (if any) must have also been submitted for execution (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkQueuePresentKHR-pWaitSemaphores-03268)
+[2023-07-23 14:55:30]ERROR: @[Validation]
+Validation Error: [ VUID-vkQueuePresentKHR-pWaitSemaphores-03268 ] Object 0: handle = 0xe7e6d0000000000f, type = VK_OBJECT_TYPE_SEMAPHORE; Object 1: handle = 0x1ddbc5f3650, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0x251f8f7a | vkQueuePresentKHR(): .pWaitSemaphores[0] Queue VkQueue 0x1ddbc5f3650[] is waiting on semaphore (VkSemaphore 0xe7e6d0000000000f[]) that has no way to be signaled. The Vulkan spec states: All elements of the pWaitSemaphores member of pPresentInfo must reference a semaphore signal operation that has been submitted for execution and any semaphore signal operations on which it depends (if any) must have also been submitted for execution (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkQueuePresentKHR-pWaitSemaphores-03268)
+[2023-07-23 14:56:39]----------Instance Layer Properties---------
+[2023-07-23 14:56:39]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	VK_EXT_debug_utils
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	VK_EXT_debug_report
+[2023-07-23 14:56:39]	VK_EXT_debug_utils
+[2023-07-23 14:56:39]	VK_EXT_validation_features
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]WARNING: @[Loader Message]
+[2023-07-23 14:56:39]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 14:56:39]-----------GPU List-----------
+[2023-07-23 14:56:39]Found 2 GPU(s)
+[2023-07-23 14:56:39]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 14:56:39]Device ID:9860
+[2023-07-23 14:56:39]---------------------------
+[2023-07-23 14:56:39]----------Device Layer Properties---------
+[2023-07-23 14:56:39]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 14:56:39]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 14:56:39]	Instance Extension Properties---------
+[2023-07-23 14:56:39]	VK_EXT_validation_cache
+[2023-07-23 14:56:39]	VK_EXT_debug_marker
+[2023-07-23 14:56:39]	------------------
+[2023-07-23 15:24:08]----------Instance Layer Properties---------
+[2023-07-23 15:24:08]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	VK_EXT_debug_utils
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	VK_EXT_debug_report
+[2023-07-23 15:24:08]	VK_EXT_debug_utils
+[2023-07-23 15:24:08]	VK_EXT_validation_features
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 15:24:08]	Instance Extension Properties---------
+[2023-07-23 15:24:08]	------------------
+[2023-07-23 15:24:08]WARNING: @[Loader Message]
+[2023-07-23 15:24:08]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 15:24:09]-----------GPU List-----------
+[2023-07-23 15:24:09]Found 2 GPU(s)
+[2023-07-23 15:24:09]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 15:24:09]Device ID:9860
+[2023-07-23 15:24:09]---------------------------
+[2023-07-23 15:24:09]----------Device Layer Properties---------
+[2023-07-23 15:24:09]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 15:24:09]	Instance Extension Properties---------
+[2023-07-23 15:24:09]	------------------
+[2023-07-23 15:24:09]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 15:24:09]	Instance Extension Properties---------
+[2023-07-23 15:24:09]	------------------
+[2023-07-23 15:24:09]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 15:24:09]	Instance Extension Properties---------
+[2023-07-23 15:24:09]	------------------
+[2023-07-23 15:24:09]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 15:24:09]	Instance Extension Properties---------
+[2023-07-23 15:24:09]	------------------
+[2023-07-23 15:24:09]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 15:24:09]	Instance Extension Properties---------
+[2023-07-23 15:24:09]	VK_EXT_validation_cache
+[2023-07-23 15:24:09]	VK_EXT_debug_marker
+[2023-07-23 15:24:09]	------------------
+[2023-07-23 15:24:12]ERROR: @[Validation]
+[2023-07-23 15:24:12]Validation Error: [ VUID-vkQueuePresentKHR-pWaitSemaphores-03268 ] Object 0: handle = 0x967dd1000000000e, type = VK_OBJECT_TYPE_SEMAPHORE; Object 1: handle = 0x1998e7f76c0, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0x251f8f7a | vkQueuePresentKHR(): .pWaitSemaphores[0] Queue VkQueue 0x1998e7f76c0[] is waiting on semaphore (VkSemaphore 0x967dd1000000000e[]) that has no way to be signaled. The Vulkan spec states: All elements of the pWaitSemaphores member of pPresentInfo must reference a semaphore signal operation that has been submitted for execution and any semaphore signal operations on which it depends (if any) must have also been submitted for execution (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkQueuePresentKHR-pWaitSemaphores-03268)
+[2023-07-23 15:24:12]ERROR: @[Validation]
+Validation Error: [ VUID-vkQueuePresentKHR-pWaitSemaphores-03268 ] Object 0: handle = 0x967dd1000000000e, type = VK_OBJECT_TYPE_SEMAPHORE; Object 1: handle = 0x1998e7f76c0, type = VK_OBJECT_TYPE_QUEUE; | MessageID = 0x251f8f7a | vkQueuePresentKHR(): .pWaitSemaphores[0] Queue VkQueue 0x1998e7f76c0[] is waiting on semaphore (VkSemaphore 0x967dd1000000000e[]) that has no way to be signaled. The Vulkan spec states: All elements of the pWaitSemaphores member of pPresentInfo must reference a semaphore signal operation that has been submitted for execution and any semaphore signal operations on which it depends (if any) must have also been submitted for execution (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkQueuePresentKHR-pWaitSemaphores-03268)
+[2023-07-23 15:24:22]ERROR: @[Validation]
+[2023-07-23 15:24:22]Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x980f360000000011, type = VK_OBJECT_TYPE_SWAPCHAIN_KHR; | MessageID = 0xc7aabc16 | vkQueuePresentKHR: pSwapchains[0] image at index 0 was not acquired from the swapchain. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
+[2023-07-23 15:24:22]ERROR: @[Validation]
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x980f360000000011, type = VK_OBJECT_TYPE_SWAPCHAIN_KHR; | MessageID = 0xc7aabc16 | vkQueuePresentKHR: pSwapchains[0] image at index 0 was not acquired from the swapchain. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
+[2023-07-23 15:28:27]----------Instance Layer Properties---------
+[2023-07-23 15:28:27]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	VK_EXT_debug_utils
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	VK_EXT_debug_report
+[2023-07-23 15:28:27]	VK_EXT_debug_utils
+[2023-07-23 15:28:27]	VK_EXT_validation_features
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]WARNING: @[Loader Message]
+[2023-07-23 15:28:27]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 15:28:27]-----------GPU List-----------
+[2023-07-23 15:28:27]Found 2 GPU(s)
+[2023-07-23 15:28:27]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 15:28:27]Device ID:9860
+[2023-07-23 15:28:27]---------------------------
+[2023-07-23 15:28:27]----------Device Layer Properties---------
+[2023-07-23 15:28:27]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:28:27]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 15:28:27]	Instance Extension Properties---------
+[2023-07-23 15:28:27]	VK_EXT_validation_cache
+[2023-07-23 15:28:27]	VK_EXT_debug_marker
+[2023-07-23 15:28:27]	------------------
+[2023-07-23 15:29:12]VK_ERROR_OUT_OF_DATE_KHR.Swapchain need to reset.
+[2023-07-23 15:29:12]ERROR: @[Validation]
+[2023-07-23 15:29:12]Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x149539188b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xd5b26f0000000010, type = VK_OBJECT_TYPE_SEMAPHORE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x149539188b0[], VkSemaphore 0xd5b26f0000000010[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[2023-07-23 15:29:12]ERROR: @[Validation]
+Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x149539188b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xd5b26f0000000010, type = VK_OBJECT_TYPE_SEMAPHORE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x149539188b0[], VkSemaphore 0xd5b26f0000000010[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[2023-07-23 15:36:46]----------Instance Layer Properties---------
+[2023-07-23 15:36:46]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	VK_EXT_debug_utils
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	VK_EXT_debug_report
+[2023-07-23 15:36:46]	VK_EXT_debug_utils
+[2023-07-23 15:36:46]	VK_EXT_validation_features
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]WARNING: @[Loader Message]
+[2023-07-23 15:36:46]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 15:36:46]-----------GPU List-----------
+[2023-07-23 15:36:46]Found 2 GPU(s)
+[2023-07-23 15:36:46]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 15:36:46]Device ID:9860
+[2023-07-23 15:36:46]---------------------------
+[2023-07-23 15:36:46]----------Device Layer Properties---------
+[2023-07-23 15:36:46]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:46]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 15:36:46]	Instance Extension Properties---------
+[2023-07-23 15:36:46]	VK_EXT_validation_cache
+[2023-07-23 15:36:46]	VK_EXT_debug_marker
+[2023-07-23 15:36:46]	------------------
+[2023-07-23 15:36:55]VK_ERROR_OUT_OF_DATE_KHR.Swapchain need to reset.
+[2023-07-23 15:36:55]ERROR: @[Validation]
+[2023-07-23 15:36:55]Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x1f880f86710, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xd5b26f0000000010, type = VK_OBJECT_TYPE_SEMAPHORE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x1f880f86710[], VkSemaphore 0xd5b26f0000000010[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[2023-07-23 15:36:55]ERROR: @[Validation]
+Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x1f880f86710, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xd5b26f0000000010, type = VK_OBJECT_TYPE_SEMAPHORE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x1f880f86710[], VkSemaphore 0xd5b26f0000000010[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[2023-07-23 15:38:21]----------Instance Layer Properties---------
+[2023-07-23 15:38:21]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 15:38:21]	Instance Extension Properties---------
+[2023-07-23 15:38:21]	------------------
+[2023-07-23 15:38:21]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 15:38:21]	Instance Extension Properties---------
+[2023-07-23 15:38:21]	------------------
+[2023-07-23 15:38:21]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 15:38:21]	Instance Extension Properties---------
+[2023-07-23 15:38:21]	------------------
+[2023-07-23 15:38:21]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 15:38:21]	Instance Extension Properties---------
+[2023-07-23 15:38:21]	VK_EXT_debug_utils
+[2023-07-23 15:38:21]	------------------
+[2023-07-23 15:38:21]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 15:38:21]	Instance Extension Properties---------
+[2023-07-23 15:38:21]	------------------
+[2023-07-23 15:38:21]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 15:38:21]	Instance Extension Properties---------
+[2023-07-23 15:38:21]	------------------
+[2023-07-23 15:38:21]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 15:38:21]	Instance Extension Properties---------
+[2023-07-23 15:38:21]	------------------
+[2023-07-23 15:38:21]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 15:38:21]	Instance Extension Properties---------
+[2023-07-23 15:38:21]	------------------
+[2023-07-23 15:38:21]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 15:38:21]	Instance Extension Properties---------
+[2023-07-23 15:38:21]	------------------
+[2023-07-23 15:38:21]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 15:38:21]	Instance Extension Properties---------
+[2023-07-23 15:38:21]	------------------
+[2023-07-23 15:38:21]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 15:38:21]	Instance Extension Properties---------
+[2023-07-23 15:38:21]	------------------
+[2023-07-23 15:38:21]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 15:38:21]	Instance Extension Properties---------
+[2023-07-23 15:38:21]	------------------
+[2023-07-23 15:38:21]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 15:38:21]	Instance Extension Properties---------
+[2023-07-23 15:38:21]	VK_EXT_debug_report
+[2023-07-23 15:38:21]	VK_EXT_debug_utils
+[2023-07-23 15:38:21]	VK_EXT_validation_features
+[2023-07-23 15:38:21]	------------------
+[2023-07-23 15:38:21]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 15:38:22]	Instance Extension Properties---------
+[2023-07-23 15:38:22]	------------------
+[2023-07-23 15:38:22]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 15:38:22]	Instance Extension Properties---------
+[2023-07-23 15:38:22]	------------------
+[2023-07-23 15:38:22]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 15:38:22]	Instance Extension Properties---------
+[2023-07-23 15:38:22]	------------------
+[2023-07-23 15:38:22]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 15:38:22]	Instance Extension Properties---------
+[2023-07-23 15:38:22]	------------------
+[2023-07-23 15:38:22]WARNING: @[Loader Message]
+[2023-07-23 15:38:22]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 15:38:22]-----------GPU List-----------
+[2023-07-23 15:38:22]Found 2 GPU(s)
+[2023-07-23 15:38:22]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 15:38:22]Device ID:9860
+[2023-07-23 15:38:22]---------------------------
+[2023-07-23 15:38:22]----------Device Layer Properties---------
+[2023-07-23 15:38:22]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 15:38:22]	Instance Extension Properties---------
+[2023-07-23 15:38:22]	------------------
+[2023-07-23 15:38:22]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 15:38:22]	Instance Extension Properties---------
+[2023-07-23 15:38:22]	------------------
+[2023-07-23 15:38:22]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 15:38:22]	Instance Extension Properties---------
+[2023-07-23 15:38:22]	------------------
+[2023-07-23 15:38:22]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 15:38:22]	Instance Extension Properties---------
+[2023-07-23 15:38:22]	------------------
+[2023-07-23 15:38:22]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 15:38:22]	Instance Extension Properties---------
+[2023-07-23 15:38:22]	VK_EXT_validation_cache
+[2023-07-23 15:38:22]	VK_EXT_debug_marker
+[2023-07-23 15:38:22]	------------------
+[2023-07-23 15:38:24]VK_ERROR_OUT_OF_DATE_KHR.Swapchain need to reset.
+[2023-07-23 15:38:32]ERROR: @[Validation]
+[2023-07-23 15:38:32]Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x27c0730d6a0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xd5b26f0000000010, type = VK_OBJECT_TYPE_SEMAPHORE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x27c0730d6a0[], VkSemaphore 0xd5b26f0000000010[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[2023-07-23 15:38:32]ERROR: @[Validation]
+Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x27c0730d6a0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xd5b26f0000000010, type = VK_OBJECT_TYPE_SEMAPHORE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x27c0730d6a0[], VkSemaphore 0xd5b26f0000000010[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://vulkan.lunarg.com/doc/view/1.3.250.1/windows/1.3-extensions/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[2023-07-23 15:58:47]----------Instance Layer Properties---------
+[2023-07-23 15:58:47]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	VK_EXT_debug_utils
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	VK_EXT_debug_report
+[2023-07-23 15:58:47]	VK_EXT_debug_utils
+[2023-07-23 15:58:47]	VK_EXT_validation_features
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]WARNING: @[Loader Message]
+[2023-07-23 15:58:47]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 15:58:47]-----------GPU List-----------
+[2023-07-23 15:58:47]Found 2 GPU(s)
+[2023-07-23 15:58:47]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 15:58:47]Device ID:9860
+[2023-07-23 15:58:47]---------------------------
+[2023-07-23 15:58:47]----------Device Layer Properties---------
+[2023-07-23 15:58:47]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:47]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 15:58:47]	Instance Extension Properties---------
+[2023-07-23 15:58:47]	VK_EXT_validation_cache
+[2023-07-23 15:58:47]	VK_EXT_debug_marker
+[2023-07-23 15:58:47]	------------------
+[2023-07-23 15:58:56]VK_ERROR_OUT_OF_DATE_KHR.Swapchain need to reset.
+[2023-07-23 17:04:06]----------Instance Layer Properties---------
+[2023-07-23 17:04:06]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	VK_EXT_debug_utils
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	VK_EXT_debug_report
+[2023-07-23 17:04:06]	VK_EXT_debug_utils
+[2023-07-23 17:04:06]	VK_EXT_validation_features
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]WARNING: @[Loader Message]
+[2023-07-23 17:04:06]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 17:04:06]-----------GPU List-----------
+[2023-07-23 17:04:06]Found 2 GPU(s)
+[2023-07-23 17:04:06]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 17:04:06]Device ID:9860
+[2023-07-23 17:04:06]---------------------------
+[2023-07-23 17:04:06]----------Device Layer Properties---------
+[2023-07-23 17:04:06]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:06]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 17:04:06]	Instance Extension Properties---------
+[2023-07-23 17:04:06]	VK_EXT_validation_cache
+[2023-07-23 17:04:06]	VK_EXT_debug_marker
+[2023-07-23 17:04:06]	------------------
+[2023-07-23 17:04:12]VK_ERROR_OUT_OF_DATE_KHR.Swapchain need to reset.
+[2023-07-23 17:06:33]Fatal error! Load renderer config failed !!
+[2023-07-23 17:16:09]ç¿»è¯‘å†…å®¹å·²åŠ è½½ã€‚
+[2023-07-23 17:16:10]----------Instance Layer Properties---------
+[2023-07-23 17:16:10]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	VK_EXT_debug_utils
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	VK_EXT_debug_report
+[2023-07-23 17:16:10]	VK_EXT_debug_utils
+[2023-07-23 17:16:10]	VK_EXT_validation_features
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]WARNING: @[Loader Message]
+[2023-07-23 17:16:10]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 17:16:10]-----------GPU List-----------
+[2023-07-23 17:16:10]Found 2 GPU(s)
+[2023-07-23 17:16:10]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 17:16:10]Device ID:9860
+[2023-07-23 17:16:10]---------------------------
+[2023-07-23 17:16:10]----------Device Layer Properties---------
+[2023-07-23 17:16:10]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:10]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 17:16:10]	Instance Extension Properties---------
+[2023-07-23 17:16:10]	VK_EXT_validation_cache
+[2023-07-23 17:16:10]	VK_EXT_debug_marker
+[2023-07-23 17:16:10]	------------------
+[2023-07-23 17:16:52]ç¿»è¯‘å†…å®¹å·²åŠ è½½ã€‚
+[2023-07-23 17:31:11]·­ÒëÄÚÈÝÒÑ¼ÓÔØ¡£
+[2023-07-23 17:31:12]----------Instance Layer Properties---------
+[2023-07-23 17:31:12]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	VK_EXT_debug_utils
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	VK_EXT_debug_report
+[2023-07-23 17:31:12]	VK_EXT_debug_utils
+[2023-07-23 17:31:12]	VK_EXT_validation_features
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]WARNING: @[Loader Message]
+[2023-07-23 17:31:12]Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 17:31:12]-----------GPU List-----------
+[2023-07-23 17:31:12]Found 2 GPU(s)
+[2023-07-23 17:31:12]Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 17:31:12]Device ID:9860
+[2023-07-23 17:31:12]---------------------------
+[2023-07-23 17:31:12]----------Device Layer Properties---------
+[2023-07-23 17:31:12]VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:12]VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 17:31:12]	Instance Extension Properties---------
+[2023-07-23 17:31:12]	VK_EXT_validation_cache
+[2023-07-23 17:31:12]	VK_EXT_debug_marker
+[2023-07-23 17:31:12]	------------------
+[2023-07-23 17:31:27]VK_ERROR_OUT_OF_DATE_KHR.Swapchain need to reset.
+[2023-07-23 17:31:46]·­ÒëÄÚÈÝÒÑ¼ÓÔØ¡£
+[2023-07-23 17:32:38] ·­ÒëÄÚÈÝÒÑ¼ÓÔØ¡£
+[2023-07-23 17:32:38] ----------Instance Layer Properties---------
+[2023-07-23 17:32:38] VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 17:32:38] 	Instance Extension Properties---------
+[2023-07-23 17:32:38] 	------------------
+[2023-07-23 17:32:38] VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	VK_EXT_debug_utils
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	VK_EXT_debug_report
+[2023-07-23 17:32:39] 	VK_EXT_debug_utils
+[2023-07-23 17:32:39] 	VK_EXT_validation_features
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] WARNING: @[Loader Message]
+[2023-07-23 17:32:39] Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 17:32:39] -----------GPU List-----------
+[2023-07-23 17:32:39] Found 2 GPU(s)
+[2023-07-23 17:32:39] Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 17:32:39] Device ID:9860
+[2023-07-23 17:32:39] ---------------------------
+[2023-07-23 17:32:39] ----------Device Layer Properties---------
+[2023-07-23 17:32:39] VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:39] VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 17:32:39] 	Instance Extension Properties---------
+[2023-07-23 17:32:39] 	VK_EXT_validation_cache
+[2023-07-23 17:32:39] 	VK_EXT_debug_marker
+[2023-07-23 17:32:39] 	------------------
+[2023-07-23 17:32:47] VK_ERROR_OUT_OF_DATE_KHR.Swapchain need to reset.
+[2023-07-23 17:33:24] ·­ÒëÄÚÈÝÒÑ¼ÓÔØ¡£
+[2023-07-23 17:33:25] ----------Instance Layer Properties---------
+[2023-07-23 17:33:25] VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_RENDERDOC_Capture  |  Debugging capture layer for RenderDoc
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	VK_EXT_debug_utils
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_VALVE_steam_overlay  |  Steam Overlay Layer
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_VALVE_steam_fossilize  |  Steam Pipeline Caching Layer
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_EOS_Overlay  |  Vulkan overlay layer for Epic Online Services
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_LUNARG_api_dump  |  LunarG API dump layer
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_LUNARG_gfxreconstruct  |  GFXReconstruct Capture Layer Version 0.9.20
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_KHRONOS_synchronization2  |  Khronos Synchronization2 layer
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	VK_EXT_debug_report
+[2023-07-23 17:33:25] 	VK_EXT_debug_utils
+[2023-07-23 17:33:25] 	VK_EXT_validation_features
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_LUNARG_monitor  |  Execution Monitoring Layer
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_LUNARG_screenshot  |  LunarG image capture layer
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_KHRONOS_profiles  |  Khronos Profiles layer
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_KHRONOS_shader_object  |  Shader object layer
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] WARNING: @[Loader Message]
+[2023-07-23 17:33:25] Layer VK_LAYER_bandicam_helper uses API version 1.1 which is older than the application specified API version of 1.3. May cause issues.
+[2023-07-23 17:33:25] -----------GPU List-----------
+[2023-07-23 17:33:25] Found 2 GPU(s)
+[2023-07-23 17:33:25] Device Name:NVIDIA GeForce RTX 4090
+[2023-07-23 17:33:25] Device ID:9860
+[2023-07-23 17:33:25] ---------------------------
+[2023-07-23 17:33:25] ----------Device Layer Properties---------
+[2023-07-23 17:33:25] VK_LAYER_AMD_switchable_graphics  |  AMD switchable graphics layer
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_NV_optimus  |  NVIDIA Optimus layer
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_bandicam_helper  |  Vulkan Bandicam Helper
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_RTSS  |  RTSS overlay hook bootstrap
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:25] VK_LAYER_KHRONOS_validation  |  Khronos Validation Layer
+[2023-07-23 17:33:25] 	Instance Extension Properties---------
+[2023-07-23 17:33:25] 	VK_EXT_validation_cache
+[2023-07-23 17:33:25] 	VK_EXT_debug_marker
+[2023-07-23 17:33:25] 	------------------
+[2023-07-23 17:33:42] VK_ERROR_OUT_OF_DATE_KHR.Swapchain need to reset.

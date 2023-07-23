@@ -18,12 +18,18 @@ public:
 		return _vulkanManager;
 	}
 
-	HBBR_API __forceinline static int GetSwapchainBufferIndex() {
-		return _swapchainBufferIndex;
+	/* Frame buffer index */
+	HBBR_API __forceinline static int GetCurrentFrameIndex() {
+		return _currentFrameIndex;
 	}
 
 	/* 帧渲染函数 */
 	HBBR_API void Render();
+
+	/* 检查Swapchain是否过期(一般是因为窗口大小改变了,和swapchain初始化的大小不一致导致的) */
+	HBBR_API void CheckSwapchainOutOfData();
+
+	HBBR_API void ResetWindowSize(uint32_t width,uint32_t height);
 
 private:
 	
@@ -37,6 +43,8 @@ private:
 
 	VkExtent2D _surfaceSize{};
 
+	VkExtent2D _windowSize{};
+
 	std::vector<VkImage> _swapchainImages;
 
 	std::vector<VkImageView> _swapchainImageViews;
@@ -45,5 +53,8 @@ private:
 
 	std::vector<VkSemaphore> _presentSemaphore;
 
-	static uint32_t _swapchainBufferIndex;
+	static uint32_t _currentFrameIndex;
+
+	bool bRendererRelease;
+
 };
