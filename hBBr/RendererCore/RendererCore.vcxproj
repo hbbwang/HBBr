@@ -169,9 +169,10 @@
     <ClInclude Include="Common\ConsoleDebug.h" />
     <ClInclude Include="Common\HString.h" />
     <ClInclude Include="Common\XMLStream.h" />
+    <ClInclude Include="Core\PassBase.h" />
     <ClInclude Include="Core\Pipeline.h" />
     <ClInclude Include="Core\RendererConfig.h" />
-    <ClInclude Include="Core\RenderPass.h" />
+    <ClInclude Include="Core\PassManager.h" />
     <ClInclude Include="Core\Texture.h" />
     <ClInclude Include="Core\VulkanManager.h" />
     <ClInclude Include="Core\VulkanRenderer.h" />
@@ -181,9 +182,10 @@
     <ClCompile Include="Common\Common.cpp" />
     <ClCompile Include="Common\ConsoleDebug.cpp" />
     <ClCompile Include="Common\XMLStream.cpp" />
+    <ClCompile Include="Core\PassBase.cpp" />
     <ClCompile Include="Core\Pipeline.cpp" />
     <ClCompile Include="Core\RendererConfig.cpp" />
-    <ClCompile Include="Core\RenderPass.cpp" />
+    <ClCompile Include="Core\PassManager.cpp" />
     <ClCompile Include="Core\Texture.cpp" />
     <ClCompile Include="Core\VulkanManager.cpp" />
     <ClCompile Include="Core\VulkanRenderer.cpp" />

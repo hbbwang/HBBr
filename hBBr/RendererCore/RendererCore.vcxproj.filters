@@ -57,13 +57,16 @@
     <ClInclude Include="Core\Texture.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\RenderPass.h">
+    <ClInclude Include="Core\PassManager.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Pipeline.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\RendererConfig.h">
+      <Filter>Renderer\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\PassBase.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -89,7 +92,7 @@
     <ClCompile Include="Core\Texture.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\RenderPass.cpp">
+    <ClCompile Include="Core\PassManager.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\Pipeline.cpp">
@@ -100,6 +103,9 @@
     </ClCompile>
     <ClCompile Include="Common\Common.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\PassBase.cpp">
+      <Filter>Renderer\Core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

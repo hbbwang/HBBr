@@ -52,7 +52,7 @@ public:
 	VkExtent2D CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<VkImage>& swapchainImages, std::vector<VkImageView>& swapchainImageViews);
 
 	/* 释放Swapchain */
-	void DestroySwapchain(VkSwapchainKHR swapchain, std::vector<VkImage> swapchainImages, std::vector<VkImageView> swapchainImageViews);
+	void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImage>& swapchainImages, std::vector<VkImageView>& swapchainImageViews);
 
 	/* 创建Vulkan image ,但是不带 mipmaps */
 	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image);
@@ -84,7 +84,7 @@ public:
 
 	void CreateCommandBuffer(VkCommandPool commandPool , VkCommandBuffer& cmdBuf);
 
-	void DestroyCommandBuffers(VkCommandPool commandPool, std::vector<VkCommandBuffer> cmdBufs);
+	void FreeCommandBuffers(VkCommandPool commandPool, std::vector<VkCommandBuffer> cmdBufs);
 
 	void BeginCommandBuffer(VkCommandBuffer cmdBuf , VkCommandBufferUsageFlags flag = 0);
 
@@ -92,7 +92,7 @@ public:
 
 	void GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t* swapchainIndex);
 
-	void Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainIndex);
+	void Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainImageIndex);
 
 	/* Image 布局转换 */
 	void Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1);

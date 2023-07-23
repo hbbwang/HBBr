@@ -226,22 +226,26 @@ class Pipeline
 {
 public:
 
-	Pipeline(VkRenderPass renderPass, uint32_t subpassIndex , PipelineType pipelineType = PipelineType::Graphics);
+	Pipeline();
 
 	__forceinline VkPipeline GetPipeline()const 
 	{
 		return _pipeline;
 	}
 
+	void CreatePipelineObject(VkRenderPass renderPass, uint32_t subpassCount = 1, PipelineType pipelineType = PipelineType::Graphics);
+
+	//Graphics pipeline setting step 1
 	void SetColorBlend(bool bEnable, StaticBlendState blendState = {});
 
+	//Graphics pipeline setting step 2
 	void SetRenderRasterizer(Rasterizer rasterizer);
 
+	//Graphics pipeline setting step 3
 	void SetRenderDepthStencil(DepthStencil depthStencil = {});
 
+	//Graphics pipeline setting step 4
 	void SetVertexInput(VertexInputLayout vertexInputLayout);
-
-	void CreatePipelineObject();
 
 private:
 

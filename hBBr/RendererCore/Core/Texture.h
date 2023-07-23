@@ -21,7 +21,7 @@ public:
 		return _imageView;
 	}
 
-	static std::shared_ptr<Texture> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags);
+	static std::shared_ptr<Texture> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, HString textureName = "Texture", bool noMemory = false);
 
 private:
 	bool _bNoMemory = false;
@@ -30,6 +30,7 @@ private:
 	VkDeviceMemory _imageViewMemory;
 	VkFormat _format;
 	VkImageUsageFlags _usageFlags;
+	HString _textureName;
 };
 
 class FrameBufferTexture

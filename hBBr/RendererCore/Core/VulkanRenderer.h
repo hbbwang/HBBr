@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "VulkanManager.h"
 #include <memory>
+#include <mutex>
+#include <thread>
 
 class Texture;
 class FrameBufferTexture;
@@ -13,14 +15,21 @@ public:
 #endif
 	HBBR_API ~VulkanRenderer();
 
-	HBBR_API __forceinline static VulkanManager* GetManager()
-	{
+	HBBR_API __forceinline static VulkanManager* GetManager(){
 		return _vulkanManager;
 	}
 
 	/* Frame buffer index */
 	HBBR_API __forceinline static int GetCurrentFrameIndex() {
 		return _currentFrameIndex;
+	}
+
+	HBBR_API __forceinline bool IsRendererWantRelease() {
+		return _bRendererRelease;
+	}
+
+	HBBR_API __forceinline bool IsRendererWantResize() {
+		return _bRendererResize;
 	}
 
 	/* 帧渲染函数 */
@@ -32,7 +41,9 @@ public:
 	HBBR_API void ResetWindowSize(uint32_t width,uint32_t height);
 
 private:
-	
+
+	void RendererResize();
+
 	static VulkanManager* _vulkanManager;
 
 	VkSurfaceKHR _surface = VK_NULL_HANDLE;
@@ -53,8 +64,19 @@ private:
 
 	std::vector<VkSemaphore> _presentSemaphore;
 
+	std::vector<VkCommandBuffer> _commandBuffers;
+
 	static uint32_t _currentFrameIndex;
 
-	bool bRendererRelease;
+	bool _bRendererRelease;
 
+	bool _bRendererResize;
+
+	bool _bRendering;
+
+	//Passes
+	std::unique_ptr<class PassManager> _passManager;
+
+	//multithread
+	std::thread _renderThread;
 };

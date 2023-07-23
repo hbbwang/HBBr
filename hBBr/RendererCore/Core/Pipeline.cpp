@@ -1,12 +1,19 @@
 ﻿#include "Pipeline.h"
 #include "VulkanRenderer.h"
 
-Pipeline::Pipeline(VkRenderPass renderPass, uint32_t subpassIndex, PipelineType pipelineType)
+Pipeline::Pipeline()
+{
+
+}
+
+void Pipeline::CreatePipelineObject(VkRenderPass renderPass, uint32_t subpassCount, PipelineType pipelineType)
 {
 	_pipelineType = pipelineType;
 	_renderPass = renderPass;
-	BuildGraphicsPipelineState(renderPass , subpassIndex);
-	//VulkanRenderer::GetManager()->;
+	for (int i = 0; i < subpassCount; i++)
+	{
+		BuildGraphicsPipelineState(renderPass, subpassCount);
+	}
 }
 
 void Pipeline::SetColorBlend(bool bEnable, StaticBlendState blendState)
@@ -114,11 +121,6 @@ void Pipeline::SetVertexInput(VertexInputLayout vertexInputLayout)
 	_graphicsPipelineCreateInfoCache.CreateInfo.pVertexInputState = &_graphicsPipelineCreateInfoCache.vertexInputInfo;
 }
 
-void Pipeline::CreatePipelineObject()
-{
-	VulkanRenderer::GetManager()->CreateGraphicsPipeline(_graphicsPipelineCreateInfoCache.CreateInfo, _pipeline);
-}
-
 void Pipeline::BuildGraphicsPipelineState(VkRenderPass renderPass, uint32_t subpassIndex)
 {
 	//-----------------------------------------------------------------------------------Dynamic State
@@ -160,15 +162,14 @@ void Pipeline::BuildGraphicsPipelineState(VkRenderPass renderPass, uint32_t subp
 	//
 	_graphicsPipelineCreateInfoCache.CreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	_graphicsPipelineCreateInfoCache.CreateInfo.flags = 0;
-	//_graphicsPipelineCreateInfoCache.CreateInfo.pVertexInputState = &_graphicsPipelineCreateInfoCache.vertexInputInfo;
-	_graphicsPipelineCreateInfoCache.CreateInfo.pInputAssemblyState = &_graphicsPipelineCreateInfoCache.inputAssemblyInfo;
 	_graphicsPipelineCreateInfoCache.CreateInfo.pViewportState = &_graphicsPipelineCreateInfoCache.viewportInfo;
-	_graphicsPipelineCreateInfoCache.CreateInfo.pRasterizationState = &_graphicsPipelineCreateInfoCache.rasterInfo;
+	//_graphicsPipelineCreateInfoCache.CreateInfo.pRasterizationState = &_graphicsPipelineCreateInfoCache.rasterInfo;
 	_graphicsPipelineCreateInfoCache.CreateInfo.pMultisampleState = &_graphicsPipelineCreateInfoCache.msInfo;
-	_graphicsPipelineCreateInfoCache.CreateInfo.pDepthStencilState = &depthInfo;
-	//_graphicsPipelineCreateInfoCache.CreateInfo.pColorBlendState = &colorBlendInfo;
+	//_graphicsPipelineCreateInfoCache.CreateInfo.pDepthStencilState = &depthInfo;
 	_graphicsPipelineCreateInfoCache.CreateInfo.pDynamicState = &_graphicsPipelineCreateInfoCache.dynamicStateInfo;
 	//_graphicsPipelineCreateInfoCache.CreateInfo.layout = bd->PipelineLayout;
 	_graphicsPipelineCreateInfoCache.CreateInfo.renderPass = renderPass;
 	_graphicsPipelineCreateInfoCache.CreateInfo.subpass = subpassIndex;
+
+	VulkanRenderer::GetManager()->CreateGraphicsPipeline(_graphicsPipelineCreateInfoCache.CreateInfo, _pipeline);
 }

@@ -9,10 +9,10 @@ RenderView::RenderView(QWidget *parent)
 	setAttribute(Qt::WA_OpaquePaintEvent);
 	setAttribute(Qt::WA_PaintOnScreen);
 
-	_renderTimer = new QTimer(this);
-	_renderTimer->setInterval(1);
-	_renderTimer->start();
-	connect(_renderTimer,SIGNAL(timeout()),this,SLOT(FuncRender()));
+	//_renderTimer = new QTimer(this);
+	//_renderTimer->setInterval(1);
+	//_renderTimer->start();
+	//connect(_renderTimer,SIGNAL(timeout()),this,SLOT(FuncRender()));
 }
 
 RenderView::~RenderView()
@@ -24,6 +24,7 @@ RenderView::~RenderView()
 
 void RenderView::showEvent(QShowEvent* event)
 {
+	__super::showEvent(event);
 	if (_vkRenderer == NULL)
 		_vkRenderer = new VulkanRenderer((void*)this->winId(), true);
 	_vkRenderer->ResetWindowSize(width(), height());
@@ -31,14 +32,16 @@ void RenderView::showEvent(QShowEvent* event)
 
 void RenderView::resizeEvent(QResizeEvent* event)
 {
+	__super::resizeEvent(event);
 	if (_vkRenderer != NULL)
 		_vkRenderer->ResetWindowSize(width(), height());
 }
 
 void RenderView::FuncRender()
 {
-	if (_vkRenderer != NULL)
-	{
-		_vkRenderer->Render();
-	}
+	//使用渲染线程,不在这里循环
+	//if (_vkRenderer != NULL)
+	//{
+	//	_vkRenderer->Render();
+	//}
 }

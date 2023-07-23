@@ -582,25 +582,24 @@ VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatK
 	}
 	EndCommandBuffer(buf);
 	SubmitQueueImmediate({buf});
-	DestroyCommandBuffers(_commandPool, { buf });
-	//
+	FreeCommandBuffers(_commandPool, { buf });
 	return _surfaceSize;
 }
 
-void VulkanManager::DestroySwapchain(VkSwapchainKHR swapchain, std::vector<VkImage> swapchainImages, std::vector<VkImageView> swapchainImageViews)
+void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImage>& swapchainImages, std::vector<VkImageView>& swapchainImageViews)
 {
+	for (int i = 0; i < _swapchainBufferCount; i++)
+	{
+		DestroyImageView(swapchainImageViews[i]);
+	}
+	swapchainImageViews.clear();
+	swapchainImages.clear();
+	//
 	if (swapchain != VK_NULL_HANDLE)
 	{
 		vkDestroySwapchainKHR(_device, swapchain, nullptr);
 		swapchain = VK_NULL_HANDLE;
 	}
-	for (int i = 0; i < _swapchainBufferCount; i++)
-	{
-		DestroyImageView(swapchainImageViews[i]);
-		//DestroyImage(swapchainImages[i]);
-	}
-	swapchainImages.clear();
-	swapchainImageViews.clear();
 }
 
 void VulkanManager::CreateImage(uint32_t width , uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image)
@@ -845,7 +844,7 @@ void VulkanManager::CreateCommandBuffer(VkCommandPool commandPool, VkCommandBuff
 	}
 }
 
-void VulkanManager::DestroyCommandBuffers(VkCommandPool commandPool, std::vector<VkCommandBuffer> cmdBufs)
+void VulkanManager::FreeCommandBuffers(VkCommandPool commandPool, std::vector<VkCommandBuffer> cmdBufs)
 {
 	if (cmdBufs.size() > 0)
 	{
@@ -884,14 +883,14 @@ void VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore 
 	}
 }
 
-void VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainIndex)
+void VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainImageIndex)
 {
 	VkPresentInfoKHR presentInfo = {};
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	presentInfo.pNext = NULL;
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = &swapchain;
-	presentInfo.pImageIndices = &swapchainIndex;
+	presentInfo.pImageIndices = &swapchainImageIndex;
 	presentInfo.pResults = nullptr; // Optional
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = &semaphore;
