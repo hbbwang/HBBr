@@ -117,7 +117,9 @@ void VulkanRenderer::ResetWindowSize(uint32_t width, uint32_t height)
 	{
 		_bRendererResize = true;
 		//Wait render setting finish.
-		while (_bRendering) {}
+		while (_bRendering) { 
+			vkDeviceWaitIdle(_vulkanManager->GetDevice()); //Must be wait render finish,because we need resize on safe time.
+		}
 		//Resize
 		_windowSize.width = width;
 		_windowSize.height = height;

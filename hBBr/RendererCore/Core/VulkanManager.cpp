@@ -594,6 +594,7 @@ VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatK
 	}
 	EndCommandBuffer(buf);
 	SubmitQueueImmediate({buf});
+	vkDeviceWaitIdle(GetDevice());
 	FreeCommandBuffers(_commandPool, { buf });
 	return _surfaceSize;
 }
