@@ -10,6 +10,7 @@ namespace VertexFactory
 		glm::vec3 tan;
 		glm::vec4 col;
 		glm::vec4 uv01;
+		glm::vec4 uv23;
 		static VertexInputLayout BuildLayout()
 		{
 			VertexInputLayout result = {};
@@ -17,6 +18,7 @@ namespace VertexFactory
 				VK_FORMAT_R32G32B32_SFLOAT,
 				VK_FORMAT_R32G32B32_SFLOAT,
 				VK_FORMAT_R32G32B32_SFLOAT,
+				VK_FORMAT_R32G32B32A32_SFLOAT,
 				VK_FORMAT_R32G32B32A32_SFLOAT,
 				VK_FORMAT_R32G32B32A32_SFLOAT
 			};

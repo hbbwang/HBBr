@@ -126,7 +126,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,7 +148,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -197,6 +197,7 @@
     <ClInclude Include="Core\VertexFactory.h" />
     <ClInclude Include="Core\VulkanManager.h" />
     <ClInclude Include="Core\VulkanRenderer.h" />
+    <ClInclude Include="Editor\ShaderCompiler.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_allegro5.cpp" />
@@ -227,6 +228,7 @@
     <ClCompile Include="Core\Texture.cpp" />
     <ClCompile Include="Core\VulkanManager.cpp" />
     <ClCompile Include="Core\VulkanRenderer.cpp" />
+    <ClCompile Include="Editor\ShaderCompiler.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>

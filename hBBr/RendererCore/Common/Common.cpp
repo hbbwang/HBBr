@@ -1,9 +1,9 @@
 ﻿#include "Common.h"
 #include "ConsoleDebug.h"
 
-void MessageOut(const char* msg, bool bExit, bool bMessageBox)
+void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textColor)
 {
-	ConsoleDebug::print_endl(msg);
+	ConsoleDebug::print_endl(msg, textColor);
 #if defined(_WIN32)
 	if (bMessageBox)
 	{

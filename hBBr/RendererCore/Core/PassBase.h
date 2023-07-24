@@ -6,6 +6,8 @@
 #include <memory>
 #include <map>
 #include "VulkanRenderer.h"
+#include "glm/glm.hpp"
+
 class Texture;
 
 class PassBase
