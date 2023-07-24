@@ -129,9 +129,9 @@ void Pipeline::SetDepthStencil()
 
 }
 
-void Pipeline::SetPipelineLayout()
+void Pipeline::SetPipelineLayout(std::vector<VkDescriptorSetLayout> layout)
 {
-
+	VulkanRenderer::GetManager()->CreatePipelineLayout(layout, _pipelineLayout);
 }
 
 void Pipeline::SetVertexShaderAndPixelShader()

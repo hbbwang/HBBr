@@ -28,6 +28,9 @@
     <Filter Include="Common">
       <UniqueIdentifier>{4e7f3267-14e0-42dc-af1e-94e1a811f20a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ThirdParty\Imgui">
+      <UniqueIdentifier>{e00dbb4d-2fd4-4931-a5d0-1be791c9d0ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\VulkanManager.h">
@@ -72,6 +75,66 @@
     <ClInclude Include="Core\VertexFactory.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl2.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdlrenderer2.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdlrenderer3.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_wgpu.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_win32.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_allegro5.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_android.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_dx9.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_dx10.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_dx11.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_dx12.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_glfw.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_glut.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_metal.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl2.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl3.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl3_loader.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_osx.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -110,5 +173,64 @@
     <ClCompile Include="Core\PassBase.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl2.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdlrenderer2.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdlrenderer3.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_wgpu.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_win32.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_allegro5.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_android.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_dx9.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_dx10.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_dx11.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_dx12.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_glfw.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_glut.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl2.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl3.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\ThirdParty\Imgui\backends\imgui_impl_metal.mm">
+      <Filter>ThirdParty\Imgui</Filter>
+    </None>
+    <None Include="..\ThirdParty\Imgui\backends\imgui_impl_osx.mm">
+      <Filter>ThirdParty\Imgui</Filter>
+    </None>
   </ItemGroup>
 </Project>

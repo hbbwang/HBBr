@@ -130,8 +130,8 @@ void OpaquePass::BuildPass()
 	_pipeline->SetRenderRasterizer();
 	_pipeline->SetRenderDepthStencil();
 	_pipeline->SetVertexInput(VertexFactory::VertexInputBase::BuildLayout());
-	_pipeline->SetPipelineLayout(); NotComplete;
-	_pipeline->SetVertexShaderAndPixelShader(); NotComplete;
+	_pipeline->SetPipelineLayout({});
+	_pipeline->SetVertexShaderAndPixelShader();
 	//Setting pipeline end
 	_pipeline->CreatePipelineObject(_renderPass, _subpassDescs.size());
 }

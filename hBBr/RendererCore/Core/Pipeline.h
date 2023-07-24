@@ -249,7 +249,7 @@ public:
 	void SetDepthStencil();
 
 	//Graphics pipeline setting step 6
-	void SetPipelineLayout();
+	void SetPipelineLayout(std::vector<VkDescriptorSetLayout> layout);
 
 	//Graphics pipeline setting step 7
 	void SetVertexShaderAndPixelShader();

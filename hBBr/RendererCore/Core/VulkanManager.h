@@ -105,6 +105,10 @@ public:
 
 	void DestroyPipelineLayout(VkPipelineLayout pipelineLayout);
 
+	void CreateDescripotrPool(VkDescriptorPool& pool);
+
+	void DestroyDescriptorPool(VkDescriptorPool pool);
+
 	/* Image 布局转换 */
 	void Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1);
 
@@ -146,6 +150,10 @@ public:
 		return _commandPool;
 	}
 
+	__forceinline VkDescriptorPool GetDescriptorPool()const {
+		return _descriptorPool;
+	}
+	
 private:
 
 	bool _bDebugEnable;
@@ -183,6 +191,8 @@ private:
 	VkQueue	_graphicsQueue;
 
 	VkCommandPool _commandPool;
+
+	VkDescriptorPool _descriptorPool;
 
 	int _graphicsQueueFamilyIndex;
 

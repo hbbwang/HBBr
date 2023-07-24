@@ -80,10 +80,13 @@ VulkanManager::VulkanManager(bool bDebug)
 	InitDevice();
 	InitDebug();
 	CreateCommandPool();
+	CreateDescripotrPool(_descriptorPool);
 }
 
 VulkanManager::~VulkanManager()
 {
+	DestroyDescriptorPool(_descriptorPool);
+	DestroyCommandPool();
 	if (_bDebugEnable)
 		fvkDestroyDebugReportCallbackEXT(_instance, _debugReport, nullptr);
 	if (_device != VK_NULL_HANDLE)
@@ -1044,6 +1047,41 @@ void VulkanManager::DestroyPipelineLayout(VkPipelineLayout pipelineLayout)
 	{
 		vkDestroyPipelineLayout(_device, pipelineLayout, nullptr);
 	}
+	pipelineLayout = VK_NULL_HANDLE;
+}
+
+void VulkanManager::CreateDescripotrPool(VkDescriptorPool& pool)
+{
+	VkDescriptorPoolSize pool_sizes[] =
+	{
+		//{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },	//这是一个image和sampler的组合descriptor
+		//{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },			//纯image,不带sampler
+		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 100 },
+		//{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+		//{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+		//{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 3000 },
+		//{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+		{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 80 }
+	};
+	VkDescriptorPoolCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	info.pNext = NULL;
+	info.maxSets = 10000;
+	info.poolSizeCount = std::size(pool_sizes);
+	info .pPoolSizes = pool_sizes;
+	vkCreateDescriptorPool(_device, &info, nullptr, &pool);
+}
+
+void VulkanManager::DestroyDescriptorPool(VkDescriptorPool pool)
+{
+	if (pool != VK_NULL_HANDLE)
+	{
+		vkDestroyDescriptorPool(_device, pool, nullptr);	
+	}
+	pool = VK_NULL_HANDLE;
 }
 
 void VulkanManager::CreateSemaphore(VkSemaphore& semaphore)
@@ -1060,6 +1098,7 @@ void VulkanManager::DestroySemaphore(VkSemaphore semaphore)
 	{
 		vkDestroySemaphore(_device, semaphore, nullptr);
 	}
+	semaphore = VK_NULL_HANDLE;
 }
 
 void VulkanManager::CreateRenderSemaphores(std::vector<VkSemaphore>& semaphore)
@@ -1113,6 +1152,7 @@ void VulkanManager::DestroyRenderPass(VkRenderPass renderPass)
 	{
 		vkDestroyRenderPass(_device, renderPass, nullptr);
 	}
+	renderPass = VK_NULL_HANDLE;
 }
 
 void VulkanManager::SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask, VkQueue queue)

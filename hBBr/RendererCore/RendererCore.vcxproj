@@ -126,7 +126,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,7 +148,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -163,6 +163,26 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_allegro5.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_android.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_dx10.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_dx11.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_dx12.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_dx9.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_glfw.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_glut.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_metal.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl2.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_osx.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl2.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdlrenderer2.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdlrenderer3.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_wgpu.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_win32.h" />
     <ClInclude Include="..\ThirdParty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="..\ThirdParty\pugixml\pugixml.hpp" />
     <ClInclude Include="Common\Common.h" />
@@ -179,6 +199,23 @@
     <ClInclude Include="Core\VulkanRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_allegro5.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_android.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_dx10.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_dx12.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_dx9.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_glut.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl2.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl2.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdlrenderer2.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdlrenderer3.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_wgpu.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="..\ThirdParty\pugixml\pugixml.cpp" />
     <ClCompile Include="Common\Common.cpp" />
     <ClCompile Include="Common\ConsoleDebug.cpp" />
@@ -191,6 +228,10 @@
     <ClCompile Include="Core\VulkanManager.cpp" />
     <ClCompile Include="Core\VulkanRenderer.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\ThirdParty\Imgui\backends\imgui_impl_metal.mm" />
+    <None Include="..\ThirdParty\Imgui\backends\imgui_impl_osx.mm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

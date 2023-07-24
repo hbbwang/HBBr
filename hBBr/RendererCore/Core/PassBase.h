@@ -60,7 +60,13 @@ public:
 class OpaquePass :public GraphicsPass
 {
 public:
+	struct PassUniformBuffer
+	{
+		glm::vec4 BaseColor;
+	};
 	OpaquePass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
 	virtual void PassInit()override;
 	virtual void BuildPass()override;
+
+	VkDescriptorSetLayout _descriptorSetLayot;
 };

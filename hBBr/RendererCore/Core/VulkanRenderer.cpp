@@ -75,7 +75,6 @@ VulkanRenderer::~VulkanRenderer()
 		vkDeviceWaitIdle(_vulkanManager->GetDevice());
 		_vulkanManager->FreeCommandBuffers(_vulkanManager->GetCommandPool(), _commandBuffers);
 		_passManager.reset();
-		_vulkanManager->DestroyCommandPool();
 		_vulkanManager->DestroySwapchain(_swapchain, _swapchainTextures);
 		_vulkanManager->DestroyRenderSemaphores(_presentSemaphore);
 		_vulkanManager->DestroySurface(_surface);
