@@ -62,7 +62,7 @@ VulkanDebugCallback(
 }
 
 
-VulkanManager::VulkanManager()
+VulkanManager::VulkanManager(bool bDebug)
 {
 #if defined(_WIN32)
 	_currentPlatform = EPlatform::Windows;
@@ -75,16 +75,27 @@ VulkanManager::VulkanManager()
 	_graphicsQueueFamilyIndex = -1;
 	_swapchainBufferCount = 3;
 	_enable_VK_KHR_display = false;
+	//Init global vulkan  
+	InitInstance(bDebug);
+	InitDevice();
+	InitDebug();
+	CreateCommandPool();
 }
 
 VulkanManager::~VulkanManager()
 {
-	if (_gpuDevice)
-		vkDestroyDevice(_device,nullptr);
 	if (_bDebugEnable)
 		fvkDestroyDebugReportCallbackEXT(_instance, _debugReport, nullptr);
+	if (_device != VK_NULL_HANDLE)
+	{
+		vkDestroyDevice(_device, nullptr);
+		_device = VK_NULL_HANDLE;
+	}
 	if (_instance != VK_NULL_HANDLE)
+	{
 		vkDestroyInstance(_instance, nullptr);
+		_instance = VK_NULL_HANDLE;
+	}
 }
 
 void VulkanManager::InitInstance(bool bEnableDebug)
@@ -153,6 +164,8 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 	if (_bDebugEnable)
 	{
 		layers.push_back("VK_LAYER_KHRONOS_validation");
+		//RenderDoc支持
+		//layers.push_back("VK_LAYER_RENDERDOC_Capture");//
 		extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
@@ -179,7 +192,7 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 	}
 }
 
-void VulkanManager::InitDevice(VkSurfaceKHR surface)
+void VulkanManager::InitDevice()
 {
 	//--------------Get GPU
 	{
@@ -224,19 +237,20 @@ void VulkanManager::InitDevice(VkSurfaceKHR surface)
 		for (uint32_t i = 0; i < family_count; i++) {
 			//一般情况下Graphics queue同时支持多种功能,不需要另外获取Transfer等不同queue
 			//但是据听说有的Graphics queue并不支持Present,所以需要同时判断Present支持
-			if (bFound_Graphics == false && family_property_list[i].queueCount > 0 && family_property_list[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+			if (bFound_Graphics == false && family_property_list[i].queueCount > 0 && (family_property_list[i].queueFlags & VK_QUEUE_GRAPHICS_BIT || family_property_list[i].queueFlags & VK_QUEUE_TRANSFER_BIT))
 			{
 				bFound_Graphics = true;
 				_graphicsQueueFamilyIndex = i;
 				graphicsQueueFamilyProperty = family_property_list[i];
-				if (surface != VK_NULL_HANDLE)
-				{
-					VkBool32 presentSupport = false;
-					vkGetPhysicalDeviceSurfaceSupportKHR(_gpuDevice, i, surface, &presentSupport);
-					if (presentSupport) {
-						break;
-					}
-				}
+				//if (surface != VK_NULL_HANDLE)
+				//{
+				//	VkBool32 presentSupport = false;
+				//	vkGetPhysicalDeviceSurfaceSupportKHR(_gpuDevice, i, surface, &presentSupport);
+				//	if (presentSupport) {
+				//		break;
+				//	}
+				//}
+				break;
 			}
 			//if (bFound_Transfer == false && family_property_list[i].queueCount > 0 && family_property_list[i].queueFlags & VK_QUEUE_TRANSFER_BIT)
 			//{
@@ -299,8 +313,6 @@ void VulkanManager::InitDevice(VkSurfaceKHR surface)
 	if (_bDebugEnable)
 	{
 		layers.push_back("VK_LAYER_KHRONOS_validation");
-		//RenderDoc支持
-		layers.push_back("VK_LAYER_RENDERDOC_Capture");//
 		extensions.push_back("VK_EXT_debug_marker");
 		extensions.push_back("VK_EXT_tooling_info");
 	}
@@ -877,7 +889,7 @@ void VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore 
 	{
 		MessageOut(RendererLauguage::GetText("A000009").c_str(), false, true);
 	}
-	else if (result != VK_SUCCESS) 
+	else if (result != VK_SUCCESS)
 	{
 		MessageOut(RendererLauguage::GetText("A000010").c_str(), false, true);
 	}
@@ -897,7 +909,7 @@ void VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uin
 	auto result = vkQueuePresentKHR(_graphicsQueue, &presentInfo);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR)
 	{
-		MessageOut("VK_ERROR_OUT_OF_DATE_KHR.Swapchain need to reset.", false, false);
+		//MessageOut("VK_ERROR_OUT_OF_DATE_KHR.Swapchain need to reset.", false, false);
 	}
 	else if (result != VK_SUCCESS)
 	{

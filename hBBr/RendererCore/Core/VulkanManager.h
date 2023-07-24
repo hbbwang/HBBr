@@ -25,14 +25,14 @@ enum class EPlatform :uint8_t
 class VulkanManager
 {
 public:
-	VulkanManager();
+	VulkanManager(bool bDebug);
 	~VulkanManager();
 
 	/* 初始化Vulkan */
 
 	void InitInstance(bool bEnableDebug);
 
-	void InitDevice(VkSurfaceKHR surface = VK_NULL_HANDLE);
+	void InitDevice();
 
 	void InitDebug();
 

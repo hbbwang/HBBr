@@ -24,15 +24,13 @@ RenderView::~RenderView()
 
 void RenderView::showEvent(QShowEvent* event)
 {
-	__super::showEvent(event);
 	if (_vkRenderer == NULL)
-		_vkRenderer = new VulkanRenderer((void*)this->winId(), true);
+		_vkRenderer = new VulkanRenderer((void*)this->winId(), "MainRenderer" , true);
 	_vkRenderer->ResetWindowSize(width(), height());
 }
 
 void RenderView::resizeEvent(QResizeEvent* event)
 {
-	__super::resizeEvent(event);
 	if (_vkRenderer != NULL)
 		_vkRenderer->ResetWindowSize(width(), height());
 }

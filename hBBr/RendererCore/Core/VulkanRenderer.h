@@ -3,7 +3,7 @@
 #include <memory>
 #include <mutex>
 #include <thread>
-
+#include <map>
 class Texture;
 class FrameBufferTexture;
 
@@ -11,17 +11,21 @@ class VulkanRenderer
 {
 public:
 #if defined(_WIN32)
-	HBBR_API VulkanRenderer(void* windowHandle, bool bDebug);
+	HBBR_API VulkanRenderer(void* windowHandle, const char* rendererName, bool bDebug);
 #endif
 	HBBR_API ~VulkanRenderer();
 
-	HBBR_API __forceinline static VulkanManager* GetManager(){
+	HBBR_API __forceinline static std::shared_ptr<VulkanManager> GetManager(){
 		return _vulkanManager;
 	}
 
 	/* Frame buffer index */
 	HBBR_API __forceinline static int GetCurrentFrameIndex() {
 		return _currentFrameIndex;
+	}
+
+	HBBR_API __forceinline int GetSwapchinImageIndex() {
+		return _swapchainIndex;
 	}
 
 	HBBR_API __forceinline bool IsRendererWantRelease() {
@@ -44,7 +48,12 @@ private:
 
 	void RendererResize();
 
-	static VulkanManager* _vulkanManager;
+	static std::shared_ptr<VulkanManager> _vulkanManager;
+
+	//Renderer map
+	static std::map<HString, VulkanRenderer*>_renderers;
+
+	HString _rendererName;
 
 	VkSurfaceKHR _surface = VK_NULL_HANDLE;
 
@@ -67,6 +76,8 @@ private:
 	std::vector<VkCommandBuffer> _commandBuffers;
 
 	static uint32_t _currentFrameIndex;
+
+	uint32_t _swapchainIndex;
 
 	bool _bRendererRelease;
 
