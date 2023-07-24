@@ -4,36 +4,51 @@
 #include "Texture.h"
 #include <vector>
 #include <map>
-
+class VulkanRenderer;
 class PassBase;
-enum class SceneTextureDesc {
+enum class SceneTextureDesc{
 	SceneColor = 0,
 	DepthStencil = 1,
 };
 
-struct SceneTexture
+class SceneTexture
 {
-	SceneTexture()
-	{
-		auto sceneColor = Texture::CreateTexture2D(1, 1, VK_FORMAT_R16G16B16A16_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneColor");
-		auto sceneDepth = Texture::CreateTexture2D(1, 1, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneDepth");
-		_sceneTexture.insert(std::make_pair(SceneTextureDesc::SceneColor, sceneColor));
-		_sceneTexture.insert(std::make_pair(SceneTextureDesc::DepthStencil, sceneDepth));
-	}
+public:
+	SceneTexture(VulkanRenderer* renderer);
 	~SceneTexture() 
 	{
 		_sceneTexture.clear();
 	}
+	void UpdateTextures();
+	std::shared_ptr<Texture> GetTexture(SceneTextureDesc desc)
+	{
+		auto it = _sceneTexture.find(desc);
+		if (it != _sceneTexture.end())
+		{
+			return it->second;
+		}
+		return NULL;
+	}
+private:
 	std::map<SceneTextureDesc, std::shared_ptr<Texture>> _sceneTexture;
 };
 
 class PassManager
 {
 public:
-	void PassesInit();
+	~PassManager() 
+	{
+		PassesRelease();
+	}
+	void PassesInit(VulkanRenderer* renderer);
 	void PassesUpdate();
 	void PassesRelease();
+	__forceinline std::shared_ptr <SceneTexture> GetSceneTexture()const {
+		return _sceneTextures;
+	}
+	/* Pass添加,passName必须唯一! */
+	void AddPass(std::shared_ptr<PassBase> newPass, const char* passName);
 private:
 	std::map<HString, std::shared_ptr<PassBase>> _passes;
-	std::shared_ptr < SceneTexture> _sceneTextures;
+	std::shared_ptr <SceneTexture> _sceneTextures;
 };

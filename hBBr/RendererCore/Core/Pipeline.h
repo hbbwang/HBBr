@@ -233,19 +233,29 @@ public:
 		return _pipeline;
 	}
 
-	void CreatePipelineObject(VkRenderPass renderPass, uint32_t subpassCount = 1, PipelineType pipelineType = PipelineType::Graphics);
-
 	//Graphics pipeline setting step 1
-	void SetColorBlend(bool bEnable, StaticBlendState blendState = {});
+	void SetColorBlend(bool bEnable, StaticBlendState blendState = StaticBlendState());
 
 	//Graphics pipeline setting step 2
-	void SetRenderRasterizer(Rasterizer rasterizer);
+	void SetRenderRasterizer(Rasterizer rasterizer = Rasterizer());
 
 	//Graphics pipeline setting step 3
-	void SetRenderDepthStencil(DepthStencil depthStencil = {});
+	void SetRenderDepthStencil(DepthStencil depthStencil = DepthStencil());
 
 	//Graphics pipeline setting step 4
 	void SetVertexInput(VertexInputLayout vertexInputLayout);
+
+	//Graphics pipeline setting step 5 , also not.
+	void SetDepthStencil();
+
+	//Graphics pipeline setting step 6
+	void SetPipelineLayout();
+
+	//Graphics pipeline setting step 7
+	void SetVertexShaderAndPixelShader();
+
+	//Graphics pipeline setting the last step
+	void CreatePipelineObject(VkRenderPass renderPass, uint32_t subpassCount = 1, PipelineType pipelineType = PipelineType::Graphics);
 
 private:
 
@@ -254,6 +264,8 @@ private:
 	VkPipeline	_pipeline;
 
 	VkRenderPass _renderPass;
+
+	VkPipelineLayout _pipelineLayout;
 
 	VkGraphicsPipelineCreateInfoCache _graphicsPipelineCreateInfoCache = {};
 

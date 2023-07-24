@@ -5,7 +5,7 @@
 #include "HString.h"
 #include "ConsoleDebug.h"
 #include "RendererConfig.h"
-
+#include "Texture.h"
 //导入Vulkan静态库
 #pragma comment(lib ,"vulkan-1.lib")
 
@@ -599,6 +599,93 @@ VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatK
 	return _surfaceSize;
 }
 
+VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures)
+{
+	//ConsoleDebug::print_endl("Create Swapchain KHR.");
+	VkPresentModeKHR present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+	//if (_winInfo.vsync)
+	{
+		uint32_t present_mode_count = 0;
+		vkGetPhysicalDeviceSurfacePresentModesKHR(_gpuDevice, surface, &present_mode_count, nullptr);
+		std::vector<VkPresentModeKHR> presentModes(present_mode_count);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(_gpuDevice, surface, &present_mode_count, presentModes.data());
+		for (int i = 0; i < presentModes.size(); i++)
+		{
+			//if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
+			//{
+			//	present_mode = presentModes[i];//这个垂直同步在Nvidia有bug ?
+			//	//break;
+			//}
+			if (presentModes[i] == VK_PRESENT_MODE_FIFO_KHR)
+			{
+				present_mode = presentModes[i];//垂直同步
+				break;
+			}
+		}
+	}
+
+	//Get surface size 
+	VkExtent2D _surfaceSize = GetSurfaceSize(surface);
+	if (_surfaceSize.width <= 0 && _surfaceSize.height <= 0)
+	{
+		return _surfaceSize;
+	}
+	VkSwapchainCreateInfoKHR info = {};
+	info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	info.surface = surface;
+	info.minImageCount = _swapchainBufferCount;
+	info.imageFormat = surfaceFormat.format;
+	info.imageColorSpace = surfaceFormat.colorSpace;
+	info.imageExtent = _surfaceSize;
+	info.imageArrayLayers = 1;
+	info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT	//支持在RenderPass中作为color附件，并且在subpass中进行传递
+		| VK_IMAGE_USAGE_TRANSFER_SRC_BIT					//支持复制到其他图像
+		;
+	info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	info.queueFamilyIndexCount = 0;
+	info.pQueueFamilyIndices = nullptr;
+	info.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+	info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;//是否半透明，用于组合其他表面,这里我们不需要
+	info.presentMode = present_mode;
+	info.clipped = VK_TRUE;//是否不渲染看不见的位置
+	//替补swapchain,在重置这个swapchain的时候会比较有用，但是事实上我们可以用更暴力的方法重置swapchain，也就是完全重写
+	info.oldSwapchain = VK_NULL_HANDLE;
+	auto result = vkCreateSwapchainKHR(_device, &info, nullptr, &newSwapchain);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut((RendererLauguage::GetText("A000007").c_str() + GetVkResult(result)).c_str(), true, true);
+	}
+	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, nullptr);
+	textures.resize(_swapchainBufferCount);
+	std::vector<VkImage> images(_swapchainBufferCount);
+	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, images.data());
+	//创建ImageView
+	for (int i = 0; i < _swapchainBufferCount; i++)
+	{
+		textures[i]->_image = images[i];
+		textures[i]->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		textures[i]->_imageAspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+		textures[i]->_format = surfaceFormat.format;
+		textures[i]->_usageFlags = info.imageUsage;
+		textures[i]->_textureName = "Swapchain Image " + HString::FromInt(i);
+		CreateImageView(textures[i]->_image, surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, textures[i]->_imageView );
+	}
+	//Swapchain转换到呈现模式
+	VkCommandBuffer buf;
+	CreateCommandBuffer(_commandPool, buf);
+	BeginCommandBuffer(buf, 0);
+	for (int i = 0; i < _swapchainBufferCount; i++)
+	{
+		//Transition(buf, swapchainImages[i], VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		textures[i]->Transition(buf, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	}
+	EndCommandBuffer(buf);
+	SubmitQueueImmediate({ buf });
+	vkDeviceWaitIdle(GetDevice());
+	FreeCommandBuffers(_commandPool, { buf });
+	return _surfaceSize;
+}
+
 void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImage>& swapchainImages, std::vector<VkImageView>& swapchainImageViews)
 {
 	for (int i = 0; i < _swapchainBufferCount; i++)
@@ -607,6 +694,23 @@ void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkIm
 	}
 	swapchainImageViews.clear();
 	swapchainImages.clear();
+	//
+	if (swapchain != VK_NULL_HANDLE)
+	{
+		vkDestroySwapchainKHR(_device, swapchain, nullptr);
+		swapchain = VK_NULL_HANDLE;
+	}
+}
+
+void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<std::shared_ptr<class Texture>>& textures)
+{
+	for (int i = 0; i < _swapchainBufferCount; i++)
+	{
+		DestroyImageView(textures[i]->_imageView);
+		textures[i]->_image = VK_NULL_HANDLE;
+		textures[i]->_imageView = VK_NULL_HANDLE;
+	}
+	textures.clear();
 	//
 	if (swapchain != VK_NULL_HANDLE)
 	{
@@ -918,6 +1022,30 @@ void VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uin
 	}
 }
 
+void VulkanManager::CreatePipelineLayout(std::vector <VkDescriptorSetLayout> descriptorSetLayout, VkPipelineLayout& pipelineLayout)
+{
+	VkPipelineLayoutCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	info.flags = 0;
+	info.pushConstantRangeCount = 0;
+	info.pPushConstantRanges = nullptr;
+	info.pSetLayouts = descriptorSetLayout.data();
+	info.setLayoutCount = descriptorSetLayout.size();
+	auto result = vkCreatePipelineLayout(_device, &info, nullptr, &pipelineLayout);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut("vkCreatePipelineLayout error!",true,true);
+	}
+}
+
+void VulkanManager::DestroyPipelineLayout(VkPipelineLayout pipelineLayout)
+{
+	if (pipelineLayout != VK_NULL_HANDLE)
+	{
+		vkDestroyPipelineLayout(_device, pipelineLayout, nullptr);
+	}
+}
+
 void VulkanManager::CreateSemaphore(VkSemaphore& semaphore)
 {
 	VkSemaphoreCreateInfo semaphoreCreateInfo = {};
@@ -961,6 +1089,29 @@ void VulkanManager::CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info, V
 	if (result != VK_SUCCESS)
 	{
 		MessageOut(RendererLauguage::GetText("A000012").c_str(), true, true);
+	}
+}
+
+void VulkanManager::CreateRenderPass(std::vector<VkAttachmentDescription>attachmentDescs, std::vector<VkSubpassDependency>subpassDependencys, std::vector<VkSubpassDescription>subpassDescs, VkRenderPass& renderPass)
+{
+	VkRenderPassCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	info.flags = NULL;
+	info.attachmentCount = attachmentDescs.size();
+	info.pAttachments = attachmentDescs.data();
+	info.dependencyCount = subpassDependencys.size();
+	info.pDependencies = subpassDependencys.data();
+	info.pNext = NULL;
+	info.subpassCount = subpassDescs.size();
+	info.pSubpasses = subpassDescs.data();
+	vkCreateRenderPass(_device, &info, nullptr, &renderPass);
+}
+
+void VulkanManager::DestroyRenderPass(VkRenderPass renderPass)
+{
+	if (renderPass != VK_NULL_HANDLE)
+	{
+		vkDestroyRenderPass(_device, renderPass, nullptr);
 	}
 }
 

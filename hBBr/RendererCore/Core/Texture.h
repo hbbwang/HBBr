@@ -10,6 +10,7 @@
 
 class Texture
 {
+	friend class VulkanManager;
 public:
 	Texture() {}
 	Texture(bool bNoMemory) {_bNoMemory = bNoMemory;}
@@ -20,8 +21,27 @@ public:
 	__forceinline VkImageView GetTextureView()const {
 		return _imageView;
 	}
+	__forceinline VkFormat GetFormat()const {
+		return _format;
+	}
+	__forceinline VkImageLayout GetLayout ()const {
+		return _imageLayout;
+	}
+	__forceinline VkImageUsageFlags GetUsageFlags()const {
+		return _usageFlags;
+	}
+	__forceinline uint32_t GetMipCount()const {
+		return _mipCount;
+	}
+	__forceinline VkImageAspectFlags GetAspectFlags()const {
+		return _imageAspectFlags;
+	}
+
+	void Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0 , uint32_t mipLevelCount = 1);
 
 	static std::shared_ptr<Texture> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, HString textureName = "Texture", bool noMemory = false);
+
+	HString _textureName;
 
 private:
 	bool _bNoMemory = false;
@@ -30,7 +50,9 @@ private:
 	VkDeviceMemory _imageViewMemory;
 	VkFormat _format;
 	VkImageUsageFlags _usageFlags;
-	HString _textureName;
+	VkImageAspectFlags _imageAspectFlags;
+	uint32_t _mipCount = 1;
+	VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 };
 
 class FrameBufferTexture

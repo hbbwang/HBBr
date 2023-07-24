@@ -3,6 +3,7 @@
 #include "RendererConfig.h"
 #include "ConsoleDebug.h"
 #include "PassManager.h"
+#include "PassBase.h"
 
 std::shared_ptr<VulkanManager> VulkanRenderer::_vulkanManager = NULL;
 uint32_t VulkanRenderer::_currentFrameIndex;
@@ -33,7 +34,7 @@ VulkanRenderer::VulkanRenderer(void* windowHandle, const char* rendererName, boo
 	//Swapchain
 	_vulkanManager->CreateRenderSemaphores(_presentSemaphore);
 	_vulkanManager->CheckSurfaceFormat(_surface , _surfaceFormat);
-	_surfaceSize = _vulkanManager->CreateSwapchain(_surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
+	_surfaceSize = _vulkanManager->CreateSwapchain(_surface, _surfaceFormat, _swapchain, _swapchainTextures);
 	//CommandBuffers
 	_commandBuffers.resize(_vulkanManager->GetSwapchainBufferCount());
 	for (int i = 0; i < _commandBuffers.size(); i++)
@@ -42,7 +43,7 @@ VulkanRenderer::VulkanRenderer(void* windowHandle, const char* rendererName, boo
 	}
 	//Init passes
 	_passManager.reset(new PassManager());
-	_passManager->PassesInit();
+	_passManager->PassesInit(this);
 	//Create render thread.
 	_renderThread = std::thread(RenderThreadUpdate, this);
 	//Set renderer map
@@ -73,10 +74,9 @@ VulkanRenderer::~VulkanRenderer()
 	{
 		vkDeviceWaitIdle(_vulkanManager->GetDevice());
 		_vulkanManager->FreeCommandBuffers(_vulkanManager->GetCommandPool(), _commandBuffers);
-		_passManager->PassesRelease();
 		_passManager.reset();
 		_vulkanManager->DestroyCommandPool();
-		_vulkanManager->DestroySwapchain(_swapchain, _swapchainImages, _swapchainImageViews);
+		_vulkanManager->DestroySwapchain(_swapchain, _swapchainTextures);
 		_vulkanManager->DestroyRenderSemaphores(_presentSemaphore);
 		_vulkanManager->DestroySurface(_surface);
 		_renderers.erase(_rendererName);
@@ -101,7 +101,7 @@ void VulkanRenderer::Render()
 		//Which swapchain index need to present?
 		_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], &_swapchainIndex);
 
-		//_passManager->PassesUpdate();
+		_passManager->PassesUpdate();
 
 		//Present swapchain.
 		_vulkanManager->Present(_swapchain, _presentSemaphore[_currentFrameIndex], _swapchainIndex);
@@ -144,7 +144,7 @@ void VulkanRenderer::CheckSwapchainOutOfData()
 void VulkanRenderer::RendererResize()
 {
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
-	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImages, _swapchainImageViews);
-	_surfaceSize = _vulkanManager->CreateSwapchain(_surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
+	_vulkanManager->DestroySwapchain(_swapchain, _swapchainTextures);
+	_surfaceSize = _vulkanManager->CreateSwapchain(_surface, _surfaceFormat, _swapchain, _swapchainTextures);
 }
 

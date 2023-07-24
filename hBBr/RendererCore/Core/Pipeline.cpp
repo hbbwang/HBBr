@@ -10,9 +10,12 @@ void Pipeline::CreatePipelineObject(VkRenderPass renderPass, uint32_t subpassCou
 {
 	_pipelineType = pipelineType;
 	_renderPass = renderPass;
-	for (int i = 0; i < subpassCount; i++)
+	if (_pipelineType == PipelineType::Graphics)
 	{
-		BuildGraphicsPipelineState(renderPass, subpassCount);
+		for (int i = 0; i < subpassCount; i++)
+		{
+			BuildGraphicsPipelineState(renderPass, subpassCount);
+		}
 	}
 }
 
@@ -121,6 +124,21 @@ void Pipeline::SetVertexInput(VertexInputLayout vertexInputLayout)
 	_graphicsPipelineCreateInfoCache.CreateInfo.pVertexInputState = &_graphicsPipelineCreateInfoCache.vertexInputInfo;
 }
 
+void Pipeline::SetDepthStencil()
+{
+
+}
+
+void Pipeline::SetPipelineLayout()
+{
+
+}
+
+void Pipeline::SetVertexShaderAndPixelShader()
+{
+
+}
+
 void Pipeline::BuildGraphicsPipelineState(VkRenderPass renderPass, uint32_t subpassIndex)
 {
 	//-----------------------------------------------------------------------------------Dynamic State
@@ -163,7 +181,6 @@ void Pipeline::BuildGraphicsPipelineState(VkRenderPass renderPass, uint32_t subp
 	_graphicsPipelineCreateInfoCache.CreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	_graphicsPipelineCreateInfoCache.CreateInfo.flags = 0;
 	_graphicsPipelineCreateInfoCache.CreateInfo.pViewportState = &_graphicsPipelineCreateInfoCache.viewportInfo;
-	//_graphicsPipelineCreateInfoCache.CreateInfo.pRasterizationState = &_graphicsPipelineCreateInfoCache.rasterInfo;
 	_graphicsPipelineCreateInfoCache.CreateInfo.pMultisampleState = &_graphicsPipelineCreateInfoCache.msInfo;
 	//_graphicsPipelineCreateInfoCache.CreateInfo.pDepthStencilState = &depthInfo;
 	_graphicsPipelineCreateInfoCache.CreateInfo.pDynamicState = &_graphicsPipelineCreateInfoCache.dynamicStateInfo;

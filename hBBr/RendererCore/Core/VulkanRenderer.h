@@ -36,6 +36,14 @@ public:
 		return _bRendererResize;
 	}
 
+	HBBR_API __forceinline class PassManager* GetPassManager() {
+		return _passManager.get();
+	}
+
+	HBBR_API __forceinline std::shared_ptr<Texture> GetSwapchainImage() {
+		return _swapchainTextures[(_currentFrameIndex + 1) % 3 ];
+	}
+
 	/* 帧渲染函数 */
 	HBBR_API void Render();
 
@@ -65,11 +73,13 @@ private:
 
 	VkExtent2D _windowSize{};
 
-	std::vector<VkImage> _swapchainImages;
+	//std::vector<VkImage> _swapchainImages;
 
-	std::vector<VkImageView> _swapchainImageViews;
+	//std::vector<VkImageView> _swapchainImageViews;
 
-	std::shared_ptr<FrameBufferTexture> _swapchainRenderTarget;
+	std::vector<std::shared_ptr<Texture>> _swapchainTextures;
+
+	std::shared_ptr<FrameBufferTexture> _swapchainRenderTarget; 
 
 	std::vector<VkSemaphore> _presentSemaphore;
 
