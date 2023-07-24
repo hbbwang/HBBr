@@ -7,7 +7,7 @@
 std::shared_ptr<VulkanManager> VulkanRenderer::_vulkanManager = NULL;
 uint32_t VulkanRenderer::_currentFrameIndex;
 std::map<HString, VulkanRenderer*> VulkanRenderer::_renderers;
-
+std::mutex renderThreadMutex;
 static void RenderThreadUpdate(VulkanRenderer* renderer)
 {
 	while (!renderer->IsRendererWantRelease())
@@ -93,6 +93,8 @@ void VulkanRenderer::Render()
 	{
 		_bRendering = true;
 
+		std::lock_guard<std::mutex> renderThreadLock(renderThreadMutex);
+
 		//Check swapchain valid.
 		CheckSwapchainOutOfData();
 
@@ -113,19 +115,18 @@ void VulkanRenderer::Render()
 
 void VulkanRenderer::ResetWindowSize(uint32_t width, uint32_t height)
 {
+	_bRendererResize = true;
+
 	if (_vulkanManager && !_bRendererRelease)
 	{
-		_bRendererResize = true;
 		//Wait render setting finish.
-		while (_bRendering) { 
-			vkDeviceWaitIdle(_vulkanManager->GetDevice()); //Must be wait render finish,because we need resize on safe time.
-		}
+		std::lock_guard<std::mutex> renderThreadLock(renderThreadMutex);
 		//Resize
 		_windowSize.width = width;
 		_windowSize.height = height;
 		RendererResize();
-		_bRendererResize = false;
 	}
+	_bRendererResize = false;
 }
 
 void VulkanRenderer::CheckSwapchainOutOfData()
