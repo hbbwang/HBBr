@@ -15,10 +15,6 @@ public:
 #endif
 	HBBR_API ~VulkanRenderer();
 
-	HBBR_API __forceinline static std::shared_ptr<VulkanManager> GetManager(){
-		return _vulkanManager;
-	}
-
 	/* Frame buffer index */
 	HBBR_API __forceinline static int GetCurrentFrameIndex() {
 		return _currentFrameIndex;
@@ -59,8 +55,6 @@ private:
 #endif
 
 	void RendererResize();
-
-	static std::shared_ptr<VulkanManager> _vulkanManager;
 
 	//Renderer map
 	static std::map<HString, VulkanRenderer*>_renderers;

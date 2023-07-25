@@ -16,7 +16,7 @@ class PassBase
 public:
 	PassBase(VulkanRenderer* renderer) { _renderer = renderer; }
 	~PassBase() {}
-	virtual void BuildPass() {}
+	virtual void PassBuild() {}
 protected:
 	virtual void PassInit() {}
 	virtual void PassUpdate() {}
@@ -35,8 +35,8 @@ public:
 	virtual void AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, std::shared_ptr<Texture> texture);
 	//Step 2 , Setup subpass by attachments.
 	virtual void AddSubpass(std::vector<uint32_t> inputAttachments, std::vector<uint32_t> colorAttachments, int depthStencilAttachments = -1);
-	//Step the last
-	virtual void BuildPass()override;
+	//Step the last,custom.
+	virtual void PassBuild()override;
 
 	__forceinline VkRenderPass GetRenderPass()const
 	{
@@ -59,16 +59,25 @@ public:
 	ComputePass(VulkanRenderer* renderer) :PassBase(renderer) {}
 };
 
+/* Opaque pass define */
 class OpaquePass :public GraphicsPass
 {
 public:
 	struct PassUniformBuffer
 	{
+		glm::mat4 ViewMatrix;
+		glm::mat4 ProjectionMatrix;
 		glm::vec4 BaseColor;
+	};
+	struct ObjectUniformBuffer
+	{
+		glm::mat4 WorldMatrix;
 	};
 	OpaquePass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
 	virtual void PassInit()override;
-	virtual void BuildPass()override;
-
-	VkDescriptorSetLayout _descriptorSetLayot;
+	virtual void PassBuild()override;
+	virtual void PassUpdate()override;
+private:
+	std::shared_ptr<class DescriptorSet> _descriptorSet_pass;
+	std::shared_ptr<class DescriptorSet> _descriptorSet_obj;
 };

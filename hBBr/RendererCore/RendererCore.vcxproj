@@ -180,6 +180,7 @@
     <ClInclude Include="Common\FileSystem.h" />
     <ClInclude Include="Common\HString.h" />
     <ClInclude Include="Common\XMLStream.h" />
+    <ClInclude Include="Core\DescriptorSet.h" />
     <ClInclude Include="Core\PassBase.h" />
     <ClInclude Include="Core\Pipeline.h" />
     <ClInclude Include="Core\RendererConfig.h" />
@@ -203,6 +204,7 @@
     <ClCompile Include="Common\ConsoleDebug.cpp" />
     <ClCompile Include="Common\FileSystem.cpp" />
     <ClCompile Include="Common\XMLStream.cpp" />
+    <ClCompile Include="Core\DescriptorSet.cpp" />
     <ClCompile Include="Core\PassBase.cpp" />
     <ClCompile Include="Core\Pipeline.cpp" />
     <ClCompile Include="Core\RendererConfig.cpp" />

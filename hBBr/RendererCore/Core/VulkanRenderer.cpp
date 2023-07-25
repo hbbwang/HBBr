@@ -9,7 +9,6 @@
 #include "ShaderCompiler.h"
 #endif
 
-std::shared_ptr<VulkanManager> VulkanRenderer::_vulkanManager = NULL;
 uint32_t VulkanRenderer::_currentFrameIndex;
 std::map<HString, VulkanRenderer*> VulkanRenderer::_renderers;
 std::mutex renderThreadMutex;
@@ -31,6 +30,7 @@ void VulkanRenderer::EditorContentInit()
 
 VulkanRenderer::VulkanRenderer(void* windowHandle, const char* rendererName, bool bDebug)
 {
+	const std::shared_ptr<VulkanManager> _vulkanManager = VulkanManager::GetManager();
 	ConsoleDebug::print_endl(RendererLauguage::GetText("T000000"));
 	_currentFrameIndex = 0;
 	_swapchainIndex = 0;
@@ -39,8 +39,6 @@ VulkanRenderer::VulkanRenderer(void* windowHandle, const char* rendererName, boo
 	_bRendering = false;
 	_swapchain = VK_NULL_HANDLE;
 	_surface = VK_NULL_HANDLE;
-	if (_vulkanManager == NULL)
-		_vulkanManager.reset(new VulkanManager(bDebug));
 	//Surface
 	_vulkanManager->CreateSurface(windowHandle, _surface);
 	//Swapchain
@@ -51,7 +49,7 @@ VulkanRenderer::VulkanRenderer(void* windowHandle, const char* rendererName, boo
 	_commandBuffers.resize(_vulkanManager->GetSwapchainBufferCount());
 	for (int i = 0; i < _commandBuffers.size(); i++)
 	{
-		_vulkanManager->CreateCommandBuffer(_vulkanManager->GetCommandPool(), _commandBuffers[i]);
+		_vulkanManager->AllocateCommandBuffer(_vulkanManager->GetCommandPool(), _commandBuffers[i]);
 	}
 	//Editor init
 #if IS_EDITOR
@@ -83,6 +81,7 @@ VulkanRenderer::VulkanRenderer(void* windowHandle, const char* rendererName, boo
 
 VulkanRenderer::~VulkanRenderer()
 {
+	const std::shared_ptr<VulkanManager> _vulkanManager = VulkanManager::GetManager();
 	_bRendererRelease = true;
 	//Wait for thread stop.
 	_renderThread.join();
@@ -98,12 +97,13 @@ VulkanRenderer::~VulkanRenderer()
 	}
 	if (_renderers.size() <= 0)
 	{
-		_vulkanManager.reset();
+		_vulkanManager->ReleaseManager();
 	}
 }
 
 void VulkanRenderer::Render()
 {
+	const std::shared_ptr<VulkanManager> _vulkanManager = VulkanManager::GetManager();
 	if (!_bRendererResize)
 	{
 		_bRendering = true;
@@ -130,8 +130,8 @@ void VulkanRenderer::Render()
 
 void VulkanRenderer::ResetWindowSize(uint32_t width, uint32_t height)
 {
+	const std::shared_ptr<VulkanManager> _vulkanManager = VulkanManager::GetManager();
 	_bRendererResize = true;
-
 	if (_vulkanManager && !_bRendererRelease)
 	{
 		//Wait render setting finish.
@@ -146,6 +146,7 @@ void VulkanRenderer::ResetWindowSize(uint32_t width, uint32_t height)
 
 void VulkanRenderer::CheckSwapchainOutOfData()
 {
+	const std::shared_ptr<VulkanManager> _vulkanManager = VulkanManager::GetManager();
 	if (_vulkanManager)
 	{
 		if (_surfaceSize.width == _windowSize.width && _surfaceSize.height == _windowSize.height)
@@ -158,6 +159,7 @@ void VulkanRenderer::CheckSwapchainOutOfData()
 
 void VulkanRenderer::RendererResize()
 {
+	const std::shared_ptr<VulkanManager> _vulkanManager = VulkanManager::GetManager();
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
 	_vulkanManager->DestroySwapchain(_swapchain, _swapchainTextures);
 	_surfaceSize = _vulkanManager->CreateSwapchain(_surface, _surfaceFormat, _swapchain, _swapchainTextures);

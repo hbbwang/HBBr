@@ -12,7 +12,7 @@ void Pipeline::CreatePipelineObject(VkRenderPass renderPass, uint32_t subpassCou
 	_renderPass = renderPass;
 	if (_pipelineType == PipelineType::Graphics)
 	{
-		for (int i = 0; i < subpassCount; i++)
+		for (int i = 0; i < (int)subpassCount; i++)
 		{
 			BuildGraphicsPipelineState(renderPass, subpassCount);
 		}
@@ -131,12 +131,15 @@ void Pipeline::SetDepthStencil()
 
 void Pipeline::SetPipelineLayout(std::vector<VkDescriptorSetLayout> layout)
 {
-	VulkanRenderer::GetManager()->CreatePipelineLayout(layout, _pipelineLayout);
+	VulkanManager::GetManager()->CreatePipelineLayout(layout, _pipelineLayout);
 }
 
 void Pipeline::SetVertexShaderAndPixelShader()
 {
+	//set shader
 
+	//_graphicsPipelineCreateInfoCache.CreateInfo.stageCount = _countof(shader_stage);
+	//_graphicsPipelineCreateInfoCache.CreateInfo.pStages = shader_stage;
 }
 
 void Pipeline::BuildGraphicsPipelineState(VkRenderPass renderPass, uint32_t subpassIndex)
@@ -188,5 +191,5 @@ void Pipeline::BuildGraphicsPipelineState(VkRenderPass renderPass, uint32_t subp
 	_graphicsPipelineCreateInfoCache.CreateInfo.renderPass = renderPass;
 	_graphicsPipelineCreateInfoCache.CreateInfo.subpass = subpassIndex;
 
-	VulkanRenderer::GetManager()->CreateGraphicsPipeline(_graphicsPipelineCreateInfoCache.CreateInfo, _pipeline);
+	VulkanManager::GetManager()->CreateGraphicsPipeline(_graphicsPipelineCreateInfoCache.CreateInfo, _pipeline);
 }

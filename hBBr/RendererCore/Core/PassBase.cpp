@@ -3,14 +3,16 @@
 #include "Texture.h"
 #include "PassManager.h"
 #include "VertexFactory.h"
-void GraphicsPass::BuildPass()
+#include "DescriptorSet.h"
+
+void GraphicsPass::PassBuild()
 {
-	VulkanRenderer::GetManager()->CreateRenderPass(_attachmentDescs, _subpassDependencys, _subpassDescs, _renderPass);
+	VulkanManager::GetManager()->CreateRenderPass(_attachmentDescs, _subpassDependencys, _subpassDescs, _renderPass);
 	_pipeline.reset(new Pipeline());
 	//Setting pipeline start
 	//.....
 	//Setting pipeline end
-	_pipeline->CreatePipelineObject(_renderPass, _subpassDescs.size());
+	_pipeline->CreatePipelineObject(_renderPass, (uint32_t)_subpassDescs.size());
 }
 
 void GraphicsPass::AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp,std::shared_ptr<Texture> texture )
@@ -71,9 +73,9 @@ void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<ui
 	VkSubpassDescription subpassDesc = {};
 	subpassDesc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	subpassDesc.flags = 0;
-	subpassDesc.inputAttachmentCount = _input_ref.size();
+	subpassDesc.inputAttachmentCount = (uint32_t)_input_ref.size();
 	subpassDesc.pInputAttachments = _input_ref.data();
-	subpassDesc.colorAttachmentCount = _color_ref.size();
+	subpassDesc.colorAttachmentCount = (uint32_t)_color_ref.size();
 	subpassDesc.pColorAttachments = _color_ref.data();
 	subpassDesc.pResolveAttachments = NULL;
 	subpassDesc.pDepthStencilAttachment = depthStencilIndex >= 0 ? &_depthStencil_ref : NULL;
@@ -118,20 +120,35 @@ void OpaquePass::PassInit()
 	//Swapchain
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR , VK_ATTACHMENT_STORE_OP_STORE,_renderer->GetSwapchainImage());
 	AddSubpass({}, {0}, {});
-	BuildPass(); 
+	PassBuild();
 }
 
-void OpaquePass::BuildPass()
+void OpaquePass::PassBuild()
 {
-	VulkanRenderer::GetManager()->CreateRenderPass(_attachmentDescs, _subpassDependencys, _subpassDescs, _renderPass);
+	_descriptorSet_pass.reset(new DescriptorSet(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1));
+	_descriptorSet_pass->CreateBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+	_descriptorSet_obj.reset(new DescriptorSet(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1));
+	_descriptorSet_obj->CreateBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+
+	VulkanManager::GetManager()->CreateRenderPass(_attachmentDescs, _subpassDependencys, _subpassDescs, _renderPass);
 	_pipeline.reset(new Pipeline());
 	//Setting pipeline start
 	_pipeline->SetColorBlend(false);
 	_pipeline->SetRenderRasterizer();
 	_pipeline->SetRenderDepthStencil();
 	_pipeline->SetVertexInput(VertexFactory::VertexInputBase::BuildLayout());
-	_pipeline->SetPipelineLayout({});
+	//
+	_pipeline->SetPipelineLayout(
+		{ 
+			_descriptorSet_pass ->GetDescriptorSetLayout() ,
+			_descriptorSet_obj->GetDescriptorSetLayout() 
+		});
 	_pipeline->SetVertexShaderAndPixelShader();
 	//Setting pipeline end
-	_pipeline->CreatePipelineObject(_renderPass, _subpassDescs.size());
+	_pipeline->CreatePipelineObject(_renderPass, (uint32_t)_subpassDescs.size());
+}
+
+void OpaquePass::PassUpdate()
+{
+
 }

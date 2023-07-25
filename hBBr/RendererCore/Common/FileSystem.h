@@ -33,5 +33,6 @@ public:
 	static HString GetRelativePath(const char* path);
 	static bool IsPathContain(const char* pathA , const char* pathContain);
 	static std::vector<FileEntry> GetFilesBySuffix(const char* path , const char* suffix);
-
+	std::vector<char>ReadBinaryFile(const char* filePath);
+	
 };

@@ -1,6 +1,9 @@
-﻿#include "FileSystem.h"
+﻿#include "Common.h"
+#include "FileSystem.h"
 #include <iostream>
 #include <filesystem>
+#include <fstream>
+
 namespace fs = std::filesystem;
 
 HString FileSystem::GetProgramPath()
@@ -102,4 +105,20 @@ std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char
         }
     }
     return result;
+}
+
+std::vector<char> FileSystem::ReadBinaryFile(const char* filePath)
+{
+    std::ifstream file(filePath, std::ios::ate | std::ios::binary);
+    if (!file.is_open())
+    {
+        //throw std::runtime_error((DString("failed to open file : ") + filePath).c_str());
+        MessageOut((HString("failed to open file : ") + filePath).c_str(), false, true, "255,0,0");
+    }
+    size_t fileSize = static_cast<size_t>(file.tellg());
+    std::vector<char> buffer(fileSize);
+    file.seekg(0);
+    file.read(buffer.data(), fileSize);
+    file.close();
+    return buffer;
 }

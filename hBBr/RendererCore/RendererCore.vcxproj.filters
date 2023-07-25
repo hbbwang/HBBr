@@ -103,6 +103,9 @@
     <ClInclude Include="Common\FileSystem.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="Core\DescriptorSet.h">
+      <Filter>Renderer\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -167,6 +170,9 @@
     </ClCompile>
     <ClCompile Include="Common\FileSystem.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\DescriptorSet.cpp">
+      <Filter>Renderer\Core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

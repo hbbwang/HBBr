@@ -2,6 +2,7 @@
 //Vulkan底层核心管理类
 #include "../Common/Common.h"
 #include <vulkan/vulkan.h>
+#include <memory>
 #include "HString.h"
 
 //Windows 
@@ -25,9 +26,28 @@ enum class EPlatform :uint8_t
 
 class VulkanManager
 {
+
 public:
 	VulkanManager(bool bDebug);
 	~VulkanManager();
+
+	__forceinline static std::shared_ptr<VulkanManager> InitManager(bool bDebug) {
+		if (_vulkanManager == NULL)
+		{
+			_vulkanManager.reset(new VulkanManager(bDebug));
+		}
+	}
+
+	__forceinline static void ReleaseManager() {
+		if (_vulkanManager)
+		{
+			_vulkanManager.reset();
+		}
+	}
+
+	__forceinline static std::shared_ptr<VulkanManager> GetManager() {
+		return _vulkanManager;
+	}
 
 	/* 初始化Vulkan */
 
@@ -89,7 +109,7 @@ public:
 
 	void DestroyCommandPool(VkCommandPool commandPool);
 
-	void CreateCommandBuffer(VkCommandPool commandPool , VkCommandBuffer& cmdBuf);
+	void AllocateCommandBuffer(VkCommandPool commandPool , VkCommandBuffer& cmdBuf);
 
 	void FreeCommandBuffers(VkCommandPool commandPool, std::vector<VkCommandBuffer> cmdBufs);
 
@@ -109,6 +129,15 @@ public:
 
 	void DestroyDescriptorPool(VkDescriptorPool pool);
 
+	void CreateDescripotrSetLayout(VkDescriptorType type, uint32_t bindingCount ,  VkDescriptorSetLayout& descriptorSetLayout , VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+
+	void DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout);
+
+	/* Allocate a new descriptorSet ,attention,we should be free the old or unuseful descriptorSet for save memory. */
+	void AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, uint32_t newDescriptorSetCount, std::vector<VkDescriptorSet>& descriptorSet);
+
+	void FreeDescriptorSet(VkDescriptorPool pool, std::vector<VkDescriptorSet>& descriptorSet);
+
 	/* Image 布局转换 */
 	void Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1);
 
@@ -125,6 +154,14 @@ public:
 	void CreateRenderPass(std::vector<VkAttachmentDescription>attachmentDescs, std::vector<VkSubpassDependency>subpassDependencys, std::vector<VkSubpassDescription>subpassDescs, VkRenderPass& renderPass);
 
 	void DestroyRenderPass(VkRenderPass renderPass);
+
+	void CreateBuffer(VkBufferUsageFlags usage, VkDeviceSize bufferSize, VkBuffer& buffer);
+
+	void AllocateBufferMemory(VkBuffer buffer , VkDeviceMemory& bufferMemory, VkMemoryPropertyFlags propertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+	void FreeBufferMemory(VkDeviceMemory& bufferMemory);
+
+	void DestroyBuffer(VkBuffer& buffer);
 
 	/* 立刻序列提交,为保证运行安全,会执行一次等待运行结束 */
 	void SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
@@ -153,10 +190,8 @@ public:
 	__forceinline VkDescriptorPool GetDescriptorPool()const {
 		return _descriptorPool;
 	}
-	
-private:
 
-	bool _bDebugEnable;
+private:
 
 	EPlatform _currentPlatform;
 
@@ -177,6 +212,8 @@ private:
 	VkPhysicalDevice _gpuDevice;
 
 	VkDebugReportCallbackCreateInfoEXT	debugCallbackCreateInfo{};
+
+	bool _bDebugEnable;
 
 	VkDebugReportCallbackEXT			_debugReport;
 
@@ -208,5 +245,7 @@ private:
 	static PFN_vkCmdDebugMarkerBeginEXT vkCmdDebugMarkerBegin;
 	static PFN_vkCmdDebugMarkerEndEXT vkCmdDebugMarkerEnd;
 	static PFN_vkCmdDebugMarkerInsertEXT vkCmdDebugMarkerInsert;
+
+	static std::shared_ptr<VulkanManager> _vulkanManager;
 
 };

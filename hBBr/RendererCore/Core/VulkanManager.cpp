@@ -9,6 +9,8 @@
 //导入Vulkan静态库
 #pragma comment(lib ,"vulkan-1.lib")
 
+std::shared_ptr<VulkanManager> VulkanManager::_vulkanManager;
+
 PFN_vkCreateDebugReportCallbackEXT  fvkCreateDebugReportCallbackEXT = nullptr;
 PFN_vkDestroyDebugReportCallbackEXT  fvkDestroyDebugReportCallbackEXT = nullptr;
 
@@ -583,15 +585,15 @@ VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatK
 	swapchainImageViews.resize(_swapchainBufferCount);
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, swapchainImages.data());
 	//创建ImageView
-	for (int i = 0; i < _swapchainBufferCount; i++)
+	for (int i = 0; i < (int)_swapchainBufferCount; i++)
 	{
 		CreateImageView(swapchainImages[i], surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, swapchainImageViews[i]);
 	}
 	//Swapchain转换到呈现模式
 	VkCommandBuffer buf;
-	CreateCommandBuffer(_commandPool, buf);
+	AllocateCommandBuffer(_commandPool, buf);
 	BeginCommandBuffer(buf, 0);
-	for (int i = 0; i < _swapchainBufferCount; i++)
+	for (int i = 0; i < (int)_swapchainBufferCount; i++)
 	{
 		Transition(buf, swapchainImages[i], VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	}
@@ -663,7 +665,7 @@ VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatK
 	std::vector<VkImage> images(_swapchainBufferCount);
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, images.data());
 	//创建ImageView
-	for (int i = 0; i < _swapchainBufferCount; i++)
+	for (int i = 0; i < (int)_swapchainBufferCount; i++)
 	{
 		textures[i].reset(new Texture(true));
 		textures[i]->_image = images[i];
@@ -676,9 +678,9 @@ VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatK
 	}
 	//Swapchain转换到呈现模式
 	VkCommandBuffer buf;
-	CreateCommandBuffer(_commandPool, buf);
+	AllocateCommandBuffer(_commandPool, buf);
 	BeginCommandBuffer(buf, 0);
-	for (int i = 0; i < _swapchainBufferCount; i++)
+	for (int i = 0; i < (int)_swapchainBufferCount; i++)
 	{
 		//Transition(buf, swapchainImages[i], VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 		textures[i]->Transition(buf, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
@@ -692,7 +694,7 @@ VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatK
 
 void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImage>& swapchainImages, std::vector<VkImageView>& swapchainImageViews)
 {
-	for (int i = 0; i < _swapchainBufferCount; i++)
+	for (int i = 0; i < (int)_swapchainBufferCount; i++)
 	{
 		DestroyImageView(swapchainImageViews[i]);
 	}
@@ -708,7 +710,7 @@ void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkIm
 
 void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<std::shared_ptr<class Texture>>& textures)
 {
-	for (int i = 0; i < _swapchainBufferCount; i++)
+	for (int i = 0; i < (int)_swapchainBufferCount; i++)
 	{
 		DestroyImageView(textures[i]->_imageView);
 		textures[i]->_image = VK_NULL_HANDLE;
@@ -890,7 +892,7 @@ void VulkanManager::DestroyImageView(VkImageView& imageView)
 void VulkanManager::CreateFrameBuffers(VkRenderPass renderPass, VkExtent2D FrameBufferSize, std::vector<std::vector<VkImageView>> imageViews, std::vector<VkFramebuffer>& frameBuffers)
 {
 	frameBuffers.resize(_swapchainBufferCount);
-	for (int i = 0; i < _swapchainBufferCount; i++)
+	for (int i = 0; i < (int)_swapchainBufferCount; i++)
 	{
 		std::vector<VkImageView> attachments;
 		for (int v = 0; v < imageViews.size(); v++)
@@ -950,7 +952,7 @@ void VulkanManager::DestroyCommandPool(VkCommandPool commandPool)
 	}
 }
 
-void VulkanManager::CreateCommandBuffer(VkCommandPool commandPool, VkCommandBuffer& cmdBuf)
+void VulkanManager::AllocateCommandBuffer(VkCommandPool commandPool, VkCommandBuffer& cmdBuf)
 {
 	VkCommandBufferAllocateInfo cmdBufAllocInfo = {};
 	cmdBufAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -969,7 +971,7 @@ void VulkanManager::FreeCommandBuffers(VkCommandPool commandPool, std::vector<Vk
 {
 	if (cmdBufs.size() > 0)
 	{
-		vkFreeCommandBuffers(_device, commandPool, cmdBufs.size(), cmdBufs.data());
+		vkFreeCommandBuffers(_device, commandPool, (uint32_t)cmdBufs.size(), cmdBufs.data());
 	}
 }
 
@@ -1034,7 +1036,7 @@ void VulkanManager::CreatePipelineLayout(std::vector <VkDescriptorSetLayout> des
 	info.pushConstantRangeCount = 0;
 	info.pPushConstantRanges = nullptr;
 	info.pSetLayouts = descriptorSetLayout.data();
-	info.setLayoutCount = descriptorSetLayout.size();
+	info.setLayoutCount = (uint32_t)descriptorSetLayout.size();
 	auto result = vkCreatePipelineLayout(_device, &info, nullptr, &pipelineLayout);
 	if (result != VK_SUCCESS)
 	{
@@ -1071,7 +1073,7 @@ void VulkanManager::CreateDescripotrPool(VkDescriptorPool& pool)
 	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	info.pNext = NULL;
 	info.maxSets = 10000;
-	info.poolSizeCount = std::size(pool_sizes);
+	info.poolSizeCount = (uint32_t)std::size(pool_sizes);
 	info .pPoolSizes = pool_sizes;
 	vkCreateDescriptorPool(_device, &info, nullptr, &pool);
 }
@@ -1083,6 +1085,68 @@ void VulkanManager::DestroyDescriptorPool(VkDescriptorPool pool)
 		vkDestroyDescriptorPool(_device, pool, nullptr);	
 	}
 	pool = VK_NULL_HANDLE;
+}
+
+void VulkanManager::CreateDescripotrSetLayout(VkDescriptorType descriptorType, uint32_t bindingCount, VkDescriptorSetLayout& descriptorSetLayout, VkShaderStageFlags shaderStageFlags)
+{
+	std::vector<VkDescriptorSetLayoutBinding> bindings(bindingCount);
+	for (uint32_t i = 0; i < bindingCount; i++)
+	{
+		bindings[i] = {};
+		bindings[i].descriptorType = descriptorType;
+		bindings[i].descriptorCount = 1;
+		bindings[i].stageFlags = shaderStageFlags;
+		bindings[i].binding = i;
+		bindings[i].pImmutableSamplers = nullptr;
+	}
+	VkDescriptorSetLayoutCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	info.bindingCount = (uint32_t)bindings.size();
+	info.pBindings = bindings.data();
+	auto result = vkCreateDescriptorSetLayout(_device, &info, nullptr, &descriptorSetLayout);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut("Create Descriptor Set Layout Error!!", false, true);
+	}	
+}
+
+void VulkanManager::DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
+{
+	if (descriptorSetLayout != VK_NULL_HANDLE)
+	{
+		vkDestroyDescriptorSetLayout(_device, descriptorSetLayout, nullptr);
+	}
+}
+
+void VulkanManager::AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, uint32_t newDescriptorSetCount , std::vector<VkDescriptorSet>&  descriptorSet)
+{
+	std::vector<VkDescriptorSetLayout> setLayout;
+	setLayout.resize(newDescriptorSetCount);
+	descriptorSet.resize(newDescriptorSetCount);
+	for (int i = 0; i < (int)newDescriptorSetCount; i++)
+	{
+		setLayout[i] = descriptorSetLayout;
+	}
+	//
+	VkDescriptorSetAllocateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	info.descriptorPool = pool;
+	info.descriptorSetCount = static_cast<uint32_t>(setLayout.size());
+	info.pSetLayouts = setLayout.data();
+	auto result = vkAllocateDescriptorSets(_device, nullptr, descriptorSet.data());
+	if (result != VK_SUCCESS)
+	{
+		MessageOut("Vulkan ERROR: Allocate Descriptor Sets Failed.", true, true);
+	}
+}
+
+void VulkanManager::FreeDescriptorSet(VkDescriptorPool pool, std::vector<VkDescriptorSet>& descriptorSet)
+{
+	if (descriptorSet.size() > 0)
+	{
+		vkFreeDescriptorSets(_device, pool, (uint32_t)descriptorSet.size(), descriptorSet.data());
+	}
+	descriptorSet.clear();
 }
 
 void VulkanManager::CreateSemaphore(VkSemaphore& semaphore)
@@ -1137,12 +1201,12 @@ void VulkanManager::CreateRenderPass(std::vector<VkAttachmentDescription>attachm
 	VkRenderPassCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 	info.flags = NULL;
-	info.attachmentCount = attachmentDescs.size();
+	info.attachmentCount = (uint32_t)attachmentDescs.size();
 	info.pAttachments = attachmentDescs.data();
-	info.dependencyCount = subpassDependencys.size();
+	info.dependencyCount = (uint32_t)subpassDependencys.size();
 	info.pDependencies = subpassDependencys.data();
 	info.pNext = NULL;
-	info.subpassCount = subpassDescs.size();
+	info.subpassCount = (uint32_t)subpassDescs.size();
 	info.pSubpasses = subpassDescs.data();
 	vkCreateRenderPass(_device, &info, nullptr, &renderPass);
 }
@@ -1154,6 +1218,53 @@ void VulkanManager::DestroyRenderPass(VkRenderPass renderPass)
 		vkDestroyRenderPass(_device, renderPass, nullptr);
 	}
 	renderPass = VK_NULL_HANDLE;
+}
+
+void VulkanManager::CreateBuffer(VkBufferUsageFlags usage, VkDeviceSize bufferSize, VkBuffer& buffer)
+{
+	VkBufferCreateInfo create_info{};
+	create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	create_info.queueFamilyIndexCount = 0;
+	create_info.pQueueFamilyIndices = VK_NULL_HANDLE;
+	create_info.usage = usage;
+	create_info.size = bufferSize;
+	create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	if (vkCreateBuffer(_device, &create_info, nullptr, &buffer) != VK_SUCCESS) {
+		MessageOut("[ Create Buffer ] Create Uniform Buffer Failed.", true, true, "255,2,0");
+	}
+}
+
+void VulkanManager::DestroyBuffer(VkBuffer& buffer)
+{
+	if (buffer != VK_NULL_HANDLE)
+	{
+		vkDestroyBuffer(_device, buffer, nullptr);
+		buffer = VK_NULL_HANDLE;
+	}
+}
+
+void VulkanManager::AllocateBufferMemory(VkBuffer buffer, VkDeviceMemory& bufferMemory, VkMemoryPropertyFlags propertyFlags)
+{
+	VkMemoryRequirements mem_requirement;
+	vkGetBufferMemoryRequirements(_device, buffer, &mem_requirement);
+	VkMemoryAllocateInfo mem_allocate_info{};
+	mem_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	mem_allocate_info.allocationSize = mem_requirement.size;
+	mem_allocate_info.memoryTypeIndex = FindMemoryTypeIndex(&mem_requirement,propertyFlags);
+	if (vkAllocateMemory(_device, &mem_allocate_info, nullptr, &bufferMemory) != VK_SUCCESS) {
+		MessageOut("[ Create Buffer ] Allocate Memory Failed! ", true, true, "255,2,0");
+	}
+	if (vkBindBufferMemory(_device, buffer, bufferMemory, 0) != VK_SUCCESS) {
+		MessageOut("[ Create Buffer ] Bind Buffer Memory!  ", true, true, "255,2,0");
+	}
+}
+
+void VulkanManager::FreeBufferMemory(VkDeviceMemory& bufferMemory)
+{
+	if (bufferMemory != VK_NULL_HANDLE)
+	{
+		vkFreeMemory(_device, bufferMemory, nullptr);
+	}
 }
 
 void VulkanManager::SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask, VkQueue queue)
