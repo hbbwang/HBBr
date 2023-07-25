@@ -54,6 +54,10 @@ public:
 
 private:
 
+#if IS_EDITOR
+	void EditorContentInit();
+#endif
+
 	void RendererResize();
 
 	static std::shared_ptr<VulkanManager> _vulkanManager;

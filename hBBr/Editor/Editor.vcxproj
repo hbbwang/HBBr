@@ -61,6 +61,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)DependencyCopy\$(Configuration)\;$(SolutionDir)DependencyCopy\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -69,6 +70,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)DependencyCopy\$(Configuration)\;$(SolutionDir)DependencyCopy\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

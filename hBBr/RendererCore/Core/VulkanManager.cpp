@@ -665,6 +665,7 @@ VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatK
 	//创建ImageView
 	for (int i = 0; i < _swapchainBufferCount; i++)
 	{
+		textures[i].reset(new Texture(true));
 		textures[i]->_image = images[i];
 		textures[i]->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		textures[i]->_imageAspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;

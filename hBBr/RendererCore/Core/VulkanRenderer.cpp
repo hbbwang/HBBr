@@ -4,6 +4,10 @@
 #include "ConsoleDebug.h"
 #include "PassManager.h"
 #include "PassBase.h"
+#include "FileSystem.h"
+#if IS_EDITOR
+#include "ShaderCompiler.h"
+#endif
 
 std::shared_ptr<VulkanManager> VulkanRenderer::_vulkanManager = NULL;
 uint32_t VulkanRenderer::_currentFrameIndex;
@@ -16,6 +20,14 @@ static void RenderThreadUpdate(VulkanRenderer* renderer)
 		renderer->Render();
 	}
 }
+#if IS_EDITOR
+
+void VulkanRenderer::EditorContentInit()
+{
+	Shaderc::ShaderCompiler::CompileAllShaders(FileSystem::GetShaderIncludeAbsPath().c_str());
+}
+
+#endif
 
 VulkanRenderer::VulkanRenderer(void* windowHandle, const char* rendererName, bool bDebug)
 {
@@ -41,6 +53,10 @@ VulkanRenderer::VulkanRenderer(void* windowHandle, const char* rendererName, boo
 	{
 		_vulkanManager->CreateCommandBuffer(_vulkanManager->GetCommandPool(), _commandBuffers[i]);
 	}
+	//Editor init
+#if IS_EDITOR
+	EditorContentInit();
+#endif
 	//Init passes
 	_passManager.reset(new PassManager());
 	_passManager->PassesInit(this);

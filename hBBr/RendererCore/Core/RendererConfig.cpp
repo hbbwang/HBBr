@@ -10,7 +10,7 @@ RendererConfig* RendererConfig::Get()
 	{
 		_rendererConfig.reset(new RendererConfig);
 		HString path = HString::GetExePathWithoutFileName() + "Config/Renderer.xml";
-		path = path.CorrectionPath();
+		path.CorrectionPath();
 		if (!XMLStream::LoadXML(path.c_wstr(), _rendererConfig->_configFile))
 		{
 			MessageOut("Fatal error! Load renderer config failed !!", true, true);
@@ -25,7 +25,7 @@ HString RendererLauguage::GetText(HString key)
 	{
 		HString LauguageFilePath = RendererConfig::Get()->_configFile.child(TEXT("root")).child(TEXT("BaseSetting")).child(TEXT("Language")).attribute(TEXT("path")).as_string();
 		LauguageFilePath = HString::GetExePathWithoutFileName() + LauguageFilePath;
-		LauguageFilePath = LauguageFilePath.CorrectionPath();
+		LauguageFilePath.CorrectionPath();
 		pugi::xml_document doc;
 		if (!XMLStream::LoadXML(LauguageFilePath.c_wstr(), doc))
 		{

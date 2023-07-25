@@ -15,7 +15,7 @@ struct VSToPS
 };
 
 //Vertex shader
-VSToPS vert(VSInput IN)
+VSToPS VSMain(VSInput IN)
 {
     VSToPS OUT;
     OUT.SVPosition = float4(IN.position.xyz, 1.0f);
@@ -23,7 +23,7 @@ VSToPS vert(VSInput IN)
 }
 
 //Pixel shader
-float4 frag(VSToPS IN) : SV_Target0
+float4 PSMain(VSToPS IN) : SV_Target0
 {   
     return float4(1.0f,0.0f,0.0f,1.0f);
 }

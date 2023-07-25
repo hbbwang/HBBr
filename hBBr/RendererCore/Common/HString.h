@@ -9,6 +9,12 @@
 #include <ostream>
 #include <math.h>
 #include <vector>
+#include <iostream>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 #pragma comment(lib, "comsuppw.lib")
 class  HString
 {
@@ -165,7 +171,7 @@ public:
 		return strcmp(this->_str, c._str) != 0;
 	}
 
-	FORCEINLINE HString Left(size_t index)
+	__forceinline HString Left(size_t index)
 	{
 		if (index >= this->length || index <= 0)
 		{
@@ -178,7 +184,7 @@ public:
 		return *this;
 	}
 
-	FORCEINLINE HString Right(size_t index)
+	__forceinline HString Right(size_t index)
 	{
 		if (index >= this->length || index < 0)
 		{
@@ -307,7 +313,7 @@ public:
 #endif
 	}
 
-	FORCEINLINE void assign(const char* str)
+	__forceinline void assign(const char* str)
 	{
 		clear();
 		length = strlen(str);
@@ -315,7 +321,7 @@ public:
 		strcpy_s(_str, length + 1, str);
 	}
 
-	FORCEINLINE void assign(HString str)
+	__forceinline void assign(HString str)
 	{
 		clear();
 		length = str.length;
@@ -323,13 +329,13 @@ public:
 		strcpy_s(_str, length + 1, str._str);
 	}
 
-	FORCEINLINE size_t	Length()const { return length; }
+	__forceinline size_t	Length()const { return length; }
 
-	FORCEINLINE const char* c_str() { return _str; }
+	__forceinline const char* c_str() { return _str; }
 
-	FORCEINLINE const wchar_t* c_wstr() { return ps2ws(_str); }
+	__forceinline const wchar_t* c_wstr() { return ps2ws(_str); }
 
-	FORCEINLINE const char* c_strC()const { return _str; }
+	__forceinline const char* c_strC()const { return _str; }
 
 	inline void clear()
 	{
@@ -353,7 +359,7 @@ public:
 		length = strlen(_str);
 	}
 
-	FORCEINLINE void append(const wchar_t* str)
+	__forceinline void append(const wchar_t* str)
 	{
 		pws2s(str);
 		this->append(m_char);
@@ -530,37 +536,18 @@ public:
 		return out;
 	}
 
-	/*  获取相对路径 */
-	inline HString  GetRelativePath()
-	{
-		//获取相对路径
-		wchar_t path[2048];
-		memset(path,L'\0',2048);
-		_wgetcwd(path, 2048);//获取程序路径,Linux的函数
-		int strlen = lstrlenW(path);
-		this->CorrectionPath();
-		HString out = *this;
-		out.Remove((HString(path).CorrectionPath()).c_str());
-		if (out[0] != '.') {
-			out = "." + out;
-		}
-		return out;
-	}
-
 	/*  路径斜杠格式纠正,目前window和Linux都支持“/”，不过window还是用“\\”吧 */
-	FORCEINLINE  HString  CorrectionPath()
+	__forceinline  void  CorrectionPath()
 	{
-		HString result = *this;
 #ifdef WIN32
-		result.Replace("/", "\\");
+		this->Replace("/", "\\");
 #else
-		result.Replace("\\", "/");
+		this->Replace("\\", "/");
 #endif
-		return result;
 	}
 
 	/* 转换成纯字符串形式的路径 */
-	FORCEINLINE void ToPathString()
+	__forceinline void ToPathString()
 	{
 #ifdef WIN32
 		this->Replace("\\", "\\\\");
@@ -569,7 +556,7 @@ public:
 #endif
 	}
 
-	FORCEINLINE static char GetSeparate()
+	__forceinline static char GetSeparate()
 	{
 #ifdef WIN32
 		return '\\';
@@ -579,20 +566,25 @@ public:
 	}
 
 	/* 获取exe文件完整路径 */
-	inline static HString GetExeFullPath()
+	__forceinline static HString GetExeFullPath()
 	{
-		TCHAR _szPath[MAX_PATH + 1] = { 0 };
-		GetModuleFileName(NULL, _szPath, MAX_PATH);
-		HString path = _szPath;
+		wchar_t szPath[1024];
+#ifdef _WIN32
+		// Windows specific
+		GetModuleFileNameW(NULL, szPath, sizeof(szPath));
+#else
+		// Linux specific
+		auto count = readlink("/proc/self/exe", szPath, sizeof(szPath));
+		szPath[count] = '\0';
+#endif
+		HString path = szPath;
 		return path;
 	}
 
 	/* 获取exe文件路径 */
-	inline static HString GetExePathWithoutFileName()
+	__forceinline static HString GetExePathWithoutFileName()
 	{
-		TCHAR _szPath[MAX_PATH + 1] = { 0 };
-		GetModuleFileName(NULL, _szPath, MAX_PATH);
-		HString path = _szPath;
+		HString path = GetExeFullPath();
 		path = path.GetFilePath();
 		return path;
 	}
@@ -602,31 +594,40 @@ public:
 	*/
 	inline void Replace(const char* whatStr, const char* newStr)
 	{
-		std::vector<HString>split = this->Split(whatStr);
-		if (split.size() > 0)
-		{
-			this->assign(split[0]);
-			for (size_t i = 1; i < split.size(); i++)
-			{
-				this->append(newStr);
-				this->append(split[i]);
-			}
+		//std::vector<HString>split = this->Split(whatStr);
+		//if (split.size() > 0)
+		//{
+		//	this->assign(split[0]);
+		//	for (size_t i = 1; i < split.size(); i++)
+		//	{
+		//		this->append(newStr);
+		//		this->append(split[i]);
+		//	}
+		//}
+		std::string str = this->_str;
+		std::string old_str = whatStr;
+		std::string new_str = newStr;
+		size_t pos = 0;
+		while ((pos = str.find(old_str, pos)) != std::string::npos) {
+			str.replace(pos, old_str.length(), new_str);
+			pos += new_str.length();
 		}
+		this->assign(str.c_str());
 	}
 
 	/* 字符串包含 */
-	inline bool Contains(const char* whatStr)
+	__forceinline bool Contains(const char* whatStr)
 	{
 		std::string strCache(_str);
 		return strCache.find(whatStr) != std::string::npos;
 	}
 
-	FORCEINLINE char* ToStr()
+	__forceinline char* ToStr()
 	{
 		return const_cast<char*>(c_str());
 	}
 
-	static FORCEINLINE HString	FromFloat(double f, int precise = 6)
+	static __forceinline HString	FromFloat(double f, int precise = 6)
 	{
 		HString out;
 		HString format = "%.";
@@ -637,7 +638,7 @@ public:
 		return out;
 	}
 
-	static FORCEINLINE HString	FromInt(int i)
+	static __forceinline HString	FromInt(int i)
 	{
 		HString out;
 		char str[128];
@@ -646,7 +647,7 @@ public:
 		return out;
 	}
 
-	static FORCEINLINE HString	FromUInt(UINT i)
+	static __forceinline HString	FromUInt(UINT i)
 	{
 		HString out;
 		char str[128];
@@ -655,7 +656,7 @@ public:
 		return out;
 	}
 
-	static FORCEINLINE HString	FromSize_t(size_t i)
+	static __forceinline HString	FromSize_t(size_t i)
 	{
 		HString out;
 		char str[256];
@@ -664,57 +665,57 @@ public:
 		return out;
 	}
 
-	static FORCEINLINE HString	FromBool(bool i)
+	static __forceinline HString	FromBool(bool i)
 	{
 		return i == true ? "true": "false";
 	}
 
-	static FORCEINLINE bool ToBool(const char* str)
+	static __forceinline bool ToBool(const char* str)
 	{
 		return  str[0]== 't'|| str[0] == 'T'? true : false;
 	}
 
-	static FORCEINLINE bool ToBool(HString str)
+	static __forceinline bool ToBool(HString str)
 	{
 		return  str.IsSame("true",false) ? true : false;
 	}
 
-	static FORCEINLINE int ToInt(const char* str)
+	static __forceinline int ToInt(const char* str)
 	{
 		return atoi(str);
 	}
 
-	static FORCEINLINE int ToInt(HString str)
+	static __forceinline int ToInt(HString str)
 	{
 		return atoi(str.c_str());
 	}
 
-	static FORCEINLINE double ToDouble(HString str)
+	static __forceinline double ToDouble(HString str)
 	{
 		return atof(str.c_str());
 	}
 
-	static FORCEINLINE double ToDouble(const char* str)
+	static __forceinline double ToDouble(const char* str)
 	{
 		return atof(str);
 	}
 
-	static FORCEINLINE long ToLong(HString str)
+	static __forceinline long ToLong(HString str)
 	{
 		return atol(str.c_str());
 	}
 
-	static FORCEINLINE long ToLong(const char* str)
+	static __forceinline long ToLong(const char* str)
 	{
 		return atol(str);
 	}
 
-	static FORCEINLINE long long ToLongLong(const char* str)
+	static __forceinline long long ToLongLong(const char* str)
 	{
 		return atoll(str);
 	}
 
-	static FORCEINLINE long long ToLongLong(HString str)
+	static __forceinline long long ToLongLong(HString str)
 	{
 		return atoll(str.c_str());
 	}

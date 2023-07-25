@@ -122,17 +122,18 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;RENDERERCORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);_USRDLL</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;RENDERERCORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);_USRDLL;IS_EDITOR</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(SolutionDir)ThirdParty\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /c /f /y $(solutiondir)DependencyCopy\$(Configuration)\*.dll $(solutiondir)$(Platform)\$(Configuration)</Command>
@@ -144,11 +145,12 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;RENDERERCORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);_USRDLL</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;RENDERERCORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);_USRDLL;IS_EDITOR</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,37 +158,26 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(SolutionDir)ThirdParty\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /c /f /y $(solutiondir)DependencyCopy\$(Configuration)\*.dll $(solutiondir)$(Platform)\$(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_allegro5.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_android.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_dx10.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_dx11.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_dx12.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_dx9.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_glfw.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_glut.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_metal.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl2.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl3.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl3_loader.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_osx.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl2.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdlrenderer2.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdlrenderer3.h" />
     <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h" />
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_wgpu.h" />
     <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_win32.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imconfig.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imgui.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imgui_internal.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_textedit.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_truetype.h" />
     <ClInclude Include="..\ThirdParty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="..\ThirdParty\pugixml\pugixml.hpp" />
     <ClInclude Include="Common\Common.h" />
     <ClInclude Include="Common\ConsoleDebug.h" />
+    <ClInclude Include="Common\FileSystem.h" />
     <ClInclude Include="Common\HString.h" />
     <ClInclude Include="Common\XMLStream.h" />
     <ClInclude Include="Core\PassBase.h" />
@@ -200,26 +191,17 @@
     <ClInclude Include="Editor\ShaderCompiler.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_allegro5.cpp" />
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_android.cpp" />
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_dx10.cpp" />
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_dx11.cpp" />
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_dx12.cpp" />
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_dx9.cpp" />
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_glfw.cpp" />
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_glut.cpp" />
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl2.cpp" />
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl2.cpp" />
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp" />
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdlrenderer2.cpp" />
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdlrenderer3.cpp" />
     <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp" />
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_wgpu.cpp" />
     <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\ThirdParty\pugixml\pugixml.cpp" />
     <ClCompile Include="Common\Common.cpp" />
     <ClCompile Include="Common\ConsoleDebug.cpp" />
+    <ClCompile Include="Common\FileSystem.cpp" />
     <ClCompile Include="Common\XMLStream.cpp" />
     <ClCompile Include="Core\PassBase.cpp" />
     <ClCompile Include="Core\Pipeline.cpp" />
@@ -230,10 +212,6 @@
     <ClCompile Include="Core\VulkanRenderer.cpp" />
     <ClCompile Include="Editor\ShaderCompiler.cpp" />
     <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\ThirdParty\Imgui\backends\imgui_impl_metal.mm" />
-    <None Include="..\ThirdParty\Imgui\backends\imgui_impl_osx.mm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
