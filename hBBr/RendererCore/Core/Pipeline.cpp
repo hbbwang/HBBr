@@ -134,12 +134,18 @@ void Pipeline::SetPipelineLayout(std::vector<VkDescriptorSetLayout> layout)
 	VulkanManager::GetManager()->CreatePipelineLayout(layout, _pipelineLayout);
 }
 
-void Pipeline::SetVertexShaderAndPixelShader()
+void Pipeline::SetVertexShaderAndPixelShader(ShaderCache vs, ShaderCache ps)
 {
 	//set shader
-
 	//_graphicsPipelineCreateInfoCache.CreateInfo.stageCount = _countof(shader_stage);
 	//_graphicsPipelineCreateInfoCache.CreateInfo.pStages = shader_stage;
+	static VkPipelineShaderStageCreateInfo info[] = {
+		vs.shaderStageInfo, 
+		ps.shaderStageInfo
+	};
+	_graphicsPipelineCreateInfoCache.CreateInfo.stageCount = 2;
+	_graphicsPipelineCreateInfoCache.CreateInfo.pStages = info;
+
 }
 
 void Pipeline::BuildGraphicsPipelineState(VkRenderPass renderPass, uint32_t subpassIndex)

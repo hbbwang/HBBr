@@ -3,7 +3,8 @@
 
 void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textColor)
 {
-	ConsoleDebug::print_endl(msg, textColor);
+	HString msgStr = msg;
+	ConsoleDebug::print_endl(msgStr, textColor);
 #if defined(_WIN32)
 	if (bMessageBox)
 	{

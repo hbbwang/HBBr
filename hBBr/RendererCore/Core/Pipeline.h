@@ -2,7 +2,7 @@
 //#include "Common.h"
 #include <vector>
 #include "vulkan/vulkan.h"
-
+#include "Shader.h"
 struct VkGraphicsPipelineCreateInfoCache
 {
 	//------------------------State
@@ -228,9 +228,19 @@ public:
 
 	Pipeline();
 
-	__forceinline VkPipeline GetPipeline()const 
+	__forceinline VkPipeline GetPipelineObject()const 
 	{
 		return _pipeline;
+	}
+
+	__forceinline VkRenderPass GetRenderPass()const
+	{
+		return _renderPass;
+	}
+
+	__forceinline PipelineType GetPipelineType()const
+	{
+		return _pipelineType;
 	}
 
 	//Graphics pipeline setting step 1
@@ -252,7 +262,7 @@ public:
 	void SetPipelineLayout(std::vector<VkDescriptorSetLayout> layout);
 
 	//Graphics pipeline setting step 7
-	void SetVertexShaderAndPixelShader();
+	void SetVertexShaderAndPixelShader(ShaderCache vs, ShaderCache ps);
 
 	//Graphics pipeline setting the last step
 	void CreatePipelineObject(VkRenderPass renderPass, uint32_t subpassCount = 1, PipelineType pipelineType = PipelineType::Graphics);

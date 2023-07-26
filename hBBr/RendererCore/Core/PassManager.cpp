@@ -4,6 +4,7 @@
 
 void PassManager::PassesInit(VulkanRenderer* renderer)
 {
+	_renderer = renderer;
 	_sceneTextures.reset(new SceneTexture(renderer));
 	{
 		//Opaque Pass
@@ -20,10 +21,15 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 void PassManager::PassesUpdate()
 {
 	_sceneTextures->UpdateTextures();
+	//Collect render setting (Commandbuffer record)
+	std::vector<std::shared_ptr<PassBase>>executePasses;
 	for (auto p : _passes)
 	{
 		p.second->PassUpdate();
+		executePasses.push_back(p.second);
 	}
+	//Execute
+	VulkanManager::GetManager()->SubmitQueueForPasses(executePasses, _renderer->GetPresentSemaphore());
 }
 
 void PassManager::PassesRelease()

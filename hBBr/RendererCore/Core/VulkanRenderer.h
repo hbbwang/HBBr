@@ -11,33 +11,49 @@ class VulkanRenderer
 {
 public:
 #if defined(_WIN32)
-	HBBR_API VulkanRenderer(void* windowHandle, const char* rendererName, bool bDebug);
+	HBBR_API VulkanRenderer(void* windowHandle, const char* rendererName);
 #endif
 	HBBR_API ~VulkanRenderer();
 
 	/* Frame buffer index */
-	HBBR_API __forceinline static int GetCurrentFrameIndex() {
+	__forceinline static int GetCurrentFrameIndex() {
 		return _currentFrameIndex;
 	}
 
-	HBBR_API __forceinline int GetSwapchinImageIndex() {
+	__forceinline int GetSwapchinImageIndex() {
 		return _swapchainIndex;
 	}
 
-	HBBR_API __forceinline bool IsRendererWantRelease() {
+	__forceinline bool IsRendererWantRelease() {
 		return _bRendererRelease;
 	}
 
-	HBBR_API __forceinline bool IsRendererWantResize() {
+	__forceinline bool IsRendererWantResize() {
 		return _bRendererResize;
 	}
 
-	HBBR_API __forceinline class PassManager* GetPassManager() {
+	__forceinline class PassManager* GetPassManager() {
 		return _passManager.get();
 	}
 
-	HBBR_API __forceinline std::shared_ptr<Texture> GetSwapchainImage() {
-		return _swapchainTextures[(_currentFrameIndex + 1) % 3 ];
+	__forceinline std::shared_ptr<Texture> GetSwapchainImage() {
+		return _swapchainTextures[_currentFrameIndex];
+	}
+
+	__forceinline VkExtent2D GetSurfaceSize() {
+		return _surfaceSize;
+	}
+
+	__forceinline VkSemaphore GetPresentSemaphore() {
+		return _presentSemaphore[_currentFrameIndex];
+	}
+
+	__forceinline bool IsInit() {
+		return _bInit;
+	}
+
+	__forceinline HString GetName() {
+		return _rendererName;
 	}
 
 	/* 帧渲染函数 */
@@ -48,16 +64,14 @@ public:
 
 	HBBR_API void ResetWindowSize(uint32_t width,uint32_t height);
 
-private:
-
-#if IS_EDITOR
-	void EditorContentInit();
-#endif
-
-	void RendererResize();
+	void Init();
 
 	//Renderer map
-	static std::map<HString, VulkanRenderer*>_renderers;
+	static std::map<HString, VulkanRenderer*> _renderers;
+
+private:
+
+	void RendererResize();
 
 	HString _rendererName;
 
@@ -81,8 +95,6 @@ private:
 
 	std::vector<VkSemaphore> _presentSemaphore;
 
-	std::vector<VkCommandBuffer> _commandBuffers;
-
 	static uint32_t _currentFrameIndex;
 
 	uint32_t _swapchainIndex;
@@ -93,9 +105,11 @@ private:
 
 	bool _bRendering;
 
+	bool _bInit;
 	//Passes
 	std::unique_ptr<class PassManager> _passManager;
 
 	//multithread
-	std::thread _renderThread;
+	static std::unique_ptr<std::thread> _renderThread;
+
 };

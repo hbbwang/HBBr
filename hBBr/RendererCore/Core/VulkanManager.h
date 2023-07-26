@@ -3,6 +3,7 @@
 #include "../Common/Common.h"
 #include <vulkan/vulkan.h>
 #include <memory>
+#include <array>
 #include "HString.h"
 
 //Windows 
@@ -31,11 +32,15 @@ public:
 	VulkanManager(bool bDebug);
 	~VulkanManager();
 
-	__forceinline static std::shared_ptr<VulkanManager> InitManager(bool bDebug) {
+	HBBR_API __forceinline static void InitManager(bool bDebug) {
 		if (_vulkanManager == NULL)
 		{
 			_vulkanManager.reset(new VulkanManager(bDebug));
 		}
+	}
+
+	HBBR_API __forceinline static std::shared_ptr<VulkanManager> GetManager() {
+		return _vulkanManager;
 	}
 
 	__forceinline static void ReleaseManager() {
@@ -45,8 +50,8 @@ public:
 		}
 	}
 
-	__forceinline static std::shared_ptr<VulkanManager> GetManager() {
-		return _vulkanManager;
+	__forceinline VkQueue GetGraphicsQueue() {
+		return _graphicsQueue;
 	}
 
 	/* 初始化Vulkan */
@@ -99,7 +104,7 @@ public:
 	/* 创建Frame buffer */
 	void CreateFrameBuffers(VkRenderPass renderPass, VkExtent2D FrameBufferSize,std::vector<std::vector<VkImageView>> imageViews, std::vector<VkFramebuffer>&frameBuffers);
 
-	void DestroyFrameBuffers(std::vector<VkFramebuffer>frameBuffers);
+	void DestroyFrameBuffers(std::vector<VkFramebuffer>& frameBuffers);
 
 	void CreateCommandPool();
 
@@ -117,6 +122,10 @@ public:
 
 	void EndCommandBuffer(VkCommandBuffer cmdBuf);
 
+	void BeginRenderPass(VkCommandBuffer cmdBuf, VkFramebuffer framebuffer, VkRenderPass renderPass, VkExtent2D areaSize, std::vector<VkAttachmentDescription>_attachmentDescs, std::array<float, 4> clearColor = { 0.0f, 0.0f, 0.0f, 0.0f });
+
+	void EndRenderPass(VkCommandBuffer cmdBuf);
+
 	void GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t* swapchainIndex);
 
 	void Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainImageIndex);
@@ -132,6 +141,11 @@ public:
 	void CreateDescripotrSetLayout(VkDescriptorType type, uint32_t bindingCount ,  VkDescriptorSetLayout& descriptorSetLayout , VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 
 	void DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout);
+
+	/* width and height must be same as attachments(ImageViews) size. */
+	void CreateFrameBuffer(uint32_t width, uint32_t height, VkRenderPass renderPass, std::vector<VkImageView>attachments, VkFramebuffer& framebuffer);
+
+	void DestroyFrameBuffer(VkFramebuffer& framebuffer);
 
 	/* Allocate a new descriptorSet ,attention,we should be free the old or unuseful descriptorSet for save memory. */
 	void AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, uint32_t newDescriptorSetCount, std::vector<VkDescriptorSet>& descriptorSet);
@@ -165,6 +179,10 @@ public:
 
 	/* 立刻序列提交,为保证运行安全,会执行一次等待运行结束 */
 	void SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
+
+	void SubmitQueue(std::vector<VkCommandBuffer> cmdBufs, std::vector <VkSemaphore> lastSemaphore, std::vector <VkSemaphore> newSemaphore, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
+
+	void SubmitQueueForPasses(std::vector<std::shared_ptr<class PassBase>> passes, VkSemaphore presentSemaphore, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
 
 	/* 获取平台 */
 	__forceinline EPlatform GetPlatform()const {

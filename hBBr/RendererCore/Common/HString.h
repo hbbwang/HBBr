@@ -77,6 +77,19 @@ public:
 		strcpy_s(this->_str, this->length + 1, obj._str);
 	}
 
+	void operator/(const HString& obj)
+	{
+		HString newAppend = GetSeparate() + obj;
+		this->append(newAppend);
+	}
+
+	HString& operator/=(const HString& obj)
+	{
+		HString newAppend = GetSeparate() + obj;
+		this->append(newAppend);
+		return *this;
+	}
+
 	HString& operator+=(const HString& obj)
 	{
 		if (obj._str == nullptr || obj._str == NULL)
@@ -556,12 +569,12 @@ public:
 #endif
 	}
 
-	__forceinline static char GetSeparate()
+	__forceinline static HString GetSeparate()
 	{
 #ifdef WIN32
-		return '\\';
+		return "\\";
 #else
-		return '/';
+		return "/";
 #endif
 	}
 
@@ -616,10 +629,10 @@ public:
 	}
 
 	/* ×Ö·û´®°üº¬ */
-	__forceinline bool Contains(const char* whatStr)
+	__forceinline bool Contains(HString whatStr)
 	{
 		std::string strCache(_str);
-		return strCache.find(whatStr) != std::string::npos;
+		return strCache.find(whatStr.c_str()) != std::string::npos;
 	}
 
 	__forceinline char* ToStr()

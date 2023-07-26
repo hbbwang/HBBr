@@ -1,13 +1,18 @@
 #include "RenderView.h"
-
+#include "VulkanManager.h"
 #pragma comment(lib , "RendererCore.lib")
 
-RenderView::RenderView(QWidget *parent)
+RenderView::RenderView(QWidget* parent)
 	: QWidget(parent)
 {
 	setAttribute(Qt::WA_NoSystemBackground);
 	setAttribute(Qt::WA_OpaquePaintEvent);
 	setAttribute(Qt::WA_PaintOnScreen);
+
+	if (VulkanManager::GetManager() == NULL)
+	{
+		VulkanManager::InitManager(true);
+	}
 
 	//_renderTimer = new QTimer(this);
 	//_renderTimer->setInterval(1);
@@ -25,7 +30,7 @@ RenderView::~RenderView()
 void RenderView::showEvent(QShowEvent* event)
 {
 	if (_vkRenderer == NULL)
-		_vkRenderer = new VulkanRenderer((void*)this->winId(), "MainRenderer" , true);
+		_vkRenderer = new VulkanRenderer((void*)this->winId(), "MainRenderer");
 	_vkRenderer->ResetWindowSize(width(), height());
 }
 

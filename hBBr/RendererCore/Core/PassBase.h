@@ -5,26 +5,32 @@
 #include <vector>
 #include <memory>
 #include <map>
-#include "VulkanRenderer.h"
 #include "glm/glm.hpp"
+#include "HString.h"
 
 class Texture;
+class VulkanRenderer;
 
 class PassBase
 {
+	friend class VulkanManager;
 	friend class PassManager;
 public:
-	PassBase(VulkanRenderer* renderer) { _renderer = renderer; }
-	~PassBase() {}
+	PassBase(VulkanRenderer* renderer);
+	~PassBase();
+	__forceinline VkSemaphore GetSemaphore()const { return _semaphore; }
 	virtual void PassBuild() {}
 protected:
 	virtual void PassInit() {}
 	virtual void PassUpdate() {}
 	virtual void PassReset() {}
+	VkCommandBuffer& GetCommandBuffer();
 	std::shared_ptr<Texture> GetSceneTexture(uint32_t descIndex);
 	std::unique_ptr<Pipeline> _pipeline;
 	VulkanRenderer* _renderer = NULL;
 	HString _passName = "PassBase";
+	VkSemaphore _semaphore;
+	std::vector<VkCommandBuffer> _cmdBuf;
 };
 
 class GraphicsPass : public PassBase
@@ -32,12 +38,12 @@ class GraphicsPass : public PassBase
 public:
 	GraphicsPass(VulkanRenderer* renderer) :PassBase(renderer) {}
 	//Step 1 , Can add multiple attachments.
-	virtual void AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, std::shared_ptr<Texture> texture);
+	virtual void AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, VkFormat attachmentFormat, VkImageLayout initLayout, VkImageLayout finalLayout);
 	//Step 2 , Setup subpass by attachments.
 	virtual void AddSubpass(std::vector<uint32_t> inputAttachments, std::vector<uint32_t> colorAttachments, int depthStencilAttachments = -1);
 	//Step the last,custom.
 	virtual void PassBuild()override;
-
+	virtual void ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> imageViews);
 	__forceinline VkRenderPass GetRenderPass()const
 	{
 		return _renderPass;
@@ -51,6 +57,8 @@ protected:
 	std::vector<VkAttachmentReference> _input_ref;
 	std::vector<VkAttachmentReference> _color_ref;
 	VkAttachmentReference	_depthStencil_ref;
+	std::vector<VkFramebuffer> _framebuffers;
+	VkExtent2D _currentFrameBufferSize;
 };
 
 class ComputePass : public PassBase

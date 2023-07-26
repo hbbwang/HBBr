@@ -1,9 +1,29 @@
 ﻿#include "PassBase.h"
 #include "VulkanRenderer.h"
+#include "VulkanManager.h"
 #include "Texture.h"
 #include "PassManager.h"
 #include "VertexFactory.h"
 #include "DescriptorSet.h"
+
+void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> imageViews)
+{
+	if (_currentFrameBufferSize.width != size.width || _currentFrameBufferSize.height != size.height)
+	{
+		_currentFrameBufferSize = size;
+		const auto manager = VulkanManager::GetManager();
+		if (_framebuffers.size() > 0)
+		{
+			vkQueueWaitIdle(manager->GetGraphicsQueue());
+			manager->DestroyFrameBuffer(_framebuffers[VulkanRenderer::GetCurrentFrameIndex()]);
+		}
+		else
+		{
+			_framebuffers.resize(manager->GetSwapchainBufferCount());
+		}
+		VulkanManager::GetManager()->CreateFrameBuffer(size.width, size.height, _pipeline->GetRenderPass(), imageViews, _framebuffers[VulkanRenderer::GetCurrentFrameIndex()]);
+	}
+}
 
 void GraphicsPass::PassBuild()
 {
@@ -15,39 +35,19 @@ void GraphicsPass::PassBuild()
 	_pipeline->CreatePipelineObject(_renderPass, (uint32_t)_subpassDescs.size());
 }
 
-void GraphicsPass::AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp,std::shared_ptr<Texture> texture )
+void GraphicsPass::AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp,VkFormat attachmentFormat , VkImageLayout initLayout,VkImageLayout finalLayout)
 {
 	//attachment
 	VkAttachmentDescription attachmentDesc = {} ;
-
 	attachmentDesc.flags = 0;
-	attachmentDesc.format = texture->GetFormat();
+	attachmentDesc.format = attachmentFormat;
 	attachmentDesc.samples = VK_SAMPLE_COUNT_1_BIT;
 	attachmentDesc.loadOp = loadOp;
 	attachmentDesc.storeOp = storeOp;
 	attachmentDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	attachmentDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	attachmentDesc.initialLayout = texture->GetLayout();
-
-	if (texture->GetLayout() == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
-	{
-		attachmentDesc.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-	}
-	else if (texture->GetUsageFlags() & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
-	{
-		attachmentDesc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	}
-	else if (texture->GetUsageFlags() & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
-	{
-		if (texture->GetAspectFlags() & (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT))
-		{
-			attachmentDesc.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-		}
-		else
-		{
-			attachmentDesc.finalLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
-		}
-	}
+	attachmentDesc.initialLayout = initLayout;
+	attachmentDesc.finalLayout = finalLayout;
 	_attachmentDescs.push_back(attachmentDesc);
 }
 
@@ -57,18 +57,22 @@ void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<ui
 	for (int i = 0; i < inputIndexes.size(); i++)
 	{
 		_input_ref[i].attachment = inputIndexes[i];
-		_input_ref[i].layout = _attachmentDescs[inputIndexes[i]].finalLayout;
+		//_input_ref[i].layout = _attachmentDescs[inputIndexes[i]].finalLayout;
+		_input_ref[i].layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
 	}
 	_color_ref.resize(colorIndexes.size());
 	for (int i = 0; i < colorIndexes.size(); i++)
 	{
 		_color_ref[i].attachment = colorIndexes[i];
-		_color_ref[i].layout = _attachmentDescs[colorIndexes[i]].finalLayout;
+		//_color_ref[i].layout = _attachmentDescs[colorIndexes[i]].finalLayout;
+		_color_ref[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	}
 	if (depthStencilIndex >= 0)
 	{
 		_depthStencil_ref.attachment = depthStencilIndex;
-		_depthStencil_ref.layout = _attachmentDescs[depthStencilIndex].finalLayout;
+		//_depthStencil_ref.layout = _attachmentDescs[depthStencilIndex].finalLayout;
+		_depthStencil_ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	}
 	VkSubpassDescription subpassDesc = {};
 	subpassDesc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -85,28 +89,54 @@ void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<ui
 	_subpassDescs.push_back(subpassDesc);
 
 	VkSubpassDependency depen = {};
-	if (_subpassDependencys.size() <= 0)//The srcSubpass  of the first subpass should be outside renderpass.It looks like it could be 0.
+	if (_subpassDependencys.size() <= 0)
 	{
-		depen.srcSubpass = VK_SUBPASS_EXTERNAL;//0
-		depen.dstSubpass = 1;//Next subpass.
-		depen.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-		if(depthStencilIndex >= 0)
-		{
-			depen.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-			depen.dstAccessMask =
-				VK_ACCESS_INPUT_ATTACHMENT_READ_BIT |VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-				VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-		}
-		else
-		{
-			depen.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT ;
-			depen.dstAccessMask =
-				VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		}	
-		depen.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		depen.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		depen.srcSubpass = VK_SUBPASS_EXTERNAL;//pass out side
+		depen.dstSubpass = 0;//Next subpass,into the first subpass.	
 	}
+	else
+	{
+		depen.srcSubpass = _subpassDependencys.size() - 1;
+		depen.dstSubpass = _subpassDependencys.size() ;//Next subpass.	
+	}
+	depen.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+	if (depthStencilIndex >= 0)
+	{
+		depen.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		depen.dstAccessMask =
+			VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+			VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+	}
+	else
+	{
+		depen.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		depen.dstAccessMask =
+			VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	}
+	depen.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	depen.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	_subpassDependencys.push_back(depen);
+}
+
+PassBase::PassBase(VulkanRenderer* renderer)
+{
+	_renderer = renderer;
+	//CommandBuffers
+	_cmdBuf.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
+	for (int i = 0; i < _cmdBuf.size(); i++)
+	{
+		VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf[i]);
+	}
+}
+
+PassBase::~PassBase()
+{
+	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf);
+}
+
+VkCommandBuffer& PassBase::GetCommandBuffer()
+{
+	return _cmdBuf[_renderer->GetCurrentFrameIndex()];
 }
 
 std::shared_ptr<Texture> PassBase::GetSceneTexture(uint32_t descIndex)
@@ -118,8 +148,8 @@ std::shared_ptr<Texture> PassBase::GetSceneTexture(uint32_t descIndex)
 void OpaquePass::PassInit()
 {
 	//Swapchain
-	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR , VK_ATTACHMENT_STORE_OP_STORE,_renderer->GetSwapchainImage());
-	AddSubpass({}, {0}, {});
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSwapchainImage()->GetFormat(), _renderer->GetSwapchainImage()->GetLayout(), VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	AddSubpass({}, {0} , -1);
 	PassBuild();
 }
 
@@ -143,12 +173,19 @@ void OpaquePass::PassBuild()
 			_descriptorSet_pass ->GetDescriptorSetLayout() ,
 			_descriptorSet_obj->GetDescriptorSetLayout() 
 		});
-	_pipeline->SetVertexShaderAndPixelShader();
+	_pipeline->SetVertexShaderAndPixelShader(Shader::_vsShader["TestShader"], Shader::_psShader["TestShader"]);
 	//Setting pipeline end
-	_pipeline->CreatePipelineObject(_renderPass, (uint32_t)_subpassDescs.size());
+	_pipeline->CreatePipelineObject(_renderPass, (uint32_t)_subpassDescs.size() - 1 );
 }
 
 void OpaquePass::PassUpdate()
 {
-
+	const uint32_t frameIndex = _renderer->GetCurrentFrameIndex();
+	const auto manager = VulkanManager::GetManager();
+	//Update FrameBuffer
+	ResetFrameBuffer(_renderer->GetSurfaceSize(), { _renderer->GetSwapchainImage()->GetTextureView()});
+	manager->BeginCommandBuffer(_cmdBuf[frameIndex]);
+	manager->BeginRenderPass(_cmdBuf[frameIndex], _framebuffers[frameIndex], _pipeline->GetRenderPass(), _currentFrameBufferSize, _attachmentDescs, { 1,0,0,1 });
+	manager->EndRenderPass(_cmdBuf[frameIndex]);
+	manager->EndCommandBuffer(_cmdBuf[frameIndex]);
 }

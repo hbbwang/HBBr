@@ -53,20 +53,13 @@ HString FileSystem::GetRelativePath(const char* filePath)
     programPath.CorrectionPath();
     HString path = fs::path(filePath).c_str();
     path.CorrectionPath();
-    if (IsPathContain(path.c_str(), programPath.c_str()))
+    if (path.Contains(programPath))
     {
         path.Remove(0, programPath.Length());
+        path = "." + HString::GetSeparate() +  path;
         return path;
     }
     return filePath;
-}
-
-bool FileSystem::IsPathContain(const char* pathA, const char* pathContain)
-{
-    fs::path mainPath = pathA;
-    fs::path checkPath = pathContain;
-    auto it = std::search(mainPath.begin(), mainPath.end(), checkPath.begin(), checkPath.end() );
-    return it != mainPath.end();
 }
 
 std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char* suffix)

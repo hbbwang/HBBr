@@ -914,7 +914,7 @@ void VulkanManager::CreateFrameBuffers(VkRenderPass renderPass, VkExtent2D Frame
 	}
 }
 
-void VulkanManager::DestroyFrameBuffers(std::vector<VkFramebuffer> frameBuffers)
+void VulkanManager::DestroyFrameBuffers(std::vector<VkFramebuffer>& frameBuffers)
 {
 	for (int i = 0; i < frameBuffers.size(); i++)
 	{
@@ -991,6 +991,44 @@ void VulkanManager::BeginCommandBuffer(VkCommandBuffer cmdBuf, VkCommandBufferUs
 void VulkanManager::EndCommandBuffer(VkCommandBuffer cmdBuf)
 {
 	vkEndCommandBuffer(cmdBuf);
+}
+
+void VulkanManager::BeginRenderPass(VkCommandBuffer cmdBuf, VkFramebuffer framebuffer, VkRenderPass renderPass, VkExtent2D areaSize, std::vector<VkAttachmentDescription>_attachmentDescs, std::array<float, 4> clearColor)
+{
+	VkRenderPassBeginInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	info.framebuffer = framebuffer;
+	info.renderPass = renderPass;
+	info.renderArea.offset = { 0, 0 };
+	info.renderArea.extent = areaSize;
+	info.clearValueCount = (uint32_t)_attachmentDescs.size();
+	std::vector < VkClearValue > clearValues;
+	for (int i = 0; i < (int)_attachmentDescs.size(); i++)
+	{
+		VkClearValue clearValue = {};
+		if (_attachmentDescs[i].finalLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL || _attachmentDescs[i].finalLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+		{
+			clearValue.depthStencil.depth = 0.0f;
+			clearValue.depthStencil.stencil = 1.0f;
+		}
+		else
+		{
+			clearValue.color.float32[0]= clearColor[0];
+			clearValue.color.float32[1] = clearColor[1];
+			clearValue.color.float32[2] = clearColor[2];
+			clearValue.color.float32[3] = clearColor[3];
+		}
+		clearValues.push_back(clearValue);
+	}
+
+	info.pClearValues = clearValues.data();
+
+	vkCmdBeginRenderPass(cmdBuf, &info, VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
+}
+
+void VulkanManager::EndRenderPass(VkCommandBuffer cmdBuf)
+{
+	vkCmdEndRenderPass(cmdBuf);
 }
 
 void VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t* swapchainIndex)
@@ -1118,6 +1156,30 @@ void VulkanManager::DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorS
 	}
 }
 
+void VulkanManager::CreateFrameBuffer(uint32_t width, uint32_t height, VkRenderPass renderPass, std::vector<VkImageView>attachments, VkFramebuffer& framebuffer)
+{
+	VkFramebufferCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	info.flags = 0;
+	info.pNext = 0;
+	info.layers = 1;
+	info.renderPass = renderPass;
+	info.width = width;
+	info.height = height;
+	info.attachmentCount = (uint32_t)attachments.size();
+	info.pAttachments = attachments.data();
+	auto result = vkCreateFramebuffer(_device, &info, nullptr, &framebuffer);
+}
+
+void VulkanManager::DestroyFrameBuffer(VkFramebuffer& framebuffer)
+{
+	if (framebuffer != VK_NULL_HANDLE)
+	{
+		vkDestroyFramebuffer(_device, framebuffer, nullptr);
+		framebuffer = VK_NULL_HANDLE;
+	}
+}
+
 void VulkanManager::AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, uint32_t newDescriptorSetCount , std::vector<VkDescriptorSet>&  descriptorSet)
 {
 	std::vector<VkDescriptorSetLayout> setLayout;
@@ -1133,10 +1195,10 @@ void VulkanManager::AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSet
 	info.descriptorPool = pool;
 	info.descriptorSetCount = static_cast<uint32_t>(setLayout.size());
 	info.pSetLayouts = setLayout.data();
-	auto result = vkAllocateDescriptorSets(_device, nullptr, descriptorSet.data());
+	auto result = vkAllocateDescriptorSets(_device, &info, descriptorSet.data());
 	if (result != VK_SUCCESS)
 	{
-		MessageOut("Vulkan ERROR: Allocate Descriptor Sets Failed.", true, true);
+		MessageOut("Vulkan ERROR: Allocate Descriptor Sets Failed.", false, true);
 	}
 }
 
@@ -1275,9 +1337,9 @@ void VulkanManager::SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, V
 	}
 	VkSubmitInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	info.pWaitDstStageMask = &waitStageMask;
 	info.waitSemaphoreCount = 0;
 	info.pWaitSemaphores = NULL;
-	info.pWaitDstStageMask = NULL;
 	info.signalSemaphoreCount = 0;
 	info.pSignalSemaphores = NULL;
 	info.commandBufferCount = static_cast<uint32_t>(cmdBufs.size());
@@ -1290,6 +1352,62 @@ void VulkanManager::SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, V
 	if(result != VK_SUCCESS)
 		MessageOut(" [Submit Queue Immediate]vkQueueSubmit error", false, false);
 	vkQueueWaitIdle(_graphicsQueue);
+}
+
+void VulkanManager::SubmitQueue(std::vector<VkCommandBuffer> cmdBufs, std::vector <VkSemaphore> lastSemaphore, std::vector <VkSemaphore> newSemaphore, VkPipelineStageFlags waitStageMask, VkQueue queue)
+{
+	if (cmdBufs.size() <= 0)
+	{
+		MessageOut(RendererLauguage::GetText("A000013").c_str(), true, true);
+	}
+	VkSubmitInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	info.pWaitDstStageMask = &waitStageMask;
+	info.waitSemaphoreCount = (uint32_t)lastSemaphore.size();
+	info.pWaitSemaphores = lastSemaphore.data();
+	info.signalSemaphoreCount = (uint32_t)newSemaphore.size();
+	info.pSignalSemaphores = newSemaphore.data();
+	info.commandBufferCount = static_cast<uint32_t>(cmdBufs.size());
+	info.pCommandBuffers = cmdBufs.data();
+	VkResult result;
+	if (queue == VK_NULL_HANDLE)
+		result = vkQueueSubmit(_graphicsQueue, 1, &info, VK_NULL_HANDLE);
+	else
+		result = vkQueueSubmit(queue, 1, &info, VK_NULL_HANDLE);
+	if (result != VK_SUCCESS)
+		MessageOut(" [Submit Queue Immediate]vkQueueSubmit error", false, false);
+}
+
+#include "PassBase.h"
+void VulkanManager::SubmitQueueForPasses( std::vector<std::shared_ptr<PassBase>> passes, VkSemaphore presentSemaphore, VkPipelineStageFlags waitStageMask, VkQueue queue)
+{
+	std::vector<VkSubmitInfo> infos = {};
+	std::vector<VkSemaphore> lastSem = { presentSemaphore };
+	for (int i = 0; i < passes.size(); i++)
+	{
+		if (passes[i]->GetSemaphore() == VK_NULL_HANDLE)
+		{
+			CreateSemaphore(passes[i]->_semaphore);
+		}
+		VkSubmitInfo info = {};
+		info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		info.pWaitDstStageMask = &waitStageMask;
+		info.waitSemaphoreCount = 1;
+		info.pWaitSemaphores = &lastSem[i];
+		info.signalSemaphoreCount = 1;
+		info.pSignalSemaphores = &passes[i]->_semaphore;
+		info.commandBufferCount = 1;
+		info.pCommandBuffers = &passes[i]->GetCommandBuffer();
+		infos.push_back(info);
+		lastSem.push_back(passes[i]->GetSemaphore());
+	}
+	VkResult result;
+	if (queue == VK_NULL_HANDLE)
+		result = vkQueueSubmit(_graphicsQueue, (uint32_t)infos.size(), infos.data(), VK_NULL_HANDLE);
+	else
+		result = vkQueueSubmit(queue, (uint32_t)infos.size(), infos.data(), VK_NULL_HANDLE);
+	if (result != VK_SUCCESS)
+		MessageOut(" [Submit Queue Immediate]vkQueueSubmit error", false, false);
 }
 
 HString VulkanManager::GetVkResult(VkResult code)

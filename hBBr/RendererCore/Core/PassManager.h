@@ -49,6 +49,7 @@ public:
 	/* Pass添加,passName必须唯一! */
 	void AddPass(std::shared_ptr<PassBase> newPass, const char* passName);
 private:
+	class VulkanRenderer* _renderer;
 	std::map<HString, std::shared_ptr<PassBase>> _passes;
 	std::shared_ptr <SceneTexture> _sceneTextures;
 };

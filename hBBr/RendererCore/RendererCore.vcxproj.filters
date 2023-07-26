@@ -106,6 +106,9 @@
     <ClInclude Include="Core\DescriptorSet.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Shader.h">
+      <Filter>Renderer\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -172,6 +175,9 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Core\DescriptorSet.cpp">
+      <Filter>Renderer\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Shader.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
   </ItemGroup>
