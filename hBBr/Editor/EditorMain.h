@@ -14,6 +14,7 @@ public:
     /* Ö÷äÖÈ¾´°¿Ú */
     class RenderView* _mainRenderView;
 
+    virtual void closeEvent(QCloseEvent* event);
 private:
     Ui::EditorMainClass ui;
 };

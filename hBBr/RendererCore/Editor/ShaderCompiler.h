@@ -30,10 +30,10 @@ namespace Shaderc
 	{
 	public:
 		/* Auto find all fx shaders for compile in the path. */
-		static void CompileAllShaders(const char* srcShaderPath);
+		HBBR_API static void CompileAllShaders(const char* srcShaderPath);
 
 		/* Compile single shader. */
-		static void CompileShader(const char* srcShaderFileFullPath,const char* entryPoint, CompileShaderType shaderType, ShaderCompileFlags flags = 0);
+		HBBR_API static void CompileShader(const char* srcShaderFileFullPath,const char* entryPoint, CompileShaderType shaderType, ShaderCompileFlags flags = 0);
 	};
 };
 #endif

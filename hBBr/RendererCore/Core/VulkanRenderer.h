@@ -64,6 +64,8 @@ public:
 
 	HBBR_API void ResetWindowSize(uint32_t width,uint32_t height);
 
+	HBBR_API void Release();
+
 	void Init();
 
 	//Renderer map
@@ -106,6 +108,7 @@ private:
 	bool _bRendering;
 
 	bool _bInit;
+
 	//Passes
 	std::unique_ptr<class PassManager> _passManager;
 

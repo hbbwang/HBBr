@@ -23,14 +23,14 @@ struct FileEntry
 class FileSystem
 {
 public:
-	static HString GetProgramPath();
-	static HString GetShaderCacheAbsPath();
-	static HString GetResourceAbsPath();
-	static HString GetConfigAbsPath();
+	HBBR_API static HString GetProgramPath();
+	HBBR_API static HString GetShaderCacheAbsPath();
+	HBBR_API static HString GetResourceAbsPath();
+	HBBR_API static HString GetConfigAbsPath();
 	/* editor only */
-	static HString GetShaderIncludeAbsPath();
+	HBBR_API static HString GetShaderIncludeAbsPath();
 
-	static HString GetRelativePath(const char* path);
+	HBBR_API static HString GetRelativePath(const char* path);
 	static std::vector<FileEntry> GetFilesBySuffix(const char* path , const char* suffix);
 	static std::vector<char>ReadBinaryFile(const char* filePath);
 	

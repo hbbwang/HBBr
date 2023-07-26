@@ -6,6 +6,39 @@
 #include "VertexFactory.h"
 #include "DescriptorSet.h"
 
+PassBase::PassBase(VulkanRenderer* renderer)
+{
+	_renderer = renderer;
+	//CommandBuffers
+	_cmdBuf.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
+	for (int i = 0; i < _cmdBuf.size(); i++)
+	{
+		VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf[i]);
+	}
+}
+
+PassBase::~PassBase()
+{
+	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf);
+	VulkanManager::GetManager()->DestroyRenderSemaphores(_semaphore);
+	_pipeline.reset();
+}
+
+VkSemaphore& PassBase::GetSemaphore()
+{
+	return _semaphore[VulkanRenderer::GetCurrentFrameIndex()];
+}
+
+VkCommandBuffer& PassBase::GetCommandBuffer()
+{
+	return _cmdBuf[_renderer->GetCurrentFrameIndex()];
+}
+
+std::shared_ptr<Texture> PassBase::GetSceneTexture(uint32_t descIndex)
+{
+	return _renderer->GetPassManager()->GetSceneTexture()->GetTexture(SceneTextureDesc(descIndex));
+}
+
 void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> imageViews)
 {
 	if (_currentFrameBufferSize.width != size.width || _currentFrameBufferSize.height != size.height)
@@ -21,7 +54,7 @@ void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> im
 		{
 			_framebuffers.resize(manager->GetSwapchainBufferCount());
 		}
-		VulkanManager::GetManager()->CreateFrameBuffer(size.width, size.height, _pipeline->GetRenderPass(), imageViews, _framebuffers[VulkanRenderer::GetCurrentFrameIndex()]);
+		VulkanManager::GetManager()->CreateFrameBuffer(size.width, size.height, _renderPass, imageViews, _framebuffers[VulkanRenderer::GetCurrentFrameIndex()]);
 	}
 }
 
@@ -35,10 +68,16 @@ void GraphicsPass::PassBuild()
 	_pipeline->CreatePipelineObject(_renderPass, (uint32_t)_subpassDescs.size());
 }
 
-void GraphicsPass::AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp,VkFormat attachmentFormat , VkImageLayout initLayout,VkImageLayout finalLayout)
+GraphicsPass::~GraphicsPass()
+{
+	VulkanManager::GetManager()->DestroyFrameBuffers(_framebuffers);
+	VulkanManager::GetManager()->DestroyRenderPass(_renderPass);
+}
+
+void GraphicsPass::AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, VkFormat attachmentFormat, VkImageLayout initLayout, VkImageLayout finalLayout)
 {
 	//attachment
-	VkAttachmentDescription attachmentDesc = {} ;
+	VkAttachmentDescription attachmentDesc = {};
 	attachmentDesc.flags = 0;
 	attachmentDesc.format = attachmentFormat;
 	attachmentDesc.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -97,7 +136,7 @@ void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<ui
 	else
 	{
 		depen.srcSubpass = _subpassDependencys.size() - 1;
-		depen.dstSubpass = _subpassDependencys.size() ;//Next subpass.	
+		depen.dstSubpass = _subpassDependencys.size();//Next subpass.	
 	}
 	depen.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 	if (depthStencilIndex >= 0)
@@ -118,32 +157,11 @@ void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<ui
 	_subpassDependencys.push_back(depen);
 }
 
-PassBase::PassBase(VulkanRenderer* renderer)
+OpaquePass::~OpaquePass()
 {
-	_renderer = renderer;
-	//CommandBuffers
-	_cmdBuf.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
-	for (int i = 0; i < _cmdBuf.size(); i++)
-	{
-		VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf[i]);
-	}
+	_descriptorSet_pass.reset();
+	_descriptorSet_obj.reset();
 }
-
-PassBase::~PassBase()
-{
-	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf);
-}
-
-VkCommandBuffer& PassBase::GetCommandBuffer()
-{
-	return _cmdBuf[_renderer->GetCurrentFrameIndex()];
-}
-
-std::shared_ptr<Texture> PassBase::GetSceneTexture(uint32_t descIndex)
-{
-	return _renderer->GetPassManager()->GetSceneTexture()->GetTexture(SceneTextureDesc(descIndex));
-}
-
 
 void OpaquePass::PassInit()
 {
@@ -170,12 +188,12 @@ void OpaquePass::PassBuild()
 	//
 	_pipeline->SetPipelineLayout(
 		{ 
-			_descriptorSet_pass ->GetDescriptorSetLayout() ,
+			_descriptorSet_pass->GetDescriptorSetLayout() ,
 			_descriptorSet_obj->GetDescriptorSetLayout() 
 		});
 	_pipeline->SetVertexShaderAndPixelShader(Shader::_vsShader["TestShader"], Shader::_psShader["TestShader"]);
 	//Setting pipeline end
-	_pipeline->CreatePipelineObject(_renderPass, (uint32_t)_subpassDescs.size() - 1 );
+	_pipeline->CreatePipelineObject(_renderPass, (uint32_t)_subpassDescs.size());
 }
 
 void OpaquePass::PassUpdate()
@@ -185,7 +203,7 @@ void OpaquePass::PassUpdate()
 	//Update FrameBuffer
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), { _renderer->GetSwapchainImage()->GetTextureView()});
 	manager->BeginCommandBuffer(_cmdBuf[frameIndex]);
-	manager->BeginRenderPass(_cmdBuf[frameIndex], _framebuffers[frameIndex], _pipeline->GetRenderPass(), _currentFrameBufferSize, _attachmentDescs, { 1,0,0,1 });
+	manager->BeginRenderPass(_cmdBuf[frameIndex], _framebuffers[frameIndex], _renderPass, _currentFrameBufferSize, _attachmentDescs, { 1,0,0,1 });
 	manager->EndRenderPass(_cmdBuf[frameIndex]);
 	manager->EndCommandBuffer(_cmdBuf[frameIndex]);
 }

@@ -1,20 +1,33 @@
 ﻿#include "Pipeline.h"
 #include "VulkanRenderer.h"
-
+#include "VulkanManager.h"
 Pipeline::Pipeline()
 {
 
 }
 
+Pipeline::~Pipeline()
+{
+	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout);
+	if (_pipeline != VK_NULL_HANDLE)
+	{
+		vkDestroyPipeline(VulkanManager::GetManager()->GetDevice(), _pipeline, nullptr);
+		_pipeline = VK_NULL_HANDLE;
+	}
+}
+
 void Pipeline::CreatePipelineObject(VkRenderPass renderPass, uint32_t subpassCount, PipelineType pipelineType)
 {
+	if (subpassCount <= 0)
+	{
+		MessageOut("Create Pipeline Object Error,subpass count is 0.", true, true);
+	}
 	_pipelineType = pipelineType;
-	_renderPass = renderPass;
 	if (_pipelineType == PipelineType::Graphics)
 	{
 		for (int i = 0; i < (int)subpassCount; i++)
 		{
-			BuildGraphicsPipelineState(renderPass, subpassCount);
+			BuildGraphicsPipelineState(renderPass, subpassCount - 1);
 		}
 	}
 }
@@ -132,6 +145,7 @@ void Pipeline::SetDepthStencil()
 void Pipeline::SetPipelineLayout(std::vector<VkDescriptorSetLayout> layout)
 {
 	VulkanManager::GetManager()->CreatePipelineLayout(layout, _pipelineLayout);
+	_graphicsPipelineCreateInfoCache.CreateInfo.layout = _pipelineLayout;
 }
 
 void Pipeline::SetVertexShaderAndPixelShader(ShaderCache vs, ShaderCache ps)

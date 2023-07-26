@@ -8,7 +8,7 @@ class RenderView  : public QWidget
 
 public:
 
-	VulkanRenderer *_vkRenderer = NULL;
+	class VulkanRenderer* _vkRenderer = NULL;
 
 	RenderView(QWidget *parent);
 
@@ -19,6 +19,7 @@ protected:
 
 	virtual void resizeEvent(QResizeEvent* event)override;
 
+	virtual void closeEvent(QCloseEvent* event);
 private:
 
 	QTimer* _renderTimer = NULL;

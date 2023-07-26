@@ -6,10 +6,13 @@
 #include "ConsoleDebug.h"
 #include "RendererConfig.h"
 #include "Texture.h"
+#include "FileSystem.h"
+#include "Shader.h"
 //导入Vulkan静态库
 #pragma comment(lib ,"vulkan-1.lib")
+using namespace std;
 
-std::shared_ptr<VulkanManager> VulkanManager::_vulkanManager;
+std::unique_ptr<VulkanManager> VulkanManager::_vulkanManager;
 
 PFN_vkCreateDebugReportCallbackEXT  fvkCreateDebugReportCallbackEXT = nullptr;
 PFN_vkDestroyDebugReportCallbackEXT  fvkDestroyDebugReportCallbackEXT = nullptr;
@@ -62,7 +65,6 @@ VulkanDebugCallback(
 		MessageOut(HString(title + HString("@[") + layer_prefix + "]\n" + msg).c_str(),false,true);
 	return false;
 }
-
 
 VulkanManager::VulkanManager(bool bDebug)
 {
@@ -1082,7 +1084,7 @@ void VulkanManager::CreatePipelineLayout(std::vector <VkDescriptorSetLayout> des
 	}
 }
 
-void VulkanManager::DestroyPipelineLayout(VkPipelineLayout pipelineLayout)
+void VulkanManager::DestroyPipelineLayout(VkPipelineLayout& pipelineLayout)
 {
 	if (pipelineLayout != VK_NULL_HANDLE)
 	{
@@ -1116,7 +1118,7 @@ void VulkanManager::CreateDescripotrPool(VkDescriptorPool& pool)
 	vkCreateDescriptorPool(_device, &info, nullptr, &pool);
 }
 
-void VulkanManager::DestroyDescriptorPool(VkDescriptorPool pool)
+void VulkanManager::DestroyDescriptorPool(VkDescriptorPool& pool)
 {
 	if (pool != VK_NULL_HANDLE)
 	{
@@ -1273,7 +1275,7 @@ void VulkanManager::CreateRenderPass(std::vector<VkAttachmentDescription>attachm
 	vkCreateRenderPass(_device, &info, nullptr, &renderPass);
 }
 
-void VulkanManager::DestroyRenderPass(VkRenderPass renderPass)
+void VulkanManager::DestroyRenderPass(VkRenderPass& renderPass)
 {
 	if (renderPass != VK_NULL_HANDLE)
 	{
@@ -1303,6 +1305,24 @@ void VulkanManager::DestroyBuffer(VkBuffer& buffer)
 		vkDestroyBuffer(_device, buffer, nullptr);
 		buffer = VK_NULL_HANDLE;
 	}
+}
+
+void VulkanManager::CreateShaderModule(std::vector<char> data, VkShaderModule& shaderModule)
+{
+	VkShaderModuleCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	info.codeSize = data.size();
+	info.pCode = reinterpret_cast<const uint32_t*>(data.data());
+	vkCreateShaderModule(_device, &info, nullptr, &shaderModule);
+}
+
+void VulkanManager::CreateShaderModule(VkDevice device, std::vector<char> data, VkShaderModule& shaderModule)
+{
+	VkShaderModuleCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	info.codeSize = data.size();
+	info.pCode = reinterpret_cast<const uint32_t*>(data.data());
+	vkCreateShaderModule(device, &info, nullptr, &shaderModule);
 }
 
 void VulkanManager::AllocateBufferMemory(VkBuffer buffer, VkDeviceMemory& bufferMemory, VkMemoryPropertyFlags propertyFlags)
@@ -1387,7 +1407,7 @@ void VulkanManager::SubmitQueueForPasses( std::vector<std::shared_ptr<PassBase>>
 	{
 		if (passes[i]->GetSemaphore() == VK_NULL_HANDLE)
 		{
-			CreateSemaphore(passes[i]->_semaphore);
+			CreateSemaphore(passes[i]->GetSemaphore());
 		}
 		VkSubmitInfo info = {};
 		info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1395,7 +1415,7 @@ void VulkanManager::SubmitQueueForPasses( std::vector<std::shared_ptr<PassBase>>
 		info.waitSemaphoreCount = 1;
 		info.pWaitSemaphores = &lastSem[i];
 		info.signalSemaphoreCount = 1;
-		info.pSignalSemaphores = &passes[i]->_semaphore;
+		info.pSignalSemaphores = &passes[i]->GetSemaphore();
 		info.commandBufferCount = 1;
 		info.pCommandBuffers = &passes[i]->GetCommandBuffer();
 		infos.push_back(info);

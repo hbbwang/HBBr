@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Common.h"
 #include "HString.h"
 #include <vulkan/vulkan.h>
 #include <map>
@@ -22,7 +23,8 @@ struct ShaderCache
 class Shader
 {
 public:
-	static void LoadShaderCache(const char* cachePath);
+	HBBR_API static void LoadShaderCache(const char* cachePath);
+	HBBR_API static void DestroyAllShaderCache();
 	static std::map<HString, ShaderCache> _vsShader;
 	static std::map<HString, ShaderCache> _psShader;
 	static std::map<HString, ShaderCache> _csShader;

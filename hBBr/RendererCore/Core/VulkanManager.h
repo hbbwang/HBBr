@@ -39,11 +39,11 @@ public:
 		}
 	}
 
-	HBBR_API __forceinline static std::shared_ptr<VulkanManager> GetManager() {
-		return _vulkanManager;
+	HBBR_API __forceinline static VulkanManager* GetManager() {
+		return _vulkanManager.get();
 	}
 
-	__forceinline static void ReleaseManager() {
+	HBBR_API static void ReleaseManager() {
 		if (_vulkanManager)
 		{
 			_vulkanManager.reset();
@@ -132,11 +132,11 @@ public:
 
 	void CreatePipelineLayout(std::vector <VkDescriptorSetLayout> descriptorSetLayout , VkPipelineLayout& pipelineLayout);
 
-	void DestroyPipelineLayout(VkPipelineLayout pipelineLayout);
+	void DestroyPipelineLayout(VkPipelineLayout& pipelineLayout);
 
 	void CreateDescripotrPool(VkDescriptorPool& pool);
 
-	void DestroyDescriptorPool(VkDescriptorPool pool);
+	void DestroyDescriptorPool(VkDescriptorPool& pool);
 
 	void CreateDescripotrSetLayout(VkDescriptorType type, uint32_t bindingCount ,  VkDescriptorSetLayout& descriptorSetLayout , VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 
@@ -150,6 +150,7 @@ public:
 	/* Allocate a new descriptorSet ,attention,we should be free the old or unuseful descriptorSet for save memory. */
 	void AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, uint32_t newDescriptorSetCount, std::vector<VkDescriptorSet>& descriptorSet);
 
+	/* Pool must created setting VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT */
 	void FreeDescriptorSet(VkDescriptorPool pool, std::vector<VkDescriptorSet>& descriptorSet);
 
 	/* Image 布局转换 */
@@ -167,7 +168,7 @@ public:
 
 	void CreateRenderPass(std::vector<VkAttachmentDescription>attachmentDescs, std::vector<VkSubpassDependency>subpassDependencys, std::vector<VkSubpassDescription>subpassDescs, VkRenderPass& renderPass);
 
-	void DestroyRenderPass(VkRenderPass renderPass);
+	void DestroyRenderPass(VkRenderPass& renderPass);
 
 	void CreateBuffer(VkBufferUsageFlags usage, VkDeviceSize bufferSize, VkBuffer& buffer);
 
@@ -176,6 +177,10 @@ public:
 	void FreeBufferMemory(VkDeviceMemory& bufferMemory);
 
 	void DestroyBuffer(VkBuffer& buffer);
+
+	void CreateShaderModule(std::vector<char> data , VkShaderModule& shaderModule);
+
+	void CreateShaderModule(VkDevice device, std::vector<char> data, VkShaderModule& shaderModule);
 
 	/* 立刻序列提交,为保证运行安全,会执行一次等待运行结束 */
 	void SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
@@ -264,6 +269,6 @@ private:
 	static PFN_vkCmdDebugMarkerEndEXT vkCmdDebugMarkerEnd;
 	static PFN_vkCmdDebugMarkerInsertEXT vkCmdDebugMarkerInsert;
 
-	static std::shared_ptr<VulkanManager> _vulkanManager;
+	static std::unique_ptr<VulkanManager> _vulkanManager;
 
 };

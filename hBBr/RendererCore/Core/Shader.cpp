@@ -16,11 +16,7 @@ void Shader::LoadShaderCache(const char* cachePath)
 		ShaderCache cache = {};
 		//
 		auto shaderData = FileSystem::ReadBinaryFile(i.absPath.c_str());
-		VkShaderModuleCreateInfo info = {};
-		info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		info.codeSize = shaderData.size();
-		info.pCode = reinterpret_cast<const uint32_t*>(shaderData.data());
-		vkCreateShaderModule(VulkanManager::GetManager()->GetDevice(),&info,nullptr, &cache.shaderModule);
+		VulkanManager::GetManager()->CreateShaderModule(shaderData, cache.shaderModule);
 		//
 		cache.shaderPath = i.relativePath;
 		cache.shaderName = split[0];
@@ -50,4 +46,23 @@ void Shader::LoadShaderCache(const char* cachePath)
 		}
 	}
 
+}
+
+void Shader::DestroyAllShaderCache()
+{
+	for (auto& i : _vsShader)
+	{
+		vkDestroyShaderModule(VulkanManager::GetManager()->GetDevice(), i.second.shaderModule, nullptr);
+	}
+	for (auto& i : _psShader)
+	{
+		vkDestroyShaderModule(VulkanManager::GetManager()->GetDevice(), i.second.shaderModule, nullptr);
+	}
+	for (auto& i : _csShader)
+	{
+		vkDestroyShaderModule(VulkanManager::GetManager()->GetDevice(), i.second.shaderModule, nullptr);
+	}
+	_vsShader.clear();
+	_psShader.clear();
+	_csShader.clear();
 }

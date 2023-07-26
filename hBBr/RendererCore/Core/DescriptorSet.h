@@ -63,15 +63,15 @@ private:
 
 	std::vector<std::vector<VkDescriptorSet>>_descriptorSets;
 
-	VkDescriptorSetLayout			_descriptorSetLayout;
+	VkDescriptorSetLayout			_descriptorSetLayout = VK_NULL_HANDLE;
 
 	VkShaderStageFlags				_shaderStageFlags;
 
 	uint32_t						_descriptorSetCount ;
 
-	VkBuffer						_buffer;
+	VkBuffer						_buffer = VK_NULL_HANDLE;
 
-	VkDeviceMemory					_bufferMemory;
+	VkDeviceMemory					_bufferMemory = VK_NULL_HANDLE;
 
 	uint64_t						_bufferCapacity;
 

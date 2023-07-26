@@ -18,18 +18,18 @@ class PassBase
 public:
 	PassBase(VulkanRenderer* renderer);
 	~PassBase();
-	__forceinline VkSemaphore GetSemaphore()const { return _semaphore; }
 	virtual void PassBuild() {}
 protected:
 	virtual void PassInit() {}
 	virtual void PassUpdate() {}
 	virtual void PassReset() {}
+	VkSemaphore& GetSemaphore();
 	VkCommandBuffer& GetCommandBuffer();
 	std::shared_ptr<Texture> GetSceneTexture(uint32_t descIndex);
 	std::unique_ptr<Pipeline> _pipeline;
 	VulkanRenderer* _renderer = NULL;
 	HString _passName = "PassBase";
-	VkSemaphore _semaphore;
+	std::vector<VkSemaphore> _semaphore;
 	std::vector<VkCommandBuffer> _cmdBuf;
 };
 
@@ -37,6 +37,7 @@ class GraphicsPass : public PassBase
 {
 public:
 	GraphicsPass(VulkanRenderer* renderer) :PassBase(renderer) {}
+	~GraphicsPass();
 	//Step 1 , Can add multiple attachments.
 	virtual void AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, VkFormat attachmentFormat, VkImageLayout initLayout, VkImageLayout finalLayout);
 	//Step 2 , Setup subpass by attachments.
@@ -82,6 +83,7 @@ public:
 		glm::mat4 WorldMatrix;
 	};
 	OpaquePass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
+	~OpaquePass();
 	virtual void PassInit()override;
 	virtual void PassBuild()override;
 	virtual void PassUpdate()override;

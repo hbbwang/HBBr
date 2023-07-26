@@ -227,15 +227,11 @@ class Pipeline
 public:
 
 	Pipeline();
+	~Pipeline();
 
 	__forceinline VkPipeline GetPipelineObject()const 
 	{
 		return _pipeline;
-	}
-
-	__forceinline VkRenderPass GetRenderPass()const
-	{
-		return _renderPass;
 	}
 
 	__forceinline PipelineType GetPipelineType()const
@@ -272,8 +268,6 @@ private:
 	void BuildGraphicsPipelineState(VkRenderPass renderPass, uint32_t subpassIndex);
 
 	VkPipeline	_pipeline;
-
-	VkRenderPass _renderPass;
 
 	VkPipelineLayout _pipelineLayout;
 

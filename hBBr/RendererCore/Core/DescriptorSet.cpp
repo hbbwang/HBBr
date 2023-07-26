@@ -19,7 +19,13 @@ DescriptorSet::DescriptorSet(VkDescriptorType type, uint32_t bindingCount, VkSha
 
 DescriptorSet::~DescriptorSet()
 {
-
+	//for (auto& i : _descriptorSets)
+	//{
+	//	  VulkanManager::GetManager()->FreeDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), i);
+	//}
+	VulkanManager::GetManager()->DestroyDescriptorSetLayout(_descriptorSetLayout);
+	VulkanManager::GetManager()->FreeBufferMemory(_bufferMemory);
+	VulkanManager::GetManager()->DestroyBuffer(_buffer);
 }
 
 void DescriptorSet::Resize(uint32_t newDescriptorSetCount)
