@@ -6,30 +6,27 @@
 #include <map>
 class Texture;
 class FrameBufferTexture;
-
 class VulkanRenderer
 {
+	friend class PassManager;
 public:
 #if defined(_WIN32)
 	HBBR_API VulkanRenderer(void* windowHandle, const char* rendererName);
 #endif
 	HBBR_API ~VulkanRenderer();
 
-	/* Frame buffer index */
+	/* Get current Frame buffer index. It is frequent use in the passes. */
 	__forceinline static int GetCurrentFrameIndex() {
 		return _currentFrameIndex;
 	}
 
+	/* Current swapchain present image index. It is not used very often. */
 	__forceinline int GetSwapchinImageIndex() {
 		return _swapchainIndex;
 	}
 
 	__forceinline bool IsRendererWantRelease() {
 		return _bRendererRelease;
-	}
-
-	__forceinline bool IsRendererWantResize() {
-		return _bRendererResize;
 	}
 
 	__forceinline class PassManager* GetPassManager() {
@@ -40,7 +37,12 @@ public:
 		return _swapchainTextures[_currentFrameIndex];
 	}
 
-	__forceinline VkExtent2D GetSurfaceSize() {
+	/* Get swapchain imageViews for render attachments */
+	__forceinline std::vector<VkImageView> GetSwapchainImageViews() {
+		return _swapchainImageViews;
+	}
+
+	__forceinline VkExtent2D GetSurfaceSize()const {
 		return _surfaceSize;
 	}
 
@@ -59,10 +61,7 @@ public:
 	/* 帧渲染函数 */
 	HBBR_API void Render();
 
-	/* 检查Swapchain是否过期(一般是因为窗口大小改变了,和swapchain初始化的大小不一致导致的) */
-	HBBR_API void CheckSwapchainOutOfData();
-
-	HBBR_API void ResetWindowSize(uint32_t width,uint32_t height);
+	HBBR_API void RendererResize();
 
 	HBBR_API void Release();
 
@@ -72,8 +71,6 @@ public:
 	static std::map<HString, VulkanRenderer*> _renderers;
 
 private:
-
-	void RendererResize();
 
 	HString _rendererName;
 
@@ -85,15 +82,13 @@ private:
 
 	VkExtent2D _surfaceSize{};
 
-	VkExtent2D _windowSize{};
-
 	//std::vector<VkImage> _swapchainImages;
 
 	//std::vector<VkImageView> _swapchainImageViews;
 
 	std::vector<std::shared_ptr<Texture>> _swapchainTextures;
 
-	std::shared_ptr<FrameBufferTexture> _swapchainRenderTarget; 
+	std::vector<VkImageView>_swapchainImageViews;
 
 	std::vector<VkSemaphore> _presentSemaphore;
 
@@ -103,16 +98,10 @@ private:
 
 	bool _bRendererRelease;
 
-	bool _bRendererResize;
-
-	bool _bRendering;
-
 	bool _bInit;
+
+	bool _bResize;
 
 	//Passes
 	std::unique_ptr<class PassManager> _passManager;
-
-	//multithread
-	static std::unique_ptr<std::thread> _renderThread;
-
 };

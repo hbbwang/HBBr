@@ -30,6 +30,7 @@ protected:
 	VulkanRenderer* _renderer = NULL;
 	HString _passName = "PassBase";
 	std::vector<VkSemaphore> _semaphore;
+	std::vector<VkFence> _fence;
 	std::vector<VkCommandBuffer> _cmdBuf;
 };
 
@@ -44,7 +45,7 @@ public:
 	virtual void AddSubpass(std::vector<uint32_t> inputAttachments, std::vector<uint32_t> colorAttachments, int depthStencilAttachments = -1);
 	//Step the last,custom.
 	virtual void PassBuild()override;
-	virtual void ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> imageViews);
+	virtual void ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> swapchainImageViews,std::vector<VkImageView> imageViews);
 	__forceinline VkRenderPass GetRenderPass()const
 	{
 		return _renderPass;

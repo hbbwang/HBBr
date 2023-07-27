@@ -78,7 +78,7 @@ public:
 	VkExtent2D CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<VkImage>& swapchainImages, std::vector<VkImageView>& swapchainImageViews);
 
 	/* 创建Swapchain From Texture Class */
-	VkExtent2D CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures);
+	VkExtent2D CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures , std::vector<VkImageView>& swapchainImageViews);
 
 	/* 释放Swapchain */
 	void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImage>& swapchainImages, std::vector<VkImageView>& swapchainImageViews);
@@ -102,7 +102,7 @@ public:
 	void DestroyImageView(VkImageView& imageView);
 
 	/* 创建Frame buffer */
-	void CreateFrameBuffers(VkRenderPass renderPass, VkExtent2D FrameBufferSize,std::vector<std::vector<VkImageView>> imageViews, std::vector<VkFramebuffer>&frameBuffers);
+	void CreateFrameBuffers(VkExtent2D FrameBufferSize, VkRenderPass renderPass, std::vector<VkImageView> attachments, std::vector<VkFramebuffer>& frameBuffers);
 
 	void DestroyFrameBuffers(std::vector<VkFramebuffer>& frameBuffers);
 
@@ -126,7 +126,8 @@ public:
 
 	void EndRenderPass(VkCommandBuffer cmdBuf);
 
-	void GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t* swapchainIndex);
+	/* return the swapchain is normal (not out of data). */
+	bool GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t* swapchainIndex);
 
 	void Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainImageIndex);
 
@@ -158,11 +159,23 @@ public:
 
 	void CreateSemaphore(VkSemaphore& semaphore);
 
-	void DestroySemaphore(VkSemaphore semaphore);
+	void DestroySemaphore(VkSemaphore& semaphore);
 
 	void CreateRenderSemaphores(std::vector<VkSemaphore>& semaphore);
 
 	void DestroyRenderSemaphores(std::vector<VkSemaphore>& semaphore);
+
+	void CreateFence(VkFence& fence);
+
+	void DestroyFence(VkFence& fence);
+
+	void CreateRenderFences(std::vector<VkFence>& fences);
+
+	void DestroyRenderFences(std::vector<VkFence>& fences);
+
+	void WaitForFences(std::vector<VkFence> fences, bool bReset = true, uint64_t timeOut = UINT64_MAX);
+
+	void WaitSemaphores(std::vector<VkSemaphore> semaphores , uint64_t timeOut = UINT64_MAX);
 
 	void CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info , VkPipeline& pipeline);
 
@@ -187,7 +200,13 @@ public:
 
 	void SubmitQueue(std::vector<VkCommandBuffer> cmdBufs, std::vector <VkSemaphore> lastSemaphore, std::vector <VkSemaphore> newSemaphore, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
 
-	void SubmitQueueForPasses(std::vector<std::shared_ptr<class PassBase>> passes, VkSemaphore presentSemaphore, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
+	VkViewport GetViewport(float w,float h);
+
+	VkSemaphore* SubmitQueueForPasses(std::vector<std::shared_ptr<class PassBase>> passes, VkSemaphore presentSemaphore , VkFence executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
+
+	/* CMD */
+	void CmdSetViewport(VkCommandBuffer cmdbuf, std::vector<VkExtent2D> viewports);
+	/*-----------------*/
 
 	/* 获取平台 */
 	__forceinline EPlatform GetPlatform()const {

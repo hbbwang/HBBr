@@ -2,6 +2,19 @@
 #include "VulkanRenderer.h"
 #include "PassBase.h"
 
+SceneTexture::SceneTexture(VulkanRenderer* renderer)
+{
+	auto sceneColor = Texture::CreateTexture2D(1, 1, VK_FORMAT_R16G16B16A16_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneColor");
+	auto sceneDepth = Texture::CreateTexture2D(1, 1, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneDepth");
+	_sceneTexture.insert(std::make_pair(SceneTextureDesc::SceneColor, sceneColor));
+	_sceneTexture.insert(std::make_pair(SceneTextureDesc::DepthStencil, sceneDepth));
+}
+
+void SceneTexture::UpdateTextures()
+{
+
+}
+
 void PassManager::PassesInit(VulkanRenderer* renderer)
 {
 	_renderer = renderer;
@@ -12,6 +25,10 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 		AddPass(opaque, "Opaque");
 
 	}
+	if (_executeFence.size() <= 0)
+	{
+		VulkanManager::GetManager()->CreateRenderFences(_executeFence);
+	}
 	for (auto p : _passes)
 	{
 		p.second->PassInit();
@@ -20,6 +37,8 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 
 void PassManager::PassesUpdate()
 {
+	const uint32_t frameIndex = VulkanRenderer::GetCurrentFrameIndex();
+	VulkanManager::GetManager()->WaitForFences({ _executeFence[frameIndex] });
 	_sceneTextures->UpdateTextures();
 	//Collect render setting (Commandbuffer record)
 	std::vector<std::shared_ptr<PassBase>>executePasses;
@@ -29,11 +48,12 @@ void PassManager::PassesUpdate()
 		executePasses.push_back(p.second);
 	}
 	//Execute
-	VulkanManager::GetManager()->SubmitQueueForPasses(executePasses, _renderer->GetPresentSemaphore());
+	_theLastSemaphore = VulkanManager::GetManager()->SubmitQueueForPasses(executePasses, _renderer->GetPresentSemaphore(), _executeFence[frameIndex]);
 }
 
 void PassManager::PassesRelease()
 {
+	VulkanManager::GetManager()->DestroyRenderFences(_executeFence);
 	_sceneTextures.reset();
 }
 
@@ -50,16 +70,4 @@ void PassManager::AddPass(std::shared_ptr<PassBase> newPass, const char* passNam
 	}
 	newPass->_passName = passName;
 	_passes.emplace(std::make_pair(passName, newPass));
-}
-
-SceneTexture::SceneTexture(VulkanRenderer* renderer)
-{
-	auto sceneColor = Texture::CreateTexture2D(1, 1, VK_FORMAT_R16G16B16A16_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneColor");
-	auto sceneDepth = Texture::CreateTexture2D(1, 1, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneDepth");
-	_sceneTexture.insert(std::make_pair(SceneTextureDesc::SceneColor, sceneColor));
-	_sceneTexture.insert(std::make_pair(SceneTextureDesc::DepthStencil, sceneDepth));
-}
-
-void SceneTexture::UpdateTextures()
-{
 }

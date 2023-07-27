@@ -11,6 +11,11 @@ PassBase::PassBase(VulkanRenderer* renderer)
 	_renderer = renderer;
 	//CommandBuffers
 	_cmdBuf.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
+	_semaphore.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
+
+	//we will collect all passes we need, direct execute them by once.So need not create VkFence for the every alone pass.
+	//_fence.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
+
 	for (int i = 0; i < _cmdBuf.size(); i++)
 	{
 		VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf[i]);
@@ -21,6 +26,7 @@ PassBase::~PassBase()
 {
 	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf);
 	VulkanManager::GetManager()->DestroyRenderSemaphores(_semaphore);
+	//VulkanManager::GetManager()->DestroyRenderFences(_fence);
 	_pipeline.reset();
 }
 
@@ -39,22 +45,31 @@ std::shared_ptr<Texture> PassBase::GetSceneTexture(uint32_t descIndex)
 	return _renderer->GetPassManager()->GetSceneTexture()->GetTexture(SceneTextureDesc(descIndex));
 }
 
-void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> imageViews)
+void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> swapchainImageViews, std::vector<VkImageView> imageViews)
 {
 	if (_currentFrameBufferSize.width != size.width || _currentFrameBufferSize.height != size.height)
 	{
 		_currentFrameBufferSize = size;
 		const auto manager = VulkanManager::GetManager();
+		const auto frameIndex = VulkanRenderer::GetCurrentFrameIndex();
+		//Insert swapchain imageView to first.
 		if (_framebuffers.size() > 0)
 		{
 			vkQueueWaitIdle(manager->GetGraphicsQueue());
-			manager->DestroyFrameBuffer(_framebuffers[VulkanRenderer::GetCurrentFrameIndex()]);
+			manager->DestroyFrameBuffers(_framebuffers);
 		}
-		else
+		_framebuffers.resize(manager->GetSwapchainBufferCount());
+		//VulkanManager::GetManager()->CreateFrameBuffer(size.width, size.height, _renderPass, imageViews, _framebuffers[frameIndex]);
+		//VulkanManager::GetManager()->CreateFrameBuffers({ size.width, size.height }, _renderPass, imageViews, _framebuffers);
+		for (int i = 0; i < (int)VulkanManager::GetManager()->GetSwapchainBufferCount(); i++)
 		{
-			_framebuffers.resize(manager->GetSwapchainBufferCount());
+			std::vector<VkImageView> ivs = { swapchainImageViews[i] };
+			if (imageViews.size() > 0)
+			{
+				ivs.insert(ivs.end(), imageViews.begin(), imageViews.end());
+			}
+			VulkanManager::GetManager()->CreateFrameBuffer(size.width, size.height, _renderPass, ivs, _framebuffers[i]);
 		}
-		VulkanManager::GetManager()->CreateFrameBuffer(size.width, size.height, _renderPass, imageViews, _framebuffers[VulkanRenderer::GetCurrentFrameIndex()]);
 	}
 }
 
@@ -135,8 +150,8 @@ void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<ui
 	}
 	else
 	{
-		depen.srcSubpass = _subpassDependencys.size() - 1;
-		depen.dstSubpass = _subpassDependencys.size();//Next subpass.	
+		depen.srcSubpass = (uint32_t)_subpassDependencys.size() - 1;
+		depen.dstSubpass = (uint32_t)_subpassDependencys.size();//Next subpass.	
 	}
 	depen.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 	if (depthStencilIndex >= 0)
@@ -201,9 +216,10 @@ void OpaquePass::PassUpdate()
 	const uint32_t frameIndex = _renderer->GetCurrentFrameIndex();
 	const auto manager = VulkanManager::GetManager();
 	//Update FrameBuffer
-	ResetFrameBuffer(_renderer->GetSurfaceSize(), { _renderer->GetSwapchainImage()->GetTextureView()});
+	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews() , {});
 	manager->BeginCommandBuffer(_cmdBuf[frameIndex]);
-	manager->BeginRenderPass(_cmdBuf[frameIndex], _framebuffers[frameIndex], _renderPass, _currentFrameBufferSize, _attachmentDescs, { 1,0,0,1 });
+	manager->CmdSetViewport(_cmdBuf[frameIndex], { _currentFrameBufferSize });
+	manager->BeginRenderPass(_cmdBuf[frameIndex], _framebuffers[frameIndex], _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.5,1 });
 	manager->EndRenderPass(_cmdBuf[frameIndex]);
 	manager->EndCommandBuffer(_cmdBuf[frameIndex]);
 }

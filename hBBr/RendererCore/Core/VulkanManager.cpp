@@ -606,7 +606,7 @@ VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatK
 	return _surfaceSize;
 }
 
-VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures)
+VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures, std::vector<VkImageView>& swapchainImageViews)
 {
 	//ConsoleDebug::print_endl("Create Swapchain KHR.");
 	VkPresentModeKHR present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
@@ -667,6 +667,7 @@ VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatK
 	std::vector<VkImage> images(_swapchainBufferCount);
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, images.data());
 	//创建ImageView
+	swapchainImageViews.clear();
 	for (int i = 0; i < (int)_swapchainBufferCount; i++)
 	{
 		textures[i].reset(new Texture(true));
@@ -676,7 +677,8 @@ VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatK
 		textures[i]->_format = surfaceFormat.format;
 		textures[i]->_usageFlags = info.imageUsage;
 		textures[i]->_textureName = "Swapchain Image " + HString::FromInt(i);
-		CreateImageView(textures[i]->_image, surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, textures[i]->_imageView );
+		CreateImageView(textures[i]->_image, surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, textures[i]->_imageView);
+		swapchainImageViews.push_back(textures[i]->_imageView);
 	}
 	//Swapchain转换到呈现模式
 	VkCommandBuffer buf;
@@ -891,40 +893,6 @@ void VulkanManager::DestroyImageView(VkImageView& imageView)
 	}
 }
 
-void VulkanManager::CreateFrameBuffers(VkRenderPass renderPass, VkExtent2D FrameBufferSize, std::vector<std::vector<VkImageView>> imageViews, std::vector<VkFramebuffer>& frameBuffers)
-{
-	frameBuffers.resize(_swapchainBufferCount);
-	for (int i = 0; i < (int)_swapchainBufferCount; i++)
-	{
-		std::vector<VkImageView> attachments;
-		for (int v = 0; v < imageViews.size(); v++)
-		{
-			attachments.push_back(imageViews[v][i]);
-		}
-		VkFramebufferCreateInfo framebufferInfo = {};
-		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = renderPass;
-		framebufferInfo.attachmentCount = 1;
-		framebufferInfo.pAttachments = attachments.data();
-		framebufferInfo.width = FrameBufferSize.width;
-		framebufferInfo.height = FrameBufferSize.height;
-		framebufferInfo.layers = 1;
-
-		if (vkCreateFramebuffer(_device, &framebufferInfo, nullptr, &frameBuffers[i]) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create framebuffer!");
-		}
-	}
-}
-
-void VulkanManager::DestroyFrameBuffers(std::vector<VkFramebuffer>& frameBuffers)
-{
-	for (int i = 0; i < frameBuffers.size(); i++)
-	{
-		vkDestroyFramebuffer(_device, frameBuffers[i], nullptr);
-	}
-	frameBuffers.clear();
-}
-
 void VulkanManager::CreateCommandPool()
 {
 	CreateCommandPool(_commandPool);
@@ -1011,7 +979,7 @@ void VulkanManager::BeginRenderPass(VkCommandBuffer cmdBuf, VkFramebuffer frameb
 		if (_attachmentDescs[i].finalLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL || _attachmentDescs[i].finalLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
 		{
 			clearValue.depthStencil.depth = 0.0f;
-			clearValue.depthStencil.stencil = 1.0f;
+			clearValue.depthStencil.stencil = 0;
 		}
 		else
 		{
@@ -1033,36 +1001,40 @@ void VulkanManager::EndRenderPass(VkCommandBuffer cmdBuf)
 	vkCmdEndRenderPass(cmdBuf);
 }
 
-void VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t* swapchainIndex)
+bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t* swapchainIndex)
 {
-	VkResult result = vkAcquireNextImageKHR(_device, swapchain, UINT16_MAX, semaphore, VK_NULL_HANDLE, swapchainIndex);
+	VkResult result = vkAcquireNextImageKHR(_device, swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, swapchainIndex);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR)
 	{
-		MessageOut(RendererLauguage::GetText("A000009").c_str(), false, true);
+		MessageOut(RendererLauguage::GetText("A000009").c_str(), false, false);
+		return false;
 	}
 	else if (result != VK_SUCCESS)
 	{
 		MessageOut(RendererLauguage::GetText("A000010").c_str(), false, true);
+		return false;
 	}
+	return true;
 }
 
 void VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainImageIndex)
 {
+	VkResult infoResult = VK_SUCCESS;
 	VkPresentInfoKHR presentInfo = {};
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	presentInfo.pNext = NULL;
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = &swapchain;
 	presentInfo.pImageIndices = &swapchainImageIndex;
-	presentInfo.pResults = nullptr; // Optional
+	presentInfo.pResults = &infoResult; // Optional
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = &semaphore;
 	auto result = vkQueuePresentKHR(_graphicsQueue, &presentInfo);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR)
 	{
-		//MessageOut("VK_ERROR_OUT_OF_DATE_KHR.Swapchain need to reset.", false, false);
+		MessageOut("VK_ERROR_OUT_OF_DATE_KHR.Swapchain need to reset.", false, false);
 	}
-	else if (result != VK_SUCCESS)
+	else if (result != VK_SUCCESS || infoResult != VK_SUCCESS)
 	{
 		MessageOut(RendererLauguage::GetText("A000011").c_str(), false, true);
 	}
@@ -1158,6 +1130,35 @@ void VulkanManager::DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorS
 	}
 }
 
+void VulkanManager::CreateFrameBuffers(VkExtent2D FrameBufferSize, VkRenderPass renderPass, std::vector<VkImageView> attachments, std::vector<VkFramebuffer>& frameBuffers)
+{
+	frameBuffers.resize(_swapchainBufferCount);
+	for (int i = 0; i < (int)_swapchainBufferCount; i++)
+	{
+		VkFramebufferCreateInfo framebufferInfo = {};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = renderPass;
+		framebufferInfo.attachmentCount = (uint32_t)attachments.size();
+		framebufferInfo.pAttachments = attachments.data();
+		framebufferInfo.width = FrameBufferSize.width;
+		framebufferInfo.height = FrameBufferSize.height;
+		framebufferInfo.layers = 1;
+
+		if (vkCreateFramebuffer(_device, &framebufferInfo, nullptr, &frameBuffers[i]) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create framebuffer!");
+		}
+	}
+}
+
+void VulkanManager::DestroyFrameBuffers(std::vector<VkFramebuffer>& frameBuffers)
+{
+	for (int i = 0; i < frameBuffers.size(); i++)
+	{
+		vkDestroyFramebuffer(_device, frameBuffers[i], nullptr);
+	}
+	frameBuffers.clear();
+}
+
 void VulkanManager::CreateFrameBuffer(uint32_t width, uint32_t height, VkRenderPass renderPass, std::vector<VkImageView>attachments, VkFramebuffer& framebuffer)
 {
 	VkFramebufferCreateInfo info = {};
@@ -1221,7 +1222,7 @@ void VulkanManager::CreateSemaphore(VkSemaphore& semaphore)
 	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &semaphore);
 }
 
-void VulkanManager::DestroySemaphore(VkSemaphore semaphore)
+void VulkanManager::DestroySemaphore(VkSemaphore& semaphore)
 {
 	if (semaphore  != VK_NULL_HANDLE)
 	{
@@ -1235,7 +1236,7 @@ void VulkanManager::CreateRenderSemaphores(std::vector<VkSemaphore>& semaphore)
 	semaphore.resize(_swapchainBufferCount);
 	for (int i = 0; i < semaphore.size(); i++)
 	{
-		CreateSemaphore(semaphore[i]);
+		this->CreateSemaphore(semaphore[i]);
 	}
 }
 
@@ -1249,6 +1250,71 @@ void VulkanManager::DestroyRenderSemaphores(std::vector<VkSemaphore>& semaphore)
 		}
 	}
 	semaphore.clear();
+}
+
+void VulkanManager::CreateFence(VkFence& fence)
+{
+	VkFenceCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	info.flags = VK_FENCE_CREATE_SIGNALED_BIT;//default signaled
+	VkResult result = vkCreateFence(_device, &info, nullptr, &fence);
+	if (result != VK_SUCCESS) {
+		MessageOut("Create Fence Failed.", false, true);
+	}
+}
+
+void VulkanManager::DestroyFence(VkFence& fence)
+{
+	if (fence != VK_NULL_HANDLE)
+	{
+		vkDestroyFence(_device, fence, nullptr);
+		fence = VK_NULL_HANDLE;
+	}
+}
+
+void VulkanManager::CreateRenderFences(std::vector<VkFence>& fences)
+{
+	fences.resize(_swapchainBufferCount);
+	for (int i = 0; i < fences.size(); i++)
+	{
+		this->CreateFence(fences[i]);
+	}
+}
+
+void VulkanManager::DestroyRenderFences(std::vector<VkFence>& fences)
+{
+	for (int i = 0; i < fences.size(); i++)
+	{
+		if (fences[i] != VK_NULL_HANDLE)
+		{
+			DestroyFence(fences[i]);
+		}
+	}
+	fences.clear();
+}
+
+void VulkanManager::WaitForFences(std::vector<VkFence> fences, bool bReset, uint64_t timeOut)
+{
+	vkWaitForFences(_device, (uint32_t)fences.size(), fences.data(), VK_TRUE, timeOut);
+	if (bReset)
+		vkResetFences(_device, (uint32_t)fences.size(), fences.data());
+}
+
+void VulkanManager::WaitSemaphores(std::vector<VkSemaphore> semaphores, uint64_t timeOut)
+{
+	//Semaphore 标识,借助vkGetSemaphoreCounterValue 用来查询信号状态用的，返回的value是否等于我们这里指定的值，是就代表获取到信号。
+	//不具备实际数据作用,如果没有查询的意义,随便给一个不同的值就行了,但不能为NULL(0)
+	std::vector<uint64_t> values(semaphores.size());
+	for (int i = 0 ; i < (int)values.size();i++)
+	{
+		values[i] = i + (uint64_t)1;
+	}
+	VkSemaphoreWaitInfo waitInfo = {};
+	waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+	waitInfo.semaphoreCount = (uint32_t)semaphores.size();
+	waitInfo.pSemaphores = semaphores.data();
+	waitInfo.pValues = values.data();
+	vkWaitSemaphores(_device, &waitInfo, timeOut);
 }
 
 void VulkanManager::CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info, VkPipeline& pipeline)
@@ -1398,36 +1464,57 @@ void VulkanManager::SubmitQueue(std::vector<VkCommandBuffer> cmdBufs, std::vecto
 		MessageOut(" [Submit Queue Immediate]vkQueueSubmit error", false, false);
 }
 
-#include "PassBase.h"
-void VulkanManager::SubmitQueueForPasses( std::vector<std::shared_ptr<PassBase>> passes, VkSemaphore presentSemaphore, VkPipelineStageFlags waitStageMask, VkQueue queue)
+VkViewport VulkanManager::GetViewport(float w, float h)
 {
-	std::vector<VkSubmitInfo> infos = {};
-	std::vector<VkSemaphore> lastSem = { presentSemaphore };
+	VkViewport viewport = {};
+	viewport.x = 0.0f; // 视口左下角的x坐标
+	viewport.y = 0.0f; // 视口左下角的y坐标
+	viewport.width = (float)w; // 视口的宽度
+	viewport.height = (float)h; // 视口的高度
+	viewport.minDepth = 0.0f; // 视口的最小深度
+	viewport.maxDepth = 1.0f; // 视口的最大深度
+	return viewport;
+}
+
+#include "PassBase.h"
+VkSemaphore* VulkanManager::SubmitQueueForPasses( std::vector<std::shared_ptr<PassBase>> passes, VkSemaphore presentSemaphore , VkFence executeFence, VkPipelineStageFlags waitStageMask, VkQueue queue)
+{
+	std::vector<VkSubmitInfo> infos(passes.size());
+	VkSemaphore* lastSem = &presentSemaphore;
 	for (int i = 0; i < passes.size(); i++)
 	{
 		if (passes[i]->GetSemaphore() == VK_NULL_HANDLE)
 		{
-			CreateSemaphore(passes[i]->GetSemaphore());
+			this->CreateSemaphore(passes[i]->GetSemaphore());
 		}
-		VkSubmitInfo info = {};
-		info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		info.pWaitDstStageMask = &waitStageMask;
-		info.waitSemaphoreCount = 1;
-		info.pWaitSemaphores = &lastSem[i];
-		info.signalSemaphoreCount = 1;
-		info.pSignalSemaphores = &passes[i]->GetSemaphore();
-		info.commandBufferCount = 1;
-		info.pCommandBuffers = &passes[i]->GetCommandBuffer();
-		infos.push_back(info);
-		lastSem.push_back(passes[i]->GetSemaphore());
+		infos[i].sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		infos[i].pWaitDstStageMask = &waitStageMask;
+		infos[i].waitSemaphoreCount = 1;
+		infos[i].pWaitSemaphores = lastSem;
+		infos[i].signalSemaphoreCount = 1;
+		infos[i].pSignalSemaphores = &passes[i]->GetSemaphore();
+		infos[i].commandBufferCount = 1;
+		infos[i].pCommandBuffers = &passes[i]->GetCommandBuffer();
+		lastSem = &passes[i]->GetSemaphore();
 	}
 	VkResult result;
 	if (queue == VK_NULL_HANDLE)
-		result = vkQueueSubmit(_graphicsQueue, (uint32_t)infos.size(), infos.data(), VK_NULL_HANDLE);
+		result = vkQueueSubmit(_graphicsQueue, (uint32_t)infos.size(), infos.data(), executeFence);
 	else
-		result = vkQueueSubmit(queue, (uint32_t)infos.size(), infos.data(), VK_NULL_HANDLE);
+		result = vkQueueSubmit(queue, (uint32_t)infos.size(), infos.data(), executeFence);
 	if (result != VK_SUCCESS)
 		MessageOut(" [Submit Queue Immediate]vkQueueSubmit error", false, false);
+	return lastSem;
+}
+
+void VulkanManager::CmdSetViewport(VkCommandBuffer cmdbuf, std::vector<VkExtent2D> viewports)
+{
+	std::vector<VkViewport> vps(viewports.size());
+	for (int i = 0; i < vps.size(); i++)
+	{
+		vps[i] = GetViewport((float)viewports[i].width, (float)viewports[i].height);
+	}
+	vkCmdSetViewport(cmdbuf, 0, (uint32_t)viewports.size(), vps.data());
 }
 
 HString VulkanManager::GetVkResult(VkResult code)
