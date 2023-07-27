@@ -22,7 +22,6 @@ public:
 protected:
 	virtual void PassInit() {}
 	virtual void PassUpdate() {}
-	virtual void PassReset() {}
 	VkSemaphore& GetSemaphore();
 	VkCommandBuffer& GetCommandBuffer();
 	std::shared_ptr<Texture> GetSceneTexture(uint32_t descIndex);
