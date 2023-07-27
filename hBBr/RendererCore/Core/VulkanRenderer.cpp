@@ -28,7 +28,7 @@ VulkanRenderer::VulkanRenderer(void* windowHandle, const char* rendererName)
 	//Swapchain
 	_vulkanManager->CreateRenderSemaphores(_presentSemaphore);
 	_vulkanManager->CheckSurfaceFormat(_surface , _surfaceFormat);
-	_surfaceSize = _vulkanManager->CreateSwapchain(_surface, _surfaceFormat, _swapchain, _swapchainTextures , _swapchainImageViews);
+	_surfaceSize = _vulkanManager->CreateSwapchain(_surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
 	//Set renderer map , Add new renderer
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
 	_rendererName = rendererName;
@@ -60,7 +60,7 @@ void VulkanRenderer::Release()
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
 	_passManager.reset();
-	_vulkanManager->DestroySwapchain(_swapchain, _swapchainTextures);
+	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
 	_vulkanManager->DestroyRenderSemaphores(_presentSemaphore);
 	_vulkanManager->DestroySurface(_surface);
 	VulkanRenderer::_renderers.erase(GetName());
@@ -77,27 +77,43 @@ void VulkanRenderer::Init()
 
 void VulkanRenderer::Render()
 {
-	VulkanManager* _vulkanManager = VulkanManager::GetManager();
-	
-	//Which swapchain index need to present?
-	_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], &_swapchainIndex);
+	if (!_bRendererRelease)
+	{
+		Resizing();
 
-	_passManager->PassesUpdate();
+		VulkanManager* _vulkanManager = VulkanManager::GetManager();
 
-	//Present swapchain.
-	_vulkanManager->Present(_swapchain, *_passManager->GetTheLastSemaphore(), _swapchainIndex);
+		//Which swapchain index need to present?
+		_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], &_swapchainIndex);
 
-	//Get next frame index.
-	_currentFrameIndex = (_currentFrameIndex + 1) % _vulkanManager->GetSwapchainBufferCount();
+		_passManager->PassesUpdate();
+
+		//Present swapchain.
+		_vulkanManager->Present(_swapchain, *_passManager->GetTheLastSemaphore(), _swapchainIndex);
+
+		//Get next frame index.
+		_currentFrameIndex = (_currentFrameIndex + 1) % _vulkanManager->GetSwapchainBufferCount();
+	}
 }
 
 void VulkanRenderer::RendererResize()
 {
 	_bResize = true;
-	VulkanManager* _vulkanManager = VulkanManager::GetManager();
-	vkDeviceWaitIdle(_vulkanManager->GetDevice());
-	_vulkanManager->DestroySwapchain(_swapchain, _swapchainTextures);
-	_surfaceSize = _vulkanManager->CreateSwapchain(_surface, _surfaceFormat, _swapchain, _swapchainTextures, _swapchainImageViews);
-	_bResize = false;
 }
 
+void VulkanRenderer::Resizing()
+{
+	if (!_bRendererRelease)
+	{
+		VulkanManager* _vulkanManager = VulkanManager::GetManager();
+		auto currentSize = _vulkanManager->GetSurfaceSize(_surface);
+		if (_bResize || currentSize.width != _surfaceSize.width || currentSize.height != _surfaceSize.height
+			)
+		{
+			vkDeviceWaitIdle(_vulkanManager->GetDevice());
+			_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
+			_surfaceSize = _vulkanManager->CreateSwapchain(_surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
+			_bResize = false;
+		}
+	}
+}

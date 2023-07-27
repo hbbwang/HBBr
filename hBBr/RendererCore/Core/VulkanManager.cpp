@@ -696,14 +696,13 @@ VkExtent2D VulkanManager::CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatK
 	return _surfaceSize;
 }
 
-void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImage>& swapchainImages, std::vector<VkImageView>& swapchainImageViews)
+void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImageView>& swapchainImageViews)
 {
 	for (int i = 0; i < (int)_swapchainBufferCount; i++)
 	{
 		DestroyImageView(swapchainImageViews[i]);
 	}
 	swapchainImageViews.clear();
-	swapchainImages.clear();
 	//
 	if (swapchain != VK_NULL_HANDLE)
 	{

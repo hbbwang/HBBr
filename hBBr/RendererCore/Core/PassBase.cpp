@@ -181,7 +181,7 @@ OpaquePass::~OpaquePass()
 void OpaquePass::PassInit()
 {
 	//Swapchain
-	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSwapchainImage()->GetFormat(), _renderer->GetSwapchainImage()->GetLayout(), VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR , VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	AddSubpass({}, {0} , -1);
 	PassBuild();
 }

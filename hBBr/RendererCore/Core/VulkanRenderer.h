@@ -33,8 +33,8 @@ public:
 		return _passManager.get();
 	}
 
-	__forceinline std::shared_ptr<Texture> GetSwapchainImage() {
-		return _swapchainTextures[_currentFrameIndex];
+	__forceinline VkSurfaceFormatKHR GetSurfaceFormat()const {
+		return _surfaceFormat;
 	}
 
 	/* Get swapchain imageViews for render attachments */
@@ -72,6 +72,8 @@ public:
 
 private:
 
+	void Resizing();
+
 	HString _rendererName;
 
 	VkSurfaceKHR _surface = VK_NULL_HANDLE;
@@ -86,7 +88,7 @@ private:
 
 	//std::vector<VkImageView> _swapchainImageViews;
 
-	std::vector<std::shared_ptr<Texture>> _swapchainTextures;
+	std::vector<VkImage>	_swapchainImages;
 
 	std::vector<VkImageView>_swapchainImageViews;
 
