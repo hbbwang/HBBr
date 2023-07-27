@@ -22,15 +22,10 @@ public:
 protected:
 	virtual void PassInit() {}
 	virtual void PassUpdate() {}
-	VkSemaphore& GetSemaphore();
-	VkCommandBuffer& GetCommandBuffer();
 	std::shared_ptr<Texture> GetSceneTexture(uint32_t descIndex);
 	std::unique_ptr<Pipeline> _pipeline;
 	VulkanRenderer* _renderer = NULL;
 	HString _passName = "PassBase";
-	std::vector<VkSemaphore> _semaphore;
-	std::vector<VkFence> _fence;
-	std::vector<VkCommandBuffer> _cmdBuf;
 };
 
 class GraphicsPass : public PassBase

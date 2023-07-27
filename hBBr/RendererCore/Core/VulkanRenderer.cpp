@@ -18,7 +18,6 @@ VulkanRenderer::VulkanRenderer(void* windowHandle, const char* rendererName)
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
 	ConsoleDebug::print_endl(RendererLauguage::GetText("T000000"));
 	_currentFrameIndex = 0;
-	_swapchainIndex = 0;
 	_bRendererRelease = false;
 	_bInit = false;
 	_swapchain = VK_NULL_HANDLE;
@@ -27,8 +26,15 @@ VulkanRenderer::VulkanRenderer(void* windowHandle, const char* rendererName)
 	_vulkanManager->CreateSurface(windowHandle, _surface);
 	//Swapchain
 	_vulkanManager->CreateRenderSemaphores(_presentSemaphore);
+	_vulkanManager->CreateRenderSemaphores(_queueSubmitSemaphore);
 	_vulkanManager->CheckSurfaceFormat(_surface , _surfaceFormat);
-	_surfaceSize = _vulkanManager->CreateSwapchain(_surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
+	_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
+	//CommandBuffer
+	_cmdBuf.resize(_vulkanManager->GetSwapchainBufferCount());
+	for (int i = 0; i < _cmdBuf.size(); i++)
+	{
+		VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf[i]);
+	}
 	//Set renderer map , Add new renderer
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
 	_rendererName = rendererName;
@@ -60,8 +66,10 @@ void VulkanRenderer::Release()
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
 	_passManager.reset();
+	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf);
 	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
 	_vulkanManager->DestroyRenderSemaphores(_presentSemaphore);
+	_vulkanManager->DestroyRenderSemaphores(_queueSubmitSemaphore);
 	_vulkanManager->DestroySurface(_surface);
 	VulkanRenderer::_renderers.erase(GetName());
 	delete this;
@@ -83,22 +91,26 @@ void VulkanRenderer::Render()
 
 		VulkanManager* _vulkanManager = VulkanManager::GetManager();
 
+		uint32_t _swapchainIndex = 0;
+
 		//Which swapchain index need to present?
 		_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], &_swapchainIndex);
 
 		_passManager->PassesUpdate();
 
 		//Present swapchain.
-		_vulkanManager->Present(_swapchain, *_passManager->GetTheLastSemaphore(), _swapchainIndex);
+		_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], _swapchainIndex);
 
 		//Get next frame index.
 		_currentFrameIndex = (_currentFrameIndex + 1) % _vulkanManager->GetSwapchainBufferCount();
 	}
 }
 
-void VulkanRenderer::RendererResize()
+void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
 {
 	_bResize = true;
+	_windowSize.width = w;
+	_windowSize.height = h;
 }
 
 void VulkanRenderer::Resizing()
@@ -106,13 +118,15 @@ void VulkanRenderer::Resizing()
 	if (!_bRendererRelease)
 	{
 		VulkanManager* _vulkanManager = VulkanManager::GetManager();
-		auto currentSize = _vulkanManager->GetSurfaceSize(_surface);
-		if (_bResize || currentSize.width != _surfaceSize.width || currentSize.height != _surfaceSize.height
+		auto currentSize = _vulkanManager->GetSurfaceSize(_windowSize, _surface);
+		if (
+			currentSize.width > 0 && currentSize.height > 0 
+			&& (_bResize || currentSize.width != _surfaceSize.width || currentSize.height != _surfaceSize.height)
 			)
 		{
 			vkDeviceWaitIdle(_vulkanManager->GetDevice());
 			_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
-			_surfaceSize = _vulkanManager->CreateSwapchain(_surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
+			_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
 			_bResize = false;
 		}
 	}

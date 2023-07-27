@@ -11,7 +11,7 @@ Pipeline::~Pipeline()
 	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout);
 	if (_pipeline != VK_NULL_HANDLE)
 	{
-		vkDestroyPipeline(VulkanManager::GetManager()->GetDevice(), _pipeline, nullptr);
+		vkDestroyPipeline(VulkanManager::GetManager()->GetDevice(), _pipeline, VK_NULL_HANDLE);
 		_pipeline = VK_NULL_HANDLE;
 	}
 }

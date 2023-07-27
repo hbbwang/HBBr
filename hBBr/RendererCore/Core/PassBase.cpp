@@ -9,35 +9,13 @@
 PassBase::PassBase(VulkanRenderer* renderer)
 {
 	_renderer = renderer;
-	//CommandBuffers
-	_cmdBuf.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
-	_semaphore.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
-
 	//we will collect all passes we need, direct execute them by once.So need not create VkFence for the every alone pass.
 	//_fence.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
-
-	for (int i = 0; i < _cmdBuf.size(); i++)
-	{
-		VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf[i]);
-	}
 }
 
 PassBase::~PassBase()
 {
-	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf);
-	VulkanManager::GetManager()->DestroyRenderSemaphores(_semaphore);
-	//VulkanManager::GetManager()->DestroyRenderFences(_fence);
 	_pipeline.reset();
-}
-
-VkSemaphore& PassBase::GetSemaphore()
-{
-	return _semaphore[VulkanRenderer::GetCurrentFrameIndex()];
-}
-
-VkCommandBuffer& PassBase::GetCommandBuffer()
-{
-	return _cmdBuf[_renderer->GetCurrentFrameIndex()];
 }
 
 std::shared_ptr<Texture> PassBase::GetSceneTexture(uint32_t descIndex)
@@ -217,9 +195,9 @@ void OpaquePass::PassUpdate()
 	const auto manager = VulkanManager::GetManager();
 	//Update FrameBuffer
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews() , {});
-	manager->BeginCommandBuffer(_cmdBuf[frameIndex]);
-	manager->CmdSetViewport(_cmdBuf[frameIndex], { _currentFrameBufferSize });
-	manager->BeginRenderPass(_cmdBuf[frameIndex], _framebuffers[frameIndex], _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.5,1 });
-	manager->EndRenderPass(_cmdBuf[frameIndex]);
-	manager->EndCommandBuffer(_cmdBuf[frameIndex]);
+	manager->BeginCommandBuffer(_renderer->GetCommandBuffer());
+	manager->CmdSetViewport(_renderer->GetCommandBuffer(), { _currentFrameBufferSize });
+	manager->BeginRenderPass(_renderer->GetCommandBuffer(), _framebuffers[frameIndex], _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.5,1 });
+	manager->EndRenderPass(_renderer->GetCommandBuffer());
+	manager->EndCommandBuffer(_renderer->GetCommandBuffer());
 }

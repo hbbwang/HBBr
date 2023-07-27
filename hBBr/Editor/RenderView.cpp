@@ -28,7 +28,7 @@ void RenderView::showEvent(QShowEvent* event)
 void RenderView::resizeEvent(QResizeEvent* event)
 {
 	if (_vkRenderer != NULL)
-		_vkRenderer->RendererResize();
+		_vkRenderer->RendererResize(width(), height());
 }
 
 void RenderView::closeEvent(QCloseEvent* event)

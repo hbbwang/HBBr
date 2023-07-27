@@ -51,9 +51,7 @@ public:
 	/* Pass添加,passName必须唯一! */
 	void AddPass(std::shared_ptr<PassBase> newPass, const char* passName);
 private:
-	__forceinline VkSemaphore* GetTheLastSemaphore()const {
-		return _theLastSemaphore;
-	}
+
 	class VulkanRenderer* _renderer;
 
 	std::map<HString, std::shared_ptr<PassBase>> _passes;
@@ -61,6 +59,4 @@ private:
 	std::shared_ptr <SceneTexture> _sceneTextures;
 
 	std::vector<VkFence> _executeFence;
-
-	VkSemaphore* _theLastSemaphore;
 };

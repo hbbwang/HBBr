@@ -48,7 +48,7 @@ void PassManager::PassesUpdate()
 		executePasses.push_back(p.second);
 	}
 	//Execute
-	_theLastSemaphore = VulkanManager::GetManager()->SubmitQueueForPasses(executePasses, _renderer->GetPresentSemaphore(), _executeFence[frameIndex]);
+	VulkanManager::GetManager()->SubmitQueueForPasses(_renderer->GetCommandBuffer(), executePasses, _renderer->GetPresentSemaphore(), _renderer->GetSubmitSemaphore(), _executeFence[frameIndex]);
 }
 
 void PassManager::PassesRelease()

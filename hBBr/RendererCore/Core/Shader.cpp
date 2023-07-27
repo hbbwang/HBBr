@@ -52,15 +52,15 @@ void Shader::DestroyAllShaderCache()
 {
 	for (auto& i : _vsShader)
 	{
-		vkDestroyShaderModule(VulkanManager::GetManager()->GetDevice(), i.second.shaderModule, nullptr);
+		vkDestroyShaderModule(VulkanManager::GetManager()->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
 	}
 	for (auto& i : _psShader)
 	{
-		vkDestroyShaderModule(VulkanManager::GetManager()->GetDevice(), i.second.shaderModule, nullptr);
+		vkDestroyShaderModule(VulkanManager::GetManager()->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
 	}
 	for (auto& i : _csShader)
 	{
-		vkDestroyShaderModule(VulkanManager::GetManager()->GetDevice(), i.second.shaderModule, nullptr);
+		vkDestroyShaderModule(VulkanManager::GetManager()->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
 	}
 	_vsShader.clear();
 	_psShader.clear();

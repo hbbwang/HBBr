@@ -69,16 +69,16 @@ public:
 	void DestroySurface(VkSurfaceKHR surface);
 
 	/* 获取Surface的大小 */
-	VkExtent2D GetSurfaceSize(VkSurfaceKHR surface);
+	VkExtent2D GetSurfaceSize(VkExtent2D windowSizeIn, VkSurfaceKHR surface);
 
 	/* 检查Surface支持 */
 	void CheckSurfaceFormat(VkSurfaceKHR surface, VkSurfaceFormatKHR& surfaceFormat);
 
 	/* 创建Swapchain */
-	VkExtent2D CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<VkImage>& swapchainImages, std::vector<VkImageView>& swapchainImageViews);
+	VkExtent2D CreateSwapchain(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<VkImage>& swapchainImages, std::vector<VkImageView>& swapchainImageViews);
 
 	/* 创建Swapchain From Texture Class */
-	VkExtent2D CreateSwapchain(VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures , std::vector<VkImageView>& swapchainImageViews);
+	VkExtent2D CreateSwapchain(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures , std::vector<VkImageView>& swapchainImageViews);
 
 	/* 释放Swapchain */
 	void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImageView>& swapchainImageViews);
@@ -202,7 +202,7 @@ public:
 
 	VkViewport GetViewport(float w,float h);
 
-	VkSemaphore* SubmitQueueForPasses(std::vector<std::shared_ptr<class PassBase>> passes, VkSemaphore presentSemaphore , VkFence executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
+	void SubmitQueueForPasses(VkCommandBuffer cmdBuf,std::vector<std::shared_ptr<class PassBase>> passes, VkSemaphore presentSemaphore, VkSemaphore submitFinishSemaphore, VkFence executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
 
 	/* CMD */
 	void CmdSetViewport(VkCommandBuffer cmdbuf, std::vector<VkExtent2D> viewports);

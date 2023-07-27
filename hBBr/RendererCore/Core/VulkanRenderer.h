@@ -20,11 +20,6 @@ public:
 		return _currentFrameIndex;
 	}
 
-	/* Current swapchain present image index. It is not used very often. */
-	__forceinline int GetSwapchinImageIndex() {
-		return _swapchainIndex;
-	}
-
 	__forceinline bool IsRendererWantRelease() {
 		return _bRendererRelease;
 	}
@@ -50,6 +45,10 @@ public:
 		return _presentSemaphore[_currentFrameIndex];
 	}
 
+	__forceinline VkSemaphore GetSubmitSemaphore() {
+		return _queueSubmitSemaphore[_currentFrameIndex];
+	}
+
 	__forceinline bool IsInit() {
 		return _bInit;
 	}
@@ -58,10 +57,14 @@ public:
 		return _rendererName;
 	}
 
+	__forceinline VkCommandBuffer GetCommandBuffer()const{
+		return _cmdBuf[_currentFrameIndex];
+	}
+
 	/* 帧渲染函数 */
 	HBBR_API void Render();
 
-	HBBR_API void RendererResize();
+	HBBR_API void RendererResize(uint32_t w,uint32_t h);
 
 	HBBR_API void Release();
 
@@ -84,6 +87,8 @@ private:
 
 	VkExtent2D _surfaceSize{};
 
+	VkExtent2D _windowSize{};
+
 	//std::vector<VkImage> _swapchainImages;
 
 	//std::vector<VkImageView> _swapchainImageViews;
@@ -93,16 +98,17 @@ private:
 	std::vector<VkImageView>_swapchainImageViews;
 
 	std::vector<VkSemaphore> _presentSemaphore;
+	std::vector<VkSemaphore> _queueSubmitSemaphore;
 
 	static uint32_t _currentFrameIndex;
-
-	uint32_t _swapchainIndex;
 
 	bool _bRendererRelease;
 
 	bool _bInit;
 
 	bool _bResize;
+
+	std::vector<VkCommandBuffer> _cmdBuf;
 
 	//Passes
 	std::unique_ptr<class PassManager> _passManager;
