@@ -1,22 +1,22 @@
 ﻿#pragma once
 //Vulkan底层核心管理类
-#include "../Common/Common.h"
-#include <vulkan/vulkan.h>
-#include <memory>
-#include <array>
-#include "HString.h"
 
-//Windows 
 #if defined(_WIN32)
 	#define WIN32_LEAN_AND_MEAN             // 从 Windows 头文件中排除极少使用的内容
+	#define VK_USE_PLATFORM_WIN32_KHR  1 //support win32
 	#include <stdlib.h>
 	#include <Windows.h>
-	#include <vulkan/vulkan_win32.h>
 #elif defined(__ANDROID__)
 	#include <vulkan/vulkan_android.h>
 #elif defined(__linux__)
 	#include <vulkan/vulkan_xcb.h>
 #endif
+
+#include "../Common/Common.h"
+#include <vulkan/vulkan.h>
+#include <memory>
+#include <array>
+#include "HString.h"
 
 enum class EPlatform :uint8_t
 {

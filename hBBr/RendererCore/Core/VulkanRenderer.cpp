@@ -87,8 +87,6 @@ void VulkanRenderer::Render()
 {
 	if (!_bRendererRelease)
 	{
-		Resizing();
-
 		VulkanManager* _vulkanManager = VulkanManager::GetManager();
 
 		uint32_t _swapchainIndex = 0;
@@ -111,6 +109,7 @@ void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
 	_bResize = true;
 	_windowSize.width = w;
 	_windowSize.height = h;
+	Resizing();
 }
 
 void VulkanRenderer::Resizing()
@@ -118,13 +117,9 @@ void VulkanRenderer::Resizing()
 	if (!_bRendererRelease)
 	{
 		VulkanManager* _vulkanManager = VulkanManager::GetManager();
-		auto currentSize = _vulkanManager->GetSurfaceSize(_windowSize, _surface);
-		if (
-			currentSize.width > 0 && currentSize.height > 0 
-			&& (_bResize || currentSize.width != _surfaceSize.width || currentSize.height != _surfaceSize.height)
-			)
+		if (_bResize)
 		{
-			vkDeviceWaitIdle(_vulkanManager->GetDevice());
+			vkQueueWaitIdle(_vulkanManager->GetGraphicsQueue());
 			_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
 			_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
 			_bResize = false;

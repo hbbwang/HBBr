@@ -579,7 +579,7 @@ VkExtent2D VulkanManager::CreateSwapchain(VkExtent2D surfaceSize, VkSurfaceKHR s
 	auto result = vkCreateSwapchainKHR(_device, &info, VK_NULL_HANDLE, &newSwapchain);
 	if (result != VK_SUCCESS)
 	{
-		MessageOut((RendererLauguage::GetText("A000007").c_str() + GetVkResult(result)).c_str(), true, true);
+		MessageOut((RendererLauguage::GetText("A000007").c_str() + GetVkResult(result)).c_str(), false, true);
 	}
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, VK_NULL_HANDLE);
 	swapchainImages.resize(_swapchainBufferCount);
@@ -1000,7 +1000,7 @@ void VulkanManager::EndRenderPass(VkCommandBuffer cmdBuf)
 bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t* swapchainIndex)
 {
 	VkResult result = vkAcquireNextImageKHR(_device, swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, swapchainIndex);
-	if (result == VK_ERROR_OUT_OF_DATE_KHR)
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 	{
 		MessageOut(RendererLauguage::GetText("A000009").c_str(), false, false);
 		return false;
@@ -1026,9 +1026,9 @@ void VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uin
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = &semaphore;
 	auto result = vkQueuePresentKHR(_graphicsQueue, &presentInfo);
-	if (result == VK_ERROR_OUT_OF_DATE_KHR)
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 	{
-		MessageOut("VK_ERROR_OUT_OF_DATE_KHR.Swapchain need to reset.", false, false);
+		MessageOut("VK_ERROR_OUT_OF_DATE_KHR or VK_SUBOPTIMAL_KHR.Swapchain need to reset.", false, false);
 	}
 	else if (result != VK_SUCCESS || infoResult != VK_SUCCESS)
 	{

@@ -89,15 +89,12 @@ private:
 
 	VkExtent2D _windowSize{};
 
-	//std::vector<VkImage> _swapchainImages;
-
-	//std::vector<VkImageView> _swapchainImageViews;
-
 	std::vector<VkImage>	_swapchainImages;
 
 	std::vector<VkImageView>_swapchainImageViews;
 
 	std::vector<VkSemaphore> _presentSemaphore;
+
 	std::vector<VkSemaphore> _queueSubmitSemaphore;
 
 	static uint32_t _currentFrameIndex;

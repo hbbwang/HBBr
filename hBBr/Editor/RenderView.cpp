@@ -7,7 +7,7 @@ RenderView::RenderView(QWidget* parent)
 	setAttribute(Qt::WA_OpaquePaintEvent);
 	setAttribute(Qt::WA_PaintOnScreen);
 	_renderTimer = new QTimer(this);
-	_renderTimer->setInterval(1);
+	_renderTimer->setInterval(100);
 	_renderTimer->start();
 	connect(_renderTimer,SIGNAL(timeout()),this,SLOT(FuncRender()));
 }
@@ -19,6 +19,7 @@ RenderView::~RenderView()
 
 void RenderView::showEvent(QShowEvent* event)
 {
+	QWidget::showEvent(event);
 	if (_vkRenderer == NULL)
 	{
 		_vkRenderer = new VulkanRenderer((void*)this->winId(), "MainRenderer");
@@ -27,12 +28,16 @@ void RenderView::showEvent(QShowEvent* event)
 
 void RenderView::resizeEvent(QResizeEvent* event)
 {
+	QWidget::resizeEvent(event);
 	if (_vkRenderer != NULL)
+	{
 		_vkRenderer->RendererResize(width(), height());
+	}
 }
 
 void RenderView::closeEvent(QCloseEvent* event)
 {
+	QWidget::closeEvent(event);
 	if (_vkRenderer != NULL) 
 	{
 		_vkRenderer->Release();
