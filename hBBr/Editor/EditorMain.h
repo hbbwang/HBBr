@@ -24,6 +24,8 @@ public:
 
     virtual void mouseReleaseEvent(QMouseEvent* event)override;
 
+    virtual void resizeEvent(QResizeEvent* event)override;
+
     bool eventFilter(QObject*, QEvent*)override;
 
 private:

@@ -111,14 +111,11 @@ VulkanManager::VulkanManager(bool bDebug)
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 
-	_renderThread.reset(new RenderThread());
 }
 
 VulkanManager::~VulkanManager()
 {
 	ImGui::DestroyContext();
-
-	_renderThread.reset();
 	DestroyDescriptorPool(_descriptorPool);
 	DestroyCommandPool();
 	if (_bDebugEnable)
@@ -732,10 +729,11 @@ VkExtent2D VulkanManager::CreateSwapchain(VkExtent2D surfaceSize, VkSurfaceKHR s
 
 void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImageView>& swapchainImageViews)
 {
-	for (int i = 0; i < (int)_swapchainBufferCount; i++)
+	for (int i = 0; i < (int)swapchainImageViews.size(); i++)
 	{
 		DestroyImageView(swapchainImageViews[i]);
 	}
+	swapchainImageViews.clear();
 	if (swapchain != VK_NULL_HANDLE)
 	{
 		vkDestroySwapchainKHR(_device, swapchain, VK_NULL_HANDLE);
@@ -745,7 +743,7 @@ void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkIm
 
 void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<std::shared_ptr<class Texture>>& textures)
 {
-	for (int i = 0; i < (int)_swapchainBufferCount; i++)
+	for (int i = 0; i < (int)textures.size(); i++)
 	{
 		DestroyImageView(textures[i]->_imageView);
 		textures[i]->_image = VK_NULL_HANDLE;

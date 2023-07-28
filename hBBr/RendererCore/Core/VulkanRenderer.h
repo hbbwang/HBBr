@@ -79,7 +79,7 @@ public:
 
 private:
 
-	void Resizing(bool bForce = false);
+	bool Resizing(bool bForce = false);
 
 	HString _rendererName;
 

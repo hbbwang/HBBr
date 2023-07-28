@@ -1,16 +1,20 @@
 #include "RenderView.h"
+#include "qstylepainter.h"
+#include "QStyleOption.h"
 #pragma comment(lib , "RendererCore.lib")
 RenderView::RenderView(QWidget* parent)
 	: QWidget(parent)
 {
-	setAttribute(Qt::WA_NoSystemBackground);
-	setAttribute(Qt::WA_OpaquePaintEvent);
-	setAttribute(Qt::WA_PaintOnScreen);
-	setFocusPolicy(Qt::StrongFocus);
-	//_renderTimer = new QTimer(this);
-	//_renderTimer->setInterval(1);
-	//_renderTimer->start();
-	//connect(_renderTimer,SIGNAL(timeout()),this,SLOT(FuncRender()));
+	//若是使用用户自定义绘制，则须要设置WA_PaintOnScreen
+	setAttribute(Qt::WA_PaintOnScreen, true);
+	//不须要默认的Qt背景
+	setAttribute(Qt::WA_NoSystemBackground, true);
+	//重绘时，绘制全部像素
+	//setAttribute(Qt::WA_OpaquePaintEvent, true);
+	setAttribute(Qt::WA_NoBackground, true);
+	setAttribute(Qt::WA_NativeWindow, true);
+
+	setStyleSheet("background-color:rgb(0,0,0);");
 }
 
 RenderView::~RenderView()
@@ -24,6 +28,11 @@ void RenderView::showEvent(QShowEvent* event)
 	if (_vkRenderer == NULL)
 	{
 		_vkRenderer = new VulkanRenderer((void*)this->winId(), "MainRenderer");
+
+		_renderTimer = new QTimer(this);
+		_renderTimer->setInterval(1);
+		connect(_renderTimer, SIGNAL(timeout()), this, SLOT(UpdateRender()));
+		_renderTimer->start();
 	}
 }
 
@@ -46,26 +55,20 @@ void RenderView::closeEvent(QCloseEvent* event)
 	}
 }
 
-void RenderView::focusInEvent(QFocusEvent* event)
+void RenderView::paintEvent(QPaintEvent* event)
 {
+	QStylePainter painter(this);
+	QStyleOption opt;
+	opt.initFrom(this);
+	opt.rect = rect();
+	painter.drawPrimitive(QStyle::PE_Widget, opt);
 }
 
-void RenderView::focusOutEvent(QFocusEvent* event)
+void RenderView::UpdateRender()
 {
-}
-
-void RenderView::mousePressEvent(QMouseEvent* event)
-{
-}
-
-void RenderView::mouseReleaseEvent(QMouseEvent* event)
-{
-}
-
-void RenderView::FuncRender()
-{
-	//if (_vkRenderer != NULL)
-	//{
-	//	_vkRenderer->Render();
-	//}
+	if (_vkRenderer != NULL)
+	{
+		_vkRenderer->Render();
+		//SetFocus((HWND)winId());
+	}
 }

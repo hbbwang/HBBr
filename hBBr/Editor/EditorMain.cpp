@@ -9,7 +9,7 @@ EditorMain::EditorMain(QWidget *parent)
     : QMainWindow(parent)
 {
     ui.setupUi(this);
-    setFocusPolicy(Qt::ClickFocus);
+
     if (VulkanManager::GetManager() == NULL)
     {
         VulkanManager::InitManager(true);
@@ -18,12 +18,9 @@ EditorMain::EditorMain(QWidget *parent)
     }
 
     //Main render view
-    //_mainRenderView = new RenderView(NULL); 
-    //_mainRenderView->show();
-    _mainRenderView = new RenderView(this); 
-    _mainRenderView->show();
+    _mainRenderView = new RenderView(this);
+    //SetParent((HWND)_mainRenderView->winId() , (HWND)winId());
     setCentralWidget(_mainRenderView);
-    centralWidget()->setFocusPolicy(Qt::ClickFocus);
 }
 
 EditorMain::~EditorMain()
@@ -55,6 +52,11 @@ void EditorMain::mousePressEvent(QMouseEvent* event)
 
 void EditorMain::mouseReleaseEvent(QMouseEvent* event)
 {
+}
+
+void EditorMain::resizeEvent(QResizeEvent* event)
+{
+    
 }
 
 bool EditorMain::eventFilter(QObject* watched, QEvent* event)

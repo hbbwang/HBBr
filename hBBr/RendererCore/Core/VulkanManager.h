@@ -244,8 +244,6 @@ public:
 
 private:
 
-	std::unique_ptr<RenderThread> _renderThread;
-
 	EPlatform _currentPlatform;
 
 	/* Get Memory Type Index */

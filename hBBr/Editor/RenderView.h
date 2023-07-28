@@ -1,5 +1,5 @@
 #pragma once
-#include <QWidget>
+#include <qopenglwidget.h>
 #include "VulkanRenderer.h"
 #include <qtimer.h>
 
@@ -15,8 +15,10 @@ public:
 
 	~RenderView();
 
-
+	QTimer* _renderTimer;
 protected:
+	//不使用Qt默认的绘制引擎
+	//virtual QPaintEngine* paintEngine() const { return 0; }
 
 	virtual void showEvent(QShowEvent* event)override;
 
@@ -24,19 +26,10 @@ protected:
 
 	virtual void closeEvent(QCloseEvent* event)override;
 
-	virtual void focusInEvent(QFocusEvent* event)override;
-
-	virtual void focusOutEvent(QFocusEvent* event)override;
-
-	virtual void mousePressEvent(QMouseEvent* event)override;
-
-	virtual void mouseReleaseEvent(QMouseEvent* event)override;
-
-private:
-
-	QTimer* _renderTimer = NULL;
+	virtual void paintEvent(QPaintEvent* event);
 
 private slots:
-	void FuncRender();
+
+	void UpdateRender();
 
 };
