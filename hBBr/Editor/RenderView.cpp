@@ -6,6 +6,7 @@ RenderView::RenderView(QWidget* parent)
 	setAttribute(Qt::WA_NoSystemBackground);
 	setAttribute(Qt::WA_OpaquePaintEvent);
 	setAttribute(Qt::WA_PaintOnScreen);
+	setFocusPolicy(Qt::StrongFocus);
 	//_renderTimer = new QTimer(this);
 	//_renderTimer->setInterval(1);
 	//_renderTimer->start();
@@ -43,6 +44,22 @@ void RenderView::closeEvent(QCloseEvent* event)
 		_vkRenderer->Release();
 		_vkRenderer = NULL;
 	}
+}
+
+void RenderView::focusInEvent(QFocusEvent* event)
+{
+}
+
+void RenderView::focusOutEvent(QFocusEvent* event)
+{
+}
+
+void RenderView::mousePressEvent(QMouseEvent* event)
+{
+}
+
+void RenderView::mouseReleaseEvent(QMouseEvent* event)
+{
 }
 
 void RenderView::FuncRender()

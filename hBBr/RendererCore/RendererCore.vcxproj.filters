@@ -109,7 +109,7 @@
     <ClInclude Include="Core\Shader.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\RenderThread.h">
+    <ClInclude Include="Core\Thread.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -183,7 +183,7 @@
     <ClCompile Include="Core\Shader.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\RenderThread.cpp">
+    <ClCompile Include="Core\Thread.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
   </ItemGroup>

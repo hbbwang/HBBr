@@ -51,14 +51,9 @@ void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> sw
 	}
 }
 
-void GraphicsPass::PassBuild()
+void GraphicsPass::CreateRenderPass()
 {
 	VulkanManager::GetManager()->CreateRenderPass(_attachmentDescs, _subpassDependencys, _subpassDescs, _renderPass);
-	_pipeline.reset(new Pipeline());
-	//Setting pipeline start
-	//.....
-	//Setting pipeline end
-	_pipeline->CreatePipelineObject(_renderPass, (uint32_t)_subpassDescs.size());
 }
 
 GraphicsPass::~GraphicsPass()
@@ -150,6 +145,11 @@ void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<ui
 	_subpassDependencys.push_back(depen);
 }
 
+VkFramebuffer GraphicsPass::GetFrameBuffer()const
+{
+	return _framebuffers[_renderer->GetCurrentFrameIndex()];
+}
+
 OpaquePass::~OpaquePass()
 {
 	_descriptorSet_pass.reset();
@@ -161,7 +161,7 @@ void OpaquePass::PassInit()
 	//Swapchain
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR , VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	AddSubpass({}, {0} , -1);
-	PassBuild();
+	CreateRenderPass();
 }
 
 void OpaquePass::PassBuild()
@@ -171,7 +171,6 @@ void OpaquePass::PassBuild()
 	_descriptorSet_obj.reset(new DescriptorSet(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1));
 	_descriptorSet_obj->CreateBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
-	VulkanManager::GetManager()->CreateRenderPass(_attachmentDescs, _subpassDependencys, _subpassDescs, _renderPass);
 	_pipeline.reset(new Pipeline());
 	//Setting pipeline start
 	_pipeline->SetColorBlend(false);
@@ -191,15 +190,49 @@ void OpaquePass::PassBuild()
 
 void OpaquePass::PassUpdate()
 {
-	const auto frameIndex = _renderer->GetCurrentFrameIndex();
 	const auto manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	//Update FrameBuffer
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews() , {});
-	manager->BeginCommandBuffer(cmdBuf);
 	manager->CmdSetViewport(cmdBuf, { _currentFrameBufferSize });
-	manager->BeginRenderPass(cmdBuf, _framebuffers[frameIndex], _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.5,1 });
+	manager->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.5,1 });
 
 	manager->EndRenderPass(cmdBuf);
-	manager->EndCommandBuffer(cmdBuf);
+}
+
+#include "imgui.h"
+#include "backends/imgui_impl_vulkan.h"
+
+void ImguiPass::PassInit()
+{
+	//Swapchain
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	AddSubpass({}, { 0 }, -1);
+	CreateRenderPass();
+}
+void ImguiPass::PassBuild()
+{
+	const auto manager = VulkanManager::GetManager();
+	manager->InitImgui(_renderer->GetWindowHandle(), _renderPass);
+}
+
+ImguiPass::~ImguiPass()
+{
+	VulkanManager::GetManager()->ShutdownImgui();
+}
+
+void ImguiPass::PassUpdate()
+{
+	const auto manager = VulkanManager::GetManager();
+	const auto cmdBuf = _renderer->GetCommandBuffer();
+	//Update FrameBuffer
+	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews(), {});
+	manager->CmdSetViewport(cmdBuf, { _currentFrameBufferSize });
+	manager->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0,0 });
+	//Begin
+	manager->ImguiNewFrame();
+	ImGui::Text("Test Text.");
+	//End
+	manager->ImguiEndFrame(cmdBuf);
+	manager->EndRenderPass(cmdBuf);
 }

@@ -71,7 +71,11 @@ VulkanDebugCallback(
 	return false;
 }
 
+#include "imgui.h"
+#include "./backends/imgui_impl_vulkan.h"
+
 #if defined(_WIN32)
+#include "backends/imgui_impl_win32.h"
 FILE* pFileOut;
 FILE* pFileErr;
 #endif
@@ -103,11 +107,17 @@ VulkanManager::VulkanManager(bool bDebug)
 	CreateCommandPool();
 	CreateDescripotrPool(_descriptorPool);
 
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+
 	_renderThread.reset(new RenderThread());
 }
 
 VulkanManager::~VulkanManager()
 {
+	ImGui::DestroyContext();
+
 	_renderThread.reset();
 	DestroyDescriptorPool(_descriptorPool);
 	DestroyCommandPool();
@@ -461,12 +471,12 @@ bool VulkanManager::IsGPUDeviceSuitable(VkPhysicalDevice device)
 		deviceFeatures.geometryShader;
 }
 
-void VulkanManager::CreateSurface(void* hWnd , VkSurfaceKHR& newSurface)
+void VulkanManager::CreateSurface(void* handle, VkSurfaceKHR& newSurface)
 {
 #if defined(_WIN32)
 	VkWin32SurfaceCreateInfoKHR info={};
 	info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-	info.hwnd = (HWND)hWnd;
+	info.hwnd = (HWND)handle;
 	info.hinstance = GetModuleHandle(NULL);
 	auto result = vkCreateWin32SurfaceKHR(_instance, &info, VK_NULL_HANDLE, &newSurface);
 	if (result != VK_SUCCESS)
@@ -1417,6 +1427,63 @@ void VulkanManager::CreateShaderModule(VkDevice device, std::vector<char> data, 
 	info.codeSize = data.size();
 	info.pCode = reinterpret_cast<const uint32_t*>(data.data());
 	vkCreateShaderModule(device, &info, VK_NULL_HANDLE, &shaderModule);
+}
+
+void VulkanManager::InitImgui(void* handle, VkRenderPass renderPass)
+{
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.IniFilename = NULL;
+
+#if defined(_WIN32)
+	ImGui_ImplWin32_Init((HWND)handle);
+#endif
+	ImGui_ImplVulkan_InitInfo init_info = {};
+	init_info.Instance = _instance;
+	init_info.PhysicalDevice = _gpuDevice;
+	init_info.Device = _device;
+	init_info.QueueFamily = _graphicsQueueFamilyIndex;
+	init_info.Queue = _graphicsQueue;
+	init_info.PipelineCache = VK_NULL_HANDLE;
+	init_info.DescriptorPool = _descriptorPool;
+	init_info.Allocator = VK_NULL_HANDLE;
+	init_info.MinImageCount = _swapchainBufferCount;
+	init_info.ImageCount = _swapchainBufferCount;
+	init_info.CheckVkResultFn = VK_NULL_HANDLE;
+	//init_info.UseDynamicRendering = true;
+	ImGui_ImplVulkan_Init(&init_info, renderPass);
+
+	VkCommandBuffer buf;
+	AllocateCommandBuffer(_commandPool, buf);
+	BeginCommandBuffer(buf, 0);
+	ImGui_ImplVulkan_CreateFontsTexture(buf);
+	EndCommandBuffer(buf);
+	SubmitQueueImmediate({ buf });
+	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
+	FreeCommandBuffers(_commandPool, { buf });
+
+}
+
+void VulkanManager::ShutdownImgui()
+{
+	ImGui_ImplVulkan_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+}
+
+void VulkanManager::ImguiNewFrame()
+{
+#if defined(_WIN32)
+	ImGui_ImplWin32_NewFrame();
+#endif
+	ImGui_ImplVulkan_NewFrame();
+	ImGui::NewFrame();
+}
+
+void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf)
+{
+	ImGui::Render();
+	ImDrawData* drawData = ImGui::GetDrawData();
+	ImGui::EndFrame();
+	ImGui_ImplVulkan_RenderDrawData(drawData, cmdBuf);
 }
 
 void VulkanManager::AllocateBufferMemory(VkBuffer buffer, VkDeviceMemory& bufferMemory, VkMemoryPropertyFlags propertyFlags)

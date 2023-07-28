@@ -19,6 +19,7 @@ public:
 	PassBase(VulkanRenderer* renderer);
 	~PassBase();
 	virtual void PassBuild() {}
+	__forceinline HString GetName()const { return _passName; }
 protected:
 	virtual void PassInit() {}
 	virtual void PassUpdate() {}
@@ -39,14 +40,16 @@ public:
 	//Step 2 , Setup subpass by attachments.
 	virtual void AddSubpass(std::vector<uint32_t> inputAttachments, std::vector<uint32_t> colorAttachments, int depthStencilAttachments = -1);
 	//Step the last,custom.
-	virtual void PassBuild()override;
+	virtual void PassBuild()override {}
 	virtual void PassReset()override { _currentFrameBufferSize = { 999999 , 999999 }; }
 	virtual void ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> swapchainImageViews,std::vector<VkImageView> imageViews);
+	void CreateRenderPass();
 	__forceinline VkRenderPass GetRenderPass()const
 	{
 		return _renderPass;
 	}
 protected:
+	VkFramebuffer GetFrameBuffer()const;
 	VkRenderPass _renderPass = VK_NULL_HANDLE;
 	std::vector<VkAttachmentDescription>_attachmentDescs;
 	std::vector<VkSubpassDependency>_subpassDependencys;
@@ -87,4 +90,15 @@ public:
 private:
 	std::shared_ptr<class DescriptorSet> _descriptorSet_pass;
 	std::shared_ptr<class DescriptorSet> _descriptorSet_obj;
+};
+
+/* Imgui pass define */
+class ImguiPass :public GraphicsPass
+{
+public:
+	ImguiPass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
+	~ImguiPass();
+	virtual void PassInit()override;
+	virtual void PassBuild()override;
+	virtual void PassUpdate()override;
 };

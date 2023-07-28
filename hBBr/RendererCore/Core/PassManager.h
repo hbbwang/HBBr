@@ -45,8 +45,17 @@ public:
 	void PassesUpdate();
 	void PassesRelease();
 	void PassesReset();
+
 	__forceinline std::shared_ptr <SceneTexture> GetSceneTexture()const {
 		return _sceneTextures;
+	}
+
+	__forceinline std::vector<std::shared_ptr<PassBase>> GetExecutePasses()const {
+		return _executePasses;
+	}
+
+	__forceinline std::vector<VkFence> GetExecuteFences()const {
+		return _executeFence;
 	}
 
 	/* Pass添加,passName必须唯一! */
@@ -55,9 +64,11 @@ private:
 
 	class VulkanRenderer* _renderer;
 
-	std::map<HString, std::shared_ptr<PassBase>> _passes;
-
 	std::shared_ptr <SceneTexture> _sceneTextures;
+
+	std::vector<std::shared_ptr<PassBase>> _passes;
+
+	std::vector<std::shared_ptr<PassBase>> _executePasses;
 
 	std::vector<VkFence> _executeFence;
 };

@@ -6,7 +6,7 @@
 #include "PassBase.h"
 #include "FileSystem.h"
 #include "Shader.h"
-#include "RenderThread.h"
+#include "Thread.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -24,6 +24,7 @@ VulkanRenderer::VulkanRenderer(void* windowHandle, const char* rendererName)
 	_swapchain = VK_NULL_HANDLE;
 	_surface = VK_NULL_HANDLE;
 	//Surface
+	_windowHandle = windowHandle;
 	_vulkanManager->CreateSurface(windowHandle, _surface);
 	//Swapchain
 	_vulkanManager->CreateRenderSemaphores(_presentSemaphore);
@@ -100,7 +101,7 @@ void VulkanRenderer::Render()
 		{
 			Resizing(true);
 		}
-
+		
 		_passManager->PassesUpdate();
 
 		//Present swapchain.

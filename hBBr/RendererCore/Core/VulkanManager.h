@@ -17,7 +17,7 @@
 #include <memory>
 #include <array>
 #include "HString.h"
-#include "RenderThread.h"
+#include "Thread.h"
 
 enum class EPlatform :uint8_t
 {
@@ -64,7 +64,7 @@ public:
 	void InitDebug();
 
 	/* 创建Surface */
-	void CreateSurface(void* hWnd, VkSurfaceKHR& newSurface);
+	void CreateSurface(void* handle, VkSurfaceKHR& newSurface);
 
 	/* 释放Surface */
 	void DestroySurface(VkSurfaceKHR surface);
@@ -195,6 +195,14 @@ public:
 	void CreateShaderModule(std::vector<char> data , VkShaderModule& shaderModule);
 
 	void CreateShaderModule(VkDevice device, std::vector<char> data, VkShaderModule& shaderModule);
+
+	void InitImgui(void* handle , VkRenderPass renderPass);
+
+	void ShutdownImgui();
+
+	void ImguiNewFrame();
+
+	void ImguiEndFrame(VkCommandBuffer cmdBuf);
 
 	/* 立刻序列提交,为保证运行安全,会执行一次等待运行结束 */
 	void SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);

@@ -15,6 +15,17 @@ public:
     class RenderView* _mainRenderView;
 
     virtual void closeEvent(QCloseEvent* event);
+
+    virtual void focusInEvent(QFocusEvent* event)override;
+
+    virtual void focusOutEvent(QFocusEvent* event)override;
+
+    virtual void mousePressEvent(QMouseEvent* event)override;
+
+    virtual void mouseReleaseEvent(QMouseEvent* event)override;
+
+    bool eventFilter(QObject*, QEvent*)override;
+
 private:
     Ui::EditorMainClass ui;
 };

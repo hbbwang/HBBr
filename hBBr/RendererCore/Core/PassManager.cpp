@@ -23,7 +23,8 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 		//Opaque Pass
 		std::shared_ptr<OpaquePass> opaque = std::make_shared<OpaquePass>(renderer);
 		AddPass(opaque, "Opaque");
-
+		std::shared_ptr<ImguiPass> imgui = std::make_shared<ImguiPass>(renderer);
+		AddPass(imgui, "Imgui");
 	}
 	if (_executeFence.size() <= 0)
 	{
@@ -31,29 +32,39 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 	}
 	for (auto p : _passes)
 	{
-		p.second->PassInit();
+		p->PassInit();
+		p->PassBuild();
 	}
 }
 
 void PassManager::PassesUpdate()
 {
+	const auto manager = VulkanManager::GetManager();
+
 	const uint32_t frameIndex = VulkanRenderer::GetCurrentFrameIndex();
-	VulkanManager::GetManager()->WaitForFences({ _executeFence[frameIndex] });
+
+	manager->WaitForFences({ _executeFence[frameIndex] });
+
 	_sceneTextures->UpdateTextures();
+
+	manager->BeginCommandBuffer(_renderer->GetCommandBuffer());
 	//Collect render setting (Commandbuffer record)
-	std::vector<std::shared_ptr<PassBase>>executePasses;
 	for (auto p : _passes)
 	{
-		p.second->PassUpdate();
-		executePasses.push_back(p.second);
+		p->PassUpdate();
+
+		_executePasses.push_back(p);
 	}
+	manager->EndCommandBuffer(_renderer->GetCommandBuffer());
+
 	//Execute
-	VulkanManager::GetManager()->SubmitQueueForPasses(_renderer->GetCommandBuffer(), executePasses, _renderer->GetPresentSemaphore(), _renderer->GetSubmitSemaphore(), _executeFence[frameIndex]);
+	manager->SubmitQueueForPasses(_renderer->GetCommandBuffer(), _executePasses, _renderer->GetPresentSemaphore(), _renderer->GetSubmitSemaphore(), _executeFence[frameIndex]);
 }
 
 void PassManager::PassesRelease()
 {
 	VulkanManager::GetManager()->DestroyRenderFences(_executeFence);
+	_passes.clear();
 	_sceneTextures.reset();
 }
 
@@ -61,7 +72,7 @@ void PassManager::PassesReset()
 {
 	for (auto& p : _passes)
 	{
-		p.second->PassReset();
+		p->PassReset();
 	}
 }
 
@@ -71,11 +82,13 @@ void PassManager::AddPass(std::shared_ptr<PassBase> newPass, const char* passNam
 	{
 		MessageOut("Add Pass Failed.The New Pass Is Null.", true, true);
 	}
-	auto it = _passes.find(passName);
+	auto it = std::find_if(_passes.begin(), _passes.end(), [newPass](std::shared_ptr<PassBase> &inPass) {
+		return inPass->GetName() == newPass->GetName();
+	});
 	if (it != _passes.end())
 	{
 		MessageOut("Add Pass Failed.Pass Name Has Been Exist.", true, true);
 	}
 	newPass->_passName = passName;
-	_passes.emplace(std::make_pair(passName, newPass));
+	_passes.push_back(newPass);
 }

@@ -28,6 +28,10 @@ public:
 		return _passManager.get();
 	}
 
+	__forceinline void* GetWindowHandle() {
+		return _windowHandle;
+	}
+
 	__forceinline VkSurfaceFormatKHR GetSurfaceFormat()const {
 		return _surfaceFormat;
 	}
@@ -106,6 +110,8 @@ private:
 	bool _bResize;
 
 	std::vector<VkCommandBuffer> _cmdBuf;
+
+	void* _windowHandle = NULL;
 
 	//Passes
 	std::unique_ptr<class PassManager> _passManager;
