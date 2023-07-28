@@ -191,13 +191,15 @@ void OpaquePass::PassBuild()
 
 void OpaquePass::PassUpdate()
 {
-	const uint32_t frameIndex = _renderer->GetCurrentFrameIndex();
+	const auto frameIndex = _renderer->GetCurrentFrameIndex();
 	const auto manager = VulkanManager::GetManager();
+	const auto cmdBuf = _renderer->GetCommandBuffer();
 	//Update FrameBuffer
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews() , {});
-	manager->BeginCommandBuffer(_renderer->GetCommandBuffer());
-	manager->CmdSetViewport(_renderer->GetCommandBuffer(), { _currentFrameBufferSize });
-	manager->BeginRenderPass(_renderer->GetCommandBuffer(), _framebuffers[frameIndex], _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.5,1 });
-	manager->EndRenderPass(_renderer->GetCommandBuffer());
-	manager->EndCommandBuffer(_renderer->GetCommandBuffer());
+	manager->BeginCommandBuffer(cmdBuf);
+	manager->CmdSetViewport(cmdBuf, { _currentFrameBufferSize });
+	manager->BeginRenderPass(cmdBuf, _framebuffers[frameIndex], _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.5,1 });
+
+	manager->EndRenderPass(cmdBuf);
+	manager->EndCommandBuffer(cmdBuf);
 }

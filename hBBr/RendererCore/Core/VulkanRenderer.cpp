@@ -6,6 +6,7 @@
 #include "PassBase.h"
 #include "FileSystem.h"
 #include "Shader.h"
+#include "RenderThread.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -15,8 +16,8 @@ uint32_t								VulkanRenderer::_currentFrameIndex;
 
 VulkanRenderer::VulkanRenderer(void* windowHandle, const char* rendererName)
 {
+	RenderThreadLockGuard
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
-	ConsoleDebug::print_endl(RendererLauguage::GetText("T000000"));
 	_currentFrameIndex = 0;
 	_bRendererRelease = false;
 	_bInit = false;
@@ -63,6 +64,7 @@ VulkanRenderer::~VulkanRenderer()
 void VulkanRenderer::Release()
 {
 	_bRendererRelease = true;
+	RenderThreadLockGuard
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
 	_passManager.reset();
@@ -87,17 +89,25 @@ void VulkanRenderer::Render()
 {
 	if (!_bRendererRelease)
 	{
+		Resizing();
+
 		VulkanManager* _vulkanManager = VulkanManager::GetManager();
 
 		uint32_t _swapchainIndex = 0;
 
 		//Which swapchain index need to present?
-		_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], &_swapchainIndex);
+		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], &_swapchainIndex))
+		{
+			Resizing(true);
+		}
 
 		_passManager->PassesUpdate();
 
 		//Present swapchain.
-		_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], _swapchainIndex);
+		if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], _swapchainIndex))
+		{
+			Resizing(true);
+		}
 
 		//Get next frame index.
 		_currentFrameIndex = (_currentFrameIndex + 1) % _vulkanManager->GetSwapchainBufferCount();
@@ -109,19 +119,19 @@ void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
 	_bResize = true;
 	_windowSize.width = w;
 	_windowSize.height = h;
-	Resizing();
 }
 
-void VulkanRenderer::Resizing()
+void VulkanRenderer::Resizing(bool bForce)
 {
 	if (!_bRendererRelease)
 	{
 		VulkanManager* _vulkanManager = VulkanManager::GetManager();
-		if (_bResize)
+		if (_bResize || bForce)
 		{
-			vkQueueWaitIdle(_vulkanManager->GetGraphicsQueue());
+			vkDeviceWaitIdle(_vulkanManager->GetDevice());
 			_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
 			_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
+			_passManager->PassesReset();
 			_bResize = false;
 		}
 	}

@@ -57,6 +57,14 @@ void PassManager::PassesRelease()
 	_sceneTextures.reset();
 }
 
+void PassManager::PassesReset()
+{
+	for (auto& p : _passes)
+	{
+		p.second->PassReset();
+	}
+}
+
 void PassManager::AddPass(std::shared_ptr<PassBase> newPass, const char* passName)
 {
 	if (newPass == NULL)

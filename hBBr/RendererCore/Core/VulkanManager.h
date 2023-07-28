@@ -17,6 +17,7 @@
 #include <memory>
 #include <array>
 #include "HString.h"
+#include "RenderThread.h"
 
 enum class EPlatform :uint8_t
 {
@@ -129,7 +130,7 @@ public:
 	/* return the swapchain is normal (not out of data). */
 	bool GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t* swapchainIndex);
 
-	void Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainImageIndex);
+	bool Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainImageIndex);
 
 	void CreatePipelineLayout(std::vector <VkDescriptorSetLayout> descriptorSetLayout , VkPipelineLayout& pipelineLayout);
 
@@ -234,6 +235,8 @@ public:
 	}
 
 private:
+
+	std::unique_ptr<RenderThread> _renderThread;
 
 	EPlatform _currentPlatform;
 

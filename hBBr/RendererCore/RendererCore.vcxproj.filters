@@ -109,6 +109,9 @@
     <ClInclude Include="Core\Shader.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\RenderThread.h">
+      <Filter>Renderer\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -178,6 +181,9 @@
       <Filter>Renderer\Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\Shader.cpp">
+      <Filter>Renderer\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\RenderThread.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
   </ItemGroup>

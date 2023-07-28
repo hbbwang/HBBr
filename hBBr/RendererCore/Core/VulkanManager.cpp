@@ -12,6 +12,11 @@
 #pragma comment(lib ,"vulkan-1.lib")
 using namespace std;
 
+#if _DEBUG
+//#include "include/vld.h"
+//#pragma comment(lib ,"vld.lib")
+#endif
+
 std::unique_ptr<VulkanManager> VulkanManager::_vulkanManager;
 
 PFN_vkCreateDebugReportCallbackEXT  fvkCreateDebugReportCallbackEXT = VK_NULL_HANDLE;
@@ -66,15 +71,27 @@ VulkanDebugCallback(
 	return false;
 }
 
+#if defined(_WIN32)
+FILE* pFileOut;
+FILE* pFileErr;
+#endif
+
 VulkanManager::VulkanManager(bool bDebug)
 {
 #if defined(_WIN32)
 	_currentPlatform = EPlatform::Windows;
+	if (bDebug)
+	{
+		AllocConsole();
+		freopen_s(&pFileOut, "CONOUT$", "w", stdout);
+		freopen_s(&pFileErr, "CONOUT$", "w", stderr);
+	}
 #elif defined(__ANDROID__)
 	_currentPlatform = EPlatform::Android;
 #elif defined(__linux__)
 	_currentPlatform = EPlatform::Linux;
 #endif
+	ConsoleDebug::print_endl(RendererLauguage::GetText("T000000"));
 	_bDebugEnable = false;
 	_graphicsQueueFamilyIndex = -1;
 	_swapchainBufferCount = 3;
@@ -85,10 +102,13 @@ VulkanManager::VulkanManager(bool bDebug)
 	InitDebug();
 	CreateCommandPool();
 	CreateDescripotrPool(_descriptorPool);
+
+	_renderThread.reset(new RenderThread());
 }
 
 VulkanManager::~VulkanManager()
 {
+	_renderThread.reset();
 	DestroyDescriptorPool(_descriptorPool);
 	DestroyCommandPool();
 	if (_bDebugEnable)
@@ -103,6 +123,11 @@ VulkanManager::~VulkanManager()
 		vkDestroyInstance(_instance, VK_NULL_HANDLE);
 		_instance = VK_NULL_HANDLE;
 	}
+	#if defined(_WIN32)
+		fclose(pFileOut);
+		fclose(pFileErr);
+	#endif
+
 }
 
 void VulkanManager::InitInstance(bool bEnableDebug)
@@ -1002,7 +1027,9 @@ bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore 
 	VkResult result = vkAcquireNextImageKHR(_device, swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, swapchainIndex);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 	{
-		MessageOut(RendererLauguage::GetText("A000009").c_str(), false, false);
+		#if _DEBUG
+		//MessageOut(RendererLauguage::GetText("A000009").c_str(), false, false);//太烦人了,不显示了,反正不影响
+		#endif	
 		return false;
 	}
 	else if (result != VK_SUCCESS)
@@ -1013,7 +1040,7 @@ bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore 
 	return true;
 }
 
-void VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainImageIndex)
+bool VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainImageIndex)
 {
 	VkResult infoResult = VK_SUCCESS;
 	VkPresentInfoKHR presentInfo = {};
@@ -1028,12 +1055,17 @@ void VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uin
 	auto result = vkQueuePresentKHR(_graphicsQueue, &presentInfo);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 	{
-		MessageOut("VK_ERROR_OUT_OF_DATE_KHR or VK_SUBOPTIMAL_KHR.Swapchain need to reset.", false, false);
+		#if _DEBUG
+		//MessageOut("VK_ERROR_OUT_OF_DATE_KHR or VK_SUBOPTIMAL_KHR.Swapchain need to reset.", false, false);//太烦人了,不显示了,反正不影响
+		#endif
+		return false;
 	}
 	else if (result != VK_SUCCESS || infoResult != VK_SUCCESS)
 	{
 		MessageOut(RendererLauguage::GetText("A000011").c_str(), false, true);
+		return false;
 	}
+	return true;
 }
 
 void VulkanManager::CreatePipelineLayout(std::vector <VkDescriptorSetLayout> descriptorSetLayout, VkPipelineLayout& pipelineLayout)

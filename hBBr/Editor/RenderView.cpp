@@ -6,10 +6,10 @@ RenderView::RenderView(QWidget* parent)
 	setAttribute(Qt::WA_NoSystemBackground);
 	setAttribute(Qt::WA_OpaquePaintEvent);
 	setAttribute(Qt::WA_PaintOnScreen);
-	_renderTimer = new QTimer(this);
-	_renderTimer->setInterval(100);
-	_renderTimer->start();
-	connect(_renderTimer,SIGNAL(timeout()),this,SLOT(FuncRender()));
+	//_renderTimer = new QTimer(this);
+	//_renderTimer->setInterval(1);
+	//_renderTimer->start();
+	//connect(_renderTimer,SIGNAL(timeout()),this,SLOT(FuncRender()));
 }
 
 RenderView::~RenderView()
@@ -47,8 +47,8 @@ void RenderView::closeEvent(QCloseEvent* event)
 
 void RenderView::FuncRender()
 {
-	if (_vkRenderer != NULL)
-	{
-		_vkRenderer->Render();
-	}
+	//if (_vkRenderer != NULL)
+	//{
+	//	_vkRenderer->Render();
+	//}
 }

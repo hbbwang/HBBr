@@ -44,6 +44,7 @@ public:
 	void PassesInit(VulkanRenderer* renderer);
 	void PassesUpdate();
 	void PassesRelease();
+	void PassesReset();
 	__forceinline std::shared_ptr <SceneTexture> GetSceneTexture()const {
 		return _sceneTextures;
 	}

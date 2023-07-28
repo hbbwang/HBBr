@@ -75,7 +75,7 @@ public:
 
 private:
 
-	void Resizing();
+	void Resizing(bool bForce = false);
 
 	HString _rendererName;
 

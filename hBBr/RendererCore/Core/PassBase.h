@@ -22,6 +22,7 @@ public:
 protected:
 	virtual void PassInit() {}
 	virtual void PassUpdate() {}
+	virtual void PassReset() {}
 	std::shared_ptr<Texture> GetSceneTexture(uint32_t descIndex);
 	std::unique_ptr<Pipeline> _pipeline;
 	VulkanRenderer* _renderer = NULL;
@@ -39,6 +40,7 @@ public:
 	virtual void AddSubpass(std::vector<uint32_t> inputAttachments, std::vector<uint32_t> colorAttachments, int depthStencilAttachments = -1);
 	//Step the last,custom.
 	virtual void PassBuild()override;
+	virtual void PassReset()override { _currentFrameBufferSize = { 999999 , 999999 }; }
 	virtual void ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> swapchainImageViews,std::vector<VkImageView> imageViews);
 	__forceinline VkRenderPass GetRenderPass()const
 	{
