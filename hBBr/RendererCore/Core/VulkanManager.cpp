@@ -1460,7 +1460,7 @@ void VulkanManager::InitImgui(void* handle, VkRenderPass renderPass)
 	SubmitQueueImmediate({ buf });
 	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
 	FreeCommandBuffers(_commandPool, { buf });
-
+	ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
 void VulkanManager::ShutdownImgui()
