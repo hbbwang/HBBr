@@ -18,7 +18,7 @@ Hbb Renderer.
 2.不会带有QT的内容           
 3.不会带有assimp 
             
-目前有3个配置可选：
+目前有3个配置可选：     
 1.Debug             （Editor Debug，启动项：Editor）            
 2.Release           （Editor Release，启动项：Editor）              
 3.ReleaseGame_GLFW  （Renderer Only with GLFW,启动项：RendererCore）             
