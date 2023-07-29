@@ -7,4 +7,7 @@
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <QtLastBackgroundBuild>2023-07-20T07:07:32.9588877Z</QtLastBackgroundBuild>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseGame_GLFW|x64'" Label="QtSettings">
+    <QtLastBackgroundBuild>2023-07-20T07:07:32.9588877Z</QtLastBackgroundBuild>
+  </PropertyGroup>
 </Project>

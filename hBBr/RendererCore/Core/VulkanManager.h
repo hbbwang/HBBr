@@ -3,9 +3,10 @@
 
 #if defined(_WIN32)
 	#define WIN32_LEAN_AND_MEAN             // 从 Windows 头文件中排除极少使用的内容
-	#define VK_USE_PLATFORM_WIN32_KHR  1 //support win32
+	#define VK_USE_PLATFORM_WIN32_KHR	1	//support win32
 	#include <stdlib.h>
 	#include <Windows.h>
+	#include "GLFWInclude.h"
 #elif defined(__ANDROID__)
 	#include <vulkan/vulkan_android.h>
 #elif defined(__linux__)

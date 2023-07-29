@@ -29,6 +29,9 @@
     <Filter Include="ThirdParty\Imgui\backends">
       <UniqueIdentifier>{fa303a75-880e-41ba-990f-40520c2ccbd0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderer\Form">
+      <UniqueIdentifier>{eb1d85df-5f3c-4a67-8ba3-242c5cc2b2d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\VulkanManager.h">
@@ -76,9 +79,6 @@
     <ClInclude Include="Editor\ShaderCompiler.h">
       <Filter>Editor</Filter>
     </ClInclude>
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_win32.h">
-      <Filter>ThirdParty\Imgui\backends</Filter>
-    </ClInclude>
     <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h">
       <Filter>ThirdParty\Imgui\backends</Filter>
     </ClInclude>
@@ -111,6 +111,15 @@
     </ClInclude>
     <ClInclude Include="Core\Thread.h">
       <Filter>Renderer\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Form\GLFWInclude.h">
+      <Filter>Renderer\Form</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_glfw.h">
+      <Filter>ThirdParty\Imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="Form\GLFWFormMain.h">
+      <Filter>Renderer\Form</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -156,9 +165,6 @@
     <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp">
       <Filter>ThirdParty\Imgui\backends</Filter>
     </ClCompile>
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_win32.cpp">
-      <Filter>ThirdParty\Imgui\backends</Filter>
-    </ClCompile>
     <ClCompile Include="..\ThirdParty\Imgui\imgui.cpp">
       <Filter>ThirdParty\Imgui</Filter>
     </ClCompile>
@@ -185,6 +191,9 @@
     </ClCompile>
     <ClCompile Include="Core\Thread.cpp">
       <Filter>Renderer\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_glfw.cpp">
+      <Filter>ThirdParty\Imgui\backends</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

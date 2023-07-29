@@ -195,7 +195,11 @@ void OpaquePass::PassUpdate()
 	//Update FrameBuffer
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews() , {});
 	manager->CmdSetViewport(cmdBuf, { _currentFrameBufferSize });
-	manager->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.5,1 });
+	manager->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.0,0 });
+
+	//vkCmdBindPipeline(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->GetPipelineObject());
+
+
 
 	manager->EndRenderPass(cmdBuf);
 }
@@ -225,13 +229,14 @@ void ImguiPass::PassUpdate()
 {
 	const auto manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
+	ImGui_ImplVulkan_SetMinImageCount(manager->GetSwapchainBufferCount());
 	//Update FrameBuffer
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews(), {});
 	manager->CmdSetViewport(cmdBuf, { _currentFrameBufferSize });
 	manager->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0,0 });
 	//Begin
 	manager->ImguiNewFrame();
-	ImGui::Text("Test Text.");
+	ImGui::Text( HString(HString::FromInt(ImGui::GetMousePos().x) + "," + HString::FromInt(ImGui::GetMousePos().y )).c_str());
 	//End
 	manager->ImguiEndFrame(cmdBuf);
 	manager->EndRenderPass(cmdBuf);

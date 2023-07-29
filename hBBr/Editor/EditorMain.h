@@ -2,6 +2,7 @@
 
 #include <QtWidgets/QMainWindow>
 #include "ui_EditorMain.h"
+#include <qtimer.h>
 
 class EditorMain : public QMainWindow
 {
@@ -26,8 +27,20 @@ public:
 
     virtual void resizeEvent(QResizeEvent* event)override;
 
+    virtual void showEvent(QShowEvent* event)override;
+
     bool eventFilter(QObject*, QEvent*)override;
+
+    QTimer* _renderTimer;
+
+    QWidget* _mainRenderer=NULL;
 
 private:
     Ui::EditorMainClass ui;
+
+private slots:
+
+    void UpdateRender();
+
 };
+

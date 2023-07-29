@@ -71,11 +71,11 @@ VulkanDebugCallback(
 	return false;
 }
 
+// --------- IMGUI
 #include "imgui.h"
 #include "./backends/imgui_impl_vulkan.h"
-
 #if defined(_WIN32)
-#include "backends/imgui_impl_win32.h"
+#include "backends/imgui_impl_glfw.h"
 FILE* pFileOut;
 FILE* pFileErr;
 #endif
@@ -468,20 +468,29 @@ bool VulkanManager::IsGPUDeviceSuitable(VkPhysicalDevice device)
 		deviceFeatures.geometryShader;
 }
 
+#pragma optimize( "", off )
+
 void VulkanManager::CreateSurface(void* handle, VkSurfaceKHR& newSurface)
 {
 #if defined(_WIN32)
-	VkWin32SurfaceCreateInfoKHR info={};
-	info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-	info.hwnd = (HWND)handle;
-	info.hinstance = GetModuleHandle(NULL);
-	auto result = vkCreateWin32SurfaceKHR(_instance, &info, VK_NULL_HANDLE, &newSurface);
+	//VkWin32SurfaceCreateInfoKHR info={};
+	//info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+	//info.hwnd = (HWND)handle;
+	//info.hinstance = GetModuleHandle(NULL);
+	//auto result = vkCreateWin32SurfaceKHR(_instance, &info, VK_NULL_HANDLE, &newSurface);
+	//if (result != VK_SUCCESS)
+	//{
+	//	MessageOut(RendererLauguage::GetText("A000005").c_str(),true, true);
+	//}
+	auto result = glfwCreateWindowSurface(_instance, (GLFWwindow*)handle, VK_NULL_HANDLE, &newSurface);
 	if (result != VK_SUCCESS)
 	{
-		MessageOut(RendererLauguage::GetText("A000005").c_str(),true, true);
+		MessageOut("glfw Create Window Surface Failed.",true,true);
 	}
 #endif
 }
+
+#pragma optimize( "", on )
 
 void VulkanManager::DestroySurface(VkSurfaceKHR surface)
 {
@@ -1433,7 +1442,8 @@ void VulkanManager::InitImgui(void* handle, VkRenderPass renderPass)
 	io.IniFilename = NULL;
 
 #if defined(_WIN32)
-	ImGui_ImplWin32_Init((HWND)handle);
+	//ImGui_ImplWin32_Init((HWND)handle);
+	ImGui_ImplGlfw_InitForVulkan((GLFWwindow*)handle, true);
 #endif
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = _instance;
@@ -1464,24 +1474,26 @@ void VulkanManager::InitImgui(void* handle, VkRenderPass renderPass)
 void VulkanManager::ShutdownImgui()
 {
 	ImGui_ImplVulkan_Shutdown();
-	ImGui_ImplWin32_Shutdown();
+#if defined(_WIN32)
+	//ImGui_ImplWin32_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+#endif
 }
 
 void VulkanManager::ImguiNewFrame()
 {
-#if defined(_WIN32)
-	ImGui_ImplWin32_NewFrame();
-#endif
 	ImGui_ImplVulkan_NewFrame();
+#if defined(_WIN32)
+	//ImGui_ImplWin32_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+#endif
 	ImGui::NewFrame();
 }
 
 void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf)
 {
 	ImGui::Render();
-	ImDrawData* drawData = ImGui::GetDrawData();
-	ImGui::EndFrame();
-	ImGui_ImplVulkan_RenderDrawData(drawData, cmdBuf);
+	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuf);
 }
 
 void VulkanManager::AllocateBufferMemory(VkBuffer buffer, VkDeviceMemory& bufferMemory, VkMemoryPropertyFlags propertyFlags)

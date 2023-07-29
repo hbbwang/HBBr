@@ -1,6 +1,6 @@
 ﻿#include "Common.h"
 #include "ConsoleDebug.h"
-
+#include <assert.h>
 void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textColor)
 {
 	HString msgStr = msg;
@@ -9,8 +9,11 @@ void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textC
 	if (bMessageBox)
 	{
 		//MessageBoxA(NULL, msg, "message", MB_ICONERROR);
-		//assert( 0 && msg);
+		#if NDEBUG
+		MessageBoxA(NULL, msg, "message", MB_ICONERROR);
+		#else
 		DE_ASSERT(0, msg);
+		#endif
 	}
 #else
 	printf(msg);

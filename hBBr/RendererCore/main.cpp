@@ -1,19 +1,184 @@
-﻿// dllmain.cpp : 定义 DLL 应用程序的入口点。
-//
-//BOOL APIENTRY DllMain( HMODULE hModule,
-//                       DWORD  ul_reason_for_call,
-//                       LPVOID lpReserved
-//                     )
-//{
-//    switch (ul_reason_for_call)
-//    {
-//    case DLL_PROCESS_ATTACH:
-//    case DLL_THREAD_ATTACH:
-//    case DLL_THREAD_DETACH:
-//    case DLL_PROCESS_DETACH:
-//        break;
-//    }
-//
-//    return TRUE;
-//}
+﻿#include "GLFWFormMain.h"
+#include "Shader.h"
 
+std::vector<VulkanGLFW> VulkanApp::_glfwWindows;
+
+void GLFWResize(GLFWwindow* window, int width, int height)
+{
+	auto it = std::find_if(VulkanApp::VulkanApp::GetWindows().begin(), VulkanApp::VulkanApp::GetWindows().end(), [window](VulkanGLFW& glfw)
+	{
+		return glfw.window == window;
+	});
+	if (it != VulkanApp::GetWindows().end() && it->renderer)
+	{
+		it->renderer->RendererResize((uint32_t)width, (uint32_t)height);
+	}
+}
+
+void GLFWClose(GLFWwindow* window)
+{
+	auto it = std::find_if(VulkanApp::VulkanApp::GetWindows().begin(), VulkanApp::VulkanApp::GetWindows().end(), [window](VulkanGLFW& glfw)
+	{
+		return glfw.window == window;
+	});
+	if (it != VulkanApp::VulkanApp::GetWindows().end())
+	{
+		if (it->renderer)
+		{
+			it->renderer->Release();
+			it->renderer = NULL;
+		}
+	}
+}
+
+void GLFWFocus(GLFWwindow* window, int focused)
+{
+
+}
+
+void GLFWKeyBoard(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+
+}
+
+void GLFWMouseButton(GLFWwindow* window, int button, int action, int mods)
+{
+
+}
+
+void GLFWCursorPos(GLFWwindow* window, double xpos, double ypos)
+{
+
+}
+
+void GLFWCursorEnter(GLFWwindow* window, int entered)
+{
+
+}
+
+void GLFWScroll(GLFWwindow* window, double xoffset, double yoffset)
+{
+
+}
+
+void GLFWDrop(GLFWwindow* window, int path_count, const char* paths[])
+{
+
+}
+
+void GLFWJoystick(int jid, int event)
+{
+
+}
+
+void GLFWMonitor(GLFWmonitor* monitor, int event)
+{
+
+}
+
+GLFWwindow* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDebug)
+{
+	//must be successful.
+	if (!glfwInit())
+	{
+		MessageOut("Init glfw failed.", true, true, "255,0,0");
+	}
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
+	glfwSetJoystickCallback(GLFWJoystick);
+	glfwSetMonitorCallback(GLFWMonitor);
+
+	VulkanManager::InitManager(bEnableDebug);
+	Shader::LoadShaderCache(FileSystem::GetShaderCacheAbsPath().c_str());
+
+	//Create Main Window
+	auto win = CreateNewWindow(64, 64, "MainRenderer", true);
+
+	if (bCustomRenderLoop)
+	{
+		while (true)
+		{
+			bool quit = true;
+			glfwPollEvents();
+			for (int i = 0; i < _glfwWindows.size(); i++)
+			{
+				if (glfwWindowShouldClose(_glfwWindows[i].window))
+				{
+					auto window = _glfwWindows[i].window;
+					auto it = std::remove_if(_glfwWindows.begin(), _glfwWindows.end(), [window](VulkanGLFW& glfw) {
+						return window == glfw.window;
+					});
+					if (it != _glfwWindows.end())
+					{
+						_glfwWindows.erase(it);
+					}
+					i = i - 1;
+					continue;
+				}
+				else if (_glfwWindows[i].renderer)
+				{
+					quit = false;
+					_glfwWindows[i].renderer->Render();
+				}
+			}
+			if (quit)
+			{
+				break;
+			}
+		}
+	}
+	else
+	{
+		return win;
+	}
+	return NULL;
+}
+
+void VulkanApp::DeInitVulkanManager()
+{
+	Shader::DestroyAllShaderCache();
+	VulkanManager::ReleaseManager();
+	glfwTerminate();
+}
+
+GLFWwindow* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* title, bool bCreateRenderer)
+{
+	GLFWwindow* window = glfwCreateWindow(w, h, title, nullptr, nullptr);
+	if (!window)
+	{
+		MessageOut("Create glfw window failed.", true, true, "255,0,0");
+		glfwTerminate();
+	}
+	//set event
+	glfwSetWindowSizeCallback(window, GLFWResize);
+	glfwSetWindowCloseCallback(window, GLFWClose);
+	glfwSetWindowFocusCallback(window,GLFWFocus);
+	glfwSetKeyCallback(window,GLFWKeyBoard);
+	glfwSetMouseButtonCallback(window,GLFWMouseButton);
+	glfwSetCursorPosCallback(window,GLFWCursorPos);
+	glfwSetCursorEnterCallback(window,GLFWCursorEnter);
+	glfwSetScrollCallback(window,GLFWScroll);
+	glfwSetDropCallback(window,GLFWDrop);
+
+	VulkanGLFW newGLFW = {};
+	newGLFW.window = window;
+	if (bCreateRenderer)
+	{
+		newGLFW.renderer = new VulkanRenderer((void*)newGLFW.window , title);
+	}
+	_glfwWindows.push_back(newGLFW);
+	glfwSetWindowPos(window,0, 0);
+	return window;
+}
+
+#if IS_GAME
+int main(int argc, char* argv[])
+{
+	//Enable custom loop
+	VulkanApp::InitVulkanManager(true, true);
+	VulkanApp::DeInitVulkanManager();
+	return 0;
+}
+#else
+
+#endif

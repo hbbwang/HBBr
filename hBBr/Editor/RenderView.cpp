@@ -1,6 +1,8 @@
 #include "RenderView.h"
 #include "qstylepainter.h"
 #include "QStyleOption.h"
+#include "qevent.h"
+
 #pragma comment(lib , "RendererCore.lib")
 RenderView::RenderView(QWidget* parent)
 	: QWidget(parent)
@@ -15,6 +17,14 @@ RenderView::RenderView(QWidget* parent)
 	setAttribute(Qt::WA_NativeWindow, true);
 
 	setStyleSheet("background-color:rgb(0,0,0);");
+	//setMouseTracking(true);
+
+
+
+	_renderTimer = new QTimer(this);
+	_renderTimer->setInterval(1);
+	connect(_renderTimer, SIGNAL(timeout()), this, SLOT(UpdateRender()));
+	_renderTimer->start();
 }
 
 RenderView::~RenderView()
@@ -25,34 +35,22 @@ RenderView::~RenderView()
 void RenderView::showEvent(QShowEvent* event)
 {
 	QWidget::showEvent(event);
-	if (_vkRenderer == NULL)
-	{
-		_vkRenderer = new VulkanRenderer((void*)this->winId(), "MainRenderer");
-
-		_renderTimer = new QTimer(this);
-		_renderTimer->setInterval(1);
-		connect(_renderTimer, SIGNAL(timeout()), this, SLOT(UpdateRender()));
-		_renderTimer->start();
-	}
 }
 
 void RenderView::resizeEvent(QResizeEvent* event)
 {
 	QWidget::resizeEvent(event);
-	if (_vkRenderer != NULL)
-	{
-		_vkRenderer->RendererResize(width(), height());
-	}
 }
+
+bool RenderView::event(QEvent* event)
+{
+	return QWidget::event(event);
+}
+
 
 void RenderView::closeEvent(QCloseEvent* event)
 {
 	QWidget::closeEvent(event);
-	if (_vkRenderer != NULL) 
-	{
-		_vkRenderer->Release();
-		_vkRenderer = NULL;
-	}
 }
 
 void RenderView::paintEvent(QPaintEvent* event)
@@ -66,9 +64,25 @@ void RenderView::paintEvent(QPaintEvent* event)
 
 void RenderView::UpdateRender()
 {
-	if (_vkRenderer != NULL)
-	{
-		_vkRenderer->Render();
-		//SetFocus((HWND)winId());
-	}
+
+}
+
+void RenderView::focusInEvent(QFocusEvent* event)
+{
+
+}
+
+void RenderView::focusOutEvent(QFocusEvent* event)
+{
+
+}
+
+void RenderView::mousePressEvent(QMouseEvent* event)
+{
+
+}
+
+void RenderView::mouseReleaseEvent(QMouseEvent* event)
+{
+
 }
