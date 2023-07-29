@@ -17,19 +17,9 @@ public:
 
     virtual void closeEvent(QCloseEvent* event);
 
-    virtual void focusInEvent(QFocusEvent* event)override;
-
-    virtual void focusOutEvent(QFocusEvent* event)override;
-
-    virtual void mousePressEvent(QMouseEvent* event)override;
-
-    virtual void mouseReleaseEvent(QMouseEvent* event)override;
-
     virtual void resizeEvent(QResizeEvent* event)override;
 
     virtual void showEvent(QShowEvent* event)override;
-
-    bool eventFilter(QObject*, QEvent*)override;
 
     QTimer* _renderTimer;
 

@@ -8,13 +8,6 @@ EditorMain::EditorMain(QWidget *parent)
 {
     ui.setupUi(this);
     setFocusPolicy(Qt::ClickFocus);
-    ////Main render view
-    //_mainRenderView = new RenderView(this);
-    ////SetParent((HWND)_mainRenderView->winId() , (HWND)winId());
-    //setCentralWidget(_mainRenderView);
-    //centralWidget()->setFocus();
-    //centralWidget()->setFocusPolicy(Qt::ClickFocus);
-
 }
 
 EditorMain::~EditorMain()
@@ -29,14 +22,7 @@ void EditorMain::UpdateRender()
 	{
 		if (glfwWindowShouldClose(windows[i].window))
 		{
-			auto window = windows[i].window;
-			auto it = std::remove_if(windows.begin(), windows.end(), [window](VulkanGLFW& glfw) {
-				return window == glfw.window;
-				});
-			if (it != windows.end())
-			{
-				windows.erase(it);
-			}
+			VulkanApp::RemoveGLFWWindow(windows[i]);
 			i = i - 1;
 			continue;
 		}
@@ -47,16 +33,21 @@ void EditorMain::UpdateRender()
 	}
 }
 
+VulkanGLFW* mainRenderer;
+
 void EditorMain::showEvent(QShowEvent* event)
 {
 	if (_mainRenderer == NULL)
 	{
 		//Enable custom loop
-		auto mainRenderer = VulkanApp::InitVulkanManager(false, true);
-		HWND hwnd = glfwGetWin32Window(mainRenderer);
+		mainRenderer = VulkanApp::InitVulkanManager(false, true);
+
+		//VulkanApp::SetSimpleGLFWWindow(*mainRenderer);
+		HWND hwnd = (HWND)VulkanApp::GetHandle(*mainRenderer);
 		auto mainRendererWindow = QWindow::fromWinId((WId)hwnd);
 		_mainRenderer = QWidget::createWindowContainer(mainRendererWindow, this);
-		//SetParent(hwnd, (HWND)winId());
+		setCentralWidget(_mainRenderer);
+
 		_renderTimer = new QTimer(this);
 		_renderTimer->setInterval(1);
 		connect(_renderTimer, SIGNAL(timeout()), this, SLOT(UpdateRender()));
@@ -66,31 +57,10 @@ void EditorMain::showEvent(QShowEvent* event)
 
 void EditorMain::closeEvent(QCloseEvent* event)
 {
-	_mainRenderer->close();
+	_renderTimer->stop();
     VulkanApp::DeInitVulkanManager();
-}
-
-void EditorMain::focusInEvent(QFocusEvent* event)
-{
-}
-
-void EditorMain::focusOutEvent(QFocusEvent* event)
-{
-}
-
-void EditorMain::mousePressEvent(QMouseEvent* event)
-{
-}
-
-void EditorMain::mouseReleaseEvent(QMouseEvent* event)
-{
 }
 
 void EditorMain::resizeEvent(QResizeEvent* event)
 {
-}
-
-bool EditorMain::eventFilter(QObject* watched, QEvent* event)
-{
-    return QMainWindow::eventFilter(watched, event);
 }
