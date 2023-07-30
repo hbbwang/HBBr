@@ -4,6 +4,9 @@
 #include <mutex>
 #include <thread>
 #include <map>
+
+#include "HTime.h"
+
 class Texture;
 class FrameBufferTexture;
 class VulkanRenderer
@@ -65,6 +68,10 @@ public:
 		return _cmdBuf[_currentFrameIndex];
 	}
 
+	__forceinline double GetFrameRate()const {
+		return _frameRate;
+	}
+
 	/* 帧渲染函数 */
 	HBBR_API void Render();
 
@@ -115,4 +122,8 @@ private:
 
 	//Passes
 	std::unique_ptr<class PassManager> _passManager;
+
+	HTime _frameTime;
+
+	double _frameRate;
 };

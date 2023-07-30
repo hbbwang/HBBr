@@ -1482,6 +1482,7 @@ void VulkanManager::ShutdownImgui()
 
 void VulkanManager::ImguiNewFrame()
 {
+	ImGui_ImplVulkan_SetMinImageCount(_swapchainBufferCount);
 	ImGui_ImplVulkan_NewFrame();
 #if defined(_WIN32)
 	//ImGui_ImplWin32_NewFrame();

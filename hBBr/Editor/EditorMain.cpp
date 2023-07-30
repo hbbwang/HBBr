@@ -22,7 +22,7 @@ void EditorMain::UpdateRender()
 	{
 		if (glfwWindowShouldClose(windows[i].window))
 		{
-			VulkanApp::RemoveGLFWWindow(windows[i]);
+			VulkanApp::RemoveWindow(windows[i]);
 			i = i - 1;
 			continue;
 		}
@@ -33,7 +33,7 @@ void EditorMain::UpdateRender()
 	}
 }
 
-VulkanGLFW* mainRenderer;
+VulkanForm* mainRenderer;
 
 void EditorMain::showEvent(QShowEvent* event)
 {
@@ -42,8 +42,7 @@ void EditorMain::showEvent(QShowEvent* event)
 		//Enable custom loop
 		mainRenderer = VulkanApp::InitVulkanManager(false, true);
 
-		//VulkanApp::SetSimpleGLFWWindow(*mainRenderer);
-		HWND hwnd = (HWND)VulkanApp::GetHandle(*mainRenderer);
+		HWND hwnd = (HWND)VulkanApp::GetWindowHandle(*mainRenderer);
 		auto mainRendererWindow = QWindow::fromWinId((WId)hwnd);
 		_mainRenderer = QWidget::createWindowContainer(mainRendererWindow, this);
 		setCentralWidget(_mainRenderer);

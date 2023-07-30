@@ -89,6 +89,8 @@ void VulkanRenderer::Render()
 {
 	if (!_bRendererRelease && _bInit)
 	{
+		_frameRate = _frameTime.FrameRate_ms();
+
 		if (!Resizing())
 			return;
 

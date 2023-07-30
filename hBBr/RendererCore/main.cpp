@@ -1,11 +1,11 @@
 ﻿#include "GLFWFormMain.h"
 #include "Shader.h"
 
-std::vector<VulkanGLFW> VulkanApp::_glfwWindows;
+std::vector<VulkanForm> VulkanApp::_glfwWindows;
 
 void GLFWResize(GLFWwindow* window, int width, int height)
 {
-	auto it = std::find_if(VulkanApp::GetWindows().begin(),VulkanApp::GetWindows().end(), [window](VulkanGLFW& glfw)
+	auto it = std::find_if(VulkanApp::GetWindows().begin(),VulkanApp::GetWindows().end(), [window](VulkanForm& glfw)
 	{
 		return glfw.window == window;
 	});
@@ -17,7 +17,7 @@ void GLFWResize(GLFWwindow* window, int width, int height)
 
 void GLFWClose(GLFWwindow* window)
 {
-	auto it = std::find_if(VulkanApp::GetWindows().begin(), VulkanApp::GetWindows().end(), [window](VulkanGLFW& glfw)
+	auto it = std::find_if(VulkanApp::GetWindows().begin(), VulkanApp::GetWindows().end(), [window](VulkanForm& glfw)
 	{
 		return glfw.window == window;
 	});
@@ -76,7 +76,7 @@ void GLFWMonitor(GLFWmonitor* monitor, int event)
 
 }
 
-VulkanGLFW* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDebug)
+VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDebug)
 {
 	//must be successful.
 	if (!glfwInit())
@@ -101,7 +101,7 @@ VulkanGLFW* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 			{
 				if (glfwWindowShouldClose(_glfwWindows[i].window))
 				{
-					RemoveGLFWWindow(_glfwWindows[i]);
+					RemoveWindow(_glfwWindows[i]);
 					i = i - 1;
 					continue;
 				}
@@ -147,7 +147,7 @@ void VulkanApp::DeInitVulkanManager()
 	glfwTerminate();
 }
 
-VulkanGLFW* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* title, bool bCreateRenderer)
+VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* title, bool bCreateRenderer)
 {
 	GLFWwindow* window = glfwCreateWindow(w, h, title, nullptr, nullptr);
 	if (!window)
@@ -166,7 +166,7 @@ VulkanGLFW* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 	glfwSetScrollCallback(window,GLFWScroll);
 	glfwSetDropCallback(window,GLFWDrop);
 
-	VulkanGLFW newGLFW = {};
+	VulkanForm newGLFW = {};
 	newGLFW.window = window;
 	newGLFW.name = title;
 	if (bCreateRenderer)
@@ -177,10 +177,10 @@ VulkanGLFW* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 	return &_glfwWindows[_glfwWindows.size() - 1];
 }
 
-void VulkanApp::RemoveGLFWWindow(VulkanGLFW& glfwWindow)
+void VulkanApp::RemoveWindow(VulkanForm& glfwWindow)
 {
 	auto window = glfwWindow.window;
-	auto it = std::remove_if(_glfwWindows.begin(), _glfwWindows.end(), [window](VulkanGLFW& glfw) {
+	auto it = std::remove_if(_glfwWindows.begin(), _glfwWindows.end(), [window](VulkanForm& glfw) {
 		return window == glfw.window;
 		});
 	if (it != _glfwWindows.end())
@@ -189,7 +189,7 @@ void VulkanApp::RemoveGLFWWindow(VulkanGLFW& glfwWindow)
 	}
 }
 
-void VulkanApp::ResizeGLFWWindow(VulkanGLFW& glfwWindow, uint32_t w, uint32_t h)
+void VulkanApp::ResizeWindow(VulkanForm& glfwWindow, uint32_t w, uint32_t h)
 {
 	if (w < 1 || h < 1)
 	{
@@ -199,26 +199,13 @@ void VulkanApp::ResizeGLFWWindow(VulkanGLFW& glfwWindow, uint32_t w, uint32_t h)
 		glfwSetWindowSize(glfwWindow.window, (int)w, (int)h);
 }
 
-void VulkanApp::SetGLFWWindowPos(VulkanGLFW& glfwWindow, uint32_t x, uint32_t y)
+void VulkanApp::SetWindowPos(VulkanForm& glfwWindow, uint32_t x, uint32_t y)
 {
 	if (glfwWindow.window)
 		glfwSetWindowPos(glfwWindow.window, (int)x, (int)y);
 }
 
-void VulkanApp::SetSimpleGLFWWindow(VulkanGLFW& glfwWindow)
-{
-	if (glfwWindow.window)
-	{
-		// 窗体装饰（GLFW_FALSE：表示去掉边框，标题栏，系统按钮等）
-		glfwSetWindowAttrib(glfwWindow.window, GLFW_DECORATED, GLFW_FALSE);
-		glfwSetWindowAttrib(glfwWindow.window, GLFW_NO_WINDOW_CONTEXT, GLFW_TRUE);
-		#if defined(_WIN32)
-		SetWindowLong(glfwGetWin32Window(glfwWindow.window), GWL_STYLE, WS_CHILD | WS_VISIBLE);
-		#endif
-	}
-}
-
-void* VulkanApp::GetHandle(VulkanGLFW& glfwWindow)
+void* VulkanApp::GetWindowHandle(VulkanForm& glfwWindow)
 {
 	if (glfwWindow.window)
 	{

@@ -25,7 +25,7 @@ protected:
 	virtual void PassUpdate() {}
 	virtual void PassReset() {}
 	std::shared_ptr<Texture> GetSceneTexture(uint32_t descIndex);
-	std::unique_ptr<Pipeline> _pipeline;
+	std::unique_ptr<class Pipeline> _pipeline;
 	VulkanRenderer* _renderer = NULL;
 	HString _passName = "PassBase";
 };
@@ -66,39 +66,4 @@ class ComputePass : public PassBase
 {
 public:
 	ComputePass(VulkanRenderer* renderer) :PassBase(renderer) {}
-};
-
-/* Opaque pass define */
-class OpaquePass :public GraphicsPass
-{
-public:
-	struct PassUniformBuffer
-	{
-		glm::mat4 ViewMatrix;
-		glm::mat4 ProjectionMatrix;
-		glm::vec4 BaseColor;
-	};
-	struct ObjectUniformBuffer
-	{
-		glm::mat4 WorldMatrix;
-	};
-	OpaquePass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
-	~OpaquePass();
-	virtual void PassInit()override;
-	virtual void PassBuild()override;
-	virtual void PassUpdate()override;
-private:
-	std::shared_ptr<class DescriptorSet> _descriptorSet_pass;
-	std::shared_ptr<class DescriptorSet> _descriptorSet_obj;
-};
-
-/* Imgui pass define */
-class ImguiPass :public GraphicsPass
-{
-public:
-	ImguiPass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
-	~ImguiPass();
-	virtual void PassInit()override;
-	virtual void PassBuild()override;
-	virtual void PassUpdate()override;
 };

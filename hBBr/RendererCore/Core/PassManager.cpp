@@ -1,6 +1,7 @@
 ﻿#include "PassManager.h"
 #include "VulkanRenderer.h"
 #include "PassBase.h"
+#include "Pass/PassDefine.h"
 
 SceneTexture::SceneTexture(VulkanRenderer* renderer)
 {

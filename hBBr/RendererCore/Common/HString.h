@@ -660,7 +660,7 @@ public:
 		return out;
 	}
 
-	static __forceinline HString	FromUInt(UINT i)
+	static __forceinline HString	FromUInt(unsigned int i)
 	{
 		HString out;
 		char str[128];

@@ -32,6 +32,9 @@
     <Filter Include="Renderer\Form">
       <UniqueIdentifier>{eb1d85df-5f3c-4a67-8ba3-242c5cc2b2d0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderer\Core\Pass">
+      <UniqueIdentifier>{4d0dd611-afb8-444c-8f92-a917cb95313e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\VulkanManager.h">
@@ -121,6 +124,12 @@
     <ClInclude Include="Form\GLFWFormMain.h">
       <Filter>Renderer\Form</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Pass\PassDefine.h">
+      <Filter>Renderer\Core\Pass</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\HTime.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -194,6 +203,12 @@
     </ClCompile>
     <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_glfw.cpp">
       <Filter>ThirdParty\Imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Pass\PassDefine.cpp">
+      <Filter>Renderer\Core\Pass</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\HTime.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

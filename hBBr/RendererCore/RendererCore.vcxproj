@@ -258,9 +258,11 @@
     <ClInclude Include="Common\ConsoleDebug.h" />
     <ClInclude Include="Common\FileSystem.h" />
     <ClInclude Include="Common\HString.h" />
+    <ClInclude Include="Common\HTime.h" />
     <ClInclude Include="Common\XMLStream.h" />
     <ClInclude Include="Core\DescriptorSet.h" />
     <ClInclude Include="Core\PassBase.h" />
+    <ClInclude Include="Core\Pass\PassDefine.h" />
     <ClInclude Include="Core\Pipeline.h" />
     <ClInclude Include="Core\RendererConfig.h" />
     <ClInclude Include="Core\PassManager.h" />
@@ -286,9 +288,11 @@
     <ClCompile Include="Common\Common.cpp" />
     <ClCompile Include="Common\ConsoleDebug.cpp" />
     <ClCompile Include="Common\FileSystem.cpp" />
+    <ClCompile Include="Common\HTime.cpp" />
     <ClCompile Include="Common\XMLStream.cpp" />
     <ClCompile Include="Core\DescriptorSet.cpp" />
     <ClCompile Include="Core\PassBase.cpp" />
+    <ClCompile Include="Core\Pass\PassDefine.cpp" />
     <ClCompile Include="Core\Pipeline.cpp" />
     <ClCompile Include="Core\RendererConfig.cpp" />
     <ClCompile Include="Core\PassManager.cpp" />
