@@ -501,6 +501,26 @@ public:
 		return out;
 	}
 
+	inline HString ClearSpace()
+	{
+		if (length > 0)
+		{
+			std::string s = _str;
+			size_t index = 0;
+			while ((index = s.find(' ', index)) != std::string::npos)
+			{
+				s.erase(index, 1);
+			}
+			index = 0;
+			while ((index = s.find('\t', index)) != std::string::npos)
+			{
+				s.erase(index, 1);
+			}
+			return s.c_str();
+		}
+		return _str;
+	}
+
 	/* 获取文件后缀 */
 	inline HString GetSuffix()
 	{

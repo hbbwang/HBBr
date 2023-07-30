@@ -11,8 +11,22 @@ enum class ShaderType
 	ComputeShader = 2,
 };
 
+typedef uint32_t ShaderFlags;
+typedef enum ShaderFlagBits
+{
+	EnableShaderDebug = 0x00000001,		//Useful for shader debug in renderdoc .
+	HiddenInMaterial = 0x00000002,		//Shader will not be show in Material.
+}ShaderFlagBits;
+
+struct ShaderCacheHeader
+{
+	ShaderFlags flags;
+};
+
 struct ShaderCache
 {
+	ShaderCacheHeader header;
+	//
 	ShaderType shaderType;
 	VkShaderModule shaderModule;
 	HString shaderName;

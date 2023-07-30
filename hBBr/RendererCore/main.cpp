@@ -1,5 +1,9 @@
 ﻿#include "GLFWFormMain.h"
 #include "Shader.h"
+#include "Pipeline.h"
+#if IS_EDITOR
+#include "ShaderCompiler.h"
+#endif
 
 std::vector<VulkanForm> VulkanApp::_glfwWindows;
 
@@ -86,6 +90,9 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
 	VulkanManager::InitManager(bEnableDebug);
+#if IS_EDITOR
+	Shaderc::ShaderCompiler::CompileAllShaders(FileSystem::GetShaderIncludeAbsPath().c_str());
+#endif
 	Shader::LoadShaderCache(FileSystem::GetShaderCacheAbsPath().c_str());
 
 	//Create Main Window
@@ -143,6 +150,7 @@ void VulkanApp::DeInitVulkanManager()
 		_glfwWindows.clear();
 	}
 	Shader::DestroyAllShaderCache();
+	PipelineManager::ClearPipelineObjects();
 	VulkanManager::ReleaseManager();
 	glfwTerminate();
 }

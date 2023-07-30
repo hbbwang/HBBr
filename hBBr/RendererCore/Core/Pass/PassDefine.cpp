@@ -27,22 +27,6 @@ void OpaquePass::PassBuild()
 	_descriptorSet_pass->CreateBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 	_descriptorSet_obj.reset(new DescriptorSet(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1));
 	_descriptorSet_obj->CreateBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-
-	_pipeline.reset(new Pipeline());
-	//Setting pipeline start
-	_pipeline->SetColorBlend(false);
-	_pipeline->SetRenderRasterizer();
-	_pipeline->SetRenderDepthStencil();
-	_pipeline->SetVertexInput(VertexFactory::VertexInputBase::BuildLayout());
-	//
-	_pipeline->SetPipelineLayout(
-		{
-			_descriptorSet_pass->GetDescriptorSetLayout() ,
-			_descriptorSet_obj->GetDescriptorSetLayout()
-		});
-	_pipeline->SetVertexShaderAndPixelShader(Shader::_vsShader["TestShader"], Shader::_psShader["TestShader"]);
-	//Setting pipeline end
-	_pipeline->CreatePipelineObject(_renderPass, (uint32_t)_subpassDescs.size());
 }
 
 void OpaquePass::PassUpdate()
@@ -54,10 +38,26 @@ void OpaquePass::PassUpdate()
 	manager->CmdSetViewport(cmdBuf, { _currentFrameBufferSize });
 	manager->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.0,0 });
 
-	//vkCmdBindPipeline(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->GetPipelineObject());
+	auto pipeline = PipelineManager::GetGraphicsPipelineMap("TestShader");
+	if (pipeline == NULL)
+	{
+		VkGraphicsPipelineCreateInfoCache pipelineCreateInfo = {};
+		PipelineManager::SetColorBlend(pipelineCreateInfo, false);
+		PipelineManager::SetColorBlend(pipelineCreateInfo, false);
+		PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
+		PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
+		PipelineManager::SetVertexInput(pipelineCreateInfo, VertexFactory::VertexInputBase::BuildLayout());
+		PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, Shader::_vsShader["TestShader"], Shader::_psShader["TestShader"]);
+		//Setting pipeline end
+		pipeline = PipelineManager::CreatePipelineObject(pipelineCreateInfo,
+			{
+				_descriptorSet_pass->GetDescriptorSetLayout() ,
+				_descriptorSet_obj->GetDescriptorSetLayout()
+			},
+			_renderPass, (uint32_t)_subpassDescs.size());
 
-
-
+	}
+	manager->CmdCmdBindPipeline(cmdBuf, pipeline->pipeline);
 	manager->EndRenderPass(cmdBuf);
 }
 

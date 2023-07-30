@@ -4,7 +4,7 @@
 #include "Common.h"
 #include "HString.h"
 #include <vector>
-
+#include "Shader.h"
 //32bit
 #define EmptyVariantBit "00000000"
 
@@ -14,13 +14,6 @@ enum class CompileShaderType
 	PixelShader = 1,
 	ComputeShader = 2,
 };
-
-typedef uint32_t ShaderCompileFlags;
-typedef enum ShaderCompileFlagBits
-{
-	EnableShaderDebug = 0x00000001,		//Useful for shader debug in renderdoc .
-	HiddenInMaterial = 0x00000002,		//Shader will not be show in Material.
-}EPipelineFlagBits;
 
 #if IS_EDITOR
 //Shader Compiler(shaderc)
@@ -33,7 +26,7 @@ namespace Shaderc
 		HBBR_API static void CompileAllShaders(const char* srcShaderPath);
 
 		/* Compile single shader. */
-		HBBR_API static void CompileShader(const char* srcShaderFileFullPath,const char* entryPoint, CompileShaderType shaderType, ShaderCompileFlags flags = 0);
+		HBBR_API static void CompileShader(const char* srcShaderFileFullPath,const char* entryPoint, CompileShaderType shaderType);
 	};
 };
 #endif

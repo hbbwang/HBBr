@@ -1436,7 +1436,7 @@ void VulkanManager::CreateShaderModule(VkDevice device, std::vector<char> data, 
 	vkCreateShaderModule(device, &info, VK_NULL_HANDLE, &shaderModule);
 }
 
-void VulkanManager::InitImgui(void* handle, VkRenderPass renderPass)
+void VulkanManager::InitImgui(void* handle, VkRenderPass renderPass, uint32_t subPassIndex)
 {
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.IniFilename = NULL;
@@ -1456,6 +1456,7 @@ void VulkanManager::InitImgui(void* handle, VkRenderPass renderPass)
 	init_info.Allocator = VK_NULL_HANDLE;
 	init_info.MinImageCount = _swapchainBufferCount;
 	init_info.ImageCount = _swapchainBufferCount;
+	init_info.Subpass = subPassIndex;
 	init_info.CheckVkResultFn = VK_NULL_HANDLE;
 	//init_info.UseDynamicRendering = true;
 	ImGui_ImplVulkan_Init(&init_info, renderPass);
@@ -1629,6 +1630,16 @@ void VulkanManager::CmdSetViewport(VkCommandBuffer cmdbuf, std::vector<VkExtent2
 		vps[i] = GetViewport((float)viewports[i].width, (float)viewports[i].height);
 	}
 	vkCmdSetViewport(cmdbuf, 0, (uint32_t)viewports.size(), vps.data());
+}
+
+void VulkanManager::CmdNextSubpass(VkCommandBuffer cmdbuf, VkSubpassContents subpassContents)
+{
+	vkCmdNextSubpass(cmdbuf, subpassContents);
+}
+
+void VulkanManager::CmdCmdBindPipeline(VkCommandBuffer cmdbuf, VkPipeline pipelineObject, VkPipelineBindPoint bindPoint)
+{
+	vkCmdBindPipeline(cmdbuf, bindPoint, pipelineObject);
 }
 
 HString VulkanManager::GetVkResult(VkResult code)

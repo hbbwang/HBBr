@@ -197,7 +197,7 @@ public:
 
 	void CreateShaderModule(VkDevice device, std::vector<char> data, VkShaderModule& shaderModule);
 
-	void InitImgui(void* handle , VkRenderPass renderPass);
+	void InitImgui(void* handle , VkRenderPass renderPass , uint32_t subPassIndex = 0);
 
 	void ShutdownImgui();
 
@@ -216,6 +216,10 @@ public:
 
 	/* CMD */
 	void CmdSetViewport(VkCommandBuffer cmdbuf, std::vector<VkExtent2D> viewports);
+
+	void CmdNextSubpass(VkCommandBuffer cmdbuf, VkSubpassContents subpassContents = VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
+
+	void CmdCmdBindPipeline(VkCommandBuffer cmdbuf ,VkPipeline pipelineObject, VkPipelineBindPoint bindPoint = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS);
 	/*-----------------*/
 
 	/* 获取平台 */

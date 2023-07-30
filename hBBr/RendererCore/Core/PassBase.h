@@ -7,6 +7,8 @@
 #include <map>
 #include "glm/glm.hpp"
 #include "HString.h"
+#include "DescriptorSet.h"
+#include "VertexFactory.h"
 
 class Texture;
 class VulkanRenderer;
@@ -25,7 +27,6 @@ protected:
 	virtual void PassUpdate() {}
 	virtual void PassReset() {}
 	std::shared_ptr<Texture> GetSceneTexture(uint32_t descIndex);
-	std::unique_ptr<class Pipeline> _pipeline;
 	VulkanRenderer* _renderer = NULL;
 	HString _passName = "PassBase";
 };

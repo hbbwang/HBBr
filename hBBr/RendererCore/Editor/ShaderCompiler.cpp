@@ -1,11 +1,14 @@
 ﻿#include "ShaderCompiler.h"
 #include "FileSystem.h"
 #if IS_EDITOR
-#pragma comment(lib,"./shaderc/shaderc_shared.lib")
 #include <fstream>
 #include "ConsoleDebug.h"
 #include "glm/glm.hpp"
 #include "shaderc/shaderc.hpp"
+#include <string>  
+#include <iostream> 
+
+#pragma comment(lib,"./shaderc/shaderc_shared.lib")
 
 void Shaderc::ShaderCompiler::CompileAllShaders(const char* srcShaderPath)
 {
@@ -90,7 +93,7 @@ private:
 	};
 };
 
-void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, const char* entryPoint, CompileShaderType shaderType, ShaderCompileFlags flags)
+void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, const char* entryPoint, CompileShaderType shaderType)
 {
 	{
 		//导入shader源码
@@ -100,8 +103,34 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 		//
 		shaderc::Compiler compiler;
 		shaderc::CompileOptions options;
+		ShaderCacheHeader header = {};
+		//自定义的信息进去
+		{
+			auto line = _shaderSrcCode.Split("\n");
+			for (auto s : line)
+			{
+				s.ClearSpace();
+				HString setting = s;
+				auto settings = setting.Split("]");
+				if (settings[0].IsSame("//[Flags"))
+				{
+					auto flagStr = settings[1].Split(",");
+					for (auto i : flagStr)
+					{
+						if (i.IsSame("EnableShaderDebug"))
+						{
+							header.flags |= EnableShaderDebug;
+						}
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
 		//
-		if ((flags & EnableShaderDebug)) {
+		if ((header.flags & EnableShaderDebug)) {
 			options.SetOptimizationLevel(shaderc_optimization_level_zero);
 			options.SetGenerateDebugInfo();
 		}
@@ -162,8 +191,12 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 			}
 			cachePath += TEXT(".spv");
 			std::ofstream out(cachePath.c_str(), std::ios::binary);
+			//Header
+			out.write((char*)&header, sizeof(ShaderCacheHeader));
+			//ShaderCache
 			out.write((char*)resultChar.data(), resultChar.size() * sizeof(glm::uint));
 			out.close();
+			//Log
 			HString compileResultStr = TEXT("Compile shader [");
 			compileResultStr += srcShaderFileFullPath;
 			compileResultStr += TEXT("] successful.");

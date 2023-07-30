@@ -5,6 +5,7 @@
 #include "Shader.h"
 struct VkGraphicsPipelineCreateInfoCache
 {
+	HString graphicsName;//ps or cs name
 	//------------------------State
 	VkGraphicsPipelineCreateInfo					CreateInfo{};
 	//------------------------Rasterizer
@@ -222,56 +223,53 @@ enum class PipelineType
 	Compute
 };
 
-class Pipeline
+struct PipelineObject
+{
+	VkPipeline	pipeline;
+
+	VkPipelineLayout pipelineLayout;
+
+	PipelineType pipelineType;
+
+	~PipelineObject();
+};
+
+class PipelineManager
 {
 public:
 
-	Pipeline();
-	~Pipeline();
-
-	__forceinline VkPipeline GetPipelineObject()const 
-	{
-		return _pipeline;
-	}
-
-	__forceinline PipelineType GetPipelineType()const
-	{
-		return _pipelineType;
-	}
+	PipelineManager();
+	~PipelineManager();
 
 	//Graphics pipeline setting step 1
-	void SetColorBlend(bool bEnable, StaticBlendState blendState = StaticBlendState());
+	static void SetColorBlend(VkGraphicsPipelineCreateInfoCache & createInfo, bool bEnable, StaticBlendState blendState = StaticBlendState());
 
 	//Graphics pipeline setting step 2
-	void SetRenderRasterizer(Rasterizer rasterizer = Rasterizer());
+	static void SetRenderRasterizer(VkGraphicsPipelineCreateInfoCache& createInfo, Rasterizer rasterizer = Rasterizer());
 
 	//Graphics pipeline setting step 3
-	void SetRenderDepthStencil(DepthStencil depthStencil = DepthStencil());
+	static void SetRenderDepthStencil(VkGraphicsPipelineCreateInfoCache& createInfo, DepthStencil depthStencil = DepthStencil());
 
 	//Graphics pipeline setting step 4
-	void SetVertexInput(VertexInputLayout vertexInputLayout);
+	static void SetVertexInput(VkGraphicsPipelineCreateInfoCache& createInfo, VertexInputLayout vertexInputLayout);
 
 	//Graphics pipeline setting step 5 , also not.
-	void SetDepthStencil();
+	static void SetDepthStencil(VkGraphicsPipelineCreateInfoCache& createInfo);
 
 	//Graphics pipeline setting step 6
-	void SetPipelineLayout(std::vector<VkDescriptorSetLayout> layout);
-
-	//Graphics pipeline setting step 7
-	void SetVertexShaderAndPixelShader(ShaderCache vs, ShaderCache ps);
+	static void SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache vs, ShaderCache ps);
 
 	//Graphics pipeline setting the last step
-	void CreatePipelineObject(VkRenderPass renderPass, uint32_t subpassCount = 1, PipelineType pipelineType = PipelineType::Graphics);
+	static PipelineObject* CreatePipelineObject(VkGraphicsPipelineCreateInfoCache& createInfo, std::vector<VkDescriptorSetLayout> layout, VkRenderPass renderPass, uint32_t subpassCount = 1, PipelineType pipelineType = PipelineType::Graphics);
+
+	static PipelineObject* GetGraphicsPipelineMap(HString name);
+
+	static void ClearPipelineObjects();
 
 private:
+	static void BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCache& createInfo, VkRenderPass renderPass, uint32_t subpassIndex , VkPipeline& pipelineObj);
+	static void SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& createInfo, std::vector<VkDescriptorSetLayout> layout, VkPipelineLayout& pipelineLayout);
+	static std::map<HString, std::unique_ptr<PipelineObject>> _graphicsPipelines;
+	static std::map<HString, std::unique_ptr<PipelineObject>> _computePipelines;
 
-	void BuildGraphicsPipelineState(VkRenderPass renderPass, uint32_t subpassIndex);
-
-	VkPipeline	_pipeline;
-
-	VkPipelineLayout _pipelineLayout;
-
-	VkGraphicsPipelineCreateInfoCache _graphicsPipelineCreateInfoCache = {};
-
-	PipelineType _pipelineType;
 };

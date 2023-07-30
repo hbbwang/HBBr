@@ -15,7 +15,7 @@ PassBase::PassBase(VulkanRenderer* renderer)
 
 PassBase::~PassBase()
 {
-	_pipeline.reset();
+
 }
 
 std::shared_ptr<Texture> PassBase::GetSceneTexture(uint32_t descIndex)

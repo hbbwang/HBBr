@@ -1,7 +1,7 @@
 ﻿#include "Shader.h"
 #include "FileSystem.h"
 #include "VulkanManager.h"
-
+#include <fstream>
 std::map<HString, ShaderCache> Shader::_vsShader;
 std::map<HString, ShaderCache> Shader::_psShader;
 std::map<HString, ShaderCache> Shader::_csShader;
@@ -15,8 +15,16 @@ void Shader::LoadShaderCache(const char* cachePath)
 		auto split = fileName.Split("@");
 		ShaderCache cache = {};
 		//
-		auto shaderData = FileSystem::ReadBinaryFile(i.absPath.c_str());
+		//auto shaderData = FileSystem::ReadBinaryFile(i.absPath.c_str());
+		std::ifstream file(i.absPath.c_str(), std::ios::ate | std::ios::binary);
+		size_t fileSize = static_cast<size_t>(file.tellg());
+		file.seekg(0);
+		//header
+		file.read((char*)&cache.header, sizeof(ShaderCacheHeader));
+		std::vector<char> shaderData(fileSize - sizeof(ShaderCacheHeader));
+		file.read(shaderData.data(), fileSize - sizeof(ShaderCacheHeader));
 		VulkanManager::GetManager()->CreateShaderModule(shaderData, cache.shaderModule);
+		file.close();
 		//
 		cache.shaderPath = i.relativePath;
 		cache.shaderName = split[0];

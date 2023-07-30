@@ -1,3 +1,4 @@
+//[Flags]EnableShaderDebug
 
 struct VSInput
 {
