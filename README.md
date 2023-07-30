@@ -22,5 +22,6 @@ Hbb Renderer.
 1.Debug             （Editor Debug，启动项：Editor）            
 2.Release           （Editor Release，启动项：Editor）              
 3.ReleaseGame_GLFW  （Renderer Only with GLFW,启动项：RendererCore）             
-           
+
+![PreviewImage](/Preview.png)
 
