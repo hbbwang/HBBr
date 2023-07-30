@@ -3,6 +3,24 @@
 #include "Pipeline.h"
 namespace VertexFactory
 {
+	//vertex data cache
+	struct VertexInputScreen
+	{
+		glm::vec3 pos;
+		glm::vec4 col;
+		static VertexInputLayout BuildLayout()
+		{
+			VertexInputLayout result = {};
+			result.inputLayouts = {
+				VK_FORMAT_R32G32B32_SFLOAT,
+				VK_FORMAT_R32G32B32A32_SFLOAT,
+			};
+			result.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			result.inputSize = sizeof(VertexInputScreen);
+			return result;
+		}
+	};
+
 	struct VertexInputBase
 	{
 		glm::vec3 pos;

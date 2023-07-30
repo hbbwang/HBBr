@@ -8,7 +8,6 @@
 #include "HTime.h"
 
 class Texture;
-class FrameBufferTexture;
 class VulkanRenderer
 {
 	friend class PassManager;

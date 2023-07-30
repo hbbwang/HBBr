@@ -37,23 +37,3 @@ std::shared_ptr<Texture> Texture::CreateTexture2D(uint32_t width, uint32_t heigh
 	newTexture->_usageFlags = usageFlags;
 	return std::move(newTexture);
 }
-
-FrameBufferTexture::~FrameBufferTexture()
-{
-	_frameBufferTextures.clear();
-}
-
-std::shared_ptr<FrameBufferTexture> FrameBufferTexture::CreateFrameBuffer(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags)
-{
-	std::shared_ptr<FrameBufferTexture> newTexture = std::make_shared<FrameBufferTexture>();
-	for (int i = 0; i < (int)VulkanManager::GetManager()->GetSwapchainBufferCount(); i++)
-	{
-		newTexture->_frameBufferTextures.push_back(Texture::CreateTexture2D(width,height,format,usageFlags));
-	}
-	return std::move(newTexture);
-}
-
-std::shared_ptr<Texture> FrameBufferTexture::GetBuffer()
-{
-	return _frameBufferTextures[VulkanRenderer::GetCurrentFrameIndex()];
-}

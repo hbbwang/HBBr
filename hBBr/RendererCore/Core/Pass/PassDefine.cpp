@@ -3,7 +3,7 @@
 #include "DescriptorSet.h"
 #include "VertexFactory.h"
 #include "imgui.h"
-
+#include "Buffer.h"
 /*
 	Opaque pass
 */
@@ -27,6 +27,8 @@ void OpaquePass::PassBuild()
 	_descriptorSet_pass->CreateBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 	_descriptorSet_obj.reset(new DescriptorSet(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1));
 	_descriptorSet_obj->CreateBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+	_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
+	_indexBuffer.reset(new Buffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT));
 }
 
 void OpaquePass::PassUpdate()
@@ -47,7 +49,7 @@ void OpaquePass::PassUpdate()
 		PipelineManager::SetColorBlend(pipelineCreateInfo, false);
 		PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
 		PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
-		PipelineManager::SetVertexInput(pipelineCreateInfo, VertexFactory::VertexInputBase::BuildLayout());
+		PipelineManager::SetVertexInput(pipelineCreateInfo, VertexFactory::VertexInputScreen::BuildLayout());
 		PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, Shader::_vsShader["TestShader"], Shader::_psShader["TestShader"]);
 		//Setting pipeline end
 		pipeline = PipelineManager::CreatePipelineObject(pipelineCreateInfo,
@@ -56,9 +58,29 @@ void OpaquePass::PassUpdate()
 				_descriptorSet_obj->GetDescriptorSetLayout()
 			},
 			_renderPass, (uint32_t)_subpassDescs.size());
-
 	}
 	manager->CmdCmdBindPipeline(cmdBuf, pipeline->pipeline);
+	{
+		struct vertexBuffer
+		{
+			glm::vec3 position;
+			glm::vec4 color;
+		};
+		std::vector<vertexBuffer>vb =
+		{
+			{{glm::vec3(-1,1,0)},{glm::vec4(1,0,0,1)}},
+			{{glm::vec3(0,-1,0)},{glm::vec4(0,1,0,1)}},
+			{{glm::vec3(1,1,0)},{glm::vec4(0,0,1,1)}},
+		};
+		std::vector<uint32_t>ib = { 0 ,1 ,2 };
+		VkDeviceSize vertex_offset[1] = { 0 };
+		VkBuffer verBuf[] = { _vertexBuffer->GetBuffer() };
+		_vertexBuffer->BufferMapping<vertexBuffer>(vb.data(), sizeof(vertexBuffer) * vb.size());
+		_indexBuffer->BufferMapping<uint32_t>(ib.data(), sizeof(uint32_t) * ib.size());
+		vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, vertex_offset);
+		vkCmdBindIndexBuffer(cmdBuf, _indexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(cmdBuf, ib.size(), 1, 0, 0, 0);
+	}
 	manager->EndRenderPass(cmdBuf);
 }
 

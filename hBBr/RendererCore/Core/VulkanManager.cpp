@@ -1410,12 +1410,37 @@ void VulkanManager::CreateBuffer(VkBufferUsageFlags usage, VkDeviceSize bufferSi
 	}
 }
 
+
 void VulkanManager::DestroyBuffer(VkBuffer& buffer)
 {
 	if (buffer != VK_NULL_HANDLE)
 	{
 		vkDestroyBuffer(_device, buffer, VK_NULL_HANDLE);
 		buffer = VK_NULL_HANDLE;
+	}
+}
+
+void VulkanManager::AllocateBufferMemory(VkBuffer buffer, VkDeviceMemory& bufferMemory, VkMemoryPropertyFlags propertyFlags)
+{
+	VkMemoryRequirements mem_requirement;
+	vkGetBufferMemoryRequirements(_device, buffer, &mem_requirement);
+	VkMemoryAllocateInfo mem_allocate_info{};
+	mem_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	mem_allocate_info.allocationSize = mem_requirement.size;
+	mem_allocate_info.memoryTypeIndex = FindMemoryTypeIndex(&mem_requirement, propertyFlags);
+	if (vkAllocateMemory(_device, &mem_allocate_info, VK_NULL_HANDLE, &bufferMemory) != VK_SUCCESS) {
+		MessageOut("[ Create Buffer ] Allocate Memory Failed! ", true, true, "255,2,0");
+	}
+	if (vkBindBufferMemory(_device, buffer, bufferMemory, 0) != VK_SUCCESS) {
+		MessageOut("[ Create Buffer ] Bind Buffer Memory!  ", true, true, "255,2,0");
+	}
+}
+
+void VulkanManager::FreeBufferMemory(VkDeviceMemory& bufferMemory)
+{
+	if (bufferMemory != VK_NULL_HANDLE)
+	{
+		vkFreeMemory(_device, bufferMemory, VK_NULL_HANDLE);
 	}
 }
 
@@ -1497,30 +1522,6 @@ void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf)
 {
 	ImGui::Render();
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuf);
-}
-
-void VulkanManager::AllocateBufferMemory(VkBuffer buffer, VkDeviceMemory& bufferMemory, VkMemoryPropertyFlags propertyFlags)
-{
-	VkMemoryRequirements mem_requirement;
-	vkGetBufferMemoryRequirements(_device, buffer, &mem_requirement);
-	VkMemoryAllocateInfo mem_allocate_info{};
-	mem_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	mem_allocate_info.allocationSize = mem_requirement.size;
-	mem_allocate_info.memoryTypeIndex = FindMemoryTypeIndex(&mem_requirement,propertyFlags);
-	if (vkAllocateMemory(_device, &mem_allocate_info, VK_NULL_HANDLE, &bufferMemory) != VK_SUCCESS) {
-		MessageOut("[ Create Buffer ] Allocate Memory Failed! ", true, true, "255,2,0");
-	}
-	if (vkBindBufferMemory(_device, buffer, bufferMemory, 0) != VK_SUCCESS) {
-		MessageOut("[ Create Buffer ] Bind Buffer Memory!  ", true, true, "255,2,0");
-	}
-}
-
-void VulkanManager::FreeBufferMemory(VkDeviceMemory& bufferMemory)
-{
-	if (bufferMemory != VK_NULL_HANDLE)
-	{
-		vkFreeMemory(_device, bufferMemory, VK_NULL_HANDLE);
-	}
 }
 
 void VulkanManager::SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask, VkQueue queue)
@@ -1626,11 +1627,14 @@ void VulkanManager::SubmitQueueForPasses(VkCommandBuffer cmdBuf, std::vector<std
 void VulkanManager::CmdSetViewport(VkCommandBuffer cmdbuf, std::vector<VkExtent2D> viewports)
 {
 	std::vector<VkViewport> vps(viewports.size());
+	std::vector<VkRect2D> scissors(viewports.size());
 	for (int i = 0; i < vps.size(); i++)
 	{
 		vps[i] = GetViewport((float)viewports[i].width, (float)viewports[i].height);
+		scissors[i].extent = { viewports[i].width , viewports[i].height };
 	}
 	vkCmdSetViewport(cmdbuf, 0, (uint32_t)viewports.size(), vps.data());
+	vkCmdSetScissor(cmdbuf, 0, (uint32_t)scissors.size(), scissors.data());
 }
 
 void VulkanManager::CmdNextSubpass(VkCommandBuffer cmdbuf, VkSubpassContents subpassContents)

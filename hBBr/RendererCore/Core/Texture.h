@@ -54,17 +54,3 @@ private:
 	uint32_t _mipCount = 1;
 	VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 };
-
-class FrameBufferTexture
-{
-public:
-
-	FrameBufferTexture() {}
-	~FrameBufferTexture();
-	static std::shared_ptr<FrameBufferTexture> CreateFrameBuffer(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags);
-
-	std::shared_ptr<Texture> GetBuffer();
-
-private:
-	std::vector<std::shared_ptr<Texture>> _frameBufferTextures;
-};
