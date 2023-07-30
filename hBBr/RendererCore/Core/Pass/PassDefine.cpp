@@ -33,6 +33,7 @@ void OpaquePass::PassUpdate()
 {
 	const auto manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
+	COMMAND_MAKER(cmdBuf, OpaquePass,"Opaque Render Pass", glm::vec4(0.2, 1.0, 0.7, 0.2));
 	//Update FrameBuffer
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews(), {});
 	manager->CmdSetViewport(cmdBuf, { _currentFrameBufferSize });
@@ -87,6 +88,7 @@ void ImguiPass::PassUpdate()
 {
 	const auto manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
+	COMMAND_MAKER(cmdBuf, OpaquePass, "Imgui Render Pass", glm::vec4(0.1, 0.4, 0.2, 0.2));
 	//Update FrameBuffer
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews(), {});
 	manager->CmdSetViewport(cmdBuf, { _currentFrameBufferSize });

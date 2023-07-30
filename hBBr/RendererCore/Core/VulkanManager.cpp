@@ -17,6 +17,7 @@ using namespace std;
 //#pragma comment(lib ,"vld.lib")
 #endif
 
+
 std::unique_ptr<VulkanManager> VulkanManager::_vulkanManager;
 
 PFN_vkCreateDebugReportCallbackEXT  fvkCreateDebugReportCallbackEXT = VK_NULL_HANDLE;
@@ -1640,6 +1641,66 @@ void VulkanManager::CmdNextSubpass(VkCommandBuffer cmdbuf, VkSubpassContents sub
 void VulkanManager::CmdCmdBindPipeline(VkCommandBuffer cmdbuf, VkPipeline pipelineObject, VkPipelineBindPoint bindPoint)
 {
 	vkCmdBindPipeline(cmdbuf, bindPoint, pipelineObject);
+}
+
+void VulkanManager::SetObjectName(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name)
+{
+	if (VulkanManager::debugMarkerActive)
+	{
+		VkDebugMarkerObjectNameInfoEXT nameInfo = {};
+		nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT;
+		nameInfo.objectType = objectType;
+		nameInfo.object = object;
+		nameInfo.pObjectName = name;
+		VulkanManager::vkDebugMarkerSetObjectName(device, &nameInfo);
+	}
+}
+
+void VulkanManager::SetObjectTag(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag)
+{
+	if (VulkanManager::debugMarkerActive)
+	{
+		VkDebugMarkerObjectTagInfoEXT tagInfo = {};
+		tagInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_TAG_INFO_EXT;
+		tagInfo.objectType = objectType;
+		tagInfo.object = object;
+		tagInfo.tagName = name;
+		tagInfo.tagSize = tagSize;
+		tagInfo.pTag = tag;
+		VulkanManager::vkDebugMarkerSetObjectTag(device, &tagInfo);
+	}
+}
+
+void VulkanManager::BeginRegion(VkCommandBuffer cmdbuf, const char* pMarkerName, glm::vec4 color)
+{
+	if (VulkanManager::debugMarkerActive)
+	{
+		VkDebugMarkerMarkerInfoEXT markerInfo = {};
+		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
+		memcpy(markerInfo.color, &color[0], sizeof(float) * 4);
+		markerInfo.pMarkerName = pMarkerName;
+		VulkanManager::vkCmdDebugMarkerBegin(cmdbuf, &markerInfo);
+	}
+}
+
+void VulkanManager::InsertRegion(VkCommandBuffer cmdbuf, std::string markerName, glm::vec4 color)
+{
+	if (VulkanManager::debugMarkerActive)
+	{
+		VkDebugMarkerMarkerInfoEXT markerInfo = {};
+		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
+		memcpy(markerInfo.color, &color[0], sizeof(float) * 4);
+		markerInfo.pMarkerName = markerName.c_str();
+		VulkanManager::vkCmdDebugMarkerInsert(cmdbuf, &markerInfo);
+	}
+}
+
+void VulkanManager::EndRegion(VkCommandBuffer cmdbuf)
+{
+	if (VulkanManager::vkCmdDebugMarkerEnd)
+	{
+		VulkanManager::vkCmdDebugMarkerEnd(cmdbuf);
+	}
 }
 
 HString VulkanManager::GetVkResult(VkResult code)

@@ -19,6 +19,23 @@
 #include <array>
 #include "HString.h"
 #include "Thread.h"
+#include "glm/glm.hpp"
+
+#define COMMAND_MAKER(cmdBuf ,UniqueID ,name, color) \
+	struct Renderer_Command_Maker_##UniqueID\
+	{\
+		Renderer_Command_Maker_##UniqueID(VkCommandBuffer cmdBufIn ,const char* passName, glm::vec4 makerColor)\
+		{\
+			_cmdBuf = cmdBufIn;\
+			VulkanManager::BeginRegion(_cmdBuf, passName, makerColor);\
+		}\
+		~Renderer_Command_Maker_##UniqueID()\
+		{\
+			VulkanManager::EndRegion(_cmdBuf);\
+		}\
+		VkCommandBuffer _cmdBuf;\
+	};\
+	Renderer_Command_Maker_##UniqueID _renderer_Command_Maker_##UniqueID(cmdBuf,name,color);
 
 enum class EPlatform :uint8_t
 {
@@ -220,6 +237,14 @@ public:
 	void CmdNextSubpass(VkCommandBuffer cmdbuf, VkSubpassContents subpassContents = VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
 
 	void CmdCmdBindPipeline(VkCommandBuffer cmdbuf ,VkPipeline pipelineObject, VkPipelineBindPoint bindPoint = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS);
+
+	//RenderDoc debug
+	static void SetObjectName(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name);
+	static void SetObjectTag(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag);
+	static void BeginRegion(VkCommandBuffer cmdbuf, const char* pMarkerName, glm::vec4 color);
+	static void InsertRegion(VkCommandBuffer cmdbuf, std::string markerName, glm::vec4 color);
+	static void EndRegion(VkCommandBuffer cmdbuf);
+
 	/*-----------------*/
 
 	/* 获取平台 */
@@ -301,7 +326,5 @@ private:
 	static PFN_vkCmdDebugMarkerBeginEXT vkCmdDebugMarkerBegin;
 	static PFN_vkCmdDebugMarkerEndEXT vkCmdDebugMarkerEnd;
 	static PFN_vkCmdDebugMarkerInsertEXT vkCmdDebugMarkerInsert;
-
 	static std::unique_ptr<VulkanManager> _vulkanManager;
-
 };
