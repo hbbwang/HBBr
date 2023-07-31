@@ -1,8 +1,9 @@
 ﻿#include "DescriptorSet.h"
 #include "VulkanManager.h"
-
-DescriptorSet::DescriptorSet(VkDescriptorType type, uint32_t bindingCount, VkShaderStageFlags shaderStageFlags)
+#include "VulkanRenderer.h"
+DescriptorSet::DescriptorSet(class VulkanRenderer* renderer ,VkDescriptorType type, uint32_t bindingCount, VkShaderStageFlags shaderStageFlags)
 {
+	_renderer = renderer;
 	_descriptorTypes = type;
 	_descriptorSetCount = 1;
 	_shaderStageFlags = shaderStageFlags;
@@ -15,6 +16,10 @@ DescriptorSet::DescriptorSet(VkDescriptorType type, uint32_t bindingCount, VkSha
 			VulkanManager::GetManager()->AllocateDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), _descriptorSetLayout, 1, _descriptorSets[i]);
 		}
 	}
+	if (type & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || type & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
+	{
+		_buffer.reset(new Buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT));
+	}
 }
 
 DescriptorSet::~DescriptorSet()
@@ -23,9 +28,8 @@ DescriptorSet::~DescriptorSet()
 	//{
 	//	  VulkanManager::GetManager()->FreeDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), i);
 	//}
+	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
 	VulkanManager::GetManager()->DestroyDescriptorSetLayout(_descriptorSetLayout);
-	VulkanManager::GetManager()->FreeBufferMemory(_bufferMemory);
-	VulkanManager::GetManager()->DestroyBuffer(_buffer);
 }
 
 void DescriptorSet::Resize(uint32_t newDescriptorSetCount)
@@ -34,7 +38,7 @@ void DescriptorSet::Resize(uint32_t newDescriptorSetCount)
 	{
 		_descriptorSetCount = newDescriptorSetCount;
 		//等待渲染完成
-		vkDeviceWaitIdle(VulkanManager::GetManager()->GetDevice());
+		vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
 		for (int i = 0; i < (int)VulkanManager::GetManager()->GetSwapchainBufferCount(); i++)
 		{
 			//销毁旧的DescriptorSet
@@ -45,31 +49,7 @@ void DescriptorSet::Resize(uint32_t newDescriptorSetCount)
 	}
 }
 
-void DescriptorSet::CreateBuffer(VkBufferUsageFlags usageFlags, uint64_t bufferSize)
+std::vector<VkDescriptorSet> DescriptorSet::GetDescriptorSets() const
 {
-	if (_buffer != VK_NULL_HANDLE)
-		return;
-	_bufferCapacity = bufferSize;
-	VulkanManager::GetManager()->CreateBuffer(usageFlags, bufferSize, _buffer);
-	VulkanManager::GetManager()->AllocateBufferMemory(_buffer, _bufferMemory);
-	MapMemory();
-}
-
-void DescriptorSet::MapMemory()
-{
-	if (_bufferIsMapping)
-		return;
-	_bufferIsMapping = true;
-	auto result = vkMapMemory(VulkanManager::GetManager()->GetDevice(), _bufferMemory, 0, VK_WHOLE_SIZE, 0, &_bufferMapping);
-	if (result != VK_SUCCESS)
-	{
-	}
-}
-
-void DescriptorSet::UnMapMemory()
-{
-	if (!_bufferIsMapping)
-		return;
-	_bufferIsMapping = false;
-	vkUnmapMemory(VulkanManager::GetManager()->GetDevice(), _bufferMemory);
+	return _descriptorSets[_renderer->GetCurrentFrameIndex()];
 }

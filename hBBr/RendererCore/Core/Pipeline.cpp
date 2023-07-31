@@ -141,7 +141,7 @@ void PipelineManager::SetVertexInput(VkGraphicsPipelineCreateInfoCache& createIn
 	createInfo.vertexInputBindingDescs[0] = {};
 	createInfo.vertexInputBindingDescs[0].binding = 0;
 	createInfo.vertexInputBindingDescs[0].stride = vertexInputLayout.inputSize;
-	createInfo.vertexInputBindingDescs[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+	createInfo.vertexInputBindingDescs[0].inputRate = vertexInputLayout.inputRate;
 	createInfo.vertexInputAttributes.resize(vertexInputLayout.inputLayouts.size());
 	uint32_t offset = 0;
 	for (int i = 0; i < createInfo.vertexInputAttributes.size(); i++)
@@ -181,7 +181,7 @@ void PipelineManager::SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& creat
 
 void PipelineManager::SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache vs, ShaderCache ps)
 {
-	createInfo.graphicsName = ps.shaderName;
+	createInfo.graphicsName = "Graphics-" + vs.shaderName +"-"+ ps.shaderName;
 	//set shader
 	//createInfo.CreateInfo.stageCount = _countof(shader_stage);
 	//createInfo.CreateInfo.pStages = shader_stage;
@@ -215,15 +215,7 @@ void PipelineManager::BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCac
 	createInfo.viewportInfo.scissorCount = 1;
 	//-----------------------------------------------------------------------------------VertexInput
 	//-----------------------------------------------------------------------------------InputAssemblyState
-	createInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-	createInfo.inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
-	createInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 	//-----------------------------------------------------------------------------------RasterizationState
-	createInfo.rasterInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	createInfo.rasterInfo.polygonMode = VK_POLYGON_MODE_FILL;
-	createInfo.rasterInfo.cullMode = VK_CULL_MODE_NONE;
-	createInfo.rasterInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-	createInfo.rasterInfo.lineWidth = 1.0f;
 	//-----------------------------------------------------------------------------------ColorBlendState
 	//-----------------------------------------------------------------------------------DepthStencilState
 	VkPipelineDepthStencilStateCreateInfo depthInfo = {};

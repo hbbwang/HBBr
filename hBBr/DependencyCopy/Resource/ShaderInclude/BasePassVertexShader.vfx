@@ -1,0 +1,23 @@
+
+#include "Include/Common.hlsl"
+
+struct VSInput
+{
+    float3 Position     : POSITION;
+    float4 Color        : COLOR;
+    float3 Normal       : NORMAL;
+    float3 Tangent      : TANGENT;
+    float4 Texcoord01   : TEXCOORD0;
+    float4 Texcoord23   : TEXCOORD0;
+};
+
+VSToPS VSMain(VSInput IN)
+{
+    VSToPS OUT;
+    InitVSToPS(OUT);
+
+    OUT.SVPosition = float4(IN.Position.xyz, 1.0f);
+    OUT.Color = IN.Color;
+    
+    return OUT;
+}

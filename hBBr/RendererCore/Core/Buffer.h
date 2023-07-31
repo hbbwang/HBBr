@@ -29,6 +29,18 @@ public:
 
 	void UnMapMemory();
 
+	inline void BufferMapping(void* mappingData, uint64_t bufferSize)
+	{
+		void* bufBegin = (uint8_t*)(_bufferMapping);
+		memcpy(bufBegin, mappingData, bufferSize);
+	}
+
+	inline void BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize)
+	{
+		void* bufBegin = (uint8_t*)(_bufferMapping) + offset;
+		memcpy(bufBegin, mappingData, bufferSize);
+	}
+
 	template<class T>
 	inline void BufferMapping(T mappingStruct)
 	{

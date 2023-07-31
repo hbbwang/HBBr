@@ -143,7 +143,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 		//options.SetTargetSpirv(shaderc_spirv_version_1_3);
 		HString fileName = srcShaderFileFullPath;
 		HString filePath = fileName.GetFilePath();
-		HString ResourcePath = HString::GetExePathWithoutFileName() + "Resource/";
+		HString ResourcePath = FileSystem::GetShaderIncludeAbsPath();
 		ResourcePath.CorrectionPath();
 		options.SetIncluder(std::make_unique<ShaderIncluder>(ResourcePath));
 		HString dTarget;

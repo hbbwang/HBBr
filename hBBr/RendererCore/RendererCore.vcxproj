@@ -268,6 +268,7 @@
     <ClInclude Include="Core\Primitive.h" />
     <ClInclude Include="Core\RendererConfig.h" />
     <ClInclude Include="Core\PassManager.h" />
+    <ClInclude Include="Core\Resource\ModelData.h" />
     <ClInclude Include="Core\Thread.h" />
     <ClInclude Include="Core\Shader.h" />
     <ClInclude Include="Core\Texture.h" />
@@ -299,9 +300,11 @@
     <ClCompile Include="Core\Pipeline.cpp" />
     <ClCompile Include="Core\RendererConfig.cpp" />
     <ClCompile Include="Core\PassManager.cpp" />
+    <ClCompile Include="Core\Resource\ModelData.cpp" />
     <ClCompile Include="Core\Thread.cpp" />
     <ClCompile Include="Core\Shader.cpp" />
     <ClCompile Include="Core\Texture.cpp" />
+    <ClCompile Include="Core\VertexFactory.cpp" />
     <ClCompile Include="Core\VulkanManager.cpp" />
     <ClCompile Include="Core\VulkanRenderer.cpp" />
     <ClCompile Include="Editor\ShaderCompiler.cpp" />

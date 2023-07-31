@@ -35,6 +35,9 @@
     <Filter Include="Renderer\Core\Pass">
       <UniqueIdentifier>{4d0dd611-afb8-444c-8f92-a917cb95313e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderer\Core\Resource">
+      <UniqueIdentifier>{94d3536f-235e-41d5-a018-d48eeba67e6e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\VulkanManager.h">
@@ -136,6 +139,9 @@
     <ClInclude Include="Core\Buffer.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Resource\ModelData.h">
+      <Filter>Renderer\Core\Resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -217,6 +223,12 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Core\Buffer.cpp">
+      <Filter>Renderer\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\ModelData.cpp">
+      <Filter>Renderer\Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\VertexFactory.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
   </ItemGroup>

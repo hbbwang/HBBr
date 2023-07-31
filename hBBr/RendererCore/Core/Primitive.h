@@ -2,9 +2,9 @@
 #include <vector>
 #include "VertexFactory.h"
 
-class Primitive
+class MeshPrimitive
 {
 public:
-	std::vector<VertexFactory::VertexData> _vertexData;
-	std::vector <uint32_t> _vertexIndex;
+	VertexFactory::VertexInput	_vertexInput;
+	std::vector<uint32_t>		_vertexIndices;
 };
