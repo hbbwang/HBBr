@@ -160,6 +160,8 @@ public:
 
 	void CreateDescripotrSetLayout(VkDescriptorType type, uint32_t bindingCount ,  VkDescriptorSetLayout& descriptorSetLayout , VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 
+	void CreateDescripotrSetLayout(std::vector<VkDescriptorType> types, VkDescriptorSetLayout& descriptorSetLayout, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+
 	void DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout);
 
 	/* width and height must be same as attachments(ImageViews) size. */
@@ -168,6 +170,8 @@ public:
 	void DestroyFrameBuffer(VkFramebuffer& framebuffer);
 
 	/* Allocate a new descriptorSet ,attention,we should be free the old or unuseful descriptorSet for save memory. */
+	void AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptorSet);
+
 	void AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, uint32_t newDescriptorSetCount, std::vector<VkDescriptorSet>& descriptorSet);
 
 	/* Pool must created setting VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT */
@@ -230,6 +234,10 @@ public:
 	VkViewport GetViewport(float w,float h);
 
 	void SubmitQueueForPasses(VkCommandBuffer cmdBuf,std::vector<std::shared_ptr<class PassBase>> passes, VkSemaphore presentSemaphore, VkSemaphore submitFinishSemaphore, VkFence executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
+
+	void UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset , VkDeviceSize Range);
+
+	void UpdateImageSamplerDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
 
 	/* CMD */
 	void CmdSetViewport(VkCommandBuffer cmdbuf, std::vector<VkExtent2D> viewports);

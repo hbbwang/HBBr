@@ -115,24 +115,9 @@ void OpaquePass::PassUpdate()
 			0.0f, 0.0f, 1.0f, 0.0f,
 			0.0f, 0.0f, 0.0f, 1.0f);
 		//
-		_descriptorSet_pass->GetBuffer()->BufferMapping(&_passUniformBuffer, sizeof(_passUniformBuffer));
-		VkDescriptorBufferInfo bufferInfo = {};
-		bufferInfo.buffer = _descriptorSet_pass->GetBuffer()->GetBuffer();
-		bufferInfo.offset = 0;
-		bufferInfo.range = sizeof(PassUniformBuffer);
-		VkWriteDescriptorSet descriptorWrite = {};
-		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrite.dstSet = _descriptorSet_pass->GetDescriptorSets()[0];
-		descriptorWrite.dstBinding = 0;
-		descriptorWrite.dstArrayElement = 0;
-		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-		descriptorWrite.descriptorCount = 1;
-		descriptorWrite.pBufferInfo = &bufferInfo; 
-		descriptorWrite.pImageInfo = nullptr; // Optional
-		descriptorWrite.pTexelBufferView = nullptr; // Optional
-		vkUpdateDescriptorSets(manager->GetDevice(), 1, &descriptorWrite, 0, VK_NULL_HANDLE);
+		_descriptorSet_pass->BufferMapping(&_passUniformBuffer, sizeof(_passUniformBuffer));
 		uint32_t dynamicOffset[] = { 0 };
-		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->pipelineLayout, 0, 1, _descriptorSet_pass->GetDescriptorSets().data(), 1, dynamicOffset);
+		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->pipelineLayout, 0, 1, &_descriptorSet_pass->GetDescriptorSet(), 1, dynamicOffset);
 		//
 		VkDeviceSize vertex_offset[1] = { 0 };
 		VkBuffer verBuf[] = { _vertexBuffer->GetBuffer() };

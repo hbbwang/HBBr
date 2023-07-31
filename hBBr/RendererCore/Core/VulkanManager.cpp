@@ -8,6 +8,7 @@
 #include "Texture.h"
 #include "FileSystem.h"
 #include "Shader.h"
+#include "DescriptorSet.h"
 //导入Vulkan静态库
 #pragma comment(lib ,"vulkan-1.lib")
 using namespace std;
@@ -1168,6 +1169,29 @@ void VulkanManager::CreateDescripotrSetLayout(VkDescriptorType descriptorType, u
 	}	
 }
 
+void VulkanManager::CreateDescripotrSetLayout(std::vector<VkDescriptorType> types, VkDescriptorSetLayout& descriptorSetLayout, VkShaderStageFlags shaderStageFlags)
+{
+	std::vector<VkDescriptorSetLayoutBinding> bindings(types.size());
+	for (uint32_t i = 0; i < types.size(); i++)
+	{
+		bindings[i] = {};
+		bindings[i].descriptorType = types[i];
+		bindings[i].descriptorCount = 1;
+		bindings[i].stageFlags = shaderStageFlags;
+		bindings[i].binding = i;
+		bindings[i].pImmutableSamplers = VK_NULL_HANDLE;
+	}
+	VkDescriptorSetLayoutCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	info.bindingCount = (uint32_t)bindings.size();
+	info.pBindings = bindings.data();
+	auto result = vkCreateDescriptorSetLayout(_device, &info, VK_NULL_HANDLE, &descriptorSetLayout);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut("Create Descriptor Set Layout Error!!", false, true);
+	}
+}
+
 void VulkanManager::DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
 {
 	if (descriptorSetLayout != VK_NULL_HANDLE)
@@ -1226,6 +1250,20 @@ void VulkanManager::DestroyFrameBuffer(VkFramebuffer& framebuffer)
 	{
 		vkDestroyFramebuffer(_device, framebuffer, VK_NULL_HANDLE);
 		framebuffer = VK_NULL_HANDLE;
+	}
+}
+
+void VulkanManager::AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptorSet)
+{
+	VkDescriptorSetAllocateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	info.descriptorPool = pool;
+	info.descriptorSetCount = 1;
+	info.pSetLayouts = &descriptorSetLayout;
+	auto result = vkAllocateDescriptorSets(_device, &info, &descriptorSet);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut("Vulkan ERROR: Allocate Descriptor Sets Failed.", false, true);
 	}
 }
 
@@ -1622,6 +1660,43 @@ void VulkanManager::SubmitQueueForPasses(VkCommandBuffer cmdBuf, std::vector<std
 		result = vkQueueSubmit(queue, (uint32_t)1, &info, executeFence);
 	if (result != VK_SUCCESS)
 		MessageOut(" [Submit Queue Immediate]vkQueueSubmit error", false, false);
+}
+
+void VulkanManager::UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range)
+{
+	for (int i = 0; i < descriptorSet->GetTypes().size(); i++)
+	{
+		if (descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+		{
+			VkPhysicalDeviceProperties properties;
+			vkGetPhysicalDeviceProperties(_gpuDevice, &properties);
+			VkDeviceSize minUboAlignment = properties.limits.minUniformBufferOffsetAlignment;
+			if (minUboAlignment > 0) {
+				Range = (Range + (VkDeviceSize)minUboAlignment - 1) & ~((VkDeviceSize)minUboAlignment - 1);
+			}
+			VkDescriptorBufferInfo bufferInfo = {};
+			bufferInfo.buffer = descriptorSet->GetBuffer()->GetBuffer();
+			bufferInfo.offset = offset;
+			bufferInfo.range = Range;
+			VkWriteDescriptorSet descriptorWrite = {};
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = descriptorSet->GetDescriptorSet();
+			descriptorWrite.dstBinding = dstBinding;
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.descriptorType = descriptorSet->GetTypes()[i];
+			descriptorWrite.descriptorCount = 1;
+			descriptorWrite.pBufferInfo = &bufferInfo;
+			descriptorWrite.pImageInfo = VK_NULL_HANDLE; // Optional
+			descriptorWrite.pTexelBufferView = VK_NULL_HANDLE; // Optional
+			vkUpdateDescriptorSets(_device, 1, &descriptorWrite, 0, VK_NULL_HANDLE);
+		}
+	}
+
+}
+
+void VulkanManager::UpdateImageSamplerDescriptorSet(DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range)
+{
+
 }
 
 void VulkanManager::CmdSetViewport(VkCommandBuffer cmdbuf, std::vector<VkExtent2D> viewports)

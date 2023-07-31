@@ -13,25 +13,30 @@ public:
 	DescriptorSet(class VulkanRenderer* renderer , VkDescriptorType type, uint32_t bindingCount, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 	~DescriptorSet();
 
-	void Resize(uint32_t newDescriptorSetCount);
-
 	__forceinline VkDescriptorSetLayout GetDescriptorSetLayout()const { return _descriptorSetLayout; }
 
-	__forceinline Buffer* GetBuffer()const { return _buffer.get(); }
+	void BufferMapping(void* mappingData, uint64_t bufferSize, int bufferIndex = 0);
 
-	std::vector<VkDescriptorSet> GetDescriptorSets()const;
+	inline void BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize , int bufferIndex = 0)
+	{
+		_buffers[bufferIndex]->BufferMapping(mappingData, offset, bufferSize);
+	}
+
+	__forceinline Buffer* GetBuffer(int bufferIndex = 0)const { return _buffers[bufferIndex].get(); }
+
+	__forceinline std::vector<VkDescriptorType> GetTypes()const { return _descriptorTypes; }
+
+	const VkDescriptorSet& GetDescriptorSet();
 private:
-	VkDescriptorType				_descriptorTypes;
+	std::vector<VkDescriptorType>	_descriptorTypes;
 
-	std::vector<std::vector<VkDescriptorSet>>_descriptorSets;
+	std::vector<VkDescriptorSet>	_descriptorSets;
 
 	VkDescriptorSetLayout			_descriptorSetLayout = VK_NULL_HANDLE;
 
 	VkShaderStageFlags				_shaderStageFlags;
 
-	uint32_t						_descriptorSetCount;
-
-	std::unique_ptr<Buffer>			_buffer;
+	std::vector<std::unique_ptr<Buffer>> _buffers;
 
 	class VulkanRenderer* _renderer;
 };
