@@ -1,6 +1,6 @@
 #include "EditorMain.h"
 #include "RenderView.h"
-#include "GLFWFormMain.h"
+#include "FormMain.h"
 #include "GLFWInclude.h"
 #include <qwindow.h>
 EditorMain::EditorMain(QWidget *parent)

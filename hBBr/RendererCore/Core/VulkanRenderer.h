@@ -4,10 +4,11 @@
 #include <mutex>
 #include <thread>
 #include <map>
-
 #include "HTime.h"
 
 class Texture;
+class Scene;
+
 class VulkanRenderer
 {
 	friend class PassManager;
@@ -71,6 +72,10 @@ public:
 		return _frameRate;
 	}
 
+	__forceinline class SceneManager* GetScene() {
+		return _sceneManager.get();
+	}
+
 	/* 帧渲染函数 */
 	HBBR_API void Render();
 
@@ -121,6 +126,9 @@ private:
 
 	//Passes
 	std::unique_ptr<class PassManager> _passManager;
+
+	//Scene
+	std::unique_ptr<class SceneManager> _sceneManager;
 
 	HTime _frameTime;
 

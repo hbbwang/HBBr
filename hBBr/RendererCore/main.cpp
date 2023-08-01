@@ -1,4 +1,4 @@
-﻿#include "GLFWFormMain.h"
+﻿#include "FormMain.h"
 #include "Shader.h"
 #include "Pipeline.h"
 #if IS_EDITOR
@@ -6,6 +6,7 @@
 #endif
 
 std::vector<VulkanForm> VulkanApp::_glfwWindows;
+VulkanForm* VulkanApp::_mainForm;
 
 void GLFWResize(GLFWwindow* window, int width, int height)
 {
@@ -97,6 +98,7 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 
 	//Create Main Window
 	auto win = CreateNewWindow(64, 64, "MainRenderer", true);
+	_mainForm = win;
 
 	if (bCustomRenderLoop)
 	{

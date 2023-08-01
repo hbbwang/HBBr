@@ -7,6 +7,7 @@
 #include "FileSystem.h"
 #include "Shader.h"
 #include "Thread.h"
+#include "Resource/SceneManager.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -36,6 +37,7 @@ void VulkanRenderer::Release()
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
 	_passManager.reset();
+	_sceneManager.reset();
 	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf);
 	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
 	_vulkanManager->DestroyRenderSemaphores(_presentSemaphore);
@@ -79,15 +81,23 @@ void VulkanRenderer::Init()
 			MessageOut((HString("Has the same name of renderer.Random a new name is [") + _rendererName + "]").c_str(), false, true);
 		}
 	}
+	//Init scene
+	_sceneManager.reset(new SceneManager());
+	 
 	//Init passes
 	_passManager.reset(new PassManager());
-	_passManager->PassesInit(this);
-	_bInit = true;
+
 }
 
 void VulkanRenderer::Render()
 {
-	if (!_bRendererRelease && _bInit)
+	if (!_bInit)
+	{
+		_passManager->PassesInit(this);
+		_sceneManager->SceneInit(this);
+		_bInit = true;
+	}
+	else if (!_bRendererRelease && _bInit)
 	{
 		_frameRate = _frameTime.FrameRate_ms();
 
@@ -102,7 +112,8 @@ void VulkanRenderer::Render()
 		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], &_swapchainIndex))
 		{
 			Resizing(true);
-		}	
+		}
+		_sceneManager->SceneUpdate();
 		_passManager->PassesUpdate();
 		//Present swapchain.
 		if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], _swapchainIndex))
