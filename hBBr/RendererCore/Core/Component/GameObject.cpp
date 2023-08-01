@@ -1,8 +1,8 @@
 ﻿#include"GameObject.h"
 #include "FormMain.h"
 #include "Resource/SceneManager.h"
-
-GameObject::GameObject(SceneManager* scene)
+#include "Component.h"
+GameObject::GameObject(HString objectName, SceneManager* scene)
 {
 	if (scene == NULL)
 	{
@@ -12,6 +12,8 @@ GameObject::GameObject(SceneManager* scene)
 	{
 		_scene = scene;
 	}
+	_name = objectName;
+	_bActive = true;
 	_scene->_gameObjects.push_back(this);
 }
 
@@ -31,7 +33,7 @@ void GameObject::SetActive(bool newActive)
 
 void GameObject::Init()
 {
-
+	_bInit = true;
 }
 
 bool GameObject::Update()
@@ -42,6 +44,8 @@ bool GameObject::Update()
 		if (it != _scene->_gameObjects.end())
 		{
 			_scene->_gameObjects.erase(it);
+			ExecuteDestroy();
+			delete this;
 		}
 		return false;
 	}
@@ -49,7 +53,29 @@ bool GameObject::Update()
 	{
 		if (_bActive)
 		{
+			if (!_bInit)//Init
+			{
+				Init();
+			}
+			else
+			{
+				const auto compCount = _comps.size();
+				for (int i = 0; i < compCount; i++)
+				{
+					if (!_comps[i]->Update())
+					{
+						i -= 1;
+					}
+				}
 
+			}
 		}
 	}
+	return true;
+}
+
+void GameObject::ExecuteDestroy()
+{
+
+
 }

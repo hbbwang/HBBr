@@ -1,9 +1,9 @@
 ﻿#include"SceneManager.h"
 #include "VulkanRenderer.h"
-
+#include "Component/GameObject.h"
 SceneManager::~SceneManager()
 {
-
+	GameObject* cube = new GameObject();
 }
 
 void SceneManager::SceneInit(class VulkanRenderer* renderer)

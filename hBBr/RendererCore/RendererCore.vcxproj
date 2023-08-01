@@ -261,6 +261,10 @@
     <ClInclude Include="Common\HTime.h" />
     <ClInclude Include="Common\XMLStream.h" />
     <ClInclude Include="Core\Buffer.h" />
+    <ClInclude Include="Core\Component\CameraComponent.h" />
+    <ClInclude Include="Core\Component\Component.h" />
+    <ClInclude Include="Core\Component\GameObject.h" />
+    <ClInclude Include="Core\Component\MeshComponent.h" />
     <ClInclude Include="Core\DescriptorSet.h" />
     <ClInclude Include="Core\PassBase.h" />
     <ClInclude Include="Core\Pass\PassDefine.h" />
@@ -269,6 +273,7 @@
     <ClInclude Include="Core\RendererConfig.h" />
     <ClInclude Include="Core\PassManager.h" />
     <ClInclude Include="Core\Resource\ModelData.h" />
+    <ClInclude Include="Core\Resource\SceneManager.h" />
     <ClInclude Include="Core\Thread.h" />
     <ClInclude Include="Core\Shader.h" />
     <ClInclude Include="Core\Texture.h" />
@@ -276,7 +281,7 @@
     <ClInclude Include="Core\VulkanManager.h" />
     <ClInclude Include="Core\VulkanRenderer.h" />
     <ClInclude Include="Editor\ShaderCompiler.h" />
-    <ClInclude Include="Form\GLFWFormMain.h" />
+    <ClInclude Include="Form\FormMain.h" />
     <ClInclude Include="Form\GLFWInclude.h" />
   </ItemGroup>
   <ItemGroup>
@@ -294,6 +299,10 @@
     <ClCompile Include="Common\HTime.cpp" />
     <ClCompile Include="Common\XMLStream.cpp" />
     <ClCompile Include="Core\Buffer.cpp" />
+    <ClCompile Include="Core\Component\CameraComponent.cpp" />
+    <ClCompile Include="Core\Component\Component.cpp" />
+    <ClCompile Include="Core\Component\GameObject.cpp" />
+    <ClCompile Include="Core\Component\MeshComponent.cpp" />
     <ClCompile Include="Core\DescriptorSet.cpp" />
     <ClCompile Include="Core\PassBase.cpp" />
     <ClCompile Include="Core\Pass\PassDefine.cpp" />
@@ -301,6 +310,7 @@
     <ClCompile Include="Core\RendererConfig.cpp" />
     <ClCompile Include="Core\PassManager.cpp" />
     <ClCompile Include="Core\Resource\ModelData.cpp" />
+    <ClCompile Include="Core\Resource\SceneManager.cpp" />
     <ClCompile Include="Core\Thread.cpp" />
     <ClCompile Include="Core\Shader.cpp" />
     <ClCompile Include="Core\Texture.cpp" />

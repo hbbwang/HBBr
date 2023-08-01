@@ -5,12 +5,14 @@
 class GameObject
 {
 	friend class SceneManager;
+	friend class Component;
 public:
 
-	GameObject(class SceneManager* scene = NULL);
+	GameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL);
 	~GameObject();
 
 	__forceinline void Destroy() {
+		SetActive(false);
 		_bWantDestroy = true;
 	}
 
@@ -35,11 +37,18 @@ private:
 	/* If object need to destroy(_bWantDesctroy = true),the function will return false. */
 	bool Update();
 
+	/* Auto run destroy execute.Do not call this function initiatively. */
+	void ExecuteDestroy();
+
 	class SceneManager* _scene = NULL;
 
 	bool _bActive;
 
-	bool _bWantDestroy = false;
+	bool _bWantDestroy;
 
-	HString _name = "NewGameObject";
+	bool _bInit;
+
+	std::vector<class Component*> _comps;
+
+	HString _name;
 };
