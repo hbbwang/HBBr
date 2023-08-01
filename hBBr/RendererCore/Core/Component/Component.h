@@ -1,5 +1,8 @@
 ﻿#pragma once
+//基础Compoennt组件类,组件都是附加在GameObject上的,结构体参数必须至少带有class GameObject* parent
 #include <vector>
+
+
 class Component
 {
 	friend class GameObject;

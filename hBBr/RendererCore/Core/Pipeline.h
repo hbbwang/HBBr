@@ -37,6 +37,7 @@ struct VertexInputLayout
 	VkVertexInputRate inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 	uint32_t inputSize;
 	std::vector<VkFormat>inputLayouts;
+	HString inputName = "VIL";
 };
 
 enum class ColorWriteMask

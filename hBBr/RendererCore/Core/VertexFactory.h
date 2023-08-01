@@ -13,6 +13,8 @@ namespace VertexFactory
 		std::vector<glm::vec4> uv01;
 		std::vector<glm::vec4> uv23;
 
+		std::vector<uint32_t> vertexIndices;
+
 		std::vector<float> GetData()
 		{
 			std::vector<float> result(

@@ -5,8 +5,8 @@
 #include "imgui.h"
 #include "Buffer.h"
 #include "glm/matrix.hpp"
-
 #include "glm/ext.hpp"
+#include "Primitive.h"
 /*
 	Opaque pass
 */
@@ -42,90 +42,94 @@ void OpaquePass::PassUpdate()
 	manager->CmdSetViewport(cmdBuf, { _currentFrameBufferSize });
 	manager->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.0,0 });
 
-	VertexFactory::VertexInput vertexInput = {};
-	vertexInput.pos = 
-	{ 
-		glm::vec3(1.0f,1.0f,-1.0f) ,
-		glm::vec3(1.0f,-1.0f,-1.0f),
-		glm::vec3(-1.0f,-1.0f,-1.0f),
-		glm::vec3(-1.0f,1.0f,-1.0f),
-		glm::vec3(-1.0f,1.0f,1.0f),
-		glm::vec3(-1.0f,-1.0f,1.0f),
-		glm::vec3(1.0f,-1.0f,1.0f),
-		glm::vec3(1.0f,1.0f,1.0f),
-	};
-	vertexInput.col = 
-	{
-		glm::vec4(1,0,0,1),
-		glm::vec4(0,1,0,1),
-		glm::vec4(0,0,1,1),
-		glm::vec4(1,0,1,1),
-		glm::vec4(1,1,1,1),
-		glm::vec4(0,1,1,1),
-		glm::vec4(1,1,0,1),
-		glm::vec4(1,0,1,1),
-	};
-	std::vector<uint32_t>ib =
-	{
-		0,1,2,0,2,3,
-		0,3,4,0,4,7,
-		4,5,6,4,6,7,
-		1,6,5,1,5,2,
-		3,2,5,3,5,4,
-		7,6,1,7,1,0
-	};
-	auto vbd = vertexInput.GetData();
+	//VertexFactory::VertexInput vertexInput = {};
+	//vertexInput.pos = 
+	//{ 
+	//	glm::vec3(1.0f,1.0f,-1.0f) ,
+	//	glm::vec3(1.0f,-1.0f,-1.0f),
+	//	glm::vec3(-1.0f,-1.0f,-1.0f),
+	//	glm::vec3(-1.0f,1.0f,-1.0f),
+	//	glm::vec3(-1.0f,1.0f,1.0f),
+	//	glm::vec3(-1.0f,-1.0f,1.0f),
+	//	glm::vec3(1.0f,-1.0f,1.0f),
+	//	glm::vec3(1.0f,1.0f,1.0f),
+	//};
+	//vertexInput.col = 
+	//{
+	//	glm::vec4(1,0,0,1),
+	//	glm::vec4(0,1,0,1),
+	//	glm::vec4(0,0,1,1),
+	//	glm::vec4(1,0,1,1),
+	//	glm::vec4(1,1,1,1),
+	//	glm::vec4(0,1,1,1),
+	//	glm::vec4(1,1,0,1),
+	//	glm::vec4(1,0,1,1),
+	//};
+	//std::vector<uint32_t>ib =
+	//{
+	//	0,1,2,0,2,3,
+	//	0,3,4,0,4,7,
+	//	4,5,6,4,6,7,
+	//	1,6,5,1,5,2,
+	//	3,2,5,3,5,4,
+	//	7,6,1,7,1,0
+	//};
+	//auto vbd = vertexInput.GetData();
 
-	VertexFactory::ScreenTriangleVertexInput scrrenTri;
-
-	auto pipeline = PipelineManager::GetGraphicsPipelineMap("Graphics-TestShader-TestShader");
-	if (pipeline == NULL)
+	for (auto p : PrimitiveProxy::GetModelPrimitives(Pass::BasePass))
 	{
-		VkGraphicsPipelineCreateInfoCache pipelineCreateInfo = {};
-		PipelineManager::SetColorBlend(pipelineCreateInfo, false);
-		PipelineManager::SetColorBlend(pipelineCreateInfo, false);
-		PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
-		PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
-		PipelineManager::SetVertexInput(pipelineCreateInfo, vertexInput.BuildLayout());
-		PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, Shader::_vsShader["TestShader"], Shader::_psShader["TestShader"]);
-		//Setting pipeline end
-		pipeline = PipelineManager::CreatePipelineObject(pipelineCreateInfo,
+		for (int i = 0; i < p.vertexData.size(); i++)
+		{
+			auto pipeline = PipelineManager::GetGraphicsPipelineMap("Graphics-TestShader-TestShader-" + p.vertexInputLayouts[i].inputName);
+			if (pipeline == NULL)
 			{
-				_descriptorSet_pass->GetDescriptorSetLayout() ,
-				_descriptorSet_obj->GetDescriptorSetLayout()
-			},
-			_renderPass, (uint32_t)_subpassDescs.size());
-	}
-	manager->CmdCmdBindPipeline(cmdBuf, pipeline->pipeline);
-	{
-		//Update uniform
-		_passUniformBuffer = {};
-		_passUniformBuffer.ScreenInfo = glm::vec4((float)_currentFrameBufferSize.width, (float)_currentFrameBufferSize.height, 0.001f, 500.0f);
-		_passUniformBuffer.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		//_passUniformBuffer.View_Inv = glm::inverse(_passUniformBuffer.View);
-		float aspect = (float)_currentFrameBufferSize.width / (float)_currentFrameBufferSize.height;
-		_passUniformBuffer.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.001f, 500.0f);
-		_passUniformBuffer.Projection[1][1] *= -1;
-		//_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
-		_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
-		//_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
-		_passUniformBuffer.WorldMatrix = glm::mat4(
-			1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 1.0f);
-		//
-		_descriptorSet_pass->BufferMapping(&_passUniformBuffer, sizeof(_passUniformBuffer));
-		uint32_t dynamicOffset[] = { 0 };
-		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->pipelineLayout, 0, 1, &_descriptorSet_pass->GetDescriptorSet(), 1, dynamicOffset);
-		//
-		VkDeviceSize vertex_offset[1] = { 0 };
-		VkBuffer verBuf[] = { _vertexBuffer->GetBuffer() };
-		_vertexBuffer->BufferMapping(vbd.data(), sizeof(float) * vbd.size());
-		_indexBuffer->BufferMapping<uint32_t>(ib.data(), sizeof(uint32_t) * ib.size());
-		vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, vertex_offset);
-		vkCmdBindIndexBuffer(cmdBuf, _indexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(cmdBuf, ib.size(), 1, 0, 0, 0);
+				VkGraphicsPipelineCreateInfoCache pipelineCreateInfo = {};
+				PipelineManager::SetColorBlend(pipelineCreateInfo, false);
+				PipelineManager::SetColorBlend(pipelineCreateInfo, false);
+				PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
+				PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
+				PipelineManager::SetVertexInput(pipelineCreateInfo, p.vertexInputLayouts[i]);
+				PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, Shader::_vsShader["TestShader"], Shader::_psShader["TestShader"]);
+				//Setting pipeline end
+				pipeline = PipelineManager::CreatePipelineObject(pipelineCreateInfo,
+					{
+						_descriptorSet_pass->GetDescriptorSetLayout() ,
+						_descriptorSet_obj->GetDescriptorSetLayout()
+					},
+					_renderPass, (uint32_t)_subpassDescs.size());
+			}
+			manager->CmdCmdBindPipeline(cmdBuf, pipeline->pipeline);
+			{
+				//Update uniform
+				_passUniformBuffer = {};
+				_passUniformBuffer.ScreenInfo = glm::vec4((float)_currentFrameBufferSize.width, (float)_currentFrameBufferSize.height, 0.001f, 500.0f);
+				_passUniformBuffer.View = glm::lookAt(glm::vec3(0.0f, 2.0f, -4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				//_passUniformBuffer.View_Inv = glm::inverse(_passUniformBuffer.View);
+				float aspect = (float)_currentFrameBufferSize.width / (float)_currentFrameBufferSize.height;
+				_passUniformBuffer.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.001f, 500.0f);
+				_passUniformBuffer.Projection[1][1] *= -1;
+				//_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
+				_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
+				//_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
+				_passUniformBuffer.WorldMatrix = glm::mat4(
+					1.0f, 0.0f, 0.0f, 0.0f,
+					0.0f, 1.0f, 0.0f, 0.0f,
+					0.0f, 0.0f, 1.0f, 0.0f,
+					0.0f, 0.0f, 0.0f, 1.0f);
+				//
+				_descriptorSet_pass->BufferMapping(&_passUniformBuffer, sizeof(_passUniformBuffer));
+				uint32_t dynamicOffset[] = { 0 };
+				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->pipelineLayout, 0, 1, &_descriptorSet_pass->GetDescriptorSet(), 1, dynamicOffset);
+				//
+				VkDeviceSize vertex_offset[1] = { 0 };
+				VkBuffer verBuf[] = { _vertexBuffer->GetBuffer() };
+				_vertexBuffer->BufferMapping(p.vertexData[i].data(), sizeof(float) * p.vertexData[i].size());
+				_indexBuffer->BufferMapping<uint32_t>(p.vertexIndices[i].data(), sizeof(uint32_t) * p.vertexIndices[i].size());
+				vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, vertex_offset);
+				vkCmdBindIndexBuffer(cmdBuf, _indexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+				vkCmdDrawIndexed(cmdBuf, p.vertexIndices[i].size(), 1, 0, 0, 0);
+			}
+		}
 	}
 	manager->EndRenderPass(cmdBuf);
 }

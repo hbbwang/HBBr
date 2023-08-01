@@ -178,7 +178,8 @@
     <PreBuildEvent>
       <Command>xcopy  /s /y /e /i $(solutiondir)DependencyCopy\Config\* $(solutiondir)$(Platform)\$(Configuration)\Config\
 xcopy  /s /y /e /i $(solutiondir)DependencyCopy\Resource\* $(solutiondir)$(Platform)\$(Configuration)\Resource\
-xcopy  /s /y /e /i $(solutiondir)ThirdParty\shaderc\*.dll $(solutiondir)$(Platform)\$(Configuration)\</Command>
+xcopy  /s /y /e /i $(solutiondir)ThirdParty\shaderc\*.dll $(solutiondir)$(Platform)\$(Configuration)\
+xcopy  /s /y /e /i $(solutiondir)ThirdParty\assimp\*.dll $(solutiondir)$(Platform)\$(Configuration)\</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -203,7 +204,8 @@ xcopy  /s /y /e /i $(solutiondir)ThirdParty\shaderc\*.dll $(solutiondir)$(Platfo
     <PreBuildEvent>
       <Command>xcopy  /s /y /e /i $(solutiondir)DependencyCopy\Config\* $(solutiondir)$(Platform)\$(Configuration)\Config\
 xcopy  /s /y /e /i $(solutiondir)DependencyCopy\Resource\* $(solutiondir)$(Platform)\$(Configuration)\Resource\
-xcopy  /s /y /e /i $(solutiondir)ThirdParty\shaderc\*.dll $(solutiondir)$(Platform)\$(Configuration)\</Command>
+xcopy  /s /y /e /i $(solutiondir)ThirdParty\shaderc\*.dll $(solutiondir)$(Platform)\$(Configuration)\
+xcopy  /s /y /e /i $(solutiondir)ThirdParty\assimp\*.dll $(solutiondir)$(Platform)\$(Configuration)\</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>

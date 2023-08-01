@@ -26,7 +26,7 @@ public:
 	HBBR_API static void ResizeWindow(VulkanForm& glfwWindow , uint32_t w, uint32_t h);
 	HBBR_API static void SetWindowPos(VulkanForm& glfwWindow, uint32_t x, uint32_t y);
 	HBBR_API static void* GetWindowHandle(VulkanForm& glfwWindow);
-	HBBR_API static inline VulkanForm* GetMainForm()const { return _mainForm; }
+	HBBR_API static inline VulkanForm* GetMainForm() { return _mainForm; }
 private:
 
 	static std::vector<VulkanForm> _glfwWindows;

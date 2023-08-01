@@ -157,8 +157,11 @@
     <ClInclude Include="Core\Component\Component.h">
       <Filter>Renderer\Core\Component</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Component\MeshComponent.h">
+    <ClInclude Include="Core\Component\ModelComponent.h">
       <Filter>Renderer\Core\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Pass\PassType.h">
+      <Filter>Renderer\Core\Pass</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -261,8 +264,11 @@
     <ClCompile Include="Core\Component\Component.cpp">
       <Filter>Renderer\Core\Component</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Component\MeshComponent.cpp">
+    <ClCompile Include="Core\Component\ModelComponent.cpp">
       <Filter>Renderer\Core\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Primitive.cpp">
+      <Filter>Renderer\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

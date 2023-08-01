@@ -30,6 +30,14 @@ public:
 		_name = newName;
 	}
 
+	template<typename T, typename ...Args>
+	T* AddComponent(Args... args)
+	{
+		T* newComp = new T(this, args...);
+		_comps.push_back(newComp);
+		return newComp;
+	}
+
 private:
 
 	void Init();

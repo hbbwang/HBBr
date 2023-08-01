@@ -9,7 +9,7 @@
 #include "HString.h"
 #include "DescriptorSet.h"
 #include "VertexFactory.h"
-
+#include "Primitive.h"
 class Texture;
 class VulkanRenderer;
 
