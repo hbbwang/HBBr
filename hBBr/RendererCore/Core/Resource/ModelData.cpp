@@ -185,23 +185,31 @@ ModelData* ModelFileStream::ImportFbxToMemory(HString fbxPath)
 	return _modelCache[fbxPath].get();
 }
 
-bool ModelFileStream::BuildModelPrimitive(ModelData* data, ModelPrimitive& prim)
+bool ModelFileStream::BuildGraphicsPrimitives(ModelData* data, std::vector<GraphicsPrimitive>& prims)
 {
 	if (data != NULL)
 	{
-		prim.boundingBox_min = data->boundingBox_min;
-		prim.boundingBox_max = data->boundingBox_max;
-		prim.vertexData.resize(data->faces.size());
-		prim.vertexInputLayouts.resize(data->faces.size());
-		prim.vertexIndices.resize(data->faces.size());
-
+		//prim.boundingBox_min = data->boundingBox_min;
+		//prim.boundingBox_max = data->boundingBox_max;
+		//prim.vertexData.resize(data->faces.size());
+		//prim.vertexIndices.resize(data->faces.size());
+		//for (int i = 0; i < data->faces.size(); i++)
+		//{
+		//	prim.vertexData[i]=(data->faces[i].vertexData.GetData());
+		//	prim.vertexIndices[i]=(data->faces[i].vertexData.vertexIndices);
+		//}
+		prims.resize(data->faces.size());
 		for (int i = 0; i < data->faces.size(); i++)
 		{
-			//prim.vertexInputs.push_back(data->faces[i].vertexData);
-			prim.vertexData[i] = data->faces[i].vertexData.GetData();
-			prim.vertexInputLayouts[i] = data->faces[i].vertexData.BuildLayout();
-			prim.vertexIndices[i] = data->faces[i].vertexData.vertexIndices;
-		} 
+			prims[i].graphicsName = data->faces[i].matName;
+			ModelPrimitive mP = {};
+			mP.boundingBox_min = data->boundingBox_min;
+			mP.boundingBox_max = data->boundingBox_max;
+			mP.vertexInput = data->faces[i].vertexData;
+			mP.vertexIndices = data->faces[i].vertexData.vertexIndices;
+			prims[i].modelPrimitives.push_back(mP);
+
+		}
 		return true;
 	}
 	return false;

@@ -43,4 +43,17 @@ void InitVSToPS(inout VSToPS vs2ps)
     vs2ps.WorldPosition = float3(0,0,0);
 }
 
+float3 DirectionLocalToWorld(in float3 LocalDir)
+{
+    float3x3 worldDirMatrix = (float3x3)World;
+    return mul(worldDirMatrix , LocalDir).xyz;
+}
+
+
+
+
+
+
+
+
 #endif

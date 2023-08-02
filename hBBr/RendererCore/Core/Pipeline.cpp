@@ -1,7 +1,6 @@
 ﻿#include "Pipeline.h"
 #include "VulkanRenderer.h"
 #include "VulkanManager.h"
-
 std::map<HString, std::unique_ptr<PipelineObject>> PipelineManager::_graphicsPipelines;
 std::map<HString, std::unique_ptr<PipelineObject>> PipelineManager::_computePipelines;
 
@@ -25,12 +24,13 @@ PipelineManager::~PipelineManager()
 
 }
 
-PipelineObject* PipelineManager::CreatePipelineObject(VkGraphicsPipelineCreateInfoCache& createInfo, std::vector<VkDescriptorSetLayout> layout, VkRenderPass renderPass, uint32_t subpassCount, PipelineType pipelineType)
+PipelineObject* PipelineManager::CreatePipelineObject(VkGraphicsPipelineCreateInfoCache& createInfo, std::vector<VkDescriptorSetLayout> layout, VkRenderPass renderPass, HString pipelineName, uint32_t subpassCount, PipelineType pipelineType)
 {
 	if (subpassCount <= 0)
 	{
 		MessageOut("Create Pipeline Object Error,subpass count is 0.", true, true);
 	}
+	createInfo.graphicsName = pipelineName;
 	std::unique_ptr<PipelineObject> newPSO = std::make_unique<PipelineObject>();
 	newPSO->pipelineType = pipelineType;
 	SetPipelineLayout(createInfo, layout, newPSO->pipelineLayout);
@@ -181,7 +181,6 @@ void PipelineManager::SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& creat
 
 void PipelineManager::SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache vs, ShaderCache ps)
 {
-	createInfo.graphicsName = "Graphics-" + vs.shaderName +"-"+ ps.shaderName;
 	//set shader
 	//createInfo.CreateInfo.stageCount = _countof(shader_stage);
 	//createInfo.CreateInfo.pStages = shader_stage;

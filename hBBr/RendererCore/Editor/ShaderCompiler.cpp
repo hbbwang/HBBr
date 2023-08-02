@@ -107,6 +107,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 		//自定义的信息进去
 		{
 			auto line = _shaderSrcCode.Split("\n");
+			bool bSearchVertexInputLayout = false;
 			for (auto s : line)
 			{
 				s.ClearSpace();
@@ -114,7 +115,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 				auto settings = setting.Split("]");
 				if (settings[0].IsSame("//[Flags"))
 				{
-					auto flagStr = settings[1].Split(",");
+					auto flagStr = settings[1].Split(";");
 					for (auto i : flagStr)
 					{
 						if (i.IsSame("EnableShaderDebug"))
@@ -123,9 +124,50 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 						}
 					}
 				}
-				else
+				else if (settings[0].IsSame("//[InputLayout"))
 				{
-					break;
+					bSearchVertexInputLayout = true;
+				}
+				else if (bSearchVertexInputLayout)
+				{
+					//查找类型符号
+					//[0]pos:POSITION , [1]nor:NORMAL , [2]tar:TANGENT , [3]col:COLOR , [4]uv01:TEXCOORD0 , [5]uv23:TEXCOORD1
+					bool bFind = false;
+					int size = 0;
+					if (s.Contains("float3"))
+					{
+						bFind = true;
+						size = 3;
+					}
+					else if (s.Contains("float4"))
+					{
+						bFind = true;
+						size = 4;
+					}
+					if (bFind)
+					{
+						auto sem = s.Split(":");
+						if (sem.size() > 1)
+						{
+							if (sem[1].Contains("POSITION"))
+								header.vertexInput[0] = size;
+							else if (sem[1].Contains("NORMAL"))
+								header.vertexInput[1] = size;
+							else if (sem[1].Contains("TANGENT"))
+								header.vertexInput[2] = size;
+							else if (sem[1].Contains("COLOR"))
+								header.vertexInput[3] = size;
+							else if (sem[1].Contains("TEXCOORD0"))
+								header.vertexInput[4] = size;
+							else if (sem[1].Contains("TEXCOORD1"))
+								header.vertexInput[5] = size;
+						}
+					}
+					//结构体结束
+					if (s.Contains("};"))
+					{
+						bSearchVertexInputLayout = false;
+					}
 				}
 			}
 		}
@@ -176,7 +218,6 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 			std::vector<uint32_t> resultChar = { result.cbegin(), result.cend() };
 			HString cachePath = (FileSystem::GetShaderCacheAbsPath()).c_str();
 			cachePath += fileName.GetBaseName();
-
 			if (shaderType == CompileShaderType::VertexShader)
 			{
 				cachePath += ("@vs");

@@ -3,6 +3,7 @@
 #include <vector>
 #include "vulkan/vulkan.h"
 #include "Shader.h"
+#include "Pass/PassType.h"
 struct VkGraphicsPipelineCreateInfoCache
 {
 	HString graphicsName;//ps or cs name
@@ -30,14 +31,6 @@ struct VkGraphicsPipelineCreateInfoCache
 	VkPipelineMultisampleStateCreateInfo			msInfo{};
 	//------------------------Depth Stencil
 	VkPipelineDepthStencilStateCreateInfo			depthStencilInfo{};
-};
-
-struct VertexInputLayout
-{
-	VkVertexInputRate inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-	uint32_t inputSize;
-	std::vector<VkFormat>inputLayouts;
-	HString inputName = "VIL";
 };
 
 enum class ColorWriteMask
@@ -261,7 +254,7 @@ public:
 	static void SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache vs, ShaderCache ps);
 
 	//Graphics pipeline setting the last step
-	static PipelineObject* CreatePipelineObject(VkGraphicsPipelineCreateInfoCache& createInfo, std::vector<VkDescriptorSetLayout> layout, VkRenderPass renderPass, uint32_t subpassCount = 1, PipelineType pipelineType = PipelineType::Graphics);
+	static PipelineObject* CreatePipelineObject(VkGraphicsPipelineCreateInfoCache& createInfo, std::vector<VkDescriptorSetLayout> layout, VkRenderPass renderPass,HString pipelineName, uint32_t subpassCount = 1, PipelineType pipelineType = PipelineType::Graphics);
 
 	static PipelineObject* GetGraphicsPipelineMap(HString name);
 

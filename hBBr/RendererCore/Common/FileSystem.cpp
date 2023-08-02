@@ -62,6 +62,26 @@ HString FileSystem::GetRelativePath(const char* filePath)
     return filePath;
 }
 
+uint32_t FileSystem::GetPathFileNum(const char* path)
+{
+    if (!fs::exists(path))
+    {
+        MessageOut("Get Files By Suffix Failed.Path is not exists.", false, true);
+        return 0;
+    }
+    uint32_t count = 0;
+    for (const auto& entry : fs::directory_iterator(path))
+    {
+        count++;
+    }
+    return count;
+}
+
+bool FileSystem::FileExist(const char* path)
+{
+    return fs::exists(path);
+}
+
 std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char* suffix)
 {
     if (!fs::exists(path))

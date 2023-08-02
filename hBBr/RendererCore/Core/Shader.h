@@ -21,6 +21,9 @@ typedef enum ShaderFlagBits
 struct ShaderCacheHeader
 {
 	ShaderFlags flags;
+	//Vertex input layout type,vs only
+	//{ pos,nor,tan,col,uv01,uv23 }
+	uint8_t vertexInput[6] = {0,0,0,0,0,0};
 };
 
 struct ShaderCache

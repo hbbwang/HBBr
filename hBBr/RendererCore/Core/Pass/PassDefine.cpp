@@ -7,6 +7,7 @@
 #include "glm/matrix.hpp"
 #include "glm/ext.hpp"
 #include "Primitive.h"
+#include "Pass/PassType.h"
 /*
 	Opaque pass
 */
@@ -76,28 +77,31 @@ void OpaquePass::PassUpdate()
 	//};
 	//auto vbd = vertexInput.GetData();
 
-	for (auto p : PrimitiveProxy::GetModelPrimitives(Pass::BasePass))
+	for (auto g : PrimitiveProxy::GetGraphicsPrimitives(Pass::BasePass))
 	{
-		for (int i = 0; i < p.vertexData.size(); i++)
+		if (g.graphicsID.Length() <= 2)
+			continue;
+		auto pipeline = PipelineManager::GetGraphicsPipelineMap(g.graphicsID);
+		if (pipeline == NULL)
 		{
-			auto pipeline = PipelineManager::GetGraphicsPipelineMap("Graphics-TestShader-TestShader-" + p.vertexInputLayouts[i].inputName);
-			if (pipeline == NULL)
-			{
-				VkGraphicsPipelineCreateInfoCache pipelineCreateInfo = {};
-				PipelineManager::SetColorBlend(pipelineCreateInfo, false);
-				PipelineManager::SetColorBlend(pipelineCreateInfo, false);
-				PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
-				PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
-				PipelineManager::SetVertexInput(pipelineCreateInfo, p.vertexInputLayouts[i]);
-				PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, Shader::_vsShader["TestShader"], Shader::_psShader["TestShader"]);
-				//Setting pipeline end
-				pipeline = PipelineManager::CreatePipelineObject(pipelineCreateInfo,
-					{
-						_descriptorSet_pass->GetDescriptorSetLayout() ,
-						_descriptorSet_obj->GetDescriptorSetLayout()
-					},
-					_renderPass, (uint32_t)_subpassDescs.size());
-			}
+			VkGraphicsPipelineCreateInfoCache pipelineCreateInfo = {};
+			PipelineManager::SetColorBlend(pipelineCreateInfo, false);
+			PipelineManager::SetColorBlend(pipelineCreateInfo, false);
+			PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
+			PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
+			PipelineManager::SetVertexInput(pipelineCreateInfo, g.inputLayout );
+			PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, Shader::_vsShader[g.vsShader], Shader::_psShader[g.psShader]);
+			//Setting pipeline end
+			pipeline = PipelineManager::CreatePipelineObject(pipelineCreateInfo,
+				{
+					_descriptorSet_pass->GetDescriptorSetLayout() ,
+					_descriptorSet_obj->GetDescriptorSetLayout()
+				},
+				_renderPass, g.graphicsID, (uint32_t)_subpassDescs.size());
+		}
+		for (int m = 0; m < g.modelPrimitives.size(); m++)
+		{
+			ModelPrimitive prim = g.modelPrimitives[m];
 			manager->CmdCmdBindPipeline(cmdBuf, pipeline->pipeline);
 			{
 				//Update uniform
@@ -108,9 +112,9 @@ void OpaquePass::PassUpdate()
 				float aspect = (float)_currentFrameBufferSize.width / (float)_currentFrameBufferSize.height;
 				_passUniformBuffer.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.001f, 500.0f);
 				_passUniformBuffer.Projection[1][1] *= -1;
-				//_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
+				_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
 				_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
-				//_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
+				_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
 				_passUniformBuffer.WorldMatrix = glm::mat4(
 					1.0f, 0.0f, 0.0f, 0.0f,
 					0.0f, 1.0f, 0.0f, 0.0f,
@@ -123,11 +127,11 @@ void OpaquePass::PassUpdate()
 				//
 				VkDeviceSize vertex_offset[1] = { 0 };
 				VkBuffer verBuf[] = { _vertexBuffer->GetBuffer() };
-				_vertexBuffer->BufferMapping(p.vertexData[i].data(), sizeof(float) * p.vertexData[i].size());
-				_indexBuffer->BufferMapping<uint32_t>(p.vertexIndices[i].data(), sizeof(uint32_t) * p.vertexIndices[i].size());
+				_vertexBuffer->BufferMapping(prim.vertexData.data(), sizeof(float) * prim.vertexData.size());
+				_indexBuffer->BufferMapping<uint32_t>(prim.vertexIndices.data(), sizeof(uint32_t) * prim.vertexIndices.size());
 				vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, vertex_offset);
 				vkCmdBindIndexBuffer(cmdBuf, _indexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-				vkCmdDrawIndexed(cmdBuf, p.vertexIndices[i].size(), 1, 0, 0, 0);
+				vkCmdDrawIndexed(cmdBuf, prim.vertexIndices.size(), 1, 0, 0, 0);
 			}
 		}
 	}

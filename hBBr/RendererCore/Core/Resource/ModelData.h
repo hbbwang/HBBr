@@ -147,9 +147,7 @@ public:
 	
 	HBBR_API static ModelData* ImportFbxToMemory(HString fbxPath);
 
-	HBBR_API static bool BuildModelPrimitive(ModelData* data , ModelPrimitive& prim);
-
-	//HBBR_API static void ImportFbxToMeshlFile(HString fbxPath, HString newModelFilePath);
+	HBBR_API static bool BuildGraphicsPrimitives(ModelData* data ,std::vector<GraphicsPrimitive>& prims);
 
 	static std::map<HString, std::unique_ptr<ModelData>> _modelCache;
 };
