@@ -25,35 +25,20 @@ void Component::Init()
 	_bInit = true;
 }
 
-bool Component::Update()
+void Component::Update()
 {
-	if (_bWantDestroy)
+	if (_bActive)
 	{
-		auto it = std::remove(_gameObject->_comps.begin(), _gameObject->_comps.end(), this);
-		if (it != _gameObject->_comps.end())
+		if (!_bInit)//Init
 		{
-			_gameObject->_comps.erase(it);
-			ExecuteDestroy();
-			delete this;
+			Init();
 		}
-		return false;
-	}
-	else
-	{
-		if (_bActive)
+		else
 		{
-			if (!_bInit)//Init
-			{
-				Init();
-			}
-			else
-			{
 
 
-			}
 		}
 	}
-	return true;
 }
 
 void Component::ExecuteDestroy()

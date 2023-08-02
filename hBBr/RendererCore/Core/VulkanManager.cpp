@@ -13,12 +13,6 @@
 #pragma comment(lib ,"vulkan-1.lib")
 using namespace std;
 
-#if _DEBUG
-//#include "include/vld.h"
-//#pragma comment(lib ,"vld.lib")
-#endif
-
-
 std::unique_ptr<VulkanManager> VulkanManager::_vulkanManager;
 
 PFN_vkCreateDebugReportCallbackEXT  fvkCreateDebugReportCallbackEXT = VK_NULL_HANDLE;

@@ -3,7 +3,7 @@
 #include "Shader.h"
 std::map<Pass, std::vector<GraphicsPrimitive>> PrimitiveProxy::_allGraphicsPrimitives;
 
-void PrimitiveProxy::AddGraphicsPrimitives(Pass pass, HString vsShader, HString psShader, GraphicsPrimitive prim)
+HString PrimitiveProxy::AddGraphicsPrimitives(Pass pass, HString vsShader, HString psShader, GraphicsPrimitive prim)
 {
 	//Generate ID
 	prim.graphicsID = vsShader + psShader ;//Graphics唯一标识
@@ -37,6 +37,30 @@ void PrimitiveProxy::AddGraphicsPrimitives(Pass pass, HString vsShader, HString 
 		else
 		{
 			it->second.push_back(prim);
+		}
+	}
+	return prim.graphicsID;
+}
+
+void PrimitiveProxy::RemoveModelPrimitives(Pass pass, HString graphicsID, HString modelPrimitiveName)
+{
+	auto pit = _allGraphicsPrimitives.find(pass);
+	if (pit != _allGraphicsPrimitives.end())
+	{
+		auto git = std::find_if(pit->second.begin(), pit->second.end(), [graphicsID](GraphicsPrimitive& prim)
+			{
+				return prim.graphicsID == graphicsID;
+			});
+		if (git != pit->second.end())
+		{
+			auto mit = std::remove_if(git->modelPrimitives.begin(), git->modelPrimitives.end(), [modelPrimitiveName](ModelPrimitive& prim)
+				{
+					return modelPrimitiveName == prim.modelPrimitiveName;
+				});
+			if (mit != git->modelPrimitives.end())
+			{
+				git->modelPrimitives.erase(mit);
+			}
 		}
 	}
 }

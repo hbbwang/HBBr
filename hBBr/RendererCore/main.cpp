@@ -5,6 +5,11 @@
 #include "ShaderCompiler.h"
 #endif
 
+//#if _DEBUG
+//#include "include/vld.h"
+//#pragma comment(lib ,"vld.lib")
+//#endif
+
 std::vector<VulkanForm> VulkanApp::_glfwWindows;
 VulkanForm* VulkanApp::_mainForm;
 

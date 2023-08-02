@@ -14,6 +14,9 @@ GameObject::GameObject(HString objectName, SceneManager* scene)
 	}
 	_name = objectName;
 	_bActive = true;
+	//Create Transform
+	_transform = new Transform(this);
+
 	_scene->_gameObjects.push_back(this);
 }
 
@@ -31,6 +34,12 @@ void GameObject::SetActive(bool newActive)
 	}
 }
 
+void GameObject::SetParent(GameObject* newParent)
+{
+	_newParent = newParent;
+	_scene->_gameObjectParentSettings.push_back(this);
+}
+
 void GameObject::Init()
 {
 	_bInit = true;
@@ -45,7 +54,6 @@ bool GameObject::Update()
 		{
 			_scene->_gameObjects.erase(it);
 			ExecuteDestroy();
-			delete this;
 		}
 		return false;
 	}
@@ -62,12 +70,8 @@ bool GameObject::Update()
 				const auto compCount = _comps.size();
 				for (int i = 0; i < compCount; i++)
 				{
-					if (!_comps[i]->Update())
-					{
-						i -= 1;
-					}
+					_comps[i]->Update();
 				}
-
 			}
 		}
 	}
@@ -76,6 +80,29 @@ bool GameObject::Update()
 
 void GameObject::ExecuteDestroy()
 {
+	SetParent(NULL);
 
-
+	while (_comps.size() > 0)
+	{
+		for (int i = 0; i < _comps.size(); i++)
+		{
+			_comps[i]->Destroy();
+		}
+		const auto compCount = _comps.size();
+		for (int i = 0; i < compCount; i++)
+		{
+			if (_comps[i]->_bWantDestroy)
+			{
+				_comps[i].reset();
+				_comps.erase(_comps.begin() + i);
+				i -= 1;
+				if (_comps.size() <= 0)
+					break;
+			}
+		}
+	}
+	delete _transform;
+	_transform = NULL;
+	//延迟到下一帧再销毁
+	_scene->_gameObjectNeedDestroy.push_back(this);
 }

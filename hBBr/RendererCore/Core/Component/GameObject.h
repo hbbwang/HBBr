@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "HString.h"
+#include "Transform.h"
 
 class GameObject
 {
@@ -30,12 +31,28 @@ public:
 		_name = newName;
 	}
 
+	__forceinline std::vector<GameObject*> GetChildren() {
+		return _children;
+	}
+
+	__forceinline GameObject* GetParent() {
+		return _parent;
+	}
+
+	__forceinline Transform* GetTransform() {
+		return _transform;
+	}
+
+	void SetParent(GameObject* newParent);
+
 	template<typename T, typename ...Args>
 	T* AddComponent(Args... args)
 	{
-		T* newComp = new T(this, args...);
-		_comps.push_back(newComp);
-		return newComp;
+		std::unique_ptr<T> newComp;
+		newComp.reset(new T(this, args...));
+		T* result = newComp.get();
+		_comps.push_back(std::move(newComp));
+		return result;
 	}
 
 private:
@@ -56,7 +73,16 @@ private:
 
 	bool _bInit;
 
-	std::vector<class Component*> _comps;
+	std::vector<std::unique_ptr<class Component>> _comps;
 
 	HString _name;
+
+	//指定新的父子关系,但并不是立刻执行的，将会在SceneManager的Update里统一进行处理
+	GameObject* _newParent = NULL;
+
+	GameObject* _parent = NULL;
+
+	std::vector<GameObject*> _children;
+
+	Transform* _transform;
 };

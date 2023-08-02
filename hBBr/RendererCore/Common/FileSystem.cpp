@@ -104,6 +104,7 @@ std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char
                 en.fileName = entry.path().filename().c_str();
                 en.suffix = entry.path().extension().c_str();
                 en.baseName = entry.path().stem().c_str();
+                en.type = FileEntryType::File;
                 result.push_back(en);
             }
         }

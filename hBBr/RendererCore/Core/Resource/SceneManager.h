@@ -22,6 +22,11 @@ private:
 
 	std::vector<GameObject*> _gameObjects;
 
+	//需要进行父子关系处理的对象
+	std::vector<GameObject*> _gameObjectParentSettings;
+
+	//需要进行销毁的Objects
+	std::vector<GameObject*> _gameObjectNeedDestroy;
 };
 
 

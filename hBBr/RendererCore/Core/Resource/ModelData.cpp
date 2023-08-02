@@ -2,6 +2,9 @@
 
 #pragma comment(lib,"assimp-vc142-mt.lib")
 
+#include "ConsoleDebug.h"
+#include "FileSystem.h"
+
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>			// C++ importer interface
 #include <assimp/postprocess.h>     // Post processing flags
@@ -11,7 +14,8 @@
 #include <glm/exponential.hpp>
 #include <glm/geometric.hpp>
 #include <glm/ext.hpp>
-#include "ConsoleDebug.h"
+
+
 std::map<HString, std::unique_ptr<ModelData>> ModelFileStream::_modelCache;
 
 ModelData* ModelFileStream::ImportFbxToMemory(HString fbxPath)
@@ -23,9 +27,12 @@ ModelData* ModelFileStream::ImportFbxToMemory(HString fbxPath)
 			return it->second.get();
 		}
 	}
-
 	if (fbxPath.Length() == 0) {
-		MessageOut(HString("Import Fbx To Memory : Path string error!" + fbxPath).c_str(), false, true, "255,255,0");
+		MessageOut(HString("Import Fbx To Memory : Path string error!" + fbxPath).c_str(), false, false, "255,255,0");
+		return NULL;
+	}
+	if (!FileSystem::FileExist(fbxPath.c_str()))
+	{
 		return NULL;
 	}
 	fbxPath.CorrectionPath();

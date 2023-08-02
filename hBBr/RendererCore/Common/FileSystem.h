@@ -3,11 +3,10 @@
 #include <vector>
 #include "HString.h"
 
-enum FileEntryType
+enum class FileEntryType
 {
 	Dir = 0,
 	File = 1,
-	Url = 2,
 };
 
 struct FileEntry

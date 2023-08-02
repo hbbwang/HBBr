@@ -23,6 +23,6 @@ Hbb Renderer.
 2.Release           （Editor Release，启动项：Editor）              
 3.ReleaseGame_GLFW  （Renderer Only with GLFW,启动项：RendererCore）             
 
-![PreviewImage](/Preview.png)
-![PreviewImageCube](/PreviewCube.png)
-
+![PreviewImage](/Preview.png) 
+![PreviewImageCube](/PreviewCube.png) 
+![PreviewImageCube](/PreviewFBX.png) 

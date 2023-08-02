@@ -10,7 +10,7 @@ public:
 
 	Component(class GameObject* parent);
 
-	~Component();
+	virtual  ~Component();
 
 	__forceinline void Destroy() {
 		SetActive(false);
@@ -31,7 +31,7 @@ protected:
 
 	virtual void Init();
 
-	virtual bool Update();
+	virtual void Update();
 
 	virtual void ExecuteDestroy();
 

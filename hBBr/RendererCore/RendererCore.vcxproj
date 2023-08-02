@@ -265,6 +265,7 @@
     <ClInclude Include="Core\Component\Component.h" />
     <ClInclude Include="Core\Component\GameObject.h" />
     <ClInclude Include="Core\Component\ModelComponent.h" />
+    <ClInclude Include="Core\Component\Transform.h" />
     <ClInclude Include="Core\DescriptorSet.h" />
     <ClInclude Include="Core\PassBase.h" />
     <ClInclude Include="Core\Pass\PassDefine.h" />
@@ -304,6 +305,7 @@
     <ClCompile Include="Core\Component\Component.cpp" />
     <ClCompile Include="Core\Component\GameObject.cpp" />
     <ClCompile Include="Core\Component\ModelComponent.cpp" />
+    <ClCompile Include="Core\Component\Transform.cpp" />
     <ClCompile Include="Core\DescriptorSet.cpp" />
     <ClCompile Include="Core\PassBase.cpp" />
     <ClCompile Include="Core\Pass\PassDefine.cpp" />

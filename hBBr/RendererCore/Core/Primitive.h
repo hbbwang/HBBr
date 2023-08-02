@@ -3,11 +3,12 @@
 #include <map>
 #include "VertexFactory.h"
 #include "Pass/PassType.h"
+#include "Component/Transform.h"
 
 //每个面的数据
 struct ModelPrimitive
 {
-	HString						objName;
+	HString						modelPrimitiveName;
 
 	VertexFactory::VertexInput  vertexInput;
 
@@ -19,11 +20,7 @@ struct ModelPrimitive
 
 	glm::vec3					boundingBox_max = glm::vec3(0, 0, 0);
 
-	glm::mat4					worldMatrix = glm::mat4(
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f);
+	Transform*					transform = NULL;
 
 	//用于排序
 	int							priority = 0;
@@ -56,7 +53,9 @@ class PrimitiveProxy
 {
 public:
 
-	static void AddGraphicsPrimitives(Pass pass, HString vsShader , HString psShader , GraphicsPrimitive prim);
+	static HString AddGraphicsPrimitives(Pass pass, HString vsShader , HString psShader , GraphicsPrimitive prim);
+
+	static void RemoveModelPrimitives(Pass pass, HString graphicsID , HString modelPrimitiveName);
 
 	static std::vector<GraphicsPrimitive> GetGraphicsPrimitives(Pass pass)
 	{
