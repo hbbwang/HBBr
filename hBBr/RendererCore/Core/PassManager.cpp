@@ -3,19 +3,6 @@
 #include "PassBase.h"
 #include "Pass/PassDefine.h"
 
-SceneTexture::SceneTexture(VulkanRenderer* renderer)
-{
-	auto sceneColor = Texture::CreateTexture2D(1, 1, VK_FORMAT_R16G16B16A16_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneColor");
-	auto sceneDepth = Texture::CreateTexture2D(1, 1, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneDepth");
-	_sceneTexture.insert(std::make_pair(SceneTextureDesc::SceneColor, sceneColor));
-	_sceneTexture.insert(std::make_pair(SceneTextureDesc::DepthStencil, sceneDepth));
-}
-
-void SceneTexture::UpdateTextures()
-{
-
-}
-
 void PassManager::PassesInit(VulkanRenderer* renderer)
 {
 	_renderer = renderer;

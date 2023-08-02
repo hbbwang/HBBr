@@ -8,6 +8,7 @@
 #include "glm/ext.hpp"
 #include "Primitive.h"
 #include "Pass/PassType.h"
+#include "Texture.h"
 /*
 	Opaque pass
 */
@@ -21,7 +22,9 @@ void OpaquePass::PassInit()
 {
 	//Swapchain
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-	AddSubpass({}, { 0 }, -1);
+	//SceneDepth
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetFormat() , VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+	AddSubpass({}, { 0 }, 1);
 	CreateRenderPass();
 }
 
@@ -39,7 +42,7 @@ void OpaquePass::PassUpdate()
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, OpaquePass,"Opaque Render Pass", glm::vec4(0.2, 1.0, 0.7, 0.2));
 	//Update FrameBuffer
-	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews(), {});
+	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews(), { GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetTextureView() });
 	manager->CmdSetViewport(cmdBuf, { _currentFrameBufferSize });
 	manager->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.0,0 });
 

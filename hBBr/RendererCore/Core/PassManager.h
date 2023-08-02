@@ -6,32 +6,6 @@
 #include <map>
 class VulkanRenderer;
 class PassBase;
-enum class SceneTextureDesc{
-	SceneColor = 0,
-	DepthStencil = 1,
-};
-
-class SceneTexture
-{
-public:
-	SceneTexture(VulkanRenderer* renderer);
-	~SceneTexture() 
-	{
-		_sceneTexture.clear();
-	}
-	void UpdateTextures();
-	std::shared_ptr<Texture> GetTexture(SceneTextureDesc desc)
-	{
-		auto it = _sceneTexture.find(desc);
-		if (it != _sceneTexture.end())
-		{
-			return it->second;
-		}
-		return NULL;
-	}
-private:
-	std::map<SceneTextureDesc, std::shared_ptr<Texture>> _sceneTexture;
-};
 
 class PassManager
 {
