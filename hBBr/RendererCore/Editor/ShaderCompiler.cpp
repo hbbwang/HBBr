@@ -216,8 +216,8 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 		else
 		{
 			std::vector<uint32_t> resultChar = { result.cbegin(), result.cend() };
-			HString cachePath = (FileSystem::GetShaderCacheAbsPath()).c_str();
-			cachePath += fileName.GetBaseName();
+			HString cacheOnlyPath = (FileSystem::GetShaderCacheAbsPath()).c_str();
+			HString cachePath = cacheOnlyPath + fileName.GetBaseName();
 			if (shaderType == CompileShaderType::VertexShader)
 			{
 				cachePath += ("@vs");
@@ -231,17 +231,28 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 				cachePath += ("@cs");
 			}
 			cachePath += TEXT(".spv");
-			std::ofstream out(cachePath.c_str(), std::ios::binary);
-			//Header
-			out.write((char*)&header, sizeof(ShaderCacheHeader));
-			//ShaderCache
-			out.write((char*)resultChar.data(), resultChar.size() * sizeof(glm::uint));
-			out.close();
-			//Log
-			HString compileResultStr = TEXT("Compile shader [");
-			compileResultStr += srcShaderFileFullPath;
-			compileResultStr += TEXT("] successful.");
-			ConsoleDebug::print_endl(compileResultStr, TEXT("0,255,50"));
+			//Cache 路径不存在
+			if (!FileSystem::FileExist(cacheOnlyPath.c_str()))
+			{
+				std::filesystem::create_directory(cacheOnlyPath.c_str());
+			}
+			std::ofstream out(cachePath.c_str(), std::ios::binary );
+			if (out.is_open())
+			{
+				//Header
+				out.write((char*)&header, sizeof(ShaderCacheHeader));
+				//ShaderCache
+				out.write((char*)resultChar.data(), resultChar.size() * sizeof(glm::uint));
+				out.close();
+				//Log
+				HString compileResultStr = TEXT("Compile shader [");
+				compileResultStr += srcShaderFileFullPath;
+				compileResultStr += TEXT("] successful.");
+				ConsoleDebug::print_endl(compileResultStr, TEXT("0,255,50"));
+			}
+			else
+			{
+			}
 		}
 	}
 }

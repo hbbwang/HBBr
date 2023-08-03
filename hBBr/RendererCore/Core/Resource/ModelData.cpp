@@ -1,7 +1,13 @@
 ﻿#include "ModelData.h"
 
-#pragma comment(lib,"assimp-vc142-mt.lib")
-
+#ifdef NDEBUG
+//非Debug我们直接用静态库打入exe内。
+#pragma comment(lib,"Static/Release/assimp-vc142-mt.lib")
+#pragma comment(lib,"Static/Release/zlibstatic.lib") 
+#else
+//Debug使用dll进行调试
+#pragma comment(lib,"assimp-vc142-mt.lib") 
+#endif
 #include "ConsoleDebug.h"
 #include "FileSystem.h"
 

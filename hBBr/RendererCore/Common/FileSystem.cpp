@@ -1,7 +1,6 @@
 ﻿#include "Common.h"
 #include "FileSystem.h"
 #include <iostream>
-#include <filesystem>
 #include <fstream>
 
 namespace fs = std::filesystem;
@@ -86,7 +85,7 @@ std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char
 {
     if (!fs::exists(path))
     {
-        MessageOut("Get Files By Suffix Failed.Path is not exists.",false,true);
+        MessageOut("Get Files By Suffix Failed.Path is not exists.",false,false);
         return {};
     }
     std::vector<FileEntry> result;

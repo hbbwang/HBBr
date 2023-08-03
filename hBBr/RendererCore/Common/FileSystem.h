@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Common.h"
 #include <vector>
+#include <filesystem>
 #include "HString.h"
 
 enum class FileEntryType
