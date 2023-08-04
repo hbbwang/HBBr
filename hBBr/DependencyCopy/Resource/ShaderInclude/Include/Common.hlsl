@@ -16,6 +16,10 @@ cbuffer Pass :register(b0)
     float4 ScreenInfo; // screen xy,z near,w zfar
     float4 CameraPos_GameTime;
     float4 CameraDirection;
+};
+
+cbuffer Pass :register(b0,space1)
+{
     float4x4 World;
 };
 

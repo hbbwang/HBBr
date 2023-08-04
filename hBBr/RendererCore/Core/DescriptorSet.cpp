@@ -35,8 +35,26 @@ DescriptorSet::~DescriptorSet()
 
 void DescriptorSet::BufferMapping(void* mappingData, uint64_t bufferSize, int bufferIndex)
 {
-	_buffers[bufferIndex]->BufferMapping(mappingData, bufferSize);
-	VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, bufferIndex, 0, bufferSize);
+	auto alignmentSize =  VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSize);
+	_buffers[bufferIndex]->BufferMapping(mappingData, alignmentSize);
+	VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, bufferIndex, 0, alignmentSize);
+}
+
+void DescriptorSet::BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize, int bufferIndex)
+{
+	auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSize);
+	_buffers[bufferIndex]->BufferMapping(mappingData, offset, bufferSize);
+	VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, bufferIndex, 0, alignmentSize);
+}
+
+void DescriptorSet::BufferMappingOffset(void* mappingData, uint64_t bufferSize, int bufferIndex)
+{
+	auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSize);
+	//Get current offset
+	_buffers[bufferIndex]->BufferMapping(mappingData, _currentOffset, bufferSize);
+	VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, bufferIndex, 0, alignmentSize);
+	//Add offset
+	_currentOffset += alignmentSize;
 }
 
 const VkDescriptorSet& DescriptorSet::GetDescriptorSet()

@@ -9,6 +9,7 @@
 #include "FileSystem.h"
 #include "Shader.h"
 #include "DescriptorSet.h"
+#include "Primitive.h"
 //导入Vulkan静态库
 #pragma comment(lib ,"vulkan-1.lib")
 using namespace std;
@@ -106,7 +107,6 @@ VulkanManager::VulkanManager(bool bDebug)
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
-
 }
 
 VulkanManager::~VulkanManager()
@@ -1665,12 +1665,6 @@ void VulkanManager::UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet
 	{
 		if (descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
 		{
-			VkPhysicalDeviceProperties properties;
-			vkGetPhysicalDeviceProperties(_gpuDevice, &properties);
-			VkDeviceSize minUboAlignment = properties.limits.minUniformBufferOffsetAlignment;
-			if (minUboAlignment > 0) {
-				Range = (Range + (VkDeviceSize)minUboAlignment - 1) & ~((VkDeviceSize)minUboAlignment - 1);
-			}
 			VkDescriptorBufferInfo bufferInfo = {};
 			bufferInfo.buffer = descriptorSet->GetBuffer()->GetBuffer();
 			bufferInfo.offset = offset;
@@ -1688,7 +1682,18 @@ void VulkanManager::UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet
 			vkUpdateDescriptorSets(_device, 1, &descriptorWrite, 0, VK_NULL_HANDLE);
 		}
 	}
+}
 
+VkDeviceSize VulkanManager::GetMinUboAlignmentSize(VkDeviceSize realSize)
+{
+	VkDeviceSize outSize = realSize;
+	VkPhysicalDeviceProperties properties;
+	vkGetPhysicalDeviceProperties(_gpuDevice, &properties);
+	VkDeviceSize minUboAlignment = properties.limits.minUniformBufferOffsetAlignment;
+	if (minUboAlignment > 0) {
+		outSize = (outSize + (VkDeviceSize)minUboAlignment - 1) & ~((VkDeviceSize)minUboAlignment - 1);
+	}
+	return outSize;
 }
 
 void VulkanManager::UpdateImageSamplerDescriptorSet(DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range)

@@ -23,8 +23,6 @@ struct VkGraphicsPipelineCreateInfoCache
 	std::vector<VkVertexInputBindingDescription>	vertexInputBindingDescs;
 	std::vector<VkVertexInputAttributeDescription>	vertexInputAttributes;
 	VkPipelineVertexInputStateCreateInfo			vertexInputInfo{};
-	//------------------------VertexInputLayout
-	VkPipelineLayout								pipelineLayout = VK_NULL_HANDLE;
 	//------------------------Input Assembly
 	VkPipelineInputAssemblyStateCreateInfo			inputAssemblyInfo{};
 	//------------------------MultiSampling
@@ -221,11 +219,26 @@ struct PipelineObject
 {
 	VkPipeline	pipeline;
 
-	VkPipelineLayout pipelineLayout;
-
 	PipelineType pipelineType;
 
 	~PipelineObject();
+};
+
+struct PipelineIndex
+{
+	uint64_t vsIndex;
+	uint64_t psIndex;
+	uint64_t varients;
+
+	bool operator<(const PipelineIndex& id) const {
+		return (vsIndex < id.vsIndex) && (psIndex < id.psIndex);
+	}
+
+	bool operator==(const PipelineIndex& id) const {
+		return (vsIndex == id.vsIndex)
+			&& (psIndex == id.psIndex)
+			&& (varients == id.varients);
+	}
 };
 
 class PipelineManager
@@ -254,16 +267,16 @@ public:
 	static void SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache vs, ShaderCache ps);
 
 	//Graphics pipeline setting the last step
-	static PipelineObject* CreatePipelineObject(VkGraphicsPipelineCreateInfoCache& createInfo, std::vector<VkDescriptorSetLayout> layout, VkRenderPass renderPass,HString pipelineName, uint32_t subpassCount = 1, PipelineType pipelineType = PipelineType::Graphics);
+	static PipelineObject* CreatePipelineObject(VkGraphicsPipelineCreateInfoCache& createInfo,VkPipelineLayout layout, VkRenderPass renderPass, PipelineIndex pipelineIndex, uint32_t subpassCount = 1, PipelineType pipelineType = PipelineType::Graphics);
 
-	static PipelineObject* GetGraphicsPipelineMap(HString name);
+	static PipelineObject* GetGraphicsPipelineMap(PipelineIndex index);
 
 	static void ClearPipelineObjects();
 
 private:
 	static void BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCache& createInfo, VkRenderPass renderPass, uint32_t subpassIndex , VkPipeline& pipelineObj);
-	static void SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& createInfo, std::vector<VkDescriptorSetLayout> layout, VkPipelineLayout& pipelineLayout);
-	static std::map<HString, std::unique_ptr<PipelineObject>> _graphicsPipelines;
-	static std::map<HString, std::unique_ptr<PipelineObject>> _computePipelines;
+	static void SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& createInfo, VkPipelineLayout pipelineLayout);
+	static std::map<PipelineIndex, std::unique_ptr<PipelineObject>> _graphicsPipelines;
+	static std::map<PipelineIndex, std::unique_ptr<PipelineObject>> _computePipelines;
 
 };

@@ -3,7 +3,7 @@
 #include "PassBase.h"
 
 /* Opaque pass define */
-class OpaquePass :public GraphicsPass
+class BasePass :public GraphicsPass
 {
 public:
 	struct PassUniformBuffer
@@ -17,15 +17,14 @@ public:
 		glm::vec4 ScreenInfo; // screen xy,z near,w zfar
 		glm::vec4 CameraPos_GameTime;
 		glm::vec4 CameraDirection;
-		glm::mat4 WorldMatrix;
 	};
 	struct ObjectUniformBuffer
 	{
 		glm::mat4 WorldMatrix;
 	};
 
-	OpaquePass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
-	~OpaquePass();
+	BasePass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
+	~BasePass();
 
 	virtual void PassInit()override;
 	virtual void PassBuild()override;
@@ -36,6 +35,7 @@ private:
 	std::shared_ptr<class Buffer>_vertexBuffer;
 	std::shared_ptr<class Buffer>_indexBuffer;
 	PassUniformBuffer _passUniformBuffer;
+	ObjectUniformBuffer objectUniformBuffer;
 };
 
 /* Imgui pass define */

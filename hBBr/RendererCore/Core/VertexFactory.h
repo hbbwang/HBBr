@@ -260,4 +260,50 @@ namespace VertexFactory
 		std::vector<uint32_t> vertexIndices;
 		VertexInputLayout vertexInputLayout;
 	};
+
+	struct CubeVertexInput : public VertexInput
+	{
+		CubeVertexInput()
+		{
+			if (vertexInputData.size() <= 0)
+			{
+				pos =
+				{
+					glm::vec3(1.0f,1.0f,-1.0f) ,
+					glm::vec3(1.0f,-1.0f,-1.0f),
+					glm::vec3(-1.0f,-1.0f,-1.0f),
+					glm::vec3(-1.0f,1.0f,-1.0f),
+					glm::vec3(-1.0f,1.0f,1.0f),
+					glm::vec3(-1.0f,-1.0f,1.0f),
+					glm::vec3(1.0f,-1.0f,1.0f),
+					glm::vec3(1.0f,1.0f,1.0f),
+				};
+				col =
+				{
+					glm::vec4(1,0,0,1),
+					glm::vec4(0,1,0,1),
+					glm::vec4(0,0,1,1),
+					glm::vec4(1,0,1,1),
+					glm::vec4(1,1,1,1),
+					glm::vec4(0,1,1,1),
+					glm::vec4(1,1,0,1),
+					glm::vec4(1,0,1,1),
+				};
+				vertexInputData = GetData();
+				vertexIndices = 
+				{
+					0,1,2,0,2,3,
+					0,3,4,0,4,7,
+					4,5,6,4,6,7,
+					1,6,5,1,5,2,
+					3,2,5,3,5,4,
+					7,6,1,7,1,0
+				};
+				vertexInputLayout = BuildLayout();
+			}
+		}
+		std::vector<float> vertexInputData;
+		std::vector<uint32_t> vertexIndices;
+		VertexInputLayout vertexInputLayout;
+	};
 };

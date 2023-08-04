@@ -166,6 +166,9 @@
     <ClInclude Include="Core\Component\Transform.h">
       <Filter>Renderer\Core\Component</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Component\Material.h">
+      <Filter>Renderer\Core\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -274,6 +277,9 @@
       <Filter>Renderer\Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\Component\Transform.cpp">
+      <Filter>Renderer\Core\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Component\Material.cpp">
       <Filter>Renderer\Core\Component</Filter>
     </ClCompile>
   </ItemGroup>

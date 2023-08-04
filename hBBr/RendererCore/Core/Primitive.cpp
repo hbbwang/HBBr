@@ -1,66 +1,60 @@
 ﻿#pragma once
 #include "Primitive.h"
 #include "Shader.h"
-std::map<Pass, std::vector<GraphicsPrimitive>> PrimitiveProxy::_allGraphicsPrimitives;
+std::vector<std::vector<MaterialPrimitive*>> PrimitiveProxy::_allGraphicsPrimitives;
+std::map<MaterialPrimitive* ,std::vector<ModelPrimitive>> PrimitiveProxy::_allModelPrimitives;
 
-HString PrimitiveProxy::AddGraphicsPrimitives(Pass pass, HString vsShader, HString psShader, GraphicsPrimitive prim)
+void PrimitiveProxy::AddMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
 {
-	//Generate ID
-	prim.graphicsID = vsShader + psShader ;//Graphics唯一标识
-	//Build layout and data
-	uint8_t intputs[6]; 
-	memcpy(intputs, Shader::_vsShader[vsShader].header.vertexInput, sizeof(uint8_t) * 6);
-	prim.inputLayout = VertexFactory::VertexInput::BuildLayout(intputs);
-	for (auto& i : prim.modelPrimitives)
+	if ((uint32_t)PrimitiveProxy::_allGraphicsPrimitives.size() != (uint32_t)Pass::MaxNum)
 	{
-		i.vertexData = i.vertexInput.GetData(intputs);
-		i.vertexInput = VertexFactory::VertexInput();
+		_allGraphicsPrimitives.resize((uint32_t)Pass::MaxNum);
 	}
-	//
-	auto it = _allGraphicsPrimitives.find(pass);
-	if (it == _allGraphicsPrimitives.end())
+	_allGraphicsPrimitives[(uint32_t)pass].push_back(prim);
+}
+
+void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim)
+{
+	uint64_t result = 0;
+	prim->graphicsIndex.vsIndex = Shader::_vsShader[prim->vsShader].shaderCacheIndex;
+	prim->graphicsIndex.psIndex = Shader::_vsShader[prim->vsShader].shaderCacheIndex;
+	prim->graphicsIndex.varients = prim->varients;
+	//未来还会有混合模式的识别一起加入进来，目前就这样
+}
+
+void PrimitiveProxy::RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
+{
+	if ((uint32_t)PrimitiveProxy::_allGraphicsPrimitives.size() != (uint32_t)Pass::MaxNum)
 	{
-		prim.vsShader = vsShader;
-		prim.psShader = psShader;
-		_allGraphicsPrimitives.emplace(std::make_pair(pass, std::vector<GraphicsPrimitive>({ prim })));
+		_allGraphicsPrimitives.resize((uint32_t)Pass::MaxNum);
 	}
-	else
+	int index = (uint32_t)pass;
+	auto it = std::find(_allGraphicsPrimitives[index].begin(), _allGraphicsPrimitives[index].end(), prim);
+	if (it != _allGraphicsPrimitives[index].end())
 	{
-		auto pit = std::find_if(it->second.begin(), it->second.end(), [prim, vsShader, psShader](GraphicsPrimitive& gp)
+		_allGraphicsPrimitives[index].erase(it);
+	}
+}
+
+void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive prim)
+{
+	prim.vertexData =  prim.vertexInput.GetData(Shader::_vsShader[mat->vsShader].header.vertexInput);
+	prim.vertexInput = VertexFactory::VertexInput();
+	_allModelPrimitives[mat].push_back(prim);
+}
+
+void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim)
+{
+	auto it = _allModelPrimitives.find(mat);
+	if (it != _allModelPrimitives.end())
+	{
+		auto pit = std::find_if(it->second.begin(), it->second.end(), [prim](ModelPrimitive& model)
 			{
-				return prim.graphicsID == gp.graphicsID;
+				return model.modelPrimitiveName == prim->modelPrimitiveName;
 			});
 		if (pit != it->second.end())
 		{
-			pit->modelPrimitives.insert(pit->modelPrimitives.end(), prim.modelPrimitives.begin(), prim.modelPrimitives.end());
-		}
-		else
-		{
-			it->second.push_back(prim);
-		}
-	}
-	return prim.graphicsID;
-}
-
-void PrimitiveProxy::RemoveModelPrimitives(Pass pass, HString graphicsID, HString modelPrimitiveName)
-{
-	auto pit = _allGraphicsPrimitives.find(pass);
-	if (pit != _allGraphicsPrimitives.end())
-	{
-		auto git = std::find_if(pit->second.begin(), pit->second.end(), [graphicsID](GraphicsPrimitive& prim)
-			{
-				return prim.graphicsID == graphicsID;
-			});
-		if (git != pit->second.end())
-		{
-			auto mit = std::remove_if(git->modelPrimitives.begin(), git->modelPrimitives.end(), [modelPrimitiveName](ModelPrimitive& prim)
-				{
-					return modelPrimitiveName == prim.modelPrimitiveName;
-				});
-			if (mit != git->modelPrimitives.end())
-			{
-				git->modelPrimitives.erase(mit);
-			}
+			it->second.erase(pit);
 		}
 	}
 }

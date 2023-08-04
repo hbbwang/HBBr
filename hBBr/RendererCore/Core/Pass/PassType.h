@@ -1,8 +1,11 @@
 ﻿#pragma once
 #include <vulkan/vulkan.h>
-enum class Pass
+
+enum class Pass : uint32_t
 {
-	BasePass = 0,
+	OpaquePass = 0,
+
+	MaxNum = 32
 };
 
 struct VertexInputLayout

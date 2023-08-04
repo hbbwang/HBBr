@@ -1,12 +1,11 @@
 ﻿#include "Pipeline.h"
 #include "VulkanRenderer.h"
 #include "VulkanManager.h"
-std::map<HString, std::unique_ptr<PipelineObject>> PipelineManager::_graphicsPipelines;
-std::map<HString, std::unique_ptr<PipelineObject>> PipelineManager::_computePipelines;
+std::map<PipelineIndex, std::unique_ptr<PipelineObject>> PipelineManager::_graphicsPipelines;
+std::map<PipelineIndex, std::unique_ptr<PipelineObject>> PipelineManager::_computePipelines;
 
 PipelineObject::~PipelineObject()
 {
-	VulkanManager::GetManager()->DestroyPipelineLayout(pipelineLayout);
 	if (pipeline != VK_NULL_HANDLE)
 	{
 		vkDestroyPipeline(VulkanManager::GetManager()->GetDevice(), pipeline, VK_NULL_HANDLE);
@@ -24,16 +23,16 @@ PipelineManager::~PipelineManager()
 
 }
 
-PipelineObject* PipelineManager::CreatePipelineObject(VkGraphicsPipelineCreateInfoCache& createInfo, std::vector<VkDescriptorSetLayout> layout, VkRenderPass renderPass, HString pipelineName, uint32_t subpassCount, PipelineType pipelineType)
+PipelineObject* PipelineManager::CreatePipelineObject(VkGraphicsPipelineCreateInfoCache& createInfo, VkPipelineLayout layout,  VkRenderPass renderPass, PipelineIndex pipelineIndex, uint32_t subpassCount, PipelineType pipelineType)
 {
 	if (subpassCount <= 0)
 	{
 		MessageOut("Create Pipeline Object Error,subpass count is 0.", true, true);
 	}
-	createInfo.graphicsName = pipelineName;
+	//createInfo.graphicsName = pipelineName;
 	std::unique_ptr<PipelineObject> newPSO = std::make_unique<PipelineObject>();
 	newPSO->pipelineType = pipelineType;
-	SetPipelineLayout(createInfo, layout, newPSO->pipelineLayout);
+	SetPipelineLayout(createInfo, layout);
 	if (pipelineType == PipelineType::Graphics)
 	{
 		for (int i = 0; i < (int)subpassCount; i++)
@@ -41,15 +40,15 @@ PipelineObject* PipelineManager::CreatePipelineObject(VkGraphicsPipelineCreateIn
 			BuildGraphicsPipelineState(createInfo, renderPass, subpassCount - 1, newPSO->pipeline);
 		}
 		PipelineObject* result = newPSO.get();
-		_graphicsPipelines.emplace(std::make_pair(createInfo.graphicsName, std::move(newPSO)));
+		_graphicsPipelines.emplace(std::make_pair(pipelineIndex, std::move(newPSO)));
 		return result;
 	}
 	return NULL;
 }
 
-PipelineObject* PipelineManager::GetGraphicsPipelineMap(HString name)
+PipelineObject* PipelineManager::GetGraphicsPipelineMap(PipelineIndex index)
 {
-	auto it = _graphicsPipelines.find(name);
+	auto it = _graphicsPipelines.find(index);
 	if (it != _graphicsPipelines.end())
 	{
 		return it->second.get();
@@ -173,9 +172,8 @@ void PipelineManager::SetDepthStencil(VkGraphicsPipelineCreateInfoCache& createI
 
 }
 
-void PipelineManager::SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& createInfo, std::vector<VkDescriptorSetLayout> layout, VkPipelineLayout& pipelineLayout)
+void PipelineManager::SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& createInfo, VkPipelineLayout pipelineLayout)
 {
-	VulkanManager::GetManager()->CreatePipelineLayout(layout, pipelineLayout);
 	createInfo.CreateInfo.layout = pipelineLayout;
 }
 

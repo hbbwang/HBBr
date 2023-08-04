@@ -139,6 +139,8 @@ struct ModelData
 	glm::vec3					boundingBox_max = glm::vec3(0, 0, 0);
 	glm::vec4					uv_0_1_abs_max = glm::vec4(0, 0, 0, 0);
 	glm::vec4					uv_2_3_abs_max = glm::vec4(0, 0, 0, 0);
+	//
+	HString						filePath;
 };
 
 class ModelFileStream
@@ -147,7 +149,7 @@ public:
 	
 	HBBR_API static ModelData* ImportFbxToMemory(HString fbxPath);
 
-	HBBR_API static bool BuildGraphicsPrimitives(ModelData* data ,std::vector<GraphicsPrimitive>& prims);
+	HBBR_API static bool BuildModelPrimitives(ModelData* data ,std::vector<ModelPrimitive>& prims);
 
 	static std::map<HString, std::unique_ptr<ModelData>> _modelCache;
 };

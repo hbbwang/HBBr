@@ -9,7 +9,7 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 	_sceneTextures.reset(new SceneTexture(renderer));
 	{
 		//Opaque Pass
-		std::shared_ptr<OpaquePass> opaque = std::make_shared<OpaquePass>(renderer);
+		std::shared_ptr<BasePass> opaque = std::make_shared<BasePass>(renderer);
 		AddPass(opaque, "Opaque");
 		std::shared_ptr<ImguiPass> imgui = std::make_shared<ImguiPass>(renderer);
 		AddPass(imgui, "Imgui");

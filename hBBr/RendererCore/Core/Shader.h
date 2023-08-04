@@ -35,6 +35,7 @@ struct ShaderCache
 	HString shaderName;
 	HString shaderPath;
 	VkPipelineShaderStageCreateInfo shaderStageInfo={};
+	uint64_t shaderCacheIndex = 0;
 };
 
 class Shader

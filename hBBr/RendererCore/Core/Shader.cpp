@@ -9,11 +9,13 @@ std::map<HString, ShaderCache> Shader::_csShader;
 void Shader::LoadShaderCache(const char* cachePath)
 {
 	auto allCacheFiles = FileSystem::GetFilesBySuffix(cachePath, "spv");
+	uint64_t cacheIndex = 0;
 	for (auto i : allCacheFiles)
 	{
 		HString fileName = i.baseName;
 		auto split = fileName.Split("@");
 		ShaderCache cache = {};
+		cache.shaderCacheIndex = cacheIndex;
 		//
 		//auto shaderData = FileSystem::ReadBinaryFile(i.absPath.c_str());
 		std::ifstream file(i.absPath.c_str(), std::ios::ate | std::ios::binary);
@@ -52,6 +54,7 @@ void Shader::LoadShaderCache(const char* cachePath)
 			cache.shaderType = ShaderType::ComputeShader;
 			_csShader.emplace(std::make_pair(cache.shaderName, cache));
 		}
+		cacheIndex++;
 	}
 
 }

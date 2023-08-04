@@ -5,38 +5,27 @@
 #include "FileSystem.h"
 ModelComponent::ModelComponent(GameObject* parent) :Component(parent)
 {
-	_vsShader = "BasePassVertexShader";
-	_psShader = "BasePassPixelShader";
 }
 
 void ModelComponent::SetModel(HString path)
 {
-	//先清除
-	if (_modelPrimitiveID.Length() > 5)
+	//clear
+	for (int i = 0; i < (int)_materials.size(); i++)
 	{
-		for (int i = 0; i < _pass.size(); i++)
-		{
-			PrimitiveProxy::RemoveModelPrimitives(_pass[i], _graphicsPrimID[i], _modelPrimitiveID);
-		}
+		PrimitiveProxy::RemoveModelPrimitive(_materials[i]->GetPrimitive(), &_primitive[i]);
 	}
-	//再获取
+	_primitive.clear();
+	//create
 	path.CorrectionPath();
 	_modelData = ModelFileStream::ImportFbxToMemory(path);
-	if (_modelData != NULL)
+	ModelFileStream::BuildModelPrimitives(_modelData, _primitive);
+	_materials.resize(_primitive.size());
+	for (int i = 0; i < (int)_primitive.size(); i++)
 	{
-		_modelPrimitiveID = FileSystem::GetRelativePath(path.c_str());
-		_pass.clear();
-		_graphicsPrimID.clear();
-		std::vector<GraphicsPrimitive> prims;
-		ModelFileStream::BuildGraphicsPrimitives(_modelData, prims);
-		_pass.resize(prims.size());
-		_graphicsPrimID.resize(prims.size());
-		for (int i = 0; i < prims.size(); i++)
-		{
-			for (auto& p : prims[i].modelPrimitives)
-				p.transform = GetGameObject()->GetTransform();
-			_graphicsPrimID[i] = PrimitiveProxy::AddGraphicsPrimitives(_pass[i], _vsShader, _psShader, prims[i]);
-		}
+		_primitive[i].transform = GetGameObject()->GetTransform();
+		if (_materials[i] == NULL)
+			_materials[i] = Material::GetDefaultMaterial();//Set default material
+		PrimitiveProxy::AddModelPrimitive(_materials[i]->GetPrimitive(), _primitive[i]);
 	}
 }
 

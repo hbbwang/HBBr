@@ -4,6 +4,7 @@
 #include "Component.h"
 #include "HString.h"
 #include "Pass/PassType.h"
+#include "Material.h"
 
 class ModelComponent :public Component
 {
@@ -20,15 +21,9 @@ private:
 	HString _modelPath;
 
 	struct ModelData* _modelData = NULL ;
-	
-	std::vector<Pass>	_pass;
 
-	HString _vsShader;
+	std::vector<ModelPrimitive> _primitive;
 
-	HString _psShader;
-
-	std::vector<HString> _graphicsPrimID;
-
-	HString _modelPrimitiveID;
+	std::vector<Material*>		_materials;
 
 };

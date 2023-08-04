@@ -4,6 +4,8 @@
 #include "VertexFactory.h"
 #include "Pass/PassType.h"
 #include "Component/Transform.h"
+#include "Texture.h"
+#include "Pipeline.h"
 
 //每个面的数据
 struct ModelPrimitive
@@ -22,48 +24,78 @@ struct ModelPrimitive
 
 	Transform*					transform = NULL;
 
+	HString						matSocketName="";
+
 	//用于排序
 	int							priority = 0;
+
 };
 
-struct GraphicsPrimitive
+struct MaterialPrimitive
 {
-	//一共有多少个面在这个Graphics里
-	std::vector<ModelPrimitive>				modelPrimitives;
-	
 	//Graphics用的什么vs
-	HString vsShader;
+	HString vsShader = "BasePassVertexShader";
 
 	//Graphics用的什么ps
-	HString psShader;
+	HString psShader = "BasePassPixelShader";
 
-	//其实就是材质名字
-	HString graphicsName;
+	//顶点输入
+	VertexInputLayout	inputLayout;
+
+	PipelineIndex	graphicsIndex;
 
 	//用于排序
 	int priority = 0;
 
-	HString graphicsID;
-	
-	VertexInputLayout			inputLayout;
-};
+	//其实就是材质名字
+	HString graphicsName;
 
+	//参数
+
+	//纹理贴图
+	std::vector<Texture*> textures;
+
+	//Shader参数
+	std::vector<float> uniformBuffer;
+
+	//变体开关
+	uint64_t varients = 0;
+};
 
 class PrimitiveProxy
 {
 public:
 
-	static HString AddGraphicsPrimitives(Pass pass, HString vsShader , HString psShader , GraphicsPrimitive prim);
+	static void AddMaterialPrimitive(Pass pass, MaterialPrimitive* prim);
 
-	static void RemoveModelPrimitives(Pass pass, HString graphicsID , HString modelPrimitiveName);
+	static void GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim);
 
-	static std::vector<GraphicsPrimitive> GetGraphicsPrimitives(Pass pass)
-	{
-		return _allGraphicsPrimitives[pass];
+	static void RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim);
+
+	static void AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive prim);
+
+	static void RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim);
+
+	inline static std::vector<std::vector<MaterialPrimitive*>> GetAllMaterialPrimitiveArray() {
+		return _allGraphicsPrimitives;
+	}
+
+	inline static std::vector<MaterialPrimitive*> GetMaterialPrimitives(uint32_t index) {
+		return _allGraphicsPrimitives[index];
+	}
+
+	inline static std::map<MaterialPrimitive*, std::vector<ModelPrimitive>> GetAllModelPrimitiveArray() {
+		return _allModelPrimitives;
+	}
+
+	inline static std::vector<ModelPrimitive> GetModelPrimitives(MaterialPrimitive* index) {
+		return _allModelPrimitives[index];
 	}
 
 private:
 
-	static std::map<Pass, std::vector<GraphicsPrimitive>> _allGraphicsPrimitives;
+	static std::vector<std::vector<MaterialPrimitive*>> _allGraphicsPrimitives;
+
+	static std::map<MaterialPrimitive*, std::vector<ModelPrimitive>> _allModelPrimitives;
 
 };

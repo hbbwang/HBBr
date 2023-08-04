@@ -52,6 +52,7 @@ public:
 protected:
 	VkFramebuffer GetFrameBuffer()const;
 	VkRenderPass _renderPass = VK_NULL_HANDLE;
+	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
 	std::vector<VkAttachmentDescription>_attachmentDescs;
 	std::vector<VkSubpassDependency>_subpassDependencys;
 	std::vector<VkSubpassDescription>_subpassDescs;
