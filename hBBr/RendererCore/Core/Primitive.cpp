@@ -1,7 +1,9 @@
 ﻿#pragma once
 #include "Primitive.h"
 #include "Shader.h"
+
 std::vector<std::vector<MaterialPrimitive*>> PrimitiveProxy::_allGraphicsPrimitives;
+
 std::map<MaterialPrimitive* ,std::vector<ModelPrimitive>> PrimitiveProxy::_allModelPrimitives;
 
 void PrimitiveProxy::AddMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
@@ -24,6 +26,12 @@ void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim)
 
 void PrimitiveProxy::RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
 {
+	//auto mit = _allModelPrimitives.find(prim);
+	//if (mit != _allModelPrimitives.end())
+	//{
+	//	_allModelPrimitives.erase(mit);
+	//}
+
 	if ((uint32_t)PrimitiveProxy::_allGraphicsPrimitives.size() != (uint32_t)Pass::MaxNum)
 	{
 		_allGraphicsPrimitives.resize((uint32_t)Pass::MaxNum);

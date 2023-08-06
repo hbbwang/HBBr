@@ -18,6 +18,8 @@ public:
 		if (!_defaultMaterial)
 		{
 			_defaultMaterial.reset(new Material());
+			_defaultMaterial->_materialName = "DefaultMaterial";
+			_defaultMaterial->bIsDefaultMaterial = true;
 		}
 		return _defaultMaterial.get();
 	}
@@ -31,6 +33,8 @@ private:
 	HString _materialName = "Unknow material" ;
 
 	std::unique_ptr<MaterialPrimitive> _primitive;
+
+	bool bIsDefaultMaterial;
 
 	static std::shared_ptr<Material> _defaultMaterial;
 

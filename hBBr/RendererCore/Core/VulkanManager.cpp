@@ -1605,7 +1605,7 @@ void VulkanManager::SubmitQueue(std::vector<VkCommandBuffer> cmdBufs, std::vecto
 	else
 		result = vkQueueSubmit(queue, 1, &info, VK_NULL_HANDLE);
 	if (result != VK_SUCCESS)
-		MessageOut(" [Submit Queue Immediate]vkQueueSubmit error", false, false);
+		MessageOut((HString("[Submit Queue]vkQueueSubmit error : ")+ GetVkResult(result)).c_str(), false, true);
 }
 
 VkViewport VulkanManager::GetViewport(float w, float h)
@@ -1656,7 +1656,7 @@ void VulkanManager::SubmitQueueForPasses(VkCommandBuffer cmdBuf, std::vector<std
 	else
 		result = vkQueueSubmit(queue, (uint32_t)1, &info, executeFence);
 	if (result != VK_SUCCESS)
-		MessageOut(" [Submit Queue Immediate]vkQueueSubmit error", false, false);
+		MessageOut((HString("[Submit Queue]vkQueueSubmit error : ") + GetVkResult(result)).c_str(), false, true);
 }
 
 void VulkanManager::UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range)

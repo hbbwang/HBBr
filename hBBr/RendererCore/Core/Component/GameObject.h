@@ -1,5 +1,5 @@
 ﻿#pragma once
-
+#include <vector>
 #include "HString.h"
 #include "Transform.h"
 
@@ -55,6 +55,8 @@ public:
 		return result;
 	}
 
+	std::weak_ptr<GameObject>_selfWeak;
+
 private:
 
 	void Init();
@@ -85,4 +87,5 @@ private:
 	std::vector<GameObject*> _children;
 
 	Transform* _transform;
+
 };

@@ -16,17 +16,32 @@ SceneManager::~SceneManager()
 	}
 }
 
+//Test 
+std::weak_ptr<GameObject> testObj;
+
 void SceneManager::SceneInit(class VulkanRenderer* renderer)
 {
 	_renderer = renderer;
 	//Test
+	auto test = new GameObject();
+	testObj = test->_selfWeak;
+	auto modelComp0 = test->AddComponent<ModelComponent>();
+	modelComp0->SetModel(FileSystem::GetResourceAbsPath() + "Content/FBX/TestFbx_1_Combine.FBX");
+
 	GameObject* cube = new GameObject();
 	auto modelComp = cube->AddComponent<ModelComponent>();
-	modelComp->SetModel(FileSystem::GetResourceAbsPath() + "Content/FBX/TestFbx_1_Combine.FBX");
+	cube->GetTransform()->SetLocation(glm::vec3(-0.75f, 1.5f, 0));
+	modelComp->SetModel(FileSystem::GetResourceAbsPath() + "Content/FBX/Sphere_1x1.FBX");
 }
 
 void SceneManager::SceneUpdate()
 {
+	//Test
+	if (!testObj.expired() && testObj.lock()->GetTransform())
+	{
+		testObj.lock()->GetTransform()->SetRotation(testObj.lock()->GetTransform()->GetRotation() + glm::vec3(0, _renderer->GetFrameRate() / 10.0f, 0));
+	}
+
 	//Setting object parent
 	const auto settingObjCount = _gameObjectParentSettings.size();
 	for (auto& i : _gameObjectParentSettings)
@@ -71,7 +86,7 @@ void SceneManager::SceneUpdate()
 	const auto destroyCount = _gameObjectNeedDestroy.size();
 	for (auto& i : _gameObjectNeedDestroy)
 	{
-		delete i;
+		i.reset();
 	}
 	_gameObjectNeedDestroy.clear();
 

@@ -64,6 +64,8 @@ public:
 
 	__forceinline const bool IsMapping()const { return _bufferIsMapping; }
 
+	__forceinline const VkDeviceSize GetBufferSize()const { return _bufferCapacity; }
+
 	__forceinline void* GetBufferMemory()const{return _bufferMapping;}
 
 	VkBuffer GetBuffer();

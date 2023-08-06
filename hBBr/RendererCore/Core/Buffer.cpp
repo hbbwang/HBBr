@@ -14,6 +14,8 @@ Buffer::~Buffer()
 
 void Buffer::Resize(uint64_t newSize)
 {
+	UnMapMemory();
+	_bufferCapacity = newSize;
 	//保存旧缓存,保证安全释放,我们必须保证Buffer不再被使用的时候再释放
 	//从GetBuffer里进行帧计算
 	BufferWaitToRelease oldBuffer;
@@ -24,9 +26,10 @@ void Buffer::Resize(uint64_t newSize)
 	VkBuffer newBuffer;
 	VkDeviceMemory newMemory;
 	VulkanManager::GetManager()->CreateBuffer(_bufferUsage, newSize, newBuffer);
-	VulkanManager::GetManager()->AllocateBufferMemory(_buffer, newMemory);
+	VulkanManager::GetManager()->AllocateBufferMemory(newBuffer, newMemory);
 	_buffer = newBuffer;
 	_bufferMemory = newMemory;
+	MapMemory();
 }
 
 void Buffer::AddSize(uint64_t newSize)
@@ -69,7 +72,7 @@ VkBuffer Buffer::GetBuffer()
 {
 	//销毁计数旧Buffer
 	const size_t oldBufferCount = _oldBuffer.size();
-	for (int i = 0; i < oldBufferCount; i++)
+	for (size_t i = 0; i < oldBufferCount; i++)
 	{
 		if (_oldBuffer[i].safeDestoryOldBuffer > VulkanManager::GetManager()->GetSwapchainBufferCount())
 		{

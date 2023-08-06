@@ -32,7 +32,7 @@ void BasePass::PassInit()
 
 void BasePass::PassBuild()
 {
-	_descriptorSet_pass.reset(new DescriptorSet(_renderer,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1));
+	_descriptorSet_pass.reset(new DescriptorSet(_renderer,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1, sizeof(PassUniformBuffer)));
 	_descriptorSet_obj.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1));
 	_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
 	_indexBuffer.reset(new Buffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT));
@@ -53,11 +53,43 @@ void BasePass::PassUpdate()
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews(), { GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetTextureView() });
 	manager->CmdSetViewport(cmdBuf, { _currentFrameBufferSize });
 	manager->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.0,0 });
+	VkDeviceSize vbOffset = 0;
+	VkDeviceSize ibOffset = 0;
+	uint32_t objectUboOffset = 0;
+	//Reset buffer
+	{
+		_descriptorSet_pass->UpdateDescriptorSet(sizeof(PassUniformBuffer), 1);
+		uint32_t objectCount = 0;
+		for (auto g : PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
+		{
+			auto prims = PrimitiveProxy::GetModelPrimitives(g);
+			for (size_t m = 0; m < prims.size(); m++)
+			{
+				ModelPrimitive prim = prims[m];
+
+				if (prim.transform)
+					objectUniformBuffer.WorldMatrix = prim.transform->GetWorldMatrix();
+				_descriptorSet_obj->BufferMapping(&objectUniformBuffer, (uint64_t)objectUboOffset, sizeof(ObjectUniformBuffer), 0);
+
+				VkDeviceSize vbSize = sizeof(float) * prim.vertexData.size();
+				VkDeviceSize ibSize = sizeof(uint32_t) * prim.vertexIndices.size();
+				_vertexBuffer->BufferMapping(prim.vertexData.data(), vbOffset, vbSize);
+				_indexBuffer->BufferMapping(prim.vertexIndices.data(), ibOffset, ibSize);
+
+				objectCount++;
+				objectUboOffset += (uint32_t)sizeof(ObjectUniformBuffer);
+				vbOffset += vbSize;
+				ibOffset += ibSize;
+			}
+		}
+		_descriptorSet_obj->ResizeDescriptorBuffer(sizeof(ObjectUniformBuffer) * (objectCount + 1));
+		_descriptorSet_obj->UpdateDescriptorSet(sizeof(ObjectUniformBuffer), objectCount);
+	}
 	//Update pass uniform buffers
 	{
 		_passUniformBuffer = {};
 		_passUniformBuffer.ScreenInfo = glm::vec4((float)_currentFrameBufferSize.width, (float)_currentFrameBufferSize.height, 0.001f, 500.0f);
-		_passUniformBuffer.View = glm::lookAt(glm::vec3(0.0f, 2.0f, -4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		_passUniformBuffer.View = glm::lookAt(glm::vec3(0.0f, 2.0f, -3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		//_passUniformBuffer.View_Inv = glm::inverse(_passUniformBuffer.View);
 		float aspect = (float)_currentFrameBufferSize.width / (float)_currentFrameBufferSize.height;
 		_passUniformBuffer.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.001f, 500.0f);
@@ -65,15 +97,13 @@ void BasePass::PassUpdate()
 		_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
 		_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
 		_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
-		_descriptorSet_pass->BufferMapping(&_passUniformBuffer, sizeof(_passUniformBuffer));
+		_descriptorSet_pass->BufferMapping(&_passUniformBuffer, 0, sizeof(_passUniformBuffer));
 		uint32_t dynamicOffset[] = { 0 };
 		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet_pass->GetDescriptorSet(), 1, dynamicOffset);
 	}
-	//Reset buffer
-	{
-		_descriptorSet_obj->ResetBufferMappingOffset();
-	}
-
+	vbOffset = 0;
+	ibOffset = 0;
+	objectUboOffset = 0;
 	for (auto g : PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
 	{
 		auto pipeline = PipelineManager::GetGraphicsPipelineMap(g->graphicsIndex);
@@ -96,21 +126,16 @@ void BasePass::PassUpdate()
 		{
 			ModelPrimitive prim = prims[m];
 			{
-				{
-					VkDeviceSize offset = _descriptorSet_obj->GetCurrentOffset();
-					if (prim.transform)
-						objectUniformBuffer.WorldMatrix = prim.transform->GetWorldMatrix();
-					_descriptorSet_obj->BufferMappingOffset(&objectUniformBuffer, sizeof(objectUniformBuffer), 0);
-					uint32_t dynamicOffset[] = { offset };
-					vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 1, 1, &_descriptorSet_obj->GetDescriptorSet(), 1, dynamicOffset);
-				}
-				VkDeviceSize vertex_offset[1] = { 0 };
+				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 1, 1, &_descriptorSet_obj->GetDescriptorSet(), 1, &objectUboOffset);
+				objectUboOffset += sizeof(ObjectUniformBuffer);
+
 				VkBuffer verBuf[] = { _vertexBuffer->GetBuffer() };
-				_vertexBuffer->BufferMapping(prim.vertexData.data(), sizeof(float) * prim.vertexData.size());
-				_indexBuffer->BufferMapping<uint32_t>(prim.vertexIndices.data(), sizeof(uint32_t) * prim.vertexIndices.size());
-				vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, vertex_offset);
-				vkCmdBindIndexBuffer(cmdBuf, _indexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+				vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, &vbOffset);
+				vkCmdBindIndexBuffer(cmdBuf, _indexBuffer->GetBuffer(), ibOffset, VK_INDEX_TYPE_UINT32);
 				vkCmdDrawIndexed(cmdBuf, (uint32_t)prim.vertexIndices.size(), 1, 0, 0, 0);
+
+				vbOffset += sizeof(float) * prim.vertexData.size();
+				ibOffset += sizeof(uint32_t) * prim.vertexIndices.size();
 			}
 		}
 	}
