@@ -17,20 +17,21 @@ EditorMain::~EditorMain()
 
 void EditorMain::UpdateRender()
 {
-	auto windows = VulkanApp::GetWindows();
-	for (int i = 0; i < windows.size(); i++)
-	{
-		if (glfwWindowShouldClose(windows[i].window))
-		{
-			VulkanApp::RemoveWindow(windows[i]);
-			i = i - 1;
-			continue;
-		}
-		else if (windows[i].renderer)
-		{
-			windows[i].renderer->Render();
-		}
-	}
+	//auto windows = VulkanApp::GetWindows();
+	//for (int i = 0; i < windows.size(); i++)
+	//{
+	//	if (glfwWindowShouldClose(windows[i].window))
+	//	{
+	//		VulkanApp::RemoveWindow(windows[i]);
+	//		i = i - 1;
+	//		continue;
+	//	}
+	//	else if (windows[i].renderer)
+	//	{
+	//		windows[i].renderer->Render();
+	//	}
+	//}
+	VulkanApp::UpdateForm();
 }
 
 VulkanForm* mainRenderer;

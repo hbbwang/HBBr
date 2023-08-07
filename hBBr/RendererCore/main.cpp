@@ -1,6 +1,7 @@
 ﻿#include "FormMain.h"
 #include "Shader.h"
 #include "Pipeline.h"
+#include "HInput.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -12,6 +13,8 @@
 
 std::vector<VulkanForm> VulkanApp::_glfwWindows;
 VulkanForm* VulkanApp::_mainForm;
+void* VulkanApp::_focusWindow = NULL;
+std::vector<FormDropFun> VulkanApp::_dropFuns;
 
 void GLFWResize(GLFWwindow* window, int width, int height)
 {
@@ -43,12 +46,20 @@ void GLFWClose(GLFWwindow* window)
 
 void GLFWFocus(GLFWwindow* window, int focused)
 {
-
+	if (focused == 1)
+	{
+		VulkanApp::_focusWindow = window;
+	}
+	else
+	{
+		VulkanApp::_focusWindow = NULL;
+	}
 }
 
 void GLFWKeyBoard(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-
+	using namespace HInput;
+	Input::KeyProcess((KeyCode)key, (KeyMod)mods, (Action)action);
 }
 
 void GLFWMouseButton(GLFWwindow* window, int button, int action, int mods)
@@ -73,7 +84,10 @@ void GLFWScroll(GLFWwindow* window, double xoffset, double yoffset)
 
 void GLFWDrop(GLFWwindow* window, int path_count, const char* paths[])
 {
-
+	for (auto& i : VulkanApp::_dropFuns)
+	{
+		i(path_count, paths);
+	}
 }
 
 void GLFWJoystick(int jid, int event)
@@ -107,28 +121,9 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 
 	if (bCustomRenderLoop)
 	{
-		while (true)
+		while (UpdateForm())
 		{
-			bool quit = true;
-			glfwPollEvents();
-			for (int i = 0; i < _glfwWindows.size(); i++)
-			{
-				if (glfwWindowShouldClose(_glfwWindows[i].window))
-				{
-					RemoveWindow(_glfwWindows[i]);
-					i = i - 1;
-					continue;
-				}
-				else if (_glfwWindows[i].renderer)
-				{
-					quit = false;
-					_glfwWindows[i].renderer->Render();
-				}
-			}
-			if (quit)
-			{
-				break;
-			}
+			
 		}
 	}
 	else
@@ -162,6 +157,36 @@ void VulkanApp::DeInitVulkanManager()
 	glfwTerminate();
 }
 
+bool VulkanApp::UpdateForm()
+{
+	using namespace HInput;
+	bool quit = true;
+	glfwPollEvents();
+	for (int i = 0; i < _glfwWindows.size(); i++)
+	{
+		if (glfwWindowShouldClose(_glfwWindows[i].window))
+		{
+			RemoveWindow(_glfwWindows[i]);
+			i = i - 1;
+			return true;
+		}
+		else if (_glfwWindows[i].renderer)
+		{
+			quit = false;
+			_glfwWindows[i].renderer->Render();
+		}
+	}
+	if (quit)
+	{
+		return false;
+	}
+	else
+	{
+		Input::ClearInput();
+	}
+	return true;
+}
+
 VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* title, bool bCreateRenderer)
 {
 	GLFWwindow* window = glfwCreateWindow(w, h, title, nullptr, nullptr);
@@ -192,6 +217,15 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 	return &_glfwWindows[_glfwWindows.size() - 1];
 }
 
+bool VulkanApp::IsWindowFocus(void* windowHandle)
+{
+	if (_focusWindow != NULL)
+	{
+		return  _focusWindow == windowHandle;
+	}
+	return false;
+}
+
 void VulkanApp::RemoveWindow(VulkanForm& glfwWindow)
 {
 	auto window = glfwWindow.window;
@@ -220,12 +254,12 @@ void VulkanApp::SetWindowPos(VulkanForm& glfwWindow, uint32_t x, uint32_t y)
 		glfwSetWindowPos(glfwWindow.window, (int)x, (int)y);
 }
 
-void* VulkanApp::GetWindowHandle(VulkanForm& glfwWindow)
+void* VulkanApp::GetWindowHandle(VulkanForm form)
 {
-	if (glfwWindow.window)
+	if (form .window!=NULL)
 	{
 		#if defined(_WIN32)
-		return (void*)glfwGetWin32Window(glfwWindow.window);
+		return (void*)glfwGetWin32Window((GLFWwindow*)form.window);
 		#endif
 	}
 	return NULL;

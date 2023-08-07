@@ -257,6 +257,7 @@
     <ClInclude Include="Common\Common.h" />
     <ClInclude Include="Common\ConsoleDebug.h" />
     <ClInclude Include="Common\FileSystem.h" />
+    <ClInclude Include="Common\HInput.h" />
     <ClInclude Include="Common\HString.h" />
     <ClInclude Include="Common\HTime.h" />
     <ClInclude Include="Common\XMLStream.h" />
@@ -299,6 +300,7 @@
     <ClCompile Include="Common\Common.cpp" />
     <ClCompile Include="Common\ConsoleDebug.cpp" />
     <ClCompile Include="Common\FileSystem.cpp" />
+    <ClCompile Include="Common\HInput.cpp" />
     <ClCompile Include="Common\HTime.cpp" />
     <ClCompile Include="Common\XMLStream.cpp" />
     <ClCompile Include="Core\Buffer.cpp" />
