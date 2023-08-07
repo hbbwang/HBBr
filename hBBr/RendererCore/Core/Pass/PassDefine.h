@@ -32,10 +32,11 @@ public:
 private:
 	std::shared_ptr<class DescriptorSet> _descriptorSet_pass;
 	std::shared_ptr<class DescriptorSet> _descriptorSet_obj;
+	std::shared_ptr<class DescriptorSet> _descriptorSet_mat;
 	std::shared_ptr<class Buffer>_vertexBuffer;
 	std::shared_ptr<class Buffer>_indexBuffer;
 	PassUniformBuffer _passUniformBuffer;
-	ObjectUniformBuffer objectUniformBuffer;
+	ObjectUniformBuffer _objectUniformBuffer;
 };
 
 /* Imgui pass define */

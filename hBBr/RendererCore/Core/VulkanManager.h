@@ -237,6 +237,8 @@ public:
 
 	void UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset , VkDeviceSize Range);
 
+	void UpdateBufferDescriptorSetAll(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
+
 	VkDeviceSize GetMinUboAlignmentSize(VkDeviceSize realSize);
 
 	void UpdateImageSamplerDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);

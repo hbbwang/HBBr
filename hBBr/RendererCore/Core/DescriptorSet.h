@@ -17,16 +17,19 @@ public:
 
 	bool ResizeDescriptorBuffer(VkDeviceSize newSize , int bufferIndex = 0);
 
-	void UpdateDescriptorSet(std::vector<uint32_t> bufferRanges , int bufferIndex = 0);
+	void UpdateDescriptorSet(std::vector<uint32_t> bufferRanges);
 
-	void UpdateDescriptorSet(uint32_t sameBufferSize,uint32_t bufferCount, int bufferIndex = 0);
+	void UpdateDescriptorSet(uint32_t sameBufferSize);
 
-	/* Must be called before vkCmdBindDescriptorSets  */
-	void UpdateDescriptorSetFullSize(int bufferIndex = 0);
+	void UpdateDescriptorSetAll(uint32_t sameBufferSize);
 
 	__forceinline Buffer* GetBuffer(int bufferIndex = 0)const { return _buffers[bufferIndex].get(); }
 
 	__forceinline std::vector<VkDescriptorType> GetTypes()const { return _descriptorTypes; }
+
+	__forceinline void NeedUpdate() {
+		memset(_needUpdates.data(), 1, sizeof(uint8_t) * _needUpdates.size());
+	}
 
 	const VkDescriptorSet& GetDescriptorSet();
 
@@ -36,6 +39,8 @@ private:
 	std::vector<VkDescriptorType>	_descriptorTypes;
 
 	std::vector<VkDescriptorSet>	_descriptorSets;
+
+	std::vector<uint8_t>	_needUpdates;
 
 	VkDescriptorSetLayout			_descriptorSetLayout = VK_NULL_HANDLE;
 

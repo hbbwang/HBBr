@@ -34,6 +34,7 @@ void BasePass::PassBuild()
 {
 	_descriptorSet_pass.reset(new DescriptorSet(_renderer,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1, sizeof(PassUniformBuffer)));
 	_descriptorSet_obj.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1));
+	_descriptorSet_mat.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1));
 	_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
 	_indexBuffer.reset(new Buffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT));
 	VulkanManager::GetManager()->CreatePipelineLayout(
@@ -42,6 +43,8 @@ void BasePass::PassBuild()
 			_descriptorSet_obj->GetDescriptorSetLayout()
 		}
 	, _pipelineLayout);
+	//Pass Uniform总是一尘不变的,并且我们用的是Dynamic uniform buffer ,所以只需要更新一次所有的DescriptorSet即可。
+	_descriptorSet_pass->UpdateDescriptorSetAll(sizeof(PassUniformBuffer));
 }
 
 void BasePass::PassUpdate()
@@ -58,7 +61,20 @@ void BasePass::PassUpdate()
 	uint32_t objectUboOffset = 0;
 	//Reset buffer
 	{
-		_descriptorSet_pass->UpdateDescriptorSet(sizeof(PassUniformBuffer), 1);
+		//Update pass uniform buffers
+		{
+			_passUniformBuffer = {};
+			_passUniformBuffer.ScreenInfo = glm::vec4((float)_currentFrameBufferSize.width, (float)_currentFrameBufferSize.height, 0.001f, 500.0f);
+			_passUniformBuffer.View = glm::lookAt(glm::vec3(0.0f, 2.0f, -3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			_passUniformBuffer.View_Inv = glm::inverse(_passUniformBuffer.View);
+			float aspect = (float)_currentFrameBufferSize.width / (float)_currentFrameBufferSize.height;
+			_passUniformBuffer.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.001f, 500.0f);
+			_passUniformBuffer.Projection[1][1] *= -1;
+			_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
+			_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
+			_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
+			_descriptorSet_pass->BufferMapping(&_passUniformBuffer, 0, sizeof(_passUniformBuffer));
+		}
 		uint32_t objectCount = 0;
 		for (auto g : PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
 		{
@@ -66,11 +82,9 @@ void BasePass::PassUpdate()
 			for (size_t m = 0; m < prims.size(); m++)
 			{
 				ModelPrimitive prim = prims[m];
-
 				if (prim.transform)
-					objectUniformBuffer.WorldMatrix = prim.transform->GetWorldMatrix();
-				_descriptorSet_obj->BufferMapping(&objectUniformBuffer, (uint64_t)objectUboOffset, sizeof(ObjectUniformBuffer), 0);
-
+					_objectUniformBuffer.WorldMatrix = prim.transform->GetWorldMatrix();
+				_descriptorSet_obj->BufferMapping(&_objectUniformBuffer, (uint64_t)objectUboOffset, sizeof(ObjectUniformBuffer), 0);
 				VkDeviceSize vbSize = sizeof(float) * prim.vertexData.size();
 				VkDeviceSize ibSize = sizeof(uint32_t) * prim.vertexIndices.size();
 				_vertexBuffer->BufferMapping(prim.vertexData.data(), vbOffset, vbSize);
@@ -83,27 +97,15 @@ void BasePass::PassUpdate()
 			}
 		}
 		_descriptorSet_obj->ResizeDescriptorBuffer(sizeof(ObjectUniformBuffer) * (objectCount + 1));
-		_descriptorSet_obj->UpdateDescriptorSet(sizeof(ObjectUniformBuffer), objectCount);
+		_descriptorSet_obj->UpdateDescriptorSet(sizeof(ObjectUniformBuffer));
 	}
-	//Update pass uniform buffers
-	{
-		_passUniformBuffer = {};
-		_passUniformBuffer.ScreenInfo = glm::vec4((float)_currentFrameBufferSize.width, (float)_currentFrameBufferSize.height, 0.001f, 500.0f);
-		_passUniformBuffer.View = glm::lookAt(glm::vec3(0.0f, 2.0f, -3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		//_passUniformBuffer.View_Inv = glm::inverse(_passUniformBuffer.View);
-		float aspect = (float)_currentFrameBufferSize.width / (float)_currentFrameBufferSize.height;
-		_passUniformBuffer.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.001f, 500.0f);
-		_passUniformBuffer.Projection[1][1] *= -1;
-		_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
-		_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
-		_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
-		_descriptorSet_pass->BufferMapping(&_passUniformBuffer, 0, sizeof(_passUniformBuffer));
-		uint32_t dynamicOffset[] = { 0 };
-		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet_pass->GetDescriptorSet(), 1, dynamicOffset);
-	}
+
+	//Update Render
 	vbOffset = 0;
 	ibOffset = 0;
 	objectUboOffset = 0;
+	uint32_t dynamicOffset[] = { 0 };
+	vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet_pass->GetDescriptorSet(), 1, dynamicOffset);
 	for (auto g : PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
 	{
 		auto pipeline = PipelineManager::GetGraphicsPipelineMap(g->graphicsIndex);

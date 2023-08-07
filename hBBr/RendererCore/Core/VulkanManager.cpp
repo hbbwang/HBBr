@@ -1684,6 +1684,36 @@ void VulkanManager::UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet
 	}
 }
 
+void VulkanManager::UpdateBufferDescriptorSetAll(DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range)
+{
+	for (int i = 0; i < descriptorSet->GetTypes().size(); i++)
+	{
+		if (descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+		{
+			std::vector<VkDescriptorBufferInfo> bufferInfo(_swapchainBufferCount);
+			std::vector<VkWriteDescriptorSet> descriptorWrite(_swapchainBufferCount);
+			for (int d = 0; d < _swapchainBufferCount; d++)
+			{
+				bufferInfo[d] = {};
+				bufferInfo[d].buffer = descriptorSet->GetBuffer()->GetBuffer();
+				bufferInfo[d].offset = offset;
+				bufferInfo[d].range = Range;
+				descriptorWrite[d] = {};
+				descriptorWrite[d].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrite[d].dstSet = descriptorSet->GetDescriptorSet(d);
+				descriptorWrite[d].dstBinding = dstBinding;
+				descriptorWrite[d].dstArrayElement = 0;
+				descriptorWrite[d].descriptorType = descriptorSet->GetTypes()[i];
+				descriptorWrite[d].descriptorCount = 1;
+				descriptorWrite[d].pBufferInfo = &bufferInfo[d];
+				descriptorWrite[d].pImageInfo = VK_NULL_HANDLE; // Optional
+				descriptorWrite[d].pTexelBufferView = VK_NULL_HANDLE; // Optional
+			}		
+			vkUpdateDescriptorSets(_device, _swapchainBufferCount, descriptorWrite.data(), 0, VK_NULL_HANDLE);
+		}
+	}
+}
+
 VkDeviceSize VulkanManager::GetMinUboAlignmentSize(VkDeviceSize realSize)
 {
 	VkDeviceSize outSize = realSize;

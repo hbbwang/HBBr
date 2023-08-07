@@ -23,7 +23,8 @@ DescriptorSet::DescriptorSet(class VulkanRenderer* renderer , VkDescriptorType t
 		buffer.reset(new Buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, alignmentSize ));
 		_buffers.push_back(std::move(buffer));
 	}
-
+	_needUpdates.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
+	NeedUpdate();
 }
 
 DescriptorSet::~DescriptorSet()
@@ -49,49 +50,39 @@ bool DescriptorSet::ResizeDescriptorBuffer(VkDeviceSize newSize, int bufferIndex
 	if (alignmentSize > _buffers[bufferIndex]->GetBufferSize())
 	{
 		_buffers[bufferIndex]->Resize(alignmentSize);
+		NeedUpdate();
 		return true;
 	}
 	return false;
 }
 
-void DescriptorSet::UpdateDescriptorSet(std::vector<uint32_t> bufferRanges, int bufferIndex)
+void DescriptorSet::UpdateDescriptorSet(std::vector<uint32_t> bufferRanges)
 {
-	for (size_t i = 0; i < bufferRanges.size(); i++)
+	if (_needUpdates[_renderer->GetCurrentFrameIndex()] == 1)
 	{
-		auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferRanges[i]);
+		_needUpdates[_renderer->GetCurrentFrameIndex()] = 0;
+		for (size_t i = 0; i < bufferRanges.size(); i++)
+		{
+			auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferRanges[i]);
+			VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, 0, 0, alignmentSize);
+		}
+	}	
+}
+
+void DescriptorSet::UpdateDescriptorSet(uint32_t sameBufferSize)
+{
+	if (_needUpdates[_renderer->GetCurrentFrameIndex()] == 1)
+	{
+		_needUpdates[_renderer->GetCurrentFrameIndex()] = 0;
+		auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(sameBufferSize);
 		VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, 0, 0, alignmentSize);
 	}
 }
 
-void DescriptorSet::UpdateDescriptorSet(uint32_t sameBufferSize, uint32_t bufferCount, int bufferIndex)
+void DescriptorSet::UpdateDescriptorSetAll(uint32_t sameBufferSize)
 {
 	auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(sameBufferSize);
-	VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, 0, 0, alignmentSize);
-}
-
-void DescriptorSet::UpdateDescriptorSetFullSize(int bufferIndex)
-{
-	VkDeviceSize bufferSize = _buffers[bufferIndex]->GetBufferSize();
-	uint32_t maxUboRange = 4096;
-	bufferSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSize);
-	VkDeviceSize offset = 0;
-	while (true)
-	{
-		uint32_t updateSize = 1;
-		if (bufferSize > maxUboRange)
-		{
-			updateSize = maxUboRange;
-			offset += updateSize;
-			bufferSize -= updateSize;
-			VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, bufferIndex, offset, updateSize);
-		}
-		else
-		{
-			updateSize = bufferSize;
-			VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, bufferIndex, offset, updateSize);
-			break;
-		}
-	}
+	VulkanManager::GetManager()->UpdateBufferDescriptorSetAll(this, 0, 0, alignmentSize);
 }
 
 const VkDescriptorSet& DescriptorSet::GetDescriptorSet()
