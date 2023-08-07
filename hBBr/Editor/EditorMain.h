@@ -21,16 +21,15 @@ public:
 
     virtual void showEvent(QShowEvent* event)override;
 
-    QTimer* _renderTimer;
+    virtual void focusInEvent(QFocusEvent* event);
 
-    QWidget* _mainRenderer=NULL;
+    virtual void focusOutEvent(QFocusEvent* event);
 
 private:
     Ui::EditorMainClass ui;
 
 private slots:
 
-    void UpdateRender();
 
 };
 

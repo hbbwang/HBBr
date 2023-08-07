@@ -1,19 +1,40 @@
 ﻿#include "HInput.h"
+#include "VulkanRenderer.h"
+#include "FormMain.h"
 
-using namespace HInput;
+std::vector<KeyCallBack> HInput::_keyRegisterDefault;
+std::vector<KeyCallBack> HInput::_keyRegisterRepeat;
 
-std::vector<KeyCallBack> Input::_keyRegister;
-
-void HInput::Input::KeyProcess(KeyCode key, KeyMod mod, Action action)
+void HInput::KeyProcess(void* focusWindowHandle , KeyCode key, KeyMod mod, Action action)
 {
 	KeyCallBack callBack;
 	callBack.key = key;
 	callBack.action = action;
 	callBack.mod = mod;
-	_keyRegister.push_back(callBack);
+	callBack.focusWindowHandle = focusWindowHandle;
+	{
+		_keyRegisterDefault.push_back(callBack);
+		if (action == Action::RELEASE)
+		{
+			for (int i = 0; i < _keyRegisterRepeat.size(); i++)
+			{
+				if (_keyRegisterRepeat[i].key == key)
+				{
+					_keyRegisterRepeat.erase(_keyRegisterRepeat.begin() + i);
+					i -= 1;
+					if (_keyRegisterRepeat.size() <= 0)
+						break;
+				}
+			}
+		}
+		else if (action == Action::PRESS)
+		{
+			_keyRegisterRepeat.push_back(callBack);
+		}
+	}
 }
 
-void HInput::Input::ClearInput()
+void HInput::ClearInput()
 {
-	_keyRegister.clear();
+	_keyRegisterDefault.clear();
 }

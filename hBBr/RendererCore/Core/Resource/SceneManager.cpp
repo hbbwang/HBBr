@@ -33,11 +33,11 @@ void SceneManager::SceneInit(class VulkanRenderer* renderer)
 	cube->GetTransform()->SetLocation(glm::vec3(-0.75f, 1.5f, 0));
 	modelComp->SetModel(FileSystem::GetResourceAbsPath() + "Content/FBX/Sphere_1x1.FBX");
 }
-
+#include "HInput.h"
 void SceneManager::SceneUpdate()
 {
 	//Test
-	if (!testObj.expired() && testObj.lock()->GetTransform())
+	if (!testObj.expired() && testObj.lock()->GetTransform() && ( HInput::GetKey(KeyCode::F)))
 	{
 		testObj.lock()->GetTransform()->SetRotation(testObj.lock()->GetTransform()->GetRotation() + glm::vec3(0, _renderer->GetFrameRate() / 10.0f, 0));
 	}

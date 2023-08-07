@@ -2,6 +2,7 @@
 #include "Shader.h"
 #include "Pipeline.h"
 #include "HInput.h"
+#include "VulkanRenderer.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -11,30 +12,30 @@
 //#pragma comment(lib ,"vld.lib")
 //#endif
 
-std::vector<VulkanForm> VulkanApp::_glfwWindows;
+std::vector<VulkanForm> VulkanApp::_forms;
 VulkanForm* VulkanApp::_mainForm;
 void* VulkanApp::_focusWindow = NULL;
 std::vector<FormDropFun> VulkanApp::_dropFuns;
 
-void GLFWResize(GLFWwindow* window, int width, int height)
+void ResizeCallBack(GLFWwindow* window, int width, int height)
 {
-	auto it = std::find_if(VulkanApp::GetWindows().begin(),VulkanApp::GetWindows().end(), [window](VulkanForm& glfw)
+	auto it = std::find_if(VulkanApp::GetForms().begin(),VulkanApp::GetForms().end(), [window](VulkanForm& glfw)
 	{
 		return glfw.window == window;
 	});
-	if (it != VulkanApp::GetWindows().end() && it->renderer)
+	if (it != VulkanApp::GetForms().end() && it->renderer)
 	{
 		it->renderer->RendererResize((uint32_t)width, (uint32_t)height);
 	}
 }
 
-void GLFWClose(GLFWwindow* window)
+void CloseCallBack(GLFWwindow* window)
 {
-	auto it = std::find_if(VulkanApp::GetWindows().begin(), VulkanApp::GetWindows().end(), [window](VulkanForm& glfw)
+	auto it = std::find_if(VulkanApp::GetForms().begin(), VulkanApp::GetForms().end(), [window](VulkanForm& glfw)
 	{
 		return glfw.window == window;
 	});
-	if (it != VulkanApp::GetWindows().end())
+	if (it != VulkanApp::GetForms().end())
 	{
 		if (it->renderer)
 		{
@@ -44,45 +45,37 @@ void GLFWClose(GLFWwindow* window)
 	}
 }
 
-void GLFWFocus(GLFWwindow* window, int focused)
+void FocusCallBack(GLFWwindow* window, int focused)
 {
-	if (focused == 1)
-	{
-		VulkanApp::_focusWindow = window;
-	}
-	else
-	{
-		VulkanApp::_focusWindow = NULL;
-	}
+	VulkanApp::_focusWindow = window;
 }
 
-void GLFWKeyBoard(GLFWwindow* window, int key, int scancode, int action, int mods)
+void KeyBoardCallBack(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	using namespace HInput;
-	Input::KeyProcess((KeyCode)key, (KeyMod)mods, (Action)action);
+	HInput::KeyProcess((void*)window , (KeyCode)key, (KeyMod)mods, (Action)action);
 }
 
-void GLFWMouseButton(GLFWwindow* window, int button, int action, int mods)
+void MouseButtonCallBack(GLFWwindow* window, int button, int action, int mods)
+{
+	glfwFocusWindow(window);
+}
+
+void CursorPosCallBack(GLFWwindow* window, double xpos, double ypos)
 {
 
 }
 
-void GLFWCursorPos(GLFWwindow* window, double xpos, double ypos)
+void CursorEnterCallBack(GLFWwindow* window, int entered)
 {
 
 }
 
-void GLFWCursorEnter(GLFWwindow* window, int entered)
+void ScrollCallBack(GLFWwindow* window, double xoffset, double yoffset)
 {
 
 }
 
-void GLFWScroll(GLFWwindow* window, double xoffset, double yoffset)
-{
-
-}
-
-void GLFWDrop(GLFWwindow* window, int path_count, const char* paths[])
+void DropCallBack(GLFWwindow* window, int path_count, const char* paths[])
 {
 	for (auto& i : VulkanApp::_dropFuns)
 	{
@@ -90,12 +83,12 @@ void GLFWDrop(GLFWwindow* window, int path_count, const char* paths[])
 	}
 }
 
-void GLFWJoystick(int jid, int event)
+void JoystickCallBack(int jid, int event)
 {
 
 }
 
-void GLFWMonitor(GLFWmonitor* monitor, int event)
+void MonitorCallBack(GLFWmonitor* monitor, int event)
 {
 
 }
@@ -116,7 +109,12 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	Shader::LoadShaderCache(FileSystem::GetShaderCacheAbsPath().c_str());
 
 	//Create Main Window
-	auto win = CreateNewWindow(64, 64, "MainRenderer", true);
+	auto win = CreateNewWindow(128, 128, "MainRenderer", true);
+
+	//Try Refresh focus
+	SetFormVisiable(win, false);
+	SetFormVisiable(win, true);
+
 	_mainForm = win;
 
 	if (bCustomRenderLoop)
@@ -135,21 +133,21 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 
 void VulkanApp::DeInitVulkanManager()
 {
-	if (_glfwWindows.size() > 0)
+	if (_forms.size() > 0)
 	{
-		for (int i = 0; i < _glfwWindows.size(); i++)
+		for (int i = 0; i < _forms.size(); i++)
 		{
-			if (_glfwWindows[i].renderer)
+			if (_forms[i].renderer)
 			{
-				_glfwWindows[i].renderer->Release();
-				_glfwWindows[i].renderer = NULL;
+				_forms[i].renderer->Release();
+				_forms[i].renderer = NULL;
 			}
-			if (_glfwWindows[i].window)
+			if (_forms[i].window)
 			{
-				glfwSetWindowShouldClose(_glfwWindows[i].window, true);
+				glfwSetWindowShouldClose(_forms[i].window, true);
 			}
 		}
-		_glfwWindows.clear();
+		_forms.clear();
 	}
 	Shader::DestroyAllShaderCache();
 	PipelineManager::ClearPipelineObjects();
@@ -159,21 +157,20 @@ void VulkanApp::DeInitVulkanManager()
 
 bool VulkanApp::UpdateForm()
 {
-	using namespace HInput;
 	bool quit = true;
 	glfwPollEvents();
-	for (int i = 0; i < _glfwWindows.size(); i++)
+	for (int i = 0; i < _forms.size(); i++)
 	{
-		if (glfwWindowShouldClose(_glfwWindows[i].window))
+		if (glfwWindowShouldClose(_forms[i].window))
 		{
-			RemoveWindow(_glfwWindows[i]);
+			RemoveWindow(&_forms[i]);
 			i = i - 1;
 			return true;
 		}
-		else if (_glfwWindows[i].renderer)
+		else if (_forms[i].renderer)
 		{
 			quit = false;
-			_glfwWindows[i].renderer->Render();
+			_forms[i].renderer->Render();
 		}
 	}
 	if (quit)
@@ -182,7 +179,7 @@ bool VulkanApp::UpdateForm()
 	}
 	else
 	{
-		Input::ClearInput();
+		HInput::ClearInput();
 	}
 	return true;
 }
@@ -196,15 +193,15 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 		glfwTerminate();
 	}
 	//set event
-	glfwSetWindowSizeCallback(window, GLFWResize);
-	glfwSetWindowCloseCallback(window, GLFWClose);
-	glfwSetWindowFocusCallback(window,GLFWFocus);
-	glfwSetKeyCallback(window,GLFWKeyBoard);
-	glfwSetMouseButtonCallback(window,GLFWMouseButton);
-	glfwSetCursorPosCallback(window,GLFWCursorPos);
-	glfwSetCursorEnterCallback(window,GLFWCursorEnter);
-	glfwSetScrollCallback(window,GLFWScroll);
-	glfwSetDropCallback(window,GLFWDrop);
+	glfwSetWindowSizeCallback(window, ResizeCallBack);
+	glfwSetWindowCloseCallback(window, CloseCallBack);
+	glfwSetWindowFocusCallback(window,FocusCallBack);
+	glfwSetKeyCallback(window,KeyBoardCallBack);
+	glfwSetMouseButtonCallback(window,MouseButtonCallBack);
+	glfwSetCursorPosCallback(window,CursorPosCallBack);
+	glfwSetCursorEnterCallback(window,CursorEnterCallBack);
+	glfwSetScrollCallback(window,ScrollCallBack);
+	glfwSetDropCallback(window,DropCallBack);
 
 	VulkanForm newGLFW = {};
 	newGLFW.window = window;
@@ -213,8 +210,8 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 	{
 		newGLFW.renderer = new VulkanRenderer((void*)newGLFW.window , title);
 	}
-	_glfwWindows.push_back(newGLFW);
-	return &_glfwWindows[_glfwWindows.size() - 1];
+	_forms.push_back(newGLFW);
+	return &_forms[_forms.size() - 1];
 }
 
 bool VulkanApp::IsWindowFocus(void* windowHandle)
@@ -226,43 +223,66 @@ bool VulkanApp::IsWindowFocus(void* windowHandle)
 	return false;
 }
 
-void VulkanApp::RemoveWindow(VulkanForm& glfwWindow)
+void VulkanApp::RemoveWindow(VulkanForm* form)
 {
-	auto window = glfwWindow.window;
-	auto it = std::remove_if(_glfwWindows.begin(), _glfwWindows.end(), [window](VulkanForm& glfw) {
+	auto window = form->window;
+	auto it = std::remove_if(_forms.begin(), _forms.end(), [window](VulkanForm& glfw) {
 		return window == glfw.window;
 		});
-	if (it != _glfwWindows.end())
+	if (it != _forms.end())
 	{
-		_glfwWindows.erase(it);
+		_forms.erase(it);
 	}
 }
 
-void VulkanApp::ResizeWindow(VulkanForm& glfwWindow, uint32_t w, uint32_t h)
+void VulkanApp::ResizeWindow(VulkanForm* form, uint32_t w, uint32_t h)
 {
 	if (w < 1 || h < 1)
 	{
 		return;
 	}
-	if(glfwWindow.window)
-		glfwSetWindowSize(glfwWindow.window, (int)w, (int)h);
+	if(form && form->window)
+		glfwSetWindowSize(form->window, (int)w, (int)h);
 }
 
-void VulkanApp::SetWindowPos(VulkanForm& glfwWindow, uint32_t x, uint32_t y)
+void VulkanApp::SetWindowPos(VulkanForm* form, uint32_t x, uint32_t y)
 {
-	if (glfwWindow.window)
-		glfwSetWindowPos(glfwWindow.window, (int)x, (int)y);
+	if (form && form->window)
+		glfwSetWindowPos(form->window, (int)x, (int)y);
 }
 
-void* VulkanApp::GetWindowHandle(VulkanForm form)
+void* VulkanApp::GetWindowHandle(VulkanForm* form)
 {
-	if (form .window!=NULL)
+	if (form && form->window)
 	{
 		#if defined(_WIN32)
-		return (void*)glfwGetWin32Window((GLFWwindow*)form.window);
+		return (void*)glfwGetWin32Window((GLFWwindow*)form->window);
 		#endif
 	}
 	return NULL;
+}
+
+inline void VulkanApp::SetFormFocus(VulkanForm* form)
+{
+	if (form && form->window)
+	{
+		glfwFocusWindow((GLFWwindow*)form->window);
+	}
+}
+
+inline void VulkanApp::SetFormVisiable(VulkanForm* form, bool bShow)
+{
+	if (form && form->window)
+	{
+		if (bShow)
+		{
+			glfwShowWindow(form->window);
+		}
+		else
+		{
+			glfwHideWindow(form->window);
+		}
+	}
 }
 
 #if IS_GAME

@@ -38,6 +38,7 @@ protected:
 
 	virtual void paintEvent(QPaintEvent* event);
 
+	QWidget* _mainRenderer = NULL;
 
 private slots:
 

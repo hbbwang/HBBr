@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "Common.h"
 #include "VulkanManager.h"
-#include "VulkanRenderer.h"
 #include "FileSystem.h"
 
 typedef void (*FormDropFun)(int path_count, const char* paths[]);
@@ -10,7 +9,7 @@ struct VulkanForm
 {
 	HString name;
 	GLFWwindow* window = NULL;
-	VulkanRenderer* renderer = NULL;
+	class VulkanRenderer* renderer = NULL;
 };
 
 class VulkanApp
@@ -27,12 +26,14 @@ public:
 
 	HBBR_API static VulkanForm* CreateNewWindow(uint32_t w = 512, uint32_t h = 512, const char* title = "Renderer",bool bCreateRenderer = false);
 	HBBR_API static bool IsWindowFocus(void* windowHandle);
-	HBBR_API static std::vector<VulkanForm>& GetWindows() { return _glfwWindows; }
-	HBBR_API static void RemoveWindow(VulkanForm& glfwWindow);
-	HBBR_API static void ResizeWindow(VulkanForm& glfwWindow , uint32_t w, uint32_t h);
-	HBBR_API static void SetWindowPos(VulkanForm& glfwWindow, uint32_t x, uint32_t y);
-	HBBR_API static void* GetWindowHandle(VulkanForm form);
+	HBBR_API static std::vector<VulkanForm>& GetForms() { return _forms; }
+	HBBR_API static void RemoveWindow(VulkanForm* form);
+	HBBR_API static void ResizeWindow(VulkanForm* form, uint32_t w, uint32_t h);
+	HBBR_API static void SetWindowPos(VulkanForm* form, uint32_t x, uint32_t y);
+	HBBR_API static void* GetWindowHandle(VulkanForm* form);
 	HBBR_API static inline VulkanForm* GetMainForm() { return _mainForm; }
+	HBBR_API static inline void SetFormFocus(VulkanForm* form);
+	HBBR_API static inline void SetFormVisiable(VulkanForm* form, bool bShow);
 	//Callbacks
 	static std::vector<FormDropFun> _dropFuns;
 
@@ -40,7 +41,7 @@ public:
 
 private:
 
-	static std::vector<VulkanForm> _glfwWindows;
+	static std::vector<VulkanForm> _forms;
 
 	static VulkanForm* _mainForm;
 

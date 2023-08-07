@@ -175,8 +175,9 @@ void ImguiPass::PassUpdate()
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews(), {});
 	manager->CmdSetViewport(cmdBuf, { _currentFrameBufferSize });
 	manager->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0,0 });
-	//Begin
 	manager->ImguiNewFrame();
+	//Begin
+	//ImGui::ShowDemoWindow((bool*)1);
 	ShowPerformance();
 	//End
 	manager->ImguiEndFrame(cmdBuf);

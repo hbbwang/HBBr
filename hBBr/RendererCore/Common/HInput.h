@@ -4,283 +4,311 @@
 
 #include <vector>
 #include <map>
-
-namespace HInput
+#include "VulkanRenderer.h"
+enum class Action : int
 {
+	RELEASE = 0,
+	PRESS   = 1,
+	REPEAT  = 2,
+};
 
-	enum class Action : int
-	{
-		RELEASE = 0,
-		PRESS   = 1,
-		REPEAT  = 2,
-	};
+enum class JoystickHat : int
+{
+	Centered = 0,
+	Up = 1,
+	Right = 2,
+	Down = 4,
+	Left = 8,
+	Right_Up = (Right | Up),
+	Right_Down = (Right | Down),
+	Left_Up = (Left | Up),
+	Left_Down = (Left | Down),
+};
 
-	enum class JoystickHat : int
-	{
-		HAT_CENTERED = 0,
-		HAT_UP = 1,
-		HAT_RIGHT = 2,
-		HAT_DOWN = 4,
-		HAT_LEFT = 8,
-		HAT_RIGHT_UP = (HAT_RIGHT | HAT_UP),
-		HAT_RIGHT_DOWN = (HAT_RIGHT | HAT_DOWN),
-		HAT_LEFT_UP = (HAT_LEFT | HAT_UP),
-		HAT_LEFT_DOWN = (HAT_LEFT | HAT_DOWN),
-	};
+enum class Joystick : int
+{
+	Joystick_1             =0 ,
+	Joystick_2             =1 ,
+	Joystick_3             =2 ,
+	Joystick_4             =3 ,
+	Joystick_5             =4 ,
+	Joystick_6             =5 ,
+	Joystick_7             =6 ,
+	Joystick_8             =7 ,
+	Joystick_9             =8 ,
+	Joystick_10            =9 ,
+	Joystick_11            =10,
+	Joystick_12            =11,
+	Joystick_13            =12,
+	Joystick_14            =13,
+	Joystick_15            =14,
+	Joystick_16            =15,
+	Joystick_LAST          =Joystick_16,
+};
 
-	enum class Joystick : int
-	{
-		JOYSTICK_1             =0 ,
-		JOYSTICK_2             =1 ,
-		JOYSTICK_3             =2 ,
-		JOYSTICK_4             =3 ,
-		JOYSTICK_5             =4 ,
-		JOYSTICK_6             =5 ,
-		JOYSTICK_7             =6 ,
-		JOYSTICK_8             =7 ,
-		JOYSTICK_9             =8 ,
-		JOYSTICK_10            =9 ,
-		JOYSTICK_11            =10,
-		JOYSTICK_12            =11,
-		JOYSTICK_13            =12,
-		JOYSTICK_14            =13,
-		JOYSTICK_15            =14,
-		JOYSTICK_16            =15,
-		JOYSTICK_LAST          =JOYSTICK_16,
-	};
-
-	enum class GamePadButton : int
-	{
-		GAMEPAD_BUTTON_A				=0	,
-		GAMEPAD_BUTTON_B				=1	,
-		GAMEPAD_BUTTON_X				=2	,
-		GAMEPAD_BUTTON_Y				=3	,
-		GAMEPAD_BUTTON_LEFT_BUMPER		=4	,
-		GAMEPAD_BUTTON_RIGHT_BUMPER		=5	,
-		GAMEPAD_BUTTON_BACK				=6	,
-		GAMEPAD_BUTTON_START			=7	,
-		GAMEPAD_BUTTON_GUIDE			=8	,
-		GAMEPAD_BUTTON_LEFT_THUMB		=9	,
-		GAMEPAD_BUTTON_RIGHT_THUMB		=10	,
-		GAMEPAD_BUTTON_DPAD_UP			=11	,
-		GAMEPAD_BUTTON_DPAD_RIGHT		=12	,
-		GAMEPAD_BUTTON_DPAD_DOWN		=13	,
-		GAMEPAD_BUTTON_DPAD_LEFT		=14	,
-		GAMEPAD_BUTTON_LAST				=GAMEPAD_BUTTON_DPAD_LEFT,
+enum class GamePadButton : int
+{
+	A					=0	,
+	B					=1	,
+	X					=2	,
+	Y					=3	,
+	Left_Bumper			=4	,
+	Right_Bumper		=5	,
+	Back				=6	,
+	Start				=7	,
+	Guide				=8	,
+	Left_Thumb			=9	,
+	Right_Thumb			=10	,
+	Dpad_Up				=11	,
+	Dpad_Right			=12	,
+	Dpad_Down			=13	,
+	Dpad_Left			=14	,
+	Last				=Dpad_Left,
 														 
-		GAMEPAD_BUTTON_CROSS			=GAMEPAD_BUTTON_A		 ,
-		GAMEPAD_BUTTON_CIRCLE			=GAMEPAD_BUTTON_B		 ,
-		GAMEPAD_BUTTON_SQUARE			=GAMEPAD_BUTTON_X		 ,
-		GAMEPAD_BUTTON_TRIANGLE			=GAMEPAD_BUTTON_Y		 ,
-	};
+	Cross				=A		 ,
+	Circle				=B		 ,
+	Square				=X		 ,
+	Triangle			=Y		 ,
+};
 
-	enum class GamePadAxis : int
+enum class GamePadAxis : int
+{
+	Left_X			=0,
+	Left_Y			=1,
+	Right_X			=2,
+	Right_Y			=3,
+	Left_Trigger	=4,
+	Right_Trigger	=5,
+	LAST			= Right_Trigger,
+};
+
+enum class KeyCode : int
+{
+	None				   =-1 ,
+	Space				   =32 ,  
+	Apostrophe             =39 ,   /* ' */
+	Comma                  =44 ,   /* , */
+	Minus                  =45 ,   /* - */
+	Period                 =46 ,   /* . */
+	Slash                  =47 ,   /* / */
+	Num0                   =48 ,
+	Num1                   =49 ,
+	Num2                   =50 ,
+	Num3                   =51 ,
+	Num4                   =52 ,
+	Num5                   =53 ,
+	Num6                   =54 ,
+	Num7                   =55 ,
+	Num8                   =56 ,
+	Num9                   =57 ,
+	Semicolon              =59 ,   /* ; */
+	Equal                  =61 ,   /* = */
+	A                      =65 ,  
+	B                      =66 ,  
+	C                      =67 ,  
+	D                      =68 ,  
+	E                      =69 ,  
+	F                      =70 ,  
+	G                      =71 ,  
+	H                      =72 ,  
+	I                      =73 ,  
+	J                      =74 ,  
+	K                      =75 ,  
+	L                      =76 ,  
+	M                      =77 ,  
+	N                      =78 ,  
+	O                      =79 ,  
+	P                      =80 ,  
+	Q                      =81 ,  
+	R                      =82 ,  
+	S                      =83 ,  
+	T                      =84 ,  
+	U                      =85 ,  
+	V                      =86 ,  
+	W                      =87 ,  
+	X                      =88 ,  
+	Y                      =89 ,  
+	Z                      =90 ,  
+	LeftBracket            =91 ,    	/* [ */
+	Backslash              =92 ,    	/* \ */
+	RightBracket           =93 ,    	/* ] */
+	GraveAccent            =96 ,    	/* ` */
+	World1                =161,     	/* non-US #1 */
+	World2                =162,     	/* non-US #2 */
+						    		    
+	/* Function keys */    		    
+	Escape                 =256,    
+	Enter                  =257,  
+	Tab                    =258,  
+	BackSpace              =259,  
+	Insert                 =260,  
+	Delete                 =261,  
+	Right                  =262,  
+	Left                   =263,  
+	Down                   =264,  
+	Up                     =265,  
+	PageUp                 =266,  
+	PageDown               =267,  
+	Home                   =268,  
+	End                    =269,  
+	CapsLock               =280,  
+	ScrollLock             =281,  
+	NumLock                =282,  
+	PrintScreen            =283,  
+	Pause                  =284,  
+	F1                     =290,  
+	F2                     =291,  
+	F3                     =292,  
+	F4                     =293,  
+	F5                     =294,  
+	F6                     =295,  
+	F7                     =296,  
+	F8                     =297,  
+	F9                     =298,  
+	F10                    =299,  
+	F11                    =300,  
+	F12                    =301,  
+	F13                    =302,  
+	F14                    =303,  
+	F15                    =304,  
+	F16                    =305,  
+	F17                    =306,  
+	F18                    =307,  
+	F19                    =308,  
+	F20                    =309,  
+	F21                    =310,  
+	F22                    =311,  
+	F23                    =312,  
+	F24                    =313,  
+	F25                    =314,  
+	KP_0                   =320,  
+	KP_1                   =321,  
+	KP_2                   =322,  
+	KP_3                   =323,  
+	KP_4                   =324,  
+	KP_5                   =325,  
+	KP_6                   =326,  
+	KP_7                   =327,  
+	KP_8                   =328,  
+	KP_9                   =329,  
+	KP_Decimal             =330,  
+	KP_Divide              =331,  
+	KP_Multiply            =332,  
+	KP_Subtract            =333,  
+	KP_Add                 =334,  
+	KP_Enter               =335,  
+	KP_Equal               =336,  
+	LeftShift              =340,  
+	LeftControl            =341,
+	LeftAlt                =342,
+	LeftSuper              =343,
+	RightShift             =344,  
+	RightControl           =345,  
+	RightAlt               =346,
+	RightSuper             =347,
+	MENU                   =348,  
+};
+
+enum class KeyMod : int
+{
+	Shift          = 0x0001,
+	Contorl        = 0x0002,
+	Alt            = 0x0004,
+	Super          = 0x0008,
+	Caps_Lock      = 0x0010,
+	NumLock       = 0x0020,
+};
+
+enum class MouseButton : int
+{
+	BUTTON_1 = 0,
+	BUTTON_2 = 1,
+	BUTTON_3 = 2,
+	BUTTON_4 = 3,
+	BUTTON_5 = 4,
+	BUTTON_6 = 5,
+	BUTTON_7 = 6,
+	BUTTON_8 = 7,
+	BUTTON_LAST = BUTTON_8,
+	BUTTON_LEFT = BUTTON_1,
+	BUTTON_RIGHT = BUTTON_2,
+	BUTTON_MIDDLE = BUTTON_3,
+};
+
+struct KeyCallBack
+{
+	KeyCode key;
+	Action  action;
+	KeyMod  mod;
+	void* focusWindowHandle = NULL; 
+};
+
+class HInput
+{
+public:
+	//Keyboard	注册当前帧反馈按键
+
+	static bool GetKey(KeyCode key , class VulkanRenderer* renderer = NULL) {
+		if (!HasFocus(renderer))
+			return false;
+		return FindRepeatKey(key) != NULL;
+	}
+
+	static bool GetKeyDown(KeyCode key, class VulkanRenderer* renderer = NULL) {
+		if (!HasFocus(renderer))
+			return false;
+		return FindDefaultKey(key, Action::PRESS) != NULL;
+	}
+
+	static bool GetKeyUp(KeyCode key, class VulkanRenderer* renderer = NULL) {
+		if (!HasFocus(renderer))
+			return false;
+		return FindDefaultKey(key, Action::RELEASE) != NULL;
+	}
+
+	//键盘输入的回调函数中调用,记录当前帧按下的按键,其他时候不要主动调用该函数!
+	static void KeyProcess(void* focusWindowHandle , KeyCode key, KeyMod mod ,Action action);
+
+	//清空当前帧的输入缓存,其他时候不要主动调用该函数!
+	static void ClearInput();
+
+private:
+
+	static bool HasFocus(class VulkanRenderer* renderer)
 	{
-		GAMEPAD_AXIS_LEFT_X			=0,
-		GAMEPAD_AXIS_LEFT_Y			=1,
-		GAMEPAD_AXIS_RIGHT_X		=2,
-		GAMEPAD_AXIS_RIGHT_Y		=3,
-		GAMEPAD_AXIS_LEFT_TRIGGER	=4,
-		GAMEPAD_AXIS_RIGHT_TRIGGER	=5,
-		GAMEPAD_AXIS_LAST			=GAMEPAD_AXIS_RIGHT_TRIGGER,
-	};
-
-	enum class KeyCode : int
-	{
-		NONE				   =-1 ,
-		KEY_SPACE              =32 ,  
-		KEY_APOSTROPHE         =39 ,   /* ' */
-		KEY_COMMA              =44 ,   /* , */
-		KEY_MINUS              =45 ,   /* - */
-		KEY_PERIOD             =46 ,   /* . */
-		KEY_SLASH              =47 ,   /* / */
-		KEY_0                  =48 ,  
-		KEY_1                  =49 ,  
-		KEY_2                  =50 ,  
-		KEY_3                  =51 ,  
-		KEY_4                  =52 ,  
-		KEY_5                  =53 ,  
-		KEY_6                  =54 ,  
-		KEY_7                  =55 ,  
-		KEY_8                  =56 ,  
-		KEY_9                  =57 ,  
-		KEY_SEMICOLON          =59 ,   /* ; */
-		KEY_EQUAL              =61 ,   /* = */
-		KEY_A                  =65 ,  
-		KEY_B                  =66 ,  
-		KEY_C                  =67 ,  
-		KEY_D                  =68 ,  
-		KEY_E                  =69 ,  
-		KEY_F                  =70 ,  
-		KEY_G                  =71 ,  
-		KEY_H                  =72 ,  
-		KEY_I                  =73 ,  
-		KEY_J                  =74 ,  
-		KEY_K                  =75 ,  
-		KEY_L                  =76 ,  
-		KEY_M                  =77 ,  
-		KEY_N                  =78 ,  
-		KEY_O                  =79 ,  
-		KEY_P                  =80 ,  
-		KEY_Q                  =81 ,  
-		KEY_R                  =82 ,  
-		KEY_S                  =83 ,  
-		KEY_T                  =84 ,  
-		KEY_U                  =85 ,  
-		KEY_V                  =86 ,  
-		KEY_W                  =87 ,  
-		KEY_X                  =88 ,  
-		KEY_Y                  =89 ,  
-		KEY_Z                  =90 ,  
-		KEY_LEFT_BRACKET       =91 ,    	/* [ */
-		KEY_BACKSLASH          =92 ,    	/* \ */
-		KEY_RIGHT_BRACKET      =93 ,    	/* ] */
-		KEY_GRAVE_ACCENT       =96 ,    	/* ` */
-		KEY_WORLD_1            =161,     	/* non-US #1 */
-		KEY_WORLD_2            =162,     	/* non-US #2 */
-								    
-		/* Function keys */		    
-		KEY_ESCAPE             =256,    
-		KEY_ENTER              =257,  
-		KEY_TAB                =258,  
-		KEY_BACKSPACE          =259,  
-		KEY_INSERT             =260,  
-		KEY_DELETE             =261,  
-		KEY_RIGHT              =262,  
-		KEY_LEFT               =263,  
-		KEY_DOWN               =264,  
-		KEY_UP                 =265,  
-		KEY_PAGE_UP            =266,  
-		KEY_PAGE_DOWN          =267,  
-		KEY_HOME               =268,  
-		KEY_END                =269,  
-		KEY_CAPS_LOCK          =280,  
-		KEY_SCROLL_LOCK        =281,  
-		KEY_NUM_LOCK           =282,  
-		KEY_PRINT_SCREEN       =283,  
-		KEY_PAUSE              =284,  
-		KEY_F1                 =290,  
-		KEY_F2                 =291,  
-		KEY_F3                 =292,  
-		KEY_F4                 =293,  
-		KEY_F5                 =294,  
-		KEY_F6                 =295,  
-		KEY_F7                 =296,  
-		KEY_F8                 =297,  
-		KEY_F9                 =298,  
-		KEY_F10                =299,  
-		KEY_F11                =300,  
-		KEY_F12                =301,  
-		KEY_F13                =302,  
-		KEY_F14                =303,  
-		KEY_F15                =304,  
-		KEY_F16                =305,  
-		KEY_F17                =306,  
-		KEY_F18                =307,  
-		KEY_F19                =308,  
-		KEY_F20                =309,  
-		KEY_F21                =310,  
-		KEY_F22                =311,  
-		KEY_F23                =312,  
-		KEY_F24                =313,  
-		KEY_F25                =314,  
-		KEY_KP_0               =320,  
-		KEY_KP_1               =321,  
-		KEY_KP_2               =322,  
-		KEY_KP_3               =323,  
-		KEY_KP_4               =324,  
-		KEY_KP_5               =325,  
-		KEY_KP_6               =326,  
-		KEY_KP_7               =327,  
-		KEY_KP_8               =328,  
-		KEY_KP_9               =329,  
-		KEY_KP_DECIMAL         =330,  
-		KEY_KP_DIVIDE          =331,  
-		KEY_KP_MULTIPLY        =332,  
-		KEY_KP_SUBTRACT        =333,  
-		KEY_KP_ADD             =334,  
-		KEY_KP_ENTER           =335,  
-		KEY_KP_EQUAL           =336,  
-		KEY_LEFT_SHIFT         =340,  
-		KEY_LEFT_CONTROL       =341,  
-		KEY_LEFT_ALT           =342,  
-		KEY_LEFT_SUPER         =343,  
-		KEY_RIGHT_SHIFT        =344,  
-		KEY_RIGHT_CONTROL      =345,  
-		KEY_RIGHT_ALT          =346,  
-		KEY_RIGHT_SUPER        =347,  
-		KEY_MENU               =348,  
-	};
-
-	enum class KeyMod : int
-	{
-		MOD_Shift          = 0x0001,
-		MOD_Contorl        = 0x0002,
-		MOD_Alt            = 0x0004,
-		MOD_Super          = 0x0008,
-		MOD_Caps_Lock      = 0x0010,
-		MOD_Num_Lock       = 0x0020,
-	};
-
-	enum class MouseButton : int
-	{
-		MOUSE_BUTTON_1       =  0,
-		MOUSE_BUTTON_2       =  1,
-		MOUSE_BUTTON_3       =  2,
-		MOUSE_BUTTON_4       =  3,
-		MOUSE_BUTTON_5       =  4,
-		MOUSE_BUTTON_6       =  5,
-		MOUSE_BUTTON_7       =  6,
-		MOUSE_BUTTON_8       =  7,
-		MOUSE_BUTTON_LAST    =  MOUSE_BUTTON_8,
-		MOUSE_BUTTON_LEFT    =  MOUSE_BUTTON_1,
-		MOUSE_BUTTON_RIGHT   =  MOUSE_BUTTON_2,
-		MOUSE_BUTTON_MIDDLE  =  MOUSE_BUTTON_3,
-	};
-
-	struct KeyCallBack
-	{
-		KeyCode key;
-		Action  action;
-		KeyMod  mod;
-	};
-
-	class Input
-	{
-	public:
-		//Keyboard	注册当前帧反馈按键
-
-		static bool GetKey(KeyCode key) {
-			
-			return FindKey(key, Action::REPEAT);
-		}
-
-		static bool GetKeyDown(KeyCode key) {
-			return FindKey(key, Action::PRESS);
-		}
-
-		static bool GetKeyUp(KeyCode key) {
-			return FindKey(key, Action::RELEASE);
-		}
-
-		//键盘输入的回调函数中调用,记录当前帧按下的按键,其他时候不要主动调用该函数!
-		static void KeyProcess(KeyCode key, KeyMod mod ,Action action);
-
-		//清空当前帧的输入缓存,其他时候不要主动调用该函数!
-		static void ClearInput();
-
-	private:
-
-		static inline bool FindKey(KeyCode key , Action action)
+		if (renderer == NULL)
 		{
-			auto it = std::find_if(_keyRegister.begin(), _keyRegister.end(), [key, action](KeyCallBack& callback) {
-				return callback.key == key && callback.action == action;
-				});
-			return it != _keyRegister.end();
+			if (!VulkanApp::GetMainForm() || !VulkanApp::GetMainForm()->renderer)
+			{
+				return false;
+			}
+			renderer = VulkanApp::GetMainForm()->renderer;
 		}
+		return renderer->HasFocus();
+	}
 
-		static std::vector<KeyCallBack> _keyRegister;
+	static inline KeyCallBack* FindDefaultKey(KeyCode key , Action action)
+	{
+		auto it = std::find_if(_keyRegisterDefault.begin(), _keyRegisterDefault.end(), [key, action](KeyCallBack& callback) {
+			return callback.key == key && callback.action == action;
+			});
+		if (it != _keyRegisterDefault.end())
+			return &(*it);
+		else
+			return NULL;
+	}
 
-	};
+	static inline KeyCallBack* FindRepeatKey(KeyCode key)
+	{
+		auto it = std::find_if(_keyRegisterRepeat.begin(), _keyRegisterRepeat.end(), [key](KeyCallBack& callback) {
+			return callback.key == key;
+			});
+		if (it != _keyRegisterRepeat.end())
+			return &(*it);
+		else
+			return NULL;
+	}
 
+	static std::vector<KeyCallBack> _keyRegisterDefault;
+	static std::vector<KeyCallBack> _keyRegisterRepeat;
 };

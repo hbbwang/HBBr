@@ -1,5 +1,6 @@
 ﻿#include"GameObject.h"
 #include "FormMain.h"
+#include "VulkanRenderer.h"
 #include "Resource/SceneManager.h"
 #include "Component.h"
 GameObject::GameObject(HString objectName, SceneManager* scene)

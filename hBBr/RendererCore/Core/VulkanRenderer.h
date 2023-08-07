@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "VulkanManager.h"
+#include "FormMain.h"
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -74,6 +75,10 @@ public:
 
 	__forceinline class SceneManager* GetScene() {
 		return _sceneManager.get();
+	}
+
+	__forceinline bool HasFocus() {
+		return VulkanApp::IsWindowFocus(_windowHandle);
 	}
 
 	/* 帧渲染函数 */

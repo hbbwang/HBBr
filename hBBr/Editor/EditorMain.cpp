@@ -1,13 +1,15 @@
 #include "EditorMain.h"
 #include "RenderView.h"
-#include "FormMain.h"
-#include "GLFWInclude.h"
-#include <qwindow.h>
+
 EditorMain::EditorMain(QWidget *parent)
     : QMainWindow(parent)
 {
     ui.setupUi(this);
     setFocusPolicy(Qt::ClickFocus);
+
+
+    _mainRenderView = new RenderView(this);
+    setCentralWidget(_mainRenderView);
 }
 
 EditorMain::~EditorMain()
@@ -15,50 +17,22 @@ EditorMain::~EditorMain()
 
 }
 
-void EditorMain::UpdateRender()
-{
-	//auto windows = VulkanApp::GetWindows();
-	//for (int i = 0; i < windows.size(); i++)
-	//{
-	//	if (glfwWindowShouldClose(windows[i].window))
-	//	{
-	//		VulkanApp::RemoveWindow(windows[i]);
-	//		i = i - 1;
-	//		continue;
-	//	}
-	//	else if (windows[i].renderer)
-	//	{
-	//		windows[i].renderer->Render();
-	//	}
-	//}
-	VulkanApp::UpdateForm();
-}
-
-VulkanForm* mainRenderer;
-
 void EditorMain::showEvent(QShowEvent* event)
 {
-	if (_mainRenderer == NULL)
-	{
-		//Enable custom loop
-		mainRenderer = VulkanApp::InitVulkanManager(false, true);
+	
+}
 
-		HWND hwnd = (HWND)VulkanApp::GetWindowHandle(*mainRenderer);
-		auto mainRendererWindow = QWindow::fromWinId((WId)hwnd);
-		_mainRenderer = QWidget::createWindowContainer(mainRendererWindow, this);
-		setCentralWidget(_mainRenderer);
+void EditorMain::focusInEvent(QFocusEvent* event)
+{
+}
 
-		_renderTimer = new QTimer(this);
-		_renderTimer->setInterval(1);
-		connect(_renderTimer, SIGNAL(timeout()), this, SLOT(UpdateRender()));
-		_renderTimer->start();
-	}
+void EditorMain::focusOutEvent(QFocusEvent* event)
+{
 }
 
 void EditorMain::closeEvent(QCloseEvent* event)
 {
-	_renderTimer->stop();
-    VulkanApp::DeInitVulkanManager();
+    _mainRenderView->close();
 }
 
 void EditorMain::resizeEvent(QResizeEvent* event)
