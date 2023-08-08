@@ -1,6 +1,5 @@
 #pragma once
 #include "Common.h"
-#include "glm/glm.hpp"
 
 class GameObject;
 class Transform

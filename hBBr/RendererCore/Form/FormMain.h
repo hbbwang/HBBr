@@ -2,7 +2,7 @@
 #include "Common.h"
 #include "VulkanManager.h"
 #include "FileSystem.h"
-
+#include "HTime.h"
 typedef void (*FormDropFun)(int path_count, const char* paths[]);
 
 struct VulkanForm

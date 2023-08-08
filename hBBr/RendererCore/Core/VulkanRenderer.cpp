@@ -81,11 +81,15 @@ void VulkanRenderer::Init()
 			MessageOut((HString("Has the same name of renderer.Random a new name is [") + _rendererName + "]").c_str(), false, true);
 		}
 	}
+
 	//Init scene
 	_sceneManager.reset(new SceneManager());
 	 
 	//Init passes
 	_passManager.reset(new PassManager());
+
+	//Start GameTime
+	_gameTime.Start();
 
 }
 
@@ -113,8 +117,13 @@ void VulkanRenderer::Render()
 		{
 			Resizing(true);
 		}
+
 		_sceneManager->SceneUpdate();
+
+		SetupPassUniformBuffer();
+
 		_passManager->PassesUpdate();
+
 		//Present swapchain.
 		if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], _swapchainIndex))
 		{
@@ -131,6 +140,23 @@ void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
 	_bResize = true;
 	_windowSize.width = w;
 	_windowSize.height = h;
+}
+
+void VulkanRenderer::SetupPassUniformBuffer()
+{
+	_passUniformBuffer.View = glm::lookAt(_view.viewPos, _view.viewTarget, _view.viewUp);
+	_passUniformBuffer.View_Inv = glm::inverse(_passUniformBuffer.View);
+	float aspect = (float)_surfaceSize.width / (float)_surfaceSize.height;
+	_passUniformBuffer.Projection = glm::perspective(glm::radians(_view.FOV), aspect, _view.nearClipPlane, _view.farClipPlane);
+	_passUniformBuffer.Projection[1][1] *= -1;
+	_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
+	_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
+	_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
+
+	_passUniformBuffer.ScreenInfo = glm::vec4((float)_surfaceSize.width, (float)_surfaceSize.height, _view.nearClipPlane, _view.farClipPlane);
+	_passUniformBuffer.CameraPos_GameTime = glm::vec4(_view.viewPos.x, _view.viewPos.y, _view.viewPos.z, (float)GetGameTime());
+	auto viewDir = glm::normalize(_view.viewPos - _view.viewTarget);
+	_passUniformBuffer.CameraDirection = glm::vec4(viewDir.x, viewDir.y, viewDir.z, 0.0f);
 }
 
 bool VulkanRenderer::Resizing(bool bForce)

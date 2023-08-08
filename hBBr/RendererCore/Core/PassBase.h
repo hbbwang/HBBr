@@ -5,7 +5,6 @@
 #include <vector>
 #include <memory>
 #include <map>
-#include "glm/glm.hpp"
 #include "HString.h"
 #include "DescriptorSet.h"
 #include "VertexFactory.h"

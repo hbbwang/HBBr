@@ -19,6 +19,13 @@ double HTime::End_ms()
 	return (0.000001 * (double)duration);
 }
 
+double HTime::End_s()
+{
+	auto end = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - _start).count();
+	return (0.000000001 * (double)duration);
+}
+
 double HTime::FrameRate_ms()
 {
 	static std::chrono::time_point<std::chrono::steady_clock> start;

@@ -14,6 +14,9 @@ public:
 	/* 结束时间点,返回经过的时长(毫秒)*/
 	double End_ms();
 
+	/* 结束时间点,返回经过的时长(秒)*/
+	double End_s();
+
 	double FrameRate_ms();
 
 private:

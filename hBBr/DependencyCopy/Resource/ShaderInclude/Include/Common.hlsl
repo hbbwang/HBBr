@@ -5,6 +5,11 @@
 #define MVP mul(World,mul(Projection,View))
 #define VP  mul(Projection,View)
 
+#define GameTime (CameraPos_GameTime.w)
+#define CameraPos (CameraPos_GameTime.xyz)
+#define CameraVector (CameraDirection.xyz)
+#define ScreenSize (ScreenInfo.xy)
+
 cbuffer Pass :register(b0)
 {
     float4x4 View;

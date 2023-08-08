@@ -5,10 +5,26 @@
 #include <mutex>
 #include <thread>
 #include <map>
+#include "Pass/PassType.h"
 #include "HTime.h"
 
 class Texture;
 class Scene;
+
+struct ViewController
+{
+	glm::vec3 viewPos = glm::vec3(0.0f, 2.0f, -3.0f);
+
+	glm::vec3 viewTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	glm::vec3 viewUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	float nearClipPlane = 0.01f;
+
+	float farClipPlane = 500.0f;
+
+	float FOV = 90.0f;
+};
 
 class VulkanRenderer
 {
@@ -81,6 +97,17 @@ public:
 		return VulkanApp::IsWindowFocus(_windowHandle);
 	}
 
+	__forceinline const PassUniformBuffer& GetPassUniformBufferCache()
+	{
+		return _passUniformBuffer;
+	}
+
+	//获取游戏时间(秒)
+	__forceinline const double GetGameTime()
+	{
+		return _gameTime.End_s();
+	}
+
 	/* 帧渲染函数 */
 	HBBR_API void Render();
 
@@ -94,6 +121,7 @@ public:
 	static std::map<HString, VulkanRenderer*> _renderers;
 
 private:
+	void SetupPassUniformBuffer();
 
 	bool Resizing(bool bForce = false);
 
@@ -129,6 +157,12 @@ private:
 
 	void* _windowHandle = NULL;
 
+	//View Parameters
+	ViewController _view;
+
+	//Pass Uniform
+	PassUniformBuffer _passUniformBuffer;
+
 	//Passes
 	std::unique_ptr<class PassManager> _passManager;
 
@@ -137,5 +171,8 @@ private:
 
 	HTime _frameTime;
 
+	HTime _gameTime;
+
 	double _frameRate;
+
 };

@@ -4,8 +4,6 @@
 #include "VertexFactory.h"
 #include "imgui.h"
 #include "Buffer.h"
-#include "glm/matrix.hpp"
-#include "glm/ext.hpp"
 #include "Primitive.h"
 #include "Pass/PassType.h"
 #include "Texture.h"
@@ -63,16 +61,7 @@ void BasePass::PassUpdate()
 	{
 		//Update pass uniform buffers
 		{
-			_passUniformBuffer = {};
-			_passUniformBuffer.ScreenInfo = glm::vec4((float)_currentFrameBufferSize.width, (float)_currentFrameBufferSize.height, 0.001f, 500.0f);
-			_passUniformBuffer.View = glm::lookAt(glm::vec3(0.0f, 2.0f, -3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			_passUniformBuffer.View_Inv = glm::inverse(_passUniformBuffer.View);
-			float aspect = (float)_currentFrameBufferSize.width / (float)_currentFrameBufferSize.height;
-			_passUniformBuffer.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.001f, 500.0f);
-			_passUniformBuffer.Projection[1][1] *= -1;
-			_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
-			_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
-			_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
+			PassUniformBuffer _passUniformBuffer = _renderer->GetPassUniformBufferCache();		
 			_descriptorSet_pass->BufferMapping(&_passUniformBuffer, 0, sizeof(_passUniformBuffer));
 		}
 		uint32_t objectCount = 0;

@@ -3,10 +3,10 @@
 #include"Common.h"
 #include <vector>
 #include <map>
-#include "glm/glm.hpp"
 #include "HString.h"
 #include "VertexFactory.h"
 #include "Primitive.h"
+
 struct VertexData
 {
 	glm::vec3 pos;

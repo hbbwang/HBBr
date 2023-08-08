@@ -19,7 +19,6 @@
 #include <array>
 #include "HString.h"
 #include "Thread.h"
-#include "glm/glm.hpp"
 
 #define COMMAND_MAKER(cmdBuf ,UniqueID ,name, color) \
 	struct Renderer_Command_Maker_##UniqueID\
