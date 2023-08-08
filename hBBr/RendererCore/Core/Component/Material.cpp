@@ -8,8 +8,8 @@ Material::Material()
 {
 	_primitive.reset(new MaterialPrimitive());
 	_primitive->graphicsName = _materialName;
-	_primitive->vsShader = "BasePassVertexShader";
-	_primitive->psShader = "BasePassPixelShader";
+	_primitive->vsShader = "BasePassTemplate";
+	_primitive->psShader = "BasePassTemplate";
 	_primitive->inputLayout = VertexFactory::VertexInput::BuildLayout(Shader::_vsShader[_primitive->vsShader].header.vertexInput);
 	PrimitiveProxy::GetNewMaterialPrimitiveIndex(_primitive.get());
 	PrimitiveProxy::AddMaterialPrimitive(_pass, _primitive.get());

@@ -3,6 +3,8 @@
 
 #define POW_CLAMP (0.000001f)
 
+#define PI (3.1415926535897932384626433832795)
+
 struct BxDFContext
 {
 	float NoV;
@@ -33,6 +35,67 @@ void InitBxDFContext(inout BxDFContext Context)
 	Context.YoL = 0;
 	Context.YoH = 0;
 	Context.LoH = 0;
+}
+
+
+inline half Pow4 (half x)
+{
+    return x*x*x*x;
+}
+
+inline float2 Pow4 (float2 x)
+{
+    return x*x*x*x;
+}
+
+inline half3 Pow4 (half3 x)
+{
+    return x*x*x*x;
+}
+
+inline half4 Pow4 (half4 x)
+{
+    return x*x*x*x;
+}
+
+// Pow5 uses the same amount of instructions as generic pow(), but has 2 advantages:
+// 1) better instruction pipelining
+// 2) no need to worry about NaNs
+inline half Pow5 (half x)
+{
+    return x*x * x*x * x;
+}
+
+inline half2 Pow5 (half2 x)
+{
+    return x*x * x*x * x;
+}
+
+inline half3 Pow5 (half3 x)
+{
+    return x*x * x*x * x;
+}
+
+inline half4 Pow5 (half4 x)
+{
+    return x*x * x*x * x;
+}
+
+inline half3 FresnelTerm (half3 F0, half cosA)
+{
+    half t = Pow5 (1 - cosA);   // ala Schlick interpoliation
+    return F0 + (1-F0) * t;
+}
+inline half3 FresnelLerp (half3 F0, half3 F90, half cosA)
+{
+    half t = Pow5 (1 - cosA);   // ala Schlick interpoliation
+    return lerp (F0, F90, t);
+}
+// approximage Schlick with ^4 instead of ^5
+inline half3 FresnelLerpFast (half3 F0, half3 F90, half cosA)
+{
+    half t = Pow4 (1 - cosA);
+    return lerp (F0, F90, t);
 }
 
 // [Blinn 1977, "Models of light reflection for computer synthesized pictures"]
@@ -78,31 +141,6 @@ inline float GGXTerm (float NdotH, float roughness)
     float d = (NdotH * a2 - NdotH) * NdotH + 1.0f; // 2 mad
     return ( 1 / PI ) * a2 / (d * d + 1e-7f); // This function is not intended to be running on Mobile,
                                             // therefore epsilon is smaller than what can be represented by half
-}
-
-// GGX / Trowbridge-Reitz
-// [Walter et al. 2007, "Microfacet models for refraction through rough surfaces"]
-float D_GGX( float a2, float NoH )
-{
-	float d = ( NoH * a2 - NoH ) * NoH + 1;	// 2 mad
-	return a2 / ( PI*d*d );					// 4 mul, 1 rcp
-}
-
-// Anisotropic GGX
-// [Burley 2012, "Physically-Based Shading at Disney"]
-float D_GGXaniso( float ax, float ay, float NoH, float XoH, float YoH )
-{
-// The two formulations are mathematically equivalent
-#if 1
-	float a2 = ax * ay;
-	float3 V = float3(ay * XoH, ax * YoH, a2 * NoH);
-	float S = dot(V, V);
-
-	return (1.0f / PI) * a2 * Square(a2 / S);
-#else
-	float d = XoH*XoH / (ax*ax) + YoH*YoH / (ay*ay) + NoH*NoH;
-	return 1.0f / ( PI * ax*ay * d*d );
-#endif
 }
 
 float Vis_Implicit()
@@ -168,20 +206,6 @@ float3 F_Schlick( float3 SpecularColor, float VoH )
 	
 }
 
-inline float3 FresnelTerm (float3 F0, float cosA)
-{
-    float t = Pow5 (1 - cosA);   // ala Schlick interpoliation
-    return F0 + (1-F0) * t;
-}
-
-float3 F_Fresnel( float3 SpecularColor, float VoH )
-{
-	float3 SpecularColorSqrt = sqrt( clamp( float3(0, 0, 0), float3(0.99, 0.99, 0.99), SpecularColor ) );
-	float3 n = ( 1 + SpecularColorSqrt ) / ( 1 - SpecularColorSqrt );
-	float3 g = sqrt( n*n + VoH*VoH - 1 );
-	return 0.5 * Square( (g - VoH) / (g + VoH) ) * ( 1 + Square( ((g+VoH)*VoH - 1) / ((g-VoH)*VoH + 1) ) );
-}
-
 float3 Diffuse_Lambert( float3 DiffuseColor )
 {
 	return DiffuseColor * (1 / PI);
@@ -194,6 +218,17 @@ float3 Diffuse_Burley( float3 DiffuseColor, float Roughness, float NoV, float No
 	float FdV = 1 + (FD90 - 1) * Pow5( 1 - NoV );
 	float FdL = 1 + (FD90 - 1) * Pow5( 1 - NoL );
 	return DiffuseColor * ( (1 / PI) * FdV * FdL );
+}
+
+// Note: Disney diffuse must be multiply by diffuseAlbedo / PI. This is done outside of this function.
+half DisneyDiffuse(half NdotV, half NdotL, half LdotH, half perceptualRoughness)
+{
+    half fd90 = 0.5 + 2 * LdotH * LdotH * perceptualRoughness;
+    // Two schlick fresnel term
+    half lightScatter   = (1 + (fd90 - 1) * Pow5(1 - NdotL));
+    half viewScatter    = (1 + (fd90 - 1) * Pow5(1 - NdotV));
+
+    return lightScatter * viewScatter;
 }
 
 // [Gotanda 2012, "Beyond a Simple Physically Based Blinn-Phong Model in Real-Time"]

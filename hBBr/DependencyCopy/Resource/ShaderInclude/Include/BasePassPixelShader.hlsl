@@ -1,7 +1,4 @@
-//[Flags]EnableShaderDebug;
-//[Varient]USE_COLOR;
-
-#include "Include/Common.hlsl"
+//#include "Include/Common.hlsl"
 
 struct PSOutput
 {
@@ -18,6 +15,8 @@ PSOutput PSMain(VSToPS IN)
 {   
     PSOutput OUT;
     InitPSOut(OUT);
+    PixelShaderParameter Parameters;
+    frag(IN,Parameters);
 
     OUT.Color = float4(IN.WorldNormal * 0.5 + 0.5 ,1.0f) * (sin(GameTime) * 0.5 + 0.5);
 

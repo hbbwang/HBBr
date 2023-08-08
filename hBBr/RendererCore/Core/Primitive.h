@@ -34,10 +34,10 @@ struct ModelPrimitive
 struct MaterialPrimitive
 {
 	//Graphics用的什么vs
-	HString vsShader = "BasePassVertexShader";
+	HString vsShader = "BasePassTemplate";
 
 	//Graphics用的什么ps
-	HString psShader = "BasePassPixelShader";
+	HString psShader = "BasePassTemplate";
 
 	//顶点输入
 	VertexInputLayout	inputLayout;

@@ -23,21 +23,35 @@ cbuffer Pass :register(b0)
     float4 CameraDirection;
 };
 
-cbuffer Pass :register(b0,space1)
+cbuffer Pass :register(b0 ,space1)
 {
     float4x4 World;
 };
 
 struct VSToPS
 {
-    float4 SVPosition   : SV_POSITION;
-    float4 Color        : COLOR;
-    float4 Texcoord01   : TEXCOORD0;
-    float4 Texcoord23   : TEXCOORD1;
-    float3 WorldNormal  : NORMAL;
-    float3 WorldTangent : TANGENT;
-    float3 WorldBitangent: BINORMAL;
-    float3 WorldPosition: TEXCOORD2;
+    float4 SVPosition       : SV_POSITION;
+    float4 Color            : COLOR;
+    float4 Texcoord01       : TEXCOORD0;
+    float4 Texcoord23       : TEXCOORD1;
+    float3 WorldNormal      : NORMAL;
+    float3 WorldTangent     : TANGENT;
+    float3 WorldBitangent   : BINORMAL;
+    float3 LocalPosition    : TEXCOORD2;
+    float3 WorldPosition    : TEXCOORD3;
+};
+
+struct PixelShaderParameter
+{
+    float3  BaseColor;
+    float3  Emissive;
+    float   Roughness;
+    float   Metallic;
+    float3  WorldNormal;
+    float3  WorldTangent;
+    float3  WorldBitangent;
+    float3  WorldPosition;
+    float3  LocalPosition;
 };
 
 void InitVSToPS(inout VSToPS vs2ps)
@@ -57,8 +71,6 @@ float3 DirectionLocalToWorld(in float3 LocalDir)
     float3x3 worldDirMatrix = (float3x3)World;
     return mul(worldDirMatrix , LocalDir).xyz;
 }
-
-
 
 
 

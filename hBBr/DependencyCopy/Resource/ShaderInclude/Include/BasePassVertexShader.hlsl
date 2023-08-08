@@ -1,18 +1,4 @@
-//[Flags]EnableShaderDebug;
-//[Varient]USE_COLOR;
-
-#include "Include/Common.hlsl"
-
-//[InputLayout]
-struct VSInput
-{
-    float3 Position     : POSITION;
-    float3 Normal       : NORMAL;
-    float3 Tangent      : TANGENT;
-    float4 Color        : COLOR;
-    float4 Texcoord01   : TEXCOORD0;
-    float4 Texcoord23   : TEXCOORD1;
-};
+//#include "Include/Common.hlsl"
 
 VSToPS VSMain(VSInput IN)
 {
@@ -20,8 +6,9 @@ VSToPS VSMain(VSInput IN)
     InitVSToPS(OUT);
 
     //Transform MVP
+    OUT.LocalPosition = IN.Position;
     float4 WorldPosition = mul(World, float4(IN.Position,1.0));
-    OUT.SVPosition = mul(VP, mul(World, float4(IN.Position,1.0)));
+    OUT.SVPosition = mul(VP, WorldPosition);
     OUT.WorldPosition = WorldPosition.xyz;
 
     //Transform TangentSpace
@@ -35,6 +22,8 @@ VSToPS VSMain(VSInput IN)
 
     //Vertex Color
     OUT.Color = IN.Color;
+
+    vert(IN,OUT);
     
     return OUT;
 }

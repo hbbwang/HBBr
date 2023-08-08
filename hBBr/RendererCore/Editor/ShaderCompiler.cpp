@@ -50,47 +50,51 @@ void Shaderc::ShaderCompiler::CompileAllShaders(const char* srcShaderPath)
 		}
 	}
 }
-
+std::vector<HString> samePath;
 class ShaderIncluder : public  shaderc::CompileOptions::IncluderInterface
 {
 public:
-	ShaderIncluder(HString currentShaderPath) :shaderc::CompileOptions::IncluderInterface()
-	{
-		_currentShaderPath = currentShaderPath;
+	std::string content;
+	shaderc_include_result* GetInclude(const char* requested_source,
+		shaderc_include_type type,
+		const char* requesting_source,
+		size_t include_depth) override {
+		// 创建一个新的 shaderc_include_result 结构体来保存结果。
+		auto* result = new shaderc_include_result;
+		// 读取文件内容。
+		HString IncludePath = FileSystem::GetShaderIncludeAbsPath() + requested_source;
+		IncludePath.CorrectionPath();
+		std::ifstream file(IncludePath.c_str());
+		if (file.good()) {
+			if (std::find(samePath.begin(), samePath.end(), IncludePath) != samePath.end())
+			{
+				MessageOut(HString(HString(requesting_source) + (": Shader Include exist.")).c_str(), false, false, "255,255,0");
+				delete result;
+				result = nullptr;
+			}
+			samePath.push_back(IncludePath);
+			content = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()).c_str();
+			result->content = content.c_str();
+			result->content_length = content.size();
+			result->source_name = requested_source;
+			result->source_name_length = strlen(requested_source);
+			result->user_data = nullptr;
+		}
+		else {
+			// 如果无法打开文件，你可能需要处理错误。
+			// 在这个例子中，我们简单地删除了结果并返回 nullptr。
+			MessageOut(HString(HString(requesting_source) + (": Shader Include Error.")).c_str(),false,true,"255,0,0");
+			delete result;
+			result = nullptr;
+		}
+
+		return result;
 	}
-private:
-	HString _currentShaderPath;
-	HString _shaderName;
-	HString _codeContents;
-	//std::unique_ptr<char> str_contents = NULL;
-	shaderc_include_result* GetInclude(const char* requested_source, shaderc_include_type type, const char* requesting_source, size_t include_depth)override
-	{
-		HString path = _currentShaderPath + requested_source;
-		path.CorrectionPath();
-		std::ifstream t(path.c_str());
-		std::string contents((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-		_codeContents = contents.c_str();
-		//std::ifstream file(path.c_str(), std::ios::ate);
-		//size_t fileSize = static_cast<size_t>(file.tellg());
-		//str_contents.reset( new char[fileSize]);
-		//file.seekg(0);
-		//file.read(str_contents.get(), fileSize);
-		//file.close();
-		//ConsoleDebug::print_endl(contents.c_str());
-		_shaderName = path.GetFileName();
-		//data->user_data = useData->data();
-		shaderc_include_result* _data = new shaderc_include_result;
-		_data->source_name = _shaderName.c_str();
-		_data->source_name_length = _shaderName.Length();
-		_data->content = _codeContents.c_str();
-		_data->content_length = _codeContents.Length();
-		return _data;
-	};
-	void ReleaseInclude(shaderc_include_result* data) override
-	{
+
+	void ReleaseInclude(shaderc_include_result* data) override {
+		// 释放我们在 GetInclude 中分配的内存。
 		delete data;
-		//delete[]str_contents;
-	};
+	}
 };
 
 void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, const char* entryPoint, CompileShaderType shaderType)
@@ -187,7 +191,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 		HString filePath = fileName.GetFilePath();
 		HString ResourcePath = FileSystem::GetShaderIncludeAbsPath();
 		ResourcePath.CorrectionPath();
-		options.SetIncluder(std::make_unique<ShaderIncluder>(ResourcePath));
+		options.SetIncluder(std::make_unique<ShaderIncluder>());
 		HString dTarget;
 		auto kind = shaderc_vertex_shader;
 		if (shaderType == CompileShaderType::VertexShader)
@@ -254,6 +258,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 			{
 			}
 		}
+		samePath.clear();
 	}
 }
 
