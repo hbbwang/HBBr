@@ -51,7 +51,7 @@ void Shaderc::ShaderCompiler::CompileAllShaders(const char* srcShaderPath)
 	}
 }
 std::vector<HString> samePath;
-class ShaderIncluder : public  shaderc::CompileOptions::IncluderInterface
+class ShaderIncluder : public  shaderc::CompileOptions::IncluderInterface 
 {
 public:
 	std::string content;
@@ -71,6 +71,7 @@ public:
 				MessageOut(HString(HString(requesting_source) + (": Shader Include exist.")).c_str(), false, false, "255,255,0");
 				delete result;
 				result = nullptr;
+				return result;
 			}
 			samePath.push_back(IncludePath);
 			content = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()).c_str();
