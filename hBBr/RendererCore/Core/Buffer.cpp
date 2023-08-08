@@ -74,7 +74,7 @@ VkBuffer Buffer::GetBuffer()
 	const size_t oldBufferCount = _oldBuffer.size();
 	for (size_t i = 0; i < oldBufferCount; i++)
 	{
-		if (_oldBuffer[i].safeDestoryOldBuffer > VulkanManager::GetManager()->GetSwapchainBufferCount())
+		if (_oldBuffer[i].safeDestoryOldBuffer > (int)VulkanManager::GetManager()->GetSwapchainBufferCount())
 		{
 			VulkanManager::GetManager()->FreeBufferMemory(_oldBuffer[i].old_bufferMemory);
 			VulkanManager::GetManager()->DestroyBuffer(_oldBuffer[i].old_buffer);

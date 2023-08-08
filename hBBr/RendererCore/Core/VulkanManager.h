@@ -137,6 +137,8 @@ public:
 
 	void FreeCommandBuffers(VkCommandPool commandPool, std::vector<VkCommandBuffer> cmdBufs);
 
+	void ResetCommandBuffer(VkCommandBuffer cmdBuf);
+
 	void BeginCommandBuffer(VkCommandBuffer cmdBuf , VkCommandBufferUsageFlags flag = 0);
 
 	void EndCommandBuffer(VkCommandBuffer cmdBuf);

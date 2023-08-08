@@ -982,6 +982,11 @@ void VulkanManager::FreeCommandBuffers(VkCommandPool commandPool, std::vector<Vk
 	}
 }
 
+void VulkanManager::ResetCommandBuffer(VkCommandBuffer cmdBuf)
+{
+	vkResetCommandBuffer(cmdBuf, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+}
+
 void VulkanManager::BeginCommandBuffer(VkCommandBuffer cmdBuf, VkCommandBufferUsageFlags flag)
 {
 	//VkCommandBufferBeginInfo.flags:
@@ -1692,7 +1697,7 @@ void VulkanManager::UpdateBufferDescriptorSetAll(DescriptorSet* descriptorSet, u
 		{
 			std::vector<VkDescriptorBufferInfo> bufferInfo(_swapchainBufferCount);
 			std::vector<VkWriteDescriptorSet> descriptorWrite(_swapchainBufferCount);
-			for (int d = 0; d < _swapchainBufferCount; d++)
+			for (uint32_t d = 0; d < _swapchainBufferCount; d++)
 			{
 				bufferInfo[d] = {};
 				bufferInfo[d].buffer = descriptorSet->GetBuffer()->GetBuffer();

@@ -35,7 +35,9 @@ void PassManager::PassesUpdate()
 
 	_sceneTextures->UpdateTextures();
 
+	manager->ResetCommandBuffer(_renderer->GetCommandBuffer());
 	manager->BeginCommandBuffer(_renderer->GetCommandBuffer());
+
 	//Collect render setting (Commandbuffer record)
 	for (auto p : _passes)
 	{
