@@ -38,6 +38,7 @@ void frag(in VSToPS IN , inout PixelShaderParameter Parameters)
     Parameters.WorldBitangent   = normalize(IN.WorldBitangent);
     Parameters.WorldPosition    = IN.WorldPosition;
     Parameters.LocalPosition    = IN.LocalPosition;
+    //
     
 }
 

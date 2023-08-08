@@ -1,4 +1,7 @@
-//#include "Include/Common.hlsl"
+#ifndef _BASE_PASS_PIXEL_SHADER_HLSL
+#define _BASE_PASS_PIXEL_SHADER_HLSL
+
+#include "Include/Common.hlsl"
 
 struct PSOutput
 {
@@ -23,3 +26,4 @@ PSOutput PSMain(VSToPS IN)
     return OUT;
 }
 
+#endif

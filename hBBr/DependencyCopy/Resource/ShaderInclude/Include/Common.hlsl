@@ -73,8 +73,4 @@ float3 DirectionLocalToWorld(in float3 LocalDir)
 }
 
 
-
-
-
-
 #endif

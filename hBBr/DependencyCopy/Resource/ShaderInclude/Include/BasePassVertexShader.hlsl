@@ -1,4 +1,8 @@
-//#include "Include/Common.hlsl"
+
+#ifndef _BASE_PASS_VERTEX_SHADER_HLSL
+#define _BASE_PASS_VERTEX_SHADER_HLSL
+
+#include "Include/Common.hlsl"
 
 VSToPS VSMain(VSInput IN)
 {
@@ -27,3 +31,5 @@ VSToPS VSMain(VSInput IN)
     
     return OUT;
 }
+
+#endif

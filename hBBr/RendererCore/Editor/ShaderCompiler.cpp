@@ -50,45 +50,43 @@ void Shaderc::ShaderCompiler::CompileAllShaders(const char* srcShaderPath)
 		}
 	}
 }
-std::vector<HString> samePath;
+
 class ShaderIncluder : public  shaderc::CompileOptions::IncluderInterface 
 {
 public:
-	std::string content;
+	std::vector<HString> samePath;
+	std::vector<std::string>contents;
+	std::vector<std::string>source_names;
+	//这是个循环函数,content必须要存起来才能正常处理嵌套关系
 	shaderc_include_result* GetInclude(const char* requested_source,
 		shaderc_include_type type,
 		const char* requesting_source,
 		size_t include_depth) override {
-		// 创建一个新的 shaderc_include_result 结构体来保存结果。
 		auto* result = new shaderc_include_result;
 		// 读取文件内容。
 		HString IncludePath = FileSystem::GetShaderIncludeAbsPath() + requested_source;
 		IncludePath.CorrectionPath();
 		std::ifstream file(IncludePath.c_str());
 		if (file.good()) {
+			contents.push_back(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()).c_str());
+			source_names.push_back(requested_source);
+			result->content = contents[contents.size() - 1].c_str();
+			result->content_length = contents[contents.size() - 1].size();
+			result->source_name = source_names[source_names.size() - 1].c_str();
+			result->source_name_length = source_names[source_names.size() - 1].size();
+			result->user_data = nullptr;
 			if (std::find(samePath.begin(), samePath.end(), IncludePath) != samePath.end())
 			{
 				MessageOut(HString(HString(requesting_source) + (": Shader Include exist.")).c_str(), false, false, "255,255,0");
-				delete result;
-				result = nullptr;
-				return result;
+				result->content = " \n\n ";
+				result->content_length = strlen(result->content);
 			}
-			samePath.push_back(IncludePath);
-			content = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()).c_str();
-			result->content = content.c_str();
-			result->content_length = content.size();
-			result->source_name = requested_source;
-			result->source_name_length = strlen(requested_source);
-			result->user_data = nullptr;
+			else
+			{
+				samePath.push_back(IncludePath);
+			}
 		}
-		else {
-			// 如果无法打开文件，你可能需要处理错误。
-			// 在这个例子中，我们简单地删除了结果并返回 nullptr。
-			MessageOut(HString(HString(requesting_source) + (": Shader Include Error.")).c_str(),false,true,"255,0,0");
-			delete result;
-			result = nullptr;
-		}
-
+		MessageOut(contents[contents.size() - 1].c_str(), false, false);
 		return result;
 	}
 
@@ -259,7 +257,6 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 			{
 			}
 		}
-		samePath.clear();
 	}
 }
 
