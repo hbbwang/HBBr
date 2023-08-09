@@ -75,6 +75,8 @@ bool GameObject::Update()
 			}
 			else
 			{
+				if(_transform != NULL)
+					_transform->Update();
 				const auto compCount = _comps.size();
 				for (int i = 0; i < compCount; i++)
 				{

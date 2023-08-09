@@ -4,7 +4,8 @@
 
 std::vector<std::vector<MaterialPrimitive*>> PrimitiveProxy::_allGraphicsPrimitives;
 
-std::map<MaterialPrimitive* ,std::vector<ModelPrimitive>> PrimitiveProxy::_allModelPrimitives;
+std::map<MaterialPrimitive* ,std::vector<ModelPrimitive*>> PrimitiveProxy::_allModelPrimitives;
+
 
 void PrimitiveProxy::AddMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
 {
@@ -44,25 +45,28 @@ void PrimitiveProxy::RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
 	}
 }
 
-void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive prim)
+void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim)
 {
-	prim.vertexData =  prim.vertexInput.GetData(Shader::_vsShader[mat->vsShader].header.vertexInput);
-	prim.vertexInput = VertexFactory::VertexInput();
+	prim->vertexData =  std::move(prim->vertexInput.GetData(Shader::_vsShader[mat->vsShader].header.vertexInput));
+	prim->vertexIndices = std::move(prim->vertexInput.vertexIndices);
+	prim->vbSize = prim->vertexData.size() * sizeof(float);
+	prim->ibSize = prim->vertexIndices.size() * sizeof(uint32_t);
+	//
+	prim->vertexInput = VertexFactory::VertexInput();
 	_allModelPrimitives[mat].push_back(prim);
 }
 
 void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim)
 {
-	auto it = _allModelPrimitives.find(mat);
-	if (it != _allModelPrimitives.end())
 	{
-		auto pit = std::find_if(it->second.begin(), it->second.end(), [prim](ModelPrimitive& model)
-			{
-				return model.modelPrimitiveName == prim->modelPrimitiveName;
-			});
-		if (pit != it->second.end())
+		auto it = _allModelPrimitives.find(mat);
+		if (it != _allModelPrimitives.end())
 		{
-			it->second.erase(pit);
+			auto pit = std::find(it->second.begin(), it->second.end(), prim);
+			if (pit != it->second.end())
+			{
+				it->second.erase(pit);
+			}
 		}
 	}
 }

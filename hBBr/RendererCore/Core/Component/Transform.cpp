@@ -15,6 +15,8 @@ Transform::Transform(GameObject* parent, glm::vec3 pos , glm::vec3 eulerAge, glm
 	forward = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	SetLocationAndRotation(pos, eulerAge);
+
+	_bNeedUpdateUniformBuffer = true;
 }
 
 Transform::~Transform()
@@ -38,6 +40,15 @@ void Transform::Update()
 	//	SetScale3D(scale3D);
 	//	localscal = scale3D;
 	//}
+	if (_bNeedUpdateUniformBuffer)
+	{
+		if (UpdateStateCount > 1)//保持1帧的更新状态
+		{
+			_bNeedUpdateUniformBuffer = false;
+			UpdateStateCount = 0;
+		}
+		UpdateStateCount++;
+	}
 }
 
 void Transform::SetWorldMatrix(glm::mat4 newWorldMat)
@@ -61,6 +72,8 @@ void Transform::SetWorldMatrix(glm::mat4 newWorldMat)
 		FSetScale3D(glm::vec3(x, y, z), false);
 		UpdateChildrenTransform();
 		worldMatrix = newWorldMat;
+
+		_bNeedUpdateUniformBuffer = true;
 	}
 }
 
@@ -123,6 +136,8 @@ void Transform::FSetWorldLocation(glm::vec3 newWorldLocation, bool bAffectChildr
 
 	if (bAffectChildren)
 		UpdateChildrenLocation();
+
+	_bNeedUpdateUniformBuffer = true;
 }
 
 void Transform::FSetWorldRotation(glm::vec3 newAngle, bool bAffectChildren)
@@ -170,6 +185,8 @@ void Transform::FSetWorldRotation(glm::vec3 newAngle, bool bAffectChildren)
 
 	if(bAffectChildren)
 		UpdateChildrenTransform();
+
+	_bNeedUpdateUniformBuffer = true;
 }
 
 void Transform::FSetScale3D(glm::vec3 newSize, bool bAffectChildren)
@@ -193,6 +210,8 @@ void Transform::FSetScale3D(glm::vec3 newSize, bool bAffectChildren)
 
 	if (bAffectChildren)
 		UpdateChildrenScale3D();
+
+	_bNeedUpdateUniformBuffer = true;
 }
 
 void Transform::FSetLocalRotation(glm::vec3 newAngle)
@@ -251,6 +270,8 @@ void Transform::FSetLocalRotation(glm::vec3 newAngle)
 		);
 	}
 	UpdateChildrenTransform();
+
+	_bNeedUpdateUniformBuffer = true;
 }
 
 void Transform::FSetLocation(glm::vec3 newLocation)
@@ -266,6 +287,8 @@ void Transform::FSetLocation(glm::vec3 newLocation)
 	{
 		FSetWorldLocation(newLocation);
 	}
+
+	_bNeedUpdateUniformBuffer = true;
 }
 
 void Transform::FSetRotation(glm::vec3 newRotation)
@@ -279,4 +302,6 @@ void Transform::FSetRotation(glm::vec3 newRotation)
 	{
 		FSetWorldRotation(newRotation);
 	}
+
+	_bNeedUpdateUniformBuffer = true;
 }

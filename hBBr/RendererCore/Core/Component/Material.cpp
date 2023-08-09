@@ -10,6 +10,7 @@ Material::Material()
 	_primitive->graphicsName = _materialName;
 	_primitive->vsShader = "BasePassTemplate";
 	_primitive->psShader = "BasePassTemplate";
+	_primitive->pass = _pass;
 	_primitive->inputLayout = VertexFactory::VertexInput::BuildLayout(Shader::_vsShader[_primitive->vsShader].header.vertexInput);
 	PrimitiveProxy::GetNewMaterialPrimitiveIndex(_primitive.get());
 	PrimitiveProxy::AddMaterialPrimitive(_pass, _primitive.get());

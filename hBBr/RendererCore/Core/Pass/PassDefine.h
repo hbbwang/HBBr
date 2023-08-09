@@ -19,7 +19,6 @@ private:
 	std::shared_ptr<class DescriptorSet> _descriptorSet_mat;
 	std::shared_ptr<class Buffer>_vertexBuffer;
 	std::shared_ptr<class Buffer>_indexBuffer;
-	ObjectUniformBuffer _objectUniformBuffer;
 };
 
 /* Imgui pass define */

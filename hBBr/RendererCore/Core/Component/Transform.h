@@ -84,6 +84,8 @@ public:
 	/*Âß¼­¸üÐÂ*/
 	virtual void Update();
 
+	__forceinline bool NeedUpdateUb()const { return _bNeedUpdateUniformBuffer; }
+
 private:
 
 	glm::vec3 scale3D = glm::vec3(1, 1, 1);
@@ -118,5 +120,9 @@ private:
 	glm::vec3 localLoc = glm::vec3(0, 0, 0);
 	glm::vec3 localRot = glm::vec3(0, 0, 0);
 	glm::vec3 localscal = glm::vec3(0, 0, 0);
+
+	bool _bNeedUpdateUniformBuffer;
+
+	uint8_t UpdateStateCount = 0 ;
 };
 

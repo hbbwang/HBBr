@@ -14,10 +14,6 @@ struct ModelPrimitive
 
 	VertexFactory::VertexInput  vertexInput;
 
-	std::vector<float>			vertexData;
-
-	std::vector<uint32_t>		vertexIndices;
-
 	glm::vec3					boundingBox_min = glm::vec3(0, 0, 0);
 
 	glm::vec3					boundingBox_max = glm::vec3(0, 0, 0);
@@ -29,6 +25,17 @@ struct ModelPrimitive
 	//用于排序
 	int							priority = 0;
 
+	std::vector<float>			vertexData;
+
+	std::vector<uint32_t>		vertexIndices;
+
+	uint64_t					vbPos = UINT64_MAX;
+
+	uint64_t					vbSize = UINT64_MAX;
+
+	uint64_t					ibPos = UINT64_MAX;
+
+	uint64_t					ibSize = UINT64_MAX;
 };
 
 struct MaterialPrimitive
@@ -49,6 +56,8 @@ struct MaterialPrimitive
 
 	//其实就是材质名字
 	HString graphicsName;
+
+	Pass pass;
 
 	//参数
 
@@ -72,23 +81,23 @@ public:
 
 	static void RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim);
 
-	static void AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive prim);
+	static void AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim);
 
 	static void RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim);
 
-	inline static std::vector<std::vector<MaterialPrimitive*>> GetAllMaterialPrimitiveArray() {
+	inline static std::vector<std::vector<MaterialPrimitive*>> &GetAllMaterialPrimitiveArray() {
 		return _allGraphicsPrimitives;
 	}
 
-	inline static std::vector<MaterialPrimitive*> GetMaterialPrimitives(uint32_t index) {
+	inline static std::vector<MaterialPrimitive*> &GetMaterialPrimitives(uint32_t index) {
 		return _allGraphicsPrimitives[index];
 	}
 
-	inline static std::map<MaterialPrimitive*, std::vector<ModelPrimitive>> GetAllModelPrimitiveArray() {
+	inline static std::map<MaterialPrimitive*, std::vector<ModelPrimitive*>> &GetAllModelPrimitiveArray() {
 		return _allModelPrimitives;
 	}
 
-	inline static std::vector<ModelPrimitive> GetModelPrimitives(MaterialPrimitive* index) {
+	inline static std::vector<ModelPrimitive*> &GetModelPrimitives(MaterialPrimitive* index) {
 		return _allModelPrimitives[index];
 	}
 
@@ -96,6 +105,6 @@ private:
 
 	static std::vector<std::vector<MaterialPrimitive*>> _allGraphicsPrimitives;
 
-	static std::map<MaterialPrimitive*, std::vector<ModelPrimitive>> _allModelPrimitives;
+	static std::map<MaterialPrimitive*, std::vector<ModelPrimitive*>> _allModelPrimitives;
 
 };

@@ -202,7 +202,6 @@ bool ModelFileStream::BuildModelPrimitives(ModelData* data, std::vector<ModelPri
 			prims[i].boundingBox_min = data->boundingBox_min;
 			prims[i].boundingBox_max = data->boundingBox_max;
 			prims[i].vertexInput = data->faces[i].vertexData;
-			prims[i].vertexIndices = data->faces[i].vertexData.vertexIndices;
 			prims[i].modelPrimitiveName = data->filePath;
 		}
 		return true;
