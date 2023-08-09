@@ -59,6 +59,7 @@ void BasePass::PassUpdate()
 	uint32_t objectUboOffset = 0;
 	//Reset buffer
 	{
+		bool bUpdateObjUb = false;
 		//Update pass uniform buffers
 		{
 			PassUniformBuffer passUniformBuffer = _renderer->GetPassUniformBufferCache();		
@@ -96,13 +97,17 @@ void BasePass::PassUpdate()
 					ObjectUniformBuffer objectUniformBuffer = {};
 					objectUniformBuffer.WorldMatrix = prim->transform->GetWorldMatrix();
 					_descriptorSet_obj->BufferMapping(&objectUniformBuffer, (uint64_t)objectUboOffset, sizeof(ObjectUniformBuffer));
+					bUpdateObjUb = true;
 				}
 				objectCount++;
 				objectUboOffset += (uint32_t)sizeof(ObjectUniformBuffer);
 			}
 		}
-		_descriptorSet_obj->ResizeDescriptorBuffer(sizeof(ObjectUniformBuffer) * (objectCount + 1));
-		_descriptorSet_obj->UpdateDescriptorSet(sizeof(ObjectUniformBuffer));
+		if (bUpdateObjUb)
+		{
+			_descriptorSet_obj->ResizeDescriptorBuffer(sizeof(ObjectUniformBuffer) * (objectCount + 1));
+			_descriptorSet_obj->UpdateDescriptorSet(sizeof(ObjectUniformBuffer));
+		}
 	}
 
 	//Update Render
