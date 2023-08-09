@@ -276,6 +276,7 @@
     <ClInclude Include="Core\Primitive.h" />
     <ClInclude Include="Core\RendererConfig.h" />
     <ClInclude Include="Core\PassManager.h" />
+    <ClInclude Include="Core\Resource\HGuid.h" />
     <ClInclude Include="Core\Resource\ModelData.h" />
     <ClInclude Include="Core\Resource\SceneManager.h" />
     <ClInclude Include="Core\Thread.h" />
@@ -317,6 +318,7 @@
     <ClCompile Include="Core\Primitive.cpp" />
     <ClCompile Include="Core\RendererConfig.cpp" />
     <ClCompile Include="Core\PassManager.cpp" />
+    <ClCompile Include="Core\Resource\HGuid.cpp" />
     <ClCompile Include="Core\Resource\ModelData.cpp" />
     <ClCompile Include="Core\Resource\SceneManager.cpp" />
     <ClCompile Include="Core\Thread.cpp" />

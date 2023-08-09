@@ -1,9 +1,12 @@
 ﻿#pragma once
-
-#include <vector>
+#include "Common.h"
 #include "Texture.h"
 #include "Pass/PassType.h"
 #include "Primitive.h"
+#include "Resource/HGuid.h"
+
+#include <unordered_map>
+#include <vector>
 
 class Material
 {
@@ -15,14 +18,19 @@ public:
 
 	__forceinline static Material* GetDefaultMaterial()
 	{
+		static HUUID defaultMatGUID;
 		if (!_defaultMaterial)
 		{
-			_defaultMaterial.reset(new Material());
-			_defaultMaterial->_materialName = "DefaultMaterial";
-			_defaultMaterial->bIsDefaultMaterial = true;
+			defaultMatGUID = CreateUUID();
+			std::shared_ptr<Material> newMat(new Material());
+			newMat->_materialName = "DefaultMaterial";
+			newMat->bIsDefaultMaterial = true;
+			_allMaterials.emplace(std::make_pair(defaultMatGUID, newMat));
 		}
-		return _defaultMaterial.get();
+		return _allMaterials[defaultMatGUID].get();
 	}
+
+	static HUUID LoadMaterial(const char* materialFilePath);
 
 	__forceinline MaterialPrimitive* GetPrimitive()const { return _primitive.get(); }
 
@@ -36,6 +44,8 @@ private:
 
 	bool bIsDefaultMaterial;
 
-	static std::shared_ptr<Material> _defaultMaterial;
+	static Material* _defaultMaterial;
+
+	static  std::unordered_map<HUUID, std::shared_ptr<Material>> _allMaterials;
 
 };

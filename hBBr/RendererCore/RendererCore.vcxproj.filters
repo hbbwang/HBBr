@@ -172,6 +172,9 @@
     <ClInclude Include="Common\HInput.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Resource\HGuid.h">
+      <Filter>Renderer\Core\Resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -287,6 +290,9 @@
     </ClCompile>
     <ClCompile Include="Common\HInput.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\HGuid.cpp">
+      <Filter>Renderer\Core\Resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
