@@ -86,7 +86,7 @@ public:
 				samePath.push_back(IncludePath);
 			}
 		}
-		MessageOut(contents[contents.size() - 1].c_str(), false, false);
+		//MessageOut(contents[contents.size() - 1].c_str(), false, false);
 		return result;
 	}
 

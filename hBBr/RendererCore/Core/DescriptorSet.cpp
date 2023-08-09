@@ -56,26 +56,32 @@ bool DescriptorSet::ResizeDescriptorBuffer(VkDeviceSize newSize, int bufferIndex
 	return false;
 }
 
-void DescriptorSet::UpdateDescriptorSet(std::vector<uint32_t> bufferRanges)
+void DescriptorSet::UpdateDescriptorSet(std::vector<uint32_t> bufferRanges, std::vector<uint32_t> offsets)
 {
 	if (_needUpdates[_renderer->GetCurrentFrameIndex()] == 1)
 	{
 		_needUpdates[_renderer->GetCurrentFrameIndex()] = 0;
-		for (size_t i = 0; i < bufferRanges.size(); i++)
-		{
-			auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferRanges[i]);
-			VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, 0, 0, alignmentSize);
-		}
+		VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, 0, bufferRanges , offsets);
 	}	
 }
 
-void DescriptorSet::UpdateDescriptorSet(uint32_t sameBufferSize)
+void DescriptorSet::UpdateDescriptorSet(uint32_t bufferSize, uint32_t offset)
+{
+	if (_needUpdates[_renderer->GetCurrentFrameIndex()] == 1)
+	{
+		_needUpdates[_renderer->GetCurrentFrameIndex()] = 0;
+		auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSize);
+		VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, 0, offset, alignmentSize);
+	}
+}
+
+void DescriptorSet::UpdateDescriptorSet(uint32_t sameBufferSize, std::vector<uint32_t> offsets)
 {
 	if (_needUpdates[_renderer->GetCurrentFrameIndex()] == 1)
 	{
 		_needUpdates[_renderer->GetCurrentFrameIndex()] = 0;
 		auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(sameBufferSize);
-		VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, 0, 0, alignmentSize);
+		VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, 0, alignmentSize , offsets);
 	}
 }
 

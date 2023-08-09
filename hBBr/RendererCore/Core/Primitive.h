@@ -31,11 +31,11 @@ struct ModelPrimitive
 
 	uint64_t					vbPos = UINT64_MAX;
 
-	uint64_t					vbSize = UINT64_MAX;
+	uint64_t					vbSize = 0;
 
 	uint64_t					ibPos = UINT64_MAX;
 
-	uint64_t					ibSize = UINT64_MAX;
+	uint64_t					ibSize = 0;
 };
 
 struct MaterialPrimitive
@@ -67,6 +67,8 @@ struct MaterialPrimitive
 	//Shader参数
 	std::vector<float> uniformBuffer;
 
+	uint64_t		   uniformBufferSize = 0;
+
 	//变体开关
 	uint64_t varients = 0;
 };
@@ -75,7 +77,7 @@ class PrimitiveProxy
 {
 public:
 
-	static void AddMaterialPrimitive(Pass pass, MaterialPrimitive* prim);
+	static void AddMaterialPrimitive( MaterialPrimitive* prim);
 
 	static void GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim);
 

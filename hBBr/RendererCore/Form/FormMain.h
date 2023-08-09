@@ -32,8 +32,8 @@ public:
 	HBBR_API static void SetWindowPos(VulkanForm* form, uint32_t x, uint32_t y);
 	HBBR_API static void* GetWindowHandle(VulkanForm* form);
 	HBBR_API static inline VulkanForm* GetMainForm() { return _mainForm; }
-	HBBR_API static inline void SetFormFocus(VulkanForm* form);
-	HBBR_API static inline void SetFormVisiable(VulkanForm* form, bool bShow);
+	HBBR_API static void SetFormFocus(VulkanForm* form);
+	HBBR_API static void SetFormVisiable(VulkanForm* form, bool bShow);
 	//Callbacks
 	static std::vector<FormDropFun> _dropFuns;
 

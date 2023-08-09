@@ -24,7 +24,8 @@ void ModelComponent::SetModel(HString path)
 	{
 		_primitive[i].transform = GetGameObject()->GetTransform();
 		if (_materials[i] == NULL)
-			_materials[i] = Material::GetDefaultMaterial();//Set default material
+			//_materials[i] = Material::GetDefaultMaterial();//Set default material
+			_materials[i] = Material::LoadMaterial("G:\\HbbRenderer\\HBBr\\hBBr\\DependencyCopy\\Resource\\Content\\Material\\DefaultPBR.mat");
 		PrimitiveProxy::AddModelPrimitive(_materials[i]->GetPrimitive(), &_primitive[i]);
 	}
 }

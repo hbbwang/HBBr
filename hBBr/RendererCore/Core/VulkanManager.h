@@ -238,6 +238,10 @@ public:
 
 	void UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset , VkDeviceSize Range);
 
+	void UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, uint32_t sameBufferSize, std::vector<uint32_t> offsets);
+
+	void UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, std::vector<uint32_t>bufferSizes, std::vector<uint32_t> offsets);
+
 	void UpdateBufferDescriptorSetAll(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
 
 	VkDeviceSize GetMinUboAlignmentSize(VkDeviceSize realSize);

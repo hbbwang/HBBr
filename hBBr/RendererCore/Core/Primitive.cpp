@@ -7,13 +7,13 @@ std::vector<std::vector<MaterialPrimitive*>> PrimitiveProxy::_allGraphicsPrimiti
 std::map<MaterialPrimitive* ,std::vector<ModelPrimitive*>> PrimitiveProxy::_allModelPrimitives;
 
 
-void PrimitiveProxy::AddMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
+void PrimitiveProxy::AddMaterialPrimitive(MaterialPrimitive* prim)
 {
 	if ((uint32_t)PrimitiveProxy::_allGraphicsPrimitives.size() != (uint32_t)Pass::MaxNum)
 	{
 		_allGraphicsPrimitives.resize((uint32_t)Pass::MaxNum);
 	}
-	_allGraphicsPrimitives[(uint32_t)pass].push_back(prim);
+	_allGraphicsPrimitives[(uint32_t)prim->pass].push_back(prim);
 }
 
 void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim)

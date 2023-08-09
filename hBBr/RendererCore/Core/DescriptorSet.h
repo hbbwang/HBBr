@@ -17,9 +17,11 @@ public:
 
 	bool ResizeDescriptorBuffer(VkDeviceSize newSize , int bufferIndex = 0);
 
-	void UpdateDescriptorSet(std::vector<uint32_t> bufferRanges);
+	void UpdateDescriptorSet(std::vector<uint32_t> bufferRanges, std::vector<uint32_t> offsets);
 
-	void UpdateDescriptorSet(uint32_t sameBufferSize);
+	void UpdateDescriptorSet(uint32_t bufferSize , uint32_t offset = 0);
+
+	void UpdateDescriptorSet(uint32_t sameBufferSize, std::vector<uint32_t> offsets);
 
 	void UpdateDescriptorSetAll(uint32_t sameBufferSize);
 

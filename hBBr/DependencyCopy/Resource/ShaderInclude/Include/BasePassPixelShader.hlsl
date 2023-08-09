@@ -21,7 +21,7 @@ PSOutput PSMain(VSToPS IN)
     PixelShaderParameter Parameters;
     frag(IN,Parameters);
 
-    OUT.Color = float4(IN.WorldNormal * 0.5 + 0.5 ,1.0f) * (sin(GameTime) * 0.5 + 0.5);
+    OUT.Color = float4((IN.WorldNormal * 0.5 + 0.5) * Parameters.BaseColor ,1.0f);
 
     return OUT;
 }

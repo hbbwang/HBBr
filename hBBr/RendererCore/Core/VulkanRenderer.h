@@ -4,6 +4,7 @@
 #include <memory>
 #include <mutex>
 #include <thread>
+#include <functional>
 #include <map>
 #include "Pass/PassType.h"
 #include "HTime.h"
@@ -121,6 +122,7 @@ public:
 	static std::map<HString, VulkanRenderer*> _renderers;
 
 private:
+
 	void SetupPassUniformBuffer();
 
 	bool Resizing(bool bForce = false);
@@ -175,4 +177,7 @@ private:
 
 	double _frameRate;
 
+	std::vector<std::function<void()>> _renderThreadFuncsOnce;
+
+	std::vector<std::function<void()>> _renderThreadFuncs;
 };

@@ -4,15 +4,21 @@
 #include "Pass/PassType.h"
 #include "Primitive.h"
 #include "Resource/HGuid.h"
+#include "XMLStream.h"
 
 #include <unordered_map>
 #include <vector>
 
+struct MaterialParameterInfo
+{
+	HString name, type, ui;
+	uint32_t beginPos;
+};
+
 class Material
 {
 public:
-
-	Material();
+	Material(bool bDefault = false);
 	
 	~Material();
 
@@ -22,30 +28,44 @@ public:
 		if (!_defaultMaterial)
 		{
 			defaultMatGUID = CreateUUID();
-			std::shared_ptr<Material> newMat(new Material());
+			std::unique_ptr<Material> newMat(new Material(true));
 			newMat->_materialName = "DefaultMaterial";
-			newMat->bIsDefaultMaterial = true;
-			_allMaterials.emplace(std::make_pair(defaultMatGUID, newMat));
+			_allMaterials.emplace(std::make_pair(defaultMatGUID, std::move(newMat)));
 		}
 		return _allMaterials[defaultMatGUID].get();
 	}
 
-	static HUUID LoadMaterial(const char* materialFilePath);
+	__forceinline static Material* GetErrorMaterial()
+	{
+		static HUUID errorMatGUID;
+		if (!_defaultMaterial)
+		{
+			errorMatGUID = CreateUUID();
+			std::unique_ptr<Material> newMat(new Material(true));
+			newMat->_materialName = "ErrorMaterial";
+			_allMaterials.emplace(std::make_pair(errorMatGUID, std::move(newMat)));
+		}
+		return _allMaterials[errorMatGUID].get();
+	}
+
+	static Material* LoadMaterial(HString materialFilePath);
 
 	__forceinline MaterialPrimitive* GetPrimitive()const { return _primitive.get(); }
 
 private:
 
-	Pass _pass = Pass::OpaquePass;
-
 	HString _materialName = "Unknow material" ;
 
 	std::unique_ptr<MaterialPrimitive> _primitive;
 
-	bool bIsDefaultMaterial;
+	HUUID _uuid;
+
+	std::vector<MaterialParameterInfo> _paramterInfos;
 
 	static Material* _defaultMaterial;
 
-	static  std::unordered_map<HUUID, std::shared_ptr<Material>> _allMaterials;
+	static Material* _errorMaterial;
+
+	static  std::unordered_map<HUUID, std::unique_ptr<Material>> _allMaterials;
 
 };

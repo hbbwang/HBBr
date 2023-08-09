@@ -16,6 +16,7 @@ BasePass::~BasePass()
 	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout);
 	_descriptorSet_pass.reset();
 	_descriptorSet_obj.reset();
+	_descriptorSet_mat.reset();
 }
 
 void BasePass::PassInit()
@@ -38,7 +39,8 @@ void BasePass::PassBuild()
 	VulkanManager::GetManager()->CreatePipelineLayout(
 		{
 			_descriptorSet_pass->GetDescriptorSetLayout() ,
-			_descriptorSet_obj->GetDescriptorSetLayout()
+			_descriptorSet_obj->GetDescriptorSetLayout(),
+			_descriptorSet_mat->GetDescriptorSetLayout()
 		}
 	, _pipelineLayout);
 	//Pass Uniform总是一尘不变的,并且我们用的是Dynamic uniform buffer ,所以只需要更新一次所有的DescriptorSet即可。
@@ -56,7 +58,10 @@ void BasePass::PassUpdate()
 	manager->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.0,0 });
 	VkDeviceSize vbOffset = 0;
 	VkDeviceSize ibOffset = 0;
+	VkDeviceSize matOffset = 0;
 	uint32_t objectUboOffset = 0;
+	std::vector<uint32_t> matBufferOffset;
+	std::vector<uint32_t> matBufferSize;
 	//Reset buffer
 	{
 		bool bUpdateObjUb = false;
@@ -66,9 +71,17 @@ void BasePass::PassUpdate()
 			_descriptorSet_pass->BufferMapping(&passUniformBuffer, 0, sizeof(PassUniformBuffer));
 		}
 		uint32_t objectCount = 0;
-		for (auto g : PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
+		for (auto m : PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
 		{
-			auto prims = PrimitiveProxy::GetModelPrimitives(g);
+			if (m->uniformBufferSize != 0)
+			{
+				m->uniformBuffer[10] = 0.0f;
+				_descriptorSet_mat->BufferMapping(m->uniformBuffer.data(), 0, m->uniformBufferSize);
+				matBufferOffset.push_back((uint32_t)matOffset);
+				matBufferSize.push_back((uint32_t)m->uniformBufferSize);
+				matOffset += m->uniformBufferSize;
+			}
+			auto prims = PrimitiveProxy::GetModelPrimitives(m);
 			for (size_t m = 0; m < prims.size(); m++)
 			{
 				ModelPrimitive* prim = prims[m];
@@ -108,6 +121,8 @@ void BasePass::PassUpdate()
 			_descriptorSet_obj->ResizeDescriptorBuffer(sizeof(ObjectUniformBuffer) * (objectCount + 1));
 			_descriptorSet_obj->UpdateDescriptorSet(sizeof(ObjectUniformBuffer));
 		}
+		_descriptorSet_mat->ResizeDescriptorBuffer(matOffset);
+		_descriptorSet_mat->UpdateDescriptorSet(matBufferSize, matBufferOffset);
 	}
 
 	//Update Render
@@ -115,6 +130,7 @@ void BasePass::PassUpdate()
 	ibOffset = 0;
 	objectUboOffset = 0;
 	uint32_t dynamicOffset[] = { 0 };
+	uint32_t matIndex = 0;
 	vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet_pass->GetDescriptorSet(), 1, dynamicOffset);
 	for (auto g : PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
 	{
@@ -133,6 +149,7 @@ void BasePass::PassUpdate()
 				_renderPass, g->graphicsIndex, (uint32_t)_subpassDescs.size());
 		}
 		manager->CmdCmdBindPipeline(cmdBuf, pipeline->pipeline);
+		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 2, 1, &_descriptorSet_mat->GetDescriptorSet(), 1, &matBufferOffset[matIndex]);
 		auto prims = PrimitiveProxy::GetModelPrimitives(g);
 		for (size_t m = 0; m < prims.size(); m++)
 		{
@@ -150,6 +167,7 @@ void BasePass::PassUpdate()
 				ibOffset += prim->ibSize;
 			}
 		}
+		matIndex++;
 	}
 	manager->EndRenderPass(cmdBuf);
 }

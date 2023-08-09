@@ -50,19 +50,23 @@ void VulkanRenderer::Release()
 void VulkanRenderer::Init()
 {	
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
+
 	//Surface
 	_vulkanManager->CreateSurface(_windowHandle, _surface);
+
 	//Swapchain
 	_vulkanManager->CreateRenderSemaphores(_presentSemaphore);
 	_vulkanManager->CreateRenderSemaphores(_queueSubmitSemaphore);
 	_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
 	_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
+
 	//CommandBuffer
 	_cmdBuf.resize(_vulkanManager->GetSwapchainBufferCount());
 	for (int i = 0; i < _cmdBuf.size(); i++)
 	{
 		VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf[i]);
 	}
+
 	//Set renderer map , Add new renderer
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
 	auto rendererName = _rendererName;
@@ -81,6 +85,9 @@ void VulkanRenderer::Init()
 			MessageOut((HString("Has the same name of renderer.Random a new name is [") + _rendererName + "]").c_str(), false, true);
 		}
 	}
+
+	_renderThreadFuncsOnce.reserve(10);
+	_renderThreadFuncs.reserve(10);
 
 	//Init scene
 	_sceneManager.reset(new SceneManager());
@@ -116,6 +123,17 @@ void VulkanRenderer::Render()
 		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], &_swapchainIndex))
 		{
 			Resizing(true);
+		}
+
+		auto funcOnce = std::move(_renderThreadFuncsOnce);
+		for (auto& func : funcOnce)
+		{
+			func();
+		}
+
+		for (auto& func : _renderThreadFuncs)
+		{
+			func();
 		}
 
 		_sceneManager->SceneUpdate();

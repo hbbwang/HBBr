@@ -262,7 +262,7 @@ void* VulkanApp::GetWindowHandle(VulkanForm* form)
 	return NULL;
 }
 
-inline void VulkanApp::SetFormFocus(VulkanForm* form)
+void VulkanApp::SetFormFocus(VulkanForm* form)
 {
 	if (form && form->window)
 	{
@@ -270,7 +270,7 @@ inline void VulkanApp::SetFormFocus(VulkanForm* form)
 	}
 }
 
-inline void VulkanApp::SetFormVisiable(VulkanForm* form, bool bShow)
+void VulkanApp::SetFormVisiable(VulkanForm* form, bool bShow)
 {
 	if (form && form->window)
 	{

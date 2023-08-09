@@ -38,7 +38,7 @@ bool XMLStream::LoadXMLNode(pugi::xml_document& doc, const wchar_t* nodeName, pu
 
 bool XMLStream::LoadXMLAttributeString(pugi::xml_node& node, const wchar_t* attributeName, HString& attri)
 {
-	if (node.empty() || node == nullptr)
+	if (node == nullptr || node.empty())
 		return false;
 	auto attr = node.attribute(attributeName);
 	if (attr != nullptr && !attr.empty())
@@ -51,7 +51,7 @@ bool XMLStream::LoadXMLAttributeString(pugi::xml_node& node, const wchar_t* attr
 
 bool XMLStream::LoadXMLAttributeInt(pugi::xml_node& node, const wchar_t* attributeName, int& attri)
 {
-	if (node.empty() || node == nullptr)
+	if (node == nullptr || node.empty())
 		return false;
 	auto attr = node.attribute(attributeName);
 	if (attr != nullptr && !attr.empty())
@@ -64,7 +64,7 @@ bool XMLStream::LoadXMLAttributeInt(pugi::xml_node& node, const wchar_t* attribu
 
 bool XMLStream::LoadXMLAttributeBool(pugi::xml_node& node, const wchar_t* attributeName, bool& attri)
 {
-	if (node.empty() || node == nullptr)
+	if (node == nullptr || node.empty())
 		return false;
 	auto attr = node.attribute(attributeName);
 	if (attr != nullptr && !attr.empty())
@@ -77,7 +77,7 @@ bool XMLStream::LoadXMLAttributeBool(pugi::xml_node& node, const wchar_t* attrib
 
 bool XMLStream::LoadXMLAttributeFloat(pugi::xml_node& node, const wchar_t* attributeName, float& attri)
 {
-	if (node.empty() || node == nullptr)
+	if (node == nullptr || node.empty())
 		return false;
 	auto attr = node.attribute(attributeName);
 	if (attr != nullptr && !attr.empty())

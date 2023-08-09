@@ -1689,6 +1689,66 @@ void VulkanManager::UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet
 	}
 }
 
+void VulkanManager::UpdateBufferDescriptorSet(DescriptorSet* descriptorSet, uint32_t dstBinding, uint32_t sameBufferSize, std::vector<uint32_t> offsets)
+{
+	for (int i = 0; i < descriptorSet->GetTypes().size(); i++)
+	{
+		if (descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+		{
+			std::vector<VkWriteDescriptorSet> descriptorWrite(offsets.size());
+			std::vector<VkDescriptorBufferInfo> bufferInfo(offsets.size());
+			for (int o = 0; o < offsets.size(); o++)
+			{
+				bufferInfo[o] = {};
+				bufferInfo[o].buffer = descriptorSet->GetBuffer()->GetBuffer();
+				bufferInfo[o].offset = offsets[o];
+				bufferInfo[o].range = (VkDeviceSize)sameBufferSize;
+				descriptorWrite[o] = {};
+				descriptorWrite[o].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrite[o].dstSet = descriptorSet->GetDescriptorSet();
+				descriptorWrite[o].dstBinding = dstBinding;
+				descriptorWrite[o].dstArrayElement = 0;
+				descriptorWrite[o].descriptorType = descriptorSet->GetTypes()[i];
+				descriptorWrite[o].descriptorCount = 1;
+				descriptorWrite[o].pBufferInfo = &bufferInfo[o];
+				descriptorWrite[o].pImageInfo = VK_NULL_HANDLE; // Optional
+				descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE; // Optional
+			}
+			vkUpdateDescriptorSets(_device, offsets.size() , descriptorWrite.data(), 0, VK_NULL_HANDLE);
+		}
+	}
+}
+
+void VulkanManager::UpdateBufferDescriptorSet(DescriptorSet* descriptorSet, uint32_t dstBinding, std::vector<uint32_t> bufferSizes, std::vector<uint32_t> offsets)
+{
+	for (int i = 0; i < descriptorSet->GetTypes().size(); i++)
+	{
+		if (descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+		{
+			std::vector<VkWriteDescriptorSet> descriptorWrite(offsets.size());
+			std::vector<VkDescriptorBufferInfo> bufferInfo(offsets.size());
+			for (int o = 0; o < offsets.size(); o++)
+			{
+				bufferInfo[o] = {};
+				bufferInfo[o].buffer = descriptorSet->GetBuffer()->GetBuffer();
+				bufferInfo[o].offset = offsets[o];
+				bufferInfo[o].range = bufferSizes[o];
+				descriptorWrite[o] = {};
+				descriptorWrite[o].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrite[o].dstSet = descriptorSet->GetDescriptorSet();
+				descriptorWrite[o].dstBinding = dstBinding;
+				descriptorWrite[o].dstArrayElement = 0;
+				descriptorWrite[o].descriptorType = descriptorSet->GetTypes()[i];
+				descriptorWrite[o].descriptorCount = 1;
+				descriptorWrite[o].pBufferInfo = &bufferInfo[o];
+				descriptorWrite[o].pImageInfo = VK_NULL_HANDLE; // Optional
+				descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE; // Optional
+			}
+			vkUpdateDescriptorSets(_device, offsets.size(), descriptorWrite.data(), 0, VK_NULL_HANDLE);
+		}
+	}
+}
+
 void VulkanManager::UpdateBufferDescriptorSetAll(DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range)
 {
 	for (int i = 0; i < descriptorSet->GetTypes().size(); i++)

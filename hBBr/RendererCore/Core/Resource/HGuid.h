@@ -35,7 +35,7 @@ inline std::string UUIDToString(const HUUID& guid)
 #endif
         buf,
         sizeof(buf),
-        "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
+        "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
         guid.Data1, guid.Data2, guid.Data3,
         guid.Data4[0], guid.Data4[1],
         guid.Data4[2], guid.Data4[3],
@@ -44,10 +44,10 @@ inline std::string UUIDToString(const HUUID& guid)
     return std::string(buf);
 }
 
-inline bool StringToUUID(const char* guidString, UUID* guid)
+inline bool StringToUUID(const char* guidString, HUUID* guid)
 {
     return sscanf_s(guidString,
-        "{%8x-%4hx-%4hx-%2hhx%2hhx-%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx}",
+        "%8x-%4hx-%4hx-%2hhx%2hhx-%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx",
         &guid->Data1, &guid->Data2, &guid->Data3,
         &guid->Data4[0], &guid->Data4[1], &guid->Data4[2], &guid->Data4[3],
         &guid->Data4[4], &guid->Data4[5], &guid->Data4[6], &guid->Data4[7]) == 11;

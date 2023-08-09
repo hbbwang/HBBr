@@ -2,10 +2,16 @@
 //[Varient]USE_COLOR;
 #include "Include/Common.hlsl"
 
-//[MaterialParameters]
 cbuffer Material :register(b0, space2)
 {
-
+    //[MP]Default = 1;
+    float   F1;
+    //[MP]Default = 1,1;
+    float2  F2;
+    //[MP]Default = 1,1,1;
+    float3  F3;
+    //[MP]Default = 1,1,1,1;
+    float4  F4;
 };
 
 //[InputLayout]
@@ -39,7 +45,7 @@ void frag(in VSToPS IN , inout PixelShaderParameter Parameters)
     Parameters.WorldPosition    = IN.WorldPosition;
     Parameters.LocalPosition    = IN.LocalPosition;
     //
-    
+    Parameters.BaseColor        = F4.rgb * F4.a * F3 * F1;
 }
 
 #include "Include/BasePassVertexShader.hlsl"
