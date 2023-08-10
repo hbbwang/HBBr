@@ -26,9 +26,11 @@ VSToPS VSMain(VSInput IN)
 
     //Vertex Color
     OUT.Color = IN.Color;
-
-    vert(IN,OUT);
     
+#ifdef DefineVert
+    vert(IN,OUT);
+#endif
+
     return OUT;
 }
 

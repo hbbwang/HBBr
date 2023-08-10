@@ -25,11 +25,12 @@ struct VSInput
     float4 Texcoord23   : TEXCOORD1;
 };
 
-//顶点着色器补充
-void vert(in VSInput IN , inout VSToPS vs2ps)
-{
-    
-}
+// //顶点着色器补充
+// #define DefineVert
+// void vert(in VSInput IN , inout VSToPS vs2ps)
+// {
+
+// }
 
 //像素着色器补充
 void frag(in VSToPS IN , inout PixelShaderParameter Parameters)

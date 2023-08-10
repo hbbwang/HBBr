@@ -26,6 +26,7 @@ public:
 	HBBR_API static HString GetProgramPath();
 	HBBR_API static HString GetShaderCacheAbsPath();
 	HBBR_API static HString GetResourceAbsPath();
+	HBBR_API static HString GetContentAbsPath();
 	HBBR_API static HString GetConfigAbsPath();
 	/* editor only */
 	HBBR_API static HString GetShaderIncludeAbsPath();

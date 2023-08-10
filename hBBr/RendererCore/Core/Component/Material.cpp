@@ -61,38 +61,42 @@ Material* Material::LoadMaterial(HString materialFilePath)
 			paramCount++;
 		}
 		mat->_paramterInfos.reserve(paramCount);
-		mat->_primitive->uniformBuffer.reserve( paramCount * 4 );
+		mat->_primitive->uniformBuffer.reserve( paramCount);
 		int alignmentFloat4 = 0; // float4 对齐
+		glm::vec4 param = glm::vec4(0);
+		uint32_t beginPos = 0;
 		for (auto i = parameters.first_child(); i != NULL; i = i.next_sibling())
 		{
 			MaterialParameterInfo info;
+			info.beginPos = beginPos;
 			HString value;
 			XMLStream::LoadXMLAttributeString(i, TEXT("name"), info.name);
 			XMLStream::LoadXMLAttributeString(i, TEXT("type"), info.type);
 			XMLStream::LoadXMLAttributeString(i, TEXT("value"), value);
 			XMLStream::LoadXMLAttributeString(i, TEXT("ui"), info.ui);
-
 			//
 			auto splitValue = value.Split(",");
 			if (alignmentFloat4 + splitValue.size() > 4)
 			{
-				for (int i = 0; i < 4 - alignmentFloat4; i++)
-				{
-					mat->_primitive->uniformBuffer.push_back(0);
-				}
+				mat->_primitive->uniformBuffer.push_back(param);
 				alignmentFloat4 = 0;
+				param = glm::vec4(0);
 			}
 			for (int i = 0; i < splitValue.size(); i++)
 			{
-				info.beginPos = mat->_primitive->uniformBuffer.size();
-				mat->_primitive->uniformBuffer.push_back((float)HString::ToDouble(splitValue[i]));
+				beginPos ++ ;
+				param[alignmentFloat4] = (float)HString::ToDouble(splitValue[i]);
 				alignmentFloat4++;
 				if (alignmentFloat4 >= 4)
+				{
+					mat->_primitive->uniformBuffer.push_back(param);
 					alignmentFloat4 = 0;
+					param = glm::vec4(0);
+				}
 			}
 			mat->_paramterInfos.push_back(info);
 		}
-		auto anlignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(sizeof(float) * mat->_primitive->uniformBuffer.size());
+		auto anlignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(sizeof(glm::vec4) * mat->_primitive->uniformBuffer.size());
 		mat->_primitive->uniformBufferSize = anlignmentSize;
 		//
 		PrimitiveProxy::GetNewMaterialPrimitiveIndex(mat->_primitive.get());

@@ -65,7 +65,7 @@ struct MaterialPrimitive
 	std::vector<Texture*> textures;
 
 	//Shader参数
-	std::vector<float> uniformBuffer;
+	std::vector<glm::vec4> uniformBuffer;
 
 	uint64_t		   uniformBufferSize = 0;
 

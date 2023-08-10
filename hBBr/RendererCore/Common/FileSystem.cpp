@@ -28,6 +28,15 @@ HString FileSystem::GetResourceAbsPath()
     return path;
 }
 
+HString FileSystem::GetContentAbsPath()
+{
+    fs::path p = GetProgramPath().c_str();
+    HString path = (p / "Resource" / "Content").c_str();
+    path += "/";
+    path.CorrectionPath();
+    return path;
+}
+
 HString FileSystem::GetConfigAbsPath()
 {
     fs::path p = GetProgramPath().c_str();

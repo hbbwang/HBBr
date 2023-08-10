@@ -75,7 +75,7 @@ void BasePass::PassUpdate()
 		{
 			if (m->uniformBufferSize != 0)
 			{
-				m->uniformBuffer[10] = 0.0f;
+				m->uniformBuffer[2] = glm::vec4(1,0,0,1);
 				_descriptorSet_mat->BufferMapping(m->uniformBuffer.data(), 0, m->uniformBufferSize);
 				matBufferOffset.push_back((uint32_t)matOffset);
 				matBufferSize.push_back((uint32_t)m->uniformBufferSize);
