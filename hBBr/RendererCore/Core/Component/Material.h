@@ -5,13 +5,15 @@
 #include "Primitive.h"
 #include "Resource/HGuid.h"
 #include "XMLStream.h"
+#include "Shader.h"
 
 #include <unordered_map>
 #include <vector>
 
 struct MaterialParameterInfo
 {
-	HString name, type, ui;
+	MPType type;
+	HString name, ui;
 	uint32_t beginPos;
 };
 

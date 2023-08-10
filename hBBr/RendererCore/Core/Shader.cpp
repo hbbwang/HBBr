@@ -23,8 +23,16 @@ void Shader::LoadShaderCache(const char* cachePath)
 		file.seekg(0);
 		//header
 		file.read((char*)&cache.header, sizeof(ShaderCacheHeader));
-		std::vector<char> shaderData(fileSize - sizeof(ShaderCacheHeader));
-		file.read(shaderData.data(), fileSize - sizeof(ShaderCacheHeader));
+		//shader parameter infos
+		for (int i = 0; i < cache.header.shaderParameterCount; i++)
+		{
+			ShaderParameterInfo newInfo;
+			file.read((char*)&newInfo, sizeof(ShaderParameterInfo));
+			cache.params.push_back(newInfo);
+		}
+		//cache
+		std::vector<char> shaderData(fileSize - sizeof(ShaderCacheHeader) - (sizeof(ShaderParameterInfo) * cache.header.shaderParameterCount));
+		file.read(shaderData.data(), fileSize - sizeof(ShaderCacheHeader) - (sizeof(ShaderParameterInfo) * cache.header.shaderParameterCount));
 		VulkanManager::GetManager()->CreateShaderModule(shaderData, cache.shaderModule);
 		file.close();
 		//

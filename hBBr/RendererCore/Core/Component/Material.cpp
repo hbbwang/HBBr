@@ -70,8 +70,10 @@ Material* Material::LoadMaterial(HString materialFilePath)
 			MaterialParameterInfo info;
 			info.beginPos = beginPos;
 			HString value;
+			int type;
 			XMLStream::LoadXMLAttributeString(i, TEXT("name"), info.name);
-			XMLStream::LoadXMLAttributeString(i, TEXT("type"), info.type);
+			XMLStream::LoadXMLAttributeInt(i, TEXT("type"), type);
+			info.type = (MPType)type;
 			XMLStream::LoadXMLAttributeString(i, TEXT("value"), value);
 			XMLStream::LoadXMLAttributeString(i, TEXT("ui"), info.ui);
 			//

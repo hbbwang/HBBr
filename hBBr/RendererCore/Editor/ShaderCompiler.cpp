@@ -5,6 +5,8 @@
 #include "ConsoleDebug.h"
 #include "glm/glm.hpp"
 #include "shaderc/shaderc.hpp"
+#include "Component/Material.h"
+
 #include <string>  
 #include <iostream> 
 
@@ -13,8 +15,9 @@
 void Shaderc::ShaderCompiler::CompileAllShaders(const char* srcShaderPath)
 {
 	auto allFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath , "fx");
-	auto allvFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath, "vfx");
-	auto allpFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath, "pfx");
+	//不打算单独编译顶点或者像素着色器
+	//auto allvFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath, "vfx");
+	//auto allpFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath, "pfx");
 	auto allcFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath, "cfx");
 	//fx
 	if (allFxShaders.size() > 0)
@@ -25,22 +28,22 @@ void Shaderc::ShaderCompiler::CompileAllShaders(const char* srcShaderPath)
 			CompileShader(i.absPath.c_str(), "PSMain", CompileShaderType::PixelShader);
 		}
 	}
-	//vfx
-	if (allvFxShaders.size() > 0)
-	{
-		for (auto i : allvFxShaders)
-		{
-			CompileShader(i.absPath.c_str(), "VSMain", CompileShaderType::VertexShader);
-		}
-	}
-	//pfx
-	if (allpFxShaders.size() > 0)
-	{
-		for (auto i : allpFxShaders)
-		{
-			CompileShader(i.absPath.c_str(), "PSMain", CompileShaderType::PixelShader);
-		}
-	}
+	////vfx
+	//if (allvFxShaders.size() > 0)
+	//{
+	//	for (auto i : allvFxShaders)
+	//	{
+	//		CompileShader(i.absPath.c_str(), "VSMain", CompileShaderType::VertexShader);
+	//	}
+	//}
+	////pfx
+	//if (allpFxShaders.size() > 0)
+	//{
+	//	for (auto i : allpFxShaders)
+	//	{
+	//		CompileShader(i.absPath.c_str(), "PSMain", CompileShaderType::PixelShader);
+	//	}
+	//}
 	//cfx
 	if (allcFxShaders.size() > 0)
 	{
@@ -107,14 +110,15 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 		shaderc::Compiler compiler;
 		shaderc::CompileOptions options;
 		ShaderCacheHeader header = {};
+		std::vector<ShaderParameterInfo> shaderParamInfos;
 		//自定义的信息进去
 		{
 			auto line = _shaderSrcCode.Split("\n");
 			bool bSearchVertexInputLayout = false;
+			bool bCollectMaterialParameter = false;
 			for (auto s : line)
 			{
-				s.ClearSpace();
-				HString setting = s;
+				HString setting = s.ClearSpace();
 				auto settings = setting.Split("]");
 				if (settings[0].IsSame("//[Flags"))
 				{
@@ -130,6 +134,25 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 				else if (settings[0].IsSame("//[InputLayout"))
 				{
 					bSearchVertexInputLayout = true;
+				}
+				else if (settings[0].IsSame("//[MP"))
+				{
+					bCollectMaterialParameter = true;
+					//提取每个属性
+					auto paramProperty = settings[1].Split(";");
+					for (auto i : paramProperty)
+					{
+						//提取属性里的值
+						auto value = i.Split("=");
+						shaderParamInfos.push_back(ShaderParameterInfo({}));
+						if (value[0].Contains("Default"))
+						{
+							auto values = value[1].Split(",");
+							auto maxCount = (((values.size()) < (3)) ? (values.size()) : (3));
+							for (int vv = 0; vv < maxCount; vv++)
+								shaderParamInfos[shaderParamInfos.size()-1].defaultValue[vv] = (float)HString::ToDouble(values[vv]);
+						}
+					}
 				}
 				else if (bSearchVertexInputLayout)
 				{
@@ -171,6 +194,29 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 					{
 						bSearchVertexInputLayout = false;
 					}
+				}
+				else if (bCollectMaterialParameter)
+				{
+					bCollectMaterialParameter = false;
+					//提取param
+					std::stringstream param(s.c_str());
+					std::string type, name;
+					param >> type >> name;
+					if (name[name.size()-1] == ';')
+					{
+						name.erase(name.begin() + name.size() - 1);
+					}
+					name.copy(shaderParamInfos[shaderParamInfos.size() - 1].name, sizeof(shaderParamInfos[shaderParamInfos.size() - 1].name) - 1);
+					shaderParamInfos[shaderParamInfos.size()-1].name[sizeof(shaderParamInfos[shaderParamInfos.size() - 1].name) - 1] = '\0';
+					if (type.compare("float4") == 0)
+						shaderParamInfos[shaderParamInfos.size()-1].type = MPType::Float4;
+					else if (type.compare("float3") == 0)
+						shaderParamInfos[shaderParamInfos.size()-1].type = MPType::Float3;
+					else if (type.compare("float2") == 0)
+						shaderParamInfos[shaderParamInfos.size()-1].type = MPType::Float2;
+					else if (type.compare("float") == 0)
+						shaderParamInfos[shaderParamInfos.size()-1].type = MPType::Float;
+					header.shaderParameterCount++;
 				}
 			}
 		}
@@ -242,8 +288,13 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 			std::ofstream out(cachePath.c_str(), std::ios::binary );
 			if (out.is_open())
 			{
-				//Header
+				//Header 存入
 				out.write((char*)&header, sizeof(ShaderCacheHeader));
+				//Shader 参数信息存入
+				for (auto s : shaderParamInfos)
+				{
+					out.write((char*)&s, sizeof(ShaderParameterInfo));
+				}
 				//ShaderCache
 				out.write((char*)resultChar.data(), resultChar.size() * sizeof(glm::uint));
 				out.close();
