@@ -101,4 +101,33 @@ void SceneManager::SceneUpdate()
 				break;
 		}
 	}
+
+	//Update Editor if the function is not null.
+	if (_editorUpdateFunc != NULL)
+	{
+		_editorUpdateFunc(this, _gameObjects);
+	}
+}
+
+void SceneManager::AddNewObject(std::shared_ptr<GameObject> newObject)
+{
+	_gameObjects.push_back(newObject);
+	if (_editorGameObjectAddFunc != NULL)
+		_editorGameObjectAddFunc(this, newObject);
+}
+
+void SceneManager::RemoveObject(GameObject* object)
+{
+	auto it = std::find_if(_gameObjects.begin(),_gameObjects.end(), [object](std::shared_ptr<GameObject>& obj)
+		{
+			return obj.get() == object;
+		});
+	if (it != _gameObjects.end())
+	{
+		//延迟到下一帧再销毁
+		_gameObjectNeedDestroy.push_back(*it);
+		_gameObjects.erase(it);
+		if (_editorGameObjectRemoveFunc != NULL)
+			_editorGameObjectAddFunc(this, *it);
+	}
 }

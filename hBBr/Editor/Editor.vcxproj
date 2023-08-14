@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="RenderView.cpp" />
+    <ClCompile Include="SceneOutline.cpp" />
     <QtRcc Include="EditorMain.qrc" />
     <QtUic Include="EditorMain.ui" />
     <QtMoc Include="EditorMain.h" />
@@ -164,6 +165,9 @@
     <ProjectReference Include="..\RendererCore\RendererCore.vcxproj">
       <Project>{5ea35751-8425-4582-9566-d9e95f11d89d}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="SceneOutline.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

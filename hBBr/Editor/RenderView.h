@@ -1,5 +1,5 @@
 #pragma once
-#include <qopenglwidget.h>
+#include <QWidget>
 #include <qtimer.h>
 
 
@@ -14,6 +14,10 @@ public:
 	~RenderView();
 
 	QTimer* _renderTimer;
+
+	QWidget* _mainRendererWidget = NULL;
+
+	class VulkanForm* _mainRenderer;
 
 protected:
 	//不使用Qt默认的绘制引擎
@@ -37,8 +41,6 @@ protected:
 	virtual void closeEvent(QCloseEvent* event)override;
 
 	virtual void paintEvent(QPaintEvent* event);
-
-	QWidget* _mainRenderer = NULL;
 
 private slots:
 

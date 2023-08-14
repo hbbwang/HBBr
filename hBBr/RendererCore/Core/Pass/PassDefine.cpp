@@ -62,6 +62,7 @@ void BasePass::PassUpdate()
 	uint32_t objectUboOffset = 0;
 	std::vector<uint32_t> matBufferOffset;
 	std::vector<uint32_t> matBufferSize;
+	PipelineObject* pipelineObj = NULL;
 	//Reset buffer
 	{
 		bool bUpdateObjUb = false;
@@ -73,6 +74,23 @@ void BasePass::PassUpdate()
 		uint32_t objectCount = 0;
 		for (auto m : PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
 		{
+			//Get Pipeline
+			pipelineObj = PipelineManager::GetGraphicsPipelineMap(m->graphicsIndex);
+			if (pipelineObj == NULL)
+			{
+				auto vsCache = Shader::_vsShader[m->vsShader];
+				auto psCache = Shader::_psShader[m->psShader];
+				VkGraphicsPipelineCreateInfoCache pipelineCreateInfo = {};
+				PipelineManager::SetColorBlend(pipelineCreateInfo, false);
+				PipelineManager::SetColorBlend(pipelineCreateInfo, false);
+				PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
+				PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
+				PipelineManager::SetVertexInput(pipelineCreateInfo, m->inputLayout);
+				PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, vsCache, psCache);
+				//Setting pipeline end
+				pipelineObj = PipelineManager::CreatePipelineObject(pipelineCreateInfo, _pipelineLayout,
+					_renderPass, m->graphicsIndex, (uint32_t)_subpassDescs.size());
+			}
 			if (m->uniformBufferSize != 0)
 			{
 				m->uniformBuffer[2] = glm::vec4(1,0,0,1);
@@ -132,25 +150,11 @@ void BasePass::PassUpdate()
 	uint32_t dynamicOffset[] = { 0 };
 	uint32_t matIndex = 0;
 	vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet_pass->GetDescriptorSet(), 1, dynamicOffset);
-	for (auto g : PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
+	for (auto m : PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
 	{
-		auto pipeline = PipelineManager::GetGraphicsPipelineMap(g->graphicsIndex);
-		if (pipeline == NULL)
-		{
-			VkGraphicsPipelineCreateInfoCache pipelineCreateInfo = {};
-			PipelineManager::SetColorBlend(pipelineCreateInfo, false);
-			PipelineManager::SetColorBlend(pipelineCreateInfo, false);
-			PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
-			PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
-			PipelineManager::SetVertexInput(pipelineCreateInfo, g->inputLayout );
-			PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, Shader::_vsShader[g->vsShader], Shader::_psShader[g->psShader]);
-			//Setting pipeline end
-			pipeline = PipelineManager::CreatePipelineObject(pipelineCreateInfo,_pipelineLayout,
-				_renderPass, g->graphicsIndex, (uint32_t)_subpassDescs.size());
-		}
-		manager->CmdCmdBindPipeline(cmdBuf, pipeline->pipeline);
+		manager->CmdCmdBindPipeline(cmdBuf, pipelineObj->pipeline);
 		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 2, 1, &_descriptorSet_mat->GetDescriptorSet(), 1, &matBufferOffset[matIndex]);
-		auto prims = PrimitiveProxy::GetModelPrimitives(g);
+		auto prims = PrimitiveProxy::GetModelPrimitives(m);
 		for (size_t m = 0; m < prims.size(); m++)
 		{
 			ModelPrimitive* prim = prims[m];

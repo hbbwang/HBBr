@@ -20,7 +20,7 @@ GameObject::GameObject(HString objectName, SceneManager* scene)
 
 	auto sharedPtr = std::shared_ptr<GameObject>(this);
 	_selfWeak = sharedPtr;
-	_scene->_gameObjects.push_back(sharedPtr);
+	_scene->AddNewObject(sharedPtr);
 }
 
 GameObject::~GameObject()
@@ -52,17 +52,8 @@ bool GameObject::Update()
 {
 	if (_bWantDestroy)
 	{
-		auto it = std::find_if(_scene->_gameObjects.begin(), _scene->_gameObjects.end(), [this](std::shared_ptr<GameObject> & obj)
-			{
-				return obj.get() == this;
-			});
-		if (it != _scene->_gameObjects.end())
-		{	
-			//延迟到下一帧再销毁
-			_scene->_gameObjectNeedDestroy.push_back(*it);
-			_scene->_gameObjects.erase(it);
-			ExecuteDestroy();
-		}
+		_scene->RemoveObject(this);
+		ExecuteDestroy();
 		return false;
 	}
 	else

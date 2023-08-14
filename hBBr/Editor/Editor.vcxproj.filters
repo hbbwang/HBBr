@@ -43,12 +43,18 @@
     <ClCompile Include="RenderView.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="SceneOutline.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="EditorMain.h">
       <Filter>Widgets</Filter>
     </QtMoc>
     <QtMoc Include="RenderView.h">
+      <Filter>Widgets</Filter>
+    </QtMoc>
+    <QtMoc Include="SceneOutline.h">
       <Filter>Widgets</Filter>
     </QtMoc>
   </ItemGroup>

@@ -5,6 +5,12 @@
 #include <memory>
 #include "Component/GameObject.h"
 
+typedef void (*EditorUpdate)(class SceneManager* scene, std::vector<std::shared_ptr<GameObject>> aliveObjects);
+
+typedef void (*EditorGameObjectAdd)(class SceneManager* scene, std::shared_ptr<GameObject> newObject);
+
+typedef void (*EditorGameObjectRemove)(class SceneManager* scene, std::shared_ptr<GameObject> oldObject);
+
 class SceneManager
 {
 	friend class VulkanRenderer;
@@ -13,11 +19,23 @@ public:
 
 	~SceneManager();
 
+#if IS_EDITOR
+	EditorUpdate _editorUpdateFunc = NULL;
+
+	EditorGameObjectAdd _editorGameObjectAddFunc = NULL;
+
+	EditorGameObjectRemove _editorGameObjectRemoveFunc = NULL;
+#endif
+
 private:
 
 	void SceneInit(class VulkanRenderer* renderer);
 
 	void SceneUpdate();
+
+	void AddNewObject(std::shared_ptr<GameObject> newObject);
+
+	void RemoveObject(GameObject* object);
 
 	class VulkanRenderer* _renderer = NULL;
 

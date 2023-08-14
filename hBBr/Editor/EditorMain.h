@@ -2,6 +2,7 @@
 
 #include <QtWidgets/QMainWindow>
 #include "ui_EditorMain.h"
+#include <qdockwidget.h>
 #include <qtimer.h>
 
 class EditorMain : public QMainWindow
@@ -14,6 +15,10 @@ public:
 
     /* 主渲染窗口 */
     class RenderView* _mainRenderView;
+
+    //场景大纲
+    class SceneOutline* _sceneOutline = NULL;
+    class QDockWidget* _sceneOutline_dock = NULL;
 
     virtual void closeEvent(QCloseEvent* event);
 

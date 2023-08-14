@@ -9,8 +9,6 @@
 
 #pragma comment(lib , "RendererCore.lib")
 
-VulkanForm* mainRenderer;
-
 RenderView::RenderView(QWidget* parent)
 	: QWidget(parent)
 {
@@ -30,15 +28,15 @@ RenderView::RenderView(QWidget* parent)
 	_renderTimer->start();
 
 
-	if (_mainRenderer == NULL)
+	if (_mainRendererWidget == NULL)
 	{
 		//Enable custom loop
-		mainRenderer = VulkanApp::InitVulkanManager(false, true);
+		_mainRenderer = VulkanApp::InitVulkanManager(false, true);
 
-		HWND hwnd = (HWND)VulkanApp::GetWindowHandle(mainRenderer);
+		HWND hwnd = (HWND)VulkanApp::GetWindowHandle(_mainRenderer);
 		auto mainRendererWindow = QWindow::fromWinId((WId)hwnd);
-		_mainRenderer = QWidget::createWindowContainer(mainRendererWindow, this);
-		_mainRenderer->setFocusPolicy(Qt::ClickFocus);
+		_mainRendererWidget = QWidget::createWindowContainer(mainRendererWindow, this);
+		_mainRendererWidget->setFocusPolicy(Qt::ClickFocus);
 
 		_renderTimer = new QTimer(this);
 		_renderTimer->setInterval(1);
@@ -61,9 +59,9 @@ void RenderView::showEvent(QShowEvent* event)
 void RenderView::resizeEvent(QResizeEvent* event)
 {
 	QWidget::resizeEvent(event);
-	if (_mainRenderer != NULL)
+	if (_mainRendererWidget != NULL)
 	{
-		_mainRenderer->setGeometry(0, 0, width(), height());
+		_mainRendererWidget->setGeometry(0, 0, width(), height());
 	}
 }
 
@@ -90,7 +88,7 @@ void RenderView::UpdateRender()
 
 void RenderView::focusInEvent(QFocusEvent* event)
 {
-	VulkanApp::SetFormFocus(mainRenderer);
+	VulkanApp::SetFormFocus(_mainRenderer);
 }
 
 void RenderView::focusOutEvent(QFocusEvent* event)
