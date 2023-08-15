@@ -3,6 +3,7 @@
 #include "VulkanRenderer.h"
 #include "Resource/SceneManager.h"
 #include "Component.h"
+#include "ConsoleDebug.h"
 GameObject::GameObject(HString objectName, SceneManager* scene)
 {
 	if (scene == NULL)
@@ -37,10 +38,55 @@ void GameObject::SetActive(bool newActive)
 	}
 }
 
+void GameObject::SetObjectName(HString newName)
+{
+#if IS_EDITOR
+	ConsoleDebug::print_endl("GameObject "+ _name +" rename : " + newName);
+#endif
+	_name = newName;
+}
+
 void GameObject::SetParent(GameObject* newParent)
 {
-	_newParent = newParent;
-	_scene->_gameObjectParentSettings.push_back(this);
+	if (newParent != NULL)
+	{
+		if (_parent != NULL)
+		{
+			//为了安全考虑，最好进行一次Parent的查找，不过感觉应该不需要...
+			//auto it = std::find(_gameObjects.begin(), _gameObjects.end(), i->_parent);
+			//if (it != _gameObjects.end())
+			{
+				//(*it)->_children.erase();
+				//如果已经有父类了先清除
+				auto cit = std::find(_parent->_children.begin(), _parent->_children.end(), this);
+				if (cit != _parent->_children.end())
+				{
+					_parent->_children.erase(cit);
+				}
+			}
+		}
+		_parent = newParent;
+#if IS_EDITOR
+		ConsoleDebug::print_endl("GameObject " + _name + " attach to  : " + newParent->GetObjectName());
+#endif
+	}
+	else
+	{
+		//如果已经有父类了先清除
+		if (_parent != NULL)
+		{
+			auto cit = std::find(_parent->_children.begin(), _parent->_children.end(), this);
+			if (cit != _parent->_children.end())
+			{
+				_parent->_children.erase(cit);
+			}
+		}
+		_parent = NULL;
+#if IS_EDITOR
+		ConsoleDebug::print_endl("GameObject " + _name + " detach");
+#endif
+	}
+
 }
 
 void GameObject::Init()

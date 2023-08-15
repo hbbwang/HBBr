@@ -43,9 +43,6 @@ private:
 
 	std::vector<std::shared_ptr<GameObject>> _gameObjects;
 
-	//需要进行父子关系处理的对象
-	std::vector<GameObject*> _gameObjectParentSettings;
-
 	//需要进行销毁的Objects
 	std::vector<std::shared_ptr<GameObject>> _gameObjectNeedDestroy;
 };

@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Common.h"
 #include <vector>
 #include "HString.h"
 #include "Transform.h"
@@ -12,38 +13,36 @@ public:
 	GameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL);
 	~GameObject();
 
-	__forceinline void Destroy() {
+	HBBR_API __forceinline void Destroy() {
 		SetActive(false);
 		_bWantDestroy = true;
 	}
 
-	__forceinline bool IsActive() const {
+	HBBR_API __forceinline bool IsActive() const {
 		return _bActive;
 	}
 
-	void SetActive(bool newActive = true);
+	HBBR_API void SetActive(bool newActive = true);
 
-	__forceinline HString GetObjectName() const {
+	HBBR_API __forceinline HString GetObjectName() const {
 		return _name;
 	}
 
-	__forceinline void SetObjectName(HString newName) {
-		_name = newName;
-	}
+	HBBR_API void SetObjectName(HString newName);
 
-	__forceinline std::vector<GameObject*> GetChildren() {
+	HBBR_API __forceinline std::vector<GameObject*> GetChildren() {
 		return _children;
 	}
 
-	__forceinline GameObject* GetParent() {
+	HBBR_API __forceinline GameObject* GetParent() {
 		return _parent;
 	}
 
-	__forceinline Transform* GetTransform() {
+	HBBR_API __forceinline Transform* GetTransform() {
 		return _transform;
 	}
 
-	void SetParent(GameObject* newParent);
+	HBBR_API void SetParent(GameObject* newParent);
 
 	template<typename T, typename ...Args>
 	T* AddComponent(Args... args)
@@ -82,9 +81,6 @@ private:
 	std::vector<std::unique_ptr<class Component>> _comps;
 
 	HString _name;
-
-	//指定新的父子关系,但并不是立刻执行的，将会在SceneManager的Update里统一进行处理
-	GameObject* _newParent = NULL;
 
 	GameObject* _parent = NULL;
 
