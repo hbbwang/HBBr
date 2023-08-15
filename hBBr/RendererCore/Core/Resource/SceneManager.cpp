@@ -103,17 +103,17 @@ void SceneManager::SceneUpdate()
 	}
 
 	//Update Editor if the function is not null.
-	if (_editorUpdateFunc != NULL)
-	{
-		_editorUpdateFunc(this, _gameObjects);
-	}
+	#if IS_EDITOR
+		_editorSceneUpdateFunc(this, _gameObjects);
+	#endif
 }
 
 void SceneManager::AddNewObject(std::shared_ptr<GameObject> newObject)
 {
 	_gameObjects.push_back(newObject);
-	if (_editorGameObjectAddFunc != NULL)
+	#if IS_EDITOR
 		_editorGameObjectAddFunc(this, newObject);
+	#endif
 }
 
 void SceneManager::RemoveObject(GameObject* object)
@@ -126,8 +126,9 @@ void SceneManager::RemoveObject(GameObject* object)
 	{
 		//延迟到下一帧再销毁
 		_gameObjectNeedDestroy.push_back(*it);
-		_gameObjects.erase(it);
-		if (_editorGameObjectRemoveFunc != NULL)
+		#if IS_EDITOR
 			_editorGameObjectAddFunc(this, *it);
+		#endif
+		_gameObjects.erase(it);
 	}
 }

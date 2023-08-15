@@ -57,6 +57,10 @@ public:
 
 	std::weak_ptr<GameObject>_selfWeak;
 
+#if IS_EDITOR
+	void* _editorObject = NULL;
+#endif
+
 private:
 
 	void Init();

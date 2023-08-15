@@ -3,9 +3,10 @@
 //场景类,每个渲染器必须有一个场景管理类,用来储存当前场景的所有对象(GameObject)
 #include <vector>
 #include <memory>
+#include <functional>
 #include "Component/GameObject.h"
 
-typedef void (*EditorUpdate)(class SceneManager* scene, std::vector<std::shared_ptr<GameObject>> aliveObjects);
+typedef void (*EditorSceneUpdate)(class SceneManager* scene, std::vector<std::shared_ptr<GameObject>> aliveObjects);
 
 typedef void (*EditorGameObjectAdd)(class SceneManager* scene, std::shared_ptr<GameObject> newObject);
 
@@ -20,11 +21,12 @@ public:
 	~SceneManager();
 
 #if IS_EDITOR
-	EditorUpdate _editorUpdateFunc = NULL;
-
-	EditorGameObjectAdd _editorGameObjectAddFunc = NULL;
-
-	EditorGameObjectRemove _editorGameObjectRemoveFunc = NULL;
+	//EditorSceneUpdate _editorSceneUpdateFunc = NULL;
+	//EditorGameObjectAdd _editorGameObjectAddFunc = NULL;
+	//EditorGameObjectRemove _editorGameObjectRemoveFunc = NULL;
+	std::function<void(class SceneManager* , std::vector<std::shared_ptr<GameObject>> )> _editorSceneUpdateFunc = [](class SceneManager* s, std::vector<std::shared_ptr<GameObject>> o) {};
+	std::function<void(class SceneManager* , std::shared_ptr<GameObject> )> _editorGameObjectAddFunc = [](class SceneManager* scene, std::shared_ptr<GameObject> newObject) {};
+	std::function<void(class SceneManager* , std::shared_ptr<GameObject> )> _editorGameObjectRemoveFunc = [](class SceneManager* scene, std::shared_ptr<GameObject> oldObject) {};
 #endif
 
 private:
