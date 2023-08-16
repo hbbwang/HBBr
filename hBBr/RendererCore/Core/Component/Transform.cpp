@@ -25,21 +25,6 @@ Transform::~Transform()
 
 void Transform::Update()
 {
-	//if (localLoc != location)
-	//{
-	//	SetLocation(location);
-	//	localLoc = location;
-	//}
-	//else if (localRot != eulerAngle)
-	//{
-	//	SetRotation(eulerAngle);
-	//	localRot = eulerAngle;
-	//}
-	//else if (localscal != scale3D)
-	//{
-	//	SetScale3D(scale3D);
-	//	localscal = scale3D;
-	//}
 	if (_bNeedUpdateUniformBuffer)
 	{
 		if (UpdateStateCount > 1)//保持1帧的更新状态
@@ -109,6 +94,11 @@ void Transform::UpdateChildrenScale3D()
 	}
 }
 
+void Transform::ResetTransformForAttachment()
+{
+	SetWorldLocationAndRotation(worldLocation, worldEulerAngle);
+}
+
 void Transform::UpdateTransformByVariable()
 {
 	FSetLocation(location);
@@ -143,9 +133,9 @@ void Transform::FSetWorldLocation(glm::vec3 newWorldLocation, bool bAffectChildr
 void Transform::FSetWorldRotation(glm::vec3 newAngle, bool bAffectChildren)
 {
 	worldEulerAngle = newAngle;
-	worldEulerAngle.x = std::fmodf(worldEulerAngle.x, 360.0);
-	worldEulerAngle.y = std::fmodf(worldEulerAngle.y, 360.0);
-	worldEulerAngle.z = std::fmodf(worldEulerAngle.z, 360.0);
+	worldEulerAngle.x = (float)std::fmod((double)worldEulerAngle.x, 360.0);
+	worldEulerAngle.y = (float)std::fmod((double)worldEulerAngle.y, 360.0);
+	worldEulerAngle.z = (float)std::fmod((double)worldEulerAngle.z, 360.0);
 
 	glm::vec3 _eulerAngle = glm::vec3(
 		glm::radians(worldEulerAngle.x),

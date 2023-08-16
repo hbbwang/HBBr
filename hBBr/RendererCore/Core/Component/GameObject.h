@@ -34,6 +34,10 @@ public:
 		return _children;
 	}
 
+	HBBR_API __forceinline uint64_t GetChildrenNum() {
+		return _children.size();
+	}
+
 	HBBR_API __forceinline GameObject* GetParent() {
 		return _parent;
 	}
@@ -58,6 +62,7 @@ public:
 
 #if IS_EDITOR
 	void* _editorObject = NULL;
+	bool _bEditorNeedUpdate = false;
 #endif
 
 private:

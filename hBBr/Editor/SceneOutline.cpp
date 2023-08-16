@@ -1,6 +1,7 @@
 #include "SceneOutline.h"
 #include "VulkanRenderer.h"
 #include "Resource/SceneManager.h"
+#include "Component/GameObject.h"
 #include <qheaderview.h>
 #include <qaction.h>
 #include <QDragEnterEvent>
@@ -13,7 +14,6 @@ GameObjectItem::GameObjectItem(GameObject* gameObject, QTreeWidget* view)
 {
     _gameObject = gameObject;
     _gameObject->_editorObject = this;
-    setText(0, gameObject->GetObjectName().c_str());
     setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
 }
 
@@ -107,19 +107,34 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     _treeWidget = new SceneOutlineTree(this);
     mainLayout->addWidget(_treeWidget);
 
-    renderer->GetScene()->_editorSceneUpdateFunc = [this]
-    (SceneManager* scene, std::vector<std::shared_ptr<GameObject>> aliveObjects) 
+    auto scene = renderer->GetScene();
+    scene->_editorSceneUpdateFunc = [this, scene]
+    (SceneManager* scene, std::vector<std::shared_ptr<GameObject>> aliveObjects)
     {
 
     };
 
-    renderer->GetScene()->_editorGameObjectAddFunc = [this]
+    //Editor GameObject更新委托
+    scene->_editorGameObjectUpdateFunc = [this, scene]
+    (SceneManager* scene, std::shared_ptr<GameObject> object)
+    {
+        if (object->_bEditorNeedUpdate)
+        {
+            auto item = (GameObjectItem*)object->_editorObject;
+            //rename?
+            item->setText(0, object->GetObjectName().c_str());
+        }
+    };
+
+    //Editor GameObject Spawn委托
+    scene->_editorGameObjectAddFunc = [this, scene]
     (SceneManager* scene, std::shared_ptr<GameObject> object) 
     {
         _treeWidget->addTopLevelItem(new GameObjectItem(object.get(), _treeWidget));
     };
 
-    renderer->GetScene()->_editorGameObjectRemoveFunc = [this]
+    //Editor GameObject Destroy委托
+    scene->_editorGameObjectRemoveFunc = [this, scene]
     (SceneManager* scene, std::shared_ptr<GameObject> object)
     {
         auto item = (GameObjectItem*)object->_editorObject;

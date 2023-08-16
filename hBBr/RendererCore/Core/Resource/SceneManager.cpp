@@ -26,12 +26,14 @@ void SceneManager::SceneInit(class VulkanRenderer* renderer)
 	auto test = new GameObject();
 	auto modelComp0 = test->AddComponent<ModelComponent>();
 	modelComp0->SetModel(FileSystem::GetResourceAbsPath() + "Content/FBX/TestFbx_1_Combine.FBX");
+	test->SetObjectName("TestFbx_1_Combine");
 
 	GameObject* cube = new GameObject();
 	testObj = cube->_selfWeak;
 	auto modelComp = cube->AddComponent<ModelComponent>();
-	cube->GetTransform()->SetLocation(glm::vec3(-0.75f, 1.5f, 0));
+	cube->GetTransform()->SetLocation(glm::vec3(0, 0.5f, 0));
 	modelComp->SetModel(FileSystem::GetResourceAbsPath() + "Content/FBX/TestFbx_Cube.FBX");
+	cube->SetObjectName("TestFbx_Cube");
 }
 #include "HInput.h"
 void SceneManager::SceneUpdate()
@@ -60,11 +62,17 @@ void SceneManager::SceneUpdate()
 			if (_gameObjects.size() <= 0)
 				break;
 		}
+		else
+		{
+			#if IS_EDITOR
+			_editorGameObjectUpdateFunc(this, _gameObjects[i]);
+			#endif
+		}
 	}
 
 	//Update Editor if the function is not null.
 	#if IS_EDITOR
-		_editorSceneUpdateFunc(this, _gameObjects);
+	_editorSceneUpdateFunc(this, _gameObjects);
 	#endif
 }
 

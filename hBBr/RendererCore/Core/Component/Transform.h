@@ -18,13 +18,13 @@ public:
 
 	HBBR_API __forceinline glm::vec3 GetWorldRotation()const { return worldEulerAngle; }
 
-	HBBR_API __forceinline glm::vec3& GetLocation() { return location; }
+	HBBR_API __forceinline glm::vec3 GetLocation()const { return location; }
 
-	HBBR_API __forceinline glm::vec3& GetRotation() { return eulerAngle; }
+	HBBR_API __forceinline glm::vec3 GetRotation()const { return eulerAngle; }
 
-	HBBR_API __forceinline glm::vec3& GetScale3D() { return scale3D; }
+	HBBR_API __forceinline glm::vec3 GetScale3D()const { return scale3D; }
 
-	HBBR_API __forceinline glm::mat4& GetWorldMatrix() { return worldMatrix; }
+	HBBR_API __forceinline glm::mat4 GetWorldMatrix()const { return worldMatrix; }
 
 	//Set object scale at local 3D space.
 	HBBR_API __forceinline  void SetScale3D(glm::vec3 newSize)
@@ -78,6 +78,8 @@ public:
 
 	void UpdateChildrenScale3D();
 
+	void ResetTransformForAttachment();
+
 	/* ¸üÐÂTransform */
 	HBBR_API virtual void UpdateTransformByVariable();
 
@@ -116,10 +118,6 @@ private:
 	HBBR_API void FSetScale3D(glm::vec3 newSize, bool bAffectChildren = true);
 	HBBR_API void FSetLocation(glm::vec3 newLocation);
 	HBBR_API void FSetRotation(glm::vec3 newRotation);
-
-	glm::vec3 localLoc = glm::vec3(0, 0, 0);
-	glm::vec3 localRot = glm::vec3(0, 0, 0);
-	glm::vec3 localscal = glm::vec3(0, 0, 0);
 
 	bool _bNeedUpdateUniformBuffer;
 

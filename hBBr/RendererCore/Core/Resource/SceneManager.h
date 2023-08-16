@@ -24,9 +24,10 @@ public:
 	//EditorSceneUpdate _editorSceneUpdateFunc = NULL;
 	//EditorGameObjectAdd _editorGameObjectAddFunc = NULL;
 	//EditorGameObjectRemove _editorGameObjectRemoveFunc = NULL;
-	std::function<void(class SceneManager* , std::vector<std::shared_ptr<GameObject>> )> _editorSceneUpdateFunc = [](class SceneManager* s, std::vector<std::shared_ptr<GameObject>> o) {};
-	std::function<void(class SceneManager* , std::shared_ptr<GameObject> )> _editorGameObjectAddFunc = [](class SceneManager* scene, std::shared_ptr<GameObject> newObject) {};
-	std::function<void(class SceneManager* , std::shared_ptr<GameObject> )> _editorGameObjectRemoveFunc = [](class SceneManager* scene, std::shared_ptr<GameObject> oldObject) {};
+	std::function<void(class SceneManager*, std::vector<std::shared_ptr<GameObject>>)> _editorSceneUpdateFunc = [](class SceneManager* s, std::vector<std::shared_ptr<GameObject>> o) {};
+	std::function<void(class SceneManager*, std::shared_ptr<GameObject>)> _editorGameObjectAddFunc = [](class SceneManager* scene, std::shared_ptr<GameObject> newObject) {};
+	std::function<void(class SceneManager*, std::shared_ptr<GameObject>)> _editorGameObjectRemoveFunc = [](class SceneManager* scene, std::shared_ptr<GameObject> oldObject) {};
+	std::function<void(class SceneManager*, std::shared_ptr<GameObject>)> _editorGameObjectUpdateFunc = [](class SceneManager* scene, std::shared_ptr<GameObject> oldObject) {};
 #endif
 
 private:

@@ -42,6 +42,7 @@ void GameObject::SetObjectName(HString newName)
 {
 #if IS_EDITOR
 	ConsoleDebug::print_endl("GameObject "+ _name +" rename : " + newName);
+	_bEditorNeedUpdate = true;
 #endif
 	_name = newName;
 }
@@ -66,6 +67,8 @@ void GameObject::SetParent(GameObject* newParent)
 			}
 		}
 		_parent = newParent;
+		_parent->_children.push_back(this);
+		_transform->ResetTransformForAttachment();
 #if IS_EDITOR
 		ConsoleDebug::print_endl("GameObject " + _name + " attach to  : " + newParent->GetObjectName());
 #endif
@@ -82,6 +85,7 @@ void GameObject::SetParent(GameObject* newParent)
 			}
 		}
 		_parent = NULL;
+		_transform->ResetTransformForAttachment();
 #if IS_EDITOR
 		ConsoleDebug::print_endl("GameObject " + _name + " detach");
 #endif
@@ -91,6 +95,9 @@ void GameObject::SetParent(GameObject* newParent)
 
 void GameObject::Init()
 {
+#if IS_EDITOR
+	_bEditorNeedUpdate = true;
+#endif
 	_bInit = true;
 }
 
