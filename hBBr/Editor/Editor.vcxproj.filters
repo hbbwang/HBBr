@@ -24,6 +24,9 @@
     <Filter Include="Widgets">
       <UniqueIdentifier>{1be2b19a-4fd6-4e61-aa64-c0a1bc78872f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Widgets\Common">
+      <UniqueIdentifier>{1312efae-6886-442a-b763-50d189c0fba1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="EditorMain.qrc">
@@ -46,6 +49,9 @@
     <ClCompile Include="SceneOutline.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="EditorCommonFunction.cpp">
+      <Filter>Widgets\Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="EditorMain.h">
@@ -57,5 +63,10 @@
     <QtMoc Include="SceneOutline.h">
       <Filter>Widgets</Filter>
     </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="EditorCommonFunction.h">
+      <Filter>Widgets\Common</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

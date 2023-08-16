@@ -1,0 +1,346 @@
+#EditorMain
+{
+    background-image: url(./Config/Theme/Images/MainWindowBackgroundImage.jpg) repeat ;
+    background-position:center top;
+    /* image: url(./Config/Theme/Images/MainWindowBackgroundImage.jpg); */
+    font-family:  微软雅黑, Arial, Helvetica, sans-serif;
+    background-color: rgba(40,40,40,1.0);
+}
+QWidget
+{
+    background-color: rgb(40,40,40);
+    color: rgb(190, 190, 190);
+    border: 0px;
+    selection-color:rgb(125,125,125);
+    selection-background-color: rgb(80,80,80);
+}
+QMainWindow::separator
+{
+    background-color:rgb(140, 90, 100);
+    border: 1px solid rgb(110,110,110);
+}
+QTabBar::tab 
+{
+    height: 25px;
+    width: 100%;
+    background-color: rgba(25,25,25,0.95);
+    color:rgb(150,150,150);
+    font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
+    border:1px solid  rgb(80,80,80);
+}
+QTabBar::tab:selected
+{
+    height: 25px;
+    font-size: 14px ;
+    color:rgb(230,230,230);
+    border: 1px solid rgb(180,150,150);
+}
+QTabBar::tab:!selected:hover 
+{
+    background-color: rgba(50,50,50,1);
+    color:rgb(230,230,230);
+}
+QTabBar::tab::label 
+{
+    width: 120px;
+}
+QLabel
+{    
+    font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
+    color:rgb(130,130,130);
+}
+QComboBox
+{    
+    font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
+    background-color: rgba(25,25,25,0.1);
+    color:rgb(180,180,180);
+    border:1px solid  rgb(80,80,80);
+    height: 20px;
+}
+QComboBox QAbstractItemView
+{    
+    font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
+    background-color: rgba(25,25,25,0.1);
+    color:rgb(150,150,150);
+    border: 1.5px solid rgb(180,150,150);
+    selection-background-color: rgb(220,150,140);
+    selection-color: rgb(255,255,255);
+}
+QLineEdit
+{
+    background-color: rgba(25,25,25,0.1);
+    color:rgb(160,160,160);
+    border:1px solid  rgb(80,80,80);
+    font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
+}
+QLineEdit:focus
+{
+    background-color: rgb(30,30,30);
+    color:rgb(200,200,200);
+    border: 1px solid rgb(100,100,100);
+    font-family:  Microsoft Yahei, Arial, Helvetica, sans-serif;
+}
+QLineEdit:hover
+{
+    background-color: rgb(30,30,30);
+    color:rgb(200,200,200);
+    border: 1px solid rgb(180,150,150);
+    font-family:  Microsoft Yahei, Arial, Helvetica, sans-serif;
+}
+QMessageBox 
+{ 
+    background-color: rgb(40,40,40);
+    border: 2px solid rgb(140, 140, 140);
+    color:#ffffff;
+}
+QMessageBox .QLabel
+{ 
+    background-color: rgb(40,40,40);
+    color:#ffffff;
+}
+QListView
+{ 
+    outline: 0; 
+} 
+QTreeView 
+{ 
+    outline: 0; 
+} 
+QMenu
+{
+    background-color: rgb(40,40,40);
+    border: 1px solid rgb(150, 100, 105);
+    Color:rgb(160,160,160);
+    font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
+}
+QMenu::item:selected
+{
+    background-color: rgb(155, 155, 155);
+    border: 1px solid rgb(200, 200, 200);
+    Color:rgb(255,255,255);
+    padding-left: 5px;
+}
+QMenu::separator
+{
+    height:1px;
+    background-color:rgba(150, 100, 105 , 0.5);
+    /* margin-left:5px;
+    margin-right:5px; */
+}
+QStatusBar
+{
+    background-color: rgba(20,20,20,0.9);
+    border: 1.2px solid rgb(140, 90, 100);
+}
+QToolTip
+{
+    background-color: rgba(20,20,20,0.9);
+    border: 2px solid rgb(140, 90, 100);
+    color:rgb(200,200,210);
+}
+/* ScrollBar */
+QScrollBar:vertical
+{ 
+    width: 16px;
+    background-color: rgba(0,0,0,0);
+}
+QScrollBar::handle:vertical
+{
+    background-color: rgba(40,40,40,1.0);
+    border: 1.2px solid rgb(160, 108, 125);
+    margin-left: 1px;
+    margin-right: 1px;
+    margin-top: 22px;
+    margin-bottom: 22px;
+}
+QScrollBar::handle:vertical:hover
+{
+    background-color: rgb(160, 108, 125);
+    border: 1.2px solid rgb(160, 160, 160);
+}
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical
+{
+    background: rgba(0,0,0,0.5);
+    margin-top: -22px;
+    margin-bottom: -22px;
+    border: 1px solid rgb(85, 70, 75);
+}
+QScrollBar::add-line:vertical
+{    
+    height: 20px;
+    background-color: rgba(70,70,70,1);
+    border: 1.2px solid rgb(180, 150, 68);
+    subcontrol-position: bottom;
+    margin-bottom: -15px;
+}
+QScrollBar::sub-line:vertical
+{    
+    height: 20px;
+    background-color: rgba(70,70,70,1);
+    border: 1.2px solid rgb(180, 150, 68);
+    subcontrol-position: top;
+    margin-top: -15px;
+}
+/*Horizontal ScrollBar*/
+QScrollBar:horizontal
+{ 
+    height: 16px;
+    background-color: rgba(0,0,0,0);
+}
+QScrollBar::handle:horizontal
+{
+    background-color: rgba(40,40,40,1.0);
+    border: 1.2px solid rgb(160, 108, 125);
+    margin-left: 22px;
+    margin-right: 22px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+QScrollBar::handle:horizontal:hover
+{
+    background-color: rgb(160, 108, 125);
+    border: 1.2px solid rgb(160, 160, 160);
+}
+QScrollBar::add-page:horizontal, 
+QScrollBar::sub-page:horizontal
+{
+    background: rgba(0,0,0,0.5);
+    margin-left: -22px;
+    margin-right: -22px;
+    border: 1px solid rgb(85, 70, 75);
+}
+QScrollBar::add-line:horizontal
+{    
+    width: 20px;
+    background-color: rgba(70,70,70,1);
+    border: 1.2px solid rgb(180, 150, 68);
+    subcontrol-position: right;
+    margin-right: -15px;
+}
+QScrollBar::sub-line:horizontal
+{    
+    width: 20px;
+    background-color: rgba(70,70,70,1);
+    border: 1.2px solid rgb(180, 150, 68);
+    subcontrol-position: left;
+    margin-left: -15px;
+}
+
+/* PushButton */
+QPushButton
+{
+    background-color: rgba(70,70,70,1);
+    color:antiquewhite;
+    font-family:  Microsoft Yahei, Arial, Helvetica, sans-serif;
+    border-radius: 4px;
+    width: 100%;
+    height: 25px;
+}
+QPushButton:hover
+{
+    background-color: rgb(130, 100, 100);
+    color:antiquewhite;
+    font-family:  Microsoft Yahei, Arial, Helvetica, sans-serif;
+    border-radius: 4px;
+    width:100%;
+    height: 25px;
+}
+QPushButton:pressed
+{
+    background-color: rgba(170,120,120,1);
+    color:#FFFFFF;
+    font-family:  Microsoft Yahei, Arial, Helvetica, sans-serif;
+    border: 1.5px solid rgb(210, 210, 210);
+    border-radius: 4px;
+    width:100%;
+    height: 25px;
+}
+QSplitter::handle
+{
+    background-color: rgb(125, 108, 72);
+    border: 1px solid rgb(110,110,110);
+}
+QDockWidget::title
+{
+    font-family:  Microsoft Yahei, Arial, Helvetica, sans-serif;
+    color:rgb(140,140,140);
+    background-color: rgb(89, 89, 89);
+    padding-left: 6px;
+    padding-top: 6px;
+}
+QDockWidget::close-button,
+QDockWidget::float-button
+{
+    color:rgb(190, 190, 190);
+    border: 1px;
+}
+QDockWidget::float-button:hover,
+QDockWidget::close-button:hover
+{
+    color:rgb(133, 133, 133);
+    background-color: rgb(151, 115, 115);
+}
+QTreeWidget
+{
+    background-color: rgba(40,40,40,0.5);
+    color: antiquewhite;
+    outline: 0;
+}
+QTreeWidget::item
+{
+    outline: 0;
+}
+QTreeWidget::item:selected
+{
+    font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
+    color :rgb(196, 196, 196);
+    background-color: rgba(94, 87, 81, 0.8);
+    border: 1px solid rgb(114, 114, 114);
+    outline: 0;
+}
+QTreeWidget::item:hover,
+QTreeWidget::item:hover
+{
+    font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
+    color :rgb(234, 209, 209);
+    background-color: rgba(79, 64, 64, 0.8);
+    border: 1px solid rgb(166, 166, 166);
+    outline: 0;
+}
+/* QTreeWidget::branch:closed:has-children:!has-siblings,
+QTreeWidget::branch:closed:has-children:has-siblings */
+QTreeWidget::branch:closed:has-children,
+QTreeWidget::branch:open:!has-children:!has-siblings,
+QTreeWidget::branch:open:!has-children:has-siblings
+{    
+    width: 10px;
+    height: 10px;
+    border-image: url(./Config/Theme/Icons/ContentBrowser_FolderClose.png) ;
+}
+QTreeWidget::branch:closed:!has-children
+{    
+    width: 10px;
+    height: 10px;
+    border-image: url(./Config/Theme/Icons/TreeLine.png) ;
+}
+/* QTreeWidget::branch:open:has-children:!has-siblings,
+QTreeWidget::branch:open:has-children:has-siblings */
+QTreeWidget::branch:open:has-children
+{
+    width: 10px;
+    height: 10px;
+    border-image: url(./Config/Theme/Icons/ContentBrowser_FolderOpen.png) ;
+}
+QTreeWidget::branch:open:!has-children
+{
+    width: 10px;
+    height: 10px;
+    border-image: url(./Config/Theme/Icons/TreeLine.png) ;
+}
+#SceneOutline
+{
+    color:rgb(151, 151, 151);
+    font-family:  Microsoft Yahei, Arial, Helvetica, sans-serif;
+    background-color: rgb(30,30,30);
+    border: 1.2px solid rgb(140, 90, 100);
+};

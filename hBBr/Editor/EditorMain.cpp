@@ -2,6 +2,7 @@
 #include "RenderView.h"
 #include "SceneOutline.h"
 #include "FormMain.h"
+#include "EditorCommonFunction.h"
 EditorMain::EditorMain(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -14,7 +15,11 @@ EditorMain::EditorMain(QWidget *parent)
     _sceneOutline = new SceneOutline(_mainRenderView->_mainRenderer->renderer, this);
     _sceneOutline_dock = new QDockWidget(this);
     _sceneOutline_dock->setWidget(_sceneOutline);
+    _sceneOutline_dock->setWindowTitle("Scene Outline");
     addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, _sceneOutline_dock);
+
+    setObjectName("EditorMain");
+    setStyleSheet(GetWidgetStyleSheetFromFile("EditorMain"));
 
 }
 

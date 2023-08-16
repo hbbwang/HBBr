@@ -10,6 +10,7 @@
 #include <QApplication>
 #include <QDrag>
 #include <qmenu.h>
+#include "EditorCommonFunction.h"
 GameObjectItem::GameObjectItem(GameObject* gameObject, QTreeWidget* view)
     :QTreeWidgetItem(view)
 {
@@ -39,11 +40,12 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
     setAcceptDrops(true);
     setEditTriggers(EditTrigger::DoubleClicked); 
     //setMouseTracking(true);
+    setObjectName("SceneOutline");
 
     _renderer = renderer;
     _menu = new QMenu(this);
-    _createNewGameObject = new QAction("创建空GameObject", _menu);
-    _deleteGameObject = new QAction("删除GameObject", _menu);
+    _createNewGameObject    = new QAction(QString::fromLocal8Bit("创建GameObject"), _menu);
+    _deleteGameObject       = new QAction(QString::fromLocal8Bit("删除GameObject"), _menu);
 
     //setRootIsDecorated(false);
     connect(this,SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),this,SLOT(ItemDoubleClicked(QTreeWidgetItem*, int)));
@@ -70,6 +72,7 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
 void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
 {
     _menu->addAction(_createNewGameObject);
+    _menu->addSeparator();
     _menu->addAction(_deleteGameObject);
     _menu->exec(event->globalPos());
 }
@@ -131,7 +134,9 @@ void SceneOutlineTree::ItemEditFinished(QString newText)
 SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     : QWidget(parent)
 {
+    setObjectName("SceneOutline");
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(1,1,1,1);
     this->setLayout(mainLayout);
 
     _treeWidget = new SceneOutlineTree(renderer, this);

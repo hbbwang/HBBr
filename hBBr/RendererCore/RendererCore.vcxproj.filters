@@ -41,6 +41,9 @@
     <Filter Include="Renderer\Core\Component">
       <UniqueIdentifier>{8fca5c07-0f8b-4d2d-b71f-d2357de10820}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ThirdParty\lodepng">
+      <UniqueIdentifier>{0390f21e-7636-4424-957a-d6637c1a97ae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\VulkanManager.h">
@@ -175,6 +178,18 @@
     <ClInclude Include="Core\Resource\HGuid.h">
       <Filter>Renderer\Core\Resource</Filter>
     </ClInclude>
+    <ClInclude Include="Common\ImageTool.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\TypeConversion.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\DDSTool.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\lodepng\lodepng.h">
+      <Filter>ThirdParty\lodepng</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -293,6 +308,15 @@
     </ClCompile>
     <ClCompile Include="Core\Resource\HGuid.cpp">
       <Filter>Renderer\Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\ImageTool.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\DDSTool.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\lodepng\lodepng.cpp">
+      <Filter>ThirdParty\lodepng</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
