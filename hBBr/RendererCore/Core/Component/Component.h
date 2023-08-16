@@ -6,16 +6,15 @@
 class Component
 {
 	friend class GameObject;
+	friend class SceneManager;
+	friend class VulkanRenderer;
 public:
 
 	Component(class GameObject* parent);
 
 	virtual  ~Component();
 
-	__forceinline void Destroy() {
-		SetActive(false);
-		_bWantDestroy = true;
-	}
+	void Destroy();
 
 	__forceinline bool IsActive() const {
 		return _bActive;
@@ -39,9 +38,6 @@ protected:
 
 	bool _bInit;
 
-	bool _bWantDestroy;
-
 	class GameObject* _gameObject = NULL;
 	
-
 };

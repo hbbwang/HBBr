@@ -53,8 +53,7 @@ void SceneManager::SceneUpdate()
 	_gameObjectNeedDestroy.clear();
 
 	//Update Objecets
-	const auto objCount = _gameObjects.size();
-	for (int i = 0; i < objCount ; i++)
+	for (int i = 0; i < _gameObjects.size(); i++)
 	{
 		if (!_gameObjects[i]->Update())
 		{
@@ -95,7 +94,7 @@ void SceneManager::RemoveObject(GameObject* object)
 		//延迟到下一帧再销毁
 		_gameObjectNeedDestroy.push_back(*it);
 		#if IS_EDITOR
-			_editorGameObjectAddFunc(this, *it);
+			_editorGameObjectRemoveFunc(this, *it);
 		#endif
 		_gameObjects.erase(it);
 	}

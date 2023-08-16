@@ -9,6 +9,7 @@
 #include <QMimeData>
 #include <QApplication>
 #include <QDrag>
+#include <qmenu.h>
 GameObjectItem::GameObjectItem(GameObject* gameObject, QTreeWidget* view)
     :QTreeWidgetItem(view)
 {
@@ -26,7 +27,7 @@ void GameObjectItem::Destroy()
     delete this;
 }
 
-SceneOutlineTree::SceneOutlineTree(QWidget* parent)
+SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* parent)
     :QTreeWidget(parent)
 {
     setHeaderHidden(true);
@@ -37,11 +38,40 @@ SceneOutlineTree::SceneOutlineTree(QWidget* parent)
     //允许接受drop操作
     setAcceptDrops(true);
     setEditTriggers(EditTrigger::DoubleClicked); 
-    setMouseTracking(true);
+    //setMouseTracking(true);
+
+    _renderer = renderer;
+    _menu = new QMenu(this);
+    _createNewGameObject = new QAction("创建空GameObject", _menu);
+    _deleteGameObject = new QAction("删除GameObject", _menu);
 
     //setRootIsDecorated(false);
     connect(this,SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),this,SLOT(ItemDoubleClicked(QTreeWidgetItem*, int)));
     connect(this, SIGNAL(sigEditFinished(QString)), this, SLOT(ItemEditFinished(QString)));
+    connect(_createNewGameObject, &QAction::triggered, this, [this](bool bChecked) 
+		{
+            _renderer->ExecFunctionOnRenderThread([]() 
+                {
+                    GameObject::CreateGameObject();
+                });           
+		});
+    connect(_deleteGameObject, &QAction::triggered, this, [this](bool bChecked)
+        {
+            _renderer->ExecFunctionOnRenderThread([this]()
+                {
+                    if (this->currentItem())
+                    {
+                        ((GameObjectItem*)this->currentItem())->_gameObject->Destroy();
+                    }
+                });
+        });
+}
+
+void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
+{
+    _menu->addAction(_createNewGameObject);
+    _menu->addAction(_deleteGameObject);
+    _menu->exec(event->globalPos());
 }
 
 void SceneOutlineTree::mousePressEvent(QMouseEvent* event)
@@ -104,10 +134,11 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     this->setLayout(mainLayout);
 
-    _treeWidget = new SceneOutlineTree(this);
+    _treeWidget = new SceneOutlineTree(renderer, this);
     mainLayout->addWidget(_treeWidget);
 
-    auto scene = renderer->GetScene();
+    _renderer = renderer;
+    auto scene = _renderer->GetScene();
     scene->_editorSceneUpdateFunc = [this, scene]
     (SceneManager* scene, std::vector<std::shared_ptr<GameObject>> aliveObjects)
     {

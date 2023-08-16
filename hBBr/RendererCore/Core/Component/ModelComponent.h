@@ -16,6 +16,8 @@ public:
 
 	virtual void SetActive(bool newActive)override;
 
+	virtual void ExecuteDestroy()override;
+
 private:
 
 	HString _modelPath;

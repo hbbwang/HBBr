@@ -30,6 +30,8 @@ public:
 	std::function<void(class SceneManager*, std::shared_ptr<GameObject>)> _editorGameObjectUpdateFunc = [](class SceneManager* scene, std::shared_ptr<GameObject> oldObject) {};
 #endif
 
+	HBBR_API __forceinline VulkanRenderer* GetRenderer()const { return _renderer; }
+
 private:
 
 	void SceneInit(class VulkanRenderer* renderer);

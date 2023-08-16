@@ -26,7 +26,7 @@ class SceneOutlineTree :public QTreeWidget
 {
     Q_OBJECT
 public:
-    explicit SceneOutlineTree(QWidget* parent = nullptr);
+    explicit SceneOutlineTree(class VulkanRenderer* renderer, QWidget* parent = nullptr);
     ~SceneOutlineTree() {}
     virtual void mousePressEvent(QMouseEvent* event)override ;
     virtual void mouseMoveEvent(QMouseEvent* event)override;
@@ -40,10 +40,18 @@ protected:
 
         QTreeWidget::commitData(editor);
     }
-
+    VulkanRenderer* _renderer = NULL;
     QTreeWidgetItem* _curItem;
     QTreeWidgetItem* _mouseTouchItem;
+
+    QMenu*      _menu = NULL;
+    QAction*    _createNewGameObject = NULL;
+    QAction*    _deleteGameObject = NULL;
+
+    virtual void contextMenuEvent(QContextMenuEvent*) override;
+
 private slots:
+
     void ItemDoubleClicked(QTreeWidgetItem* item, int column);
     void ItemEditFinished(QString newText);
 
@@ -59,7 +67,7 @@ public:
     ~SceneOutline();
 
     virtual void closeEvent(QCloseEvent* event);
-
+    VulkanRenderer* _renderer = NULL;
     SceneOutlineTree* _treeWidget = NULL;
 };
 

@@ -13,8 +13,14 @@ public:
 	GameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL);
 	~GameObject();
 
+	HBBR_API __forceinline static GameObject* CreateGameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL)
+	{
+		return new GameObject(objectName, scene);
+	}
+
 	HBBR_API __forceinline void Destroy() {
 		SetActive(false);
+		SetParent(NULL);
 		_bWantDestroy = true;
 	}
 
@@ -51,10 +57,8 @@ public:
 	template<typename T, typename ...Args>
 	T* AddComponent(Args... args)
 	{
-		std::unique_ptr<T> newComp;
-		newComp.reset(new T(this, args...));
-		T* result = newComp.get();
-		_comps.push_back(std::move(newComp));
+		T* result = new T(this, args...);
+		_comps.push_back(result);
 		return result;
 	}
 
@@ -73,7 +77,7 @@ private:
 	bool Update();
 
 	/* Auto run destroy execute.Do not call this function initiatively. */
-	void ExecuteDestroy();
+	bool ExecuteDestroy();
 
 	class SceneManager* _scene = NULL;
 
@@ -83,7 +87,7 @@ private:
 
 	bool _bInit;
 
-	std::vector<std::unique_ptr<class Component>> _comps;
+	std::vector<class Component*> _comps;
 
 	HString _name;
 

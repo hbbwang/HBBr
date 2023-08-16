@@ -68,7 +68,8 @@ void GameObject::SetParent(GameObject* newParent)
 		}
 		_parent = newParent;
 		_parent->_children.push_back(this);
-		_transform->ResetTransformForAttachment();
+		if (_transform)
+			_transform->ResetTransformForAttachment();
 #if IS_EDITOR
 		ConsoleDebug::print_endl("GameObject " + _name + " attach to  : " + newParent->GetObjectName());
 #endif
@@ -83,12 +84,14 @@ void GameObject::SetParent(GameObject* newParent)
 			{
 				_parent->_children.erase(cit);
 			}
+
+			if (_transform)
+				_transform->ResetTransformForAttachment();
+			#if IS_EDITOR
+			ConsoleDebug::print_endl("GameObject " + _name + " detach");
+			#endif
 		}
 		_parent = NULL;
-		_transform->ResetTransformForAttachment();
-#if IS_EDITOR
-		ConsoleDebug::print_endl("GameObject " + _name + " detach");
-#endif
 	}
 
 }
@@ -105,9 +108,11 @@ bool GameObject::Update()
 {
 	if (_bWantDestroy)
 	{
-		_scene->RemoveObject(this);
-		ExecuteDestroy();
-		return false;
+		if (ExecuteDestroy())
+		{
+			_scene->RemoveObject(this);
+			return false;
+		}
 	}
 	else
 	{
@@ -132,29 +137,36 @@ bool GameObject::Update()
 	return true;
 }
 
-void GameObject::ExecuteDestroy()
+bool GameObject::ExecuteDestroy()
 {
-	SetParent(NULL);
-
-	while (_comps.size() > 0)
+	if (_children.size() > 0)
 	{
-		for (int i = 0; i < _comps.size(); i++)
+		for (auto i : _children)
 		{
-			_comps[i]->Destroy();
+			i->Destroy();
 		}
-		const auto compCount = _comps.size();
-		for (int i = 0; i < compCount; i++)
-		{
-			if (_comps[i]->_bWantDestroy)
-			{
-				_comps[i].reset();
-				_comps.erase(_comps.begin() + i);
-				i -= 1;
-				if (_comps.size() <= 0)
-					break;
-			}
-		}
+		_children.clear();
+		return false;
 	}
-	delete _transform;
-	_transform = NULL;
+
+	for (int i = 0; i < _comps.size(); i++)
+	{
+		_comps[i]->Destroy();
+	}
+
+	if (_transform != NULL)
+	{
+		delete _transform;
+		_transform = NULL;
+	}
+
+	if (_comps.size() > 0)
+		return false;
+	else
+	{
+		#if IS_EDITOR
+		ConsoleDebug::print_endl("GameObject " + _name + " has been Destroy.");
+		#endif
+		return true;
+	}
 }

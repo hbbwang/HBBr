@@ -38,3 +38,12 @@ void ModelComponent::SetActive(bool newActive)
 
 	}
 }
+
+void ModelComponent::ExecuteDestroy()
+{
+	for (int i = 0; i < (int)_materials.size(); i++)
+	{
+		PrimitiveProxy::RemoveModelPrimitive(_materials[i]->GetPrimitive(), &_primitive[i]);
+	}
+	_primitive.clear();
+}

@@ -37,7 +37,7 @@ public:
 	HBBR_API ~VulkanRenderer();
 
 	/* Get current Frame buffer index. It is frequent use in the passes. */
-	__forceinline static int GetCurrentFrameIndex() {
+	HBBR_API __forceinline static int GetCurrentFrameIndex() {
 		return _currentFrameIndex;
 	}
 
@@ -45,11 +45,11 @@ public:
 		return _bRendererRelease;
 	}
 
-	__forceinline class PassManager* GetPassManager() {
+	HBBR_API __forceinline class PassManager* GetPassManager() {
 		return _passManager.get();
 	}
 
-	__forceinline void* GetWindowHandle() {
+	HBBR_API __forceinline void* GetWindowHandle() {
 		return _windowHandle;
 	}
 
@@ -62,7 +62,7 @@ public:
 		return _swapchainImageViews;
 	}
 
-	__forceinline VkExtent2D GetSurfaceSize()const {
+	HBBR_API __forceinline VkExtent2D GetSurfaceSize()const {
 		return _surfaceSize;
 	}
 
@@ -74,11 +74,11 @@ public:
 		return _queueSubmitSemaphore[_currentFrameIndex];
 	}
 
-	__forceinline bool IsInit() {
+	HBBR_API __forceinline bool IsInit() {
 		return _bInit;
 	}
 
-	__forceinline HString GetName() {
+	HBBR_API __forceinline HString GetName() {
 		return _rendererName;
 	}
 
@@ -86,15 +86,15 @@ public:
 		return _cmdBuf[_currentFrameIndex];
 	}
 
-	__forceinline double GetFrameRate()const {
+	HBBR_API __forceinline double GetFrameRate()const {
 		return _frameRate;
 	}
 
-	__forceinline class SceneManager* GetScene() {
+	HBBR_API __forceinline class SceneManager* GetScene() {
 		return _sceneManager.get();
 	}
 
-	__forceinline bool HasFocus() {
+	HBBR_API __forceinline bool HasFocus() {
 		return VulkanApp::IsWindowFocus(_windowHandle);
 	}
 
@@ -103,6 +103,11 @@ public:
 		return _passUniformBuffer;
 	}
 
+	HBBR_API __forceinline void ExecFunctionOnRenderThread(std::function<void()> func)
+	{
+		_renderThreadFuncsOnce.push_back(func);
+	}
+	
 	//获取游戏时间(秒)
 	__forceinline const double GetGameTime()
 	{
