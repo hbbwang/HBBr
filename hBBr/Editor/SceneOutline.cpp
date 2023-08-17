@@ -21,10 +21,12 @@ GameObjectItem::GameObjectItem(GameObject* gameObject, QTreeWidget* view)
 
 void GameObjectItem::Destroy()
 {
-    treeWidget()->indexOfTopLevelItem(this);
-    _gameObject->_editorObject = NULL;
-    this->_gameObject->Destroy();
-    this->_gameObject = NULL;
+    if (_gameObject != NULL)
+    {
+        _gameObject->_editorObject = NULL;
+        _gameObject->Destroy();
+        _gameObject = NULL;
+    }
     delete this;
 }
 
@@ -38,14 +40,20 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
     setDragDropMode(QAbstractItemView::InternalMove);
     //允许接受drop操作
     setAcceptDrops(true);
-    setEditTriggers(EditTrigger::DoubleClicked); 
+    //setEditTriggers(EditTrigger::DoubleClicked); 
     //setMouseTracking(true);
     setObjectName("SceneOutline");
 
     _renderer = renderer;
     _menu = new QMenu(this);
     _createNewGameObject    = new QAction(QString::fromLocal8Bit("创建GameObject"), _menu);
-    _deleteGameObject       = new QAction(QString::fromLocal8Bit("删除GameObject"), _menu);
+    _deleteGameObject       = new QAction(QString::fromLocal8Bit("删除"), _menu);
+    _renameGameObject       = new QAction(QString::fromLocal8Bit("重命名"), _menu);
+
+    _menu->addAction(_createNewGameObject);
+    _menu->addAction(_renameGameObject);
+    _menu->addSeparator();
+    _menu->addAction(_deleteGameObject);
 
     //setRootIsDecorated(false);
     connect(this,SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),this,SLOT(ItemDoubleClicked(QTreeWidgetItem*, int)));
@@ -57,6 +65,14 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
                     GameObject::CreateGameObject();
                 });           
 		});
+    connect(_renameGameObject, &QAction::triggered, this, [this](bool bChecked)
+        {
+            _renderer->ExecFunctionOnRenderThread([this]()
+                {
+                    if (this->currentItem())
+                        editItem(this->currentItem());
+                });
+        });
     connect(_deleteGameObject, &QAction::triggered, this, [this](bool bChecked)
         {
             _renderer->ExecFunctionOnRenderThread([this]()
@@ -71,9 +87,6 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
 
 void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
 {
-    _menu->addAction(_createNewGameObject);
-    _menu->addSeparator();
-    _menu->addAction(_deleteGameObject);
     _menu->exec(event->globalPos());
 }
 
@@ -121,7 +134,14 @@ void SceneOutlineTree::dropEvent(QDropEvent* event)
 
 void SceneOutlineTree::ItemDoubleClicked(QTreeWidgetItem* item, int column)
 {
-    editItem(item);
+    if (item->isExpanded())
+    {
+        item->setExpanded(false);
+    }
+    else
+    {
+        item->setExpanded(true);
+    }
 }
 
 void SceneOutlineTree::ItemEditFinished(QString newText)
@@ -174,6 +194,20 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     (SceneManager* scene, std::shared_ptr<GameObject> object)
     {
         auto item = (GameObjectItem*)object->_editorObject;
+        //QT5 QTreeWidgetItem 删除了父节点,子节点内存也会更着一起销毁,
+        //会导致object->_editorObject(内存已被删除)获取出现异常,
+        //所以销毁节点之前先把子节点取出，防止冲突。
+        if (item->childCount() > 0)
+        {
+            if (item->parent())
+            {
+                item->parent()->addChildren(item->takeChildren());
+            }
+            else
+            {
+                _treeWidget->addTopLevelItems(item->takeChildren());
+            }
+        }
         item->Destroy();
     };
 }

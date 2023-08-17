@@ -20,7 +20,6 @@ public:
 
 	HBBR_API __forceinline void Destroy() {
 		SetActive(false);
-		SetParent(NULL);
 		_bWantDestroy = true;
 	}
 

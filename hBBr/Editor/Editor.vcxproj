@@ -87,6 +87,10 @@
       <AdditionalLibraryDirectories>$(SolutionDir)DependencyCopy\$(Configuration)\;$(SolutionDir)DependencyCopy\;$(SolutionDir)ThirdParty\glfw;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -98,6 +102,10 @@
       <AdditionalLibraryDirectories>$(SolutionDir)DependencyCopy\$(Configuration)\;$(SolutionDir)DependencyCopy\;$(SolutionDir)ThirdParty\glfw;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseGame_GLFW|x64'">
     <ClCompile>

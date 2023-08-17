@@ -46,6 +46,7 @@ protected:
 
     QMenu*      _menu = NULL;
     QAction*    _createNewGameObject = NULL;
+    QAction*    _renameGameObject = NULL;
     QAction*    _deleteGameObject = NULL;
 
     virtual void contextMenuEvent(QContextMenuEvent*) override;
