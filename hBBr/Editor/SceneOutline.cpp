@@ -11,6 +11,7 @@
 #include <QDrag>
 #include <qmenu.h>
 #include "EditorCommonFunction.h"
+
 GameObjectItem::GameObjectItem(GameObject* gameObject, QTreeWidget* view)
     :QTreeWidgetItem(view)
 {
@@ -33,6 +34,7 @@ void GameObjectItem::Destroy()
 SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* parent)
     :QTreeWidget(parent)
 {
+    setFocusPolicy(Qt::FocusPolicy::ClickFocus);
     setHeaderHidden(true);
     setIconSize({ 0,0 });
     //setDragDropMode(QAbstractItemView::DragDropMode::DragDrop);
@@ -43,6 +45,7 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
     //setEditTriggers(EditTrigger::DoubleClicked); 
     //setMouseTracking(true);
     setObjectName("SceneOutline");
+    viewport()->setObjectName("SceneOutline");
 
     _renderer = renderer;
     _menu = new QMenu(this);
@@ -154,13 +157,21 @@ void SceneOutlineTree::ItemEditFinished(QString newText)
 SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     : QWidget(parent)
 {
+    setFocusPolicy(Qt::FocusPolicy::ClickFocus);
     setObjectName("SceneOutline");
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(1,1,1,1);
+    mainLayout->setSpacing(0);
     this->setLayout(mainLayout);
+
+    _search = new QLineEdit(this);
+    mainLayout->addWidget(_search);
 
     _treeWidget = new SceneOutlineTree(renderer, this);
     mainLayout->addWidget(_treeWidget);
+
+    mainLayout->setStretch(0, 0);
+    mainLayout->setStretch(0, 100);
 
     _renderer = renderer;
     auto scene = _renderer->GetScene();
@@ -218,6 +229,11 @@ SceneOutline::~SceneOutline()
 }
 
 void SceneOutline::closeEvent(QCloseEvent* event)
+{
+
+}
+
+void SceneOutline::focusInEvent(QFocusEvent* event)
 {
 
 }

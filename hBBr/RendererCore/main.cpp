@@ -47,7 +47,10 @@ void CloseCallBack(GLFWwindow* window)
 
 void FocusCallBack(GLFWwindow* window, int focused)
 {
-	VulkanApp::_focusWindow = window;
+	if (focused == 1)
+		VulkanApp::_focusWindow = window;
+	else
+		VulkanApp::_focusWindow = NULL;
 }
 
 void KeyBoardCallBack(GLFWwindow* window, int key, int scancode, int action, int mods)

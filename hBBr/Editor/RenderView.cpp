@@ -21,6 +21,7 @@ RenderView::RenderView(QWidget* parent)
 
 	//setMouseTracking(true);
 	setFocusPolicy(Qt::ClickFocus);
+	setObjectName("RenderView");
 
 	_renderTimer = new QTimer(this);
 	_renderTimer->setInterval(1);
@@ -37,6 +38,7 @@ RenderView::RenderView(QWidget* parent)
 		auto mainRendererWindow = QWindow::fromWinId((WId)hwnd);
 		_mainRendererWidget = QWidget::createWindowContainer(mainRendererWindow, this);
 		_mainRendererWidget->setFocusPolicy(Qt::ClickFocus);
+		_mainRendererWidget->setObjectName("RenderView");
 
 		_renderTimer = new QTimer(this);
 		_renderTimer->setInterval(1);

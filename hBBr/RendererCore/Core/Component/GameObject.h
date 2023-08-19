@@ -13,10 +13,7 @@ public:
 	GameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL);
 	~GameObject();
 
-	HBBR_API __forceinline static GameObject* CreateGameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL)
-	{
-		return new GameObject(objectName, scene);
-	}
+	HBBR_API static GameObject* CreateGameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL);
 
 	HBBR_API __forceinline void Destroy() {
 		SetActive(false);

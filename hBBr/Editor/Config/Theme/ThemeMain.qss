@@ -68,23 +68,23 @@ QComboBox QAbstractItemView
 }
 QLineEdit
 {
-    background-color: rgba(25,25,25,0.1);
+    background-color: rgba(25,25,25,0.9);
     color:rgb(160,160,160);
     border:1px solid  rgb(80,80,80);
     font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
 }
 QLineEdit:focus
 {
-    background-color: rgb(30,30,30);
+    background-color: rgb(25,25,25);
     color:rgb(200,200,200);
     border: 1px solid rgb(100,100,100);
     font-family:  Microsoft Yahei, Arial, Helvetica, sans-serif;
 }
 QLineEdit:hover
 {
-    background-color: rgb(30,30,30);
+    background-color: rgb(25,20,20);
     color:rgb(200,200,200);
-    border: 1px solid rgb(180,150,150);
+    border: 1px solid rgb(200,180,180);
     font-family:  Microsoft Yahei, Arial, Helvetica, sans-serif;
 }
 QMessageBox 
@@ -106,6 +106,13 @@ QTreeView
 { 
     outline: 0; 
 } 
+QMenuBar
+{
+    background-color: rgb(40,40,40);
+    border: 1px solid rgb(150, 100, 105);
+    Color:rgb(160,160,160);
+    font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
+}
 QMenu
 {
     background-color: rgb(40,40,40);
@@ -260,13 +267,23 @@ QSplitter::handle
     background-color: rgb(125, 108, 72);
     border: 1px solid rgb(110,110,110);
 }
+QDockWidget
+{
+    font-family:  Microsoft Yahei, Arial, Helvetica, sans-serif;
+    color:rgb(140,140,140);
+    background-color: rgb(15, 15, 15);
+    padding-left: 6px;
+    padding-top: 6px;
+    border: 1px solid rgb(150, 100, 105);
+}
 QDockWidget::title
 {
     font-family:  Microsoft Yahei, Arial, Helvetica, sans-serif;
     color:rgb(140,140,140);
-    background-color: rgb(89, 89, 89);
+    background-color: rgb(15, 15, 15);
     padding-left: 6px;
     padding-top: 6px;
+    border: 1px solid rgb(150, 100, 105);
 }
 QDockWidget::close-button,
 QDockWidget::float-button
@@ -293,18 +310,17 @@ QTreeWidget::item
 QTreeWidget::item:selected
 {
     font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
-    color :rgb(196, 196, 196);
-    background-color: rgba(94, 87, 81, 0.8);
-    border: 1px solid rgb(114, 114, 114);
+    color :rgb(210, 210, 210);
+    background-color: rgba(90, 85, 80, 0.8);
+    border: 1px solid rgb(120, 120, 120);
     outline: 0;
 }
-QTreeWidget::item:hover,
 QTreeWidget::item:hover
 {
     font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
     color :rgb(234, 209, 209);
     background-color: rgba(79, 64, 64, 0.8);
-    border: 1px solid rgb(166, 166, 166);
+    border: 1px solid rgb(180, 180, 180);
     outline: 0;
 }
 /* QTreeWidget::branch:closed:has-children:!has-siblings,
@@ -341,6 +357,6 @@ QTreeWidget::branch:closed:!has-children
 {
     color:rgb(151, 151, 151);
     font-family:  Microsoft Yahei, Arial, Helvetica, sans-serif;
-    background-color: rgb(30,30,30);
+    background-color: rgba(30,30,30 , 0.9);
     border: 1.2px solid rgb(140, 90, 100);
 };

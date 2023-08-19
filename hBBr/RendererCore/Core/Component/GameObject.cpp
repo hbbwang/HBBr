@@ -29,6 +29,11 @@ GameObject::~GameObject()
 
 }
 
+GameObject* GameObject::CreateGameObject(HString objectName, SceneManager* scene)
+{
+	return new GameObject(objectName, scene);
+}
+
 void GameObject::SetActive(bool newActive)
 {
 	_bActive = newActive;

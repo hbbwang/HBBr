@@ -168,18 +168,18 @@
     <QtMoc Include="RenderView.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="SceneOutline.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="EditorCommonFunction.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\DependencyCopy\DependencyCopy.vcxproj">
       <Project>{62162565-c1f0-43c9-89e8-7014eb937665}</Project>
     </ProjectReference>
     <ProjectReference Include="..\RendererCore\RendererCore.vcxproj">
       <Project>{5ea35751-8425-4582-9566-d9e95f11d89d}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="SceneOutline.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="EditorCommonFunction.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

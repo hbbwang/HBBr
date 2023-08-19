@@ -5,7 +5,7 @@
 #include <qlayout.h>
 #include <qlineedit.h>
 #include <QMimeData>
-
+#include <qlineedit.h>
 
 class GameObjectItem :public QTreeWidgetItem
 {
@@ -13,13 +13,6 @@ public:
     GameObjectItem(class GameObject* gameObject, QTreeWidget* view);
     class GameObject* _gameObject = NULL;
     void Destroy();
-};
-
-class TreeItemMimeData : public QMimeData
-{
-    Q_OBJECT
-public:
-    GameObjectItem* _item = NULL;
 };
 
 class SceneOutlineTree :public QTreeWidget
@@ -68,7 +61,9 @@ public:
     ~SceneOutline();
 
     virtual void closeEvent(QCloseEvent* event);
+    virtual void focusInEvent(QFocusEvent* event);
     VulkanRenderer* _renderer = NULL;
     SceneOutlineTree* _treeWidget = NULL;
+    QLineEdit* _search;
 };
 
