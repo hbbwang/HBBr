@@ -20,6 +20,10 @@ public:
     class SceneOutline* _sceneOutline = NULL;
     class QDockWidget* _sceneOutline_dock = NULL;
 
+    //ÄÚÈİ¹ÜÀíÆ÷
+    class ContentBrowser* _contentBrowser = NULL;
+    class QDockWidget* _contentBrowser_dock = NULL;
+
     virtual void closeEvent(QCloseEvent* event);
 
     virtual void resizeEvent(QResizeEvent* event)override;

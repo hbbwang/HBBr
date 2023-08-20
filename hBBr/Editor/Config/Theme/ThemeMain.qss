@@ -329,29 +329,39 @@ QTreeWidget::branch:open:has-children
 {    
     width: 10px;
     height: 10px;
-    border-image: url(./Config/Theme/Images/TreeWidget_Open.png) ;
+    border-image: url(./Config/Theme/Icons/TreeWidget_Open.png) ;
     border-color: rgba(255,255,255,0.25);
 }
 QTreeWidget::branch:open:!has-children
 {
     width: 10px;
     height: 10px;
-    /* border-image: url(./Config/Theme/Images/TreeWidget_Open.png) ; */
+    /* border-image: url(./Config/Theme/Icons/TreeWidget_Open.png) ; */
     border-color: rgba(255,255,255,0.25);
 }
 QTreeWidget::branch:closed:has-children
 {
     width: 10px;
     height: 10px;
-    border-image: url(./Config/Theme/Images/TreeWidget_Close.png) ;
+    border-image: url(./Config/Theme/Icons/TreeWidget_Close.png) ;
     border-color: rgba(255,255,255,0.25);
 }
 QTreeWidget::branch:closed:!has-children
 {    
     width: 10px;
     height: 10px;
-    /* border-image: url(./Config/Theme/Images/TreeWidget_Close.png) ; */
+    /* border-image: url(./Config/Theme/Icons/TreeWidget_Close.png) ; */
     border-color: rgba(255,255,255,0.25);
+}
+QSplitter
+{
+    background-color:rgb(140, 90, 100);
+    border: 1px solid rgb(110,110,110);
+}
+QSplitter::handle
+{
+    background-color:rgb(140, 90, 100);
+    border: 1px solid rgb(110,110,110);
 }
 #SceneOutline
 {
@@ -359,4 +369,27 @@ QTreeWidget::branch:closed:!has-children
     font-family:  Microsoft Yahei, Arial, Helvetica, sans-serif;
     background-color: rgba(30,30,30 , 0.9);
     border: 1.2px solid rgb(140, 90, 100);
+}
+/* Content Browser */
+#ContentBrowser
+{
+    background-color: rgba(0,0,0,0.0);
+    font-family: Microsoft Yahei Light,Arial, Helvetica, sans-serif;
+}
+
+/* Content Browser PathLabel */
+#PathLabel
+{
+    border: 1px solid rgb(140, 90, 100);
+}
+/* SearchLine */
+#SearchLine
+{
+
+}
+#SearchLine .QLabel
+{
+    min-width: 30px;
+    min-height: 24px;
+    border-image: url(./Config/Theme/Icons/ICON_SEARCH.png);
 };

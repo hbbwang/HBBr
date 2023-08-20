@@ -27,6 +27,9 @@
     <Filter Include="Widgets\Common">
       <UniqueIdentifier>{1312efae-6886-442a-b763-50d189c0fba1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Widgets\Custom">
+      <UniqueIdentifier>{669de6a2-b8df-446d-9d3f-66f103f73d9c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="EditorMain.qrc">
@@ -52,6 +55,21 @@
     <ClCompile Include="EditorCommonFunction.cpp">
       <Filter>Widgets\Common</Filter>
     </ClCompile>
+    <ClCompile Include="ContentBrowser.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomFileIconProvider.cpp">
+      <Filter>Widgets\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomFileSystemModel.cpp">
+      <Filter>Widgets\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomFileSystemView.cpp">
+      <Filter>Widgets\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomSearchLine.cpp">
+      <Filter>Widgets\Custom</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="EditorMain.h">
@@ -63,10 +81,33 @@
     <QtMoc Include="SceneOutline.h">
       <Filter>Widgets</Filter>
     </QtMoc>
+    <QtMoc Include="ContentBrowser.h">
+      <Filter>Widgets</Filter>
+    </QtMoc>
+    <QtMoc Include="CustomFileSystemModel.h">
+      <Filter>Widgets\Custom</Filter>
+    </QtMoc>
+    <QtMoc Include="CustomFileSystemView.h">
+      <Filter>Widgets\Custom</Filter>
+    </QtMoc>
+    <QtMoc Include="CustomSearchLine.h">
+      <Filter>Widgets\Custom</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditorCommonFunction.h">
       <Filter>Widgets\Common</Filter>
     </ClInclude>
+    <ClInclude Include="CustomFileIconProvider.h">
+      <Filter>Widgets\Custom</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="ContentBrowser.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="CustomSearchLine.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
 </Project>

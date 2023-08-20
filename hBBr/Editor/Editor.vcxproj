@@ -155,10 +155,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ContentBrowser.cpp" />
+    <ClCompile Include="CustomFileIconProvider.cpp" />
+    <ClCompile Include="CustomFileSystemModel.cpp" />
+    <ClCompile Include="CustomFileSystemView.cpp" />
+    <ClCompile Include="CustomSearchLine.cpp" />
     <ClCompile Include="EditorCommonFunction.cpp" />
     <ClCompile Include="RenderView.cpp" />
     <ClCompile Include="SceneOutline.cpp" />
     <QtRcc Include="EditorMain.qrc" />
+    <QtUic Include="ContentBrowser.ui" />
+    <QtUic Include="CustomSearchLine.ui" />
     <QtUic Include="EditorMain.ui" />
     <QtMoc Include="EditorMain.h" />
     <ClCompile Include="EditorMain.cpp" />
@@ -171,6 +178,11 @@
     <QtMoc Include="SceneOutline.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="ContentBrowser.h" />
+    <ClInclude Include="CustomFileIconProvider.h" />
+    <QtMoc Include="CustomFileSystemModel.h" />
+    <QtMoc Include="CustomFileSystemView.h" />
+    <QtMoc Include="CustomSearchLine.h" />
     <ClInclude Include="EditorCommonFunction.h" />
   </ItemGroup>
   <ItemGroup>
