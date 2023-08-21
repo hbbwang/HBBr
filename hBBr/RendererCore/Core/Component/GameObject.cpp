@@ -4,6 +4,7 @@
 #include "Resource/SceneManager.h"
 #include "Component.h"
 #include "ConsoleDebug.h"
+#include "Component/ModelComponent.h"
 GameObject::GameObject(HString objectName, SceneManager* scene)
 {
 	if (scene == NULL)
@@ -32,6 +33,15 @@ GameObject::~GameObject()
 GameObject* GameObject::CreateGameObject(HString objectName, SceneManager* scene)
 {
 	return new GameObject(objectName, scene);
+}
+
+GameObject* GameObject::CreateModelGameObject(HString modelPath, SceneManager* scene)
+{
+	GameObject* cube = new GameObject(modelPath.GetBaseName(), scene);
+	auto modelComp = cube->AddComponent<ModelComponent>();
+	cube->GetTransform()->SetLocation(glm::vec3(0, 0.5f, 0));
+	modelComp->SetModel(modelPath);
+	return cube;
 }
 
 void GameObject::SetActive(bool newActive)

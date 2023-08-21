@@ -4,12 +4,16 @@
 #include "ui_EditorMain.h"
 #include <qdockwidget.h>
 #include <qtimer.h>
+#include <qthread.h>
 
 class EditorMain : public QMainWindow
 {
     Q_OBJECT
 
 public:
+
+    static  EditorMain* _self;
+
     EditorMain(QWidget *parent = nullptr);
     ~EditorMain();
 

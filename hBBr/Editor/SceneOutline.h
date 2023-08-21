@@ -42,6 +42,11 @@ protected:
     QAction*    _renameGameObject = NULL;
     QAction*    _deleteGameObject = NULL;
 
+    QMenu* _menu_createBasic = NULL;
+    QAction* _createCube = NULL;
+    QAction* _createSphere = NULL;
+    QAction* _createPlane = NULL;
+
     virtual void contextMenuEvent(QContextMenuEvent*) override;
 
 private slots:
@@ -64,6 +69,10 @@ public:
     virtual void focusInEvent(QFocusEvent* event);
     VulkanRenderer* _renderer = NULL;
     SceneOutlineTree* _treeWidget = NULL;
-    QLineEdit* _search;
+    class CustomSearchLine* _search;
+
+private slots:
+    void TreeSearch();
+
 };
 

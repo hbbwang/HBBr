@@ -25,14 +25,14 @@ void SceneManager::SceneInit(class VulkanRenderer* renderer)
 	//Test
 	auto test = new GameObject();
 	auto modelComp0 = test->AddComponent<ModelComponent>();
-	modelComp0->SetModel(FileSystem::GetResourceAbsPath() + "Content/FBX/TestFbx_1_Combine.FBX");
+	modelComp0->SetModel(FileSystem::GetResourceAbsPath() + "Content/Core/FBX/TestFbx_1_Combine.FBX");
 	test->SetObjectName("TestFbx_1_Combine");
 
 	GameObject* cube = new GameObject();
 	testObj = cube->_selfWeak;
 	auto modelComp = cube->AddComponent<ModelComponent>();
 	cube->GetTransform()->SetLocation(glm::vec3(0, 0.5f, 0));
-	modelComp->SetModel(FileSystem::GetResourceAbsPath() + "Content/FBX/TestFbx_Cube.FBX");
+	modelComp->SetModel(FileSystem::GetResourceAbsPath() + "Content/Core/FBX/TestFbx_Cube.FBX");
 	cube->SetObjectName("TestFbx_Cube");
 }
 #include "HInput.h"

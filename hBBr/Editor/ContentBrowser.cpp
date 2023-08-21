@@ -123,7 +123,6 @@ ContentBrowser::ContentBrowser(QWidget *parent)
 
 	//List Combo
 	_listSearchLine->ui.comboBox->addItems({"All","Model","Material","Level","Xml"});
-
 	//Path label
 	ui.PathLabel->setObjectName("PathLabel");
 

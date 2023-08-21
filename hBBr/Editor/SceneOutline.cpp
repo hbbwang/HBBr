@@ -11,6 +11,7 @@
 #include <QDrag>
 #include <qmenu.h>
 #include "EditorCommonFunction.h"
+#include "CustomSearchLine.h"
 
 GameObjectItem::GameObjectItem(GameObject* gameObject, QTreeWidget* view)
     :QTreeWidgetItem(view)
@@ -53,7 +54,18 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
     _deleteGameObject       = new QAction(QString::fromLocal8Bit("删除"), _menu);
     _renameGameObject       = new QAction(QString::fromLocal8Bit("重命名"), _menu);
 
+    _menu_createBasic = new QMenu(this);
+    _menu_createBasic->setTitle(QString::fromLocal8Bit("创建预设模型"));
+    _createCube = new QAction(QString::fromLocal8Bit("Cube"), _menu_createBasic);
+    _createSphere = new QAction(QString::fromLocal8Bit("Sphere"), _menu_createBasic);
+    _createPlane = new QAction(QString::fromLocal8Bit("Plane"), _menu_createBasic);
+
+    _menu_createBasic->addAction(_createCube);
+    _menu_createBasic->addAction(_createSphere);
+    _menu_createBasic->addAction(_createPlane);
+
     _menu->addAction(_createNewGameObject);
+    _menu->addMenu(_menu_createBasic);
     _menu->addAction(_renameGameObject);
     _menu->addSeparator();
     _menu->addAction(_deleteGameObject);
@@ -84,6 +96,31 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
                     {
                         ((GameObjectItem*)this->currentItem())->_gameObject->Destroy();
                     }
+                });
+        });
+    //
+    connect(_createCube, &QAction::triggered, this, [this](bool bChecked)
+        {
+            _renderer->ExecFunctionOnRenderThread([]()
+                {
+                    QFileInfo fi("./Resource/Content/Core/Basic/Cube.FBX");
+                    GameObject::CreateModelGameObject(fi.absolutePath().toStdString().c_str());
+                });
+        });
+    connect(_createSphere, &QAction::triggered, this, [this](bool bChecked)
+        {
+            _renderer->ExecFunctionOnRenderThread([]()
+                {
+                    QFileInfo fi("./Resource/Content/Core/Basic/Sphere.FBX");
+                    GameObject::CreateModelGameObject(fi.absolutePath().toStdString().c_str());
+                });
+        });
+    connect(_createPlane, &QAction::triggered, this, [this](bool bChecked)
+        {
+            _renderer->ExecFunctionOnRenderThread([]()
+                {
+                    QFileInfo fi("./Resource/Content/Core/Basic/Plane.FBX");
+                    GameObject::CreateModelGameObject(fi.absolutePath().toStdString().c_str());
                 });
         });
 }
@@ -164,14 +201,17 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     mainLayout->setSpacing(0);
     this->setLayout(mainLayout);
 
-    _search = new QLineEdit(this);
+    _search = new CustomSearchLine(this);
+    _search->setMaximumHeight(30);
+    _search->ui.comboBox->setHidden(true);
     mainLayout->addWidget(_search);
+    connect(_search->ui.lineEdit, SIGNAL(returnPressed()), this, SLOT(TreeSearch()));
 
     _treeWidget = new SceneOutlineTree(renderer, this);
     mainLayout->addWidget(_treeWidget);
 
     mainLayout->setStretch(0, 0);
-    mainLayout->setStretch(0, 100);
+    mainLayout->setStretch(0, 1000);
 
     _renderer = renderer;
     auto scene = _renderer->GetScene();
@@ -226,6 +266,74 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
 SceneOutline::~SceneOutline()
 {
 
+}
+
+void traverse(QTreeWidgetItem* item , QList<QTreeWidgetItem*>& list , bool bHide = false , QString findName = "")
+{
+    // 遍历所有子节点
+    for (int i = 0; i < item->childCount(); ++i) {
+        traverse(item->child(i) , list , bHide);
+        if (findName.length() > 0)
+        {
+            if (item->child(i)->text(0).contains(findName))
+            {
+
+            }
+        }
+        list.append(item->child(i));
+        item->child(i)->setHidden(bHide);
+    }
+    item->setHidden(bHide);
+}
+
+bool searchTraverse(QTreeWidgetItem* item, QList<QTreeWidgetItem*>& list, QString findName = "")
+{
+    bool bHide = true;
+    // 遍历所有子节点
+    for (int i = 0; i < item->childCount(); ++i) {
+        bHide = bHide && searchTraverse(item->child(i), list);
+        if (findName.length() > 0)
+        {
+            if (item->child(i)->text(0).contains(findName))
+            {
+                bHide = false;
+                continue;
+            }
+        }
+        item->child(i)->setHidden(bHide);
+        list.append(item->child(i));
+    }
+
+    if (findName.length() > 0)
+    {
+        if (item->text(0).contains(findName))
+        {
+            return false;
+        }
+    }
+
+    return bHide;
+}
+
+void SceneOutline::TreeSearch()
+{
+    //_treeWidget->collapseAll();
+    QList<QTreeWidgetItem*> searchList;
+    _treeWidget->selectionModel()->clearSelection();
+    if (_search->ui.lineEdit->text().isEmpty())
+    {
+        for (int i = 0; i < _treeWidget->topLevelItemCount(); ++i) {
+            traverse(_treeWidget->topLevelItem(i), searchList, false);
+        }
+        return;
+    }
+    QString input = _search->ui.lineEdit->text();
+    _treeWidget->expandAll();
+    //auto searchList = _treeWidget->findItems(input, Qt::MatchExactly)
+    for (int i = 0; i < _treeWidget->topLevelItemCount(); ++i) {
+        bool bHide = searchTraverse(_treeWidget->topLevelItem(i) , searchList , input);
+        _treeWidget->topLevelItem(i)->setHidden(bHide);       
+    }
 }
 
 void SceneOutline::closeEvent(QCloseEvent* event)

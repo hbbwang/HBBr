@@ -8,39 +8,7 @@
 #include <QUrl>
 #include <qdir.h>
 #include <qfileinfo.h>
-
-//鼠标钩子,适配窗口焦点
-#include <Windows.h>
-HHOOK mouseHook = NULL;
-LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
-{
-    MOUSEHOOKSTRUCT* mhookstruct = (MOUSEHOOKSTRUCT*)lParam;
-    POINT pt = mhookstruct->pt;
-    if (wParam == WM_RBUTTONDOWN
-        || wParam == WM_LBUTTONDOWN
-        || wParam == WM_RBUTTONDOWN
-        || wParam == WM_MBUTTONDOWN
-        )
-    {
-        auto widget = QApplication::widgetAt(pt.x, pt.y);
-        if (widget && widget != QApplication::focusWidget() 
-            && !widget->objectName().contains("menu",Qt::CaseInsensitive)//
-            && !widget->objectName().contains("combo", Qt::CaseInsensitive)//
-            && !widget->objectName().contains("lineEdit", Qt::CaseInsensitive)
-            && !widget->objectName().contains("comboBox", Qt::CaseInsensitive)
-            && !widget->objectName().contains("viewport", Qt::CaseInsensitive)
-            )
-        {
-            //qDebug(widget->objectName().toStdString().c_str());
-            //取消所有焦点先
-            SetFocus(NULL);
-            //再重新赋予QT焦点
-            widget->setFocus();
-        }
-    }
-    return CallNextHookEx(mouseHook, nCode, wParam, lParam);//否则，如果返回给下一个钩子子程处理
-}
-//
+EditorMain* EditorMain::_self = NULL;
 
 EditorMain::EditorMain(QWidget *parent)
     : QMainWindow(parent)
@@ -80,13 +48,11 @@ EditorMain::EditorMain(QWidget *parent)
         }
     });
 
-    mouseHook = SetWindowsHookEx(WH_MOUSE_LL, mouseProc, GetModuleHandle(NULL), 0);//注册鼠标钩子
+    EditorMain::_self = this;
 }
 
 EditorMain::~EditorMain()
 {
-    if(mouseHook)
-        UnhookWindowsHookEx(mouseHook);
 }
 
 void EditorMain::showEvent(QShowEvent* event)
@@ -113,3 +79,4 @@ void EditorMain::closeEvent(QCloseEvent* event)
 void EditorMain::resizeEvent(QResizeEvent* event)
 {
 }
+

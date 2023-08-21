@@ -55,7 +55,7 @@ QComboBox
     background-color: rgba(25,25,25,0.1);
     color:rgb(180,180,180);
     border:1px solid  rgb(80,80,80);
-    height: 20px;
+    height: 29px;
 }
 QComboBox QAbstractItemView
 {    
@@ -373,23 +373,29 @@ QSplitter::handle
 /* Content Browser */
 #ContentBrowser
 {
-    background-color: rgba(0,0,0,0.0);
+    background-color: rgba(30,30,30 , 0.9);
     font-family: Microsoft Yahei Light,Arial, Helvetica, sans-serif;
 }
-
 /* Content Browser PathLabel */
 #PathLabel
 {
-    border: 1px solid rgb(140, 90, 100);
+    /* border: 1px solid rgb(140, 90, 100); */
+    background-color: rgba(0,0,0,0);
 }
 /* SearchLine */
 #SearchLine
 {
 
 }
+#SearchLine_ComboBox
+{
+
+}
+#setObjectName_ComboBoxViewport
+{
+
+}
 #SearchLine .QLabel
 {
-    min-width: 30px;
-    min-height: 24px;
     border-image: url(./Config/Theme/Icons/ICON_SEARCH.png);
 };

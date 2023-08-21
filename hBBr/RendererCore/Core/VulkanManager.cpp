@@ -53,7 +53,10 @@ VulkanDebugCallback(
 	}
 	if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
 		title = "ERROR: "; color = "255,0,0";
-		bError = true;
+		if (!HString(msg).Contains("VkLayer_nsight-sys_windows.json")) //Ignore Nsight-sys json not found error.
+		{
+			bError = true;
+		}
 	}
 	if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
 		title = "DEBUG: "; color = "255,255,255";
@@ -61,10 +64,11 @@ VulkanDebugCallback(
 	//if (flags & VK_DEBUG_REPORT_FLAG_BITS_MAX_ENUM_EXT) {
 	//	ConsoleDebug::print_endl(DString(": "));
 	//}
-	ConsoleDebug::print_endl(title + HString("@[") + layer_prefix + "]", color);
+	title = title + HString("@[") + layer_prefix + "]";
+	ConsoleDebug::print_endl(title, color);
 	ConsoleDebug::print_endl(msg, color);
 	if(bError)
-		MessageOut(HString(title + HString("@[") + layer_prefix + "]\n" + msg).c_str(),false,true);
+		MessageOut(HString(title + "\n" + msg).c_str(),false,true);
 	return false;
 }
 
@@ -1714,7 +1718,7 @@ void VulkanManager::UpdateBufferDescriptorSet(DescriptorSet* descriptorSet, uint
 				descriptorWrite[o].pImageInfo = VK_NULL_HANDLE; // Optional
 				descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE; // Optional
 			}
-			vkUpdateDescriptorSets(_device, offsets.size() , descriptorWrite.data(), 0, VK_NULL_HANDLE);
+			vkUpdateDescriptorSets(_device, (uint32_t)offsets.size() , descriptorWrite.data(), 0, VK_NULL_HANDLE);
 		}
 	}
 }
@@ -1744,7 +1748,7 @@ void VulkanManager::UpdateBufferDescriptorSet(DescriptorSet* descriptorSet, uint
 				descriptorWrite[o].pImageInfo = VK_NULL_HANDLE; // Optional
 				descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE; // Optional
 			}
-			vkUpdateDescriptorSets(_device, offsets.size(), descriptorWrite.data(), 0, VK_NULL_HANDLE);
+			vkUpdateDescriptorSets(_device, (uint32_t)offsets.size(), descriptorWrite.data(), 0, VK_NULL_HANDLE);
 		}
 	}
 }
