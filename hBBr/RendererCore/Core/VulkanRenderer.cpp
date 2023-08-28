@@ -165,7 +165,7 @@ void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
 void VulkanRenderer::SetupPassUniformBuffer()
 {
 	const CameraComponent* mainCamera = NULL;
-	if (IsInGame)
+	if (_bIsInGame)
 		mainCamera = _sceneManager->_mainCamera;
 #if IS_EDITOR
 	else
@@ -176,8 +176,13 @@ void VulkanRenderer::SetupPassUniformBuffer()
 		_passUniformBuffer.View = mainCamera->GetViewMatrix();
 		_passUniformBuffer.View_Inv = mainCamera->GetInvViewMatrix();
 		float aspect = (float)_surfaceSize.width / (float)_surfaceSize.height;
-		_passUniformBuffer.Projection = glm::perspective(glm::radians(mainCamera->GetFOV()), aspect, mainCamera->GetNearClipPlane(), mainCamera->GetFarClipPlane());
-		_passUniformBuffer.Projection[1][1] *= -1;
+		//DirectX Left hand.
+		_passUniformBuffer.Projection = glm::perspectiveLH(glm::radians(mainCamera->GetFOV()), aspect, mainCamera->GetNearClipPlane(), mainCamera->GetFarClipPlane());
+
+		//DirectX Left hand 
+		glm::mat4 flipYMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, -1.0f, 0.5f));
+		_passUniformBuffer.Projection =  flipYMatrix * _passUniformBuffer.Projection;
+
 		_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
 		_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
 		_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);

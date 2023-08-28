@@ -221,18 +221,18 @@ enum class KeyMod : int
 
 enum class MouseButton : int
 {
-	BUTTON_1 = 0,
-	BUTTON_2 = 1,
-	BUTTON_3 = 2,
-	BUTTON_4 = 3,
-	BUTTON_5 = 4,
-	BUTTON_6 = 5,
-	BUTTON_7 = 6,
-	BUTTON_8 = 7,
-	BUTTON_LAST = BUTTON_8,
-	BUTTON_LEFT = BUTTON_1,
-	BUTTON_RIGHT = BUTTON_2,
-	BUTTON_MIDDLE = BUTTON_3,
+	Button_1 = 0,
+	Button_2 = 1,
+	Button_3 = 2,
+	Button_4 = 3,
+	Button_5 = 4,
+	Button_6 = 5,
+	Button_7 = 6,
+	Button_8 = 7,
+	Button_Last = Button_8,
+	Button_Left = Button_1,
+	Button_Right = Button_2,
+	Button_Middle = Button_3,
 };
 
 struct KeyCallBack
@@ -243,34 +243,67 @@ struct KeyCallBack
 	void* focusWindowHandle = NULL; 
 };
 
+struct MouseCallBack
+{
+	MouseButton button;
+	Action  action;
+	KeyMod  mod;
+	void* focusWindowHandle = NULL;
+};
+
 class HInput
 {
+	friend class VulkanApp;
 public:
 	//Keyboard	注册当前帧反馈按键
 
-	static bool GetKey(KeyCode key , class VulkanRenderer* renderer = NULL) {
+	static inline bool GetKey(KeyCode key , class VulkanRenderer* renderer = NULL) {
 		if (!HasFocus(renderer))
 			return false;
 		return FindRepeatKey(key) != NULL;
 	}
 
-	static bool GetKeyDown(KeyCode key, class VulkanRenderer* renderer = NULL) {
+	static inline bool GetKeyDown(KeyCode key, class VulkanRenderer* renderer = NULL) {
 		if (!HasFocus(renderer))
 			return false;
 		return FindDefaultKey(key, Action::PRESS) != NULL;
 	}
 
-	static bool GetKeyUp(KeyCode key, class VulkanRenderer* renderer = NULL) {
+	static inline bool GetKeyUp(KeyCode key, class VulkanRenderer* renderer = NULL) {
 		if (!HasFocus(renderer))
 			return false;
 		return FindDefaultKey(key, Action::RELEASE) != NULL;
 	}
 
+	//
+	static inline bool GetMouse(MouseButton button, class VulkanRenderer* renderer = NULL) {
+		if (!HasFocus(renderer))
+			return false;
+		return FindRepeatMouse(button) != NULL;
+	}
+
+	static inline bool GetMouseDown(MouseButton button, class VulkanRenderer* renderer = NULL) {
+		if (!HasFocus(renderer))
+			return false;
+		return FindDefaultMouse(button, Action::PRESS) != NULL;
+	}
+
+	static inline bool GetMouseUp(MouseButton button, class VulkanRenderer* renderer = NULL) {
+		if (!HasFocus(renderer))
+			return false;
+		return FindDefaultMouse(button, Action::RELEASE) != NULL;
+	}
+
+	static inline glm::vec2 GetMousePos()
+	{
+		return _mousePos;
+	}
+
 	//键盘输入的回调函数中调用,记录当前帧按下的按键,其他时候不要主动调用该函数!
 	static void KeyProcess(void* focusWindowHandle , KeyCode key, KeyMod mod ,Action action);
 
-	//清空当前帧的输入缓存,其他时候不要主动调用该函数!
-	static void ClearInput();
+	//鼠标输入的回调函数中调用,记录当前帧按下的按键,其他时候不要主动调用该函数!
+	static void MouseProcess(void* focusWindowHandle, MouseButton mouse, KeyMod mod, Action action);
 
 private:
 
@@ -309,6 +342,45 @@ private:
 			return NULL;
 	}
 
+	//
+	static inline MouseCallBack* FindDefaultMouse(MouseButton mouse, Action action)
+	{
+		auto it = std::find_if(_mouseRegisterDefault.begin(), _mouseRegisterDefault.end(), [mouse, action](MouseCallBack& callback) {
+			return callback.button == mouse && callback.action == action;
+			});
+		if (it != _mouseRegisterDefault.end())
+			return &(*it);
+		else
+			return NULL;
+	}
+
+	static inline MouseCallBack* FindRepeatMouse(MouseButton mouse)
+	{
+		auto it = std::find_if(_mouseRegisterRepeat.begin(), _mouseRegisterRepeat.end(), [mouse](MouseCallBack& callback) {
+			return callback.button == mouse;
+			});
+		if (it != _mouseRegisterRepeat.end())
+			return &(*it);
+		else
+			return NULL;
+	}
+
+	static inline void SetMousePos(glm::vec2 pos)
+	{
+		_mousePos = pos;
+	}
+
+	//清空当前帧的输入缓存,其他时候不要主动调用该函数!
+	static void ClearInput()
+	{
+		_keyRegisterDefault.clear();
+	}
+
 	static std::vector<KeyCallBack> _keyRegisterDefault;
 	static std::vector<KeyCallBack> _keyRegisterRepeat;
+	//
+	static std::vector<MouseCallBack> _mouseRegisterDefault;
+	static std::vector<MouseCallBack> _mouseRegisterRepeat;
+	//
+	static glm::vec2 _mousePos;
 };

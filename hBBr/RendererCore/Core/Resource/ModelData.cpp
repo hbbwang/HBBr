@@ -45,7 +45,7 @@ ModelData* ModelFileStream::ImportFbxToMemory(HString fbxPath)
 		aiProcess_SortByPType |
 		aiProcess_GenBoundingBoxes
 		//Direct 3D flags
-		//|aiProcess_ConvertToLeftHanded
+		|aiProcess_ConvertToLeftHanded
 	);
 	if (!scene)
 	{

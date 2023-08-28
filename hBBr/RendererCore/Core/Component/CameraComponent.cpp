@@ -1,7 +1,9 @@
 ﻿#include "CameraComponent.h"
 #include "GameObject.h"
 #include "Resource/SceneManager.h"
-
+#include "VulkanRenderer.h"
+#include "HInput.h"
+#include "ConsoleDebug.h"
 CameraComponent::CameraComponent(GameObject* parent)
 	:Component(parent)
 {
@@ -30,16 +32,57 @@ void CameraComponent::OverrideMainCamera()
 
 void CameraComponent::Update()
 {
-	//Editor camera behavior.
-	if (_bIsEditorCamera)
-	{
-
-	}
 	const auto trans = _gameObject->GetTransform();
-	_cameraPos = trans->GetWorldLocation();
-	_cameraTarget = trans->GetForwardVector() - _cameraPos;
+	auto worldPos = trans->GetWorldLocation();
+	auto worldRot = trans->GetWorldRotation();
+	auto renderer = _gameObject->GetScene()->GetRenderer();
+	//Editor camera behavior.
+	if (_bIsEditorCamera && !renderer->IsInGame())
+	{
+		static glm::vec2 lastMousePos;
+		glm::vec2 currentMousePos = HInput::GetMousePos();
+		glm::vec2 mouseAxis = lastMousePos - currentMousePos;
+		lastMousePos = currentMousePos;
+		if (HInput::GetMouse(MouseButton::Button_Right))
+		{
+			float frameRate = (float)renderer->GetFrameRateS();
+			worldRot.y -= mouseAxis.x * _editorMouseSpeed;
+			worldRot.x -= mouseAxis.y * _editorMouseSpeed;
+			trans->SetWorldRotation(worldRot);
+			//
+			if (HInput::GetKey(KeyCode::W))
+			{
+				worldPos += trans->GetForwardVector() * _editorMoveSpeed * frameRate;
+			}
+			if (HInput::GetKey(KeyCode::S))
+			{
+				worldPos -= trans->GetForwardVector() * _editorMoveSpeed * frameRate;
+			}
+			if (HInput::GetKey(KeyCode::A))
+			{
+				worldPos -= trans->GetRightVector() * _editorMoveSpeed * frameRate;
+			}
+			if (HInput::GetKey(KeyCode::D))
+			{
+				worldPos += trans->GetRightVector() * _editorMoveSpeed * frameRate;
+			}
+			if (HInput::GetKey(KeyCode::Q))
+			{
+				worldPos -= trans->GetUpVector() * _editorMoveSpeed * frameRate;
+			}
+			if (HInput::GetKey(KeyCode::E))
+			{
+				worldPos += trans->GetUpVector() * _editorMoveSpeed * frameRate;
+			}		
+			trans->SetWorldLocation(worldPos);
+		}
+		//ConsoleDebug::print_endl(HString::FromVec2(mouseAxis));
+	}
+	_cameraPos = worldPos;
+	_cameraTarget = _cameraPos + trans->GetForwardVector();
 	_cameraUp = trans->GetUpVector();
-	_viewMatrix = glm::lookAt(_cameraPos, _cameraTarget, _cameraUp);
+	//DirectX Left hand.
+	_viewMatrix = glm::lookAtLH(_cameraPos, _cameraTarget, _cameraUp);
 	_invViewMatrix = glm::inverse(_viewMatrix);
 }
 

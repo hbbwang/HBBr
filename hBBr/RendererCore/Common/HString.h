@@ -5,6 +5,7 @@
 //Explain:		Dream Engine string class.
 //---------------------------------------
 #pragma once
+#include "Common.h"
 #include <comutil.h>  
 #include <ostream>
 #include <math.h>
@@ -667,6 +668,20 @@ public:
 		format += HString::FromInt(precise) + "f";
 		char str[128];
 		sprintf_s(str, 128, format.c_str(), f);
+		out = str;
+		return out;
+	}
+
+	static __forceinline HString	FromVec2(glm::vec2 f, int precise = 6)
+	{
+		HString out;
+		HString format = "%.";
+		format += HString::FromInt(precise);
+		format += "f , %.";
+		format += HString::FromInt(precise);
+		format += "f";
+		char str[128];
+		sprintf_s(str, 128, format.c_str(), f.x , f.y);
 		out = str;
 		return out;
 	}

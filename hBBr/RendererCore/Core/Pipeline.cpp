@@ -101,7 +101,7 @@ void PipelineManager::SetRenderRasterizer(VkGraphicsPipelineCreateInfoCache& cre
 	createInfo.rasterInfo.polygonMode = (VkPolygonMode)rasterizer.polygonMode;
 	createInfo.rasterInfo.lineWidth = 1.0f;
 	createInfo.rasterInfo.cullMode = (VkCullModeFlagBits)rasterizer.cullMode;
-	createInfo.rasterInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+	createInfo.rasterInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
 	createInfo.rasterInfo.depthBiasEnable = VK_FALSE;
 	//
 	createInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;

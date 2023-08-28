@@ -71,8 +71,14 @@ public:
 		return _cmdBuf[_currentFrameIndex];
 	}
 
+	//ms
 	HBBR_API __forceinline double GetFrameRate()const {
 		return _frameRate;
+	}
+
+	//s
+	HBBR_API __forceinline double GetFrameRateS()const {
+		return _frameRate/1000.0f;
 	}
 
 	HBBR_API __forceinline class SceneManager* GetScene() {
@@ -91,6 +97,11 @@ public:
 	HBBR_API __forceinline void ExecFunctionOnRenderThread(std::function<void()> func)
 	{
 		_renderThreadFuncsOnce.push_back(func);
+	}
+
+	HBBR_API __forceinline bool IsInGame()const
+	{
+		return _bIsInGame;
 	}
 	
 	//获取游戏时间(秒)
@@ -168,5 +179,5 @@ private:
 
 	std::vector<std::function<void()>> _renderThreadFuncs;
 
-	bool IsInGame;
+	bool _bIsInGame;
 };

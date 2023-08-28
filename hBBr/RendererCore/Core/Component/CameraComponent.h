@@ -87,4 +87,8 @@ private:
 	glm::mat4 _invViewMatrix;
 
 	bool _bIsEditorCamera = false;
+
+	float _editorMoveSpeed = 1.0f;
+
+	float _editorMouseSpeed = 0.25f;
 };

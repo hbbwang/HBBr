@@ -4,7 +4,9 @@
 
 std::vector<KeyCallBack> HInput::_keyRegisterDefault;
 std::vector<KeyCallBack> HInput::_keyRegisterRepeat;
-
+std::vector<MouseCallBack> HInput::_mouseRegisterDefault;
+std::vector<MouseCallBack> HInput::_mouseRegisterRepeat;
+glm::vec2 HInput::_mousePos;
 void HInput::KeyProcess(void* focusWindowHandle , KeyCode key, KeyMod mod, Action action)
 {
 	KeyCallBack callBack;
@@ -34,7 +36,31 @@ void HInput::KeyProcess(void* focusWindowHandle , KeyCode key, KeyMod mod, Actio
 	}
 }
 
-void HInput::ClearInput()
+void HInput::MouseProcess(void* focusWindowHandle, MouseButton mouse, KeyMod mod, Action action)
 {
-	_keyRegisterDefault.clear();
+	MouseCallBack callBack;
+	callBack.button = mouse;
+	callBack.action = action;
+	callBack.mod = mod;
+	callBack.focusWindowHandle = focusWindowHandle;
+	{
+		_mouseRegisterDefault.push_back(callBack);
+		if (action == Action::RELEASE)
+		{
+			for (int i = 0; i < _mouseRegisterRepeat.size(); i++)
+			{
+				if (_mouseRegisterRepeat[i].button == mouse)
+				{
+					_mouseRegisterRepeat.erase(_mouseRegisterRepeat.begin() + i);
+					i -= 1;
+					if (_mouseRegisterRepeat.size() <= 0)
+						break;
+				}
+			}
+		}
+		else if (action == Action::PRESS)
+		{
+			_mouseRegisterRepeat.push_back(callBack);
+		}
+	}
 }

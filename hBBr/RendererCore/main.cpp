@@ -61,11 +61,12 @@ void KeyBoardCallBack(GLFWwindow* window, int key, int scancode, int action, int
 void MouseButtonCallBack(GLFWwindow* window, int button, int action, int mods)
 {
 	glfwFocusWindow(window);
+	HInput::MouseProcess((void*)window, (MouseButton)button, (KeyMod)mods, (Action)action);
 }
 
 void CursorPosCallBack(GLFWwindow* window, double xpos, double ypos)
 {
-
+	VulkanApp::SetCursorPos(glm::vec2(xpos, ypos));
 }
 
 void CursorEnterCallBack(GLFWwindow* window, int entered)
@@ -286,6 +287,11 @@ void VulkanApp::SetFormVisiable(VulkanForm* form, bool bShow)
 			glfwHideWindow(form->window);
 		}
 	}
+}
+
+void VulkanApp::SetCursorPos(glm::vec2 pos)
+{
+	HInput::SetMousePos(pos);
 }
 
 #if IS_GAME

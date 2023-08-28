@@ -34,6 +34,7 @@ public:
 	HBBR_API static inline VulkanForm* GetMainForm() { return _mainForm; }
 	HBBR_API static void SetFormFocus(VulkanForm* form);
 	HBBR_API static void SetFormVisiable(VulkanForm* form, bool bShow);
+	static void SetCursorPos(glm::vec2 pos);
 	//Callbacks
 	static std::vector<FormDropFun> _dropFuns;
 
