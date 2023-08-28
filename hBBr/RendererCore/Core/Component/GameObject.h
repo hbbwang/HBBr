@@ -50,6 +50,10 @@ public:
 		return _transform;
 	}
 
+	HBBR_API __forceinline class SceneManager* GetScene() {
+		return _scene;
+	}
+
 	HBBR_API void SetParent(GameObject* newParent);
 
 	template<typename T, typename ...Args>

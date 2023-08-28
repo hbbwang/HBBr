@@ -445,7 +445,7 @@ void ImageTool::ImageFlipY(uint32_t w, uint32_t h, uint32_t d,void *data)
 		char* top;
 		char* bottom;
 		char* temp = (char*)malloc(sizeof(char) * lineSize);//一行的数据;
-		for (auto i = 0; i < height / 2 ; i++)
+		for (uint32_t i = 0; i < height / 2 ; i++)
 		{
 			top = (char*)data + i * lineSize;
 			bottom = (char*)data + (height - i - 1) * lineSize;

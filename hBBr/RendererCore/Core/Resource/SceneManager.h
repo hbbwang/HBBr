@@ -16,6 +16,7 @@ class SceneManager
 {
 	friend class VulkanRenderer;
 	friend class GameObject;
+	friend class CameraComponent;
 public:
 
 	~SceneManager();
@@ -28,9 +29,12 @@ public:
 	std::function<void(class SceneManager*, std::shared_ptr<GameObject>)> _editorGameObjectAddFunc = [](class SceneManager* scene, std::shared_ptr<GameObject> newObject) {};
 	std::function<void(class SceneManager*, std::shared_ptr<GameObject>)> _editorGameObjectRemoveFunc = [](class SceneManager* scene, std::shared_ptr<GameObject> oldObject) {};
 	std::function<void(class SceneManager*, std::shared_ptr<GameObject>)> _editorGameObjectUpdateFunc = [](class SceneManager* scene, std::shared_ptr<GameObject> oldObject) {};
+	class CameraComponent* _editorCamera = NULL;
 #endif
 
 	HBBR_API __forceinline VulkanRenderer* GetRenderer()const { return _renderer; }
+
+	HBBR_API __forceinline CameraComponent* GetMainCamera()const { return _mainCamera; }
 
 private:
 
@@ -43,6 +47,10 @@ private:
 	void RemoveObject(GameObject* object);
 
 	class VulkanRenderer* _renderer = NULL;
+
+	class CameraComponent* _mainCamera = NULL;
+
+	std::vector<CameraComponent*> _cameras;
 
 	std::vector<std::shared_ptr<GameObject>> _gameObjects;
 

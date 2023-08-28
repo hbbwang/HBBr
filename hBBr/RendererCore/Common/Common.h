@@ -22,6 +22,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/transform.hpp"
 
+#include "HString.h"
+
 #define _Sleep(ms) std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 
 #if defined(_WIN32)

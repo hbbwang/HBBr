@@ -8,6 +8,8 @@
 #include "Shader.h"
 #include "Thread.h"
 #include "Resource/SceneManager.h"
+#include "Component/GameObject.h"
+#include "Component/CameraComponent.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -162,19 +164,29 @@ void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
 
 void VulkanRenderer::SetupPassUniformBuffer()
 {
-	_passUniformBuffer.View = glm::lookAt(_view.viewPos, _view.viewTarget, _view.viewUp);
-	_passUniformBuffer.View_Inv = glm::inverse(_passUniformBuffer.View);
-	float aspect = (float)_surfaceSize.width / (float)_surfaceSize.height;
-	_passUniformBuffer.Projection = glm::perspective(glm::radians(_view.FOV), aspect, _view.nearClipPlane, _view.farClipPlane);
-	_passUniformBuffer.Projection[1][1] *= -1;
-	_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
-	_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
-	_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
-
-	_passUniformBuffer.ScreenInfo = glm::vec4((float)_surfaceSize.width, (float)_surfaceSize.height, _view.nearClipPlane, _view.farClipPlane);
-	_passUniformBuffer.CameraPos_GameTime = glm::vec4(_view.viewPos.x, _view.viewPos.y, _view.viewPos.z, (float)GetGameTime());
-	auto viewDir = glm::normalize(_view.viewPos - _view.viewTarget);
-	_passUniformBuffer.CameraDirection = glm::vec4(viewDir.x, viewDir.y, viewDir.z, 0.0f);
+	const CameraComponent* mainCamera = NULL;
+	if (IsInGame)
+		mainCamera = _sceneManager->_mainCamera;
+#if IS_EDITOR
+	else
+		mainCamera = _sceneManager->_editorCamera;
+#endif
+	if (mainCamera != NULL)
+	{
+		_passUniformBuffer.View = mainCamera->GetViewMatrix();
+		_passUniformBuffer.View_Inv = mainCamera->GetInvViewMatrix();
+		float aspect = (float)_surfaceSize.width / (float)_surfaceSize.height;
+		_passUniformBuffer.Projection = glm::perspective(glm::radians(mainCamera->GetFOV()), aspect, mainCamera->GetNearClipPlane(), mainCamera->GetFarClipPlane());
+		_passUniformBuffer.Projection[1][1] *= -1;
+		_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
+		_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
+		_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
+		_passUniformBuffer.ScreenInfo = glm::vec4((float)_surfaceSize.width, (float)_surfaceSize.height, mainCamera->GetNearClipPlane(), mainCamera->GetFarClipPlane());
+		auto trans = mainCamera->GetGameObject()->GetTransform();
+		_passUniformBuffer.CameraPos_GameTime = glm::vec4(trans->GetWorldLocation().x, trans->GetWorldLocation().y, trans->GetWorldLocation().z, (float)GetGameTime());
+		auto viewDir = glm::normalize(trans->GetForwardVector());
+		_passUniformBuffer.CameraDirection = glm::vec4(viewDir.x, viewDir.y, viewDir.z, 0.0f);
+	}
 }
 
 bool VulkanRenderer::Resizing(bool bForce)

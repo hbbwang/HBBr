@@ -81,7 +81,7 @@ void DescriptorSet::UpdateDescriptorSet(uint32_t sameBufferSize, std::vector<uin
 	{
 		_needUpdates[_renderer->GetCurrentFrameIndex()] = 0;
 		auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(sameBufferSize);
-		VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, 0, alignmentSize , offsets);
+		VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, 0, (uint32_t)alignmentSize , offsets);
 	}
 }
 

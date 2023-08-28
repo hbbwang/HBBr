@@ -149,8 +149,6 @@ ContentBrowser::ContentBrowser(QWidget *parent)
 	});
 	connect(_listWidget->_openCurrentFolder, SIGNAL(triggered(bool)), this, SLOT(OpenCurrentFolder_List()));
 	connect(_treeWidget->_openCurrentFolder, SIGNAL(triggered(bool)), this, SLOT(OpenCurrentFolder_List()));
-
-
 }
 
 ContentBrowser::~ContentBrowser()

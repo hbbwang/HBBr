@@ -12,21 +12,6 @@
 class Texture;
 class Scene;
 
-struct ViewController
-{
-	glm::vec3 viewPos = glm::vec3(0.0f, 2.0f, -3.0f);
-
-	glm::vec3 viewTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-
-	glm::vec3 viewUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
-	float nearClipPlane = 0.01f;
-
-	float farClipPlane = 500.0f;
-
-	float FOV = 90.0f;
-};
-
 class VulkanRenderer
 {
 	friend class PassManager;
@@ -164,9 +149,6 @@ private:
 
 	void* _windowHandle = NULL;
 
-	//View Parameters
-	ViewController _view;
-
 	//Pass Uniform
 	PassUniformBuffer _passUniformBuffer;
 
@@ -185,4 +167,6 @@ private:
 	std::vector<std::function<void()>> _renderThreadFuncsOnce;
 
 	std::vector<std::function<void()>> _renderThreadFuncs;
+
+	bool IsInGame;
 };

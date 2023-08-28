@@ -2,6 +2,7 @@
 #include "VulkanRenderer.h"
 #include "Component/GameObject.h"
 #include "Component/ModelComponent.h"
+#include "Component/CameraComponent.h"
 #include "FileSystem.h"
 SceneManager::~SceneManager()
 {
@@ -22,6 +23,17 @@ std::weak_ptr<GameObject> testObj;
 void SceneManager::SceneInit(class VulkanRenderer* renderer)
 {
 	_renderer = renderer;
+
+#if IS_EDITOR
+	//create editor camera
+	auto backCamera = new GameObject();
+	backCamera->GetTransform()->SetWorldLocation(glm::vec3(0, 2, -3.0));
+	auto cameraComp = backCamera->AddComponent<CameraComponent>();
+	cameraComp->OverrideMainCamera();
+	_editorCamera = cameraComp;
+	_editorCamera->_bIsEditorCamera = true;
+#endif
+
 	//Test
 	auto test = new GameObject();
 	auto modelComp0 = test->AddComponent<ModelComponent>();

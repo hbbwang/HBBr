@@ -211,7 +211,7 @@ static DXGI_FORMAT GetDXGIFormat(const FDDSPixelFormatHeader& ddpf)
 //--------------------------------------------------------------------------------------
 // Return the BPP for a particular format.
 //--------------------------------------------------------------------------------------
-static size_t BitsPerPixel(_In_ DXGI_FORMAT fmt)
+static uint8_t BitsPerPixel(_In_ DXGI_FORMAT fmt)
 {
 	switch (fmt)
 	{
@@ -345,7 +345,7 @@ static int GetCnumBytesPerBlock(
 	_In_ DXGI_FORMAT fmt
 )
 {
-	size_t bcnumBytesPerBlock = 0;
+	int bcnumBytesPerBlock = 0;
 	switch (fmt)
 	{
 	case DXGI_FORMAT_BC1_TYPELESS:
@@ -570,7 +570,7 @@ ImageData* DDSLoader::LoadDDSToImage()
 	out->imageSize = 0;
 	int32_t mipWidth = DDSHeader->dwWidth;
 	int32_t mipHeight = DDSHeader->dwHeight;
-	for (int i = 0; i < out->mipLevel; ++i)
+	for (unsigned int i = 0; i < out->mipLevel; ++i)
 	{
 		if (bcFormat)
 		{
