@@ -54,6 +54,10 @@ public:
 
 	HBBR_API static Material* CreateMaterial(HString newMatFilePath);
 
+	HBBR_API void ResetMaterialGUID();
+
+	HBBR_API void UpdateReference(HGUID newGUID);
+
 	__forceinline MaterialPrimitive* GetPrimitive()const { return _primitive.get(); }
 
 private:

@@ -130,14 +130,20 @@ Material* Material::CreateMaterial(HString newMatFilePath)
 	{
 		return NULL;
 	}
-
-	std::unique_ptr<Material> mat(new Material);
-	HGUID guid = CreateGUID();
-
-
-	PrimitiveProxy::GetNewMaterialPrimitiveIndex(mat->_primitive.get());
-	PrimitiveProxy::AddMaterialPrimitive(mat->_primitive.get());
-	_allMaterials.emplace(std::make_pair(guid, std::move(mat)));
-	return _allMaterials[guid].get();
+	//复制引擎自带材质实例
+	FileSystem::FileCopy((FileSystem::GetContentAbsPath() + TEXT("Core/Material/DefaultPBR.mat")).c_str() ,newMatFilePath.c_str());
+	auto mat = LoadMaterial(newMatFilePath);
+	mat->ResetMaterialGUID();
+	return mat;
 }
 
+void Material::ResetMaterialGUID()
+{
+	HGUID guid = CreateGUID();
+	UpdateReference(guid);
+
+}
+
+void Material::UpdateReference(HGUID newGUID)
+{
+}

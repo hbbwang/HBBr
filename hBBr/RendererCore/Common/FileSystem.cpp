@@ -100,6 +100,11 @@ bool FileSystem::IsNormalFile(const char* path)
     return  fs::is_regular_file(path);
 }
 
+bool FileSystem::FileCopy(const char* srcFile, const char* newPath)
+{
+    return fs::copy_file(srcFile, newPath);
+}
+
 std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char* suffix)
 {
     if (!fs::exists(path))
