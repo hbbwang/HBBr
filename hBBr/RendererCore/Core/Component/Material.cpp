@@ -2,11 +2,12 @@
 #include "Shader.h"
 #include "VertexFactory.h"
 #include "VulkanManager.h"
+#include "FileSystem.h"
 Material* Material::_defaultMaterial;
 
 Material* Material::_errorMaterial;
 
-std::unordered_map<HUUID, std::unique_ptr<Material>> Material::_allMaterials;
+std::unordered_map<HGUID, std::unique_ptr<Material>> Material::_allMaterials;
 
 Material::Material(bool bDefault)
 {
@@ -35,13 +36,13 @@ Material* Material::LoadMaterial(HString materialFilePath)
 	{
 		std::unique_ptr<Material> mat (new Material) ;
 		auto root = materialDoc.child(TEXT("root"));
-		HUUID uuid;
-		HString uuidStr;
-		XMLStream::LoadXMLAttributeString(root, TEXT("UUID"), uuidStr);
-		if (!StringToUUID(uuidStr.c_str(), &uuid))
+		HGUID guid;
+		HString guidStr;
+		XMLStream::LoadXMLAttributeString(root, TEXT("GUID"), guidStr);
+		if (!StringToGUID(guidStr.c_str(), &guid))
 		{
-			uuid = CreateUUID();
-			uuidStr = UUIDToString(uuid).c_str();
+			guid = CreateGUID();
+			guidStr = GUIDToString(guid).c_str();
 		}
 		auto materialPrim = root.child(TEXT("MaterialPrimitive"));
 		//MaterialPrimitive
@@ -113,9 +114,30 @@ Material* Material::LoadMaterial(HString materialFilePath)
 		//
 		PrimitiveProxy::GetNewMaterialPrimitiveIndex(mat->_primitive.get());
 		PrimitiveProxy::AddMaterialPrimitive( mat->_primitive.get());
-		_allMaterials.emplace(std::make_pair(uuid, std::move(mat)));
-		return _allMaterials[uuid].get();
+		_allMaterials.emplace(std::make_pair(guid, std::move(mat)));
+		return _allMaterials[guid].get();
 	}
 	return NULL;
+}
+
+Material* Material::CreateMaterial(HString newMatFilePath)
+{
+	if (!FileSystem::IsNormalFile(newMatFilePath.c_str()))
+	{
+		return NULL;
+	}
+	if (!newMatFilePath.GetSuffix().IsSame("mat"))
+	{
+		return NULL;
+	}
+
+	std::unique_ptr<Material> mat(new Material);
+	HGUID guid = CreateGUID();
+
+
+	PrimitiveProxy::GetNewMaterialPrimitiveIndex(mat->_primitive.get());
+	PrimitiveProxy::AddMaterialPrimitive(mat->_primitive.get());
+	_allMaterials.emplace(std::make_pair(guid, std::move(mat)));
+	return _allMaterials[guid].get();
 }
 

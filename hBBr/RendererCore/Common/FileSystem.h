@@ -33,6 +33,8 @@ public:
 	HBBR_API static HString GetRelativePath(const char* path);
 	HBBR_API static uint32_t GetPathFileNum(const char* path);
 	HBBR_API static bool FileExist(const char* path);
+	HBBR_API static bool IsDir(const char* path);
+	HBBR_API static bool IsNormalFile(const char* path);
 	static std::vector<FileEntry> GetFilesBySuffix(const char* path , const char* suffix);
 	static std::vector<char>ReadBinaryFile(const char* filePath);
 	

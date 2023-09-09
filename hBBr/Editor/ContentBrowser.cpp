@@ -21,6 +21,8 @@
 #include "QDesktopServices.h"
 #include "qabstractitemview.h"
 
+#include "Component/Material.h"
+
 QWidget* ContentBrowser::_currentFocusContentBrowser = NULL;
 QList<QWidget*> ContentBrowser::_allContentBrowser;
 
@@ -145,7 +147,7 @@ ContentBrowser::ContentBrowser(QWidget *parent)
 	connect(_treeWidget->_import, SIGNAL(triggered(bool)), this, SLOT(ResourceImport()));
 	connect(_listWidget->_import, SIGNAL(triggered(bool)), this, SLOT(ResourceImport()));
 	connect(_listWidget->_createMaterialInstance, &QAction::triggered, this, [this]() {
-		
+		Material::CreateMaterial(_treeFileSystemModel->filePath(_treeWidget->currentIndex()).toStdString().c_str());
 	});
 	connect(_listWidget->_openCurrentFolder, SIGNAL(triggered(bool)), this, SLOT(OpenCurrentFolder_List()));
 	connect(_treeWidget->_openCurrentFolder, SIGNAL(triggered(bool)), this, SLOT(OpenCurrentFolder_List()));

@@ -24,12 +24,12 @@ public:
 	
 	~Material();
 
-	__forceinline static Material* GetDefaultMaterial()
+	HBBR_API __forceinline static Material* GetDefaultMaterial()
 	{
-		static HUUID defaultMatGUID;
+		static HGUID defaultMatGUID;
 		if (!_defaultMaterial)
 		{
-			defaultMatGUID = CreateUUID();
+			defaultMatGUID = CreateGUID();
 			std::unique_ptr<Material> newMat(new Material(true));
 			newMat->_materialName = "DefaultMaterial";
 			_allMaterials.emplace(std::make_pair(defaultMatGUID, std::move(newMat)));
@@ -37,12 +37,12 @@ public:
 		return _allMaterials[defaultMatGUID].get();
 	}
 
-	__forceinline static Material* GetErrorMaterial()
+	HBBR_API __forceinline static Material* GetErrorMaterial()
 	{
-		static HUUID errorMatGUID;
+		static HGUID errorMatGUID;
 		if (!_defaultMaterial)
 		{
-			errorMatGUID = CreateUUID();
+			errorMatGUID = CreateGUID();
 			std::unique_ptr<Material> newMat(new Material(true));
 			newMat->_materialName = "ErrorMaterial";
 			_allMaterials.emplace(std::make_pair(errorMatGUID, std::move(newMat)));
@@ -50,7 +50,9 @@ public:
 		return _allMaterials[errorMatGUID].get();
 	}
 
-	static Material* LoadMaterial(HString materialFilePath);
+	HBBR_API static Material* LoadMaterial(HString materialFilePath);
+
+	HBBR_API static Material* CreateMaterial(HString newMatFilePath);
 
 	__forceinline MaterialPrimitive* GetPrimitive()const { return _primitive.get(); }
 
@@ -60,7 +62,7 @@ private:
 
 	std::unique_ptr<MaterialPrimitive> _primitive;
 
-	HUUID _uuid;
+	HGUID _uuid;
 
 	std::vector<MaterialParameterInfo> _paramterInfos;
 
@@ -68,6 +70,6 @@ private:
 
 	static Material* _errorMaterial;
 
-	static  std::unordered_map<HUUID, std::unique_ptr<Material>> _allMaterials;
+	static  std::unordered_map<HGUID, std::unique_ptr<Material>> _allMaterials;
 
 };

@@ -6,7 +6,7 @@
 #include "HString.h"
 #include "VertexFactory.h"
 #include "Primitive.h"
-
+#include "HGuid.h"
 struct VertexData
 {
 	glm::vec3 pos;
@@ -141,6 +141,7 @@ struct ModelData
 	glm::vec4					uv_2_3_abs_max = glm::vec4(0, 0, 0, 0);
 	//
 	HString						filePath;
+	HGUID						guid;
 };
 
 class ModelFileStream

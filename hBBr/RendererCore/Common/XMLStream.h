@@ -4,7 +4,7 @@
 //并且子节点都应该在root里
 #include <memory>
 #include <string>
-#include "pugixml.hpp"
+#include "pugixml/pugixml.hpp"
 #include "HString.h"
 class XMLStream
 {

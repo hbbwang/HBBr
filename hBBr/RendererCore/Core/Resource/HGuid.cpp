@@ -1,12 +1,12 @@
 ﻿#include "HGuid.h"
 
-HUUID CreateUUID()
+HGUID CreateGUID()
 {
-    HUUID uuid;
+    HGUID uuid;
 #ifdef _WIN32
     GUID guid;
     CoCreateGuid(&guid);
-    memcpy(&uuid, &guid, sizeof(HUUID));
+    memcpy(&uuid, &guid, sizeof(HGUID));
 #else
     uuid_generate(reinterpret_cast<unsigned char*>(&guid));
 #endif

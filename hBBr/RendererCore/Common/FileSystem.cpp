@@ -90,6 +90,16 @@ bool FileSystem::FileExist(const char* path)
     return fs::exists(path);
 }
 
+bool FileSystem::IsDir(const char* path)
+{
+    return  fs::is_directory(path);
+}
+
+bool FileSystem::IsNormalFile(const char* path)
+{
+    return  fs::is_regular_file(path);
+}
+
 std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char* suffix)
 {
     if (!fs::exists(path))
