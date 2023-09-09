@@ -22,6 +22,9 @@ public:
 	/* 读取xml节点的Int32属性 */
 	static bool LoadXMLAttributeInt(pugi::xml_node& node, const wchar_t* attributeName, int& attri);
 
+	/* 读取xml节点的Int64属性 */
+	static bool LoadXMLAttributeUInt(pugi::xml_node& node, const wchar_t* attributeName, uint32_t& attri);
+
 	/* 读取xml节点的Bool属性 */
 	static bool LoadXMLAttributeBool(pugi::xml_node& node, const wchar_t* attributeName, bool& attri);
 

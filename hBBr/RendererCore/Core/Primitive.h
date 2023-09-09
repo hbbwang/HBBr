@@ -57,7 +57,7 @@ struct MaterialPrimitive
 	//其实就是材质名字
 	HString graphicsName;
 
-	Pass pass;
+	Pass passUsing;
 
 	//参数
 

@@ -62,6 +62,19 @@ bool XMLStream::LoadXMLAttributeInt(pugi::xml_node& node, const wchar_t* attribu
 	return false;
 }
 
+bool XMLStream::LoadXMLAttributeUInt(pugi::xml_node& node, const wchar_t* attributeName, uint32_t& attri)
+{
+	if (node == nullptr || node.empty())
+		return false;
+	auto attr = node.attribute(attributeName);
+	if (attr != nullptr && !attr.empty())
+	{
+		attri = node.attribute(attributeName).as_uint();
+		return true;
+	}
+	return false;
+}
+
 bool XMLStream::LoadXMLAttributeBool(pugi::xml_node& node, const wchar_t* attributeName, bool& attri)
 {
 	if (node == nullptr || node.empty())

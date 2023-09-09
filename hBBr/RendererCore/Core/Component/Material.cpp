@@ -16,7 +16,7 @@ Material::Material(bool bDefault)
 		_primitive->graphicsName = _materialName;
 		_primitive->vsShader = "BasePassTemplate";
 		_primitive->psShader = "BasePassTemplate";
-		_primitive->pass = Pass::OpaquePass;
+		_primitive->passUsing = Pass::OpaquePass;
 		_primitive->inputLayout = VertexFactory::VertexInput::BuildLayout(Shader::_vsShader[_primitive->vsShader].header.vertexInput);
 		PrimitiveProxy::GetNewMaterialPrimitiveIndex(_primitive.get());
 		PrimitiveProxy::AddMaterialPrimitive(_primitive.get());
@@ -25,7 +25,7 @@ Material::Material(bool bDefault)
 
 Material::~Material()
 {
-	PrimitiveProxy::RemoveMaterialPrimitive(_primitive->pass, _primitive.get());
+	PrimitiveProxy::RemoveMaterialPrimitive(_primitive->passUsing, _primitive.get());
 }
 
 Material* Material::LoadMaterial(HString materialFilePath)
@@ -49,9 +49,9 @@ Material* Material::LoadMaterial(HString materialFilePath)
 		mat->_primitive->graphicsName = materialFilePath.GetBaseName();
 		XMLStream::LoadXMLAttributeString(materialPrim, TEXT("vsShader"), mat->_primitive->vsShader);
 		XMLStream::LoadXMLAttributeString(materialPrim, TEXT("psShader"), mat->_primitive->psShader);
-		int pass;
-		XMLStream::LoadXMLAttributeInt(materialPrim, TEXT("pass"), pass);
-		mat->_primitive->pass = (Pass)pass;
+		uint32_t pass;
+		XMLStream::LoadXMLAttributeUInt(materialPrim, TEXT("pass"), pass);
+		mat->_primitive->passUsing = (Pass)pass;
 		auto vsCache = Shader::_vsShader[mat->_primitive->vsShader];
 		auto psCache = Shader::_psShader[mat->_primitive->psShader];
 		mat->_primitive->inputLayout = VertexFactory::VertexInput::BuildLayout(vsCache.header.vertexInput);

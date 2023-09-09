@@ -9,6 +9,11 @@ ModelComponent::ModelComponent(GameObject* parent) :Component(parent)
 
 void ModelComponent::SetModel(HString path)
 {
+	if (_modelPath == path)
+	{
+		return;
+	}
+	_modelPath = path;
 	//clear
 	for (int i = 0; i < (int)_materials.size(); i++)
 	{

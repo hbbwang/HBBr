@@ -13,7 +13,7 @@ void PrimitiveProxy::AddMaterialPrimitive(MaterialPrimitive* prim)
 	{
 		_allGraphicsPrimitives.resize((uint32_t)Pass::MaxNum);
 	}
-	_allGraphicsPrimitives[(uint32_t)prim->pass].push_back(prim);
+	_allGraphicsPrimitives[(uint32_t)prim->passUsing].push_back(prim);
 }
 
 void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim)
