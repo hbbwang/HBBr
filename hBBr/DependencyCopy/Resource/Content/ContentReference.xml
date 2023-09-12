@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+[TypeIndex]
+0:Model(.fbx)
+1:Material(.mat)
+2:Scene(.scene)
+-->
+<root>
+    <Model>
+        <Item GUID="B32B0C1E-D358-464F-8F0C-52F0DD0FAA05" Name="Cube" Path="Core/Basic/">
+            <Ref Type="1">61A147FF-32BD-48EC-B523-57BC75EB16BA</Ref>
+        </Item>
+        <Item GUID="7700EA47-D382-40DE-A64F-D97C125A4472" Name="Plane" Path="Core/Basic/">
+            <Ref Type="1">61A147FF-32BD-48EC-B523-57BC75EB16BA</Ref>
+        </Item>
+        <Item GUID="E4F2CC0F-32CD-4167-BDA2-FCF7DA537363" Name="Sphere" Path="Core/Basic/">
+            <Ref Type="1">61A147FF-32BD-48EC-B523-57BC75EB16BA</Ref>
+        </Item>
+    </Model>
+    <Material>
+        <Item GUID="61A147FF-32BD-48EC-B523-57BC75EB16BA" Name="DefaultPBR" Path="Core/Material/">
+            <Ref Type="0">B32B0C1E-D358-464F-8F0C-52F0DD0FAA05</Ref>
+            <Ref Type="0">7700EA47-D382-40DE-A64F-D97C125A4472</Ref>
+            <Ref Type="0">E4F2CC0F-32CD-4167-BDA2-FCF7DA537363</Ref>
+        </Item>
+    </Material>
+</root>

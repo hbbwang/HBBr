@@ -190,6 +190,12 @@
     <ClInclude Include="..\ThirdParty\lodepng\lodepng.h">
       <Filter>ThirdParty\lodepng</Filter>
     </ClInclude>
+    <ClInclude Include="Common\RendererType.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ContentManager.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -317,6 +323,9 @@
     </ClCompile>
     <ClCompile Include="..\ThirdParty\lodepng\lodepng.cpp">
       <Filter>ThirdParty\lodepng</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\ContentManager.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

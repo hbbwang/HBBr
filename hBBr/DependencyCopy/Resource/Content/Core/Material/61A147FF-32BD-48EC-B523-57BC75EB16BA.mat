@@ -7,6 +7,4 @@
         <Param name="F3" type="3" value="1,1,1" ui="" />
         <Param name="F4" type="4" value="1,1,1,1" ui="" />
     </Parameters>
-    <Reference>
-    </Reference>
 </root>

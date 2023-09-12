@@ -3,6 +3,7 @@
 #include "VertexFactory.h"
 #include "VulkanManager.h"
 #include "FileSystem.h"
+#include "RendererType.h"
 Material* Material::_defaultMaterial;
 
 Material* Material::_errorMaterial;
@@ -44,6 +45,8 @@ Material* Material::LoadMaterial(HString materialFilePath)
 			guid = CreateGUID();
 			guidStr = GUIDToString(guid).c_str();
 		}
+		mat->_guid = guid;
+		mat->_oldGuid = guid;
 		auto materialPrim = root.child(TEXT("MaterialPrimitive"));
 		//MaterialPrimitive
 		mat->_primitive.reset(new MaterialPrimitive());
@@ -133,17 +136,22 @@ Material* Material::CreateMaterial(HString newMatFilePath)
 	//复制引擎自带材质实例
 	FileSystem::FileCopy((FileSystem::GetContentAbsPath() + TEXT("Core/Material/DefaultPBR.mat")).c_str() ,newMatFilePath.c_str());
 	auto mat = LoadMaterial(newMatFilePath);
-	mat->ResetMaterialGUID();
-	return mat;
+
+	mat->UpdateReference(true);
+
+	return _allMaterials[mat->GetGUID()].get();
 }
 
-void Material::ResetMaterialGUID()
+void Material::UpdateReference(bool bResetNewGUID)
 {
-	HGUID guid = CreateGUID();
-	UpdateReference(guid);
+	if (bResetNewGUID)
+	{
+		HGUID newGUID = CreateGUID();
+		memcpy(&_guid, &newGUID, sizeof(HGUID));
+	}
+	if (_oldGuid == _guid)
+	{
+		return;
+	}
 
-}
-
-void Material::UpdateReference(HGUID newGUID)
-{
 }

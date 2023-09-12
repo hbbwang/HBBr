@@ -257,12 +257,14 @@
     <ClInclude Include="..\ThirdParty\pugixml\pugixml.hpp" />
     <ClInclude Include="Common\Common.h" />
     <ClInclude Include="Common\ConsoleDebug.h" />
+    <ClInclude Include="Common\ContentManager.h" />
     <ClInclude Include="Common\DDSTool.h" />
     <ClInclude Include="Common\FileSystem.h" />
     <ClInclude Include="Common\HInput.h" />
     <ClInclude Include="Common\HString.h" />
     <ClInclude Include="Common\HTime.h" />
     <ClInclude Include="Common\ImageTool.h" />
+    <ClInclude Include="Common\RendererType.h" />
     <ClInclude Include="Common\TypeConversion.h" />
     <ClInclude Include="Common\XMLStream.h" />
     <ClInclude Include="Core\Buffer.h" />
@@ -305,6 +307,7 @@
     <ClCompile Include="..\ThirdParty\pugixml\pugixml.cpp" />
     <ClCompile Include="Common\Common.cpp" />
     <ClCompile Include="Common\ConsoleDebug.cpp" />
+    <ClCompile Include="Common\ContentManager.cpp" />
     <ClCompile Include="Common\DDSTool.cpp" />
     <ClCompile Include="Common\FileSystem.cpp" />
     <ClCompile Include="Common\HInput.cpp" />

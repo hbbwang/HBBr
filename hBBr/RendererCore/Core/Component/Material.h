@@ -54,11 +54,11 @@ public:
 
 	HBBR_API static Material* CreateMaterial(HString newMatFilePath);
 
-	HBBR_API void ResetMaterialGUID();
+	HBBR_API void UpdateReference(bool bResetNewGUID = true);
 
-	HBBR_API void UpdateReference(HGUID newGUID);
+	HBBR_API __forceinline MaterialPrimitive* GetPrimitive()const { return _primitive.get(); }
 
-	__forceinline MaterialPrimitive* GetPrimitive()const { return _primitive.get(); }
+	HBBR_API __forceinline HGUID GetGUID()const { return _guid; }
 
 private:
 
@@ -66,7 +66,9 @@ private:
 
 	std::unique_ptr<MaterialPrimitive> _primitive;
 
-	HGUID _uuid;
+	HGUID _guid;
+
+	HGUID _oldGuid;
 
 	std::vector<MaterialParameterInfo> _paramterInfos;
 
