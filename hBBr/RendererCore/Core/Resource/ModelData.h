@@ -148,9 +148,8 @@ class ModelFileStream
 {
 public:
 	
-	HBBR_API static ModelData* ImportFbxToMemory(HString fbxPath);
+	HBBR_API static ModelData* ImportFbxToMemory(HGUID guid);
 
 	HBBR_API static bool BuildModelPrimitives(ModelData* data ,std::vector<ModelPrimitive>& prims);
 
-	static std::map<HString, std::unique_ptr<ModelData>> _modelCache;
 };

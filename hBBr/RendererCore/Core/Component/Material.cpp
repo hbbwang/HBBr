@@ -4,25 +4,10 @@
 #include "VulkanManager.h"
 #include "FileSystem.h"
 #include "RendererType.h"
-Material* Material::_defaultMaterial;
+#include "ContentManager.h"
 
-Material* Material::_errorMaterial;
-
-std::unordered_map<HGUID, std::unique_ptr<Material>> Material::_allMaterials;
-
-Material::Material(bool bDefault)
+Material::Material()
 {
-	if (bDefault)
-	{
-		_primitive.reset(new MaterialPrimitive());
-		_primitive->graphicsName = _materialName;
-		_primitive->vsShader = "BasePassTemplate";
-		_primitive->psShader = "BasePassTemplate";
-		_primitive->passUsing = Pass::OpaquePass;
-		_primitive->inputLayout = VertexFactory::VertexInput::BuildLayout(Shader::_vsShader[_primitive->vsShader].header.vertexInput);
-		PrimitiveProxy::GetNewMaterialPrimitiveIndex(_primitive.get());
-		PrimitiveProxy::AddMaterialPrimitive(_primitive.get());
-	}
 }
 
 Material::~Material()
@@ -30,10 +15,34 @@ Material::~Material()
 	PrimitiveProxy::RemoveMaterialPrimitive(_primitive->passUsing, _primitive.get());
 }
 
-Material* Material::LoadMaterial(HString materialFilePath)
+Material* Material::LoadMaterial(HGUID guid)
 {
+	const auto matAssets = ContentManager::Get()->GetMaterialAssets();
+	HString guidStr = GUIDToString(guid);
+	//从内容管理器查找资产
+	auto it = matAssets.find(guid);
+	{
+		if (it == matAssets.end())
+		{
+			MessageOut(HString("Can not find [" + guidStr + "] material in content manager.").c_str(), false, false, "255,255,0");
+			return NULL;
+		}
+	}
+	auto dataPtr = reinterpret_cast<AssetInfo<Material>*>(it->second);
+	if (dataPtr->IsAssetLoad())
+	{
+		return dataPtr->GetData();
+	}
+	//获取实际路径
+	HString filePath = FileSystem::GetContentAbsPath() + it->second->relativePath + guidStr + ".mat";
+	filePath.CorrectionPath();
+	if (!FileSystem::FileExist(filePath.c_str()))
+	{
+		return NULL;
+	}
+
 	pugi::xml_document materialDoc;
-	if (XMLStream::LoadXML(materialFilePath.c_wstr(), materialDoc))
+	if (XMLStream::LoadXML(filePath.c_wstr(), materialDoc))
 	{
 		std::unique_ptr<Material> mat (new Material) ;
 		auto root = materialDoc.child(TEXT("root"));
@@ -43,14 +52,14 @@ Material* Material::LoadMaterial(HString materialFilePath)
 		if (!StringToGUID(guidStr.c_str(), &guid))
 		{
 			guid = CreateGUID();
-			guidStr = GUIDToString(guid).c_str();
+			guidStr = GUIDToString(guid);
 		}
 		mat->_guid = guid;
 		mat->_oldGuid = guid;
 		auto materialPrim = root.child(TEXT("MaterialPrimitive"));
 		//MaterialPrimitive
 		mat->_primitive.reset(new MaterialPrimitive());
-		mat->_primitive->graphicsName = materialFilePath.GetBaseName();
+		mat->_primitive->graphicsName = it->second->name;
 		XMLStream::LoadXMLAttributeString(materialPrim, TEXT("vsShader"), mat->_primitive->vsShader);
 		XMLStream::LoadXMLAttributeString(materialPrim, TEXT("psShader"), mat->_primitive->psShader);
 		uint32_t pass;
@@ -115,10 +124,15 @@ Material* Material::LoadMaterial(HString materialFilePath)
 		auto anlignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(sizeof(glm::vec4) * mat->_primitive->uniformBuffer.size());
 		mat->_primitive->uniformBufferSize = anlignmentSize;
 		//
+		
 		PrimitiveProxy::GetNewMaterialPrimitiveIndex(mat->_primitive.get());
 		PrimitiveProxy::AddMaterialPrimitive( mat->_primitive.get());
-		_allMaterials.emplace(std::make_pair(guid, std::move(mat)));
-		return _allMaterials[guid].get();
+
+		dataPtr->SetData(std::move(mat));
+
+		//_allMaterials.emplace(std::make_pair(guid, std::move(mat)));
+
+		return dataPtr->GetData();
 	}
 	return NULL;
 }
@@ -134,24 +148,9 @@ Material* Material::CreateMaterial(HString newMatFilePath)
 		return NULL;
 	}
 	//复制引擎自带材质实例
-	FileSystem::FileCopy((FileSystem::GetContentAbsPath() + TEXT("Core/Material/DefaultPBR.mat")).c_str() ,newMatFilePath.c_str());
-	auto mat = LoadMaterial(newMatFilePath);
+	HGUID guid("61A147FF-32BD-48EC-B523-57BC75EB16BA");
+	FileSystem::FileCopy((FileSystem::GetContentAbsPath() + TEXT("Core/Material/61A147FF-32BD-48EC-B523-57BC75EB16BA.mat")).c_str() ,newMatFilePath.c_str());
 
-	mat->UpdateReference(true);
 
-	return _allMaterials[mat->GetGUID()].get();
-}
-
-void Material::UpdateReference(bool bResetNewGUID)
-{
-	if (bResetNewGUID)
-	{
-		HGUID newGUID = CreateGUID();
-		memcpy(&_guid, &newGUID, sizeof(HGUID));
-	}
-	if (_oldGuid == _guid)
-	{
-		return;
-	}
-
+	return NULL;
 }

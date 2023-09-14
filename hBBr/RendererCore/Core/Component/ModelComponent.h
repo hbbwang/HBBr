@@ -20,7 +20,7 @@ public:
 
 private:
 
-	HString _modelPath;
+	HGUID _model;
 
 	struct ModelData* _modelData = NULL ;
 

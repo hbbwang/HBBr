@@ -9,12 +9,25 @@
 #include <uuid/uuid.h>
 #endif
 
+#include "HString.h"
+
 struct HGUID
 {
     unsigned long Data1;
     unsigned short Data2;
     unsigned short Data3;
     unsigned char Data4[8];
+
+    HGUID() {}
+
+    HGUID(const char* guidStr)
+    {
+        sscanf_s(guidStr,
+            "%8x-%4hx-%4hx-%2hhx%2hhx-%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx",
+            &Data1, &Data2, &Data3,
+            &Data4[0], &Data4[1], &Data4[2], &Data4[3],
+            &Data4[4], &Data4[5], &Data4[6], &Data4[7]);
+    }
 
     bool operator==(const HGUID& id) const {
         return id.Data1 == Data1 && id.Data2 == Data2 && id.Data3 == Data3
@@ -25,7 +38,7 @@ struct HGUID
 
 HGUID CreateGUID();
 
-inline std::string GUIDToString(const HGUID& guid)
+inline HString GUIDToString(const HGUID& guid)
 {
     char buf[64] = { 0 };
 #ifdef __GNUC__
@@ -41,7 +54,7 @@ inline std::string GUIDToString(const HGUID& guid)
         guid.Data4[2], guid.Data4[3],
         guid.Data4[4], guid.Data4[5],
         guid.Data4[6], guid.Data4[7]);
-    return std::string(buf);
+    return std::string(buf).c_str();
 }
 
 inline bool StringToGUID(const char* guidString, HGUID* guid)
@@ -53,7 +66,7 @@ inline bool StringToGUID(const char* guidString, HGUID* guid)
         &guid->Data4[4], &guid->Data4[5], &guid->Data4[6], &guid->Data4[7]) == 11;
 }
 
-inline std::string CreateUUIDString()
+inline HString CreateUUIDString()
 {
     return GUIDToString(CreateGUID());
 }
@@ -73,7 +86,7 @@ namespace std
         size_t operator() (const HGUID& s) const noexcept
         {      
             std::hash<std::string> hasher;
-            return hasher(GUIDToString(s));
+            return hasher(GUIDToString(s).c_str());
         }
     };
 };

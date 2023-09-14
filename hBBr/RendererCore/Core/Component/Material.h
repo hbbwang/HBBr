@@ -10,6 +10,8 @@
 #include <unordered_map>
 #include <vector>
 
+#define DefaultMaterialGuid "61A147FF-32BD-48EC-B523-57BC75EB16BA"
+
 struct MaterialParameterInfo
 {
 	MPType type;
@@ -20,45 +22,23 @@ struct MaterialParameterInfo
 class Material
 {
 public:
-	Material(bool bDefault = false);
+	Material();
 	
 	~Material();
 
-	HBBR_API __forceinline static Material* GetDefaultMaterial()
-	{
-		static HGUID defaultMatGUID;
-		if (!_defaultMaterial)
-		{
-			defaultMatGUID = CreateGUID();
-			std::unique_ptr<Material> newMat(new Material(true));
-			newMat->_materialName = "DefaultMaterial";
-			_allMaterials.emplace(std::make_pair(defaultMatGUID, std::move(newMat)));
-		}
-		return _allMaterials[defaultMatGUID].get();
-	}
-
-	HBBR_API __forceinline static Material* GetErrorMaterial()
-	{
-		static HGUID errorMatGUID;
-		if (!_defaultMaterial)
-		{
-			errorMatGUID = CreateGUID();
-			std::unique_ptr<Material> newMat(new Material(true));
-			newMat->_materialName = "ErrorMaterial";
-			_allMaterials.emplace(std::make_pair(errorMatGUID, std::move(newMat)));
-		}
-		return _allMaterials[errorMatGUID].get();
-	}
-
-	HBBR_API static Material* LoadMaterial(HString materialFilePath);
+	HBBR_API static Material* LoadMaterial(HGUID guid);
 
 	HBBR_API static Material* CreateMaterial(HString newMatFilePath);
-
-	HBBR_API void UpdateReference(bool bResetNewGUID = true);
 
 	HBBR_API __forceinline MaterialPrimitive* GetPrimitive()const { return _primitive.get(); }
 
 	HBBR_API __forceinline HGUID GetGUID()const { return _guid; }
+
+	HBBR_API __forceinline static Material* GetDefaultMaterial()
+	{	
+		return LoadMaterial(HGUID(DefaultMaterialGuid));
+	}
+
 
 private:
 
@@ -71,11 +51,4 @@ private:
 	HGUID _oldGuid;
 
 	std::vector<MaterialParameterInfo> _paramterInfos;
-
-	static Material* _defaultMaterial;
-
-	static Material* _errorMaterial;
-
-	static  std::unordered_map<HGUID, std::unique_ptr<Material>> _allMaterials;
-
 };

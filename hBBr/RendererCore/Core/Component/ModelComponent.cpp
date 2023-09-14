@@ -9,11 +9,14 @@ ModelComponent::ModelComponent(GameObject* parent) :Component(parent)
 
 void ModelComponent::SetModel(HString path)
 {
-	if (_modelPath == path)
+	HGUID guid;
+	HString guidStr = path.GetBaseName();
+	StringToGUID(guidStr.c_str(), &guid);
+	if (_model == guid)
 	{
 		return;
 	}
-	_modelPath = path;
+	_model = guid;
 	//clear
 	for (int i = 0; i < (int)_materials.size(); i++)
 	{
@@ -21,8 +24,7 @@ void ModelComponent::SetModel(HString path)
 	}
 	_primitive.clear();
 	//create
-	path.CorrectionPath();
-	_modelData = ModelFileStream::ImportFbxToMemory(path);
+	_modelData = ModelFileStream::ImportFbxToMemory(guid);
 	ModelFileStream::BuildModelPrimitives(_modelData, _primitive);
 	_materials.resize(_primitive.size());
 	for (int i = 0; i < (int)_primitive.size(); i++)
@@ -30,7 +32,7 @@ void ModelComponent::SetModel(HString path)
 		_primitive[i].transform = GetGameObject()->GetTransform();
 		if (_materials[i] == NULL)
 			//_materials[i] = Material::GetDefaultMaterial();//Set default material
-			_materials[i] = Material::LoadMaterial(FileSystem::GetContentAbsPath() + "Core/Material/DefaultPBR.mat");
+			_materials[i] = Material::LoadMaterial(HGUID("61A147FF-32BD-48EC-B523-57BC75EB16BA"));
 		PrimitiveProxy::AddModelPrimitive(_materials[i]->GetPrimitive(), &_primitive[i]);
 	}
 }

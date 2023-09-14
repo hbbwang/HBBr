@@ -4,6 +4,9 @@
 0:Model(.fbx)
 1:Material(.mat)
 2:Scene(.scene)
+3:Texture2D(.tex2d)
+4:TextureCube(.texCube)
+5:Prefab(.prefab)
 -->
 <root>
     <Model>
@@ -16,12 +19,24 @@
         <Item GUID="E4F2CC0F-32CD-4167-BDA2-FCF7DA537363" Name="Sphere" Path="Core/Basic/">
             <Ref Type="1">61A147FF-32BD-48EC-B523-57BC75EB16BA</Ref>
         </Item>
+        <Item GUID="B7CF5F97-BFB9-4C36-893C-448B57776F69" Name="TestFbx_1_Combine" Path="Core/Basic/">
+            <Ref Type="1">61A147FF-32BD-48EC-B523-57BC75EB16BA</Ref>
+        </Item>
     </Model>
     <Material>
         <Item GUID="61A147FF-32BD-48EC-B523-57BC75EB16BA" Name="DefaultPBR" Path="Core/Material/">
             <Ref Type="0">B32B0C1E-D358-464F-8F0C-52F0DD0FAA05</Ref>
             <Ref Type="0">7700EA47-D382-40DE-A64F-D97C125A4472</Ref>
             <Ref Type="0">E4F2CC0F-32CD-4167-BDA2-FCF7DA537363</Ref>
+            <Ref Type="0">B7CF5F97-BFB9-4C36-893C-448B57776F69</Ref>
         </Item>
     </Material>
+    <Scene>
+    </Scene>
+    <Texture2D>
+    </Texture2D>
+    <TextureCube>
+    </TextureCube>
+    <Prefab>
+    </Prefab>
 </root>

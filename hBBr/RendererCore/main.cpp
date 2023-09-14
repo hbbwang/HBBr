@@ -6,6 +6,7 @@
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
+#include "ContentManager.h"
 
 //#if _DEBUG
 //#include "include/vld.h"
@@ -111,7 +112,7 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	Shaderc::ShaderCompiler::CompileAllShaders(FileSystem::GetShaderIncludeAbsPath().c_str());
 #endif
 	Shader::LoadShaderCache(FileSystem::GetShaderCacheAbsPath().c_str());
-
+	ContentManager::Get();
 	//Create Main Window
 	auto win = CreateNewWindow(128, 128, "MainRenderer", true);
 
@@ -156,6 +157,7 @@ void VulkanApp::DeInitVulkanManager()
 	Shader::DestroyAllShaderCache();
 	PipelineManager::ClearPipelineObjects();
 	VulkanManager::ReleaseManager();
+	//ContentManager::Get()->Release();
 	glfwTerminate();
 }
 

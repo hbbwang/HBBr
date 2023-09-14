@@ -15,30 +15,37 @@
 #include <assimp/scene.h>			// C++ importer interface
 #include <assimp/postprocess.h>     // Post processing flags
 
-std::map<HString, std::unique_ptr<ModelData>> ModelFileStream::_modelCache;
+#include "ContentManager.h"
 
-ModelData* ModelFileStream::ImportFbxToMemory(HString fbxPath)
+ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
 {
-	{
-		auto it = _modelCache.find(fbxPath);
-		if (it != _modelCache.end())
+	const auto modelAssets = ContentManager::Get()->GetModelAssets();
+	HString guidStr = GUIDToString(guid);
+	//从内容管理器查找资产
+	auto it = modelAssets.find(guid);
+	{	
+		if (it == modelAssets.end())
 		{
-			return it->second.get();
+			MessageOut(HString("Can not find [" + guidStr + "] model in content manager.").c_str(), false, false, "255,255,0");
+			return NULL;
 		}
 	}
-	if (fbxPath.Length() == 0) {
-		MessageOut(HString("Import Fbx To Memory : Path string error!" + fbxPath).c_str(), false, false, "255,255,0");
-		return NULL;
+	auto dataPtr = reinterpret_cast<AssetInfo<ModelData>*>(it->second);
+	if (dataPtr->IsAssetLoad())
+	{
+		return dataPtr->GetData();
 	}
-	if (!FileSystem::FileExist(fbxPath.c_str()))
+	//获取实际路径
+	HString filePath = FileSystem::GetContentAbsPath() + it->second->relativePath + guidStr + ".fbx";
+	filePath.CorrectionPath();
+	if (!FileSystem::FileExist(filePath.c_str()))
 	{
 		return NULL;
 	}
-	fbxPath.CorrectionPath();
 	//导入fbx文件
-	ConsoleDebug::print_endl("Ready import fbx model :" + fbxPath , "255,255,255");
+	ConsoleDebug::print_endl("Ready import fbx model :" + filePath, "255,255,255");
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(fbxPath.c_str(),
+	const aiScene* scene = importer.ReadFile(filePath.c_str(),
 		aiProcess_CalcTangentSpace |
 		aiProcess_Triangulate |
 		aiProcess_JoinIdenticalVertices |
@@ -64,7 +71,7 @@ ModelData* ModelFileStream::ImportFbxToMemory(HString fbxPath)
 	}
 
 	auto modelData = std::make_unique<ModelData>();
-
+	modelData->guid = guid;
 	glm::vec3 boundingBox_min = glm::vec3(0, 0, 0);
 	glm::vec3 boundingBox_max = glm::vec3(0, 0, 0);
 	for (unsigned int nm = 0; nm < scene->mNumMeshes; nm++)
@@ -185,10 +192,12 @@ ModelData* ModelFileStream::ImportFbxToMemory(HString fbxPath)
 		modelData->faces.push_back(newData);
 	}
 	//----------------------
-	modelData->filePath = fbxPath;
-	_modelCache.emplace(std::make_pair(fbxPath, std::move(modelData)));
+	modelData->filePath = filePath;
+	//_modelCache.emplace(std::make_pair(fbxPath, std::move(modelData)));
 
-	return _modelCache[fbxPath].get();
+	dataPtr->SetData(std::move(modelData));
+
+	return dataPtr->GetData();
 }
 
 bool ModelFileStream::BuildModelPrimitives(ModelData* data, std::vector<ModelPrimitive>& prims)
