@@ -193,8 +193,8 @@
     <ClInclude Include="Common\RendererType.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="Common\ContentManager.h">
-      <Filter>Common</Filter>
+    <ClInclude Include="Core\Resource\ContentManager.h">
+      <Filter>Renderer\Core\Resource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -324,8 +324,8 @@
     <ClCompile Include="..\ThirdParty\lodepng\lodepng.cpp">
       <Filter>ThirdParty\lodepng</Filter>
     </ClCompile>
-    <ClCompile Include="Common\ContentManager.cpp">
-      <Filter>Common</Filter>
+    <ClCompile Include="Core\Resource\ContentManager.cpp">
+      <Filter>Renderer\Core\Resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -179,7 +179,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\glfw\include;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\glfw\include;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -202,7 +202,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\glfw\include;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\glfw\include;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -227,7 +227,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\glfw\include;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\glfw\include;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -257,7 +257,6 @@
     <ClInclude Include="..\ThirdParty\pugixml\pugixml.hpp" />
     <ClInclude Include="Common\Common.h" />
     <ClInclude Include="Common\ConsoleDebug.h" />
-    <ClInclude Include="Common\ContentManager.h" />
     <ClInclude Include="Common\DDSTool.h" />
     <ClInclude Include="Common\FileSystem.h" />
     <ClInclude Include="Common\HInput.h" />
@@ -282,6 +281,7 @@
     <ClInclude Include="Core\Primitive.h" />
     <ClInclude Include="Core\RendererConfig.h" />
     <ClInclude Include="Core\PassManager.h" />
+    <ClInclude Include="Core\Resource\ContentManager.h" />
     <ClInclude Include="Core\Resource\HGuid.h" />
     <ClInclude Include="Core\Resource\ModelData.h" />
     <ClInclude Include="Core\Resource\SceneManager.h" />
@@ -307,7 +307,6 @@
     <ClCompile Include="..\ThirdParty\pugixml\pugixml.cpp" />
     <ClCompile Include="Common\Common.cpp" />
     <ClCompile Include="Common\ConsoleDebug.cpp" />
-    <ClCompile Include="Common\ContentManager.cpp" />
     <ClCompile Include="Common\DDSTool.cpp" />
     <ClCompile Include="Common\FileSystem.cpp" />
     <ClCompile Include="Common\HInput.cpp" />
@@ -328,6 +327,7 @@
     <ClCompile Include="Core\Primitive.cpp" />
     <ClCompile Include="Core\RendererConfig.cpp" />
     <ClCompile Include="Core\PassManager.cpp" />
+    <ClCompile Include="Core\Resource\ContentManager.cpp" />
     <ClCompile Include="Core\Resource\HGuid.cpp" />
     <ClCompile Include="Core\Resource\ModelData.cpp" />
     <ClCompile Include="Core\Resource\SceneManager.cpp" />
