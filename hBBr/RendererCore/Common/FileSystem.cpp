@@ -105,6 +105,11 @@ bool FileSystem::FileCopy(const char* srcFile, const char* newPath)
     return fs::copy_file(srcFile, newPath);
 }
 
+uint64_t FileSystem::GetFileSize(const char* path)
+{
+    return fs::file_size(path);
+}
+
 std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char* suffix)
 {
     if (!fs::exists(path))

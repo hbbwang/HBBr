@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Common.h"
 #include <map>
 #include <unordered_map>
 #include <vector>
@@ -8,16 +9,20 @@
 #include "Resource/HGuid.h"
 #include "HString.h"
 
+//渲染器的资产名字在导入的过程中自动转换为GUID,而它的信息将会储存在Resource/Content/ContentReference.xml中。
+
 //资产类型
 enum class AssetType
 {
-	Unknow = -1,
-	Model = 0,			//fbx
-	Material = 1,		//mat
-	Scene = 2,			//scene
-	Texture2D = 3,		//tex2D
-	TextureCube = 4,	//texCube
-	Prefab = 5,			//frefab
+	Unknow = 0,
+	Model = 1,			//fbx
+	Material = 2,		//mat
+	Scene = 3,			//scene
+	Texture2D = 4,		//tex2D
+	TextureCube = 5,	//texCube
+	Prefab = 6,			//frefab
+
+	MaxNum = 32,
 };
 
 inline static HString GetAssetTypeString(AssetType type)
@@ -34,6 +39,11 @@ inline static HString GetAssetTypeString(AssetType type)
 	return "Unknow";
 }
 
+struct AssetInfoRefTemp
+{
+	HGUID guid;
+	AssetType type;
+};
 
 class AssetInfoBase
 {
@@ -43,42 +53,40 @@ public:
 	HGUID guid;
 	AssetType type;
 	HString name;
+	HString suffix;
 	HString relativePath;
+	uint64_t byteSize;
 	std::vector<AssetInfoBase*> refs;
-};
-
-template<typename T>
-class AssetInfo : public AssetInfoBase
-{
+	//用来暂时储存引用的guid和type,没有太多实际意义,通常是空的
+	std::vector<AssetInfoRefTemp> refTemps;
+	//
 	bool bAssetLoad = false;
-	std::unique_ptr<T> data = NULL;
-
-public:
-	AssetInfo():AssetInfoBase(){}
-	virtual ~AssetInfo() { ReleaseData(); }
-	inline T* GetData()const 
-	{
-		return data.get();
-	}
 
 	inline const bool IsAssetLoad()const
 	{
 		return bAssetLoad;
 	}
+};
 
-	inline void ReleaseData()
-	{
+template<class T>
+class AssetInfo : public AssetInfoBase
+{
+	std::unique_ptr<T> data = NULL;
+public:
+	AssetInfo():AssetInfoBase(){}
+	virtual ~AssetInfo() { ReleaseData(); }
+	inline T* GetData()const{
+		return data.get();
+	}
+	inline void ReleaseData(){
 		data.reset();
 		data = NULL;
 		bAssetLoad = false;
 	}
-
-	inline void SetData(std::unique_ptr<T> newData)
-	{
+	inline void SetData(std::unique_ptr<T> newData){
 		data = std::move(newData);
 		bAssetLoad = true;
 	}
-
 };
 
 class ContentManager
@@ -87,27 +95,51 @@ class ContentManager
 public:
 	~ContentManager();
 
-	inline static ContentManager* Get() { 
+	HBBR_API inline static ContentManager* Get() {
 		if (!_ptr)
 			_ptr.reset(new ContentManager());
 		return _ptr.get(); 
 	}
+	
+	/* 重载所有资产信息(只是加载引用信息,非资产本身) */
+	HBBR_API void ReloadAllAssetInfos();
 
-	void ReloadAllAssetInfos();
+	/* 重载相关类型资产的信息(只是加载引用信息,非资产本身) */
+	HBBR_API void ReloadAssetInfos(AssetType type);
 
-	void ReloadAssetInfos(AssetType type);
+	/* 更新所有资产引用关系 */
+	HBBR_API void UpdateAllAssetReference();
 
-	void UpdateReference(HGUID obj);
+	/* 根据AssetType更新资产的引用关系(Type) */
+	HBBR_API void UpdateAssetReferenceByType(AssetType type);
 
-	inline const std::unordered_map<HGUID, AssetInfoBase*>& GetModelAssets()const { return _ModelAssets; }
+	/* 更新单个资产的引用关系(GUID)&(Type) */
+	HBBR_API void UpdateAssetReference(AssetType type , HGUID obj);
 
-	inline const std::unordered_map<HGUID, AssetInfoBase*>& GetMaterialAssets()const { return _MaterialAssets; }
+	/* 更新单个资产的引用关系(GUID),不指定Type,会全局检索,可能会比较慢 */
+	HBBR_API void UpdateAssetReference(HGUID obj);
+
+	/* 导入资产信息, 注意:该操作不会检查是否存在相同名字和路径的资产 */
+	HBBR_API AssetInfoBase* ImportAssetInfo(AssetType type , HString sourcePath, HString contentPath);
+
+	/* 删除资产 */
+	HBBR_API void RemoveAssetInfo(HGUID obj, AssetType type = AssetType::Unknow);
+
+	HBBR_API inline const std::unordered_map<HGUID, AssetInfoBase*>& GetAssets(AssetType type)const { return _assets[(uint32_t)type]; }
 
 private:
+
+	/* 更新单个资产的引用关系(info) */
+	void UpdateAssetReference(AssetInfoBase* info);
+
+	/* 重载单个资产的信息(只是加载引用信息,非资产本身) */
+	void ReloadAssetInfo(AssetType type , pugi::xml_node& node);
 
 	void Release();
 
 	void ReleaseAssetsByType(AssetType type);
+
+	void ReleaseAsset(AssetType type, HGUID obj);
 
 	ContentManager();
 
@@ -116,9 +148,7 @@ private:
 	//<HGUID,资产信息>//
 	pugi::xml_document _contentRefConfig;
 
-	//models
-	std::unordered_map<HGUID, AssetInfoBase*>_ModelAssets;
+	std::vector<std::unordered_map<HGUID, AssetInfoBase*>>_assets;
 
-	//materials
-	std::unordered_map<HGUID, AssetInfoBase*>_MaterialAssets;
+	HString _configPath;
 };

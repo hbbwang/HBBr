@@ -17,7 +17,7 @@ Material::~Material()
 
 Material* Material::LoadMaterial(HGUID guid)
 {
-	const auto matAssets = ContentManager::Get()->GetMaterialAssets();
+	const auto matAssets = ContentManager::Get()->GetAssets(AssetType::Material);
 	HString guidStr = GUIDToString(guid);
 	//从内容管理器查找资产
 	auto it = matAssets.find(guid);

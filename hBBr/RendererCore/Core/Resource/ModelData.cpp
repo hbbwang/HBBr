@@ -19,7 +19,7 @@
 
 ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
 {
-	const auto modelAssets = ContentManager::Get()->GetModelAssets();
+	const auto modelAssets = ContentManager::Get()->GetAssets(AssetType::Model);
 	HString guidStr = GUIDToString(guid);
 	//从内容管理器查找资产
 	auto it = modelAssets.find(guid);

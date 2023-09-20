@@ -22,6 +22,7 @@
 #include "qabstractitemview.h"
 
 #include "Component/Material.h"
+#include "Resource/ContentManager.h"
 
 QWidget* ContentBrowser::_currentFocusContentBrowser = NULL;
 QList<QWidget*> ContentBrowser::_allContentBrowser;
@@ -520,7 +521,7 @@ void ContentBrowser::ResourceImport()
 		//
 		if (fileInfo.suffix().compare("fbx",Qt::CaseInsensitive) == 0)
 		{
-
+			ContentManager::Get()->ImportAssetInfo(AssetType::Model, i.toStdString().c_str(), _treeFileSystemModel->filePath(_treeWidget->currentIndex()).toStdString().c_str());
 		}
 		else if (fileInfo.suffix().compare("tga", Qt::CaseInsensitive) == 0 ||
 			fileInfo.suffix().compare("png", Qt::CaseInsensitive) == 0||

@@ -66,7 +66,7 @@ inline bool StringToGUID(const char* guidString, HGUID* guid)
         &guid->Data4[4], &guid->Data4[5], &guid->Data4[6], &guid->Data4[7]) == 11;
 }
 
-inline HString CreateUUIDString()
+inline HString CreateGUIDString()
 {
     return GUIDToString(CreateGUID());
 }
