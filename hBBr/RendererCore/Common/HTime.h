@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <chrono>
-
+#include "HString.h"
 /* 高精度计时器 */
 class HTime
 {
@@ -18,6 +18,12 @@ public:
 	double End_s();
 
 	double FrameRate_ms();
+
+	/* 获取当前的[年-月-日-小时-分钟-秒-毫秒-微秒]*/
+	static HString CurrentDateAndTimeH(bool setW=true);
+
+	/* 获取当前的[年-月-日-小时-分钟-秒]*/
+	static HString CurrentDateAndTime();
 
 private:
 

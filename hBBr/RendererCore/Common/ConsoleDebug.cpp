@@ -1,5 +1,6 @@
-#include <time.h>
+#include <ctime>
 #include "ConsoleDebug.h"
+#include "HTime.h"
 #include <mutex>
 HANDLE ConsoleDebug::ReadMessageThread = NULL;
 SOCKET ConsoleDebug::tcpSocket;
@@ -13,6 +14,7 @@ bool ConsoleDebug::bConnectedConsole = false;
 bool ConsoleDebug::bConnectedFailed = false;
 HANDLE ConsoleDebug::socketAcceptThread;
 FILE* ConsoleDebug::log_file = NULL;
+HString LogFileName = (HString(".\\log_") + HTime::CurrentDateAndTime() + ".txt");
 std::function<void(HString,  float, float, float, HString)> ConsoleDebug::printFuncAdd = [](HString, float, float, float, HString) {};
 
 STARTUPINFO ConsoleDebug::si;
@@ -53,6 +55,17 @@ DWORD WINAPI SocketAcceptThreadFunc(LPVOID lpParamter)
         ConsoleDebug::consoleSockets.push_back(accept(ConsoleDebug::tcpSocket, (sockaddr FAR*) & addrClient, &addrClientlen));
     }
     return 0;
+}
+
+void WriteToLogFile(FILE* &log_file , HString log)
+{
+    auto err_src_name = fopen_s(&log_file, LogFileName.c_str(), "a+");
+    if (log_file)
+    {
+        fwrite(log.c_str(), strlen(log.c_str()), 1, log_file);
+        fclose(log_file);
+        log_file = NULL;
+    }
 }
 
 void ConsoleDebug::CreateConsole(HString consolePath ,bool bNoClient)
@@ -127,14 +140,8 @@ void ConsoleDebug::CreateConsole(HString consolePath ,bool bNoClient)
     ReadMessageThread = CreateThread(NULL, 0, ReadConsoleMsgThreadFunc, 0, 0, 0);
 
     //Create Log file
-
-    auto err_src_name = fopen_s(&log_file, ".\\log.txt" , "w+");
-    if (log_file)
-    {
-        fclose(log_file);
-        log_file = NULL;
-    }
-
+    LogFileName = (HString(".\\log_") + HTime::CurrentDateAndTime() + ".txt");
+    WriteToLogFile(log_file,"");
 }
 
 void ConsoleDebug::CleanupConsole()
@@ -184,19 +191,7 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
     std::lock_guard<std::mutex> lock(g_num_mutex);
     if (in.Length() > 0 )
     {
-        // 基于当前系统的当前日期/时间
-        time_t now = time(0);
-        // 把 now 转换为字符串形式
-        struct tm tTm;
-        localtime_s(&tTm, &now);
-        tTm.tm_year += 1900;
-        tTm.tm_mon++;
-        char szTime[128];
-        sprintf_s(szTime, "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d",
-            tTm.tm_year, tTm.tm_mon, tTm.tm_mday,
-            tTm.tm_hour, tTm.tm_min, tTm.tm_sec);
-
-        HString Data = szTime;
+        HString Data = HTime::CurrentDateAndTimeH();
 
         std::vector<HString> colorArray = color.Split(",");
         float r, g, b;
@@ -226,13 +221,8 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
         OutputDebugStringA(nIn.c_str());
         printFuncAdd(nIn, r / 255.0f, g / 255, b / 255, Data);
 
-        auto err_src_name = fopen_s(&log_file, ".\\log.txt", "a+");
-        if (log_file)
-        {
-            fwrite(nIn.c_str(), strlen(nIn.c_str()), 1, log_file);
-            fclose(log_file);
-            log_file = NULL;
-        }
+        WriteToLogFile(log_file, nIn);
+
         if (bConnectedConsole == true)
         {
             HString out = nIn;
@@ -263,19 +253,7 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
     std::lock_guard<std::mutex> lock(g_num_mutex);
     if (in.Length() > 0 )
     {
-        // 基于当前系统的当前日期/时间
-        time_t now = time(0);
-        // 把 now 转换为字符串形式
-        struct tm tTm;
-        localtime_s(&tTm, &now);
-        tTm.tm_year += 1900;
-        tTm.tm_mon++;
-        char szTime[128];
-        sprintf_s(szTime, "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d",
-            tTm.tm_year, tTm.tm_mon, tTm.tm_mday,
-            tTm.tm_hour, tTm.tm_min, tTm.tm_sec);
-
-        HString Data = szTime;
+        HString Data = HTime::CurrentDateAndTimeH();
 
         std::vector<HString> colorArray = color.Split(",");
         float r, g, b;
@@ -308,13 +286,8 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
 
         printFuncAdd(nIn, r / 255.0f, g / 255, b / 255, Data);
 
-        auto err_src_name = fopen_s(&log_file, ".\\log.txt", "a+");
-        if (log_file != NULL)
-        {
-            fwrite(nIn.c_str(), strlen(nIn.c_str()), 1, log_file);
-            fclose(log_file);
-            log_file = NULL;
-        }
+        WriteToLogFile(log_file, nIn);
+
         if (bConnectedConsole == true)
         {
             HString out = (Data + in);

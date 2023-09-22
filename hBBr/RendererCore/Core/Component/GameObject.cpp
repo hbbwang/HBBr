@@ -5,8 +5,9 @@
 #include "Component.h"
 #include "ConsoleDebug.h"
 #include "Component/ModelComponent.h"
-GameObject::GameObject(HString objectName, SceneManager* scene)
+GameObject::GameObject(HString objectName, SceneManager* scene, bool SceneEditorHide)
 {
+	_sceneEditorHide = SceneEditorHide;
 	if (scene == NULL)
 	{
 		_scene = VulkanApp::GetMainForm()->renderer->GetScene();
@@ -57,7 +58,8 @@ void GameObject::SetObjectName(HString newName)
 {
 #if IS_EDITOR
 	ConsoleDebug::print_endl("GameObject "+ _name +" rename : " + newName);
-	_bEditorNeedUpdate = true;
+	if(!_sceneEditorHide)
+		_bEditorNeedUpdate = true;
 #endif
 	_name = newName;
 }
@@ -85,9 +87,9 @@ void GameObject::SetParent(GameObject* newParent)
 		_parent->_children.push_back(this);
 		if (_transform)
 			_transform->ResetTransformForAttachment();
-#if IS_EDITOR
+		#if IS_EDITOR
 		ConsoleDebug::print_endl("GameObject " + _name + " attach to  : " + newParent->GetObjectName());
-#endif
+		#endif
 	}
 	else
 	{
@@ -113,9 +115,10 @@ void GameObject::SetParent(GameObject* newParent)
 
 void GameObject::Init()
 {
-#if IS_EDITOR
-	_bEditorNeedUpdate = true;
-#endif
+	#if IS_EDITOR
+	if (!_sceneEditorHide)
+		_bEditorNeedUpdate = true;
+	#endif
 	_bInit = true;
 }
 

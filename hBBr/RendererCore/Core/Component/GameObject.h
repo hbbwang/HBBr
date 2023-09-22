@@ -10,7 +10,7 @@ class GameObject
 	friend class Component;
 public:
 
-	GameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL);
+	GameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL , bool SceneEditorHide = false);
 	~GameObject();
 
 	HBBR_API static GameObject* CreateGameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL);
@@ -69,6 +69,7 @@ public:
 #if IS_EDITOR
 	void* _editorObject = NULL;
 	bool _bEditorNeedUpdate = false;
+	bool _sceneEditorHide = false;
 #endif
 
 private:

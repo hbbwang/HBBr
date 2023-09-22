@@ -26,7 +26,7 @@ void SceneManager::SceneInit(class VulkanRenderer* renderer)
 
 #if IS_EDITOR
 	//create editor camera
-	auto backCamera = new GameObject();
+	auto backCamera = new GameObject("EditorCamera", NULL, true);
 	backCamera->GetTransform()->SetWorldLocation(glm::vec3(0, 2, -3.0));
 	auto cameraComp = backCamera->AddComponent<CameraComponent>();
 	cameraComp->OverrideMainCamera();
@@ -76,7 +76,8 @@ void SceneManager::SceneUpdate()
 		else
 		{
 			#if IS_EDITOR
-			_editorGameObjectUpdateFunc(this, _gameObjects[i]);
+			if (!_gameObjects[i]->_sceneEditorHide)
+				_editorGameObjectUpdateFunc(this, _gameObjects[i]);
 			#endif
 		}
 	}
@@ -91,7 +92,11 @@ void SceneManager::AddNewObject(std::shared_ptr<GameObject> newObject)
 {
 	_gameObjects.push_back(newObject);
 	#if IS_EDITOR
-		_editorGameObjectAddFunc(this, newObject);
+	if (!newObject->_sceneEditorHide)
+	{
+		if (!newObject->_sceneEditorHide)
+			_editorGameObjectAddFunc(this, newObject);
+	}
 	#endif
 }
 
@@ -106,6 +111,7 @@ void SceneManager::RemoveObject(GameObject* object)
 		//延迟到下一帧再销毁
 		_gameObjectNeedDestroy.push_back(*it);
 		#if IS_EDITOR
+		if(!((*it)->_sceneEditorHide))
 			_editorGameObjectRemoveFunc(this, *it);
 		#endif
 		_gameObjects.erase(it);
