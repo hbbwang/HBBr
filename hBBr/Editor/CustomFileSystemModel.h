@@ -3,6 +3,8 @@
 #include <qfilesystemmodel.h>
 #include "CustomFileIconProvider.h"
 #include <QTreeView>
+
+class CustomListView;
 class CustomTreeView;
 
 class CustomFileSystemModel  : public QFileSystemModel
@@ -13,6 +15,8 @@ public:
 	~CustomFileSystemModel();
 
 	CustomTreeView* _contentBrowserTreeView=NULL;
+
+	CustomListView* _contentBrowserListView = NULL;
 
 	QVariant data(const QModelIndex& index, int role) const;
 

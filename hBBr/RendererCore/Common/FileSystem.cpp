@@ -102,7 +102,13 @@ bool FileSystem::IsNormalFile(const char* path)
 
 bool FileSystem::FileCopy(const char* srcFile, const char* newPath)
 {
-    return fs::copy_file(srcFile, newPath);
+    fs::copy(srcFile, newPath);
+    return 1;
+}
+
+bool FileSystem::FileRemove(const char* path)
+{  
+    return fs::remove(path);
 }
 
 uint64_t FileSystem::GetFileSize(const char* path)

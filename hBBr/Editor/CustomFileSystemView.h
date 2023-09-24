@@ -3,6 +3,7 @@
 #include <QListView>
 #include <qtreeview.h>
 #include <qtooltip.h>
+#include "Resource/ContentManager.h"
 
 class QWidgetAction;
 class QLineEdit;
@@ -25,6 +26,10 @@ public:
 	QSize _iconSize = QSize(85,85);
 	QSize _minIconSize = QSize(30, 30);
 	QSize _maxIconSize = QSize(250, 250);
+
+	QMap<QModelIndex,class AssetInfoBase*> _fileInfos;
+
+	virtual void setRootIndex(const QModelIndex& index)override;
 
 protected:
 	bool bShowToolTip = false;

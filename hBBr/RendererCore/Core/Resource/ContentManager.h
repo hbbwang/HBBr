@@ -8,7 +8,7 @@
 #include "pugixml/pugixml.hpp"
 #include "Resource/HGuid.h"
 #include "HString.h"
-
+#include "Resource/HGuid.h"
 //渲染器的资产名字在导入的过程中自动转换为GUID,而它的信息将会储存在Resource/Content/ContentReference.xml中。
 
 //资产类型
@@ -123,9 +123,14 @@ public:
 	HBBR_API AssetInfoBase* ImportAssetInfo(AssetType type , HString sourcePath, HString contentPath);
 
 	/* 删除资产 */
+	HBBR_API void  DeleteAsset(HString filePath);
+
+	/* 删除资产信息 */
 	HBBR_API void RemoveAssetInfo(HGUID obj, AssetType type = AssetType::Unknow);
 
 	HBBR_API inline const std::unordered_map<HGUID, AssetInfoBase*>& GetAssets(AssetType type)const { return _assets[(uint32_t)type]; }
+
+	HBBR_API AssetInfoBase* GetAssetInfo(HGUID guid, AssetType type = AssetType::Unknow)const;
 
 private:
 

@@ -179,24 +179,68 @@ AssetInfoBase* ContentManager::ImportAssetInfo(AssetType type, HString sourcePat
 	ReloadAssetInfo(type,item);
 
 	//
-	FileSystem::FileCopy(sourcePath.c_str(), contentPath.c_str());
+	sourcePath.CorrectionPath();
+	contentPath += "/";
+	contentPath += guidStr + "." + suffix;
+	contentPath.CorrectionPath();
+	FileSystem::FileCopy(sourcePath.c_str(), contentPath .c_str());
 
 	//保存
 	_contentRefConfig.save_file(_configPath.c_wstr());
 	return result;
 }
 
+void ContentManager::DeleteAsset(HString filePath)
+{
+	HString guidStr = filePath.GetBaseName();
+	HGUID guid;
+	StringToGUID(guidStr.c_str(), &guid);
+	RemoveAssetInfo(guid);
+	FileSystem::FileRemove(filePath.c_str());
+}
+
 void ContentManager::RemoveAssetInfo(HGUID obj, AssetType type )
 {
-	HString typeName = GetAssetTypeString(type);
-	HString guidStr = GUIDToString(obj);
-	pugi::xml_node subGroup = _contentRefConfig.child(TEXT("root")).child(typeName.c_wstr());
 	if (type == AssetType::Unknow)
 	{
 		for (auto i : _assets)
 		{
 			auto it = i.find(obj);
 			if (it != i.end())
+			{
+				type = it->second->type;
+				//移除引用关系
+				for (auto i : it->second->refs)
+				{
+					auto iit = std::remove_if(i->refs.begin(), i->refs.end(), [obj](AssetInfoBase*& info) {
+						return info->guid == obj;
+						});
+					if (iit != it->second->refs.end())
+					{
+						i->refs.erase(iit);
+					}
+				}
+				HString typeName = GetAssetTypeString(type);
+				HString guidStr = GUIDToString(obj);
+				pugi::xml_node subGroup = _contentRefConfig.child(TEXT("root")).child(typeName.c_wstr());
+				if (subGroup)
+				{
+					auto item = subGroup.find_child_by_attribute(TEXT("GUID"), guidStr.c_wstr());
+					subGroup.remove_child(item);
+				}
+			}
+		}
+	}
+	else
+	{
+		HString typeName = GetAssetTypeString(type);
+		HString guidStr = GUIDToString(obj);
+		pugi::xml_node subGroup = _contentRefConfig.child(TEXT("root")).child(typeName.c_wstr());
+		if (subGroup)
+		{
+			//移除资产信息
+			auto it = _assets[(uint32_t)type].find(obj);
+			if (it != _assets[(uint32_t)type].end())
 			{
 				//移除引用关系
 				for (auto i : it->second->refs)
@@ -214,27 +258,32 @@ void ContentManager::RemoveAssetInfo(HGUID obj, AssetType type )
 			}
 		}
 	}
-	else
-	{
-		//移除资产
-		auto it = _assets[(uint32_t)type].find(obj);
-		if (it != _assets[(uint32_t)type].end())
-		{
-			//移除引用关系
-			for (auto i : it->second->refs)
-			{
-				auto iit = std::remove_if(i->refs.begin(), i->refs.end(), [obj](AssetInfoBase*& info) {
-					return info->guid == obj;
-					});
-				if (iit != it->second->refs.end())
-				{
-					i->refs.erase(iit);
-				}
-			}
-			auto item = subGroup.find_child_by_attribute(TEXT("GUID"), guidStr.c_wstr());
-			subGroup.remove_child(item);
-		}
-	}
 	//保存
 	_contentRefConfig.save_file(_configPath.c_wstr());
+}
+
+AssetInfoBase* ContentManager::GetAssetInfo(HGUID guid, AssetType type)const 
+{
+	if (type != AssetType::Unknow)
+	{
+		auto it = _assets[(uint32_t)type].find(guid);
+		if (it != _assets[(uint32_t)type].end())
+		{
+			return it->second;
+		}
+		return NULL;
+	}
+	else
+	{
+		for (auto i : _assets)
+		{
+			auto it = i.find(guid);
+			if (it != i.end())
+			{
+				return it->second;
+			}
+		}
+		return NULL;
+	}
+	return NULL;
 }

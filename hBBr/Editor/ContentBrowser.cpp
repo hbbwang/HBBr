@@ -93,10 +93,11 @@ ContentBrowser::ContentBrowser(QWidget *parent)
 
 	//List
 	_listFileSystemModel = new CustomFileSystemModel(_listWidget);
+	_listFileSystemModel->_contentBrowserListView = _listWidget;
 	list_filters = QDir::Files | QDir::Dirs |QDir::AllDirs | QDir::NoDotAndDotDot;
 	_listFileSystemModel->setFilter(list_filters);
 	QStringList nameFilter;
-	nameFilter << "*.xml" << "*.qss" << "*.cache" << "*.dds" << "*.tex" << "*.texCube" << "*.mat" << "*.fx" << "*.hlsl" << "*.ini" << "*.fbx" << "*.scene" << "*.prefab";
+	nameFilter << "*.qss" << "*.cache" << "*.dds" << "*.tex" << "*.texCube" << "*.mat" << "*.fx" << "*.hlsl" << "*.ini" << "*.fbx" << "*.scene" << "*.prefab";
 	list_filterCache = nameFilter;
 	_listFileSystemModel->setNameFilterDisables(false);
 	_listFileSystemModel->setNameFilters(list_filterCache);

@@ -43,7 +43,9 @@ ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
 		return NULL;
 	}
 	//导入fbx文件
+#if IS_EDITOR
 	ConsoleDebug::print_endl("Ready import fbx model :" + filePath, "255,255,255");
+#endif
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(filePath.c_str(),
 		aiProcess_CalcTangentSpace |
@@ -77,7 +79,9 @@ ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
 	for (unsigned int nm = 0; nm < scene->mNumMeshes; nm++)
 	{
 		aiMesh* mesh = scene->mMeshes[nm];
+#if IS_EDITOR
 		ConsoleDebug::print_endl("Found meshes successful.\nThere are " + HString::FromUInt(mesh->mNumVertices) + " vertices have been found.", "160,160,160");
+#endif
 		//
 		FaceData newData = {};
 		newData.vertexNum = mesh->mNumVertices;

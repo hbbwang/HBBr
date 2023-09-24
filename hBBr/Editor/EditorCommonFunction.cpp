@@ -54,11 +54,17 @@ QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
 	return result;
 }
 
+/*--------------------渲染器相关----------------------*/
+#include "Resource/ContentManager.h"
+#include "Resource/HGuid.h"
+/*----------------------------------------------------*/
+
 bool DeleteAllFile(QString path)
 {
     QFileInfo checkInfo(path);
     if (checkInfo.isFile())
     {
+        ContentManager::Get()->DeleteAsset(path.toStdString().c_str());
         QFile::remove(path);
         return true;
     }
@@ -78,6 +84,7 @@ bool DeleteAllFile(QString path)
             curFile = fileList[i];
             if (curFile.isFile())//如果是文件，删除文件
             {
+                ContentManager::Get()->DeleteAsset(curFile.filePath().toStdString().c_str());
                 QFile fileTemp(curFile.filePath());
                 fileTemp.remove();
                 fileList.removeAt(i);

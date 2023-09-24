@@ -118,6 +118,37 @@ void CustomListView::focusOutEvent(QFocusEvent* event)
 	__super::focusOutEvent(event);
 }
 
+void CustomListView::setRootIndex(const QModelIndex& index)
+{
+	QListView::setRootIndex(index);
+	//获取当前目录的所有资产的文件信息
+	{
+		_fileInfos.clear();
+		if (model())
+		{
+			auto mod = qobject_cast<QFileSystemModel*>(model());
+			if (mod)
+			{
+				QDir dir(mod->filePath(index));
+				if (dir.exists())
+				{
+					for (auto i : dir.entryInfoList())
+					{
+						HGUID guid;
+						StringToGUID(i.baseName().toStdString().c_str(), &guid);
+						auto assetInfo = ContentManager::Get()->GetAssetInfo(guid);
+						if (assetInfo)
+						{
+							auto modelIndex = mod->index(i.absoluteFilePath());
+							_fileInfos.insert(modelIndex, assetInfo);
+						}
+					}
+				}
+			}		
+		}
+	}
+}
+
 void CustomListView::mouseMoveEvent(QMouseEvent* event)
 {
 	QModelIndex index = this->indexAt(event->pos() );
@@ -130,12 +161,25 @@ void CustomListView::mouseMoveEvent(QMouseEvent* event)
 			CustomFileSystemModel* dmodel = reinterpret_cast<CustomFileSystemModel*>(this->model());
 			if (dmodel)
 			{
+				auto assetInfo = _fileInfos[index];
 				QFileInfo fileInfo(dmodel->filePath(index));
-				QString fileName = "Name: " + fileInfo.fileName();
+				QString fileName;
+				QString byteSize;
+				if (fileInfo.isDir() && !assetInfo)
+				{
+					fileName = fileInfo.fileName();
+					byteSize = "ByteSize: " + fileInfo.size();
+				}
+				else
+				{
+					fileName = assetInfo->name.c_str();
+					byteSize = "ByteSize: " + QString::number(assetInfo->byteSize);
+				}
+				fileName = "Name: " + fileName;
 				QString suffix = "Type: ";
 				suffix += fileInfo.isDir() ? "folder" : fileInfo.suffix();
-				QString filePath = "Path: " + fileInfo.absolutePath();
-				QToolTip::showText(QCursor::pos(), fileName + "\n" + suffix + "\n" + filePath, this);
+				QString filePath = "Path: " + fileInfo.absolutePath();		
+				QToolTip::showText(QCursor::pos(), fileName + "\n" + suffix + "\n" + byteSize + "\n" + filePath, this);
 				bShowToolTip = true;
 			}
 			else
@@ -241,7 +285,6 @@ void CustomListView::DeleteFile()
 		int result = msgBox.exec();
 		if (result == QMessageBox::Yes)
 		{
-
 			for (auto i : this->selectedIndexes())
 			{
 				QString filePath = dmodel->filePath(i);
@@ -333,6 +376,7 @@ void CustomTreeView::wheelEvent(QWheelEvent* event)
 	}
 	__super::wheelEvent(event);
 }
+
 void CustomTreeView::CustomContextMenu(const QPoint& point)
 {
 	if (_menu != NULL && currentIndex().isValid())
@@ -446,6 +490,7 @@ void CustomTreeView::DeleteFile()
 		}
 	}
 }
+
 void CustomTreeView::RenameFile()
 {
 	if(currentIndex().isValid())
