@@ -1,12 +1,13 @@
 ﻿#pragma once
 //Vulkan底层核心管理类
 
+#include "GLFWInclude.h"
+
 #if defined(_WIN32)
 	#define WIN32_LEAN_AND_MEAN             // 从 Windows 头文件中排除极少使用的内容
 	#define VK_USE_PLATFORM_WIN32_KHR	1	//support win32
 	#include <stdlib.h>
 	#include <Windows.h>
-	#include "GLFWInclude.h"
 #elif defined(__ANDROID__)
 	#include <vulkan/vulkan_android.h>
 #elif defined(__linux__)
@@ -81,7 +82,7 @@ public:
 	void InitDebug();
 
 	/* 创建Surface */
-	void CreateSurface(void* handle, VkSurfaceKHR& newSurface);
+	void CreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurface);
 
 	/* 释放Surface */
 	void DestroySurface(VkSurfaceKHR surface);
@@ -219,7 +220,7 @@ public:
 
 	void CreateShaderModule(VkDevice device, std::vector<char> data, VkShaderModule& shaderModule);
 
-	void InitImgui(void* handle , VkRenderPass renderPass , uint32_t subPassIndex = 0);
+	void InitImgui_SDL(SDL_Window* handle , VkRenderPass renderPass , uint32_t subPassIndex = 0);
 
 	void ShutdownImgui();
 

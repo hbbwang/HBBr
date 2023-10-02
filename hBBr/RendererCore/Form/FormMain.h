@@ -8,7 +8,7 @@ typedef void (*FormDropFun)(int path_count, const char* paths[]);
 struct VulkanForm
 {
 	HString name;
-	GLFWwindow* window = NULL;
+	SDL_Window* window = NULL;
 	class VulkanRenderer* renderer = NULL;
 };
 
@@ -23,9 +23,10 @@ public:
 	HBBR_API static VulkanForm* InitVulkanManager(bool bCustomRenderLoop,bool bEnableDebug = false);
 	HBBR_API static void DeInitVulkanManager();
 	HBBR_API static bool UpdateForm();
+	HBBR_API static void UpdateRender();
 
 	HBBR_API static VulkanForm* CreateNewWindow(uint32_t w = 512, uint32_t h = 512, const char* title = "Renderer",bool bCreateRenderer = false);
-	HBBR_API static bool IsWindowFocus(void* windowHandle);
+	HBBR_API static bool IsWindowFocus(SDL_Window* windowHandle);
 	HBBR_API static std::vector<VulkanForm>& GetForms() { return _forms; }
 	HBBR_API static void RemoveWindow(VulkanForm* form);
 	HBBR_API static void ResizeWindow(VulkanForm* form, uint32_t w, uint32_t h);
@@ -38,7 +39,7 @@ public:
 	//Callbacks
 	static std::vector<FormDropFun> _dropFuns;
 
-	static void* _focusWindow;
+	static SDL_Window* _focusWindow;
 
 private:
 

@@ -7,7 +7,9 @@
 #include "Component/ModelComponent.h"
 GameObject::GameObject(HString objectName, SceneManager* scene, bool SceneEditorHide)
 {
+#if IS_EDITOR
 	_sceneEditorHide = SceneEditorHide;
+#endif
 	if (scene == NULL)
 	{
 		_scene = VulkanApp::GetMainForm()->renderer->GetScene();

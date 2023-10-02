@@ -15,14 +15,14 @@
 
 std::vector<VulkanForm> VulkanApp::_forms;
 VulkanForm* VulkanApp::_mainForm;
-void* VulkanApp::_focusWindow = NULL;
+SDL_Window* VulkanApp::_focusWindow = NULL;
 std::vector<FormDropFun> VulkanApp::_dropFuns;
 
-void ResizeCallBack(GLFWwindow* window, int width, int height)
+void ResizeCallBack(SDL_Window* window, int width, int height)
 {
-	auto it = std::find_if(VulkanApp::GetForms().begin(),VulkanApp::GetForms().end(), [window](VulkanForm& glfw)
+	auto it = std::find_if(VulkanApp::GetForms().begin(),VulkanApp::GetForms().end(), [window](VulkanForm& form)
 	{
-		return glfw.window == window;
+		return form.window == window;
 	});
 	if (it != VulkanApp::GetForms().end() && it->renderer)
 	{
@@ -30,11 +30,11 @@ void ResizeCallBack(GLFWwindow* window, int width, int height)
 	}
 }
 
-void CloseCallBack(GLFWwindow* window)
+void CloseCallBack(SDL_Window* window)
 {
-	auto it = std::find_if(VulkanApp::GetForms().begin(), VulkanApp::GetForms().end(), [window](VulkanForm& glfw)
+	auto it = std::find_if(VulkanApp::GetForms().begin(), VulkanApp::GetForms().end(), [window](VulkanForm& form)
 	{
-		return glfw.window == window;
+		return form.window == window;
 	});
 	if (it != VulkanApp::GetForms().end())
 	{
@@ -46,7 +46,7 @@ void CloseCallBack(GLFWwindow* window)
 	}
 }
 
-void FocusCallBack(GLFWwindow* window, int focused)
+void FocusCallBack(SDL_Window* window, int focused)
 {
 	if (focused == 1)
 		VulkanApp::_focusWindow = window;
@@ -54,33 +54,28 @@ void FocusCallBack(GLFWwindow* window, int focused)
 		VulkanApp::_focusWindow = NULL;
 }
 
-void KeyBoardCallBack(GLFWwindow* window, int key, int scancode, int action, int mods)
+void KeyBoardCallBack(SDL_Window* window, int key, int scancode, int action, int mods)
 {
 	HInput::KeyProcess((void*)window , (KeyCode)key, (KeyMod)mods, (Action)action);
 }
 
-void MouseButtonCallBack(GLFWwindow* window, int button, int action, int mods)
+void MouseButtonCallBack(SDL_Window* window, int button, int action, int mods)
 {
-	glfwFocusWindow(window);
+	SDL_SetWindowInputFocus(window);	
 	HInput::MouseProcess((void*)window, (MouseButton)button, (KeyMod)mods, (Action)action);
 }
 
-void CursorPosCallBack(GLFWwindow* window, double xpos, double ypos)
+void CursorPosCallBack(SDL_Window* window, double xpos, double ypos)
 {
 	VulkanApp::SetCursorPos(glm::vec2(xpos, ypos));
 }
 
-void CursorEnterCallBack(GLFWwindow* window, int entered)
+void ScrollCallBack(SDL_Window* window, double xoffset, double yoffset)
 {
 
 }
 
-void ScrollCallBack(GLFWwindow* window, double xoffset, double yoffset)
-{
-
-}
-
-void DropCallBack(GLFWwindow* window, int path_count, const char* paths[])
+void DropCallBack(SDL_Window* window, int path_count, const char* paths[])
 {
 	for (auto& i : VulkanApp::_dropFuns)
 	{
@@ -88,24 +83,18 @@ void DropCallBack(GLFWwindow* window, int path_count, const char* paths[])
 	}
 }
 
-void JoystickCallBack(int jid, int event)
-{
-
-}
-
-void MonitorCallBack(GLFWmonitor* monitor, int event)
-{
-
-}
-
 VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDebug)
 {
 	//must be successful.
-	if (!glfwInit())
+	if (SDL_Init(SDL_INIT_EVERYTHING) == -1)
 	{
-		MessageOut("Init glfw failed.", true, true, "255,0,0");
+		MessageOut("Init sdl2 failed.", true, true, "255,0,0");
 	}
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
+	if (SDL_Vulkan_LoadLibrary(NULL) == -1)
+	{
+		MessageOut(SDL_GetError(), true, true, "255,0,0");
+	}
 
 	VulkanManager::InitManager(bEnableDebug);
 #if IS_EDITOR
@@ -113,6 +102,7 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 #endif
 	Shader::LoadShaderCache(FileSystem::GetShaderCacheAbsPath().c_str());
 	ContentManager::Get();
+
 	//Create Main Window
 	auto win = CreateNewWindow(128, 128, "MainRenderer", true);
 
@@ -149,7 +139,7 @@ void VulkanApp::DeInitVulkanManager()
 			}
 			if (_forms[i].window)
 			{
-				glfwSetWindowShouldClose(_forms[i].window, true);
+				SDL_DestroyWindow(_forms[i].window);
 			}
 		}
 		_forms.clear();
@@ -158,69 +148,91 @@ void VulkanApp::DeInitVulkanManager()
 	PipelineManager::ClearPipelineObjects();
 	VulkanManager::ReleaseManager();
 	//ContentManager::Get()->Release();
-	glfwTerminate();
+	SDL_Quit();
 }
 
+//DISABLE_CODE_OPTIMIZE
 bool VulkanApp::UpdateForm()
 {
-	bool quit = true;
-	glfwPollEvents();
-	for (int i = 0; i < _forms.size(); i++)
+	SDL_Event event;
+	while (SDL_PollEvent(&event))
 	{
-		if (glfwWindowShouldClose(_forms[i].window))
+		auto win = SDL_GetWindowFromID(event.window.windowID);
+		auto winForm = std::find_if(_forms.begin(), _forms.end(), [win](VulkanForm& form) {
+			return form.window == win;
+		});
+		switch (event.type) 
 		{
-			RemoveWindow(&_forms[i]);
-			i = i - 1;
-			return true;
+			//case 0x200://窗口事件,SDL3开始不再需要这个了
+				//WindowEvent(event);
+				//break;
+			case SDL_EVENT_WINDOW_CLOSE_REQUESTED: //窗口关闭事件
+				for (auto w : _forms)
+				{
+					if (w.window == win)
+					{
+						CloseCallBack(winForm->window);
+						SDL_DestroyWindow(win);
+						RemoveWindow(&(*winForm));
+						break;
+					}
+				}
+				break;
+			case SDL_EVENT_WINDOW_TAKE_FOCUS:
+			case SDL_EVENT_WINDOW_FOCUS_GAINED:
+				FocusCallBack(winForm->window, 1);
+				break;
+			case SDL_EVENT_WINDOW_FOCUS_LOST:
+				FocusCallBack(winForm->window, 0);
+				break;
+			case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+			case SDL_EVENT_WINDOW_RESIZED:
+				ResizeCallBack(win, event.window.data1, event.window.data2);
+				break;
+			case SDL_EVENT_QUIT://窗口完全关闭,SDL即将退出
+				MessageOut("SDL quit.", false, false, "255,255,255");
+				return false;
 		}
-		else if (_forms[i].renderer)
-		{
-			quit = false;
-			_forms[i].renderer->Render();
-		}
+		//SDL_UpdateWindowSurface(win);
 	}
-	if (quit)
-	{
-		return false;
-	}
-	else
-	{
-		HInput::ClearInput();
-	}
+
+	UpdateRender();
+
 	return true;
 }
 
+void VulkanApp::UpdateRender()
+{
+	for (auto w : _forms)
+	{
+		w.renderer->Render();
+	}
+	HInput::ClearInput();
+}
+//ENABLE_CODE_OPTIMIZE
+
 VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* title, bool bCreateRenderer)
 {
-	GLFWwindow* window = glfwCreateWindow(w, h, title, nullptr, nullptr);
+	SDL_Window* window = SDL_CreateWindow(title, w, h,
+		SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
 	if (!window)
 	{
-		MessageOut("Create glfw window failed.", true, true, "255,0,0");
-		glfwTerminate();
+		MessageOut("Create sdl2 window failed.", true, true, "255,0,0");
+		SDL_Quit();
 	}
-	//set event
-	glfwSetWindowSizeCallback(window, ResizeCallBack);
-	glfwSetWindowCloseCallback(window, CloseCallBack);
-	glfwSetWindowFocusCallback(window,FocusCallBack);
-	glfwSetKeyCallback(window,KeyBoardCallBack);
-	glfwSetMouseButtonCallback(window,MouseButtonCallBack);
-	glfwSetCursorPosCallback(window,CursorPosCallBack);
-	glfwSetCursorEnterCallback(window,CursorEnterCallBack);
-	glfwSetScrollCallback(window,ScrollCallBack);
-	glfwSetDropCallback(window,DropCallBack);
 
-	VulkanForm newGLFW = {};
-	newGLFW.window = window;
-	newGLFW.name = title;
+	VulkanForm newForm = {};
+	newForm.window = window;
+	newForm.name = title;
 	if (bCreateRenderer)
 	{
-		newGLFW.renderer = new VulkanRenderer((void*)newGLFW.window , title);
+		newForm.renderer = new VulkanRenderer( window , title);
 	}
-	_forms.push_back(newGLFW);
+	_forms.push_back(newForm);
 	return &_forms[_forms.size() - 1];
 }
 
-bool VulkanApp::IsWindowFocus(void* windowHandle)
+bool VulkanApp::IsWindowFocus(SDL_Window* windowHandle)
 {
 	if (_focusWindow != NULL)
 	{
@@ -247,14 +259,14 @@ void VulkanApp::ResizeWindow(VulkanForm* form, uint32_t w, uint32_t h)
 	{
 		return;
 	}
-	if(form && form->window)
-		glfwSetWindowSize(form->window, (int)w, (int)h);
+	if (form && form->window)
+		SDL_SetWindowSize(form->window, (int)w, (int)h);
 }
 
 void VulkanApp::SetWindowPos(VulkanForm* form, uint32_t x, uint32_t y)
 {
 	if (form && form->window)
-		glfwSetWindowPos(form->window, (int)x, (int)y);
+		SDL_SetWindowPosition(form->window, (int)x, (int)y);
 }
 
 void* VulkanApp::GetWindowHandle(VulkanForm* form)
@@ -262,7 +274,9 @@ void* VulkanApp::GetWindowHandle(VulkanForm* form)
 	if (form && form->window)
 	{
 		#if defined(_WIN32)
-		return (void*)glfwGetWin32Window((GLFWwindow*)form->window);
+		SDL_SysWMinfo wmInfo;
+		SDL_GetWindowWMInfo(form->window, &wmInfo , SDL_SYSWM_CURRENT_VERSION);
+		return (void*)wmInfo.info.win.window;
 		#endif
 	}
 	return NULL;
@@ -272,7 +286,7 @@ void VulkanApp::SetFormFocus(VulkanForm* form)
 {
 	if (form && form->window)
 	{
-		glfwFocusWindow((GLFWwindow*)form->window);
+		SDL_SetWindowInputFocus(form->window);
 	}
 }
 
@@ -282,11 +296,11 @@ void VulkanApp::SetFormVisiable(VulkanForm* form, bool bShow)
 	{
 		if (bShow)
 		{
-			glfwShowWindow(form->window);
+			SDL_ShowWindow(form->window);
 		}
 		else
 		{
-			glfwHideWindow(form->window);
+			SDL_HideWindow(form->window);
 		}
 	}
 }

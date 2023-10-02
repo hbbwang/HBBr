@@ -127,9 +127,6 @@
     <ClInclude Include="Form\GLFWInclude.h">
       <Filter>Renderer\Form</Filter>
     </ClInclude>
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_glfw.h">
-      <Filter>ThirdParty\Imgui\backends</Filter>
-    </ClInclude>
     <ClInclude Include="Form\FormMain.h">
       <Filter>Renderer\Form</Filter>
     </ClInclude>
@@ -195,6 +192,9 @@
     </ClInclude>
     <ClInclude Include="Core\Resource\ContentManager.h">
       <Filter>Renderer\Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h">
+      <Filter>ThirdParty\Imgui\backends</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -267,9 +267,6 @@
     <ClCompile Include="Core\Thread.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_glfw.cpp">
-      <Filter>ThirdParty\Imgui\backends</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Pass\PassDefine.cpp">
       <Filter>Renderer\Core\Pass</Filter>
     </ClCompile>
@@ -326,6 +323,9 @@
     </ClCompile>
     <ClCompile Include="Core\Resource\ContentManager.cpp">
       <Filter>Renderer\Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp">
+      <Filter>ThirdParty\Imgui\backends</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

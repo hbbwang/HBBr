@@ -32,9 +32,15 @@ void SceneManager::SceneInit(class VulkanRenderer* renderer)
 	cameraComp->OverrideMainCamera();
 	_editorCamera = cameraComp;
 	_editorCamera->_bIsEditorCamera = true;
+#else
+	//Test game camera
+	auto backCamera = new GameObject("Camera");
+	backCamera->GetTransform()->SetWorldLocation(glm::vec3(0, 2, -3.0));
+	auto cameraComp = backCamera->AddComponent<CameraComponent>();
+	cameraComp->OverrideMainCamera();
 #endif
 
-	//Test
+	//Test model
 	auto test = new GameObject();
 	auto modelComp0 = test->AddComponent<ModelComponent>();
 	modelComp0->SetModel(FileSystem::GetResourceAbsPath() + "Content/Core/Baise/B7CF5F97-BFB9-4C36-893C-448B57776F69.FBX");

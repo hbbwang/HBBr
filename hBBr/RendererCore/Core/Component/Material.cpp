@@ -46,16 +46,12 @@ Material* Material::LoadMaterial(HGUID guid)
 	{
 		std::unique_ptr<Material> mat (new Material) ;
 		auto root = materialDoc.child(TEXT("root"));
-		HGUID guid;
-		HString guidStr;
-		XMLStream::LoadXMLAttributeString(root, TEXT("GUID"), guidStr);
 		if (!StringToGUID(guidStr.c_str(), &guid))
 		{
 			guid = CreateGUID();
 			guidStr = GUIDToString(guid);
 		}
 		mat->_guid = guid;
-		mat->_oldGuid = guid;
 		auto materialPrim = root.child(TEXT("MaterialPrimitive"));
 		//MaterialPrimitive
 		mat->_primitive.reset(new MaterialPrimitive());
@@ -83,7 +79,7 @@ Material* Material::LoadMaterial(HGUID guid)
 		paramCount = 0;
 		for (auto i = parameters.first_child(); i != NULL; i = i.next_sibling())
 		{
-			MaterialParameterInfo info;
+			MaterialParameterInfo info = {};
 			info.beginPos = beginPos;
 			HString value;
 			int type;

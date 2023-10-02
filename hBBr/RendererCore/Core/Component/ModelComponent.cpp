@@ -10,6 +10,7 @@ ModelComponent::ModelComponent(GameObject* parent) :Component(parent)
 void ModelComponent::SetModel(HString path)
 {
 	HGUID guid;
+	path.CorrectionPath();
 	HString guidStr = path.GetBaseName();
 	StringToGUID(guidStr.c_str(), &guid);
 	if (_model == guid)

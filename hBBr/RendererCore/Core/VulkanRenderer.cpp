@@ -17,7 +17,7 @@
 std::map<HString, VulkanRenderer*>		VulkanRenderer::_renderers;
 uint32_t								VulkanRenderer::_currentFrameIndex;
 
-VulkanRenderer::VulkanRenderer(void* windowHandle, const char* rendererName)
+VulkanRenderer::VulkanRenderer(SDL_Window* windowHandle, const char* rendererName)
 {
 	_currentFrameIndex = 0;
 	_bRendererRelease = false;
@@ -51,10 +51,14 @@ void VulkanRenderer::Release()
 
 void VulkanRenderer::Init()
 {	
+	#if IS_GAME
+		_bIsInGame = true;
+	#endif
+
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
 
 	//Surface
-	_vulkanManager->CreateSurface(_windowHandle, _surface);
+	_vulkanManager->CreateSurface_SDL(_windowHandle, _surface);
 
 	//Swapchain
 	_vulkanManager->CreateRenderSemaphores(_presentSemaphore);

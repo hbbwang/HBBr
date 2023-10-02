@@ -48,7 +48,5 @@ private:
 
 	HGUID _guid;
 
-	HGUID _oldGuid;
-
 	std::vector<MaterialParameterInfo> _paramterInfos;
 };

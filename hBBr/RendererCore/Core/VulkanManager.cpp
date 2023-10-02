@@ -75,8 +75,8 @@ VulkanDebugCallback(
 // --------- IMGUI
 #include "imgui.h"
 #include "./backends/imgui_impl_vulkan.h"
+#include "backends/imgui_impl_sdl3.h"
 #if defined(_WIN32)
-#include "backends/imgui_impl_glfw.h"
 FILE* pFileOut;
 FILE* pFileErr;
 #endif
@@ -141,7 +141,7 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 {
 	_bDebugEnable = bEnableDebug;
 	//layers & extensions
-	std::vector<const char*> extensions = { VK_KHR_SURFACE_EXTENSION_NAME };
+	std::vector<const char*> extensions;// = { VK_KHR_SURFACE_EXTENSION_NAME };
 	std::vector<const char*> layers;
 
 	//列举支持的layers和extensions
@@ -179,6 +179,21 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 		}
 	}
 
+	//SDL
+	{
+		unsigned int eCount = 0 ;
+		if(SDL_Vulkan_GetInstanceExtensions(&eCount, NULL) != SDL_TRUE)
+		{
+			MessageOut(SDL_GetError(), true, true, "255,0,0");
+		}
+		std::vector<const char*>sdlExts(eCount);
+		if (SDL_Vulkan_GetInstanceExtensions(&eCount, sdlExts.data()) != SDL_TRUE)
+		{
+			MessageOut(SDL_GetError(), true, true, "255,0,0");
+		}
+		extensions.insert(extensions.end(), sdlExts.begin(), sdlExts.end());
+	}
+
 	VkApplicationInfo appInfo = {};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	appInfo.pNext = VK_NULL_HANDLE;
@@ -193,13 +208,14 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 	createInfo.flags = 0;
 	createInfo.pApplicationInfo = &appInfo;
 
-#if defined(_WIN32)
-	extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-#elif defined(__ANDROID__)
-	extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
-#elif defined(__linux__)
-	extensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
-#endif
+//#if defined(_WIN32)
+//	extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+//#elif defined(__ANDROID__)
+//	extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
+//#elif defined(__linux__)
+//	extensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
+//#endif
+
 	if (_bDebugEnable)
 	{
 		layers.push_back("VK_LAYER_KHRONOS_validation");
@@ -468,29 +484,14 @@ bool VulkanManager::IsGPUDeviceSuitable(VkPhysicalDevice device)
 		deviceFeatures.geometryShader;
 }
 
-#pragma optimize( "", off )
-
-void VulkanManager::CreateSurface(void* handle, VkSurfaceKHR& newSurface)
+void VulkanManager::CreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurface)
 {
-#if defined(_WIN32)
-	//VkWin32SurfaceCreateInfoKHR info={};
-	//info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-	//info.hwnd = (HWND)handle;
-	//info.hinstance = GetModuleHandle(NULL);
-	//auto result = vkCreateWin32SurfaceKHR(_instance, &info, VK_NULL_HANDLE, &newSurface);
-	//if (result != VK_SUCCESS)
-	//{
-	//	MessageOut(RendererLauguage::GetText("A000005").c_str(),true, true);
-	//}
-	auto result = glfwCreateWindowSurface(_instance, (GLFWwindow*)handle, VK_NULL_HANDLE, &newSurface);
-	if (result != VK_SUCCESS)
+	//SDL2
+	if (SDL_Vulkan_CreateSurface(handle, _instance, &newSurface) == SDL_FALSE)
 	{
-		MessageOut("glfw Create Window Surface Failed.",true,true);
+		MessageOut("sdl Create Window Surface Failed.", true, true);
 	}
-#endif
 }
-
-#pragma optimize( "", on )
 
 void VulkanManager::DestroySurface(VkSurfaceKHR surface)
 {
@@ -1506,15 +1507,14 @@ void VulkanManager::CreateShaderModule(VkDevice device, std::vector<char> data, 
 	vkCreateShaderModule(device, &info, VK_NULL_HANDLE, &shaderModule);
 }
 
-void VulkanManager::InitImgui(void* handle, VkRenderPass renderPass, uint32_t subPassIndex)
+void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, uint32_t subPassIndex)
 {
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.IniFilename = NULL;
 
-#if defined(_WIN32)
-	//ImGui_ImplWin32_Init((HWND)handle);
-	ImGui_ImplGlfw_InitForVulkan((GLFWwindow*)handle, true);
-#endif
+	if (!ImGui_ImplSDL3_InitForVulkan(handle))
+		MessageOut("Error,ImGui_ImplSDL3_InitForVulkan return false!",true,true,"255,0,0");
+
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = _instance;
 	init_info.PhysicalDevice = _gpuDevice;
@@ -1545,20 +1545,14 @@ void VulkanManager::InitImgui(void* handle, VkRenderPass renderPass, uint32_t su
 void VulkanManager::ShutdownImgui()
 {
 	ImGui_ImplVulkan_Shutdown();
-#if defined(_WIN32)
-	//ImGui_ImplWin32_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-#endif
+	ImGui_ImplSDL3_Shutdown();
 }
 
 void VulkanManager::ImguiNewFrame()
 {
 	ImGui_ImplVulkan_SetMinImageCount(_swapchainBufferCount);
 	ImGui_ImplVulkan_NewFrame();
-#if defined(_WIN32)
-	//ImGui_ImplWin32_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-#endif
+	ImGui_ImplSDL3_NewFrame();
 	ImGui::NewFrame();
 }
 

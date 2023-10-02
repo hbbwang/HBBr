@@ -1,13 +1,17 @@
 ﻿#pragma once
 
-#pragma comment(lib,"glfw3.lib")
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_vulkan.h>
 
-#if defined(_WIN32)
-	#define GLFW_EXPOSE_NATIVE_WIN32	1	//GLFW support win32
-	#elif defined(__linux__)
+#ifdef _WIN32
+	#include <SDL3/SDL_syswm.h>
 #endif
 
-#define GLFW_INCLUDE_VULKAN 1
+#pragma comment(lib,"SDL3-static.lib")
 
-#include "GLFW/glfw3.h"
-#include "GLFW/glfw3native.h"
+#ifdef _WIN32
+#pragma comment(lib,"imm32.lib")
+#pragma comment(lib,"winmm.lib")
+#pragma comment(lib,"version.lib")
+#pragma comment(lib,"setupapi.lib")
+#endif

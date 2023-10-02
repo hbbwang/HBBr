@@ -6,6 +6,9 @@
 #define HBBR_API __declspec(dllimport)
 #endif
 
+#define ENABLE_CODE_OPTIMIZE	__pragma (optimize("", on)) 
+#define DISABLE_CODE_OPTIMIZE	__pragma (optimize("", off)) 
+
 #include <chrono>
 #include <thread>
 #include <assert.h>

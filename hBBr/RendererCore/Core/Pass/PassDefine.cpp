@@ -210,7 +210,7 @@ void ImguiPass::PassInit()
 void ImguiPass::PassBuild()
 {
 	const auto manager = VulkanManager::GetManager();
-	manager->InitImgui(_renderer->GetWindowHandle(), _renderPass);
+	manager->InitImgui_SDL(_renderer->GetWindowHandle(), _renderPass);
 }
 
 ImguiPass::~ImguiPass()

@@ -17,7 +17,7 @@ class VulkanRenderer
 	friend class PassManager;
 public:
 #if defined(_WIN32)
-	HBBR_API VulkanRenderer(void* windowHandle, const char* rendererName);
+	HBBR_API VulkanRenderer(SDL_Window* windowHandle, const char* rendererName);
 #endif
 	HBBR_API ~VulkanRenderer();
 
@@ -34,7 +34,7 @@ public:
 		return _passManager.get();
 	}
 
-	HBBR_API __forceinline void* GetWindowHandle() {
+	HBBR_API __forceinline SDL_Window* GetWindowHandle() {
 		return _windowHandle;
 	}
 
@@ -158,7 +158,7 @@ private:
 
 	std::vector<VkCommandBuffer> _cmdBuf;
 
-	void* _windowHandle = NULL;
+	SDL_Window* _windowHandle = NULL;
 
 	//Pass Uniform
 	PassUniformBuffer _passUniformBuffer;

@@ -1,10 +1,10 @@
 ﻿#pragma once
-//输入按键的模板来自GLFW，所以属于直接兼容GLFW.
-//其他窗口输入方式则需要重新映射一下。
+//根据SDL2的输入结构进行兼容
 
 #include <vector>
 #include <map>
 #include "VulkanRenderer.h"
+
 enum class Action : int
 {
 	RELEASE = 0,

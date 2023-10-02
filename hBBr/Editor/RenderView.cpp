@@ -65,6 +65,7 @@ void RenderView::resizeEvent(QResizeEvent* event)
 	{
 		_mainRendererWidget->setGeometry(0, 0, width(), height());
 	}
+	_sleep(1);
 }
 
 bool RenderView::event(QEvent* event)
