@@ -179,14 +179,14 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\crossguid\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /c /f /y $(solutiondir)DependencyCopy\$(Configuration)\*.dll $(solutiondir)$(Platform)\$(Configuration)</Command>
@@ -202,7 +202,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -211,7 +211,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\crossguid\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /c /f /y $(solutiondir)DependencyCopy\$(Configuration)\*.dll $(solutiondir)$(Platform)\$(Configuration)</Command>
@@ -227,7 +227,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(VULKAN_SDK)\Include\vulkan\;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -236,7 +236,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\crossguid\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>

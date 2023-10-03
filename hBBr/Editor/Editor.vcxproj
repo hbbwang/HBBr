@@ -73,10 +73,17 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <IncludePath>$(SolutionDir)ThirdParty\crossguid\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)ThirdParty\crossguid\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <IncludePath>$(SolutionDir)ThirdParty\crossguid\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)ThirdParty\crossguid\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseGame_GLFW|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseGame_GLFW|x64'">
+    <IncludePath>$(SolutionDir)ThirdParty\crossguid\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)ThirdParty\crossguid\;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core;$(SolutionDir)RendererCore\Editor;$(SolutionDir)RendererCore\Form;$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\sdl3\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
