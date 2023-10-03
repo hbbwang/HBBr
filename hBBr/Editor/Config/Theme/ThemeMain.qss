@@ -6,6 +6,10 @@
     font-family:  微软雅黑, Arial, Helvetica, sans-serif;
     background-color: rgba(40,40,40,1.0);
 }
+#RenderView
+{
+    background-color: rgb(0,0,0);
+}
 QWidget
 {
     background-color: rgb(40,40,40);

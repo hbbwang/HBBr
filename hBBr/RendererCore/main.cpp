@@ -15,9 +15,9 @@
 
 std::vector<VulkanForm> VulkanApp::_forms;
 VulkanForm* VulkanApp::_mainForm;
-SDL_Window* VulkanApp::_focusWindow = NULL;
+VulkanForm* VulkanApp::_focusForm = NULL;
 std::vector<FormDropFun> VulkanApp::_dropFuns;
-
+bool VulkanApp::_bFocusQuit = false;
 void ResizeCallBack(SDL_Window* window, int width, int height)
 {
 	auto it = std::find_if(VulkanApp::GetForms().begin(),VulkanApp::GetForms().end(), [window](VulkanForm& form)
@@ -46,28 +46,33 @@ void CloseCallBack(SDL_Window* window)
 	}
 }
 
-void FocusCallBack(SDL_Window* window, int focused)
+void FocusCallBack(VulkanForm* window, int focused)
 {
 	if (focused == 1)
-		VulkanApp::_focusWindow = window;
+		VulkanApp::_focusForm = window;
 	else
-		VulkanApp::_focusWindow = NULL;
+		VulkanApp::_focusForm = NULL;
 }
 
-void KeyBoardCallBack(SDL_Window* window, int key, int scancode, int action, int mods)
+void KeyBoardCallBack(SDL_Window* window, SDL_Keycode key, int scancode, int action, int mods)
 {
 	HInput::KeyProcess((void*)window , (KeyCode)key, (KeyMod)mods, (Action)action);
 }
 
-void MouseButtonCallBack(SDL_Window* window, int button, int action, int mods)
+void MouseButtonCallBack(SDL_Window* window, int button, int action)
 {
-	SDL_SetWindowInputFocus(window);	
-	HInput::MouseProcess((void*)window, (MouseButton)button, (KeyMod)mods, (Action)action);
-}
+	SDL_SetWindowInputFocus(window);
+	SDL_SetWindowFocusable(window, SDL_TRUE);
 
-void CursorPosCallBack(SDL_Window* window, double xpos, double ypos)
-{
-	VulkanApp::SetCursorPos(glm::vec2(xpos, ypos));
+	//for (int i = 0; i < VulkanApp::GetForms().size(); ++i)
+	//{
+	//	if (VulkanApp::GetForms()[i].window == window)
+	//	{
+	//		FocusCallBack(&VulkanApp::GetForms()[i], 1);
+	//		break;
+	//	}
+	//}
+	HInput::MouseProcess((void*)window, (MouseButton)button,(Action)action);
 }
 
 void ScrollCallBack(SDL_Window* window, double xoffset, double yoffset)
@@ -83,7 +88,7 @@ void DropCallBack(SDL_Window* window, int path_count, const char* paths[])
 	}
 }
 
-VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDebug)
+VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDebug, void* parent)
 {
 	//must be successful.
 	if (SDL_Init(SDL_INIT_EVERYTHING) == -1)
@@ -103,8 +108,11 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	Shader::LoadShaderCache(FileSystem::GetShaderCacheAbsPath().c_str());
 	ContentManager::Get();
 
+	//Set sdl hints
+	SDL_SetHint(SDL_HINT_VIDEO_FOREIGN_WINDOW_VULKAN, "1");//SDL_WINDOW_VULKAN
+
 	//Create Main Window
-	auto win = CreateNewWindow(128, 128, "MainRenderer", true);
+	auto win = CreateNewWindow(128, 128, "MainRenderer", true, parent);
 
 	//Try Refresh focus
 	SetFormVisiable(win, false);
@@ -154,6 +162,7 @@ void VulkanApp::DeInitVulkanManager()
 //DISABLE_CODE_OPTIMIZE
 bool VulkanApp::UpdateForm()
 {
+	bool bQuit = false;
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
@@ -167,38 +176,55 @@ bool VulkanApp::UpdateForm()
 				//WindowEvent(event);
 				//break;
 			case SDL_EVENT_WINDOW_CLOSE_REQUESTED: //窗口关闭事件
-				for (auto w : _forms)
-				{
-					if (w.window == win)
-					{
-						CloseCallBack(winForm->window);
-						SDL_DestroyWindow(win);
-						RemoveWindow(&(*winForm));
-						break;
-					}
-				}
+				CloseCallBack(win);
+				SDL_DestroyWindow(win);
+				RemoveWindow(&(*winForm));
 				break;
 			case SDL_EVENT_WINDOW_TAKE_FOCUS:
 			case SDL_EVENT_WINDOW_FOCUS_GAINED:
-				FocusCallBack(winForm->window, 1);
+				FocusCallBack(&(*winForm), 1);
 				break;
 			case SDL_EVENT_WINDOW_FOCUS_LOST:
-				FocusCallBack(winForm->window, 0);
+				FocusCallBack(&(*winForm), 0);
 				break;
+			case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
 			case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
 			case SDL_EVENT_WINDOW_RESIZED:
 				ResizeCallBack(win, event.window.data1, event.window.data2);
 				break;
 			case SDL_EVENT_QUIT://窗口完全关闭,SDL即将退出
-				MessageOut("SDL quit.", false, false, "255,255,255");
-				return false;
+				bQuit = true;
+				break;
+			case SDL_EVENT_MOUSE_BUTTON_DOWN:
+			case SDL_EVENT_MOUSE_BUTTON_UP:
+				MouseButtonCallBack(win, event.button.button, event.button.state);
+				break;
+			case SDL_EVENT_KEY_DOWN:
+			case SDL_EVENT_KEY_UP:
+				KeyBoardCallBack(win, event.key.keysym.sym, event.key.keysym.scancode, event.key.state, event.key.keysym.mod);
+				break;
+			case SDL_EVENT_MOUSE_WHEEL:
+				break;
 		}
-		//SDL_UpdateWindowSurface(win);
 	}
 
-	UpdateRender();
+	if (_bFocusQuit || bQuit)
+	{
+		for (auto w : _forms)
+		{
+			CloseCallBack(w.window);
+			SDL_DestroyWindow(w.window);
+			RemoveWindow(&w);
+		}
+		MessageOut("SDL quit.", false, false, "255,255,255");
+		bQuit = true;
+	}
+	else
+	{
+		UpdateRender();
+	}
 
-	return true;
+	return !bQuit;
 }
 
 void VulkanApp::UpdateRender()
@@ -211,10 +237,20 @@ void VulkanApp::UpdateRender()
 }
 //ENABLE_CODE_OPTIMIZE
 
-VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* title, bool bCreateRenderer)
+VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* title, bool bCreateRenderer, void* parent)
 {
-	SDL_Window* window = SDL_CreateWindow(title, w, h,
-		SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+	SDL_Window* window = NULL;
+	if (parent != NULL)
+	{
+		window = SDL_CreateWindowFrom(parent);
+	}
+
+	if(!window)
+	{
+		window = SDL_CreateWindow(title, w, h,
+			SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+	}
+
 	if (!window)
 	{
 		MessageOut("Create sdl2 window failed.", true, true, "255,0,0");
@@ -234,9 +270,9 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 
 bool VulkanApp::IsWindowFocus(SDL_Window* windowHandle)
 {
-	if (_focusWindow != NULL)
+	if (_focusForm != NULL)
 	{
-		return  _focusWindow == windowHandle;
+		return  _focusForm->window == windowHandle;
 	}
 	return false;
 }
@@ -287,6 +323,8 @@ void VulkanApp::SetFormFocus(VulkanForm* form)
 	if (form && form->window)
 	{
 		SDL_SetWindowInputFocus(form->window);
+		SDL_SetWindowFocusable(form->window, SDL_TRUE);
+		FocusCallBack(form, 1);
 	}
 }
 
@@ -305,9 +343,9 @@ void VulkanApp::SetFormVisiable(VulkanForm* form, bool bShow)
 	}
 }
 
-void VulkanApp::SetCursorPos(glm::vec2 pos)
+void VulkanApp::AppQuit()
 {
-	HInput::SetMousePos(pos);
+	_bFocusQuit = true;
 }
 
 #if IS_GAME

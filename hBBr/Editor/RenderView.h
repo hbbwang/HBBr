@@ -42,6 +42,10 @@ protected:
 
 	virtual void paintEvent(QPaintEvent* event);
 
+	virtual void keyPressEvent(QKeyEvent* event)override;
+
+	virtual void keyReleaseEvent(QKeyEvent* event)override;
+
 private slots:
 
 	void UpdateRender();

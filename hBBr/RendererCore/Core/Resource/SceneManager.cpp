@@ -57,7 +57,7 @@ void SceneManager::SceneInit(class VulkanRenderer* renderer)
 void SceneManager::SceneUpdate()
 {
 	//Test
-	if (!testObj.expired() && testObj.lock()->GetTransform() && ( HInput::GetKey(KeyCode::F)))
+	if (!testObj.expired() && testObj.lock()->GetTransform() && ( HInput::GetKey(Key_F)))
 	{
 		testObj.lock()->GetTransform()->SetRotation(testObj.lock()->GetTransform()->GetRotation() + glm::vec3(0, _renderer->GetFrameRate() / 10.0f, 0));
 	}

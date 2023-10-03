@@ -9,6 +9,8 @@
 
 #pragma comment(lib , "RendererCore.lib")
 
+HWND hwnd;
+
 RenderView::RenderView(QWidget* parent)
 	: QWidget(parent)
 {
@@ -21,6 +23,7 @@ RenderView::RenderView(QWidget* parent)
 
 	//setMouseTracking(true);
 	setFocusPolicy(Qt::ClickFocus);
+
 	setObjectName("RenderView");
 
 	_renderTimer = new QTimer(this);
@@ -32,13 +35,13 @@ RenderView::RenderView(QWidget* parent)
 	if (_mainRendererWidget == NULL)
 	{
 		//Enable custom loop
-		_mainRenderer = VulkanApp::InitVulkanManager(false, true);
+		_mainRenderer = VulkanApp::InitVulkanManager(false, true, (void*)this->winId());
 
-		HWND hwnd = (HWND)VulkanApp::GetWindowHandle(_mainRenderer);
-		auto mainRendererWindow = QWindow::fromWinId((WId)hwnd);
-		_mainRendererWidget = QWidget::createWindowContainer(mainRendererWindow, this);
-		_mainRendererWidget->setFocusPolicy(Qt::ClickFocus);
-		_mainRendererWidget->setObjectName("RenderView");
+		hwnd = (HWND)VulkanApp::GetWindowHandle(_mainRenderer);
+		//auto mainRendererWindow = QWindow::fromWinId((WId)hwnd);
+		//_mainRendererWidget = QWidget::createWindowContainer(mainRendererWindow, this);
+		//_mainRendererWidget->setFocusPolicy(Qt::ClickFocus);
+		//_mainRendererWidget->setObjectName("RenderView");
 
 		_renderTimer = new QTimer(this);
 		_renderTimer->setInterval(1);
@@ -65,7 +68,7 @@ void RenderView::resizeEvent(QResizeEvent* event)
 	{
 		_mainRendererWidget->setGeometry(0, 0, width(), height());
 	}
-	_sleep(1);
+	//_sleep(1);
 }
 
 bool RenderView::event(QEvent* event)
@@ -87,8 +90,17 @@ void RenderView::paintEvent(QPaintEvent* event)
 	opt.initFrom(this);
 	opt.rect = rect();
 	painter.drawPrimitive(QStyle::PE_Widget, opt);
-
 	QWidget::paintEvent(event);
+}
+
+void RenderView::keyPressEvent(QKeyEvent* event)
+{
+
+}
+
+void RenderView::keyReleaseEvent(QKeyEvent* event)
+{
+
 }
 
 void RenderView::UpdateRender()
@@ -99,15 +111,17 @@ void RenderView::UpdateRender()
 void RenderView::focusInEvent(QFocusEvent* event)
 {
 	VulkanApp::SetFormFocus(_mainRenderer);
+	SetFocus(hwnd);
 }
 
 void RenderView::focusOutEvent(QFocusEvent* event)
 {
+
 }
 
 void RenderView::mousePressEvent(QMouseEvent* event)
 {
-
+	setFocus();
 }
 
 void RenderView::mouseReleaseEvent(QMouseEvent* event)

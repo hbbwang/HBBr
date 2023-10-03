@@ -20,12 +20,12 @@ public:
 		@bEnableDebug :是否开启Debug layer
 		@return:如果bCustomRenderLoop为false,则返回这个vulkan渲染窗口
 	*/
-	HBBR_API static VulkanForm* InitVulkanManager(bool bCustomRenderLoop,bool bEnableDebug = false);
+	HBBR_API static VulkanForm* InitVulkanManager(bool bCustomRenderLoop,bool bEnableDebug = false,void* parent = NULL);
 	HBBR_API static void DeInitVulkanManager();
 	HBBR_API static bool UpdateForm();
 	HBBR_API static void UpdateRender();
 
-	HBBR_API static VulkanForm* CreateNewWindow(uint32_t w = 512, uint32_t h = 512, const char* title = "Renderer",bool bCreateRenderer = false);
+	HBBR_API static VulkanForm* CreateNewWindow(uint32_t w = 512, uint32_t h = 512, const char* title = "Renderer",bool bCreateRenderer = false ,void* parent = NULL);
 	HBBR_API static bool IsWindowFocus(SDL_Window* windowHandle);
 	HBBR_API static std::vector<VulkanForm>& GetForms() { return _forms; }
 	HBBR_API static void RemoveWindow(VulkanForm* form);
@@ -35,13 +35,16 @@ public:
 	HBBR_API static inline VulkanForm* GetMainForm() { return _mainForm; }
 	HBBR_API static void SetFormFocus(VulkanForm* form);
 	HBBR_API static void SetFormVisiable(VulkanForm* form, bool bShow);
-	static void SetCursorPos(glm::vec2 pos);
+	HBBR_API static void AppQuit();
+
 	//Callbacks
 	static std::vector<FormDropFun> _dropFuns;
 
-	static SDL_Window* _focusWindow;
+	static VulkanForm* _focusForm;
 
 private:
+
+	static bool _bFocusQuit;
 
 	static std::vector<VulkanForm> _forms;
 
