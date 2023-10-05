@@ -1,9 +1,13 @@
 ﻿#pragma once
 
+#ifdef SHARED_LIBRARY
 #ifdef _USRDLL
 #define HBBR_API __declspec(dllexport)
 #else
 #define HBBR_API __declspec(dllimport)
+#endif
+#else
+#define HBBR_API 
 #endif
 
 #define ENABLE_CODE_OPTIMIZE	__pragma (optimize("", on)) 

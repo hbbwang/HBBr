@@ -4,6 +4,7 @@
 #include <qdebug.h>
 
 #include <Windows.h> //为了支持SetFocus(NULL);
+
 QWidget* currentFocusWidget = NULL;
 class MyEventFilter : public QObject
 {

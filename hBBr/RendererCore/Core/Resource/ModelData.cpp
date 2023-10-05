@@ -2,18 +2,18 @@
 
 #ifdef NDEBUG
 //非Debug我们直接用静态库打入exe内。
-#pragma comment(lib,"Static/Release/assimp-vc142-mt.lib")
-#pragma comment(lib,"Static/Release/zlibstatic.lib") 
+#pragma comment(lib,"assimp/lib/Static/Release/assimp-vc142-mt.lib")
+#pragma comment(lib,"assimp/lib/Static/Release/zlibstatic.lib") 
 #else
 //Debug使用dll进行调试
-#pragma comment(lib,"assimp-vc142-mt.lib") 
+#pragma comment(lib,"ThirdParty/assimp/lib/assimp-vc142-mt.lib") 
 #endif
 #include "ConsoleDebug.h"
 #include "FileSystem.h"
 
-#include <assimp/Importer.hpp>      // C++ importer interface
-#include <assimp/scene.h>			// C++ importer interface
-#include <assimp/postprocess.h>     // Post processing flags
+#include <ThirdParty/assimp/include/assimp/Importer.hpp>      // C++ importer interface
+#include <ThirdParty/assimp/include/assimp/scene.h>			// C++ importer interface
+#include <ThirdParty/assimp/include/assimp/postprocess.h>     // Post processing flags
 
 #include "ContentManager.h"
 

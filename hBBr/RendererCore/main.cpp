@@ -349,6 +349,7 @@ void VulkanApp::AppQuit()
 }
 
 #if IS_GAME
+
 int main(int argc, char* argv[])
 {
 	//Enable custom loop
@@ -356,6 +357,12 @@ int main(int argc, char* argv[])
 	VulkanApp::DeInitVulkanManager();
 	return 0;
 }
+
+int SDL_main(int argc, char* argv[])
+{
+	return main(argc, argv);
+}
+
 #else
 
 #endif

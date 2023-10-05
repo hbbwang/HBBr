@@ -4,13 +4,13 @@
 #include <fstream>
 #include "ConsoleDebug.h"
 #include "glm/glm.hpp"
-#include "shaderc/shaderc.hpp"
+#include "ThirdParty/shaderc/shaderc.hpp"
 #include "Component/Material.h"
 
 #include <string>  
 #include <iostream> 
 
-#pragma comment(lib,"./shaderc/shaderc_shared.lib")
+#pragma comment(lib,"shaderc/shaderc_shared.lib")
 
 void Shaderc::ShaderCompiler::CompileAllShaders(const char* srcShaderPath)
 {
@@ -22,7 +22,7 @@ void Shaderc::ShaderCompiler::CompileAllShaders(const char* srcShaderPath)
 	//fx
 	if (allFxShaders.size() > 0)
 	{
-		for (auto i : allFxShaders)
+		for (auto i : allFxShaders) 
 		{
 			CompileShader(i.absPath.c_str(), "VSMain", CompileShaderType::VertexShader);
 			CompileShader(i.absPath.c_str(), "PSMain", CompileShaderType::PixelShader);

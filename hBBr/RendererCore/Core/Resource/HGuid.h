@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "HString.h"
-#include "crossguid/guid.hpp"
+#include "ThirdParty/crossguid/Include/crossguid/guid.hpp"
 
 #ifdef _DEBUG
-#pragma comment(lib,"crossguid-dgb.lib")
+#pragma comment(lib,"ThirdParty/crossguid/crossguid-dgb.lib")
 #else
-#pragma comment(lib,"crossguid.lib")
+#pragma comment(lib,"crossguid/crossguid.lib")
 #endif
 
 #define HGUID xg::Guid
