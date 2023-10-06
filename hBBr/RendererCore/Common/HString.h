@@ -5,11 +5,21 @@
 //Explain:		Dream Engine string class.
 //---------------------------------------
 #pragma once
+
+#ifndef HBBR_INLINE
+#if __ANDROID_API__
+#define HBBR_INLINE inline
+#else
+#define HBBR_INLINE __forceinline
+#endif
+#endif
+
 #include "Common.h"
-#include <comutil.h>  
+//#include <comutil.h>  
 #include <ostream>
 #include <math.h>
 #include <vector>
+#include <string>
 #include <iostream>
 #ifdef _WIN32
 #include <windows.h>
@@ -17,9 +27,26 @@
 #include <unistd.h>
 #endif
 #pragma comment(lib, "comsuppw.lib")
+
 class  HString
 {
+private:
+	char* m_char = NULL;
+	wchar_t* m_wchar = NULL;
+	char* _str = NULL;
+	size_t length = 0;
 public:
+	inline void clear()
+	{
+		ReleaseCache();
+		if (_str != NULL)
+		{
+			delete[] _str;
+			_str = NULL;
+		}
+		length = 0;
+	}
+
 	//字符串初始化
 	HString()
 	{
@@ -185,7 +212,7 @@ public:
 		return strcmp(this->_str, c._str) != 0;
 	}
 
-	__forceinline HString Left(size_t index)
+	HBBR_INLINE HString Left(size_t index)
 	{
 		if (index >= this->length || index <= 0)
 		{
@@ -198,7 +225,7 @@ public:
 		return *this;
 	}
 
-	__forceinline HString Right(size_t index)
+	HBBR_INLINE HString Right(size_t index)
 	{
 		if (index >= this->length || index < 0)
 		{
@@ -327,7 +354,7 @@ public:
 #endif
 	}
 
-	__forceinline void assign(const char* str)
+	HBBR_INLINE void assign(const char* str)
 	{
 		clear();
 		length = strlen(str);
@@ -335,7 +362,7 @@ public:
 		strcpy_s(_str, length + 1, str);
 	}
 
-	__forceinline void assign(HString str)
+	HBBR_INLINE void assign(HString str)
 	{
 		clear();
 		length = str.length;
@@ -343,24 +370,13 @@ public:
 		strcpy_s(_str, length + 1, str._str);
 	}
 
-	__forceinline size_t	Length()const { return length; }
+	HBBR_INLINE size_t	Length()const { return length; }
 
-	__forceinline const char* c_str() { return _str; }
+	HBBR_INLINE const char* c_str() { return _str; }
 
-	__forceinline const wchar_t* c_wstr() { return ps2ws(_str); }
+	HBBR_INLINE const wchar_t* c_wstr() { return ps2ws(_str); }
 
-	__forceinline const char* c_strC()const { return _str; }
-
-	inline void clear()
-	{
-		ReleaseCache();
-		if (_str != NULL)
-		{
-			delete[] _str;
-			_str = NULL;
-		}
-		length = 0;
-	}
+	HBBR_INLINE const char* c_strC()const { return _str; }
 
 	inline void append(const char* str)
 	{
@@ -373,7 +389,7 @@ public:
 		length = strlen(_str);
 	}
 
-	__forceinline void append(const wchar_t* str)
+	HBBR_INLINE void append(const wchar_t* str)
 	{
 		pws2s(str);
 		this->append(m_char);
@@ -571,7 +587,7 @@ public:
 	}
 
 	/*  路径斜杠格式纠正,目前window和Linux都支持“/”，不过window还是用“\\”吧 */
-	__forceinline  void  CorrectionPath()
+	HBBR_INLINE  void  CorrectionPath()
 	{
 #ifdef WIN32
 		this->Replace("/", "\\");
@@ -581,7 +597,7 @@ public:
 	}
 
 	/* 转换成纯字符串形式的路径 */
-	__forceinline void ToPathString()
+	HBBR_INLINE void ToPathString()
 	{
 #ifdef WIN32
 		this->Replace("\\", "\\\\");
@@ -590,7 +606,7 @@ public:
 #endif
 	}
 
-	__forceinline static HString GetSeparate()
+	HBBR_INLINE static HString GetSeparate()
 	{
 #ifdef WIN32
 		return "\\";
@@ -600,7 +616,7 @@ public:
 	}
 
 	/* 获取exe文件完整路径 */
-	__forceinline static HString GetExeFullPath()
+	HBBR_INLINE static HString GetExeFullPath()
 	{
 		wchar_t szPath[1024];
 #ifdef _WIN32
@@ -612,14 +628,6 @@ public:
 		szPath[count] = '\0';
 #endif
 		HString path = szPath;
-		return path;
-	}
-
-	/* 获取exe文件路径 */
-	__forceinline static HString GetExePathWithoutFileName()
-	{
-		HString path = GetExeFullPath();
-		path = path.GetFilePath();
 		return path;
 	}
 
@@ -650,18 +658,18 @@ public:
 	}
 
 	/* 字符串包含 */
-	__forceinline bool Contains(HString whatStr)
+	HBBR_INLINE bool Contains(HString whatStr)
 	{
 		std::string strCache(_str);
 		return strCache.find(whatStr.c_str()) != std::string::npos;
 	}
 
-	__forceinline char* ToStr()
+	HBBR_INLINE char* ToStr()
 	{
 		return const_cast<char*>(c_str());
 	}
 
-	static __forceinline HString	FromFloat(double f, int precise = 6)
+	static HBBR_INLINE HString	FromFloat(double f, int precise = 6)
 	{
 		HString out;
 		HString format = "%.";
@@ -672,7 +680,7 @@ public:
 		return out;
 	}
 
-	static __forceinline HString	FromVec2(glm::vec2 f, int precise = 6)
+	static HBBR_INLINE HString	FromVec2(glm::vec2 f, int precise = 6)
 	{
 		HString out;
 		HString format = "%.";
@@ -686,7 +694,7 @@ public:
 		return out;
 	}
 
-	static __forceinline HString	FromInt(int i)
+	static HBBR_INLINE HString	FromInt(int i)
 	{
 		HString out;
 		char str[128];
@@ -695,7 +703,7 @@ public:
 		return out;
 	}
 
-	static __forceinline HString	FromUInt(unsigned int i)
+	static HBBR_INLINE HString	FromUInt(unsigned int i)
 	{
 		HString out;
 		char str[128];
@@ -704,7 +712,7 @@ public:
 		return out;
 	}
 
-	static __forceinline HString	FromSize_t(size_t i)
+	static HBBR_INLINE HString	FromSize_t(size_t i)
 	{
 		HString out;
 		char str[256];
@@ -713,57 +721,57 @@ public:
 		return out;
 	}
 
-	static __forceinline HString	FromBool(bool i)
+	static HBBR_INLINE HString	FromBool(bool i)
 	{
 		return i == true ? "true": "false";
 	}
 
-	static __forceinline bool ToBool(const char* str)
+	static HBBR_INLINE bool ToBool(const char* str)
 	{
 		return  str[0]== 't'|| str[0] == 'T'? true : false;
 	}
 
-	static __forceinline bool ToBool(HString str)
+	static HBBR_INLINE bool ToBool(HString str)
 	{
 		return  str.IsSame("true",false) ? true : false;
 	}
 
-	static __forceinline int ToInt(const char* str)
+	static HBBR_INLINE int ToInt(const char* str)
 	{
 		return atoi(str);
 	}
 
-	static __forceinline int ToInt(HString str)
+	static HBBR_INLINE int ToInt(HString str)
 	{
 		return atoi(str.c_str());
 	}
 
-	static __forceinline double ToDouble(HString str)
+	static HBBR_INLINE double ToDouble(HString str)
 	{
 		return atof(str.c_str());
 	}
 
-	static __forceinline double ToDouble(const char* str)
+	static HBBR_INLINE double ToDouble(const char* str)
 	{
 		return atof(str);
 	}
 
-	static __forceinline long ToLong(HString str)
+	static HBBR_INLINE long ToLong(HString str)
 	{
 		return atol(str.c_str());
 	}
 
-	static __forceinline long ToLong(const char* str)
+	static HBBR_INLINE long ToLong(const char* str)
 	{
 		return atol(str);
 	}
 
-	static __forceinline long long ToLongLong(const char* str)
+	static HBBR_INLINE long long ToLongLong(const char* str)
 	{
 		return atoll(str);
 	}
 
-	static __forceinline long long ToLongLong(HString str)
+	static HBBR_INLINE long long ToLongLong(HString str)
 	{
 		return atoll(str.c_str());
 	}
@@ -814,8 +822,6 @@ public:
 	}
 
 private:
-	char* _str = NULL;
-	size_t length = 0;
 
 	//Cache
 	void ReleaseCache()
@@ -831,8 +837,6 @@ private:
 			m_wchar = NULL;
 		}
 	}
-	char* m_char = NULL;
-	wchar_t* m_wchar = NULL;
 };
 
 //hash

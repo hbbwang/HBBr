@@ -20,7 +20,7 @@
 #include <QFileDialog>
 #include "QDesktopServices.h"
 #include "qabstractitemview.h"
-
+#include "FileSystem.h"
 #include "Component/Material.h"
 #include "Resource/ContentManager.h"
 
@@ -73,7 +73,7 @@ ContentBrowser::ContentBrowser(QWidget *parent)
 	_treeFileSystemModel = new CustomFileSystemModel(_treeWidget);
 	_treeFileSystemModel->_contentBrowserTreeView = _treeWidget;
 	_treeWidget->setModel(_treeFileSystemModel);
-	_treeFileSystemModel->setRootPath((HString::GetExePathWithoutFileName() + "Resource").c_str()  );
+	_treeFileSystemModel->setRootPath((FileSystem::GetProgramPath() + "Resource").c_str()  );
 	_treeWidget->setRootIndex(_treeFileSystemModel->index(_treeFileSystemModel->rootPath()));
 	_treeWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	for (int i = 1; i < _treeFileSystemModel->columnCount(); i++)
@@ -102,7 +102,7 @@ ContentBrowser::ContentBrowser(QWidget *parent)
 	_listFileSystemModel->setNameFilterDisables(false);
 	_listFileSystemModel->setNameFilters(list_filterCache);
 	_listWidget->setModel(_listFileSystemModel);
-	_listFileSystemModel->setRootPath((HString::GetExePathWithoutFileName() + "Resource").c_str());
+	_listFileSystemModel->setRootPath((FileSystem::GetProgramPath() + "Resource").c_str());
 	_listWidget->setRootIndex(_listFileSystemModel->index(_listFileSystemModel->rootPath()));
 	_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	_listWidget->setViewMode(QListView::IconMode);
@@ -232,7 +232,7 @@ void ContentBrowser::TreeClicked(const QModelIndex& index)
 		}
 		else
 		{
-			_listFileSystemModel->setRootPath((HString::GetExePathWithoutFileName() + "Resource").c_str());
+			_listFileSystemModel->setRootPath((FileSystem::GetProgramPath() + "Resource").c_str());
 			_listWidget->setRootIndex(_listFileSystemModel->index(_listFileSystemModel->rootPath()));
 		}
 	}

@@ -1,12 +1,12 @@
-﻿#include "FormMain.h"
-#include "Shader.h"
-#include "Pipeline.h"
-#include "HInput.h"
-#include "VulkanRenderer.h"
+﻿#include "./Form/FormMain.h"
+#include "./Core/Shader.h"
+#include "./Core/Pipeline.h"
+#include "./Common/HInput.h"
+#include "./Core/VulkanRenderer.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
-#include "ContentManager.h"
+#include "./Resource/ContentManager.h"
 
 //#if _DEBUG
 //#include "include/vld.h"
@@ -366,3 +366,10 @@ int SDL_main(int argc, char* argv[])
 #else
 
 #endif
+
+#include "main.h"
+HBBR_API void RendererCore_Test()
+{
+	printf("Hello World!\n");
+	SDL_ShowSimpleMessageBox(0, "Test", "Hello!", NULL);
+}

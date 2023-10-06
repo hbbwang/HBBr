@@ -2,6 +2,7 @@
 #include "EditorCommonFunction.h"
 #include "HString.h"
 #include "QIcon.h"
+#include "FileSystem.h"
 QIcon CustomFileIconProvider::icon(const QFileInfo& info) const
 {
     if (_scope == IconProviderScope::ContentBrowserTreeView)
@@ -15,7 +16,7 @@ QIcon CustomFileIconProvider::icon(const QFileInfo& info) const
     {
         QPixmap map;
         bool bSucceed = GetPreviewImage(info.filePath(), map);
-        HString pp = HString::GetExePathWithoutFileName();
+        HString pp = FileSystem::GetProgramPath();
         if (info.isDir())
         {
             pp += "Config/Theme/Icons/ICON_DIR.png";

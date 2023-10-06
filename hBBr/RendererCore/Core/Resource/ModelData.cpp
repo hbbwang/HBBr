@@ -6,7 +6,7 @@
 #pragma comment(lib,"assimp/lib/Static/Release/zlibstatic.lib") 
 #else
 //Debug使用dll进行调试
-#pragma comment(lib,"ThirdParty/assimp/lib/assimp-vc142-mt.lib") 
+#pragma comment(lib,"assimp/lib/assimp-vc142-mt.lib") 
 #endif
 #include "ConsoleDebug.h"
 #include "FileSystem.h"

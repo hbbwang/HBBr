@@ -1,6 +1,6 @@
 ﻿#include "RendererConfig.h"
 #include "Common.h"
-
+#include "FileSystem.h"
 std::unique_ptr<RendererConfig> RendererConfig::_rendererConfig;
 std::map<HString, HString> RendererLauguage::_rendererLauguageItem;
 
@@ -9,7 +9,7 @@ RendererConfig* RendererConfig::Get()
 	if (!_rendererConfig)
 	{
 		_rendererConfig.reset(new RendererConfig);
-		HString path = HString::GetExePathWithoutFileName() + "Config/Renderer.xml";
+		HString path = FileSystem::GetProgramPath() + "Config/Renderer.xml";
 		path.CorrectionPath();
 		if (!XMLStream::LoadXML(path.c_wstr(), _rendererConfig->_configFile))
 		{
@@ -24,7 +24,7 @@ HString RendererLauguage::GetText(HString key)
 	if (_rendererLauguageItem.size() <= 0)
 	{
 		HString LauguageFilePath = RendererConfig::Get()->_configFile.child(TEXT("root")).child(TEXT("BaseSetting")).child(TEXT("Language")).attribute(TEXT("path")).as_string();
-		LauguageFilePath = HString::GetExePathWithoutFileName() + LauguageFilePath;
+		LauguageFilePath = FileSystem::GetProgramPath() + LauguageFilePath;
 		LauguageFilePath.CorrectionPath();
 		pugi::xml_document doc;
 		if (!XMLStream::LoadXML(LauguageFilePath.c_wstr(), doc))

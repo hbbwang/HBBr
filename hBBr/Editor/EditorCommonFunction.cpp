@@ -255,7 +255,7 @@ bool GetPreviewImage(QString resourceFilePath, QPixmap& pixmap)
  //   QFileInfo info(resourceFilePath);
 
  //   QString ContentPath = QDir::toNativeSeparators(resourceFilePath);
- //   QString exePath = QDir::toNativeSeparators(HString::GetExePathWithoutFileName().c_str());
+ //   QString exePath = QDir::toNativeSeparators(FileSystem::GetProgramPath().c_str());
  //   ContentPath.remove(exePath);
 
  //   //savedPath += "\\Saved\\" + info.

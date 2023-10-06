@@ -2,12 +2,14 @@
 #include "FileSystem.h"
 #include <iostream>
 #include <fstream>
+#include "GLFWInclude.h"
 
 namespace fs = std::filesystem;
 
 HString FileSystem::GetProgramPath()
 {
-    return HString::GetExePathWithoutFileName();
+    //return HString::GetExePathWithoutFileName();
+    return SDL_GetBasePath();
 }
 
 HString FileSystem::GetShaderCacheAbsPath()

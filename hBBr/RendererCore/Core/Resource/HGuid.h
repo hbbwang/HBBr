@@ -4,7 +4,7 @@
 #include "ThirdParty/crossguid/Include/crossguid/guid.hpp"
 
 #ifdef _DEBUG
-#pragma comment(lib,"ThirdParty/crossguid/crossguid-dgb.lib")
+#pragma comment(lib,"crossguid/crossguid-dgb.lib")
 #else
 #pragma comment(lib,"crossguid/crossguid.lib")
 #endif

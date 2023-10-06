@@ -15,7 +15,7 @@ CustomSearchLine::CustomSearchLine(QWidget *parent)
 	ui.label->setMaximumSize(30, 30);
 	this->setMaximumHeight(30);
 	this->setMinimumHeight(30);
-	//QPixmap image((DString::GetExePathWithoutFileName() + "Config/Theme/Icons/ICON_SEARCH.png").c_str());
+	//QPixmap image((FileSystem::GetProgramPath() + "Config/Theme/Icons/ICON_SEARCH.png").c_str());
 	//image.scaled(4,4);
 	//ui.label->setPixmap(image);
 
