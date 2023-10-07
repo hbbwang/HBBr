@@ -137,15 +137,15 @@ ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
 			{
 				vec4.x = mesh->mTextureCoords[0][i].x;
 				vec4.y = mesh->mTextureCoords[0][i].y;
-				modelData->uv_0_1_abs_max.x = max(modelData->uv_0_1_abs_max.x, glm::abs(vec4.x));
-				modelData->uv_0_1_abs_max.y = max(modelData->uv_0_1_abs_max.y, glm::abs(vec4.y));
+				modelData->uv_0_1_abs_max.x = glm::max(modelData->uv_0_1_abs_max.x, glm::abs(vec4.x));
+				modelData->uv_0_1_abs_max.y = glm::max(modelData->uv_0_1_abs_max.y, glm::abs(vec4.y));
 			}
 			if (mesh->HasTextureCoords(1))
 			{
 				vec4.z = mesh->mTextureCoords[1][i].x;
 				vec4.w = mesh->mTextureCoords[1][i].y;
-				modelData->uv_0_1_abs_max.z = max(modelData->uv_0_1_abs_max.z, glm::abs(vec4.z));
-				modelData->uv_0_1_abs_max.w = max(modelData->uv_0_1_abs_max.w, glm::abs(vec4.w));
+				modelData->uv_0_1_abs_max.z = glm::max(modelData->uv_0_1_abs_max.z, glm::abs(vec4.z));
+				modelData->uv_0_1_abs_max.w = glm::max(modelData->uv_0_1_abs_max.w, glm::abs(vec4.w));
 			}
 			vertex.uv01.push_back(vec4);
 			//UV 23
@@ -154,15 +154,15 @@ ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
 			{
 				vec4.x = mesh->mTextureCoords[2][i].x;
 				vec4.y = mesh->mTextureCoords[2][i].y;
-				modelData->uv_2_3_abs_max.x = max(modelData->uv_2_3_abs_max.x, glm::abs(vec4.x));
-				modelData->uv_2_3_abs_max.y = max(modelData->uv_2_3_abs_max.y, glm::abs(vec4.y));
+				modelData->uv_2_3_abs_max.x = glm::max(modelData->uv_2_3_abs_max.x, glm::abs(vec4.x));
+				modelData->uv_2_3_abs_max.y = glm::max(modelData->uv_2_3_abs_max.y, glm::abs(vec4.y));
 			}
 			if (mesh->HasTextureCoords(3))
 			{
 				vec4.z = mesh->mTextureCoords[3][i].x;
 				vec4.w = mesh->mTextureCoords[3][i].y;
-				modelData->uv_2_3_abs_max.z = max(modelData->uv_2_3_abs_max.z, glm::abs(vec4.z));
-				modelData->uv_2_3_abs_max.w = max(modelData->uv_2_3_abs_max.w, glm::abs(vec4.w));
+				modelData->uv_2_3_abs_max.z = glm::max(modelData->uv_2_3_abs_max.z, glm::abs(vec4.z));
+				modelData->uv_2_3_abs_max.w = glm::max(modelData->uv_2_3_abs_max.w, glm::abs(vec4.w));
 			}
 			vertex.uv23.push_back(vec4);
 		}

@@ -7,11 +7,14 @@
 	#define WIN32_LEAN_AND_MEAN             // 从 Windows 头文件中排除极少使用的内容
 	#define VK_USE_PLATFORM_WIN32_KHR	1	//support win32
 	#include <stdlib.h>
-	#include <Windows.h>
 #elif defined(__ANDROID__)
-	#include <vulkan/vulkan_android.h>
+	#define VK_USE_PLATFORM_ANDROID_KHR 1
 #elif defined(__linux__)
-	#include <vulkan/vulkan_xcb.h>
+	#define VK_USE_PLATFORM_XCB_KHR 1
+#elif defined(__ios__)
+	#define VK_USE_PLATFORM_IOS_MVK 1
+#elif defined(__macos__)
+	#define VK_USE_PLATFORM_MACOS_MVK 1
 #endif
 
 #include "../Common/Common.h"

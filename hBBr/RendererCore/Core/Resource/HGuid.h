@@ -3,10 +3,12 @@
 #include "HString.h"
 #include "ThirdParty/crossguid/Include/crossguid/guid.hpp"
 
+#ifdef _WIN32
 #ifdef _DEBUG
-#pragma comment(lib,"crossguid/crossguid-dgb.lib")
+#pragma comment(lib ,"crossguid-dgb.lib")
 #else
-#pragma comment(lib,"crossguid/crossguid.lib")
+#pragma comment(lib ,"crossguid.lib")
+#endif
 #endif
 
 #define HGUID xg::Guid

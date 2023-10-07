@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x86">
+      <Configuration>Debug</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x86">
+      <Configuration>Release</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{122e8f85-4416-4e7d-9d1d-5259dfb119df}</ProjectGuid>
+    <Keyword>Android</Keyword>
+    <RootNamespace>RendererCore_Android</RootNamespace>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <ApplicationType>Android</ApplicationType>
+    <ApplicationTypeRevision>3.0</ApplicationTypeRevision>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_5_0</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <SourcePath>$(SolutionDir)RendererCore;$(SolutionDir)RendererCore\Common;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)RendererCore\Core\Pass;$(SolutionDir)RendererCore\Core\Resource;$(SolutionDir)RendererCore\Core\Editor;$(SolutionDir)RendererCore\Core\Form;$(SolutionDir)ThirdParty\Imgui;$(SolutionDir)ThirdParty\Imgui\backends;$(SolutionDir)ThirdParty\Imgui\lodepng;$(SolutionDir)ThirdParty\Imgui\pugixml;$(SolutionDir)ThirdParty\Imgui\sdl3;$(SolutionDir)ThirdParty\Imgui\sdl3\src;$(SourcePath)</SourcePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <SourcePath>$(SolutionDir)RendererCore;$(SolutionDir)RendererCore\Common;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)RendererCore\Core\Pass;$(SolutionDir)RendererCore\Core\Resource;$(SolutionDir)RendererCore\Core\Editor;$(SolutionDir)RendererCore\Core\Form;$(SolutionDir)ThirdParty\Imgui;$(SolutionDir)ThirdParty\Imgui\backends;$(SolutionDir)ThirdParty\Imgui\lodepng;$(SolutionDir)ThirdParty\Imgui\pugixml;$(SolutionDir)ThirdParty\Imgui\sdl3;$(SolutionDir)ThirdParty\Imgui\sdl3\src;$(SourcePath)</SourcePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <SourcePath>$(SolutionDir)RendererCore;$(SolutionDir)RendererCore\Common;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)RendererCore\Core\Pass;$(SolutionDir)RendererCore\Core\Resource;$(SolutionDir)RendererCore\Core\Editor;$(SolutionDir)RendererCore\Core\Form;$(SolutionDir)ThirdParty\Imgui;$(SolutionDir)ThirdParty\Imgui\backends;$(SolutionDir)ThirdParty\Imgui\lodepng;$(SolutionDir)ThirdParty\Imgui\pugixml;$(SolutionDir)ThirdParty\Imgui\sdl3;$(SolutionDir)ThirdParty\Imgui\sdl3\src;$(SourcePath)</SourcePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <SourcePath>$(SolutionDir)RendererCore;$(SolutionDir)RendererCore\Common;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)RendererCore\Core\Pass;$(SolutionDir)RendererCore\Core\Resource;$(SolutionDir)RendererCore\Core\Editor;$(SolutionDir)RendererCore\Core\Form;$(SolutionDir)ThirdParty\Imgui;$(SolutionDir)ThirdParty\Imgui\backends;$(SolutionDir)ThirdParty\Imgui\lodepng;$(SolutionDir)ThirdParty\Imgui\pugixml;$(SolutionDir)ThirdParty\Imgui\sdl3;$(SolutionDir)ThirdParty\Imgui\sdl3\src;$(SourcePath)</SourcePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <CppLanguageStandard>c++1z</CppLanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore;$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\pugixml\;$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core\;$(SolutionDir)ThirdParty\Imgui\;$(SolutionDir)RendererCore\Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)RendererCore\Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(SolutionDir)RendererCore\Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\vulkan\Lib;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\crossguid\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <CppLanguageStandard>c++1z</CppLanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore;$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\pugixml\;$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core\;$(SolutionDir)ThirdParty\Imgui\;$(SolutionDir)RendererCore\Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)RendererCore\Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(SolutionDir)RendererCore\Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\vulkan\Lib;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\crossguid\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <CppLanguageStandard>c++1z</CppLanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore;$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\pugixml\;$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core\;$(SolutionDir)ThirdParty\Imgui\;$(SolutionDir)RendererCore\Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)RendererCore\Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(SolutionDir)RendererCore\Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\vulkan\;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\crossguid\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <CppLanguageStandard>c++1z</CppLanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore;$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\pugixml\;$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core\;$(SolutionDir)ThirdParty\Imgui\;$(SolutionDir)RendererCore\Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)RendererCore\Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(SolutionDir)RendererCore\Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\vulkan\;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\crossguid\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="RendererCore_Android.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="RendererCore_Android.h" />
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

@@ -366,10 +366,3 @@ int SDL_main(int argc, char* argv[])
 #else
 
 #endif
-
-#include "main.h"
-HBBR_API void RendererCore_Test()
-{
-	printf("Hello World!\n");
-	SDL_ShowSimpleMessageBox(0, "Test", "Hello!", NULL);
-}

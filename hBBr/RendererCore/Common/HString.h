@@ -14,19 +14,36 @@
 #endif
 #endif
 
-#include "Common.h"
+#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+
 //#include <comutil.h>  
 #include <ostream>
 #include <math.h>
 #include <vector>
-#include <string>
 #include <iostream>
+#include "GLFWInclude.h"
+#include "glm/glm.hpp"
+
 #ifdef _WIN32
 #include <windows.h>
+#pragma comment(lib, "comsuppw.lib")
+#define strcasecmp(str1, str2) _stricmp(str1, str2)
+#pragma warning(disable : _STL_DISABLE_DEPRECATED_WARNING)
 #else
 #include <unistd.h>
+#define strcpy_s(dst,size ,src) strlcpy(dst,src,size)
+#define sprintf_s(buffer,buffer_size,format , ...) snprintf(buffer, buffer_size, format, __VA_ARGS__)
+#define strcat_s(dest, dest_size ,src) strlcat(dest, src, dest_size)
+#define strtok_s(str, delimiters, context) strtok_r(str, delimiters, context) 
 #endif
-#pragma comment(lib, "comsuppw.lib")
+
+#include <string>
+#include <cwchar>
+#include <locale>
+#include <codecvt>
+#include <clocale>
+#include <cwchar>
 
 class  HString
 {
@@ -227,13 +244,12 @@ public:
 
 	HBBR_INLINE HString Right(size_t index)
 	{
-		if (index >= this->length || index < 0)
+		if (index >= this->length || index <= 0)
 		{
 			return *this;
 		}
 		else
 		{
-			size_t ind = length - index;
 			this->Remove(0, index);
 		}
 		return *this;
@@ -411,8 +427,10 @@ public:
 	//判断字符是否相同，第二个参数作用 是否区分大小
 	inline bool IsSame(HString c, bool strict = true) const
 	{
+#ifdef _WIN32
 		if (this == nullptr)
 			return false;
+#endif
 		if (strict == true)
 		{
 			if (this->length == c.length)
@@ -429,7 +447,7 @@ public:
 		}
 		else
 		{
-			if (_stricmp(_str, c.c_str()) == 0)
+			if (strcasecmp(_str, c.c_str()) == 0)
 			{
 				return true;
 			}
@@ -615,22 +633,6 @@ public:
 #endif
 	}
 
-	/* 获取exe文件完整路径 */
-	HBBR_INLINE static HString GetExeFullPath()
-	{
-		wchar_t szPath[1024];
-#ifdef _WIN32
-		// Windows specific
-		GetModuleFileNameW(NULL, szPath, sizeof(szPath));
-#else
-		// Linux specific
-		auto count = readlink("/proc/self/exe", szPath, sizeof(szPath));
-		szPath[count] = '\0';
-#endif
-		HString path = szPath;
-		return path;
-	}
-
 	/*
 		替换字符，原理是先分离，再插入
 	*/
@@ -775,23 +777,17 @@ public:
 	{
 		return atoll(str.c_str());
 	}
+#ifdef _WIN32
 
-	static char* ws2s(const wchar_t* ws)
+	//char 到 wchar_t的 转换
+	wchar_t* ps2ws(const char* s)
 	{
-		size_t len = WideCharToMultiByte(CP_ACP, 0, ws, (int)wcslen(ws), NULL, 0, NULL, NULL);
-		char* out = new char[len + 1];
-		WideCharToMultiByte(CP_ACP, 0, ws, (int)wcslen(ws), out, (int)len, NULL, NULL);
-		out[len] = '\0';
-		return out;
-	}
-
-	static wchar_t* s2ws(const char* s)
-	{
+		ReleaseCache();
 		size_t len = MultiByteToWideChar(CP_ACP, 0, s, (int)strlen(s), NULL, 0);
-		wchar_t* out = new wchar_t[len + 1];
-		MultiByteToWideChar(CP_ACP, 0, s, (int)strlen(s), out, (int)len);
-		out[len] = '\0';
-		return out;
+		m_wchar = new wchar_t[len + 1];
+		MultiByteToWideChar(CP_ACP, 0, s, (int)strlen(s), m_wchar, (int)len);
+		m_wchar[len] = '\0';
+		return m_wchar;
 	}
 
 	//wchar_t 到 char的 转换
@@ -804,17 +800,40 @@ public:
 		m_char[len] = '\0';
 		return m_char;
 	}
-	//char 到 wchar_t的 转换
-	wchar_t* ps2ws(const char* s)
+
+#else
+	wchar_t* ps2ws(const char* src)
 	{
-		ReleaseCache();
-		size_t len = MultiByteToWideChar(CP_ACP, 0, s, (int)strlen(s), NULL, 0);
-		m_wchar = new wchar_t[len + 1];
-		MultiByteToWideChar(CP_ACP, 0, s, (int)strlen(s), m_wchar, (int)len);
-		m_wchar[len] = '\0';
+		std::setlocale(LC_ALL, ""); // 设置本地化
+		size_t wstr_size = std::mbsrtowcs(nullptr, &src, 0, nullptr);
+		if (wstr_size == static_cast<size_t>(-1)) {
+			//throw std::runtime_error("Invalid multibyte character sequence.");
+			printf("Invalid multibyte character sequence.");
+			exit(0);
+		}
+		m_wchar = new wchar_t[wstr_size + 1];
+		m_wchar[wstr_size] = '\0';
+		std::mbsrtowcs(m_wchar, &src, wstr_size + 1, nullptr);
 		return m_wchar;
 	}
 
+	// 将 wchar_t* 转换为 char*
+	char* pws2s(const wchar_t* src) {
+		std::setlocale(LC_ALL, ""); // 设置本地化
+
+		size_t str_size = std::wcsrtombs(nullptr, &src, 0, nullptr);
+		if (str_size == static_cast<size_t>(-1)) {
+			//throw std::runtime_error("Invalid wide character sequence.");
+			printf("Invalid wide character sequence.");
+			exit(0);
+		}
+		m_char = new char[str_size + 1];
+		m_char[str_size] = '\0';
+		std::wcsrtombs(m_char, &src, str_size + 1, nullptr);
+		return m_char;
+	}
+
+#endif
 	//std
 	std::string ToStdString()const
 	{

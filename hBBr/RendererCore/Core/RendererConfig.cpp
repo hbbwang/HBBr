@@ -11,7 +11,8 @@ RendererConfig* RendererConfig::Get()
 		_rendererConfig.reset(new RendererConfig);
 		HString path = FileSystem::GetProgramPath() + "Config/Renderer.xml";
 		path.CorrectionPath();
-		if (!XMLStream::LoadXML(path.c_wstr(), _rendererConfig->_configFile))
+		auto pathChar = path.c_wstr();
+		if (!XMLStream::LoadXML(pathChar, _rendererConfig->_configFile))
 		{
 			MessageOut("Fatal error! Load renderer config failed !!", true, true);
 		}
