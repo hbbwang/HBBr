@@ -38,3 +38,7 @@ hBBr/x64
 hBBr/x32
 hBBr/Editor/*.txt
 hBBr/RendererCore/*.txt
+hBBr/ARM64/
+hBBr/RendererCore_Android/ARM64/
+hBBr/DependencyCopy/AndroidProject/app/libs
+hBBr/DependencyCopy/AndroidProject/app/obj

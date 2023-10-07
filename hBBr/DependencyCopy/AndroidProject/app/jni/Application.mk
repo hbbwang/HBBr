@@ -5,7 +5,7 @@
 # APP_STL := c++_shared
 
 #修改APP_ABI，根据实际需求编译生成对应的arm架构的so库。
-APP_ABI := armeabi-v7a arm64-v8a x86 x86_64
+APP_ABI := arm64-v8a armeabi-v7a x86_64 x86 
 
 # Min runtime API level
 APP_PLATFORM=android-21
