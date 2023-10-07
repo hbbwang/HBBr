@@ -98,7 +98,7 @@ void ContentManager::ReloadAssetInfos(AssetType type)
 {
 	HString typeName = GetAssetTypeString(type);
 
-	pugi::xml_node subGroup = _contentRefConfig.child(TEXT("root")).child(typeName.c_wstr());
+	pugi::xml_node subGroup = _contentRefConfig.child(L"root").child(typeName.c_wstr());
 	if (subGroup)
 	{
 		//卸载已经加载的信息
@@ -127,12 +127,12 @@ void ContentManager::ReloadAssetInfo(AssetType type , pugi::xml_node & i)
 	AssetInfoBase* info = CreateInfo(type);
 	info->type = type;
 	HString guidStr;
-	XMLStream::LoadXMLAttributeString(i, TEXT("GUID"), guidStr);
+	XMLStream::LoadXMLAttributeString(i, L"GUID", guidStr);
 	StringToGUID(guidStr.c_str(), &info->guid);
-	XMLStream::LoadXMLAttributeString(i, TEXT("Name"), info->name);
-	XMLStream::LoadXMLAttributeString(i, TEXT("Path"), info->relativePath);
-	XMLStream::LoadXMLAttributeString(i, TEXT("Suffix"), info->suffix);
-	XMLStream::LoadXMLAttributeUint64(i, TEXT("ByteSize"), info->byteSize);
+	XMLStream::LoadXMLAttributeString(i, L"Name", info->name);
+	XMLStream::LoadXMLAttributeString(i, L"Path", info->relativePath);
+	XMLStream::LoadXMLAttributeString(i, L"Suffix", info->suffix);
+	XMLStream::LoadXMLAttributeUint64(i, L"ByteSize", info->byteSize);
 	//Ref temps
 	for (auto j = i.first_child(); j; j = j.next_sibling())
 	{
@@ -140,7 +140,7 @@ void ContentManager::ReloadAssetInfo(AssetType type , pugi::xml_node & i)
 		HString guidText = j.text().as_string();
 		StringToGUID(guidText.c_str(), &guid);
 		uint32_t typeIndex;
-		XMLStream::LoadXMLAttributeUInt(j, TEXT("Type"), typeIndex);
+		XMLStream::LoadXMLAttributeUInt(j, L"Type", typeIndex);
 		AssetInfoRefTemp newTemp;
 		newTemp.guid = guid;
 		newTemp.type = (AssetType)typeIndex;
@@ -156,24 +156,24 @@ AssetInfoBase* ContentManager::ImportAssetInfo(AssetType type, HString sourcePat
 {
 	AssetInfoBase* result = NULL;
 	HString typeName = GetAssetTypeString(type);
-	auto root = _contentRefConfig.child(TEXT("root"));
+	auto root = _contentRefConfig.child(L"root");
 	pugi::xml_node subGroup = root.child(typeName.c_wstr());
 	if (!subGroup)
 	{
 		subGroup = root.append_child(typeName.c_wstr());
 	}
 	//配置xml
-	auto item = subGroup.append_child(TEXT("Item"));
+	auto item = subGroup.append_child(L"Item");
 	auto guid = CreateGUID();
 	HString guidStr = GUIDToString(guid);
 	HString name = sourcePath.GetBaseName();
 	HString suffix = sourcePath.GetSuffix();
 	HString path = FileSystem::GetRelativePath(contentPath.GetFilePath().c_str());
-	item.append_attribute(TEXT("GUID")).set_value(guidStr.c_wstr());
-	item.append_attribute(TEXT("Name")).set_value(name.c_wstr());
-	item.append_attribute(TEXT("Suffix")).set_value(suffix.c_wstr());
-	item.append_attribute(TEXT("Path")).set_value(path.c_wstr());
-	item.append_attribute(TEXT("ByteSize")).set_value(FileSystem::GetFileSize(sourcePath.c_str()));
+	item.append_attribute(L"GUID").set_value(guidStr.c_wstr());
+	item.append_attribute(L"Name").set_value(name.c_wstr());
+	item.append_attribute(L"Suffix").set_value(suffix.c_wstr());
+	item.append_attribute(L"Path").set_value(path.c_wstr());
+	item.append_attribute(L"ByteSize").set_value(FileSystem::GetFileSize(sourcePath.c_str()));
 
 	//重新导入
 	ReloadAssetInfo(type,item);
@@ -222,10 +222,10 @@ void ContentManager::RemoveAssetInfo(HGUID obj, AssetType type )
 				}
 				HString typeName = GetAssetTypeString(type);
 				HString guidStr = GUIDToString(obj);
-				pugi::xml_node subGroup = _contentRefConfig.child(TEXT("root")).child(typeName.c_wstr());
+				pugi::xml_node subGroup = _contentRefConfig.child(L"root").child(typeName.c_wstr());
 				if (subGroup)
 				{
-					auto item = subGroup.find_child_by_attribute(TEXT("GUID"), guidStr.c_wstr());
+					auto item = subGroup.find_child_by_attribute(L"GUID", guidStr.c_wstr());
 					subGroup.remove_child(item);
 				}
 			}
@@ -235,7 +235,7 @@ void ContentManager::RemoveAssetInfo(HGUID obj, AssetType type )
 	{
 		HString typeName = GetAssetTypeString(type);
 		HString guidStr = GUIDToString(obj);
-		pugi::xml_node subGroup = _contentRefConfig.child(TEXT("root")).child(typeName.c_wstr());
+		pugi::xml_node subGroup = _contentRefConfig.child(L"root").child(typeName.c_wstr());
 		if (subGroup)
 		{
 			//移除资产信息
@@ -253,7 +253,7 @@ void ContentManager::RemoveAssetInfo(HGUID obj, AssetType type )
 						i->refs.erase(iit);
 					}
 				}
-				auto item = subGroup.find_child_by_attribute(TEXT("GUID"), guidStr.c_wstr());
+				auto item = subGroup.find_child_by_attribute(L"GUID", guidStr.c_wstr());
 				subGroup.remove_child(item);
 			}
 		}

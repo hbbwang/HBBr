@@ -20,25 +20,34 @@ struct FileEntry
 	FileEntryType type = FileEntryType::File;
 };
 
-class FileSystem
-{
-public:
-	HBBR_API static HString GetProgramPath();
-	HBBR_API static HString GetShaderCacheAbsPath();
-	HBBR_API static HString GetResourceAbsPath();
-	HBBR_API static HString GetContentAbsPath();
-	HBBR_API static HString GetConfigAbsPath();
-	/* editor only */
-	HBBR_API static HString GetShaderIncludeAbsPath();
-	HBBR_API static HString GetRelativePath(const char* path);
-	HBBR_API static uint32_t GetPathFileNum(const char* path);
-	HBBR_API static bool FileExist(const char* path);
-	HBBR_API static bool IsDir(const char* path);
-	HBBR_API static bool IsNormalFile(const char* path);
-	HBBR_API static bool FileCopy(const char* srcFile , const char* newPath);
-	HBBR_API static bool FileRemove(const char* path);
-	HBBR_API static uint64_t GetFileSize(const char* path);
-	static std::vector<FileEntry> GetFilesBySuffix(const char* path , const char* suffix);
-	static std::vector<char>ReadBinaryFile(const char* filePath);
-	
-};
+#if __ANDROID_API__
+extern "C" {
+#endif
+
+	class FileSystem
+	{
+	public:
+
+		HBBR_API static HString GetProgramPath();
+		HBBR_API static HString GetShaderCacheAbsPath();
+		HBBR_API static HString GetResourceAbsPath();
+		HBBR_API static HString GetContentAbsPath();
+		HBBR_API static HString GetConfigAbsPath();
+		/* editor only */
+		HBBR_API static HString GetShaderIncludeAbsPath();
+		HBBR_API static HString GetRelativePath(const char* path);
+		HBBR_API static uint32_t GetPathFileNum(const char* path);
+		HBBR_API static bool FileExist(const char* path);
+		HBBR_API static bool IsDir(const char* path);
+		HBBR_API static bool IsNormalFile(const char* path);
+		HBBR_API static bool FileCopy(const char* srcFile, const char* newPath);
+		HBBR_API static bool FileRemove(const char* path);
+		HBBR_API static uint64_t GetFileSize(const char* path);
+		static std::vector<FileEntry> GetFilesBySuffix(const char* path, const char* suffix);
+		static std::vector<char>ReadBinaryFile(const char* filePath);
+
+	};
+
+#if __ANDROID_API__
+}
+#endif

@@ -1,5 +1,5 @@
 ﻿#include "RendererCore_Android.h"
-#include "HString.h"
+
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "RendererCore_Android", __VA_ARGS__))
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "RendererCore_Android", __VA_ARGS__))
 
@@ -33,10 +33,15 @@ extern "C" {
 
 	RendererCore_Android::RendererCore_Android()
 	{
+		HString str = "Hello Android!";
+		printf("%s", str.c_str());
+		//Init vulkan
+		//VulkanApp::InitVulkanManager(false, true);
 	}
 
 	RendererCore_Android::~RendererCore_Android()
 	{
+		VulkanApp::DeInitVulkanManager();
 	}
 
 

@@ -1,8 +1,7 @@
 ﻿#pragma once
 //基础Compoennt组件类,组件都是附加在GameObject上的,结构体参数必须至少带有class GameObject* parent
+#include "Common.h"
 #include <vector>
-
-
 class Component
 {
 	friend class GameObject;
@@ -16,11 +15,11 @@ public:
 
 	void Destroy();
 
-	__forceinline bool IsActive() const {
+	HBBR_INLINE bool IsActive() const {
 		return _bActive;
 	}
 
-	__forceinline GameObject* GetGameObject() const {
+	HBBR_INLINE GameObject* GetGameObject() const {
 		return _gameObject;
 	}
 

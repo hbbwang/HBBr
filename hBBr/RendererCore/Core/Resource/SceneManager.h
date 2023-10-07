@@ -32,9 +32,9 @@ public:
 	class CameraComponent* _editorCamera = NULL;
 #endif
 
-	HBBR_API __forceinline class VulkanRenderer* GetRenderer()const { return _renderer; }
+	HBBR_API HBBR_INLINE class VulkanRenderer* GetRenderer()const { return _renderer; }
 
-	HBBR_API __forceinline class CameraComponent* GetMainCamera()const { return _mainCamera; }
+	HBBR_API HBBR_INLINE class CameraComponent* GetMainCamera()const { return _mainCamera; }
 
 private:
 

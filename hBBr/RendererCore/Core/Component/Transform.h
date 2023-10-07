@@ -8,63 +8,63 @@ public:
 	Transform(GameObject* parent, glm::vec3 pos = glm::vec3(0,0,0), glm::vec3 eulerAge = glm::vec3(0,0,0), glm::vec3 scale3D = glm::vec3(1,1,1));
 	~Transform();
 
-	HBBR_API __forceinline glm::vec3 GetForwardVector()const{return forward;}
+	HBBR_API HBBR_INLINE glm::vec3 GetForwardVector()const{return forward;}
 
-	HBBR_API __forceinline glm::vec3 GetRightVector()const{return right;}
+	HBBR_API HBBR_INLINE glm::vec3 GetRightVector()const{return right;}
 
-	HBBR_API __forceinline glm::vec3 GetUpVector()const{return up;}
+	HBBR_API HBBR_INLINE glm::vec3 GetUpVector()const{return up;}
 
-	HBBR_API __forceinline glm::vec3 GetWorldLocation()const {return worldLocation;}
+	HBBR_API HBBR_INLINE glm::vec3 GetWorldLocation()const {return worldLocation;}
 
-	HBBR_API __forceinline glm::vec3 GetWorldRotation()const { return worldEulerAngle; }
+	HBBR_API HBBR_INLINE glm::vec3 GetWorldRotation()const { return worldEulerAngle; }
 
-	HBBR_API __forceinline glm::vec3 GetLocation()const { return location; }
+	HBBR_API HBBR_INLINE glm::vec3 GetLocation()const { return location; }
 
-	HBBR_API __forceinline glm::vec3 GetRotation()const { return eulerAngle; }
+	HBBR_API HBBR_INLINE glm::vec3 GetRotation()const { return eulerAngle; }
 
-	HBBR_API __forceinline glm::vec3 GetScale3D()const { return scale3D; }
+	HBBR_API HBBR_INLINE glm::vec3 GetScale3D()const { return scale3D; }
 
-	HBBR_API __forceinline glm::mat4 GetWorldMatrix()const { return worldMatrix; }
+	HBBR_API HBBR_INLINE glm::mat4 GetWorldMatrix()const { return worldMatrix; }
 
 	//Set object scale at local 3D space.
-	HBBR_API __forceinline  void SetScale3D(glm::vec3 newSize)
+	HBBR_API HBBR_INLINE  void SetScale3D(glm::vec3 newSize)
 	{
 		FSetScale3D(newSize);
 	}
 
 	//Set object world location ( no attachment )
-	HBBR_API __forceinline void SetWorldLocation(glm::vec3 newLocation)
+	HBBR_API HBBR_INLINE void SetWorldLocation(glm::vec3 newLocation)
 	{
 		FSetWorldLocation(newLocation);
 	}
 
 	//Set object world rotation ( no attachment )
-	HBBR_API __forceinline void SetWorldRotation(glm::vec3 newAngle)
+	HBBR_API HBBR_INLINE void SetWorldRotation(glm::vec3 newAngle)
 	{
 		FSetWorldRotation(newAngle);
 	}
 
 	//Set object location ( with attachment )
-	HBBR_API __forceinline void SetLocation(glm::vec3 newLocation)
+	HBBR_API HBBR_INLINE void SetLocation(glm::vec3 newLocation)
 	{
 		FSetLocation(newLocation);
 	}
 
 	//Set object rotation ( with attachment )
-	HBBR_API __forceinline void SetRotation(glm::vec3 newAngle)
+	HBBR_API HBBR_INLINE void SetRotation(glm::vec3 newAngle)
 	{
 		FSetRotation(newAngle);
 	}
 
 	HBBR_API void SetWorldMatrix(glm::mat4 newWorldMat);
 
-	HBBR_API __forceinline void SetLocationAndRotation(glm::vec3 newLocation, glm::vec3 newAngle)
+	HBBR_API HBBR_INLINE void SetLocationAndRotation(glm::vec3 newLocation, glm::vec3 newAngle)
 	{
 		FSetRotation(newAngle);
 		FSetLocation(newLocation);
 	}
 
-	HBBR_API __forceinline void SetWorldLocationAndRotation(glm::vec3 newLocation, glm::vec3 newAngle)
+	HBBR_API HBBR_INLINE void SetWorldLocationAndRotation(glm::vec3 newLocation, glm::vec3 newAngle)
 	{
 		FSetWorldRotation(newAngle);
 		FSetWorldLocation(newLocation);
@@ -86,7 +86,7 @@ public:
 	/*Âß¼­¸üÐÂ*/
 	virtual void Update();
 
-	__forceinline bool NeedUpdateUb()const { return _bNeedUpdateUniformBuffer; }
+	HBBR_INLINE bool NeedUpdateUb()const { return _bNeedUpdateUniformBuffer; }
 
 private:
 

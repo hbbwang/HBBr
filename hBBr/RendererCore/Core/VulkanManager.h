@@ -7,7 +7,7 @@
 	#define WIN32_LEAN_AND_MEAN             // 从 Windows 头文件中排除极少使用的内容
 	#define VK_USE_PLATFORM_WIN32_KHR	1	//support win32
 	#include <stdlib.h>
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) || defined(__ANDROID_API__)
 	#define VK_USE_PLATFORM_ANDROID_KHR 1
 #elif defined(__linux__)
 	#define VK_USE_PLATFORM_XCB_KHR 1
@@ -54,14 +54,14 @@ public:
 	VulkanManager(bool bDebug);
 	~VulkanManager();
 
-	HBBR_API __forceinline static void InitManager(bool bDebug) {
+	HBBR_API HBBR_INLINE static void InitManager(bool bDebug) {
 		if (_vulkanManager == NULL)
 		{
 			_vulkanManager.reset(new VulkanManager(bDebug));
 		}
 	}
 
-	HBBR_API __forceinline static VulkanManager* GetManager() {
+	HBBR_API HBBR_INLINE static VulkanManager* GetManager() {
 		return _vulkanManager.get();
 	}
 
@@ -72,7 +72,7 @@ public:
 		}
 	}
 
-	__forceinline VkQueue GetGraphicsQueue() {
+	HBBR_INLINE VkQueue GetGraphicsQueue() {
 		return _graphicsQueue;
 	}
 
@@ -203,7 +203,8 @@ public:
 
 	void WaitForFences(std::vector<VkFence> fences, bool bReset = true, uint64_t timeOut = UINT64_MAX);
 
-	void WaitSemaphores(std::vector<VkSemaphore> semaphores , uint64_t timeOut = UINT64_MAX);
+	//Android 不支持...？
+	//void WaitSemaphores(std::vector<VkSemaphore> semaphores , uint64_t timeOut = UINT64_MAX);
 
 	void CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info , VkPipeline& pipeline);
 
@@ -269,27 +270,27 @@ public:
 	/*-----------------*/
 
 	/* 获取平台 */
-	__forceinline EPlatform GetPlatform()const {
+	HBBR_INLINE EPlatform GetPlatform()const {
 		return _currentPlatform;
 	}
 
-	__forceinline VkInstance GetInstance()const {
+	HBBR_INLINE VkInstance GetInstance()const {
 		return _instance;
 	}
 
-	__forceinline uint32_t GetSwapchainBufferCount()const {
+	HBBR_INLINE uint32_t GetSwapchainBufferCount()const {
 		return _swapchainBufferCount;
 	}
 
-	__forceinline VkDevice GetDevice()const {
+	HBBR_INLINE VkDevice GetDevice()const {
 		return _device;
 	}
 
-	__forceinline VkCommandPool GetCommandPool()const {
+	HBBR_INLINE VkCommandPool GetCommandPool()const {
 		return _commandPool;
 	}
 
-	__forceinline VkDescriptorPool GetDescriptorPool()const {
+	HBBR_INLINE VkDescriptorPool GetDescriptorPool()const {
 		return _descriptorPool;
 	}
 

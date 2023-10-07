@@ -2,9 +2,302 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="RendererCore_Android.cpp" />
+    <ClCompile Include="..\RendererCore\Common\Common.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Common\ConsoleDebug.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Common\DDSTool.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Common\FileSystem.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Common\HInput.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Common\HTime.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Common\ImageTool.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Common\XMLStream.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Buffer.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Component\CameraComponent.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Component\Component.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Component\GameObject.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Component\Material.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Component\ModelComponent.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Component\Transform.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\DescriptorSet.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Pass\PassDefine.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\PassBase.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\PassManager.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Pipeline.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Primitive.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\RendererConfig.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Resource\ContentManager.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Resource\HGuid.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Resource\ModelData.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Resource\SceneManager.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Shader.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Texture.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\Thread.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\VertexFactory.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\VulkanManager.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Core\VulkanRenderer.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\Editor\ShaderCompiler.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RendererCore\main.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\lodepng\lodepng.cpp">
+      <Filter>ThirdParty</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\pugixml\pugixml.cpp">
+      <Filter>ThirdParty</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_demo.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_draw.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_tables.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_widgets.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RendererCore_Android.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="..\RendererCore\Common\Common.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Common\ConsoleDebug.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Common\DDSTool.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Common\FileSystem.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Common\HInput.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Common\HString.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Common\HTime.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Common\ImageTool.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Common\RendererType.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Common\TypeConversion.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Common\XMLStream.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Buffer.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Component\CameraComponent.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Component\Component.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Component\GameObject.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Component\Material.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Component\ModelComponent.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Component\Transform.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\DescriptorSet.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Pass\PassDefine.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Pass\PassType.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\PassBase.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\PassManager.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Pipeline.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Primitive.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\RendererConfig.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Resource\ContentManager.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Resource\HGuid.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Resource\ModelData.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Resource\SceneManager.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Shader.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Texture.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\Thread.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\VertexFactory.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\VulkanManager.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Core\VulkanRenderer.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Editor\ShaderCompiler.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Form\FormMain.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\Form\GLFWInclude.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RendererCore\main.h">
+      <Filter>RendererCoreSrc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\lodepng\lodepng.h">
+      <Filter>ThirdParty</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\pugixml\pugiconfig.hpp">
+      <Filter>ThirdParty</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\pugixml\pugixml.hpp">
+      <Filter>ThirdParty</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imgui.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imgui_internal.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_rectpack.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_textedit.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_truetype.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imconfig.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="RendererCoreSrc">
+      <UniqueIdentifier>{b994c327-5fdf-443a-89a3-0422a5f432d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty">
+      <UniqueIdentifier>{8af89435-bd79-474b-b1d4-9fbcdf4a064f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\Imgui">
+      <UniqueIdentifier>{5a87a707-1a94-43f5-8573-304de9fc6f6c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

@@ -16,96 +16,95 @@ class VulkanRenderer
 {
 	friend class PassManager;
 public:
-#if defined(_WIN32)
 	HBBR_API VulkanRenderer(SDL_Window* windowHandle, const char* rendererName);
-#endif
+
 	HBBR_API ~VulkanRenderer();
 
 	/* Get current Frame buffer index. It is frequent use in the passes. */
-	HBBR_API __forceinline static int GetCurrentFrameIndex() {
+	HBBR_API HBBR_INLINE static int GetCurrentFrameIndex() {
 		return _currentFrameIndex;
 	}
 
-	__forceinline bool IsRendererWantRelease() {
+	HBBR_INLINE bool IsRendererWantRelease() {
 		return _bRendererRelease;
 	}
 
-	HBBR_API __forceinline class PassManager* GetPassManager() {
+	HBBR_API HBBR_INLINE class PassManager* GetPassManager() {
 		return _passManager.get();
 	}
 
-	HBBR_API __forceinline SDL_Window* GetWindowHandle() {
+	HBBR_API HBBR_INLINE SDL_Window* GetWindowHandle() {
 		return _windowHandle;
 	}
 
-	__forceinline VkSurfaceFormatKHR GetSurfaceFormat()const {
+	HBBR_INLINE VkSurfaceFormatKHR GetSurfaceFormat()const {
 		return _surfaceFormat;
 	}
 
 	/* Get swapchain imageViews for render attachments */
-	__forceinline std::vector<VkImageView> GetSwapchainImageViews() {
+	HBBR_INLINE std::vector<VkImageView> GetSwapchainImageViews() {
 		return _swapchainImageViews;
 	}
 
-	HBBR_API __forceinline VkExtent2D GetSurfaceSize()const {
+	HBBR_API HBBR_INLINE VkExtent2D GetSurfaceSize()const {
 		return _surfaceSize;
 	}
 
-	__forceinline VkSemaphore GetPresentSemaphore() {
+	HBBR_INLINE VkSemaphore GetPresentSemaphore() {
 		return _presentSemaphore[_currentFrameIndex];
 	}
 
-	__forceinline VkSemaphore GetSubmitSemaphore() {
+	HBBR_INLINE VkSemaphore GetSubmitSemaphore() {
 		return _queueSubmitSemaphore[_currentFrameIndex];
 	}
 
-	HBBR_API __forceinline bool IsInit() {
+	HBBR_API HBBR_INLINE bool IsInit() {
 		return _bInit;
 	}
 
-	HBBR_API __forceinline HString GetName() {
+	HBBR_API HBBR_INLINE HString GetName() {
 		return _rendererName;
 	}
 
-	__forceinline VkCommandBuffer GetCommandBuffer()const{
+	HBBR_INLINE VkCommandBuffer GetCommandBuffer()const{
 		return _cmdBuf[_currentFrameIndex];
 	}
 
 	//ms
-	HBBR_API __forceinline double GetFrameRate()const {
+	HBBR_API HBBR_INLINE double GetFrameRate()const {
 		return _frameRate;
 	}
 
 	//s
-	HBBR_API __forceinline double GetFrameRateS()const {
+	HBBR_API HBBR_INLINE double GetFrameRateS()const {
 		return _frameRate/1000.0f;
 	}
 
-	HBBR_API __forceinline class SceneManager* GetScene() {
+	HBBR_API HBBR_INLINE class SceneManager* GetScene() {
 		return _sceneManager.get();
 	}
 
-	HBBR_API __forceinline bool HasFocus() {
+	HBBR_API HBBR_INLINE bool HasFocus() {
 		return VulkanApp::IsWindowFocus(_windowHandle);
 	}
 
-	__forceinline const PassUniformBuffer& GetPassUniformBufferCache()
+	HBBR_INLINE const PassUniformBuffer& GetPassUniformBufferCache()
 	{
 		return _passUniformBuffer;
 	}
 
-	HBBR_API __forceinline void ExecFunctionOnRenderThread(std::function<void()> func)
+	HBBR_API HBBR_INLINE void ExecFunctionOnRenderThread(std::function<void()> func)
 	{
 		_renderThreadFuncsOnce.push_back(func);
 	}
 
-	HBBR_API __forceinline bool IsInGame()const
+	HBBR_API HBBR_INLINE bool IsInGame()const
 	{
 		return _bIsInGame;
 	}
 	
 	//获取游戏时间(秒)
-	__forceinline const double GetGameTime()
+	HBBR_INLINE const double GetGameTime()
 	{
 		return _gameTime.End_s();
 	}

@@ -10,52 +10,52 @@ public:
 	
 	CameraComponent(class GameObject* parent);
 
-	__forceinline glm::mat4 GetViewMatrix()const
+	HBBR_INLINE glm::mat4 GetViewMatrix()const
 	{
 		return _viewMatrix;
 	}
 
-	__forceinline glm::mat4 GetInvViewMatrix()const
+	HBBR_INLINE glm::mat4 GetInvViewMatrix()const
 	{
 		return _invViewMatrix;
 	}
 
-	__forceinline void SetFOV(float vaule)
+	HBBR_INLINE void SetFOV(float vaule)
 	{
 		_fov = vaule;
 	}
 
-	__forceinline float GetFOV()const
+	HBBR_INLINE float GetFOV()const
 	{
 		return _fov;
 	}
 
-	__forceinline void SetFarClipPlane(float vaule)
+	HBBR_INLINE void SetFarClipPlane(float vaule)
 	{
 		_farClipPlane = vaule;
 	}
 
-	__forceinline float GetFarClipPlane()const
+	HBBR_INLINE float GetFarClipPlane()const
 	{
 		return _farClipPlane;
 	}
 
-	__forceinline void SetNearClipPlane(float vaule)
+	HBBR_INLINE void SetNearClipPlane(float vaule)
 	{
 		_nearClipPlane = vaule;
 	}
 
-	__forceinline float GetNearClipPlane()const
+	HBBR_INLINE float GetNearClipPlane()const
 	{
 		return _nearClipPlane;
 	}
 
-	__forceinline glm::vec3 GetTargetPos()const
+	HBBR_INLINE glm::vec3 GetTargetPos()const
 	{
 		return _cameraTarget;
 	}
 
-	__forceinline bool IsMainCamera()const
+	HBBR_INLINE bool IsMainCamera()const
 	{
 		return _bIsMainCamera;
 	}

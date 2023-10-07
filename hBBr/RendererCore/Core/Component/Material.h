@@ -30,11 +30,11 @@ public:
 
 	HBBR_API static Material* CreateMaterial(HString newMatFilePath);
 
-	HBBR_API __forceinline MaterialPrimitive* GetPrimitive()const { return _primitive.get(); }
+	HBBR_API HBBR_INLINE MaterialPrimitive* GetPrimitive()const { return _primitive.get(); }
 
-	HBBR_API __forceinline HGUID GetGUID()const { return _guid; }
+	HBBR_API HBBR_INLINE HGUID GetGUID()const { return _guid; }
 
-	HBBR_API __forceinline static Material* GetDefaultMaterial()
+	HBBR_API HBBR_INLINE static Material* GetDefaultMaterial()
 	{	
 		return LoadMaterial(HGUID(DefaultMaterialGuid));
 	}

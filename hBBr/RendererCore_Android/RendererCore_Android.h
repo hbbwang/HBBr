@@ -1,5 +1,5 @@
 ﻿#pragma once
-
+#include "FormMain.h"
 class RendererCore_Android
 {
 public:

@@ -20,7 +20,7 @@ public:
 	PassBase(VulkanRenderer* renderer);
 	~PassBase();
 	virtual void PassBuild() {}
-	__forceinline HString GetName()const { return _passName; }
+	HBBR_INLINE HString GetName()const { return _passName; }
 protected:
 	virtual void PassInit() {}
 	virtual void PassUpdate() {}
@@ -44,7 +44,7 @@ public:
 	virtual void PassReset()override { _currentFrameBufferSize = { 999999 , 999999 }; }
 	virtual void ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> swapchainImageViews,std::vector<VkImageView> imageViews);
 	void CreateRenderPass();
-	__forceinline VkRenderPass GetRenderPass()const
+	HBBR_INLINE VkRenderPass GetRenderPass()const
 	{
 		return _renderPass;
 	}

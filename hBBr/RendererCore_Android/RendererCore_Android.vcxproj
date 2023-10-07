@@ -67,11 +67,13 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>Clang_5_0</PlatformToolset>
+    <AndroidAPILevel>android-30</AndroidAPILevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>Clang_5_0</PlatformToolset>
+    <AndroidAPILevel>android-30</AndroidAPILevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -114,9 +116,12 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)RendererCore;$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\pugixml\;$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core\;$(SolutionDir)ThirdParty\Imgui\;$(SolutionDir)RendererCore\Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)RendererCore\Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(SolutionDir)RendererCore\Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\vulkan\Lib;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\crossguid\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>-lvulkan %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -128,6 +133,8 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\vulkan\Lib;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\crossguid\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>-lvulkan %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
@@ -177,9 +184,103 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\RendererCore\Common\Common.cpp" />
+    <ClCompile Include="..\RendererCore\Common\ConsoleDebug.cpp" />
+    <ClCompile Include="..\RendererCore\Common\DDSTool.cpp" />
+    <ClCompile Include="..\RendererCore\Common\FileSystem.cpp" />
+    <ClCompile Include="..\RendererCore\Common\HInput.cpp" />
+    <ClCompile Include="..\RendererCore\Common\HTime.cpp" />
+    <ClCompile Include="..\RendererCore\Common\ImageTool.cpp" />
+    <ClCompile Include="..\RendererCore\Common\XMLStream.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Buffer.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Component\CameraComponent.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Component\Component.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Component\GameObject.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Component\Material.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Component\ModelComponent.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Component\Transform.cpp" />
+    <ClCompile Include="..\RendererCore\Core\DescriptorSet.cpp" />
+    <ClCompile Include="..\RendererCore\Core\PassBase.cpp" />
+    <ClCompile Include="..\RendererCore\Core\PassManager.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Pass\PassDefine.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Pipeline.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Primitive.cpp" />
+    <ClCompile Include="..\RendererCore\Core\RendererConfig.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Resource\ContentManager.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Resource\HGuid.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Resource\ModelData.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Resource\SceneManager.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Shader.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Texture.cpp" />
+    <ClCompile Include="..\RendererCore\Core\Thread.cpp" />
+    <ClCompile Include="..\RendererCore\Core\VertexFactory.cpp" />
+    <ClCompile Include="..\RendererCore\Core\VulkanManager.cpp" />
+    <ClCompile Include="..\RendererCore\Core\VulkanRenderer.cpp" />
+    <ClCompile Include="..\RendererCore\Editor\ShaderCompiler.cpp" />
+    <ClCompile Include="..\RendererCore\main.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\ThirdParty\lodepng\lodepng.cpp" />
+    <ClCompile Include="..\ThirdParty\pugixml\pugixml.cpp" />
     <ClCompile Include="RendererCore_Android.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\RendererCore\Common\Common.h" />
+    <ClInclude Include="..\RendererCore\Common\ConsoleDebug.h" />
+    <ClInclude Include="..\RendererCore\Common\DDSTool.h" />
+    <ClInclude Include="..\RendererCore\Common\FileSystem.h" />
+    <ClInclude Include="..\RendererCore\Common\HInput.h" />
+    <ClInclude Include="..\RendererCore\Common\HString.h" />
+    <ClInclude Include="..\RendererCore\Common\HTime.h" />
+    <ClInclude Include="..\RendererCore\Common\ImageTool.h" />
+    <ClInclude Include="..\RendererCore\Common\RendererType.h" />
+    <ClInclude Include="..\RendererCore\Common\TypeConversion.h" />
+    <ClInclude Include="..\RendererCore\Common\XMLStream.h" />
+    <ClInclude Include="..\RendererCore\Core\Buffer.h" />
+    <ClInclude Include="..\RendererCore\Core\Component\CameraComponent.h" />
+    <ClInclude Include="..\RendererCore\Core\Component\Component.h" />
+    <ClInclude Include="..\RendererCore\Core\Component\GameObject.h" />
+    <ClInclude Include="..\RendererCore\Core\Component\Material.h" />
+    <ClInclude Include="..\RendererCore\Core\Component\ModelComponent.h" />
+    <ClInclude Include="..\RendererCore\Core\Component\Transform.h" />
+    <ClInclude Include="..\RendererCore\Core\DescriptorSet.h" />
+    <ClInclude Include="..\RendererCore\Core\PassBase.h" />
+    <ClInclude Include="..\RendererCore\Core\PassManager.h" />
+    <ClInclude Include="..\RendererCore\Core\Pass\PassDefine.h" />
+    <ClInclude Include="..\RendererCore\Core\Pass\PassType.h" />
+    <ClInclude Include="..\RendererCore\Core\Pipeline.h" />
+    <ClInclude Include="..\RendererCore\Core\Primitive.h" />
+    <ClInclude Include="..\RendererCore\Core\RendererConfig.h" />
+    <ClInclude Include="..\RendererCore\Core\Resource\ContentManager.h" />
+    <ClInclude Include="..\RendererCore\Core\Resource\HGuid.h" />
+    <ClInclude Include="..\RendererCore\Core\Resource\ModelData.h" />
+    <ClInclude Include="..\RendererCore\Core\Resource\SceneManager.h" />
+    <ClInclude Include="..\RendererCore\Core\Shader.h" />
+    <ClInclude Include="..\RendererCore\Core\Texture.h" />
+    <ClInclude Include="..\RendererCore\Core\Thread.h" />
+    <ClInclude Include="..\RendererCore\Core\VertexFactory.h" />
+    <ClInclude Include="..\RendererCore\Core\VulkanManager.h" />
+    <ClInclude Include="..\RendererCore\Core\VulkanRenderer.h" />
+    <ClInclude Include="..\RendererCore\Editor\ShaderCompiler.h" />
+    <ClInclude Include="..\RendererCore\Form\FormMain.h" />
+    <ClInclude Include="..\RendererCore\Form\GLFWInclude.h" />
+    <ClInclude Include="..\RendererCore\main.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imconfig.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imgui.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imgui_internal.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_textedit.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_truetype.h" />
+    <ClInclude Include="..\ThirdParty\lodepng\lodepng.h" />
+    <ClInclude Include="..\ThirdParty\pugixml\pugiconfig.hpp" />
+    <ClInclude Include="..\ThirdParty\pugixml\pugixml.hpp" />
     <ClInclude Include="RendererCore_Android.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>

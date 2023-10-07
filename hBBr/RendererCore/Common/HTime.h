@@ -1,6 +1,13 @@
 ﻿#pragma once
 #include <chrono>
 #include "HString.h"
+
+#ifdef _WIN32
+
+#else
+#define localtime_s(_time_t,_tm) localtime_r(_tm ,_time_t)
+#endif
+
 /* 高精度计时器 */
 class HTime
 {

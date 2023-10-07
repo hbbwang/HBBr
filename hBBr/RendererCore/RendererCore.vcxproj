@@ -187,7 +187,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\vulkan\;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\crossguid\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>crossguid-dgb.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crossguid-dgb.lib;%(AdditionalDependencies);vulkan-1.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /c /f /y $(solutiondir)DependencyCopy\$(Configuration)\*.dll $(solutiondir)$(Platform)\$(Configuration)</Command>
@@ -213,7 +213,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\vulkan\;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\crossguid\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>crossguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crossguid.lib;%(AdditionalDependencies);vulkan-1.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /c /f /y $(solutiondir)DependencyCopy\$(Configuration)\*.dll $(solutiondir)$(Platform)\$(Configuration)</Command>
@@ -239,7 +239,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\vulkan\;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\crossguid\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>crossguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crossguid.lib;%(AdditionalDependencies);vulkan-1.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>

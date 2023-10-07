@@ -20,15 +20,15 @@ public:
 	void PassesRelease();
 	void PassesReset();
 
-	__forceinline std::shared_ptr <SceneTexture> GetSceneTexture()const {
+	HBBR_INLINE std::shared_ptr <SceneTexture> GetSceneTexture()const {
 		return _sceneTextures;
 	}
 
-	__forceinline std::vector<std::shared_ptr<PassBase>> GetExecutePasses()const {
+	HBBR_INLINE std::vector<std::shared_ptr<PassBase>> GetExecutePasses()const {
 		return _executePasses;
 	}
 
-	__forceinline std::vector<VkFence> GetExecuteFences()const {
+	HBBR_INLINE std::vector<VkFence> GetExecuteFences()const {
 		return _executeFence;
 	}
 

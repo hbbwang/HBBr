@@ -48,29 +48,29 @@ public:
 	Texture() {}
 	Texture(bool bNoMemory) {_bNoMemory = bNoMemory;}
 	~Texture();
-	__forceinline VkImage GetTexture()const {
+	HBBR_INLINE VkImage GetTexture()const {
 		return _image;
 	}
-	__forceinline VkImageView GetTextureView()const {
+	HBBR_INLINE VkImageView GetTextureView()const {
 		return _imageView;
 	}
-	__forceinline VkFormat GetFormat()const {
+	HBBR_INLINE VkFormat GetFormat()const {
 		return _format;
 	}
-	__forceinline VkImageLayout GetLayout ()const {
+	HBBR_INLINE VkImageLayout GetLayout ()const {
 		return _imageLayout;
 	}
-	__forceinline VkImageUsageFlags GetUsageFlags()const {
+	HBBR_INLINE VkImageUsageFlags GetUsageFlags()const {
 		return _usageFlags;
 	}
-	__forceinline uint32_t GetMipCount()const {
+	HBBR_INLINE uint32_t GetMipCount()const {
 		return _mipCount;
 	}
-	__forceinline VkImageAspectFlags GetAspectFlags()const {
+	HBBR_INLINE VkImageAspectFlags GetAspectFlags()const {
 		return _imageAspectFlags;
 	}
 
-	__forceinline VkExtent2D GetImageSize()const {
+	HBBR_INLINE VkExtent2D GetImageSize()const {
 		return _imageSize;
 	}
 

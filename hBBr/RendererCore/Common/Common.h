@@ -1,13 +1,29 @@
 ﻿#pragma once
 
-//#ifdef SHARED_LIBRARY
+#ifndef HBBR_INLINE
+#if __ANDROID_API__
+#define HBBR_INLINE inline
+#else
+#define HBBR_INLINE __forceinline
+#endif
+#endif
 
+
+//#ifdef SHARED_LIBRARY
+#ifdef __ANDROID_API__
+#include <jni.h>
+//#ifdef _USRDLL
+#define HBBR_API __attribute__((visibility("default")))
+//#else
+//#define HBBR_API 
+//#endif
+#else
 #ifdef _USRDLL
 #define HBBR_API __declspec(dllexport)
 #else
 #define HBBR_API __declspec(dllimport)
 #endif
-
+#endif
 //#else
 //#define HBBR_API 
 //#endif
@@ -46,3 +62,14 @@
 #endif
 
 void MessageOut(const char* msg, bool bExit = false, bool bMessageBox = false ,const char* textColor = ("255,255,255"));
+
+
+#ifdef _WIN32
+
+#else
+template <typename T, std::size_t N>
+constexpr std::size_t countof(const T(&)[N]) {
+	return N;
+}
+#define _countof(x) countof(x)
+#endif

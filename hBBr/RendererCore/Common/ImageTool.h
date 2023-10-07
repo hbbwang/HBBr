@@ -5,7 +5,7 @@
 #include "HString.h"
 #include <vulkan/vulkan.h>
 #include <algorithm>
-
+#include "Resource/HGuid.h"
 inline const char* GetTGAImageTypeString(uint8_t imageType)
 {
 	if (imageType == 0) return "no image data is present";
@@ -52,7 +52,7 @@ typedef struct tagImageData
 	VkFormat texFormat;
 	unsigned int imageSize = 0;
 	unsigned int mipLevel = 1;
-	GUID	guid;
+	HGUID	guid;
 	uint8_t blockSize = 0;
 	bool	isCubeMap = false;
 }ImageData, * LPImage;

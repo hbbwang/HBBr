@@ -10,7 +10,7 @@ public:
 	DescriptorSet(class VulkanRenderer* renderer , VkDescriptorType type, uint32_t bindingCount,VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 	~DescriptorSet();
 
-	__forceinline VkDescriptorSetLayout GetDescriptorSetLayout()const { return _descriptorSetLayout; }
+	HBBR_INLINE VkDescriptorSetLayout GetDescriptorSetLayout()const { return _descriptorSetLayout; }
 
 	//初始化的时候会根据bindingCount创建相同数量的VkBuffer(数组),bufferIndex是为了识别该数组,如果是1，则保持0即可
 	void BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize, int bufferIndex = 0);
@@ -25,11 +25,11 @@ public:
 
 	void UpdateDescriptorSetAll(uint32_t sameBufferSize);
 
-	__forceinline Buffer* GetBuffer(int bufferIndex = 0)const { return _buffers[bufferIndex].get(); }
+	HBBR_INLINE Buffer* GetBuffer(int bufferIndex = 0)const { return _buffers[bufferIndex].get(); }
 
-	__forceinline std::vector<VkDescriptorType> GetTypes()const { return _descriptorTypes; }
+	HBBR_INLINE std::vector<VkDescriptorType> GetTypes()const { return _descriptorTypes; }
 
-	__forceinline void NeedUpdate() {
+	HBBR_INLINE void NeedUpdate() {
 		memset(_needUpdates.data(), 1, sizeof(uint8_t) * _needUpdates.size());
 	}
 

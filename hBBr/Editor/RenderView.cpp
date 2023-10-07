@@ -38,6 +38,7 @@ RenderView::RenderView(QWidget* parent)
 		_mainRenderer = VulkanApp::InitVulkanManager(false, true, (void*)this->winId());
 
 		hwnd = (HWND)VulkanApp::GetWindowHandle(_mainRenderer);
+
 		//auto mainRendererWindow = QWindow::fromWinId((WId)hwnd);
 		//_mainRendererWidget = QWidget::createWindowContainer(mainRendererWindow, this);
 		//_mainRendererWidget->setFocusPolicy(Qt::ClickFocus);

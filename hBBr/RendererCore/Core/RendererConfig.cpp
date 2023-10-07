@@ -24,7 +24,7 @@ HString RendererLauguage::GetText(HString key)
 {
 	if (_rendererLauguageItem.size() <= 0)
 	{
-		HString LauguageFilePath = RendererConfig::Get()->_configFile.child(TEXT("root")).child(TEXT("BaseSetting")).child(TEXT("Language")).attribute(TEXT("path")).as_string();
+		HString LauguageFilePath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"Language").attribute(L"path").as_string();
 		LauguageFilePath = FileSystem::GetProgramPath() + LauguageFilePath;
 		LauguageFilePath.CorrectionPath();
 		pugi::xml_document doc;
@@ -32,10 +32,10 @@ HString RendererLauguage::GetText(HString key)
 		{
 			MessageOut("Fatal error! Load lauguage file error.", true, true);
 		}
-		for (pugi::xml_node node = doc.child(TEXT("root")).first_child(); node != NULL; node = node.next_sibling())
+		for (pugi::xml_node node = doc.child(L"root").first_child(); node != NULL; node = node.next_sibling())
 		{
 			HString nodeName = node.name();
-			HString text = node.attribute(TEXT("text")).as_string();
+			HString text = node.attribute(L"text").as_string();
 			_rendererLauguageItem.insert(std::make_pair(nodeName , text));
 		}
 	}

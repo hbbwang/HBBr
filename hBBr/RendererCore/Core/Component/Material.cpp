@@ -45,27 +45,27 @@ Material* Material::LoadMaterial(HGUID guid)
 	if (XMLStream::LoadXML(filePath.c_wstr(), materialDoc))
 	{
 		std::unique_ptr<Material> mat (new Material) ;
-		auto root = materialDoc.child(TEXT("root"));
+		auto root = materialDoc.child(L"root");
 		if (!StringToGUID(guidStr.c_str(), &guid))
 		{
 			guid = CreateGUID();
 			guidStr = GUIDToString(guid);
 		}
 		mat->_guid = guid;
-		auto materialPrim = root.child(TEXT("MaterialPrimitive"));
+		auto materialPrim = root.child(L"MaterialPrimitive");
 		//MaterialPrimitive
 		mat->_primitive.reset(new MaterialPrimitive());
 		mat->_primitive->graphicsName = it->second->name;
-		XMLStream::LoadXMLAttributeString(materialPrim, TEXT("vsShader"), mat->_primitive->vsShader);
-		XMLStream::LoadXMLAttributeString(materialPrim, TEXT("psShader"), mat->_primitive->psShader);
+		XMLStream::LoadXMLAttributeString(materialPrim, L"vsShader", mat->_primitive->vsShader);
+		XMLStream::LoadXMLAttributeString(materialPrim, L"psShader", mat->_primitive->psShader);
 		uint32_t pass;
-		XMLStream::LoadXMLAttributeUInt(materialPrim, TEXT("pass"), pass);
+		XMLStream::LoadXMLAttributeUInt(materialPrim, L"pass", pass);
 		mat->_primitive->passUsing = (Pass)pass;
 		auto vsCache = Shader::_vsShader[mat->_primitive->vsShader];
 		auto psCache = Shader::_psShader[mat->_primitive->psShader];
 		mat->_primitive->inputLayout = VertexFactory::VertexInput::BuildLayout(vsCache.header.vertexInput);
 		//Parameters
-		auto parameters = root.child(TEXT("Parameters"));
+		auto parameters = root.child(L"Parameters");
 		int paramCount = 0;
 		for (auto i = parameters.first_child(); i != NULL; i = i.next_sibling())
 		{
@@ -83,17 +83,17 @@ Material* Material::LoadMaterial(HGUID guid)
 			info.beginPos = beginPos;
 			HString value;
 			int type;
-			XMLStream::LoadXMLAttributeString(i, TEXT("name"), info.name);
+			XMLStream::LoadXMLAttributeString(i, L"name", info.name);
 			//保证Shader的材质参数 和 材质文件的参数信息一致
 			HString shaderParamName = psCache.params[paramCount].name;
 			if (shaderParamName != info.name)
 			{
 				continue;
 			}
-			XMLStream::LoadXMLAttributeInt(i, TEXT("type"), type);
+			XMLStream::LoadXMLAttributeInt(i, L"type", type);
 			info.type = (MPType)type;
-			XMLStream::LoadXMLAttributeString(i, TEXT("value"), value);
-			XMLStream::LoadXMLAttributeString(i, TEXT("ui"), info.ui);
+			XMLStream::LoadXMLAttributeString(i, L"value", value);
+			XMLStream::LoadXMLAttributeString(i, L"ui", info.ui);
 			//
 			auto splitValue = value.Split(",");
 			if (alignmentFloat4 + splitValue.size() > 4)
@@ -145,7 +145,7 @@ Material* Material::CreateMaterial(HString newMatFilePath)
 	}
 	//复制引擎自带材质实例
 	HGUID guid("61A147FF-32BD-48EC-B523-57BC75EB16BA");
-	FileSystem::FileCopy((FileSystem::GetContentAbsPath() + TEXT("Core/Material/61A147FF-32BD-48EC-B523-57BC75EB16BA.mat")).c_str() ,newMatFilePath.c_str());
+	FileSystem::FileCopy((FileSystem::GetContentAbsPath() + "Core/Material/61A147FF-32BD-48EC-B523-57BC75EB16BA.mat").c_str() ,newMatFilePath.c_str());
 
 
 	return NULL;

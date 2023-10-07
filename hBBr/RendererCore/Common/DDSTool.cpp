@@ -211,7 +211,7 @@ static DXGI_FORMAT GetDXGIFormat(const FDDSPixelFormatHeader& ddpf)
 //--------------------------------------------------------------------------------------
 // Return the BPP for a particular format.
 //--------------------------------------------------------------------------------------
-static uint8_t BitsPerPixel(_In_ DXGI_FORMAT fmt)
+static uint8_t BitsPerPixel(EDXGI_FORMAT fmt)
 {
 	switch (fmt)
 	{
@@ -342,7 +342,7 @@ static uint8_t BitsPerPixel(_In_ DXGI_FORMAT fmt)
 // Get surface information for a particular format.
 //--------------------------------------------------------------------------------------
 static int GetCnumBytesPerBlock(
-	_In_ DXGI_FORMAT fmt
+	EDXGI_FORMAT fmt
 )
 {
 	int bcnumBytesPerBlock = 0;

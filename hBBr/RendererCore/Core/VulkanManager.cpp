@@ -10,8 +10,7 @@
 #include "Shader.h"
 #include "DescriptorSet.h"
 #include "Primitive.h"
-//导入Vulkan静态库
-#pragma comment(lib ,"vulkan-1.lib")
+
 using namespace std;
 
 std::unique_ptr<VulkanManager> VulkanManager::_vulkanManager;
@@ -413,6 +412,7 @@ void VulkanManager::InitDevice()
 		MessageOut((RendererLauguage::GetText("A000004") + GetVkResult(result)).c_str() , true, true);
 	vkGetDeviceQueue(_device, _graphicsQueueFamilyIndex, 0, &_graphicsQueue);
 	//vkGetDeviceQueue(_device, _transferQueueFamilyIndex, 0, &_transfer_Queue);
+#ifdef _WIN32
 	if (_enable_VK_KHR_display)
 	{
 		uint32_t displayCount = 0;
@@ -436,6 +436,7 @@ void VulkanManager::InitDevice()
 			}
 		}
 	}
+#endif
 	if (debugMarkerActive)
 	{
 		//Debug Marker
@@ -1222,7 +1223,9 @@ void VulkanManager::CreateFrameBuffers(VkExtent2D FrameBufferSize, VkRenderPass 
 		framebufferInfo.layers = 1;
 
 		if (vkCreateFramebuffer(_device, &framebufferInfo, VK_NULL_HANDLE, &frameBuffers[i]) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create framebuffer!");
+			//throw std::runtime_error("failed to create framebuffer!");
+			printf("failed to create framebuffer!");
+			exit(0);
 		}
 	}
 }
@@ -1391,22 +1394,22 @@ void VulkanManager::WaitForFences(std::vector<VkFence> fences, bool bReset, uint
 		vkResetFences(_device, (uint32_t)fences.size(), fences.data());
 }
 
-void VulkanManager::WaitSemaphores(std::vector<VkSemaphore> semaphores, uint64_t timeOut)
-{
-	//Semaphore 标识,借助vkGetSemaphoreCounterValue 用来查询信号状态用的，返回的value是否等于我们这里指定的值，是就代表获取到信号。
-	//不具备实际数据作用,如果没有查询的意义,随便给一个不同的值就行了,但不能为NULL(0)
-	std::vector<uint64_t> values(semaphores.size());
-	for (int i = 0 ; i < (int)values.size();i++)
-	{
-		values[i] = i + (uint64_t)1;
-	}
-	VkSemaphoreWaitInfo waitInfo = {};
-	waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
-	waitInfo.semaphoreCount = (uint32_t)semaphores.size();
-	waitInfo.pSemaphores = semaphores.data();
-	waitInfo.pValues = values.data();
-	vkWaitSemaphores(_device, &waitInfo, timeOut);
-}
+//void VulkanManager::WaitSemaphores(std::vector<VkSemaphore> semaphores, uint64_t timeOut)
+//{
+//	//Semaphore 标识,借助vkGetSemaphoreCounterValue 用来查询信号状态用的，返回的value是否等于我们这里指定的值，是就代表获取到信号。
+//	//不具备实际数据作用,如果没有查询的意义,随便给一个不同的值就行了,但不能为NULL(0)
+//	std::vector<uint64_t> values(semaphores.size());
+//	for (int i = 0 ; i < (int)values.size();i++)
+//	{
+//		values[i] = i + (uint64_t)1;
+//	}
+//	VkSemaphoreWaitInfo waitInfo = {};
+//	waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+//	waitInfo.semaphoreCount = (uint32_t)semaphores.size();
+//	waitInfo.pSemaphores = semaphores.data();
+//	waitInfo.pValues = values.data();
+//	vkWaitSemaphores(_device, &waitInfo, timeOut);
+//}
 
 void VulkanManager::CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info, VkPipeline& pipeline)
 {

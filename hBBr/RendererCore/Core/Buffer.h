@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Common.h"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <thread>
@@ -62,11 +63,11 @@ public:
 		memcpy(bufBegin, mappingData, bufferSize);
 	}
 
-	__forceinline const bool IsMapping()const { return _bufferIsMapping; }
+	HBBR_INLINE const bool IsMapping()const { return _bufferIsMapping; }
 
-	__forceinline const VkDeviceSize GetBufferSize()const { return _bufferCapacity; }
+	HBBR_INLINE const VkDeviceSize GetBufferSize()const { return _bufferCapacity; }
 
-	__forceinline void* GetBufferMemory()const{return _bufferMapping;}
+	HBBR_INLINE void* GetBufferMemory()const{return _bufferMapping;}
 
 	VkBuffer GetBuffer();
 

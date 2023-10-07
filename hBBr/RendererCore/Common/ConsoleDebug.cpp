@@ -2,24 +2,35 @@
 #include "ConsoleDebug.h"
 #include "HTime.h"
 #include <mutex>
-HANDLE ConsoleDebug::ReadMessageThread = NULL;
+//#include <iconv.h>
+#ifdef _WIN32
+
+#define CloseSocket(socket) closesocket(socket)
+#define WSACleanup()    WSACleanup()
+WORD versionRequest;
+WSADATA wsaData;
+STARTUPINFO si;
+PROCESS_INFORMATION pi;
+#else
+#define CloseSocket(socket) close(socket)
+#define WSACleanup() 
+#endif
+
+std::thread ConsoleDebug::ReadMessageThread;
+
 SOCKET ConsoleDebug::tcpSocket;
 std::vector<SOCKET> ConsoleDebug::consoleSockets;
-WORD ConsoleDebug::versionRequest;
-WSADATA ConsoleDebug::wsaData;
+
 struct sockaddr_in ConsoleDebug::consoleAddr;
 struct sockaddr_in ConsoleDebug::addr;
 int ConsoleDebug::err;
 bool ConsoleDebug::bConnectedConsole = false;
 bool ConsoleDebug::bConnectedFailed = false;
-HANDLE ConsoleDebug::socketAcceptThread;
-FILE* ConsoleDebug::log_file = NULL;
+std::thread ConsoleDebug::socketAcceptThread;
 HString LogFileName = (HString(".\\log_") + HTime::CurrentDateAndTime() + ".txt");
 std::function<void(HString,  float, float, float, HString)> ConsoleDebug::printFuncAdd = [](HString, float, float, float, HString) {};
 
-STARTUPINFO ConsoleDebug::si;
-PROCESS_INFORMATION ConsoleDebug::pi;
-
+FILE* log_file = NULL;
 std::mutex g_num_mutex;
 
 HString rgb2hex(int r, int g, int b, bool with_head)
@@ -32,9 +43,8 @@ HString rgb2hex(int r, int g, int b, bool with_head)
 }
 
 std::map<HString, std::function<void()>> ConsoleDebug::commandLists;
-DWORD WINAPI ReadConsoleMsgThreadFunc(LPVOID lpParamter)
+void ReadConsoleMsgThreadFunc()
 {
-    int acceptTimeOut = 0;
     while (true)
     {
         {
@@ -42,24 +52,32 @@ DWORD WINAPI ReadConsoleMsgThreadFunc(LPVOID lpParamter)
             ConsoleDebug::ReadMsgFromConsole();
         }
     }
-    return 0;
 }
 
-DWORD WINAPI SocketAcceptThreadFunc(LPVOID lpParamter)
+void  SocketAcceptThreadFunc()
 {
     while (true)
     {
         _Sleep(500);
-        sockaddr_in addrClient;
+        sockaddr_in addrClient;              
+#ifdef _WIN32
         int addrClientlen = sizeof(addrClient);
         ConsoleDebug::consoleSockets.push_back(accept(ConsoleDebug::tcpSocket, (sockaddr FAR*) & addrClient, &addrClientlen));
+#else
+        socklen_t addrClientlen = sizeof(addrClient);
+        ConsoleDebug::consoleSockets.push_back(accept(ConsoleDebug::tcpSocket, reinterpret_cast<sockaddr*>(&addrClient), &addrClientlen));
+#endif 
+
     }
-    return 0;
 }
 
 void WriteToLogFile(FILE* &log_file , HString log)
 {
-    auto err_src_name = fopen_s(&log_file, LogFileName.c_str(), "a+");
+    #ifdef _WIN32
+        auto err_src_name = fopen_s(&log_file, LogFileName.c_str(), "a+");
+    #else
+        log_file = fopen(LogFileName.c_str(), "a+");
+    #endif
     if (log_file)
     {
         fwrite(log.c_str(), strlen(log.c_str()), 1, log_file);
@@ -73,6 +91,7 @@ void ConsoleDebug::CreateConsole(HString consolePath ,bool bNoClient)
     if (ConsoleDebug::bConnectedConsole == true && ConsoleDebug::bConnectedFailed == false)
         return;
     ConsoleDebug::bConnectedFailed = false;
+#if _WIN32
     //Socket
     versionRequest = MAKEWORD(2, 2);
     err = WSAStartup(versionRequest, &wsaData);
@@ -86,31 +105,45 @@ void ConsoleDebug::CreateConsole(HString consolePath ,bool bNoClient)
     {
         printf("已打开套接字");
     }
+#endif
     tcpSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     struct sockaddr_in daddr;
-    memset((void*)&daddr, 0, sizeof(daddr));
+    std::memset((void*)&daddr, 0, sizeof(daddr));
     daddr.sin_family = AF_INET;
+#ifdef _WIN32
     daddr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
+#else
+    daddr.sin_addr.s_addr = INADDR_ANY;
+#endif
     daddr.sin_port = htons(5050);
 
     auto retVal = ::bind(tcpSocket, (struct sockaddr*)&daddr, sizeof(daddr));
+#if _WIN32
     if (SOCKET_ERROR == retVal)
+#else
+    if (retVal == -1)
+#endif
     {
         printf("bind failed!\n");
-        closesocket(tcpSocket);
+        CloseSocket(tcpSocket);
         WSACleanup();
         return;
     }
 
 
     retVal = listen(tcpSocket, 1);
+#if _WIN32
     if (SOCKET_ERROR == retVal)
+#else
+    if (retVal == -1)
+#endif
     {
         printf("listen failed!\n");
-        closesocket(tcpSocket);
+        CloseSocket(tcpSocket);
         WSACleanup();
         return;
     }
+#if _WIN32
     if (!bNoClient)
     {
         //system(consolePath.c_str());
@@ -129,15 +162,18 @@ void ConsoleDebug::CreateConsole(HString consolePath ,bool bNoClient)
             &si,            // Pointer to STARTUPINFO structure
             &pi);           // Pointer to PROCESS_INFORMATION structure
     }
-   
+#endif
     //接收来自客户端的请求
     printf("TCPServer start...\n");
-    socketAcceptThread = CreateThread(NULL, 0, SocketAcceptThreadFunc, 0, 0, 0);
+    socketAcceptThread = std::thread(SocketAcceptThreadFunc);
+    socketAcceptThread.detach();
 
     ConsoleDebug::bConnectedConsole = true;
     _Sleep(25);
     ConsoleDebug::print_endl("Connect Console Succeed!", "0,255,0");
-    ReadMessageThread = CreateThread(NULL, 0, ReadConsoleMsgThreadFunc, 0, 0, 0);
+
+    ReadMessageThread = std::thread(ReadConsoleMsgThreadFunc);
+    ReadMessageThread.detach();
 
     //Create Log file
     LogFileName = (HString(".\\log_") + HTime::CurrentDateAndTime() + ".txt");
@@ -146,14 +182,17 @@ void ConsoleDebug::CreateConsole(HString consolePath ,bool bNoClient)
 
 void ConsoleDebug::CleanupConsole()
 {
-    closesocket(tcpSocket);
+    CloseSocket(tcpSocket);
     WSACleanup();
     bConnectedConsole = false;
+#ifdef _WIN32
     TerminateProcess(pi.hProcess, 0);
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
-    CloseHandle(ReadMessageThread);
-    CloseHandle(socketAcceptThread);
+#endif
+    //CloseHandle(ReadMessageThread);
+    //CloseHandle(socketAcceptThread);
+
     if (log_file)
     {
         fclose(log_file);
@@ -175,17 +214,18 @@ void ConsoleDebug::ReadMsgFromConsole()
         }
     }
 }
-
+#ifdef _WIN32
 char* UnicodeToUtf8(const wchar_t* unicode)
 {
-    int len;
-    len = WideCharToMultiByte(CP_UTF8, 0, unicode, -1, NULL, 0, NULL, NULL);
-    char* szUtf8 = (char*)malloc(len + 1);
-    memset(szUtf8, 0, len + 1);
-    WideCharToMultiByte(CP_UTF8, 0, unicode, -1, szUtf8, len, NULL, NULL);
+
+        int len;
+        len = WideCharToMultiByte(CP_UTF8, 0, unicode, -1, NULL, 0, NULL, NULL);
+        char* szUtf8 = (char*)malloc(len + 1);
+        memset(szUtf8, 0, len + 1);
+        WideCharToMultiByte(CP_UTF8, 0, unicode, -1, szUtf8, len, NULL, NULL);
     return szUtf8;
 }
-
+#endif
 void ConsoleDebug::print(HString in, HString color, HString background, HString type)
 {
     std::lock_guard<std::mutex> lock(g_num_mutex);
@@ -198,27 +238,29 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
         r = (float)HString::ToDouble(colorArray[0]);
         g = (float)HString::ToDouble(colorArray[1]);
         b = (float)HString::ToDouble(colorArray[2]);
-
-        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // 获取标准输出设备句柄
-        WORD wr2 = 0 ;//方法二用系统宏定义颜色属性
-        if (r > 30)
-        {
-            wr2 |= FOREGROUND_RED;
-        }
-        if (g > 30)
-        {
-            wr2 |= FOREGROUND_GREEN;
-        }
-        if (b > 30)
-        {
-            wr2 |= FOREGROUND_BLUE;
-        }
-        SetConsoleTextAttribute(hOut, wr2);
-
+        #ifdef _WIN32
+                HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // 获取标准输出设备句柄
+                WORD wr2 = 0 ;//方法二用系统宏定义颜色属性
+                if (r > 30)
+                {
+                    wr2 |= FOREGROUND_RED;
+                }
+                if (g > 30)
+                {
+                    wr2 |= FOREGROUND_GREEN;
+                }
+                if (b > 30)
+                {
+                    wr2 |= FOREGROUND_BLUE;
+                }
+                SetConsoleTextAttribute(hOut, wr2);
+        #endif
         Data = "[" + Data + "]";
         HString nIn = Data + in;
         printf(nIn.c_str());
-        OutputDebugStringA(nIn.c_str());
+        #ifdef _WIN32
+                OutputDebugStringA(nIn.c_str());
+        #endif
         printFuncAdd(nIn, r / 255.0f, g / 255, b / 255, Data);
 
         WriteToLogFile(log_file, nIn);
@@ -228,7 +270,11 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
             HString out = nIn;
             //memset(buffer, 0, sizeof(buffer));
             out += "||//||" + color + "||//||" + background + "||//||" + Data;
-            char* buffer = UnicodeToUtf8(out.c_wstr());
+            #ifdef _WIN32
+                char* buffer = UnicodeToUtf8(out.c_wstr());
+            #else
+                auto buffer = std::string(out.c_str()).c_str();
+            #endif
             //sprintf(buffer, UnicodeToUtf8(out.c_wstr()));
 
             for (int i = 0; i < consoleSockets.size(); i++) 
@@ -243,7 +289,9 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
 #endif
                 }
             }
-            free(buffer);
+            #ifdef _WIN32
+                free(buffer);
+            #endif
         }
     }
 }
@@ -260,7 +308,7 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
         r = (float)HString::ToDouble(colorArray[0]);
         g = (float)HString::ToDouble(colorArray[1]);
         b = (float)HString::ToDouble(colorArray[2]);
-
+        #ifdef _WIN32
         HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // 获取标准输出设备句柄
         WORD wr2 = 0;//方法二用系统宏定义颜色属性
         if (r > 30)
@@ -276,12 +324,13 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
             wr2 |= FOREGROUND_BLUE;
         }
         SetConsoleTextAttribute(hOut, wr2);
-
+        #endif
         Data = "[" + Data + "] ";
         printf((Data+in).c_str());
         printf("\n");
-
+        #ifdef _WIN32
         OutputDebugStringA(((Data + in) +"\n").c_str());
+        #endif
         HString nIn = (Data + in) + "\n";
 
         printFuncAdd(nIn, r / 255.0f, g / 255, b / 255, Data);
@@ -293,8 +342,11 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
             HString out = (Data + in);
             //memset(buffer, 0, sizeof(buffer));
             out += "\n||//||" + color + "||//||" + background + "||//||" + Data;
-            char* buffer = UnicodeToUtf8(out.c_wstr());
-
+            #ifdef _WIN32
+                char* buffer = UnicodeToUtf8(out.c_wstr());
+            #else
+                auto buffer = std::string(out.c_str()).c_str();
+            #endif
             //sprintf(buffer, UnicodeToUtf8(out.c_wstr()));
 
             for (int i = 0; i < consoleSockets.size(); i++)
@@ -309,7 +361,9 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
 #endif
                 }
             }
-            free(buffer);
+            #ifdef _WIN32
+                free(buffer);
+            #endif
         }
     }
 }

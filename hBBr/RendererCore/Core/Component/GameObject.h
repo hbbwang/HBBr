@@ -17,40 +17,40 @@ public:
 
 	HBBR_API static GameObject* CreateModelGameObject(HString modelPath, class SceneManager* scene = NULL);
 
-	HBBR_API __forceinline void Destroy() {
+	HBBR_API HBBR_INLINE void Destroy() {
 		SetActive(false);
 		_bWantDestroy = true;
 	}
 
-	HBBR_API __forceinline bool IsActive() const {
+	HBBR_API HBBR_INLINE bool IsActive() const {
 		return _bActive;
 	}
 
 	HBBR_API void SetActive(bool newActive = true);
 
-	HBBR_API __forceinline HString GetObjectName() const {
+	HBBR_API HBBR_INLINE HString GetObjectName() const {
 		return _name;
 	}
 
 	HBBR_API void SetObjectName(HString newName);
 
-	HBBR_API __forceinline std::vector<GameObject*> GetChildren() {
+	HBBR_API HBBR_INLINE std::vector<GameObject*> GetChildren() {
 		return _children;
 	}
 
-	HBBR_API __forceinline uint64_t GetChildrenNum() {
+	HBBR_API HBBR_INLINE uint64_t GetChildrenNum() {
 		return _children.size();
 	}
 
-	HBBR_API __forceinline GameObject* GetParent() {
+	HBBR_API HBBR_INLINE GameObject* GetParent() {
 		return _parent;
 	}
 
-	HBBR_API __forceinline Transform* GetTransform() {
+	HBBR_API HBBR_INLINE Transform* GetTransform() {
 		return _transform;
 	}
 
-	HBBR_API __forceinline class SceneManager* GetScene() {
+	HBBR_API HBBR_INLINE class SceneManager* GetScene() {
 		return _scene;
 	}
 

@@ -1,18 +1,28 @@
 #include "ImageTool.h"
 #include <fstream>
 #include <istream>
+#ifdef _WIN32
 #include <direct.h>
+#endif
 #include "ConsoleDebug.h"
 #include "DDSTool.h"
+
+#ifdef _WIN32
+#else
+#define memcpy_s(dst,dstSize,src,srcSize) memcpy(dst,src,dstSize)
+#endif
+
 ImageData* ImageTool::ReadTgaImage(const char* filename)
 {
 	ImageData* out = NULL;
 	//open TGA file
-	errno_t err_src_name;
 	FILE* file = NULL;
-	err_src_name = fopen_s(&file, filename, "rb");//读取，二进制模式
-
-	if (file == NULL || err_src_name != 0)
+#ifdef _WIN32
+	fopen_s(&file, filename, "rb");//读取，二进制模式
+#else
+	file = fopen(filename, "rb");//读取，二进制模式
+#endif
+	if (file == NULL )
 	{
 		ConsoleDebug::print_endl("open TGA image file failed.", "255,255,0");
 		return NULL;
@@ -60,7 +70,9 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 			delete[] out;
 		return NULL;
 	}
+#ifdef _WIN32
 	try {
+#endif
 		switch (data_header.bitsPerPixel)
 		{
 		case 8:
@@ -138,12 +150,13 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 				delete[] out;
 			return NULL;
 		}
+#ifdef _WIN32
 	}
 	catch (std::exception ex)
 	{
 		ConsoleDebug::print_endl(HString("Read Tga Image Pixel Failed: ") + ex.what(), "255,255,0");
 	}
-
+#endif
 	ConsoleDebug::print_endl("Get image texture:" + HString(filename)
 		+ "\n\twidth:" + HString::FromInt(data_header.width)
 		+ "\n\theight:" + HString::FromInt(data_header.height)
@@ -178,7 +191,9 @@ ImageData* ImageTool::ReadDDSImage(const char* filename)
 
 bool ImageTool::SaveTgaImage(const char* filename, ImageData* tgaData)
 {
+#ifdef _WIN32
 	try {
+#endif
 		if (tgaData == NULL)
 		{
 			ConsoleDebug::print_endl("TGA data was null", "255,255,0");
@@ -190,11 +205,17 @@ bool ImageTool::SaveTgaImage(const char* filename, ImageData* tgaData)
 			return false;
 		}
 		FILE* file = NULL;
+#ifdef _WIN32
 		if (fopen_s(&file, filename, "wb") != 0)//二进制+写
+#else
+		file = fopen(filename, "wb");
+		if (file == NULL)
+#endif
 		{
 			ConsoleDebug::print_endl(HString("open tga file failed: ") + filename, "255,255,0");
 			return false;
 		}
+
 		//12 byte Header
 		byte TGA_UnCompressed_HeaderRef[12] = { 0,0,2,0,0,0,0,0,0,0,0,0 };
 		//6 byte image data
@@ -221,24 +242,33 @@ bool ImageTool::SaveTgaImage(const char* filename, ImageData* tgaData)
 
 		ConsoleDebug::print_endl(HString("Save Tga Image Successful: ") + filename, "0,255,0");
 		return true;
+#ifdef _WIN32
 	}
 	catch (std::exception ex)
 	{
 		ConsoleDebug::print_endl(HString("Save Tga Image Failed: ") + ex.what(), "255,255,0");
 		return false;
 	}
+#endif
 }
 
 bool ImageTool::SaveTgaImage(const char* filename, uint16_t w, uint16_t h, uint16_t d, void* imageData)
 {
+#ifdef _WIN32
 	try {
+#endif
 		if (imageData == NULL)
 		{
 			ConsoleDebug::print_endl("TGA data was null", "255,255,0");
 			return false;
 		}
 		FILE* file = NULL;
+#ifdef _WIN32
 		if (fopen_s(&file, filename, "wb") != 0)//二进制+写
+#else
+		file = fopen(filename, "wb");
+		if (file ==NULL)
+#endif
 		{
 			ConsoleDebug::print_endl(HString("open tga file failed: ") + filename, "255,255,0");
 			return false;
@@ -269,12 +299,14 @@ bool ImageTool::SaveTgaImage(const char* filename, uint16_t w, uint16_t h, uint1
 
 		ConsoleDebug::print_endl(HString("Save Tga Image Successful: ") + filename, "0,255,0");
 		return true;
+#ifdef _WIN32
 	}
 	catch (std::exception ex)
 	{
 		ConsoleDebug::print_endl(HString("Save Tga Image Failed: ") + ex.what(), "255,255,0");
 		return false;
 	}
+#endif
 }
 
 bool ImageTool::SavePngImage(const char* filename, uint16_t w, uint16_t h ,void* imageData)
