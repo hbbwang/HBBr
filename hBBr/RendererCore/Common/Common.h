@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #ifndef HBBR_INLINE
-#if __ANDROID_API__
+#if __ANDROID__
 #define HBBR_INLINE inline
 #else
 #define HBBR_INLINE __forceinline
@@ -10,7 +10,7 @@
 
 
 //#ifdef SHARED_LIBRARY
-#ifdef __ANDROID_API__
+#ifdef __ANDROID__
 #include <jni.h>
 //#ifdef _USRDLL
 #define HBBR_API __attribute__((visibility("default")))

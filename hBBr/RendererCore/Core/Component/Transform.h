@@ -6,7 +6,7 @@ class Transform
 {
 public:
 	Transform(GameObject* parent, glm::vec3 pos = glm::vec3(0,0,0), glm::vec3 eulerAge = glm::vec3(0,0,0), glm::vec3 scale3D = glm::vec3(1,1,1));
-	~Transform();
+	virtual ~Transform();
 
 	HBBR_API HBBR_INLINE glm::vec3 GetForwardVector()const{return forward;}
 

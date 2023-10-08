@@ -250,9 +250,9 @@ void ImguiPass::ShowPerformance()
 		HString fpsString = HString::FromUInt((uint32_t)(1.0f / (float)(frameRate / 1000.0)));
 		ImVec2 newPos = { (float)_currentFrameBufferSize.width - 80.f , (float)_currentFrameBufferSize.height * 0.0002f };
 		ImGui::SetWindowPos(newPos);
-		ImGui::Text(frameString.c_str());
+		ImGui::Text("%s", frameString.c_str());
 		ImGui::NextColumn();
-		ImGui::Text(fpsString.c_str());
+		ImGui::Text("%s" , fpsString.c_str());
 		ImGui::End();
 	}
 }

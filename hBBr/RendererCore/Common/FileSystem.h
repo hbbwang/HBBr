@@ -20,7 +20,7 @@ struct FileEntry
 	FileEntryType type = FileEntryType::File;
 };
 
-#if __ANDROID_API__
+#if __ANDROID__
 extern "C" {
 #endif
 
@@ -48,6 +48,6 @@ extern "C" {
 
 	};
 
-#if __ANDROID_API__
+#if __ANDROID__
 }
 #endif

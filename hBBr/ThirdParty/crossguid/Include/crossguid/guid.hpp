@@ -24,9 +24,34 @@ THE SOFTWARE.
 
 #pragma once
 
+#include <cstring>
+
+#undef GUID_LIBUUID
+#undef GUID_CFUUID
+#undef GUID_WINDOWS
+#undef GUID_ANDROID
+
+#if defined(_WIN32)
+#define GUID_WINDOWS
+#elif defined(__ANDROID__)
+#define GUID_ANDROID
+#endif
+
+#ifdef GUID_LIBUUID
+#include <uuid/uuid.h>
+#endif
+
+#ifdef GUID_CFUUID
+#include <CoreFoundation/CFUUID.h>
+#endif
+
+#ifdef GUID_WINDOWS
+#include <objbase.h>
+#endif
+
 #ifdef GUID_ANDROID
-#include <thread>
 #include <jni.h>
+#include <cassert>
 #endif
 
 #include <functional>
@@ -36,6 +61,7 @@ THE SOFTWARE.
 #include <string_view>
 #include <utility>
 #include <iomanip>
+#include <thread>
 
 #define BEGIN_XG_NAMESPACE namespace xg {
 #define END_XG_NAMESPACE }

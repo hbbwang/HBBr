@@ -47,11 +47,13 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>Clang_5_0</PlatformToolset>
+    <AndroidAPILevel>android-29</AndroidAPILevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>Clang_5_0</PlatformToolset>
+    <AndroidAPILevel>android-29</AndroidAPILevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -156,11 +158,21 @@
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)RendererCore;$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\pugixml\;$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core\;$(SolutionDir)ThirdParty\Imgui\;$(SolutionDir)RendererCore\Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)RendererCore\Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(SolutionDir)RendererCore\Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Enabled</ExceptionHandling>
+      <PreprocessorDefinitions>IS_GAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\vulkan\;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\crossguid\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalOptions>-lvulkan -lSDL3 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-lvulkan -lSDL3  -lassimp -lm %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /c /f /y $(SolutionDir)$(Platform)\$(Configuration)\*.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\assimp\lib\*.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so.1 $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so.1.3.261 $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\sdl3\*.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(ProjectDir)*.h $(solutiondir)DependencyCopy\AndroidProject\app\jni\src</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <ClCompile>
@@ -169,11 +181,21 @@
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)RendererCore;$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\pugixml\;$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core\;$(SolutionDir)ThirdParty\Imgui\;$(SolutionDir)RendererCore\Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)RendererCore\Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(SolutionDir)RendererCore\Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Enabled</ExceptionHandling>
+      <PreprocessorDefinitions>IS_GAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\vulkan\;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\vld\;$(SolutionDir)ThirdParty\assimp\lib\;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\crossguid\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalOptions>-lvulkan -lSDL3 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-lvulkan -lSDL3  -lassimp -lm %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /c /f /y $(SolutionDir)$(Platform)\$(Configuration)\*.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\assimp\lib\*.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so.1 $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so.1.3.261 $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\sdl3\*.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(ProjectDir)*.h $(solutiondir)DependencyCopy\AndroidProject\app\jni\src</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
@@ -195,6 +217,7 @@
     <ClCompile Include="..\RendererCore\Common\HInput.cpp" />
     <ClCompile Include="..\RendererCore\Common\HTime.cpp" />
     <ClCompile Include="..\RendererCore\Common\ImageTool.cpp" />
+    <ClCompile Include="..\RendererCore\Common\TypeConversion.cpp" />
     <ClCompile Include="..\RendererCore\Common\XMLStream.cpp" />
     <ClCompile Include="..\RendererCore\Core\Buffer.cpp" />
     <ClCompile Include="..\RendererCore\Core\Component\CameraComponent.cpp" />
@@ -222,6 +245,7 @@
     <ClCompile Include="..\RendererCore\Core\VulkanRenderer.cpp" />
     <ClCompile Include="..\RendererCore\Editor\ShaderCompiler.cpp" />
     <ClCompile Include="..\RendererCore\main.cpp" />
+    <ClCompile Include="..\ThirdParty\crossguid\Include\crossguid\guid.cpp" />
     <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp" />
     <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp" />
     <ClCompile Include="..\ThirdParty\Imgui\imgui.cpp" />
@@ -274,6 +298,7 @@
     <ClInclude Include="..\RendererCore\Form\FormMain.h" />
     <ClInclude Include="..\RendererCore\Form\GLFWInclude.h" />
     <ClInclude Include="..\RendererCore\main.h" />
+    <ClInclude Include="..\ThirdParty\crossguid\Include\crossguid\guid.hpp" />
     <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h" />
     <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h" />
     <ClInclude Include="..\ThirdParty\Imgui\imconfig.h" />

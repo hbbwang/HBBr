@@ -18,7 +18,7 @@ class PassBase
 	friend class PassManager;
 public:
 	PassBase(VulkanRenderer* renderer);
-	~PassBase();
+	virtual ~PassBase();
 	virtual void PassBuild() {}
 	HBBR_INLINE HString GetName()const { return _passName; }
 protected:
@@ -34,7 +34,7 @@ class GraphicsPass : public PassBase
 {
 public:
 	GraphicsPass(VulkanRenderer* renderer) :PassBase(renderer) {}
-	~GraphicsPass();
+	virtual ~GraphicsPass();
 	//Step 1 , Can add multiple attachments.
 	virtual void AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, VkFormat attachmentFormat, VkImageLayout initLayout, VkImageLayout finalLayout);
 	//Step 2 , Setup subpass by attachments.

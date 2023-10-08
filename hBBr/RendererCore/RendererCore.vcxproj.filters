@@ -44,6 +44,9 @@
     <Filter Include="ThirdParty\lodepng">
       <UniqueIdentifier>{0390f21e-7636-4424-957a-d6637c1a97ae}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ThirdParty\GUID">
+      <UniqueIdentifier>{e35db4b3-bdf8-449f-baf8-19718adf72f7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\VulkanManager.h">
@@ -199,6 +202,9 @@
     <ClInclude Include="main.h">
       <Filter>Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\ThirdParty\crossguid\Include\crossguid\guid.hpp">
+      <Filter>ThirdParty\GUID</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -329,6 +335,9 @@
     </ClCompile>
     <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp">
       <Filter>ThirdParty\Imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\crossguid\Include\crossguid\guid.cpp">
+      <Filter>ThirdParty\GUID</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

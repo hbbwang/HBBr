@@ -90,6 +90,7 @@ AssetInfoBase* CreateInfo(AssetType type)
 	{
 		case AssetType::Model:		return new AssetInfo<ModelData>(); 
 		case AssetType::Material:	return new AssetInfo<Material>();
+		default:break;
 	}
 	return NULL;
 }

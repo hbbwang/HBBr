@@ -63,7 +63,7 @@ void SceneManager::SceneUpdate()
 	}
 
 	//Destroy Objects
-	const auto destroyCount = _gameObjectNeedDestroy.size();
+	//const auto destroyCount = _gameObjectNeedDestroy.size();
 	for (auto& i : _gameObjectNeedDestroy)
 	{
 		i.reset();

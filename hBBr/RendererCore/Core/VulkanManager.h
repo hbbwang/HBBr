@@ -7,7 +7,7 @@
 	#define WIN32_LEAN_AND_MEAN             // 从 Windows 头文件中排除极少使用的内容
 	#define VK_USE_PLATFORM_WIN32_KHR	1	//support win32
 	#include <stdlib.h>
-#elif defined(__ANDROID__) || defined(__ANDROID_API__)
+#elif defined(__ANDROID__)
 	#define VK_USE_PLATFORM_ANDROID_KHR 1
 #elif defined(__linux__)
 	#define VK_USE_PLATFORM_XCB_KHR 1

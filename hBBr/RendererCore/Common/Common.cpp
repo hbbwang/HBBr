@@ -18,9 +18,9 @@ void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textC
 		#endif
 	}
 #else
-	printf("%s",msg);
-	fflush(stdout);
 	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", msg, NULL);
+	printf("%s", msg);
+	fflush(stdout);
 #endif
 	if (bExit)
 	{

@@ -82,7 +82,8 @@ uint32_t FileSystem::GetPathFileNum(const char* path)
     uint32_t count = 0;
     for (const auto& entry : fs::directory_iterator(path))
     {
-        count++;
+        if(entry.exists())
+            count++;
     }
     return count;
 }

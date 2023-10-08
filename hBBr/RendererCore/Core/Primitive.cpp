@@ -1,5 +1,4 @@
-﻿#pragma once
-#include "Primitive.h"
+﻿#include "Primitive.h"
 #include "Shader.h"
 
 std::vector<std::vector<MaterialPrimitive*>> PrimitiveProxy::_allGraphicsPrimitives;
@@ -18,7 +17,7 @@ void PrimitiveProxy::AddMaterialPrimitive(MaterialPrimitive* prim)
 
 void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim)
 {
-	uint64_t result = 0;
+	//uint64_t result = 0;
 	prim->graphicsIndex.vsIndex = Shader::_vsShader[prim->vsShader].shaderCacheIndex;
 	prim->graphicsIndex.psIndex = Shader::_vsShader[prim->vsShader].shaderCacheIndex;
 	prim->graphicsIndex.varients = prim->varients;
@@ -47,8 +46,8 @@ void PrimitiveProxy::RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
 
 void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim)
 {
-	prim->vertexData =  std::move(prim->vertexInput.GetData(Shader::_vsShader[mat->vsShader].header.vertexInput));
-	prim->vertexIndices = std::move(prim->vertexInput.vertexIndices);
+	prim->vertexData = prim->vertexInput.GetData(Shader::_vsShader[mat->vsShader].header.vertexInput);
+	prim->vertexIndices = prim->vertexInput.vertexIndices;
 	prim->vbSize = prim->vertexData.size() * sizeof(float);
 	prim->ibSize = prim->vertexIndices.size() * sizeof(uint32_t);
 	//

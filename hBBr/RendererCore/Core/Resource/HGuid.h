@@ -23,7 +23,7 @@ inline bool IsGUIDValid(HGUID guid)
 	return guid.isValid();
 }
 
-inline std::string GUIDToStdString(const HGUID& guid)
+inline std::string GUIDToStdString(const HGUID& guid) 
 {
 	return guid.str();
 }

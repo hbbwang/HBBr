@@ -329,7 +329,7 @@ ImageData* ImageTool::ReadPngImage(const char* filename)
 	if (error) {
 		std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 		HString errorStr = HString("Load png failed : ") + lodepng_error_text(error);
-		printf((errorStr + "\n").c_str());
+		printf("%s", (errorStr + "\n").c_str());
 		ConsoleDebug::print_endl(HString("Load png failed.") + lodepng_error_text(error), "255,55,0");
 		return NULL;
 	}
@@ -343,7 +343,7 @@ ImageData* ImageTool::ReadPngImage(const char* filename)
 	if (error) {
 		std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 		HString errorStr = HString("Load png failed : ") + lodepng_error_text(error);
-		printf((errorStr+"\n").c_str());
+		printf("%s", (errorStr+"\n").c_str());
 		ConsoleDebug::print_endl(HString("Load png failed.") + lodepng_error_text(error), "255,55,0");
 		return NULL;
 	}

@@ -111,5 +111,5 @@ std::shared_ptr<Texture> Texture::CreateTexture2D(uint32_t width, uint32_t heigh
 	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView);
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
-	return std::move(newTexture);
+	return newTexture;
 }

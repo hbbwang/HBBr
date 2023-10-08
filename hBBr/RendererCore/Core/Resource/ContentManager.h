@@ -35,6 +35,8 @@ inline static HString GetAssetTypeString(AssetType type)
 	case AssetType::Texture2D:return "Texture2D";
 	case AssetType::TextureCube:return "TextureCube";
 	case AssetType::Prefab:return "Prefab";
+	case AssetType::Unknow:
+	case AssetType::MaxNum:	return "Unknow";
 	}
 	return "Unknow";
 }

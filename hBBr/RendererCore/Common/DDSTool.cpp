@@ -378,6 +378,8 @@ static int GetCnumBytesPerBlock(
 	case DXGI_FORMAT_R8G8_B8G8_UNORM:
 	case DXGI_FORMAT_G8R8_G8B8_UNORM:
 		break;
+	default:
+		break;
 	}
 	return bcnumBytesPerBlock;
 }
@@ -556,6 +558,8 @@ ImageData* DDSLoader::LoadDDSToImage()
 			out->texFormat = VkFormat::VK_FORMAT_BC7_UNORM_BLOCK; break;
 		case	DXGI_FORMAT_BC7_UNORM_SRGB:
 			out->texFormat = VkFormat::VK_FORMAT_BC7_SRGB_BLOCK; break;
+		default:
+			break;
 	}
 
 	//-----Get data

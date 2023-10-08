@@ -8,7 +8,7 @@ class BasePass :public GraphicsPass
 public:
 
 	BasePass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
-	~BasePass();
+	virtual ~BasePass();
 
 	virtual void PassInit()override;
 	virtual void PassBuild()override;
@@ -30,7 +30,7 @@ class ImguiPass :public GraphicsPass
 {
 public:
 	ImguiPass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
-	~ImguiPass();
+	virtual ~ImguiPass();
 	virtual void PassInit()override;
 	virtual void PassBuild()override;
 	virtual void PassUpdate()override;

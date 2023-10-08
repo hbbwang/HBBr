@@ -1,7 +1,23 @@
-﻿  ANDROID_HOME=C:\\Microsoft\AndroidSDK\25
+﻿  ANDROID_HOME=C:\NVPACK\android-sdk-windows
   ANT_HOME=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Apps\apache-ant-1.9.3
-  JAVA_HOME=C:\Program Files\Eclipse Foundation\jdk-8.0.302.8-hotspot
-  NDK_ROOT=C:\\Microsoft\AndroidNDK64\android-ndk-r16b
-  pch.h
+  JAVA_HOME=C:\Program Files\Java\jdk-20
+  NDK_ROOT=C:\NVPACK\android-sdk-windows\ndk\22.1.7171670
   RendererCore_Android.cpp
   RendererCore_Android.vcxproj -> D:\hBBr\hBBr\ARM64\Debug\libRendererCore_Android.so
+  D:\hBBr\hBBr\ARM64\Debug\libRendererCore_Android.so -> D:\hBBr\hBBr\DependencyCopy\AndroidProject\app\jni\src\libs\libRendererCore_Android.so
+  复制了 1 个文件
+  D:\hBBr\hBBr\ThirdParty\assimp\lib\libassimp.so -> D:\hBBr\hBBr\DependencyCopy\AndroidProject\app\jni\src\libs\libassimp.so
+  复制了 1 个文件
+  D:\hBBr\hBBr\ThirdParty\crossguid\libcrossguid_android.so -> D:\hBBr\hBBr\DependencyCopy\AndroidProject\app\jni\src\libs\libcrossguid_android.so
+  复制了 1 个文件
+  D:\hBBr\hBBr\ThirdParty\vulkan\libvulkan.so -> D:\hBBr\hBBr\DependencyCopy\AndroidProject\app\jni\src\libs\libvulkan.so
+  复制了 1 个文件
+  D:\hBBr\hBBr\ThirdParty\vulkan\libvulkan.so.1 -> D:\hBBr\hBBr\DependencyCopy\AndroidProject\app\jni\src\libs\libvulkan.so.1
+  复制了 1 个文件
+  D:\hBBr\hBBr\ThirdParty\vulkan\libvulkan.so.1.3.261 -> D:\hBBr\hBBr\DependencyCopy\AndroidProject\app\jni\src\libs\libvulkan.so.1.3.261
+  复制了 1 个文件
+  D:\hBBr\hBBr\ThirdParty\sdl3\libSDL3.so -> D:\hBBr\hBBr\DependencyCopy\AndroidProject\app\jni\src\libs\libSDL3.so
+  复制了 1 个文件
+  D:\hBBr\hBBr\RendererCore_Android\pch.h -> D:\hBBr\hBBr\DependencyCopy\AndroidProject\app\jni\src\pch.h
+  D:\hBBr\hBBr\RendererCore_Android\RendererCore_Android.h -> D:\hBBr\hBBr\DependencyCopy\AndroidProject\app\jni\src\RendererCore_Android.h
+  复制了 2 个文件

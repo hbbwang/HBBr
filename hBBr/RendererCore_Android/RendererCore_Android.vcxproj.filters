@@ -131,6 +131,12 @@
     <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp">
       <Filter>ThirdParty\Imgui</Filter>
     </ClCompile>
+    <ClCompile Include="..\RendererCore\Common\TypeConversion.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\crossguid\Include\crossguid\guid.cpp">
+      <Filter>RendererCoreSrc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RendererCore_Android.h" />
@@ -287,6 +293,9 @@
     </ClInclude>
     <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h">
       <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\crossguid\Include\crossguid\guid.hpp">
+      <Filter>RendererCoreSrc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

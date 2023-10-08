@@ -7,7 +7,7 @@
 #pragma once
 
 #ifndef HBBR_INLINE
-#if __ANDROID_API__
+#if __ANDROID__
 #define HBBR_INLINE inline
 #else
 #define HBBR_INLINE __forceinline
@@ -19,7 +19,6 @@
 
 //#include <comutil.h>  
 #include <ostream>
-#include <math.h>
 #include <vector>
 #include <iostream>
 #include "GLFWInclude.h"

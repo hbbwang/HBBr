@@ -63,12 +63,16 @@
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="true"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-        android:hardwareAccelerated="true" >
+        android:hardwareAccelerated="true" 
+        >
 
         <!-- Example of setting SDL hints from AndroidManifest.xml:
         <meta-data android:name="SDL_ENV.SDL_ACCELEROMETER_AS_JOYSTICK" android:value="0"/>
          -->
-     
+         
+        <!-- vulkan support -->
+        <meta-data android:name="com.android.gfx.driver" android:value="@string/igraphics_driver" />
+
         <activity android:name="SDLActivity"
             android:label="@string/app_name"
             android:alwaysRetainTaskState="true"
@@ -94,6 +98,7 @@
             </intent-filter>
             -->
         </activity>
+        
     </application>
 
 </manifest>

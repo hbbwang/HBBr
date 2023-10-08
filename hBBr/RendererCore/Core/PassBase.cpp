@@ -29,7 +29,7 @@ void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> sw
 	{
 		_currentFrameBufferSize = size;
 		const auto manager = VulkanManager::GetManager();
-		const auto frameIndex = VulkanRenderer::GetCurrentFrameIndex();
+		//const auto frameIndex = VulkanRenderer::GetCurrentFrameIndex();
 		//Insert swapchain imageView to first.
 		if (_framebuffers.size() > 0)
 		{

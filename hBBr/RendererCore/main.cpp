@@ -100,7 +100,7 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	{
 		MessageOut(SDL_GetError(), true, true, "255,0,0");
 	}
-
+	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", "Start InitManager ", NULL);
 	VulkanManager::InitManager(bEnableDebug);
 #if IS_EDITOR
 	Shaderc::ShaderCompiler::CompileAllShaders(FileSystem::GetShaderIncludeAbsPath().c_str());

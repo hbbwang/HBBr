@@ -89,10 +89,10 @@ struct Vec4FileData
 	uint64_t Get64BitData()
 	{
 		return
-			(((uint64_t)(x * (float)0xFFDC)) << 48) & 0xFFFF000000000000 |
-			(((uint64_t)(y * (float)0xFFDC)) << 32) & 0xFFFF00000000 |
-			(((uint64_t)(z * (float)0xFFDC)) << 16) & 0xFFFF0000 |
-			(((uint64_t)(w * (float)0xFFDC))) & 0xFFFF;
+			((((uint64_t)(x * (float)0xFFDC)) << 48) & 0xFFFF000000000000) |
+			((((uint64_t)(y * (float)0xFFDC)) << 32) & 0xFFFF00000000) |
+			((((uint64_t)(z * (float)0xFFDC)) << 16) & 0xFFFF0000)|
+			((((uint64_t)(w * (float)0xFFDC))) & 0xFFFF);
 	}
 	static glm::vec4 From64BitData(uint64_t i)
 	{

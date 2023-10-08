@@ -90,6 +90,7 @@ VulkanManager::VulkanManager(bool bDebug)
 		freopen_s(&pFileOut, "CONOUT$", "w", stdout);
 		freopen_s(&pFileErr, "CONOUT$", "w", stderr);
 	}
+	_currentPlatform = EPlatform::Windows;
 #elif defined(__ANDROID__)
 	_currentPlatform = EPlatform::Android;
 #elif defined(__linux__)
@@ -100,13 +101,15 @@ VulkanManager::VulkanManager(bool bDebug)
 	_graphicsQueueFamilyIndex = -1;
 	_swapchainBufferCount = 3;
 	_enable_VK_KHR_display = false;
+	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", "Start Init Vulkan Instance ", NULL);
 	//Init global vulkan  
 	InitInstance(bDebug);
+	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", "Start Init Vulkan Device", NULL);
 	InitDevice();
 	InitDebug();
 	CreateCommandPool();
 	CreateDescripotrPool(_descriptorPool);
-
+	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", "Start Init ImGui Instance ", NULL);
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
@@ -280,7 +283,7 @@ void VulkanManager::InitDevice()
 	}
 	//------------------Queue Family
 	VkQueueFamilyProperties graphicsQueueFamilyProperty{};
-	VkQueueFamilyProperties transferQueueFamilyProperty{};
+	//VkQueueFamilyProperties transferQueueFamilyProperty{};
 	{
 		uint32_t family_count = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(_gpuDevice, &family_count, VK_NULL_HANDLE);
@@ -880,6 +883,8 @@ void VulkanManager::Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImage
 		imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
 		srcFlags = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT | VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT | VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 		break;
+	default:
+		break;
 	}
 
 	switch (newLayout) {
@@ -906,6 +911,8 @@ void VulkanManager::Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImage
 	case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
 		imageBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
 		dstFlags = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		break;
+	default:
 		break;
 	}
 	vkCmdPipelineBarrier(cmdBuffer, srcFlags, dstFlags, 0, 0, NULL, 0, NULL, 1,
@@ -1252,6 +1259,10 @@ void VulkanManager::CreateFrameBuffer(uint32_t width, uint32_t height, VkRenderP
 	info.attachmentCount = (uint32_t)attachments.size();
 	info.pAttachments = attachments.data();
 	auto result = vkCreateFramebuffer(_device, &info, VK_NULL_HANDLE, &framebuffer);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut("Vulkan ERROR: Create Frame Buffer Failed.", false, true);
+	}
 }
 
 void VulkanManager::DestroyFrameBuffer(VkFramebuffer& framebuffer)
@@ -1424,7 +1435,7 @@ void VulkanManager::CreateRenderPass(std::vector<VkAttachmentDescription>attachm
 {
 	VkRenderPassCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	info.flags = NULL;
+	info.flags = 0;
 	info.attachmentCount = (uint32_t)attachmentDescs.size();
 	info.pAttachments = attachmentDescs.data();
 	info.dependencyCount = (uint32_t)subpassDependencys.size();

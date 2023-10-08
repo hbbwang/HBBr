@@ -257,7 +257,7 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
         #endif
         Data = "[" + Data + "]";
         HString nIn = Data + in;
-        printf(nIn.c_str());
+        printf("%s", nIn.c_str());
         #ifdef _WIN32
                 OutputDebugStringA(nIn.c_str());
         #endif
@@ -273,7 +273,8 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
             #ifdef _WIN32
                 char* buffer = UnicodeToUtf8(out.c_wstr());
             #else
-                auto buffer = std::string(out.c_str()).c_str();
+                auto buf_temp = std::string(out.c_str());
+                auto buffer = buf_temp.c_str();
             #endif
             //sprintf(buffer, UnicodeToUtf8(out.c_wstr()));
 
@@ -326,7 +327,7 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
         SetConsoleTextAttribute(hOut, wr2);
         #endif
         Data = "[" + Data + "] ";
-        printf((Data+in).c_str());
+        printf("%s",(Data+in).c_str());
         printf("\n");
         #ifdef _WIN32
         OutputDebugStringA(((Data + in) +"\n").c_str());
@@ -345,7 +346,8 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
             #ifdef _WIN32
                 char* buffer = UnicodeToUtf8(out.c_wstr());
             #else
-                auto buffer = std::string(out.c_str()).c_str();
+                auto buf_temp = std::string(out.c_str());
+                auto buffer = buf_temp.c_str();
             #endif
             //sprintf(buffer, UnicodeToUtf8(out.c_wstr()));
 

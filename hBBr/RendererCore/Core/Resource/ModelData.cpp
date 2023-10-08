@@ -11,6 +11,11 @@
 #include "ConsoleDebug.h"
 #include "FileSystem.h"
 
+#ifdef __ANDROID__
+#include <ThirdParty/assimp/include/assimp/port/AndroidJNI/AndroidJNIIOSystem.h>
+#else
+
+#endif
 #include <ThirdParty/assimp/include/assimp/Importer.hpp>      // C++ importer interface
 #include <ThirdParty/assimp/include/assimp/scene.h>			// C++ importer interface
 #include <ThirdParty/assimp/include/assimp/postprocess.h>     // Post processing flags
