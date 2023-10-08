@@ -30,6 +30,9 @@
 # *.exe
 # *.out
 # *.app
+/build/.cxx
+.idea
+.gradle
 .vs
 x64
 x32
