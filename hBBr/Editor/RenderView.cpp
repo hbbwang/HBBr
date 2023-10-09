@@ -7,7 +7,9 @@
 #include "FormMain.h"
 #include "GLFWInclude.h"
 
+#ifdef _WIN32
 #pragma comment(lib , "RendererCore.lib")
+#endif
 
 HWND hwnd;
 

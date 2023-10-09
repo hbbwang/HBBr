@@ -31,7 +31,7 @@ extern "C" {
 
 	}
 
-	RendererCore_Android::RendererCore_Android()
+	RendererCore_Android::RendererCore_Android() 
 	{
 		HString str = "Hello Android!";
 		printf("%s", str.c_str()); 

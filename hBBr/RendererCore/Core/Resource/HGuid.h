@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "HString.h"
-#include "ThirdParty/crossguid/Include/crossguid/guid.hpp"
+#include "crossguid/Include/crossguid/guid.hpp"
 
 #ifdef _WIN32
 #ifdef _DEBUG

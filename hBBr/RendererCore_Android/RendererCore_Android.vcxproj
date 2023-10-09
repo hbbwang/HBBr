@@ -165,13 +165,13 @@
       <AdditionalOptions>-lvulkan -lSDL3  -lassimp -lm %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /c /f /y $(SolutionDir)$(Platform)\$(Configuration)\*.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
-xcopy /c /f /y $(SolutionDir)ThirdParty\assimp\lib\*.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
-xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
-xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so.1 $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
-xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so.1.3.261 $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
-xcopy /c /f /y $(SolutionDir)ThirdParty\sdl3\*.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
-xcopy /c /f /y $(ProjectDir)*.h $(solutiondir)DependencyCopy\AndroidProject\app\jni\src</Command>
+      <Command>xcopy /c /f /y $(SolutionDir)$(Platform)\$(Configuration)\*.so $(solutiondir)AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\assimp\lib\*.so $(solutiondir)AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so $(solutiondir)AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so.1 $(solutiondir)AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so.1.3.261 $(solutiondir)AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\sdl3\*.so $(solutiondir)AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(ProjectDir)*.h $(solutiondir)AndroidProject\app\jni\src</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
@@ -188,13 +188,13 @@ xcopy /c /f /y $(ProjectDir)*.h $(solutiondir)DependencyCopy\AndroidProject\app\
       <AdditionalOptions>-lvulkan -lSDL3  -lassimp -lm %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /c /f /y $(SolutionDir)$(Platform)\$(Configuration)\*.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
-xcopy /c /f /y $(SolutionDir)ThirdParty\assimp\lib\*.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
-xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
-xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so.1 $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
-xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so.1.3.261 $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
-xcopy /c /f /y $(SolutionDir)ThirdParty\sdl3\*.so $(solutiondir)DependencyCopy\AndroidProject\app\libs\arm64-v8a
-xcopy /c /f /y $(ProjectDir)*.h $(solutiondir)DependencyCopy\AndroidProject\app\jni\src</Command>
+      <Command>xcopy /c /f /y $(SolutionDir)$(Platform)\$(Configuration)\*.so $(solutiondir)AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\assimp\lib\*.so $(solutiondir)AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so $(solutiondir)AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so.1 $(solutiondir)AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\vulkan\libvulkan.so.1.3.261 $(solutiondir)AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(SolutionDir)ThirdParty\sdl3\*.so $(solutiondir)AndroidProject\app\libs\arm64-v8a
+xcopy /c /f /y $(ProjectDir)*.h $(solutiondir)AndroidProject\app\jni\src</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
