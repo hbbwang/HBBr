@@ -1,7 +1,7 @@
 ﻿#pragma once
 //#include "Common.h"
 #include <vector>
-#include "vulkan/vulkan.h"
+#include "VulkanManager.h"
 #include "Shader.h"
 #include "Pass/PassType.h"
 struct VkGraphicsPipelineCreateInfoCache

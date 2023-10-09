@@ -1,8 +1,6 @@
 ﻿#pragma once
 //Vulkan底层核心管理类
 
-#include "GLFWInclude.h"
-
 #if defined(_WIN32)
 	#define WIN32_LEAN_AND_MEAN             // 从 Windows 头文件中排除极少使用的内容
 	#define VK_USE_PLATFORM_WIN32_KHR	1	//support win32
@@ -17,8 +15,12 @@
 	#define VK_USE_PLATFORM_MACOS_MVK 1
 #endif
 
-#include "../Common/Common.h"
+#if !defined(_WIN32)
+#include "vulkan_wrapper/vulkan_wrapper.h"
+#endif
+#include "GLFWInclude.h"
 #include <vulkan/vulkan.h>
+#include "../Common/Common.h"
 #include <memory>
 #include <array>
 #include "HString.h"
@@ -320,7 +322,7 @@ private:
 
 	VkDebugReportCallbackEXT			_debugReport;
 
-	VkPhysicalDeviceProperties2			_gpuProperties{};
+	VkPhysicalDeviceProperties			_gpuProperties{};
 
 	VkPhysicalDeviceMemoryProperties	_gpuMemoryProperties{};
 

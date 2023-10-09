@@ -318,6 +318,7 @@
     <ClCompile Include="Common\HInput.cpp" />
     <ClCompile Include="Common\HTime.cpp" />
     <ClCompile Include="Common\ImageTool.cpp" />
+    <ClCompile Include="Common\TypeConversion.cpp" />
     <ClCompile Include="Common\XMLStream.cpp" />
     <ClCompile Include="Core\Buffer.cpp" />
     <ClCompile Include="Core\Component\CameraComponent.cpp" />

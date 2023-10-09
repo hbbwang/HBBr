@@ -1,0 +1,8 @@
+mkdir android_build
+cd android_build
+cmake -DCMAKE_TOOLCHAIN_FILE=C:\NVPACK\android-sdk-windows\ndk\25.1.8937393\build\cmake\android.toolchain.cmake -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_BUILD_SAMPLES=OFF -DASSIMP_ANDROID_JNIIOSYSTEM=ON ..
+cmake --build .
+
+
+上面不行的话试试这个：
+buildAndroid.bat，修改里面的路径，cmd运行

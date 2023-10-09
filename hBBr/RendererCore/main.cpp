@@ -8,6 +8,17 @@
 #endif
 #include "./Resource/ContentManager.h"
 
+#include "GLFWInclude.h"
+#include "ConsoleDebug.h"
+
+#if defined(__ANDROID__)
+
+#ifndef IS_GAME
+#define IS_GAME 1
+#endif
+
+#endif
+
 //#if _DEBUG
 //#include "include/vld.h"
 //#pragma comment(lib ,"vld.lib")
@@ -88,19 +99,26 @@ void DropCallBack(SDL_Window* window, int path_count, const char* paths[])
 	}
 }
 
+void Android_Init()
+{
+
+}
+
 VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDebug, void* parent)
 {
 	//must be successful.
 	if (SDL_Init(SDL_INIT_EVERYTHING) == -1)
 	{
-		MessageOut("Init sdl2 failed.", true, true, "255,0,0");
+		MessageOut("Init sdl3 failed.", true, true, "255,0,0");
 	}
 
 	if (SDL_Vulkan_LoadLibrary(NULL) == -1)
 	{
 		MessageOut(SDL_GetError(), true, true, "255,0,0");
 	}
-	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", "Start InitManager ", NULL);
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SLD:hBBr:InitVulkan", NULL);
+	Android_Init();
+	
 	VulkanManager::InitManager(bEnableDebug);
 #if IS_EDITOR
 	Shaderc::ShaderCompiler::CompileAllShaders(FileSystem::GetShaderIncludeAbsPath().c_str());
@@ -348,21 +366,18 @@ void VulkanApp::AppQuit()
 	_bFocusQuit = true;
 }
 
-#if IS_GAME
+#if defined(IS_GAME)
 
 int main(int argc, char* argv[])
 {
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Begin", NULL);
+    ConsoleDebug::CreateConsole("");
 	//Enable custom loop
 	VulkanApp::InitVulkanManager(true, true);
 	VulkanApp::DeInitVulkanManager();
 	return 0;
 }
 
-int SDL_main(int argc, char* argv[])
-{
-	return main(argc, argv);
-}
-
 #else
 
-#endif
+#endif //defined(IS_GAME)

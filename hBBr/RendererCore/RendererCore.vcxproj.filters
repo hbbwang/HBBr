@@ -339,6 +339,9 @@
     <ClCompile Include="..\ThirdParty\crossguid\Include\crossguid\guid.cpp">
       <Filter>ThirdParty\GUID</Filter>
     </ClCompile>
+    <ClCompile Include="Common\TypeConversion.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

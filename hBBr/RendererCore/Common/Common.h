@@ -56,9 +56,13 @@
 #elif defined(__ANDROID__)
 	
 #elif defined(__linux__)
+
 #endif
+
 #ifndef DE_ASSERT
+
 	#define DE_ASSERT(exp_, msgw_)  ;
+
 #endif
 
 void MessageOut(const char* msg, bool bExit = false, bool bMessageBox = false ,const char* textColor = ("255,255,255"));

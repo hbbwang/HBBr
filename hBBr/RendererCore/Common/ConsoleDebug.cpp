@@ -2,6 +2,8 @@
 #include "ConsoleDebug.h"
 #include "HTime.h"
 #include <mutex>
+#include "FileSystem.h"
+#include <SDL3/SDL.h>
 //#include <iconv.h>
 #ifdef _WIN32
 
@@ -27,7 +29,7 @@ int ConsoleDebug::err;
 bool ConsoleDebug::bConnectedConsole = false;
 bool ConsoleDebug::bConnectedFailed = false;
 std::thread ConsoleDebug::socketAcceptThread;
-HString LogFileName = (HString(".\\log_") + HTime::CurrentDateAndTime() + ".txt");
+HString LogFileName = "";
 std::function<void(HString,  float, float, float, HString)> ConsoleDebug::printFuncAdd = [](HString, float, float, float, HString) {};
 
 FILE* log_file = NULL;
@@ -97,13 +99,13 @@ void ConsoleDebug::CreateConsole(HString consolePath ,bool bNoClient)
     err = WSAStartup(versionRequest, &wsaData);
     if (err != 0)
     {
-        printf("Ç¶Ì××ÖÎ´´ò¿ª");
+        printf("Ç¶ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½");
         WSACleanup();
         return;
     }
     else
     {
-        printf("ÒÑ´ò¿ªÌ×½Ó×Ö");
+        printf("ï¿½Ñ´ï¿½ï¿½×½ï¿½ï¿½ï¿½");
     }
 #endif
     tcpSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -163,7 +165,7 @@ void ConsoleDebug::CreateConsole(HString consolePath ,bool bNoClient)
             &pi);           // Pointer to PROCESS_INFORMATION structure
     }
 #endif
-    //½ÓÊÕÀ´×Ô¿Í»§¶ËµÄÇëÇó
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¿Í»ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½
     printf("TCPServer start...\n");
     socketAcceptThread = std::thread(SocketAcceptThreadFunc);
     socketAcceptThread.detach();
@@ -176,7 +178,7 @@ void ConsoleDebug::CreateConsole(HString consolePath ,bool bNoClient)
     ReadMessageThread.detach();
 
     //Create Log file
-    LogFileName = (HString(".\\log_") + HTime::CurrentDateAndTime() + ".txt");
+    LogFileName = FileSystem::GetProgramPath() + (HString("log_") + HTime::CurrentDateAndTime() + ".txt");
     WriteToLogFile(log_file,"");
 }
 
@@ -239,8 +241,8 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
         g = (float)HString::ToDouble(colorArray[1]);
         b = (float)HString::ToDouble(colorArray[2]);
         #ifdef _WIN32
-                HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // »ñÈ¡±ê×¼Êä³öÉè±¸¾ä±ú
-                WORD wr2 = 0 ;//·½·¨¶þÓÃÏµÍ³ºê¶¨ÒåÑÕÉ«ÊôÐÔ
+                HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // ï¿½ï¿½È¡ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½
+                WORD wr2 = 0 ;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½ê¶¨ï¿½ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½
                 if (r > 30)
                 {
                     wr2 |= FOREGROUND_RED;
@@ -257,7 +259,9 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
         #endif
         Data = "[" + Data + "]";
         HString nIn = Data + in;
-        printf("%s", nIn.c_str());
+
+        SDL_Log("%s", nIn.c_str());
+
         #ifdef _WIN32
                 OutputDebugStringA(nIn.c_str());
         #endif
@@ -283,7 +287,7 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
                 if (send(consoleSockets[i], buffer, 4096, 0) < 0)
                 {
 #ifdef _DEBUG
-                    HString cs = "Ð´ÈëÊý¾ÝÊ§°Ü£¡";
+                    HString cs = "Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê§ï¿½Ü£ï¿½";
                     cs += HString::FromUInt(::GetLastError());
                     printf(cs.c_str());
                     printf("\n");
@@ -310,8 +314,8 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
         g = (float)HString::ToDouble(colorArray[1]);
         b = (float)HString::ToDouble(colorArray[2]);
         #ifdef _WIN32
-        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // »ñÈ¡±ê×¼Êä³öÉè±¸¾ä±ú
-        WORD wr2 = 0;//·½·¨¶þÓÃÏµÍ³ºê¶¨ÒåÑÕÉ«ÊôÐÔ
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // ï¿½ï¿½È¡ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½
+        WORD wr2 = 0;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½ê¶¨ï¿½ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½
         if (r > 30)
         {
             wr2 |= FOREGROUND_RED;
@@ -327,8 +331,9 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
         SetConsoleTextAttribute(hOut, wr2);
         #endif
         Data = "[" + Data + "] ";
-        printf("%s",(Data+in).c_str());
-        printf("\n");
+
+        SDL_Log("%s", (Data + in).c_str());
+
         #ifdef _WIN32
         OutputDebugStringA(((Data + in) +"\n").c_str());
         #endif
@@ -356,7 +361,7 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
                 if (send(consoleSockets[i], buffer, 4096, 0) < 0)
                 {
 #ifdef _DEBUG
-                    HString cs = "Ð´ÈëÊý¾ÝÊ§°Ü£¡";
+                    HString cs = "Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê§ï¿½Ü£ï¿½";
                     cs += HString::FromUInt(::GetLastError());
                     printf(cs.c_str());
                     printf("\n");
@@ -385,7 +390,7 @@ void ConsoleDebug::AddNewCommand(HString newCommand, std::function<void()> func,
     commandLists.insert(std::pair<HString, std::function<void()>>(newCommand, func));
 }
 
-/* ÃüÁîÖ´ÐÐ */
+/* ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½ */
 void ConsoleDebug::execCommand(HString key)
 {
 

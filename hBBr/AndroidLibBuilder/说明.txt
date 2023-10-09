@@ -1,7 +1,0 @@
-改目录是一个模板，进入app/jni/目录，调用ndk-build自行编译安卓库文件。
-1.编译的代码文件都放入app/jni/src
-2.调整src目录下的Android.mk
-LOCAL_C_INCLUDES 		包含目录
-LOCAL_SRC_FILES 			main源文件或者目录
-LOCAL_SHARED_LIBRARIES 		共享库链接
-include $(BUILD_SHARED_LIBRARY) 	编译成so动态库

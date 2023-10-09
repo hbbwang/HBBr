@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include <vulkan/vulkan.h>
+#include "VulkanManager.h"
 #include <vector>
 #include <thread>
 #include "Buffer.h"

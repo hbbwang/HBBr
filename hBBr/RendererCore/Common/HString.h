@@ -21,7 +21,6 @@
 #include <ostream>
 #include <vector>
 #include <iostream>
-#include "GLFWInclude.h"
 #include "glm/glm.hpp"
 
 #ifdef _WIN32

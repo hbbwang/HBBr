@@ -1,2 +1,0 @@
-D:\hBBr\hBBr\RendererCore_Android\ARM64\Debug\libRendererCore_Android.so
-G:\HbbRenderer\HBBr\hBBr\RendererCore_Android\ARM64\Debug\libRendererCore_Android.so

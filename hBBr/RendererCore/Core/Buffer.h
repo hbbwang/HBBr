@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Common.h"
-#include <vulkan/vulkan.h>
+#include "VulkanManager.h"
 #include <vector>
 #include <thread>
 

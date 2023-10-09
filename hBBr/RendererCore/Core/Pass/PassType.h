@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "glm/glm.hpp"
-#include <vulkan/vulkan.h>
+#include "VulkanManager.h"
 
 enum class Pass : uint32_t
 {

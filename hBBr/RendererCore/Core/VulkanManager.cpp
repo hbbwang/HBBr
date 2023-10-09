@@ -96,7 +96,22 @@ VulkanManager::VulkanManager(bool bDebug)
 #elif defined(__linux__)
 	_currentPlatform = EPlatform::Linux;
 #endif
+
+#if !defined(_WIN32)
+	if (!InitVulkan())
+	{
+		// Vulkan 不可用
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Vulkan is not support on this device.", NULL);
+		printf("Vulkan is not support on this device.");
+		std::cout<< "Vulkan is not support on this device." <<std::endl;
+		throw std::runtime_error("Vulkan is not support on this device.");
+		exit(0);
+	}
+#endif
+	ConsoleDebug::print_endl("hBBr:InitVulkan");
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SLD:hBBr:InitVulkan", NULL);
 	ConsoleDebug::print_endl(RendererLauguage::GetText("T000000"));
+
 	_bDebugEnable = false;
 	_graphicsQueueFamilyIndex = -1;
 	_swapchainBufferCount = 3;
@@ -201,7 +216,7 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 	appInfo.pNext = VK_NULL_HANDLE;
 	appInfo.pApplicationName = "hBBr";
 	appInfo.pEngineName = "hBBr Engine";
-	appInfo.apiVersion = VK_API_VERSION_1_3;
+	appInfo.apiVersion = VK_API_VERSION_1_2;
 	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 
 	VkInstanceCreateInfo createInfo = {};
@@ -259,12 +274,13 @@ void VulkanManager::InitDevice()
 		vkEnumeratePhysicalDevices(_instance, &devicesCount, gpu_list.data());
 		ConsoleDebug::print_endl("-----------GPU List-----------", "0,255,0");
 		ConsoleDebug::print_endl("Found " + HString::FromUInt(devicesCount) + " GPU(s)", "222,255,255");
-		_gpuProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+		//_gpuProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
 		for (uint32_t i = 0; i < devicesCount; i++)
 		{
-			vkGetPhysicalDeviceProperties2(gpu_list[i], &_gpuProperties);
-			ConsoleDebug::print_endl("Device Name:" + HString(_gpuProperties.properties.deviceName), "200,255,255");
-			ConsoleDebug::print_endl("Device ID:" + HString::FromUInt(_gpuProperties.properties.deviceID), "150,150,150");
+			//vkGetPhysicalDeviceProperties2(gpu_list[i], &_gpuProperties);
+			vkGetPhysicalDeviceProperties(gpu_list[i], &_gpuProperties);
+			ConsoleDebug::print_endl("Device Name:" + HString(_gpuProperties.deviceName), "200,255,255");
+			ConsoleDebug::print_endl("Device ID:" + HString::FromUInt(_gpuProperties.deviceID), "150,150,150");
 
 			if (IsGPUDeviceSuitable(gpu_list[i]))
 			{
@@ -278,7 +294,8 @@ void VulkanManager::InitDevice()
 		{
 			MessageOut(RendererLauguage::GetText("A000002").c_str(),true, true);
 		}
-		vkGetPhysicalDeviceProperties2(_gpuDevice, &_gpuProperties);
+		//vkGetPhysicalDeviceProperties2(_gpuDevice, &_gpuProperties);
+		vkGetPhysicalDeviceProperties(_gpuDevice, &_gpuProperties);
 		vkGetPhysicalDeviceMemoryProperties(_gpuDevice, &_gpuMemoryProperties);
 	}
 	//------------------Queue Family
@@ -1230,8 +1247,8 @@ void VulkanManager::CreateFrameBuffers(VkExtent2D FrameBufferSize, VkRenderPass 
 		framebufferInfo.layers = 1;
 
 		if (vkCreateFramebuffer(_device, &framebufferInfo, VK_NULL_HANDLE, &frameBuffers[i]) != VK_SUCCESS) {
-			//throw std::runtime_error("failed to create framebuffer!");
 			printf("failed to create framebuffer!");
+			throw std::runtime_error("failed to create framebuffer!");
 			exit(0);
 		}
 	}

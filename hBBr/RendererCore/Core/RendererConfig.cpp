@@ -27,7 +27,6 @@ HString RendererLauguage::GetText(HString key)
 		HString LauguageFilePath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"Language").attribute(L"path").as_string();
 		LauguageFilePath = FileSystem::GetProgramPath() + LauguageFilePath;
 		LauguageFilePath.CorrectionPath();
-		SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg",( LauguageFilePath + "(Lauguage File Path)").c_str(), NULL);
 		pugi::xml_document doc;
 		if (!XMLStream::LoadXML(LauguageFilePath.c_wstr(), doc))
 		{

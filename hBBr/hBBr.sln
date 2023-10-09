@@ -9,8 +9,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor", "Editor\Editor.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DependencyCopy", "DependencyCopy\DependencyCopy.vcxproj", "{62162565-C1F0-43C9-89E8-7014EB937665}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RendererCore_Android", "RendererCore_Android\RendererCore_Android.vcxproj", "{122E8F85-4416-4E7D-9D1D-5259DFB119DF}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -96,30 +94,6 @@ Global
 		{62162565-C1F0-43C9-89E8-7014EB937665}.ReleaseGame_GLFW|x64.Build.0 = ReleaseGame_GLFW|x64
 		{62162565-C1F0-43C9-89E8-7014EB937665}.ReleaseGame_GLFW|x86.ActiveCfg = ReleaseGame_GLFW|Win32
 		{62162565-C1F0-43C9-89E8-7014EB937665}.ReleaseGame_GLFW|x86.Build.0 = ReleaseGame_GLFW|Win32
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Debug|ARM.ActiveCfg = Debug|ARM
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Debug|ARM.Build.0 = Debug|ARM
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Debug|ARM64.ActiveCfg = Debug|ARM64
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Debug|ARM64.Build.0 = Debug|ARM64
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Debug|x64.ActiveCfg = Debug|x64
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Debug|x64.Build.0 = Debug|x64
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Debug|x86.ActiveCfg = Debug|x86
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Debug|x86.Build.0 = Debug|x86
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Release|ARM.ActiveCfg = Release|ARM
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Release|ARM.Build.0 = Release|ARM
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Release|ARM64.ActiveCfg = Release|ARM64
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Release|ARM64.Build.0 = Release|ARM64
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Release|x64.ActiveCfg = Release|x64
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Release|x64.Build.0 = Release|x64
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Release|x86.ActiveCfg = Release|x86
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.Release|x86.Build.0 = Release|x86
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.ReleaseGame_GLFW|ARM.ActiveCfg = Release|ARM
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.ReleaseGame_GLFW|ARM.Build.0 = Release|ARM
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.ReleaseGame_GLFW|ARM64.ActiveCfg = Release|ARM64
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.ReleaseGame_GLFW|ARM64.Build.0 = Release|ARM64
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.ReleaseGame_GLFW|x64.ActiveCfg = Release|x64
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.ReleaseGame_GLFW|x64.Build.0 = Release|x64
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.ReleaseGame_GLFW|x86.ActiveCfg = Release|x86
-		{122E8F85-4416-4E7D-9D1D-5259DFB119DF}.ReleaseGame_GLFW|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

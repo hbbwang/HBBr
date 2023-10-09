@@ -8,17 +8,17 @@ RESOLUTION_PATH := $(LOCAL_PATH)/../../../..
 
 THIRD_PARTY_PATH := $(LOCAL_PATH)/../../../../ThirdParty
 
-# LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES
-# LOCAL_CFLAGS += \
-# 	-Wall -Wextra \
-# 	-Wmissing-prototypes \
-# 	-Wunreachable-code-break \
-# 	-Wunneeded-internal-declaration \
-# 	-Wmissing-variable-declarations \
-# 	-Wfloat-conversion \
-# 	-Wshift-sign-overflow \
-# 	-Wstrict-prototypes \
-# 	-Wkeyword-macro \
+LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES
+LOCAL_CFLAGS += \
+	-Wall -Wextra \
+	-Wmissing-prototypes \
+	-Wunreachable-code-break \
+	-Wunneeded-internal-declaration \
+	-Wmissing-variable-declarations \
+	-Wfloat-conversion \
+	-Wshift-sign-overflow \
+	-Wstrict-prototypes \
+	-Wkeyword-macro \
 
 # Warnings we haven't fixed (yet)
 LOCAL_CFLAGS += -Wno-unused-parameter -Wno-sign-compare
@@ -26,6 +26,9 @@ LOCAL_CFLAGS += -Wno-unused-parameter -Wno-sign-compare
 LOCAL_CXXFLAGS += -std=c++1z
 
 APP_CXXFLAGS += -std=c++1z
+
+#预定义宏
+LOCAL_CFLAGS := -DIS_GAME=1 
 
 # 添加库文件路径
 LOCAL_LDLIBS += -L$(LOCAL_PATH)/../../libs/$(APP_ABI)/
@@ -40,10 +43,12 @@ LOCAL_LDLIBS += -lOpenSLES
 LOCAL_LDLIBS += -llog 
 LOCAL_LDLIBS += -landroid 
 LOCAL_LDLIBS += -lc++_shared
-LOCAL_LDLIBS += -lvulkan -lSDL3  -lassimp -lm 
+#LOCAL_LDLIBS += -lvulkan 
+LOCAL_LDLIBS += -lSDL3  -lassimp -lm 
 
 #头文件目录包含
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/vulkan_wrapper/
 LOCAL_C_INCLUDES += $(RESOLUTION_PATH)/RendererCore/
 LOCAL_C_INCLUDES += $(RESOLUTION_PATH)/RendererCore/Common/
 LOCAL_C_INCLUDES += $(RESOLUTION_PATH)/RendererCore/Core/
@@ -74,7 +79,8 @@ LOCAL_C_INCLUDES += \
 #cpp源文件目录包含
 LOCAL_SRC_FILES := \
 $(subst $(LOCAL_PATH)/,, \
-$(wildcard $(LOCAL_PATH)/src/*.cpp) \
+$(wildcard $(LOCAL_PATH)/*.cpp) \
+$(wildcard $(LOCAL_PATH)/vulkan_wrapper/*.cpp) \
 $(wildcard $(RESOLUTION_PATH)/RendererCore/*.cpp) \
 $(wildcard $(RESOLUTION_PATH)/RendererCore/Common/*.cpp) \
 $(wildcard $(RESOLUTION_PATH)/RendererCore/Core/*.cpp) \
@@ -93,6 +99,10 @@ $(wildcard $(THIRD_PARTY_PATH)/lodepng/*.cpp) \
 $(wildcard $(THIRD_PARTY_PATH)/pugixml/*.cpp) \
 $(wildcard $(THIRD_PARTY_PATH)/sdl3/*.cpp) \
 $(wildcard $(THIRD_PARTY_PATH)/sdl3/Include/*.cpp) \
+$(wildcard $(THIRD_PARTY_PATH)/vulkan/*.cpp) \
+$(wildcard $(THIRD_PARTY_PATH)/vulkan/glm/*.cpp) \
+$(wildcard $(THIRD_PARTY_PATH)/vulkan/Include/*.cpp) \
+$(wildcard $(THIRD_PARTY_PATH)/vulkan/vulkan_wrapper/*.cpp) \
 ) \
 
 include $(BUILD_SHARED_LIBRARY)

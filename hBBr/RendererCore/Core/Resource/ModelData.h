@@ -7,6 +7,7 @@
 #include "VertexFactory.h"
 #include "Primitive.h"
 #include "HGuid.h"
+
 struct VertexData
 {
 	glm::vec3 pos;

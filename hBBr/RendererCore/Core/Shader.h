@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Common.h"
 #include "HString.h"
-#include <vulkan/vulkan.h>
+#include "VulkanManager.h"
 #include <map>
 
 enum class MPType : uint8_t

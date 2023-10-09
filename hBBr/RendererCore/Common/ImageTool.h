@@ -3,9 +3,10 @@
 #include "TypeConversion.h"
 #include "lodepng/lodepng.h"
 #include "HString.h"
-#include <vulkan/vulkan.h>
 #include <algorithm>
 #include "Resource/HGuid.h"
+#include "VulkanManager.h"
+
 inline const char* GetTGAImageTypeString(uint8_t imageType)
 {
 	if (imageType == 0) return "no image data is present";
