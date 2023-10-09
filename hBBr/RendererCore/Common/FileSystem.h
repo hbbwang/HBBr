@@ -45,7 +45,7 @@ extern "C" {
 		HBBR_API static uint64_t GetFileSize(const char* path);
 		static std::vector<FileEntry> GetFilesBySuffix(const char* path, const char* suffix);
 		static std::vector<char>ReadBinaryFile(const char* filePath);
-
+		static HString _appPath;
 	};
 
 #if __ANDROID__

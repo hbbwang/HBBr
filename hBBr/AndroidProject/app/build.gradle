@@ -11,13 +11,13 @@ android {
     if (buildAsApplication) {
         namespace "org.libsdl.app"
     }
-    compileSdkVersion 31
-    buildToolsVersion  "31.0.0"
+    compileSdkVersion 31 //编译sdk的版本，也就是API Level
+    buildToolsVersion  "31.0.0" //构建工具版本
     defaultConfig {
-        minSdkVersion 24 // Official vulkan support starts from API level 24
-        targetSdkVersion 31
-        versionCode 1
-        versionName "0.0.1"
+        minSdkVersion 24 //最小sdk版本，Vulkan只在24之后版本支持
+        targetSdkVersion 31 //期望版本
+        versionCode 1 //版本号
+        versionName "0.0.1" //版本名
         externalNativeBuild {
             ndkBuild {
                 arguments "APP_PLATFORM=android-24" 
@@ -25,38 +25,63 @@ android {
                 abiFilters 'arm64-v8a'
                 cppFlags "-fexceptions"
             }
-            cmake {
-                arguments "-DANDROID_APP_PLATFORM=android-21", "-DANDROID_STL=c++_static"
-                // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
-                abiFilters 'arm64-v8a'
-                cppFlags "-fexceptions"
-            }
         }
     }
+    sourceSets {
+        main{
+            jniLibs.srcDir 'libs'
+            // manifest.srcFile 'AndroidManifest.xml' // 指定清单文件
+            // res.srcDirs = ['res'] // 指定res资源目录
+            // assets.srcDirs = ['assets']    // asset资源目录
+            // jni.srcDirs 'src/main/jni'     // jni代码目录
+            // java.srcDirs = ['src'] // 指定java源代码目录
+            // resources.srcDirs = ['src'] // 指定resource目录
+            // aidl.srcDirs = ['src'] // 指定aidl目录
+            // renderscript.srcDirs = ['src'] // 指定source目录
+        }
+        debug.setRoot('build-types/debug') // 指定debug模式的路径
+        release.setRoot('build-types/release') // 指定release模式的路径
+    }
+
+    // signingConfigs {// 签名配置
+    //     release {// 发布版签名配置
+    //         storeFile file("fk.keystore") // 密钥文件路径
+    //         storePassword "123456" // 密钥文件密码
+    //         keyAlias "fk" // key别名
+    //         keyPassword "123456" // key密码
+    //     }
+    //     debug {// debug版签名配置
+    //         storeFile file("fk.keystore")
+    //         storePassword "123456"
+    //         keyAlias "fk"
+    //         keyPassword "123456"
+    //     }
+    // }
+
     buildTypes {
-        release {
-            minifyEnabled false
+        debug {
+            zipAlignEnabled true  // 是否支持zip
+            minifyEnabled false // 是否对代码进行混淆，true表示混淆
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            debuggable true  //是否支持调试
+        }
+        release {
+            zipAlignEnabled true  // 是否支持zip
+            minifyEnabled false // 是否对代码进行混淆，true表示混淆
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            debuggable false  //是否支持调试
         }
     }
     applicationVariants.all { variant ->
         tasks["merge${variant.name.capitalize()}Assets"]
             .dependsOn("externalNativeBuild${variant.name.capitalize()}")
     }
-    if (!project.hasProperty('EXCLUDE_NATIVE_LIBS')) {
-        sourceSets.main {
-            jniLibs.srcDir 'libs'
+    externalNativeBuild {
+        ndkBuild {
+            path 'jni/Android.mk'
         }
-        externalNativeBuild {
-            ndkBuild {
-                path 'jni/Android.mk'
-            }
-            // cmake {
-            //     path 'jni/CMakeLists.txt'
-            // }
-        }
-       
     }
+
     lint {
         abortOnError false
     }
@@ -74,6 +99,16 @@ android {
     }
 }
 
+// 指定当前项目的所有依赖关系：本地依赖、库依赖、远程依赖
+// 本地依赖：可以对本地 Jar 包或目录添加依赖关系
+// 库依赖：可以对项目中的库模块添加依赖关系
+// 远程依赖：可以对 jcenter 库上的开源项目添加依赖
+// 标准的远程依赖格式是 域名:组织名:版本号
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')// 本地依赖
+
 }
+
+
+// 声明是要使用谷歌服务框架
+//apply plugin: 'com.google.gms.google-services'

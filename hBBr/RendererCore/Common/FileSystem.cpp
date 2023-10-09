@@ -6,14 +6,20 @@
 
 namespace fs = std::filesystem;
 
+HString FileSystem::_appPath;
+
 HString FileSystem::GetProgramPath()
 {
-    //return HString::GetExePathWithoutFileName();
-#ifdef _WIN32 
-    return SDL_GetBasePath();
-#else 
-
-#endif
+    if (_appPath.Length() <= 2)
+    {
+        auto path = SDL_GetBasePath();
+        char pathStr[4096];
+        strcpy_s(pathStr, 4096, path);
+        pathStr[strlen(path)] = '\0';
+        _appPath = pathStr;
+        SDL_free(path);
+    }
+    return _appPath;
 }
 
 HString FileSystem::GetShaderCacheAbsPath()
