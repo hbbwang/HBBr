@@ -162,41 +162,73 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 	std::vector<const char*> extensions;// = { VK_KHR_SURFACE_EXTENSION_NAME };
 	std::vector<const char*> layers;
 	std::vector<VkLayerProperties> availableLaters;
+
 	//列举支持的layers和extensions
 	{
 		uint32_t count;
 		vkEnumerateInstanceLayerProperties(&count, VK_NULL_HANDLE);
 		availableLaters.resize(count);
 		vkEnumerateInstanceLayerProperties(&count, availableLaters.data());
+		ConsoleDebug::print_endl("");
+		ConsoleDebug::print_endl("");
 		ConsoleDebug::print_endl("----------Enumerate Instance Layer Properties---------");
+		std::vector<HString> layerLogs;
+
 		for (uint32_t i = 0; i < count; i++)
 		{
-			char layerName[256];
-			memcpy(layerName, availableLaters[i].layerName, 256);
+			bool bVK_LAYER_KHRONOS_validation = false;
+			if (strcmp(availableLaters[i].layerName, "VK_LAYER_KHRONOS_validation") == 0)
+			{
+				layers.push_back("VK_LAYER_KHRONOS_validation");
+				layerLogs.push_back("hBBr:[Vulkan Instance layer] Add VK_LAYER_KHRONOS_validation layer.");
+				bVK_LAYER_KHRONOS_validation = true;
+			}
+			//RenderDoc支持
+			//layers.push_back("VK_LAYER_RENDERDOC_Capture");//
 			//_instance_layers.push_back(layerName);
 			ConsoleDebug::print_endl(availableLaters[i].layerName + HString("  |  ") + availableLaters[i].description, "150,150,150");
-
-			uint32_t ecount = 0;
-			vkEnumerateInstanceExtensionProperties(availableLaters[i].layerName, &ecount, VK_NULL_HANDLE);
-			std::vector<VkExtensionProperties> availableExts(ecount);
-			vkEnumerateInstanceExtensionProperties(availableLaters[i].layerName, &ecount, availableExts.data());
-			ConsoleDebug::print_endl("\tInstance Extension Properties---------");
-			for (uint32_t i = 0; i < ecount; i++)
-			{
-				char extName[256];
-				memcpy(extName, availableExts[i].extensionName, 256);
-				ConsoleDebug::print_endl(HString("\t") + extName, "150,150,150");
-				if (strcmp(availableExts[i].extensionName, VK_KHR_DISPLAY_EXTENSION_NAME) == 0)
-				{
-					layers.push_back(availableLaters[i].layerName);
-					extensions.push_back(VK_KHR_DISPLAY_EXTENSION_NAME);
-					_enable_VK_KHR_display = true;
-				}
-			}
 			ConsoleDebug::print_endl("\t------------------");
 		}
 		ConsoleDebug::print_endl("\t---------End Enumerate Instance Layer Properties------");
 		ConsoleDebug::print_endl("Found Instance Layers number:" + HString::FromSize_t(availableLaters.size()));
+		//
+		ConsoleDebug::print_endl("");
+		ConsoleDebug::print_endl("");
+		ConsoleDebug::print_endl("\t---------Enumerate Instance Extension Properties------");
+		uint32_t ecount = 0;
+		vkEnumerateInstanceExtensionProperties(NULL, &ecount, VK_NULL_HANDLE);
+		std::vector<VkExtensionProperties> availableExts(ecount);
+		vkEnumerateInstanceExtensionProperties(NULL, &ecount, availableExts.data());
+		ConsoleDebug::print_endl("\tInstance Extension Properties---------");
+		for (uint32_t i = 0; i < ecount; i++)
+		{
+			char extName[256];
+			memcpy(extName, availableExts[i].extensionName, 256);
+			ConsoleDebug::print_endl(HString("\t") + extName, "150,150,150");
+			if (strcmp(availableExts[i].extensionName, VK_KHR_DISPLAY_EXTENSION_NAME) == 0)
+			{
+				layers.push_back(availableLaters[i].layerName);
+				extensions.push_back(VK_KHR_DISPLAY_EXTENSION_NAME);
+				_enable_VK_KHR_display = true;
+			}
+			if (strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_REPORT_EXTENSION_NAME) == 0)
+			{
+				extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_EXT_DEBUG_REPORT_EXTENSION_NAME ext.");
+
+			}
+			else if (strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0)
+			{
+				extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_EXT_DEBUG_UTILS_EXTENSION_NAME ext.");
+			}
+		}
+		ConsoleDebug::print_endl("\t---------End Enumerate Instance Extension Properties------");
+
+		for (auto i : layerLogs)
+		{
+			ConsoleDebug::print_endl(i);
+		}	
 	}
 
 	//SDL
@@ -213,13 +245,13 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 		}
 		extensions.insert(extensions.end(), sdlExts.begin(), sdlExts.end());
 	}
-
+	
 	VkApplicationInfo appInfo = {};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	appInfo.pNext = VK_NULL_HANDLE;
 	appInfo.pApplicationName = "hBBr";
 	appInfo.pEngineName = "hBBr Engine";
-	appInfo.apiVersion = VK_API_VERSION_1_2;
+	appInfo.apiVersion = VK_API_VERSION_1_3;
 	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 
 	VkInstanceCreateInfo createInfo = {};
@@ -228,32 +260,9 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 	createInfo.flags = 0;
 	createInfo.pApplicationInfo = &appInfo;
 
-//#if defined(_WIN32)
-//	extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-//#elif defined(__ANDROID__)
-//	extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
-//#elif defined(__linux__)
-//	extensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
-//#endif
-
 	if (_bDebugEnable)
 	{
 		ConsoleDebug::print_endl("hBBr:Enable Vulkan Debug layer.");
-		auto it = std::find_if(availableLaters.begin(), availableLaters.end(), [](VkLayerProperties& p) {
-			return HString("VK_LAYER_KHRONOS_validation").IsSame(p.layerName, false);
-		});
-		if (it != availableLaters.end())
-		{
-			layers.push_back("VK_LAYER_KHRONOS_validation");
-		}
-		else
-		{
-			ConsoleDebug::print_endl("hBBr:[Vulkan Instance layer] Can not find VK_LAYER_KHRONOS_validation layer.");
-		}
-		//RenderDoc支持
-		//layers.push_back("VK_LAYER_RENDERDOC_Capture");//
-		extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
 		debugCallbackCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
 		debugCallbackCreateInfo.pfnCallback = VulkanDebugCallback;
@@ -306,6 +315,7 @@ void VulkanManager::InitDevice()
 		ConsoleDebug::print_endl("---------------------------", "0,255,0");
 		if (_gpuDevice == VK_NULL_HANDLE)
 		{
+			_Sleep(500);
 			MessageOut(RendererLauguage::GetText("A000002").c_str(),true, true);
 		}
 		//vkGetPhysicalDeviceProperties2(_gpuDevice, &_gpuProperties);
@@ -313,6 +323,7 @@ void VulkanManager::InitDevice()
 		vkGetPhysicalDeviceMemoryProperties(_gpuDevice, &_gpuMemoryProperties);
 	}
 	//------------------Queue Family
+	ConsoleDebug::print_endl("Get Queue Family...", "0,255,0");
 	VkQueueFamilyProperties graphicsQueueFamilyProperty{};
 	//VkQueueFamilyProperties transferQueueFamilyProperty{};
 	{
@@ -354,56 +365,88 @@ void VulkanManager::InitDevice()
 			MessageOut(RendererLauguage::GetText("A000003").c_str(),true, true);
 		}
 	}
+	ConsoleDebug::print_endl("Get Device Layers and Extensions...", "0,255,0");
 	std::vector <const char*> layers;
 	std::vector <const char*> extensions;
 	//列举Device支持的Layers和Extensions
 	{
+		std::vector<HString> layerLogs;
 		uint32_t count = 0;
 		vkEnumerateDeviceLayerProperties(_gpuDevice, &count, VK_NULL_HANDLE);
 		std::vector<VkLayerProperties> availableLaters(count);
 		vkEnumerateDeviceLayerProperties(_gpuDevice, &count, availableLaters.data());
-		ConsoleDebug::print_endl("----------Device Layer Properties---------");
-		for (uint32_t i = 0; i < count; i++) {
-			char layerName[256];
-			memcpy(layerName, availableLaters[i].layerName, 256);
-			//_device_layers.push_back(layerName);
-			ConsoleDebug::print_endl(availableLaters[i].layerName + HString("  |  ") + availableLaters[i].description, "150,150,150");
-			//
-			uint32_t ecount = 0;
-			vkEnumerateDeviceExtensionProperties(_gpuDevice, availableLaters[i].layerName, &ecount, VK_NULL_HANDLE);
-			std::vector<VkExtensionProperties> availableExts(ecount);
-			vkEnumerateDeviceExtensionProperties(_gpuDevice, availableLaters[i].layerName, &ecount, availableExts.data());
-			ConsoleDebug::print_endl("\tInstance Extension Properties---------");
-			for (uint32_t i = 0; i < ecount; i++)
+		ConsoleDebug::print_endl("");
+		ConsoleDebug::print_endl("");
+		ConsoleDebug::print_endl("------------Enumerate Device Layer Properties-----------");
+		for (uint32_t i = 0; i < count; i++) 
+		{
+			if (strcmp(availableLaters[i].layerName, "VK_LAYER_KHRONOS_validation") == 0 && _bDebugEnable)
 			{
-				char extName[256];
-				memcpy(extName, availableExts[i].extensionName, 256);
-				ConsoleDebug::print_endl(HString("\t") + extName, "150,150,150");
-				//Debug Marker
-				{
-					if (strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME) == 0)
-					{
-						extensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
-						debugMarkerActive = true;
-						break;
-					}
-				}
-
+				layers.push_back("VK_LAYER_KHRONOS_validation");
+				layerLogs.push_back("hBBr:[Vulkan Device layer] Add VK_LAYER_KHRONOS_validation layer.");
 			}
+			ConsoleDebug::print_endl(availableLaters[i].layerName + HString("  |  ") + availableLaters[i].description, "150,150,150");
 			ConsoleDebug::print_endl("\t------------------");
 		}
+		ConsoleDebug::print_endl("----------End Enumerate Device Layer Properties---------");
+		//
+		ConsoleDebug::print_endl("");
+		ConsoleDebug::print_endl("");
+		ConsoleDebug::print_endl("\t---------Enumerate Device Extension Properties------");
+		uint32_t ecount = 0;
+		vkEnumerateDeviceExtensionProperties(_gpuDevice, NULL, &ecount, VK_NULL_HANDLE);
+		std::vector<VkExtensionProperties> availableExts(ecount);
+		vkEnumerateDeviceExtensionProperties(_gpuDevice, NULL, &ecount, availableExts.data());
+		ConsoleDebug::print_endl("\tDevice Extension Properties---------");
+		for (uint32_t i = 0; i < ecount; i++)
+		{
+			char extName[256];
+			memcpy(extName, availableExts[i].extensionName, 256);
+			ConsoleDebug::print_endl(HString("\t") + extName, "150,150,150");
+			//Debug Marker
+			{
+				if (strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_debug_marker ext.");
+					debugMarkerActive = true;
+				}
+				else if (strcmp(availableExts[i].extensionName, "VK_EXT_tooling_info") == 0)
+				{
+					extensions.push_back("VK_EXT_tooling_info");
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_tooling_info ext.");
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SWAPCHAIN_EXTENSION_NAME ext.");
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME ext.");
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME ext.");
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME) == 0)
+				{
+					//允许深度/模板图像的图像存储屏障仅设置了深度或模板位之一，而不是两者都设置。
+					extensions.push_back(VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME ext.");
+				}
+			}
+		}
+
+		for (auto i : layerLogs)
+		{
+			ConsoleDebug::print_endl(i);
+		}
+		ConsoleDebug::print_endl("\t---------End Enumerate Device Extension Properties------");
 	}
-	extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-	extensions.push_back(VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME);
-	extensions.push_back(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
-	//允许深度/模板图像的图像存储屏障仅设置了深度或模板位之一，而不是两者都设置。
-	extensions.push_back(VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME);
-	if (_bDebugEnable)
-	{
-		layers.push_back("VK_LAYER_KHRONOS_validation");
-		extensions.push_back("VK_EXT_debug_marker");
-		extensions.push_back("VK_EXT_tooling_info");
-	}
+
 	//---------------------Create Device
 	std::array<std::vector<float>, 1> prior;
 	prior[0].resize(graphicsQueueFamilyProperty.queueCount, 0);
@@ -512,12 +555,12 @@ uint32_t VulkanManager::FindMemoryTypeIndex(const VkMemoryRequirements* memory_r
 
 bool VulkanManager::IsGPUDeviceSuitable(VkPhysicalDevice device)
 {
-	VkPhysicalDeviceProperties deviceProperties;
+	//VkPhysicalDeviceProperties deviceProperties;
 	VkPhysicalDeviceFeatures deviceFeatures;
-	vkGetPhysicalDeviceProperties(device, &deviceProperties);
+	//vkGetPhysicalDeviceProperties(device, &deviceProperties);
 	vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-	return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
-		deviceFeatures.geometryShader;
+	//return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && deviceFeatures.geometryShader; deviceFeatures.
+	return deviceFeatures.tessellationShader && deviceFeatures.geometryShader;
 }
 
 void VulkanManager::CreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurface)
@@ -1163,9 +1206,9 @@ void VulkanManager::CreateDescripotrPool(VkDescriptorPool& pool)
 {
 	VkDescriptorPoolSize pool_sizes[] =
 	{
-		//{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
 		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },	//这是一个image和sampler的组合descriptor
-		//{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },			//纯image,不带sampler
+		{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },			//纯image,不带sampler
 		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 100 },
 		//{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
 		//{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },

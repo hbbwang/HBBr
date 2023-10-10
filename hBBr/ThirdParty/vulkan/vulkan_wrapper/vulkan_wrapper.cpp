@@ -20,6 +20,9 @@ int InitVulkan(void) {
     void* libvulkan = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
     if (!libvulkan) return 0;
 
+//    void* liblayer = dlopen("libVkLayer_khronos_validation.so", RTLD_NOW | RTLD_LOCAL);
+//    if (!liblayer) return 0;
+
     // Vulkan supported, set function addresses
     vkCreateInstance = reinterpret_cast<PFN_vkCreateInstance>(dlsym(libvulkan, "vkCreateInstance"));
     vkDestroyInstance = reinterpret_cast<PFN_vkDestroyInstance>(dlsym(libvulkan, "vkDestroyInstance"));

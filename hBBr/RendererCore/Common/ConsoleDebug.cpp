@@ -262,9 +262,6 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
 
         SDL_Log("%s", nIn.c_str());
 
-        #ifdef _WIN32
-                OutputDebugStringA(nIn.c_str());
-        #endif
         printFuncAdd(nIn, r / 255.0f, g / 255, b / 255, Data);
 
         WriteToLogFile(log_file, nIn);
@@ -334,9 +331,6 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
 
         SDL_Log("%s", (Data + in).c_str());
 
-        #ifdef _WIN32
-        OutputDebugStringA(((Data + in) +"\n").c_str());
-        #endif
         HString nIn = (Data + in) + "\n";
 
         printFuncAdd(nIn, r / 255.0f, g / 255, b / 255, Data);

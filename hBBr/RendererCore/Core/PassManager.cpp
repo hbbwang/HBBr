@@ -11,8 +11,8 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 		//Opaque Pass
 		std::shared_ptr<BasePass> opaque = std::make_shared<BasePass>(renderer);
 		AddPass(opaque, "Opaque");
-		std::shared_ptr<ImguiPass> imgui = std::make_shared<ImguiPass>(renderer);
-		AddPass(imgui, "Imgui");
+		//std::shared_ptr<ImguiPass> imgui = std::make_shared<ImguiPass>(renderer);
+		//AddPass(imgui, "Imgui");
 	}
 	if (_executeFence.size() <= 0)
 	{

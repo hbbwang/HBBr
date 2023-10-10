@@ -118,8 +118,9 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	}
 
 	Android_Init();
-	
+
 	VulkanManager::InitManager(bEnableDebug);
+
 #if IS_EDITOR
 	Shaderc::ShaderCompiler::CompileAllShaders(FileSystem::GetShaderIncludeAbsPath().c_str());
 #endif
@@ -185,9 +186,14 @@ bool VulkanApp::UpdateForm()
 	while (SDL_PollEvent(&event))
 	{
 		auto win = SDL_GetWindowFromID(event.window.windowID);
-		auto winForm = std::find_if(_forms.begin(), _forms.end(), [win](VulkanForm& form) {
+		auto winFormIt = std::find_if(_forms.begin(), _forms.end(), [win](VulkanForm& form) {
 			return form.window == win;
 		});
+		VulkanForm* winForm = NULL;
+		if (winFormIt == _forms.end())
+		{
+			winForm = &(*winForm);
+		}
 		switch (event.type) 
 		{
 			//case 0x200://窗口事件,SDL3开始不再需要这个了
@@ -196,14 +202,14 @@ bool VulkanApp::UpdateForm()
 			case SDL_EVENT_WINDOW_CLOSE_REQUESTED: //窗口关闭事件
 				CloseCallBack(win);
 				SDL_DestroyWindow(win);
-				RemoveWindow(&(*winForm));
+				RemoveWindow(winForm);
 				break;
 			case SDL_EVENT_WINDOW_TAKE_FOCUS:
 			case SDL_EVENT_WINDOW_FOCUS_GAINED:
-				FocusCallBack(&(*winForm), 1);
+				FocusCallBack(winForm, 1);
 				break;
 			case SDL_EVENT_WINDOW_FOCUS_LOST:
-				FocusCallBack(&(*winForm), 0);
+				FocusCallBack(winForm, 0);
 				break;
 			case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
 			case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
@@ -271,7 +277,7 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 
 	if (!window)
 	{
-		MessageOut("Create sdl2 window failed.", true, true, "255,0,0");
+		MessageOut((HString("Create sdl3 window failed : ")+ SDL_GetError()).c_str(), true, true, "255,0,0");
 		SDL_Quit();
 	}
 
