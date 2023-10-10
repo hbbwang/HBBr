@@ -43,7 +43,8 @@ LOCAL_LDLIBS += -lOpenSLES
 LOCAL_LDLIBS += -llog 
 LOCAL_LDLIBS += -landroid 
 LOCAL_LDLIBS += -lc++_shared
-#LOCAL_LDLIBS += -lvulkan 
+#LOCAL_LDLIBS += -lvulkan
+LOCAL_LDLIBS += -lVkLayer_khronos_validation
 LOCAL_LDLIBS += -lSDL3  -lassimp -lm 
 
 #头文件目录包含
