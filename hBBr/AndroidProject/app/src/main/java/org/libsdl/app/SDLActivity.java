@@ -326,6 +326,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         Log.v(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
 
+        new hBBrManager(this);
 
         /* Control activity re-creation */
         if (mSDLMainFinished || mActivityCreated) {
@@ -634,8 +635,13 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
            return;
         }
 
-        if (mCurrentLocale == null || !mCurrentLocale.equals(newConfig.locale)) {
-            mCurrentLocale = newConfig.locale;
+//        if (mCurrentLocale == null || !mCurrentLocale.equals(newConfig.locale)) {
+//            mCurrentLocale = newConfig.locale;
+//            SDLActivity.onNativeLocaleChanged();
+//        }
+
+        if (mCurrentLocale == null || !mCurrentLocale.equals(newConfig.getLocales().get(0))) {
+            mCurrentLocale = newConfig.getLocales().get(0);
             SDLActivity.onNativeLocaleChanged();
         }
 

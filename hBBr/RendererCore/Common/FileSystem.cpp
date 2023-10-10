@@ -2,7 +2,8 @@
 #include "FileSystem.h"
 #include <iostream>
 #include <fstream>
-#include <SDL3/SDL.h>
+
+#include "AndroidCommon.h"
 
 namespace fs = std::filesystem;
 
@@ -10,14 +11,26 @@ HString FileSystem::_appPath;
 
 HString FileSystem::GetProgramPath()
 {
+    //const char* org = "hBBr";
+    //const char* app = "Game";
+    //char* prefPath = SDL_GetPrefPath(org, app);
+    //SDL_ShowSimpleMessageBox(0, "", prefPath, NULL);
+    //SDL_free(prefPath);
+
     if (_appPath.Length() <= 2)
     {
+        #if _WIN32
         auto path = SDL_GetBasePath();
         char pathStr[4096];
         strcpy_s(pathStr, 4096, path);
         pathStr[strlen(path)] = '\0';
         _appPath = pathStr;
         SDL_free(path);
+        #elif __ANDROID__
+        //获取android/data/ [package] /files路径
+        _appPath = SDL_AndroidGetExternalStoragePath();
+        _appPath += "/";
+        #endif
     }
     return _appPath;
 }

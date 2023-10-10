@@ -116,7 +116,7 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	{
 		MessageOut(SDL_GetError(), true, true, "255,0,0");
 	}
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SLD:hBBr:InitVulkan", NULL);
+
 	Android_Init();
 	
 	VulkanManager::InitManager(bEnableDebug);
@@ -370,7 +370,6 @@ void VulkanApp::AppQuit()
 
 int main(int argc, char* argv[])
 {
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Begin", NULL);
     ConsoleDebug::CreateConsole("");
 	//Enable custom loop
 	VulkanApp::InitVulkanManager(true, true);

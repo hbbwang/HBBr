@@ -10,7 +10,7 @@
 #pragma comment(lib,"assimp/lib/Static/Release/assimp-vc142-mt.lib")
 #pragma comment(lib,"assimp/lib/Static/Release/zlibstatic.lib") 
 #else
-#pragma comment(lib,"assimp/lib/assimp-vc142-mt.lib") 
+#pragma comment(lib,"assimp/lib/Debug/assimp-vc142-mt.lib") 
 #endif
 #endif
 

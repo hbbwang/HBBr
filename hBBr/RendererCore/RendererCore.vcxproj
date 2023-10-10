@@ -259,6 +259,7 @@
     <ClInclude Include="..\ThirdParty\lodepng\lodepng.h" />
     <ClInclude Include="..\ThirdParty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="..\ThirdParty\pugixml\pugixml.hpp" />
+    <ClInclude Include="Common\AndroidCommon.h" />
     <ClInclude Include="Common\Common.h" />
     <ClInclude Include="Common\ConsoleDebug.h" />
     <ClInclude Include="Common\DDSTool.h" />

@@ -26,6 +26,10 @@
         android:name="android.hardware.usb.host"
         android:required="false" />
 
+    <!-- Vulkan支持-->
+    <uses-feature android:name="android.hardware.vulkan.level"
+        android:required="true" />
+
     <!-- External mouse input events -->
     <uses-feature
         android:name="android.hardware.type.pc"
@@ -38,7 +42,22 @@
         android:required="false" /> -->
 
     <!-- Allow downloading to the external storage on Android 5.1 and older -->
-    <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="22" /> -->
+    <!-- 写入权限申请 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="22" />
+    <!-- 读取权限申请 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="22" />
+
+    <!-- 媒体图库权限申请 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    
+    <!-- 媒体视频权限申请 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+
+    <!-- 媒体音频权限申请 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+
+    <!-- 申请所有文件权限 -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />   
 
     <!-- Allow access to Bluetooth devices -->
     <!-- Currently this is just for Steam Controller support and requires setting SDL_HINT_JOYSTICK_HIDAPI_STEAM -->

@@ -109,22 +109,23 @@ VulkanManager::VulkanManager(bool bDebug)
 	}
 #endif
 	ConsoleDebug::print_endl("hBBr:InitVulkan");
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "SLD:hBBr:InitVulkan", NULL);
 	ConsoleDebug::print_endl(RendererLauguage::GetText("T000000"));
 
 	_bDebugEnable = false;
 	_graphicsQueueFamilyIndex = -1;
 	_swapchainBufferCount = 3;
 	_enable_VK_KHR_display = false;
-	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", "Start Init Vulkan Instance ", NULL);
+	ConsoleDebug::print_endl("hBBr:Start init Vulkan Instance.");
 	//Init global vulkan  
 	InitInstance(bDebug);
-	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", "Start Init Vulkan Device", NULL);
+	ConsoleDebug::print_endl("hBBr:Start init Vulkan Device.");
 	InitDevice();
 	InitDebug();
+	ConsoleDebug::print_endl("hBBr:Start init Command Pool.");
 	CreateCommandPool();
+	ConsoleDebug::print_endl("hBBr:Start Create Descripotr Pool.");
 	CreateDescripotrPool(_descriptorPool);
-	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", "Start Init ImGui Instance ", NULL);
+	ConsoleDebug::print_endl("hBBr:Start init imgui.");
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
@@ -160,14 +161,14 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 	//layers & extensions
 	std::vector<const char*> extensions;// = { VK_KHR_SURFACE_EXTENSION_NAME };
 	std::vector<const char*> layers;
-
+	std::vector<VkLayerProperties> availableLaters;
 	//列举支持的layers和extensions
 	{
 		uint32_t count;
 		vkEnumerateInstanceLayerProperties(&count, VK_NULL_HANDLE);
-		std::vector<VkLayerProperties> availableLaters(count);
+		availableLaters.resize(count);
 		vkEnumerateInstanceLayerProperties(&count, availableLaters.data());
-		ConsoleDebug::print_endl("----------Instance Layer Properties---------");
+		ConsoleDebug::print_endl("----------Enumerate Instance Layer Properties---------");
 		for (uint32_t i = 0; i < count; i++)
 		{
 			char layerName[256];
@@ -194,6 +195,8 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 			}
 			ConsoleDebug::print_endl("\t------------------");
 		}
+		ConsoleDebug::print_endl("\t---------End Enumerate Instance Layer Properties------");
+		ConsoleDebug::print_endl("Found Instance Layers number:" + HString::FromSize_t(availableLaters.size()));
 	}
 
 	//SDL
@@ -235,7 +238,18 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 
 	if (_bDebugEnable)
 	{
-		layers.push_back("VK_LAYER_KHRONOS_validation");
+		ConsoleDebug::print_endl("hBBr:Enable Vulkan Debug layer.");
+		auto it = std::find_if(availableLaters.begin(), availableLaters.end(), [](VkLayerProperties& p) {
+			return HString("VK_LAYER_KHRONOS_validation").IsSame(p.layerName, false);
+		});
+		if (it != availableLaters.end())
+		{
+			layers.push_back("VK_LAYER_KHRONOS_validation");
+		}
+		else
+		{
+			ConsoleDebug::print_endl("hBBr:[Vulkan Instance layer] Can not find VK_LAYER_KHRONOS_validation layer.");
+		}
 		//RenderDoc支持
 		//layers.push_back("VK_LAYER_RENDERDOC_Capture");//
 		extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
@@ -472,6 +486,7 @@ void VulkanManager::InitDebug()
 {
 	if (_bDebugEnable)
 	{
+		ConsoleDebug::print_endl("hBBr:Start Init Vulkan Debug.");
 		fvkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(_instance, "vkCreateDebugReportCallbackEXT");
 		fvkDestroyDebugReportCallbackEXT = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(_instance, "vkDestroyDebugReportCallbackEXT");
 		if (VK_NULL_HANDLE == fvkCreateDebugReportCallbackEXT || VK_NULL_HANDLE == fvkDestroyDebugReportCallbackEXT)

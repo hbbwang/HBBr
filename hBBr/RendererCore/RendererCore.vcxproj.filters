@@ -205,6 +205,9 @@
     <ClInclude Include="..\ThirdParty\crossguid\Include\crossguid\guid.hpp">
       <Filter>ThirdParty\GUID</Filter>
     </ClInclude>
+    <ClInclude Include="Common\AndroidCommon.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">

@@ -31,7 +31,8 @@ android {
         main{
             jniLibs.srcDir 'libs'
             // manifest.srcFile 'AndroidManifest.xml' // 指定清单文件
-            // res.srcDirs = ['res'] // 指定res资源目录
+            //res.srcDirs += "src/data" // 指定res资源目录
+            assets.srcDirs += "src/main/assets"
             // assets.srcDirs = ['assets']    // asset资源目录
             // jni.srcDirs 'src/main/jni'     // jni代码目录
             // java.srcDirs = ['src'] // 指定java源代码目录
@@ -98,6 +99,21 @@ android {
         }
     }
 }
+
+//添加一个自定义任务,资产复制
+task CopyConfig(type: Copy) {
+    from '../../DependencyCopy/Config'
+    into 'src/main/assets/Config/'
+}
+
+task CopyResource(type: Copy) {
+    from '../../DependencyCopy/Resource'
+    into 'src/main/assets/Resource/'
+}
+
+//编译之前执行上面的这个任务
+preBuild.dependsOn CopyConfig
+preBuild.dependsOn CopyResource
 
 // 指定当前项目的所有依赖关系：本地依赖、库依赖、远程依赖
 // 本地依赖：可以对本地 Jar 包或目录添加依赖关系
