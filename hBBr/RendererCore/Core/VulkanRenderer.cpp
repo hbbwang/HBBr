@@ -44,6 +44,7 @@ void VulkanRenderer::Release()
 	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
 	_vulkanManager->DestroyRenderSemaphores(_presentSemaphore);
 	_vulkanManager->DestroyRenderSemaphores(_queueSubmitSemaphore);
+	_vulkanManager->DestroyRenderFences(_imageAcquiredFences);
 	_vulkanManager->DestroySurface(_surface);
 	VulkanRenderer::_renderers.erase(GetName());
 	delete this;
@@ -64,6 +65,8 @@ void VulkanRenderer::Init()
 	//Swapchain
 	ConsoleDebug::print_endl("hBBr:Start Present Semaphore.");
 	_vulkanManager->CreateRenderSemaphores(_presentSemaphore);
+	ConsoleDebug::print_endl("hBBr:Start image acquired fences.");
+	_vulkanManager->CreateRenderFences(_imageAcquiredFences);
 	ConsoleDebug::print_endl("hBBr:Start Queue Submit Semaphore.");
 	_vulkanManager->CreateRenderSemaphores(_queueSubmitSemaphore);
 	ConsoleDebug::print_endl("hBBr:Start Check Surface Format.");
@@ -129,13 +132,21 @@ void VulkanRenderer::Render()
 
 		VulkanManager* _vulkanManager = VulkanManager::GetManager();
 
+		const uint32_t PrevCurrentFrameIndex = _currentFrameIndex;
+		//Get next frame index.
+		_currentFrameIndex = (_currentFrameIndex + 1) % _vulkanManager->GetSwapchainBufferCount();
+
 		uint32_t _swapchainIndex = 0;
 
 		//Which swapchain index need to present?
-		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], &_swapchainIndex))
+		_vulkanManager->ResetFence(_imageAcquiredFences[_currentFrameIndex]);
+		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], _imageAcquiredFences[_currentFrameIndex], &_swapchainIndex))
 		{
-			Resizing(true);
+			_bResize = (true);
+			_currentFrameIndex = PrevCurrentFrameIndex;
+			return;
 		}
+		_vulkanManager->WaitForFences({ _imageAcquiredFences[_currentFrameIndex] } ,false);
 
 		auto funcOnce = std::move(_renderThreadFuncsOnce);
 		for (auto& func : funcOnce)
@@ -159,9 +170,6 @@ void VulkanRenderer::Render()
 		{
 			Resizing(true);
 		}
-
-		//Get next frame index.
-		_currentFrameIndex = (_currentFrameIndex + 1) % _vulkanManager->GetSwapchainBufferCount();
 	}
 }
 

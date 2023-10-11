@@ -219,6 +219,31 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 				extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_EXT_DEBUG_UTILS_EXTENSION_NAME ext.");
 			}
+			else if (strcmp(availableExts[i].extensionName, VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME) == 0)
+			{
+				extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME ext.");
+			}
+			else if (strcmp(availableExts[i].extensionName, VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME) == 0)
+			{
+				extensions.push_back(VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME);
+				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME ext.");
+			}
+			else if (strcmp(availableExts[i].extensionName, VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME) == 0)
+			{
+				extensions.push_back(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME);
+				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME ext.");
+			}
+			else if (strcmp(availableExts[i].extensionName, VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME) == 0)
+			{
+				extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME);
+				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME ext.");
+			}
+			else if (strcmp(availableExts[i].extensionName, VK_KHR_EXTERNAL_FENCE_CAPABILITIES_EXTENSION_NAME) == 0)
+			{
+				extensions.push_back(VK_KHR_EXTERNAL_FENCE_CAPABILITIES_EXTENSION_NAME);
+				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_KHR_EXTERNAL_FENCE_CAPABILITIES_EXTENSION_NAME ext.");
+			}
 		}
 		ConsoleDebug::print_endl("\t---------End Enumerate Instance Extension Properties------");
 
@@ -243,19 +268,28 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 		extensions.insert(extensions.end(), sdlExts.begin(), sdlExts.end());
 	}
 	
+	uint32_t apiVersion = VK_API_VERSION_1_2;
+    auto GetApiVersionResult = vkEnumerateInstanceVersion(&apiVersion);
+	if (VK_SUCCESS != GetApiVersionResult)
+	{
+		apiVersion = VK_API_VERSION_1_2;
+	}
+
 	VkApplicationInfo appInfo = {};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	appInfo.pNext = VK_NULL_HANDLE;
 	appInfo.pApplicationName = "hBBr";
-	appInfo.pEngineName = "hBBr Engine";
-	appInfo.apiVersion = VK_API_VERSION_1_1;
-	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+	appInfo.pEngineName = "hBBr";
+	appInfo.apiVersion = apiVersion;
+	appInfo.applicationVersion = 0;
+	appInfo.engineVersion = 0;
 
 	VkInstanceCreateInfo createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	createInfo.pNext = VK_NULL_HANDLE;
-	createInfo.flags = 0;
+	createInfo.pNext = nullptr;
 	createInfo.pApplicationInfo = &appInfo;
+	createInfo.enabledExtensionCount = 0;
+	createInfo.ppEnabledExtensionNames = nullptr;
 
 	if (_bDebugEnable)
 	{
@@ -427,6 +461,57 @@ void VulkanManager::InitDevice()
 					extensions.push_back(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME ext.");
 				}
+				else if (strcmp(availableExts[i].extensionName, VK_KHR_MAINTENANCE1_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_MAINTENANCE1_EXTENSION_NAME ext.");
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_KHR_MAINTENANCE2_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_KHR_MAINTENANCE2_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_MAINTENANCE2_EXTENSION_NAME ext.");
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_EXT_MEMORY_BUDGET_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_MEMORY_BUDGET_EXTENSION_NAME ext.");
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_EXT_MEMORY_PRIORITY_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_EXT_MEMORY_PRIORITY_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_MEMORY_PRIORITY_EXTENSION_NAME ext.");
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME ext.");
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME ext.");
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_KHR_SPIRV_1_4_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_KHR_SPIRV_1_4_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SPIRV_1_4_EXTENSION_NAME ext.");
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME ext.");
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME ext.");
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_EXT_VALIDATION_CACHE_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_EXT_VALIDATION_CACHE_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_VALIDATION_CACHE_EXTENSION_NAME ext.");
+				}
+				
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME)==0)
 				{
 					bHasRenderPass2Ext = true;
@@ -471,9 +556,21 @@ void VulkanManager::InitDevice()
 	//	queue_create_info.push_back(device_transfer_queue_create_info);
 	//}
 	vkGetPhysicalDeviceFeatures(_gpuDevice, &_gpuFeatures);
-	//开启vk的gpu特殊功能
-	_gpuVk12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
-	_gpuVk12Features.separateDepthStencilLayouts = VK_TRUE;
+	//禁用所有与稀疏相关的东西
+	_gpuFeatures.shaderResourceResidency = VK_FALSE;
+	_gpuFeatures.shaderResourceMinLod = VK_FALSE;
+	_gpuFeatures.sparseBinding = VK_FALSE;
+	_gpuFeatures.sparseResidencyBuffer = VK_FALSE;
+	_gpuFeatures.sparseResidencyImage2D = VK_FALSE;
+	_gpuFeatures.sparseResidencyImage3D = VK_FALSE;
+	_gpuFeatures.sparseResidency2Samples = VK_FALSE;
+	_gpuFeatures.sparseResidency4Samples = VK_FALSE;
+	_gpuFeatures.sparseResidency8Samples = VK_FALSE;
+	_gpuFeatures.sparseResidencyAliased = VK_FALSE;
+
+	////开启vk的gpu特殊功能
+	//_gpuVk12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+	//_gpuVk12Features.separateDepthStencilLayouts = VK_TRUE;
 
 	VkDeviceCreateInfo device_create_info = {};
 	device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -484,7 +581,7 @@ void VulkanManager::InitDevice()
 	device_create_info.ppEnabledExtensionNames = extensions.data();
 	device_create_info.enabledExtensionCount = (uint32_t)extensions.size();
 	device_create_info.pEnabledFeatures = &_gpuFeatures;
-	device_create_info.pNext = &_gpuVk12Features;
+	//device_create_info.pNext = &_gpuVk12Features;
 	auto result = vkCreateDevice(_gpuDevice, &device_create_info, VK_NULL_HANDLE, &_device);
 	if(result!= VK_SUCCESS) 
 		MessageOut((RendererLauguage::GetText("A000004") + GetVkResult(result)).c_str() , true, true);
@@ -1169,14 +1266,9 @@ void VulkanManager::EndRenderPass(VkCommandBuffer cmdBuf)
 	vkCmdEndRenderPass(cmdBuf);
 }
 
-bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore& semaphore, uint32_t* swapchainIndex)
+bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, VkFence fence, uint32_t* swapchainIndex)
 {
-	if (semaphore == VK_NULL_HANDLE)
-	{
-		_Sleep(100);
-		MessageOut("vkAcquireNextImageKHR: Active semaphore is VK_NULL_HANDLE", false, true, "255,0,0");//太烦人了,不影响
-	}
-	VkResult result = vkAcquireNextImageKHR(_device, swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, swapchainIndex);
+	VkResult result = vkAcquireNextImageKHR(_device, swapchain, UINT64_MAX, semaphore, fence, swapchainIndex);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 	{
 		#if _DEBUG
@@ -1497,6 +1589,21 @@ void VulkanManager::DestroyFence(VkFence& fence)
 		vkDestroyFence(_device, fence, VK_NULL_HANDLE);
 		fence = VK_NULL_HANDLE;
 	}
+}
+
+void VulkanManager::ResetFence(VkFence& fence)
+{
+	vkResetFences(_device, 1, &fence);
+}
+
+bool VulkanManager::IsFenceFinish(VkFence& fence)
+{
+	auto result = vkGetFenceStatus(_device, fence);
+	if (result == VK_SUCCESS)
+	{
+		return true;
+	}
+	return false;
 }
 
 void VulkanManager::CreateRenderFences(std::vector<VkFence>& fences)

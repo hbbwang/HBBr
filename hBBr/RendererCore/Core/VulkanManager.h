@@ -153,7 +153,7 @@ public:
 	void EndRenderPass(VkCommandBuffer cmdBuf);
 
 	/* return the swapchain is normal (not out of data). */
-	bool GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore& semaphore, uint32_t* swapchainIndex);
+	bool GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore,VkFence fence , uint32_t* swapchainIndex);
 
 	bool Present(VkSwapchainKHR swapchain, VkSemaphore& semaphore, uint32_t& swapchainImageIndex);
 
@@ -198,6 +198,10 @@ public:
 	void CreateFence(VkFence& fence);
 
 	void DestroyFence(VkFence& fence);
+
+	void ResetFence(VkFence& fence);
+
+	bool IsFenceFinish(VkFence& fence);
 
 	void CreateRenderFences(std::vector<VkFence>& fences);
 

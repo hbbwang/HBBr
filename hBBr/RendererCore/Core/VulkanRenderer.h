@@ -149,6 +149,8 @@ private:
 
 	std::vector<VkSemaphore> _queueSubmitSemaphore;
 
+	std::vector<VkFence> _imageAcquiredFences;
+
 	static uint32_t _currentFrameIndex;
 
 	bool _bRendererRelease;

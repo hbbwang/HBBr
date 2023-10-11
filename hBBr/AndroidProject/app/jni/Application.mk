@@ -10,6 +10,10 @@
 APP_ABI := arm64-v8a
 
 # Min runtime API level
-APP_PLATFORM=android-28
+APP_PLATFORM := android-26
+
+NDK_TOOLCHAIN_VERSION := clang
+
+APP_STL := c++_static
 
 APP_CPPFLAGS += -std=c++17
