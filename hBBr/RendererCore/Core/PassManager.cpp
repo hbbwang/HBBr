@@ -39,10 +39,10 @@ void PassManager::PassesUpdate()
 	manager->BeginCommandBuffer(_renderer->GetCommandBuffer());
 
 	//Collect render setting (Commandbuffer record)
+	_executePasses.clear();
 	for (auto p : _passes)
 	{
 		p->PassUpdate();
-
 		_executePasses.push_back(p);
 	}
 	manager->EndCommandBuffer(_renderer->GetCommandBuffer());

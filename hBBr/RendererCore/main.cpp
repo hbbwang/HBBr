@@ -117,6 +117,10 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 		MessageOut(SDL_GetError(), true, true, "255,0,0");
 	}
 
+	//Set sdl hints
+	SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "0");
+	SDL_SetHint(SDL_HINT_VIDEO_FOREIGN_WINDOW_VULKAN, "1");//SDL_WINDOW_VULKAN
+
 	Android_Init();
 
 	VulkanManager::InitManager(bEnableDebug);
@@ -126,9 +130,6 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 #endif
 	Shader::LoadShaderCache(FileSystem::GetShaderCacheAbsPath().c_str());
 	ContentManager::Get();
-
-	//Set sdl hints
-	SDL_SetHint(SDL_HINT_VIDEO_FOREIGN_WINDOW_VULKAN, "1");//SDL_WINDOW_VULKAN
 
 	//Create Main Window
 	auto win = CreateNewWindow(128, 128, "MainRenderer", true, parent);
@@ -143,7 +144,6 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	{
 		while (UpdateForm())
 		{
-			
 		}
 	}
 	else
@@ -183,6 +183,7 @@ bool VulkanApp::UpdateForm()
 {
 	bool bQuit = false;
 	SDL_Event event;
+	bool bStopRender = false; 
 	while (SDL_PollEvent(&event))
 	{
 		auto win = SDL_GetWindowFromID(event.window.windowID);
@@ -210,6 +211,10 @@ bool VulkanApp::UpdateForm()
 				break;
 			case SDL_EVENT_WINDOW_FOCUS_LOST:
 				FocusCallBack(winForm, 0);
+				#ifdef __ANDROID__
+				bStopRender = true;
+				ResizeWindow(winForm, 1, 1);
+				#endif
 				break;
 			case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
 			case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
@@ -229,6 +234,12 @@ bool VulkanApp::UpdateForm()
 				break;
 			case SDL_EVENT_MOUSE_WHEEL:
 				break;
+			case SDL_EVENT_WINDOW_MINIMIZED:
+				bStopRender = true;
+				#ifdef __ANDROID__
+				ResizeWindow(winForm, 1, 1);
+				#endif
+				break;
 		}
 	}
 
@@ -243,7 +254,7 @@ bool VulkanApp::UpdateForm()
 		MessageOut("SDL quit.", false, false, "255,255,255");
 		bQuit = true;
 	}
-	else
+	else if(!bStopRender)
 	{
 		UpdateRender();
 	}
@@ -303,13 +314,16 @@ bool VulkanApp::IsWindowFocus(SDL_Window* windowHandle)
 
 void VulkanApp::RemoveWindow(VulkanForm* form)
 {
-	auto window = form->window;
-	auto it = std::remove_if(_forms.begin(), _forms.end(), [window](VulkanForm& glfw) {
-		return window == glfw.window;
-		});
-	if (it != _forms.end())
+	if (form != NULL && form != nullptr)
 	{
-		_forms.erase(it);
+		auto window = form->window;
+		auto it = std::remove_if(_forms.begin(), _forms.end(), [window](VulkanForm& glfw) {
+			return window == glfw.window;
+			});
+		if (it != _forms.end())
+		{
+			_forms.erase(it);
+		}
 	}
 }
 
@@ -376,7 +390,7 @@ void VulkanApp::AppQuit()
 
 int main(int argc, char* argv[])
 {
-    ConsoleDebug::CreateConsole("");
+    //ConsoleDebug::CreateConsole("");
 	//Enable custom loop
 	VulkanApp::InitVulkanManager(true, true);
 	VulkanApp::DeInitVulkanManager();

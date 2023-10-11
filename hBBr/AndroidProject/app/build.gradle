@@ -20,7 +20,7 @@ android {
         versionName "0.0.1" //版本名
         externalNativeBuild {
             ndkBuild {
-                arguments "APP_PLATFORM=android-24" 
+                arguments "APP_PLATFORM=android-29"
                 // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
                 abiFilters 'arm64-v8a'
                 cppFlags "-fexceptions"
@@ -68,7 +68,7 @@ android {
         }
         release {
             zipAlignEnabled true  // 是否支持zip
-            minifyEnabled false // 是否对代码进行混淆，true表示混淆
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             debuggable false  //是否支持调试
         }

@@ -67,7 +67,7 @@ VulkanDebugCallback(
 	ConsoleDebug::print_endl(title, color);
 	ConsoleDebug::print_endl(msg, color);
 	if(bError)
-		MessageOut(HString(title + "\n" + msg).c_str(),false,true);
+		MessageOut(HString(title + "\n" + msg).c_str(),false,true,"255,0,0");
 	return false;
 }
 
@@ -199,12 +199,9 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 		vkEnumerateInstanceExtensionProperties(NULL, &ecount, VK_NULL_HANDLE);
 		std::vector<VkExtensionProperties> availableExts(ecount);
 		vkEnumerateInstanceExtensionProperties(NULL, &ecount, availableExts.data());
-		ConsoleDebug::print_endl("\tInstance Extension Properties---------");
 		for (uint32_t i = 0; i < ecount; i++)
 		{
-			char extName[256];
-			memcpy(extName, availableExts[i].extensionName, 256);
-			ConsoleDebug::print_endl(HString("\t") + extName, "150,150,150");
+			ConsoleDebug::print_endl(HString("\t") + availableExts[i].extensionName, "150,150,150");
 			if (strcmp(availableExts[i].extensionName, VK_KHR_DISPLAY_EXTENSION_NAME) == 0)
 			{
 				layers.push_back(availableLaters[i].layerName);
@@ -398,11 +395,10 @@ void VulkanManager::InitDevice()
 		std::vector<VkExtensionProperties> availableExts(ecount);
 		vkEnumerateDeviceExtensionProperties(_gpuDevice, NULL, &ecount, availableExts.data());
 		ConsoleDebug::print_endl("\tDevice Extension Properties---------");
+		bool bHasRenderPass2Ext = false;
 		for (uint32_t i = 0; i < ecount; i++)
 		{
-			char extName[256];
-			memcpy(extName, availableExts[i].extensionName, 256);
-			ConsoleDebug::print_endl(HString("\t") + extName, "150,150,150");
+			ConsoleDebug::print_endl(HString("\t") + availableExts[i].extensionName, "150,150,150");
 			//Debug Marker
 			{
 				if (strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME) == 0)
@@ -431,7 +427,13 @@ void VulkanManager::InitDevice()
 					extensions.push_back(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME ext.");
 				}
-				else if (strcmp(availableExts[i].extensionName, VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME) == 0)
+				else if (strcmp(availableExts[i].extensionName, VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME)==0)
+				{
+					bHasRenderPass2Ext = true;
+					extensions.push_back(VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME ext.");
+				}
+				else if (bHasRenderPass2Ext && strcmp(availableExts[i].extensionName, VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME) == 0)
 				{
 					//允许深度/模板图像的图像存储屏障仅设置了深度或模板位之一，而不是两者都设置。
 					extensions.push_back(VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME);
@@ -474,7 +476,6 @@ void VulkanManager::InitDevice()
 	_gpuVk12Features.separateDepthStencilLayouts = VK_TRUE;
 
 	VkDeviceCreateInfo device_create_info = {};
-	memset(&device_create_info, 0, sizeof(VkDeviceCreateInfo));
 	device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	device_create_info.queueCreateInfoCount = static_cast<uint32_t>(queue_create_info.size());
 	device_create_info.pQueueCreateInfos = queue_create_info.data();
@@ -702,6 +703,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	info.pQueueFamilyIndices = VK_NULL_HANDLE;
 	if (surfaceCapabilities)
 	{
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_vulkanManager->GetPhysicalDevice(), surface, surfaceCapabilities);
 		info.preTransform = surfaceCapabilities->currentTransform;
 		switch (surfaceCapabilities->supportedCompositeAlpha)
 		{
@@ -1162,8 +1164,13 @@ void VulkanManager::EndRenderPass(VkCommandBuffer cmdBuf)
 	vkCmdEndRenderPass(cmdBuf);
 }
 
-bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t* swapchainIndex)
+bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore& semaphore, uint32_t* swapchainIndex)
 {
+	if (semaphore == VK_NULL_HANDLE)
+	{
+		_Sleep(100);
+		MessageOut("vkAcquireNextImageKHR: Active semaphore is VK_NULL_HANDLE", false, true, "255,0,0");//太烦人了,不影响
+	}
 	VkResult result = vkAcquireNextImageKHR(_device, swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, swapchainIndex);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 	{
@@ -1180,7 +1187,7 @@ bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore 
 	return true;
 }
 
-bool VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore semaphore, uint32_t& swapchainImageIndex)
+bool VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore& semaphore, uint32_t& swapchainImageIndex)
 {
 	VkResult infoResult = VK_SUCCESS;
 	VkPresentInfoKHR presentInfo = {};
@@ -1648,7 +1655,7 @@ void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, u
 	init_info.PipelineCache = VK_NULL_HANDLE;
 	init_info.DescriptorPool = _descriptorPool;
 	init_info.Allocator = VK_NULL_HANDLE;
-	init_info.MinImageCount = _swapchainBufferCount;
+	init_info.MinImageCount = 2;
 	init_info.ImageCount = _swapchainBufferCount;
 	init_info.Subpass = subPassIndex;
 	init_info.CheckVkResultFn = VK_NULL_HANDLE;
@@ -1750,23 +1757,6 @@ VkViewport VulkanManager::GetViewport(float w, float h)
 #include "PassBase.h"
 void VulkanManager::SubmitQueueForPasses(VkCommandBuffer cmdBuf, std::vector<std::shared_ptr<PassBase>> passes, VkSemaphore* presentSemaphore, VkSemaphore* submitFinishSemaphore, VkFence executeFence, VkPipelineStageFlags waitStageMask, VkQueue queue)
 {
-	//std::vector<VkSubmitInfo> infos(passes.size());
-	//for (int i = 0; i < passes.size(); i++)
-	//{
-	//	if (passes[i]->GetSemaphore() == VK_NULL_HANDLE)
-	//	{
-	//		this->CreateSemaphore(passes[i]->GetSemaphore());
-	//	}
-	//	infos[i].sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	//	infos[i].pWaitDstStageMask = &waitStageMask;
-	//	infos[i].waitSemaphoreCount = 1;
-	//	infos[i].pWaitSemaphores = lastSem;
-	//	infos[i].signalSemaphoreCount = 1;
-	//	infos[i].pSignalSemaphores = &passes[i]->GetSemaphore();
-	//	infos[i].commandBufferCount = 1;
-	//	infos[i].pCommandBuffers = &cmdBuf;
-	//	lastSem = &passes[i]->GetSemaphore();
-	//}
 	VkSubmitInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	info.pWaitDstStageMask = &waitStageMask;

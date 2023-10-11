@@ -75,6 +75,10 @@ void  SocketAcceptThreadFunc()
 
 void WriteToLogFile(FILE* &log_file , HString log)
 {
+    if(LogFileName.Length() <= 2)
+    {
+        LogFileName = FileSystem::GetProgramPath() + (HString("log_") + HTime::CurrentDateAndTime() + ".txt");
+    }
     #ifdef _WIN32
         auto err_src_name = fopen_s(&log_file, LogFileName.c_str(), "a+");
     #else
@@ -259,8 +263,14 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
         #endif
         Data = "[" + Data + "]";
         HString nIn = Data + in;
-
-        SDL_Log("%s", nIn.c_str());
+        if (r == 255 && g < 100 && b < 100)
+        {
+            SDL_LogError(0, "%s", nIn.c_str());
+        }
+        else
+        {
+            SDL_Log("%s", nIn.c_str());
+        }
 
         printFuncAdd(nIn, r / 255.0f, g / 255, b / 255, Data);
 
@@ -329,7 +339,14 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
         #endif
         Data = "[" + Data + "] ";
 
-        SDL_Log("%s", (Data + in).c_str());
+        if (r == 255 && g < 100 && b < 100)
+        {
+            SDL_LogError(0, "%s", (Data + in).c_str());
+        }
+        else
+        {
+            SDL_Log("%s", (Data + in).c_str());
+        }
 
         HString nIn = (Data + in) + "\n";
 

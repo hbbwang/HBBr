@@ -64,7 +64,6 @@ void VulkanRenderer::Init()
 	_vulkanManager->CreateRenderSemaphores(_presentSemaphore);
 	_vulkanManager->CreateRenderSemaphores(_queueSubmitSemaphore);
 	_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_vulkanManager->GetPhysicalDevice(), _surface, &_surfaceCapabilities);
 	_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, &_surfaceCapabilities);
 
 	//CommandBuffer
