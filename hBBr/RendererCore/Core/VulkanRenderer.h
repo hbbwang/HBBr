@@ -50,12 +50,12 @@ public:
 		return _surfaceSize;
 	}
 
-	HBBR_INLINE VkSemaphore GetPresentSemaphore() {
-		return _presentSemaphore[_currentFrameIndex];
+	HBBR_INLINE VkSemaphore* GetPresentSemaphore() {
+		return &_presentSemaphore[_currentFrameIndex];
 	}
 
-	HBBR_INLINE VkSemaphore GetSubmitSemaphore() {
-		return _queueSubmitSemaphore[_currentFrameIndex];
+	HBBR_INLINE VkSemaphore* GetSubmitSemaphore() {
+		return &_queueSubmitSemaphore[_currentFrameIndex];
 	}
 
 	HBBR_API HBBR_INLINE bool IsInit() {
@@ -130,6 +130,8 @@ private:
 	HString _rendererName;
 
 	VkSurfaceKHR _surface = VK_NULL_HANDLE;
+
+	VkSurfaceCapabilitiesKHR _surfaceCapabilities{};
 
 	VkSurfaceFormatKHR _surfaceFormat{};
 

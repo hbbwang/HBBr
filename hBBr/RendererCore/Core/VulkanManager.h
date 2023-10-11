@@ -99,10 +99,10 @@ public:
 	void CheckSurfaceFormat(VkSurfaceKHR surface, VkSurfaceFormatKHR& surfaceFormat);
 
 	/* 创建Swapchain */
-	VkExtent2D CreateSwapchain(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<VkImage>& swapchainImages, std::vector<VkImageView>& swapchainImageViews);
+	VkExtent2D CreateSwapchain(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<VkImage>& swapchainImages, std::vector<VkImageView>& swapchainImageViews , VkSurfaceCapabilitiesKHR* surfaceCapabilities = NULL);
 
 	/* 创建Swapchain From Texture Class */
-	VkExtent2D CreateSwapchain(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures , std::vector<VkImageView>& swapchainImageViews);
+	VkExtent2D CreateSwapchainFromTextures(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures , std::vector<VkImageView>& swapchainImageViews);
 
 	/* 释放Swapchain */
 	void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImageView>& swapchainImageViews);
@@ -187,7 +187,7 @@ public:
 	/* Image 布局转换 */
 	void Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1);
 
-	void CreateSemaphore(VkSemaphore& semaphore);
+	void CreateVkSemaphore(VkSemaphore& semaphore);
 
 	void DestroySemaphore(VkSemaphore& semaphore);
 
@@ -241,7 +241,7 @@ public:
 
 	VkViewport GetViewport(float w,float h);
 
-	void SubmitQueueForPasses(VkCommandBuffer cmdBuf,std::vector<std::shared_ptr<class PassBase>> passes, VkSemaphore presentSemaphore, VkSemaphore submitFinishSemaphore, VkFence executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
+	void SubmitQueueForPasses(VkCommandBuffer cmdBuf,std::vector<std::shared_ptr<class PassBase>> passes, VkSemaphore* presentSemaphore, VkSemaphore* submitFinishSemaphore, VkFence executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
 
 	void UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset , VkDeviceSize Range);
 
@@ -286,6 +286,10 @@ public:
 
 	HBBR_INLINE VkDevice GetDevice()const {
 		return _device;
+	}
+
+	HBBR_INLINE VkPhysicalDevice GetPhysicalDevice()const {
+		return _gpuDevice;
 	}
 
 	HBBR_INLINE VkCommandPool GetCommandPool()const {

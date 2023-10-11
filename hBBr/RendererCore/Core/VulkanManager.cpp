@@ -646,7 +646,15 @@ void VulkanManager::CheckSurfaceFormat(VkSurfaceKHR surface, VkSurfaceFormatKHR&
 	}
 }
 
-VkExtent2D VulkanManager::CreateSwapchain(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat , VkSwapchainKHR &newSwapchain, std::vector<VkImage>& swapchainImages, std::vector<VkImageView>& swapchainImageViews)
+VkExtent2D VulkanManager::CreateSwapchain(
+	VkExtent2D surfaceSize, 
+	VkSurfaceKHR surface, 
+	VkSurfaceFormatKHR surfaceFormat , 
+	VkSwapchainKHR &newSwapchain, 
+	std::vector<VkImage>& swapchainImages, 
+	std::vector<VkImageView>& swapchainImageViews, 
+	VkSurfaceCapabilitiesKHR* surfaceCapabilities
+)
 {
 	//ConsoleDebug::print_endl("Create Swapchain KHR.");
 	VkPresentModeKHR present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
@@ -680,19 +688,42 @@ VkExtent2D VulkanManager::CreateSwapchain(VkExtent2D surfaceSize, VkSurfaceKHR s
 	VkSwapchainCreateInfoKHR info = {};
 	info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 	info.surface = surface;
-	info.minImageCount = _swapchainBufferCount;
 	info.imageFormat = surfaceFormat.format;
 	info.imageColorSpace = surfaceFormat.colorSpace;
+	info.minImageCount = _swapchainBufferCount;
 	info.imageExtent = _surfaceSize;
 	info.imageArrayLayers = 1;
-	info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT	//支持在RenderPass中作为color附件，并且在subpass中进行传递
-		| VK_IMAGE_USAGE_TRANSFER_SRC_BIT					//支持复制到其他图像
+	info.imageUsage = 
+		VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT		//支持在RenderPass中作为color附件，并且在subpass中进行传递
+		| VK_IMAGE_USAGE_TRANSFER_SRC_BIT		//支持复制到其他图像
 		;
 	info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	info.queueFamilyIndexCount = 0;
 	info.pQueueFamilyIndices = VK_NULL_HANDLE;
-	info.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
-	info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;//是否半透明，用于组合其他表面,这里我们不需要
+	if (surfaceCapabilities)
+	{
+		info.preTransform = surfaceCapabilities->currentTransform;
+		switch (surfaceCapabilities->supportedCompositeAlpha)
+		{
+		case VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR:
+			info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+			break;
+		case VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR:
+			info.compositeAlpha = VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR;
+			break;
+		case VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR:
+			info.compositeAlpha = VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR;
+			break;
+		case VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR:
+			info.compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
+			break;
+		}
+	}
+	else
+	{
+		info.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+		info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;//是否半透明，用于组合其他表面,这里我们不需要
+	}
 	info.presentMode = present_mode;
 	info.clipped = VK_TRUE;//是否不渲染看不见的位置
 	//替补swapchain,在重置这个swapchain的时候会比较有用，但是事实上我们可以用更暴力的方法重置swapchain，也就是完全重写
@@ -726,7 +757,7 @@ VkExtent2D VulkanManager::CreateSwapchain(VkExtent2D surfaceSize, VkSurfaceKHR s
 	return _surfaceSize;
 }
 
-VkExtent2D VulkanManager::CreateSwapchain(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures, std::vector<VkImageView>& swapchainImageViews)
+VkExtent2D VulkanManager::CreateSwapchainFromTextures(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures, std::vector<VkImageView>& swapchainImageViews)
 {
 	//ConsoleDebug::print_endl("Create Swapchain KHR.");
 	VkPresentModeKHR present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
@@ -1137,7 +1168,7 @@ bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 	{
 		#if _DEBUG
-		//MessageOut(RendererLauguage::GetText("A000009").c_str(), false, false);//太烦人了,不显示了,反正不影响
+		MessageOut(RendererLauguage::GetText("A000009").c_str(), false, false);//太烦人了,不影响
 		#endif	
 		return false;
 	}
@@ -1394,12 +1425,16 @@ void VulkanManager::FreeDescriptorSet(VkDescriptorPool pool, std::vector<VkDescr
 	descriptorSet.clear();
 }
 
-void VulkanManager::CreateSemaphore(VkSemaphore& semaphore)
+void VulkanManager::CreateVkSemaphore(VkSemaphore& semaphore)
 {
 	VkSemaphoreCreateInfo semaphoreCreateInfo = {};
 	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 	semaphoreCreateInfo.pNext = VK_NULL_HANDLE;
-	vkCreateSemaphore(_device, &semaphoreCreateInfo, VK_NULL_HANDLE, &semaphore);
+	auto result = vkCreateSemaphore(_device, &semaphoreCreateInfo, VK_NULL_HANDLE, &semaphore);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut((HString("Vulkan ERROR: Create Semaphore Failed : ")+ GetVkResult(result)).c_str() , true, true);
+	}
 }
 
 void VulkanManager::DestroySemaphore(VkSemaphore& semaphore)
@@ -1416,7 +1451,7 @@ void VulkanManager::CreateRenderSemaphores(std::vector<VkSemaphore>& semaphore)
 	semaphore.resize(_swapchainBufferCount);
 	for (int i = 0; i < semaphore.size(); i++)
 	{
-		this->CreateSemaphore(semaphore[i]);
+		this->CreateVkSemaphore(semaphore[i]);
 	}
 }
 
@@ -1713,9 +1748,8 @@ VkViewport VulkanManager::GetViewport(float w, float h)
 }
 
 #include "PassBase.h"
-void VulkanManager::SubmitQueueForPasses(VkCommandBuffer cmdBuf, std::vector<std::shared_ptr<PassBase>> passes, VkSemaphore presentSemaphore, VkSemaphore submitFinishSemaphore, VkFence executeFence, VkPipelineStageFlags waitStageMask, VkQueue queue)
+void VulkanManager::SubmitQueueForPasses(VkCommandBuffer cmdBuf, std::vector<std::shared_ptr<PassBase>> passes, VkSemaphore* presentSemaphore, VkSemaphore* submitFinishSemaphore, VkFence executeFence, VkPipelineStageFlags waitStageMask, VkQueue queue)
 {
-	VkSemaphore* lastSem = &presentSemaphore;
 	//std::vector<VkSubmitInfo> infos(passes.size());
 	//for (int i = 0; i < passes.size(); i++)
 	//{
@@ -1737,9 +1771,9 @@ void VulkanManager::SubmitQueueForPasses(VkCommandBuffer cmdBuf, std::vector<std
 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	info.pWaitDstStageMask = &waitStageMask;
 	info.waitSemaphoreCount = 1;
-	info.pWaitSemaphores = lastSem;
+	info.pWaitSemaphores = presentSemaphore;
 	info.signalSemaphoreCount = 1;
-	info.pSignalSemaphores = &submitFinishSemaphore;
+	info.pSignalSemaphores = submitFinishSemaphore;
 	info.commandBufferCount = 1;
 	info.pCommandBuffers = &cmdBuf;
 	VkResult result;

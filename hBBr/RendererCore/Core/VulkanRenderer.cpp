@@ -64,7 +64,8 @@ void VulkanRenderer::Init()
 	_vulkanManager->CreateRenderSemaphores(_presentSemaphore);
 	_vulkanManager->CreateRenderSemaphores(_queueSubmitSemaphore);
 	_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
-	_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_vulkanManager->GetPhysicalDevice(), _surface, &_surfaceCapabilities);
+	_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, &_surfaceCapabilities);
 
 	//CommandBuffer
 	_cmdBuf.resize(_vulkanManager->GetSwapchainBufferCount());
@@ -207,7 +208,7 @@ bool VulkanRenderer::Resizing(bool bForce)
 		{
 			vkDeviceWaitIdle(_vulkanManager->GetDevice());
 			_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
-			_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews);
+			_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, &_surfaceCapabilities);
 			if (_swapchain == VK_NULL_HANDLE)
 			{
 				return false;
