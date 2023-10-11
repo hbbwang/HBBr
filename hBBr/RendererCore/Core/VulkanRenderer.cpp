@@ -58,15 +58,21 @@ void VulkanRenderer::Init()
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
 
 	//Surface
+	ConsoleDebug::print_endl("hBBr:Start init Surface.");
 	_vulkanManager->CreateSurface_SDL(_windowHandle, _surface);
 
 	//Swapchain
+	ConsoleDebug::print_endl("hBBr:Start Present Semaphore.");
 	_vulkanManager->CreateRenderSemaphores(_presentSemaphore);
+	ConsoleDebug::print_endl("hBBr:Start Queue Submit Semaphore.");
 	_vulkanManager->CreateRenderSemaphores(_queueSubmitSemaphore);
+	ConsoleDebug::print_endl("hBBr:Start Check Surface Format.");
 	_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
+	ConsoleDebug::print_endl("hBBr:Start Create Swapchain.");
 	_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, &_surfaceCapabilities);
 
 	//CommandBuffer
+	ConsoleDebug::print_endl("hBBr:Start Allocate Main CommandBuffer.");
 	_cmdBuf.resize(_vulkanManager->GetSwapchainBufferCount());
 	for (int i = 0; i < _cmdBuf.size(); i++)
 	{

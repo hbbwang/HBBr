@@ -248,7 +248,7 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 	appInfo.pNext = VK_NULL_HANDLE;
 	appInfo.pApplicationName = "hBBr";
 	appInfo.pEngineName = "hBBr Engine";
-	appInfo.apiVersion = VK_API_VERSION_1_3;
+	appInfo.apiVersion = VK_API_VERSION_1_1;
 	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 
 	VkInstanceCreateInfo createInfo = {};
@@ -686,6 +686,9 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	{
 		return _surfaceSize;
 	}
+
+	ConsoleDebug::print_endl("hBBr:Resolution : " + HString::FromUInt(_surfaceSize.width) + " , " + HString::FromUInt(_surfaceSize.height));
+
 	VkSwapchainCreateInfoKHR info = {};
 	info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 	info.surface = surface;
@@ -740,10 +743,12 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	swapchainImageViews.resize(_swapchainBufferCount);
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, swapchainImages.data());
 	//创建ImageView
+	ConsoleDebug::print_endl("hBBr:Start Create Swapchain Image View.");
 	for (int i = 0; i < (int)_swapchainBufferCount; i++)
 	{
 		CreateImageView(swapchainImages[i], surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, swapchainImageViews[i]);
 	}
+	ConsoleDebug::print_endl("hBBr:Start Transition Swapchain Image layout to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR.");
 	//Swapchain转换到呈现模式
 	VkCommandBuffer buf;
 	AllocateCommandBuffer(_commandPool, buf);
