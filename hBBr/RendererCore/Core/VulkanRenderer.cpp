@@ -132,10 +132,6 @@ void VulkanRenderer::Render()
 
 		VulkanManager* _vulkanManager = VulkanManager::GetManager();
 
-		const uint32_t PrevCurrentFrameIndex = _currentFrameIndex;
-		//Get next frame index.
-		_currentFrameIndex = (_currentFrameIndex + 1) % _vulkanManager->GetSwapchainBufferCount();
-
 		uint32_t _swapchainIndex = 0;
 
 		//Which swapchain index need to present?
@@ -143,7 +139,6 @@ void VulkanRenderer::Render()
 		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], _imageAcquiredFences[_currentFrameIndex], &_swapchainIndex))
 		{
 			_bResize = (true);
-			_currentFrameIndex = PrevCurrentFrameIndex;
 			return;
 		}
 		_vulkanManager->WaitForFences({ _imageAcquiredFences[_currentFrameIndex] } ,false);
@@ -170,6 +165,8 @@ void VulkanRenderer::Render()
 		{
 			Resizing(true);
 		}
+		//Get next frame index.
+		_currentFrameIndex = (_currentFrameIndex + 1) % _vulkanManager->GetSwapchainBufferCount();
 	}
 }
 
