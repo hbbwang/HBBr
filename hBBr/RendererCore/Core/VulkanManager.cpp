@@ -266,9 +266,10 @@ void VulkanManager::InitInstance(bool bEnableDebug)
     auto GetApiVersionResult = vkEnumerateInstanceVersion(&apiVersion);
 	if (VK_SUCCESS != GetApiVersionResult)
 	{
-		apiVersion = VK_API_VERSION_1_3;
 #if __ANDROID__
 		apiVersion = VK_API_VERSION_1_1;
+#else
+		apiVersion = VK_API_VERSION_1_3;
 #endif
 	}
 
