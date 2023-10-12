@@ -439,90 +439,137 @@ void VulkanManager::InitDevice()
 				{
 					extensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_debug_marker ext.");
+					_deviceExtensionOptionals.HasKHRDebugMarker = 1;
 					debugMarkerActive = true;
-				}
-				else if (strcmp(availableExts[i].extensionName, "VK_EXT_tooling_info") == 0)
-				{
-					extensions.push_back("VK_EXT_tooling_info");
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_tooling_info ext.");
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SWAPCHAIN_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasKHRSwapchain = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME ext.");
-				}
-				else if (strcmp(availableExts[i].extensionName, VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME) == 0)
-				{
-					extensions.push_back(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasExtendedDynamicState = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_MAINTENANCE1_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_MAINTENANCE1_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasKHRMaintenance1 = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_MAINTENANCE2_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_MAINTENANCE2_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_MAINTENANCE2_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasKHRMaintenance2 = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_EXT_MEMORY_BUDGET_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_MEMORY_BUDGET_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasMemoryBudget = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_EXT_MEMORY_PRIORITY_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_EXT_MEMORY_PRIORITY_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_MEMORY_PRIORITY_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasMemoryPriority = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasKHRDedicatedAllocation = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasKHRDedicatedHostOperations = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_SPIRV_1_4_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_SPIRV_1_4_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SPIRV_1_4_EXTENSION_NAME ext.");
-				}
-				else if (strcmp(availableExts[i].extensionName, VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME) == 0)
-				{
-					extensions.push_back(VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasKHRSpirv_1_4 = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasKHRImageFormatList = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_EXT_VALIDATION_CACHE_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_EXT_VALIDATION_CACHE_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_VALIDATION_CACHE_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasKHRImageFormatList = 1;
 				}
-				
+				else if (strcmp(availableExts[i].extensionName, VK_AMD_BUFFER_MARKER_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_AMD_BUFFER_MARKER_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_AMD_BUFFER_MARKER_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasAMDBufferMarker = 1;
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_KHR_EXTERNAL_FENCE_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_KHR_EXTERNAL_FENCE_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_EXTERNAL_FENCE_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasKHRExternalFence = 1;
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasKHRExternalSemaphore = 1;
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_HUAWEI_SUBPASS_SHADING_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_HUAWEI_SUBPASS_SHADING_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_HUAWEI_SUBPASS_SHADING_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasKHRHuaWeiSubpassShading = 1;
+				}
+				else if (strcmp(availableExts[i].extensionName, "VK_HUAWEI_smart_cache") == 0)
+				{
+					extensions.push_back("VK_HUAWEI_smart_cache");
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_HUAWEI_smart_cache ext.");
+					_deviceExtensionOptionals.HasKHRHuaWeiSmartCache = 1;
+				}
+				else if (strcmp(availableExts[i].extensionName, "VK_HUAWEI_prerotation") == 0)
+				{
+					extensions.push_back("VK_HUAWEI_prerotation");
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_HUAWEI_prerotation ext.");
+					_deviceExtensionOptionals.HasKHRHuaWeiSmartCache = 1;
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_QCOM_RENDER_PASS_TRANSFORM_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_QCOM_RENDER_PASS_TRANSFORM_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_QCOM_RENDER_PASS_TRANSFORM_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasQcomRenderPassTransform = 1;
+				}
+				else if (strcmp(availableExts[i].extensionName, VK_QCOM_RENDER_PASS_TRANSFORM_EXTENSION_NAME) == 0)
+				{
+				extensions.push_back(VK_QCOM_RENDER_PASS_TRANSFORM_EXTENSION_NAME);
+				layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_QCOM_RENDER_PASS_TRANSFORM_EXTENSION_NAME ext.");
+				_deviceExtensionOptionals.HasQcomRenderPassTransform = 1;
+				}
+
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME)==0)
 				{
 					bHasRenderPass2Ext = true;
 					extensions.push_back(VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasKHRCreateRenderPass2 = 1;
 				}
 				else if (bHasRenderPass2Ext && strcmp(availableExts[i].extensionName, VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME) == 0)
 				{
 					//允许深度/模板图像的图像存储屏障仅设置了深度或模板位之一，而不是两者都设置。
 					extensions.push_back(VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasKHRSeparateDepthStencilLayouts = 1;
 				}
 			}
 		}
@@ -751,89 +798,205 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	VkSwapchainKHR &newSwapchain, 
 	std::vector<VkImage>& swapchainImages, 
 	std::vector<VkImageView>& swapchainImageViews, 
-	VkSurfaceCapabilitiesKHR* surfaceCapabilities
+	VkSurfaceCapabilitiesKHR& surfaceCapabilities,
+	bool bIsFullScreen
 )
 {
 	//ConsoleDebug::print_endl("Create Swapchain KHR.");
-	VkPresentModeKHR present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+	VkPresentModeKHR present_mode = VK_PRESENT_MODE_FIFO_KHR;
 	//if (_winInfo.vsync)
 	{
 		uint32_t present_mode_count = 0;
 		vkGetPhysicalDeviceSurfacePresentModesKHR(_gpuDevice, surface, &present_mode_count, VK_NULL_HANDLE);
+		if (present_mode_count <= 0)
+		{
+			MessageOut("Vulkan Error:Can not Find any VkPresentModeKHR!",true,true,"255,0,0");
+		}
 		std::vector<VkPresentModeKHR> presentModes(present_mode_count);
 		vkGetPhysicalDeviceSurfacePresentModesKHR(_gpuDevice, surface, &present_mode_count, presentModes.data());
-		for (int i = 0; i < presentModes.size(); i++)
+
+		bool bFoundPresentModeMailbox = false;
+		bool bFoundPresentModeImmediate = false;
+		bool bFoundPresentModeFIFO = false;
+
+		for (size_t i = 0; i < present_mode_count; i++)
 		{
-			//if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
-			//{
-			//	present_mode = presentModes[i];//这个垂直同步在Nvidia有bug ?
-			//	//break;
-			//}
-			if (presentModes[i] == VK_PRESENT_MODE_FIFO_KHR)
+			switch (presentModes[i])
 			{
-				present_mode = presentModes[i];//垂直同步
+			case VK_PRESENT_MODE_MAILBOX_KHR:
+				bFoundPresentModeMailbox = true;
+				ConsoleDebug::printf_endl("- VK_PRESENT_MODE_MAILBOX_KHR : (%d)",(int)VK_PRESENT_MODE_MAILBOX_KHR);
 				break;
+			case VK_PRESENT_MODE_IMMEDIATE_KHR:
+				bFoundPresentModeImmediate = true;
+				ConsoleDebug::printf_endl("- VK_PRESENT_MODE_IMMEDIATE_KHR : (%d)", (int)VK_PRESENT_MODE_IMMEDIATE_KHR);
+				break;
+			case VK_PRESENT_MODE_FIFO_KHR:
+				bFoundPresentModeFIFO = true;
+				ConsoleDebug::printf_endl("- VK_PRESENT_MODE_FIFO_KHR : (%d)", (int)VK_PRESENT_MODE_FIFO_KHR);
+				break;
+			case VK_PRESENT_MODE_FIFO_RELAXED_KHR:
+				ConsoleDebug::printf_endl("- VK_PRESENT_MODE_FIFO_RELAXED_KHR : (%d)", (int)VK_PRESENT_MODE_FIFO_RELAXED_KHR);
+				break;
+			default:
+				ConsoleDebug::printf_endl("- Other VkPresentModeKHR : (%d)", (int)presentModes[i]);
+				break;
+			}
+		}
+
+		int RequestedPresentMode = -1;
+		{
+			bool bRequestSuccessful = false;
+			switch (RequestedPresentMode)
+			{
+			case VK_PRESENT_MODE_MAILBOX_KHR:
+				if (bFoundPresentModeMailbox)
+				{
+					present_mode = VK_PRESENT_MODE_MAILBOX_KHR;
+					bRequestSuccessful = true;
+				}
+				break;
+			case VK_PRESENT_MODE_IMMEDIATE_KHR:
+				if (bFoundPresentModeImmediate)
+				{
+					present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+					bRequestSuccessful = true;
+				}
+				break;
+			case VK_PRESENT_MODE_FIFO_KHR:
+				if (bFoundPresentModeFIFO)
+				{
+					present_mode = VK_PRESENT_MODE_FIFO_KHR;
+					bRequestSuccessful = true;
+				}
+				break;
+			default:
+				break;
+			}
+
+			if (!bRequestSuccessful)
+			{
+				ConsoleDebug::printf_endl_error("Requested PresentMode (%d) is not handled or available, ignoring...", RequestedPresentMode);
+				RequestedPresentMode = -1;
+			}
+		}
+
+		if (RequestedPresentMode == -1)
+		{
+			// Until FVulkanViewport::Present honors SyncInterval, we need to disable vsync for the spectator window if using an HMD.
+			const bool bEnableVSync = true;
+
+			if (bFoundPresentModeImmediate && !bEnableVSync)
+			{
+				present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+			}
+			else if (bFoundPresentModeMailbox)
+			{
+				present_mode = VK_PRESENT_MODE_MAILBOX_KHR;
+			}
+			else if (bFoundPresentModeFIFO)
+			{
+				present_mode = VK_PRESENT_MODE_FIFO_KHR;
+			}
+			else
+			{
+				ConsoleDebug::printf_endl_error("Couldn't find desired PresentMode! Using %d", presentModes[0]);
+				present_mode = presentModes[0];
 			}
 		}
 	}
 
-	//Get surface size 
-	VkExtent2D _surfaceSize = GetSurfaceSize(surfaceSize,surface);
-	if (_surfaceSize.width <= 0 && _surfaceSize.height <= 0)
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_gpuDevice, surface, &surfaceCapabilities);
+	VkSurfaceTransformFlagBitsKHR PreTransform;
+	if (surfaceCapabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
 	{
-		return _surfaceSize;
+		PreTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+	}
+	else
+	{
+		PreTransform = surfaceCapabilities.currentTransform;
 	}
 
-	ConsoleDebug::print_endl("hBBr:Resolution : " + HString::FromUInt(_surfaceSize.width) + " , " + HString::FromUInt(_surfaceSize.height));
+	VkCompositeAlphaFlagBitsKHR CompositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
+	if (surfaceCapabilities.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
+	{
+		CompositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	}
+
+	// 0 means no limit, so use the requested number
+	uint32_t DesiredNumBuffers = surfaceCapabilities.maxImageCount > 0 ? std::clamp(_swapchainBufferCount, surfaceCapabilities.minImageCount, surfaceCapabilities.maxImageCount) : _swapchainBufferCount;
+
+	uint32_t SizeX = true ? (surfaceCapabilities.currentExtent.width == 0xFFFFFFFF ? surfaceSize.width : surfaceCapabilities.currentExtent.width) : surfaceSize.width;
+	uint32_t SizeY = true ? (surfaceCapabilities.currentExtent.height == 0xFFFFFFFF ? surfaceSize.height : surfaceCapabilities.currentExtent.height) : surfaceSize.height;
 
 	VkSwapchainCreateInfoKHR info = {};
 	info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 	info.surface = surface;
 	info.imageFormat = surfaceFormat.format;
 	info.imageColorSpace = surfaceFormat.colorSpace;
-	info.minImageCount = _swapchainBufferCount;
-	info.imageExtent = _surfaceSize;
+	info.minImageCount = DesiredNumBuffers;
+	info.imageExtent.width = SizeX;
+	info.imageExtent.height = SizeY;
+	info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+	info.preTransform = PreTransform;
 	info.imageArrayLayers = 1;
-	info.imageUsage = 
-		VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT		//支持在RenderPass中作为color附件，并且在subpass中进行传递
-		| VK_IMAGE_USAGE_TRANSFER_SRC_BIT		//支持复制到其他图像
-		;
 	info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	info.queueFamilyIndexCount = 0;
-	info.pQueueFamilyIndices = VK_NULL_HANDLE;
-	if (surfaceCapabilities)
+	info.presentMode = present_mode;
+	info.oldSwapchain = VK_NULL_HANDLE;
+	info.clipped = VK_TRUE;
+	info.compositeAlpha = CompositeAlpha;//是否半透明，用于组合其他表面,这里我们不需要
+
+	_swapchainBufferCount = DesiredNumBuffers;
 	{
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_vulkanManager->GetPhysicalDevice(), surface, surfaceCapabilities);
-		info.preTransform = surfaceCapabilities->currentTransform;
-		switch (surfaceCapabilities->supportedCompositeAlpha)
+		//#todo-rco: Crappy workaround
+		if (info.imageExtent.width == 0)
 		{
-		case VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR:
-			info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-			break;
-		case VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR:
-			info.compositeAlpha = VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR;
-			break;
-		case VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR:
-			info.compositeAlpha = VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR;
-			break;
-		case VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR:
-			info.compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
-			break;
+			info.imageExtent.width = surfaceSize.width;
+		}
+		if (info.imageExtent.height == 0)
+		{
+			info.imageExtent.height = surfaceSize.height;
 		}
 	}
-	else
+
+	if (_deviceExtensionOptionals.HasQcomRenderPassTransform)
 	{
-		info.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
-		info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;//是否半透明，用于组合其他表面,这里我们不需要
+		QCOMRenderPassTransform = surfaceCapabilities.currentTransform;
+		info.preTransform = QCOMRenderPassTransform;
+		if (info.preTransform == VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR ||
+			info.preTransform == VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR)
+		{
+			std::swap(info.imageExtent.width, info.imageExtent.height);
+		}
 	}
-	info.presentMode = present_mode;
-	info.clipped = VK_TRUE;//是否不渲染看不见的位置
-	//替补swapchain,在重置这个swapchain的时候会比较有用，但是事实上我们可以用更暴力的方法重置swapchain，也就是完全重写
-	info.oldSwapchain = VK_NULL_HANDLE;
+
+	//fullscreen support
+	VkSurfaceFullScreenExclusiveInfoEXT FullScreenInfo = {};
+	if (_deviceExtensionOptionals.HasEXTFullscreenExclusive)
+	{
+		#ifdef __ANDROID__
+			bIsFullScreen = true;
+		#endif
+		FullScreenInfo.sType = VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_INFO_EXT;
+		FullScreenInfo.fullScreenExclusive = bIsFullScreen ? VK_FULL_SCREEN_EXCLUSIVE_ALLOWED_EXT : VK_FULL_SCREEN_EXCLUSIVE_DISALLOWED_EXT;
+		FullScreenInfo.pNext = (void*)info.pNext;
+		info.pNext = &FullScreenInfo;
+	}
+
 	auto result = vkCreateSwapchainKHR(_device, &info, VK_NULL_HANDLE, &newSwapchain);
 	if (result != VK_SUCCESS)
 	{
-		MessageOut((RendererLauguage::GetText("A000007").c_str() + GetVkResult(result)).c_str(), false, true);
+		//全屏可能失败了,取消全屏
+		if (result == VK_ERROR_INITIALIZATION_FAILED)
+		{
+			ConsoleDebug::printf_endl_warning("vkCreateSwapchainKHR return VK_ERROR_INITIALIZATION_FAILED . Create swapchain failed with Initialization error; removing FullScreen extension...");
+			info.pNext = FullScreenInfo.pNext;
+			result = vkCreateSwapchainKHR(_device, &info, VK_NULL_HANDLE, &newSwapchain);
+		}
+		if (result != VK_SUCCESS)
+		{
+			MessageOut((RendererLauguage::GetText("A000007").c_str() + GetVkResult(result)).c_str(), false, true);
+		}
 	}
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, VK_NULL_HANDLE);
 	swapchainImages.resize(_swapchainBufferCount);
@@ -858,7 +1021,8 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	SubmitQueueImmediate({buf});
 	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
 	FreeCommandBuffers(_commandPool, { buf });
-	return _surfaceSize;
+
+	return info.imageExtent;
 }
 
 VkExtent2D VulkanManager::CreateSwapchainFromTextures(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures, std::vector<VkImageView>& swapchainImageViews)
@@ -1353,13 +1517,13 @@ void VulkanManager::CreateDescripotrPool(VkDescriptorPool& pool)
 		//{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
 		{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 80 }
 	};
-	VkDescriptorPoolCreateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	info.pNext = NULL;
-	info.maxSets = 10000;
-	info.poolSizeCount = (uint32_t)std::size(pool_sizes);
-	info .pPoolSizes = pool_sizes;
-	vkCreateDescriptorPool(_device, &info, VK_NULL_HANDLE, &pool);
+	VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
+	descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	descriptorPoolCreateInfo.pNext = NULL;
+	descriptorPoolCreateInfo.maxSets = 10000;
+	descriptorPoolCreateInfo.poolSizeCount = (uint32_t)std::size(pool_sizes);
+	descriptorPoolCreateInfo.pPoolSizes = pool_sizes;
+	vkCreateDescriptorPool(_device, &descriptorPoolCreateInfo, VK_NULL_HANDLE, &pool);
 }
 
 void VulkanManager::DestroyDescriptorPool(VkDescriptorPool& pool)
@@ -1458,17 +1622,17 @@ void VulkanManager::DestroyFrameBuffers(std::vector<VkFramebuffer>& frameBuffers
 
 void VulkanManager::CreateFrameBuffer(uint32_t width, uint32_t height, VkRenderPass renderPass, std::vector<VkImageView>attachments, VkFramebuffer& framebuffer)
 {
-	VkFramebufferCreateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-	info.flags = 0;
-	info.pNext = 0;
-	info.layers = 1;
-	info.renderPass = renderPass;
-	info.width = width;
-	info.height = height;
-	info.attachmentCount = (uint32_t)attachments.size();
-	info.pAttachments = attachments.data();
-	auto result = vkCreateFramebuffer(_device, &info, VK_NULL_HANDLE, &framebuffer);
+	VkFramebufferCreateInfo framebufferCreateInfo = {};
+	framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	framebufferCreateInfo.flags = 0;
+	framebufferCreateInfo.pNext = 0;
+	framebufferCreateInfo.layers = 1;
+	framebufferCreateInfo.renderPass = renderPass;
+	framebufferCreateInfo.width = width;
+	framebufferCreateInfo.height = height;
+	framebufferCreateInfo.attachmentCount = (uint32_t)attachments.size();
+	framebufferCreateInfo.pAttachments = attachments.data();
+	auto result = vkCreateFramebuffer(_device, &framebufferCreateInfo, VK_NULL_HANDLE, &framebuffer);
 	if (result != VK_SUCCESS)
 	{
 		MessageOut("Vulkan ERROR: Create Frame Buffer Failed.", false, true);
@@ -1662,17 +1826,17 @@ void VulkanManager::CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info, V
 
 void VulkanManager::CreateRenderPass(std::vector<VkAttachmentDescription>attachmentDescs, std::vector<VkSubpassDependency>subpassDependencys, std::vector<VkSubpassDescription>subpassDescs, VkRenderPass& renderPass)
 {
-	VkRenderPassCreateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	info.flags = 0;
-	info.attachmentCount = (uint32_t)attachmentDescs.size();
-	info.pAttachments = attachmentDescs.data();
-	info.dependencyCount = (uint32_t)subpassDependencys.size();
-	info.pDependencies = subpassDependencys.data();
-	info.pNext = NULL;
-	info.subpassCount = (uint32_t)subpassDescs.size();
-	info.pSubpasses = subpassDescs.data();
-	vkCreateRenderPass(_device, &info, VK_NULL_HANDLE, &renderPass);
+	VkRenderPassCreateInfo renderPassCreateInfo = {};
+	renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassCreateInfo.flags = 0;
+	renderPassCreateInfo.attachmentCount = (uint32_t)attachmentDescs.size();
+	renderPassCreateInfo.pAttachments = attachmentDescs.data();
+	renderPassCreateInfo.dependencyCount = (uint32_t)subpassDependencys.size();
+	renderPassCreateInfo.pDependencies = subpassDependencys.data();
+	renderPassCreateInfo.pNext = NULL;
+	renderPassCreateInfo.subpassCount = (uint32_t)subpassDescs.size();
+	renderPassCreateInfo.pSubpasses = subpassDescs.data();
+	vkCreateRenderPass(_device, &renderPassCreateInfo, VK_NULL_HANDLE, &renderPass);
 }
 
 void VulkanManager::DestroyRenderPass(VkRenderPass& renderPass)

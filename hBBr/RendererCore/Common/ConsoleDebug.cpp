@@ -232,6 +232,7 @@ char* UnicodeToUtf8(const wchar_t* unicode)
     return szUtf8;
 }
 #endif
+
 void ConsoleDebug::print(HString in, HString color, HString background, HString type)
 {
     std::lock_guard<std::mutex> lock(g_num_mutex);
@@ -266,6 +267,10 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
         if (r == 255 && g < 100 && b < 100)
         {
             SDL_LogError(0, "%s", nIn.c_str());
+        }
+        else if (r > 200 && g > 200 && b < 100)
+        {
+            SDL_LogWarn(0, "%s", nIn.c_str());
         }
         else
         {
@@ -342,6 +347,10 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
         if (r == 255 && g < 100 && b < 100)
         {
             SDL_LogError(0, "%s", (Data + in).c_str());
+        }
+        else if (r > 200 && g > 200 && b < 100)
+        {
+            SDL_LogWarn(0, "%s", (Data + in).c_str());
         }
         else
         {

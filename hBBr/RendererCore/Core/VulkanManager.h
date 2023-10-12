@@ -49,6 +49,31 @@ enum class EPlatform :uint8_t
 	Android		= 2,
 };
 
+struct OptionalVulkanDeviceExtensions
+{
+	uint8_t HasKHRDebugMarker = 0;
+	uint8_t HasKHRSwapchain = 0;
+	uint8_t HasExtendedDynamicState = 0;
+	uint8_t HasKHRMaintenance1 = 0;
+	uint8_t HasKHRMaintenance2 = 0;
+	uint8_t HasMemoryBudget = 0;
+	uint8_t HasMemoryPriority = 0;
+	uint8_t HasKHRDedicatedAllocation = 0;
+	uint8_t HasKHRDedicatedHostOperations = 0;
+	uint8_t HasKHRSpirv_1_4 = 0;
+	uint8_t HasKHRImageFormatList = 0;
+	uint8_t HasEXTValidationCache = 0;
+	uint8_t HasAMDBufferMarker = 0;
+	uint8_t HasKHRExternalFence = 0;
+	uint8_t HasKHRExternalSemaphore = 0;
+	uint8_t HasKHRHuaWeiSubpassShading = 0;
+	uint8_t HasKHRHuaWeiSmartCache = 0;
+	uint8_t HasQcomRenderPassTransform = 0;
+	uint8_t HasKHRCreateRenderPass2 = 0;
+	uint8_t HasKHRSeparateDepthStencilLayouts = 0;
+	uint8_t HasEXTFullscreenExclusive = 1;
+};
+
 class VulkanManager
 {
 
@@ -99,7 +124,15 @@ public:
 	void CheckSurfaceFormat(VkSurfaceKHR surface, VkSurfaceFormatKHR& surfaceFormat);
 
 	/* 创建Swapchain */
-	VkExtent2D CreateSwapchain(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<VkImage>& swapchainImages, std::vector<VkImageView>& swapchainImageViews , VkSurfaceCapabilitiesKHR* surfaceCapabilities = NULL);
+	VkExtent2D CreateSwapchain(
+		VkExtent2D surfaceSize, 
+		VkSurfaceKHR surface, 
+		VkSurfaceFormatKHR surfaceFormat, 
+		VkSwapchainKHR& newSwapchain, 
+		std::vector<VkImage>& swapchainImages, 
+		std::vector<VkImageView>& swapchainImageViews , 
+		VkSurfaceCapabilitiesKHR& surfaceCapabilities , 
+		bool bIsFullScreen = false);
 
 	/* 创建Swapchain From Texture Class */
 	VkExtent2D CreateSwapchainFromTextures(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures , std::vector<VkImageView>& swapchainImageViews);
@@ -349,6 +382,10 @@ private:
 	uint32_t _swapchainBufferCount;
 
 	bool _enable_VK_KHR_display;
+
+	OptionalVulkanDeviceExtensions _deviceExtensionOptionals;
+
+	VkSurfaceTransformFlagBitsKHR QCOMRenderPassTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 
 	//Debug marker
 	static bool debugMarkerActive;

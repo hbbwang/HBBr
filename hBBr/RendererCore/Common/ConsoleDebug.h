@@ -53,6 +53,28 @@ namespace ConsoleDebug
     HBBR_API extern void print_endl(HString in, HString color = "255,255,255", HString background = "0,0,0", HString type = " ");
     HBBR_API extern void print(HString in, HString color = "255,255,255", HString background = "0,0,0", HString type = " ");
 
+    template<typename ...Arg>
+    extern void printf_endl(HString in , Arg...args)
+    {
+        char* formattedString = nullptr;
+        SDL_asprintf(&formattedString, in.c_str(), args...);
+        print_endl(formattedString);
+    }
+    template<typename ...Arg>
+    extern void printf_endl_warning(HString in, Arg...args)
+    {
+        char* formattedString = nullptr;
+        SDL_asprintf(&formattedString, in.c_str(), args...);
+        print_endl(formattedString, "255,255,0");
+    }
+    template<typename ...Arg>
+    extern void printf_endl_error(HString in, Arg...args)
+    {
+        char* formattedString = nullptr;
+        SDL_asprintf(&formattedString, in.c_str(), args...);
+        print_endl(formattedString, "255,0,0");
+    }
+
     extern std::thread socketAcceptThread;
 
 };
