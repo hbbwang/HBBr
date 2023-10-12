@@ -158,8 +158,10 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 		if (bUpdateObjUb)
 		{
 			obj->ResizeDescriptorBuffer(sizeof(ObjectUniformBuffer) * (objectCount + 1));
-			obj->UpdateDescriptorSet(sizeof(ObjectUniformBuffer));
 		}
+		obj->NeedUpdate();
+		obj->UpdateDescriptorSet(sizeof(ObjectUniformBuffer));
+		mat->NeedUpdate();
 		mat->ResizeDescriptorBuffer(matOffset);
 		mat->UpdateDescriptorSet(matBufferSize, matBufferOffset);
 	}

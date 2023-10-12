@@ -235,10 +235,8 @@ bool VulkanApp::UpdateForm()
 			case SDL_EVENT_MOUSE_WHEEL:
 				break;
 			case SDL_EVENT_WINDOW_MINIMIZED:
+			case SDL_EVENT_WINDOW_HIDDEN:
 				bStopRender = true;
-				#ifdef __ANDROID__
-				ResizeWindow(winForm, 1, 1);
-				#endif
 				break;
 		}
 	}
@@ -392,7 +390,7 @@ int main(int argc, char* argv[])
 {
     //ConsoleDebug::CreateConsole("");
 	//Enable custom loop
-	VulkanApp::InitVulkanManager(true, true);
+	VulkanApp::InitVulkanManager(true, false);
 	VulkanApp::DeInitVulkanManager();
 	return 0;
 }

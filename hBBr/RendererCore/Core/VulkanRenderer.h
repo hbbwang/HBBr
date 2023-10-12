@@ -149,9 +149,11 @@ private:
 
 	std::vector<VkSemaphore> _queueSubmitSemaphore;
 
-	std::vector<VkFence> _imageAcquiredFences;
+	//std::vector<VkFence> _imageAcquiredFences;
 
 	static uint32_t _currentFrameIndex;
+
+	uint32_t _maxSwapchainImages = 0;
 
 	bool _bRendererRelease;
 

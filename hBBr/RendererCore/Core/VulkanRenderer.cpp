@@ -44,7 +44,7 @@ void VulkanRenderer::Release()
 	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
 	_vulkanManager->DestroyRenderSemaphores(_presentSemaphore);
 	_vulkanManager->DestroyRenderSemaphores(_queueSubmitSemaphore);
-	_vulkanManager->DestroyRenderFences(_imageAcquiredFences);
+	//_vulkanManager->DestroyRenderFences(_imageAcquiredFences);
 	_vulkanManager->DestroySurface(_surface);
 	VulkanRenderer::_renderers.erase(GetName());
 	delete this;
@@ -63,16 +63,18 @@ void VulkanRenderer::Init()
 	_vulkanManager->CreateSurface_SDL(_windowHandle, _surface);
 
 	//Swapchain
-	ConsoleDebug::print_endl("hBBr:Start Present Semaphore.");
-	_vulkanManager->CreateRenderSemaphores(_presentSemaphore);
-	ConsoleDebug::print_endl("hBBr:Start image acquired fences.");
-	_vulkanManager->CreateRenderFences(_imageAcquiredFences);
-	ConsoleDebug::print_endl("hBBr:Start Queue Submit Semaphore.");
-	_vulkanManager->CreateRenderSemaphores(_queueSubmitSemaphore);
 	ConsoleDebug::print_endl("hBBr:Start Check Surface Format.");
 	_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
 	ConsoleDebug::print_endl("hBBr:Start Create Swapchain.");
 	_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities);
+
+	//Fence & semaphore
+	ConsoleDebug::print_endl("hBBr:Start Present Semaphore.");
+	_vulkanManager->CreateRenderSemaphores(_presentSemaphore);
+	//ConsoleDebug::print_endl("hBBr:Start image acquired fences.");
+	//_vulkanManager->CreateRenderFences(_imageAcquiredFences);
+	ConsoleDebug::print_endl("hBBr:Start Queue Submit Semaphore.");
+	_vulkanManager->CreateRenderSemaphores(_queueSubmitSemaphore);
 
 	//CommandBuffer
 	ConsoleDebug::print_endl("hBBr:Start Allocate Main CommandBuffer.");
@@ -135,13 +137,13 @@ void VulkanRenderer::Render()
 		uint32_t _swapchainIndex = 0;
 
 		//Which swapchain index need to present?
-		_vulkanManager->ResetFence(_imageAcquiredFences[_currentFrameIndex]);
-		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], _imageAcquiredFences[_currentFrameIndex], &_swapchainIndex))
+		//_vulkanManager->ResetFence(_imageAcquiredFences[_currentFrameIndex]);
+		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], VK_NULL_HANDLE , &_swapchainIndex))
 		{
 			_bResize = (true);
 			return;
 		}
-		_vulkanManager->WaitForFences({ _imageAcquiredFences[_currentFrameIndex] } ,false);
+		//_vulkanManager->WaitForFences({ _imageAcquiredFences[_currentFrameIndex] } ,false);
 
 		auto funcOnce = std::move(_renderThreadFuncsOnce);
 		for (auto& func : funcOnce)
@@ -196,16 +198,32 @@ void VulkanRenderer::SetupPassUniformBuffer()
 
 		//DirectX Left hand 
 		glm::mat4 flipYMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, -1.0f, 0.5f));
-		_passUniformBuffer.Projection =  flipYMatrix * _passUniformBuffer.Projection;
+
+		{//Screen Rotator
+			glm::mat4 pre_rotate_mat = glm::mat4(1.0f);
+			glm::vec3 rotation_axis = glm::vec3(0.0f, 0.0f, 1.0f);
+			if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR) {
+				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(90.0f), rotation_axis);
+			}
+			else if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR) {
+				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(270.0f), rotation_axis);
+			}
+			else if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR) {
+				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(180.0f), rotation_axis);
+			}
+			_passUniformBuffer.Projection = pre_rotate_mat * flipYMatrix * _passUniformBuffer.Projection;
+		}
 
 		_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
 		_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
+
 		_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
 		_passUniformBuffer.ScreenInfo = glm::vec4((float)_surfaceSize.width, (float)_surfaceSize.height, mainCamera->GetNearClipPlane(), mainCamera->GetFarClipPlane());
 		auto trans = mainCamera->GetGameObject()->GetTransform();
 		_passUniformBuffer.CameraPos_GameTime = glm::vec4(trans->GetWorldLocation().x, trans->GetWorldLocation().y, trans->GetWorldLocation().z, (float)GetGameTime());
 		auto viewDir = glm::normalize(trans->GetForwardVector());
 		_passUniformBuffer.CameraDirection = glm::vec4(viewDir.x, viewDir.y, viewDir.z, 0.0f);
+
 	}
 }
 
@@ -218,6 +236,10 @@ bool VulkanRenderer::Resizing(bool bForce)
 		{
 			vkDeviceWaitIdle(_vulkanManager->GetDevice());
 			_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
+#if __ANDROID__
+			_Sleep(200);
+#endif
+			_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
 			_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities);
 			if (_swapchain == VK_NULL_HANDLE)
 			{

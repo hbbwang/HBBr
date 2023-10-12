@@ -18,6 +18,12 @@
 #if !defined(_WIN32)
 #include "vulkan_wrapper/vulkan_wrapper.h"
 #endif
+
+// --------- IMGUI
+#include "Imgui/imgui.h"
+#include "Imgui/backends/imgui_impl_vulkan.h"
+#include "Imgui/backends/imgui_impl_sdl3.h"
+
 #include "GLFWInclude.h"
 #include <vulkan/vulkan.h>
 #include "../Common/Common.h"
@@ -132,7 +138,8 @@ public:
 		std::vector<VkImage>& swapchainImages, 
 		std::vector<VkImageView>& swapchainImageViews , 
 		VkSurfaceCapabilitiesKHR& surfaceCapabilities , 
-		bool bIsFullScreen = false);
+		bool bIsFullScreen = false
+	);
 
 	/* 创建Swapchain From Texture Class */
 	VkExtent2D CreateSwapchainFromTextures(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures , std::vector<VkImageView>& swapchainImageViews);
@@ -165,9 +172,13 @@ public:
 
 	void CreateCommandPool();
 
+	void ResetCommandPool();
+
 	void DestroyCommandPool();
 
 	void CreateCommandPool(VkCommandPool& commandPool);
+
+	void ResetCommandPool(VkCommandPool& commandPool);
 
 	void DestroyCommandPool(VkCommandPool commandPool);
 
@@ -337,6 +348,9 @@ public:
 		return _descriptorPool;
 	}
 
+	//忽略vkGetSwapchainImagesKHR里获取到的Images数量，坚持使用我们设定的数量
+	bool _bIsIgnoreVulkanSwapChainExtraImages = false;
+
 private:
 
 	EPlatform _currentPlatform;
@@ -381,7 +395,9 @@ private:
 
 	uint32_t _swapchainBufferCount;
 
+#ifdef _WIN32
 	bool _enable_VK_KHR_display;
+#endif
 
 	OptionalVulkanDeviceExtensions _deviceExtensionOptionals;
 

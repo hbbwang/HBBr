@@ -10,6 +10,7 @@ void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textC
 	ConsoleDebug::print_endl(msgStr, textColor);
     if (bMessageBox)
     {
+#ifdef _DEBUG
 #if defined(_WIN32)
 		//MessageBoxA(NULL, msg, "message", MB_ICONERROR);
 		#if NDEBUG
@@ -21,6 +22,7 @@ void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textC
 #else
 	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", msg, NULL);
 	//fflush(stdout);
+#endif
 #endif
     }
 	if (bExit)

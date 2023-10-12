@@ -71,10 +71,6 @@ VulkanDebugCallback(
 	return false;
 }
 
-// --------- IMGUI
-#include "imgui.h"
-#include "./backends/imgui_impl_vulkan.h"
-#include "backends/imgui_impl_sdl3.h"
 #if defined(_WIN32)
 FILE* pFileOut;
 FILE* pFileErr;
@@ -114,7 +110,6 @@ VulkanManager::VulkanManager(bool bDebug)
 	_bDebugEnable = false;
 	_graphicsQueueFamilyIndex = -1;
 	_swapchainBufferCount = 3;
-	_enable_VK_KHR_display = false;
 	ConsoleDebug::print_endl("hBBr:Start init Vulkan Instance.");
 	//Init global vulkan  
 	InitInstance(bDebug);
@@ -125,10 +120,14 @@ VulkanManager::VulkanManager(bool bDebug)
 	CreateCommandPool();
 	ConsoleDebug::print_endl("hBBr:Start Create Descripotr Pool.");
 	CreateDescripotrPool(_descriptorPool);
+	//
 	ConsoleDebug::print_endl("hBBr:Start init imgui.");
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 }
 
 VulkanManager::~VulkanManager()
@@ -177,12 +176,15 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 		for (uint32_t i = 0; i < count; i++)
 		{
 			bool bVK_LAYER_KHRONOS_validation = false;
-			if (strcmp(availableLaters[i].layerName, "VK_LAYER_KHRONOS_validation") == 0)
+			if (_bDebugEnable)
 			{
-				layers.push_back("VK_LAYER_KHRONOS_validation");
-				layerLogs.push_back("hBBr:[Vulkan Instance layer] Add VK_LAYER_KHRONOS_validation layer.");
-				bVK_LAYER_KHRONOS_validation = true;
-			}
+				if (strcmp(availableLaters[i].layerName, "VK_LAYER_KHRONOS_validation") == 0)
+				{
+					layers.push_back("VK_LAYER_KHRONOS_validation");
+					layerLogs.push_back("hBBr:[Vulkan Instance layer] Add VK_LAYER_KHRONOS_validation layer.");
+					bVK_LAYER_KHRONOS_validation = true;
+				}
+			}	
 			//RenderDoc支持
 			//layers.push_back("VK_LAYER_RENDERDOC_Capture");//
 			//_instance_layers.push_back(layerName);
@@ -202,19 +204,21 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 		for (uint32_t i = 0; i < ecount; i++)
 		{
 			ConsoleDebug::print_endl(HString("\t") + availableExts[i].extensionName, "150,150,150");
+#ifdef _WIN32
 			if (strcmp(availableExts[i].extensionName, VK_KHR_DISPLAY_EXTENSION_NAME) == 0)
 			{
 				layers.push_back(availableLaters[i].layerName);
 				extensions.push_back(VK_KHR_DISPLAY_EXTENSION_NAME);
 				_enable_VK_KHR_display = true;
 			}
-			if (strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_REPORT_EXTENSION_NAME) == 0)
+#endif
+			if (_bDebugEnable && strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_REPORT_EXTENSION_NAME) == 0)
 			{
 				extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_EXT_DEBUG_REPORT_EXTENSION_NAME ext.");
 
 			}
-			else if (strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0)
+			else if (_bDebugEnable && strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0)
 			{
 				extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_EXT_DEBUG_UTILS_EXTENSION_NAME ext.");
@@ -234,16 +238,6 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 				extensions.push_back(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME);
 				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME ext.");
 			}
-			else if (strcmp(availableExts[i].extensionName, VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME) == 0)
-			{
-				extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME);
-				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME ext.");
-			}
-			else if (strcmp(availableExts[i].extensionName, VK_KHR_EXTERNAL_FENCE_CAPABILITIES_EXTENSION_NAME) == 0)
-			{
-				extensions.push_back(VK_KHR_EXTERNAL_FENCE_CAPABILITIES_EXTENSION_NAME);
-				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_KHR_EXTERNAL_FENCE_CAPABILITIES_EXTENSION_NAME ext.");
-			}
 		}
 		ConsoleDebug::print_endl("\t---------End Enumerate Instance Extension Properties------");
 
@@ -258,12 +252,12 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 		unsigned int eCount = 0 ;
 		if(SDL_Vulkan_GetInstanceExtensions(&eCount, NULL) != SDL_TRUE)
 		{
-			MessageOut(SDL_GetError(), true, true, "255,0,0");
+			MessageOut(SDL_GetError(), false, true, "255,0,0");
 		}
 		std::vector<const char*>sdlExts(eCount);
 		if (SDL_Vulkan_GetInstanceExtensions(&eCount, sdlExts.data()) != SDL_TRUE)
 		{
-			MessageOut(SDL_GetError(), true, true, "255,0,0");
+			MessageOut(SDL_GetError(), false, true, "255,0,0");
 		}
 		extensions.insert(extensions.end(), sdlExts.begin(), sdlExts.end());
 	}
@@ -311,10 +305,10 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 
 	VkResult result = vkCreateInstance(&createInfo, VK_NULL_HANDLE, &_instance);
 	if (result == VK_ERROR_INCOMPATIBLE_DRIVER) {
-		MessageOut( RendererLauguage::GetText("A000000").c_str() , true, true);
+		MessageOut( RendererLauguage::GetText("A000000").c_str() , false, true);
 	}
 	else if (result != VK_SUCCESS) {
-		MessageOut(RendererLauguage::GetText("A000001").c_str(), true, true);
+		MessageOut(RendererLauguage::GetText("A000001").c_str(), false, true);
 	}
 }
 
@@ -347,7 +341,7 @@ void VulkanManager::InitDevice()
 		if (_gpuDevice == VK_NULL_HANDLE)
 		{
 			_Sleep(500);
-			MessageOut(RendererLauguage::GetText("A000002").c_str(),true, true);
+			MessageOut(RendererLauguage::GetText("A000002").c_str(), false, true);
 		}
 		//vkGetPhysicalDeviceProperties2(_gpuDevice, &_gpuProperties);
 		vkGetPhysicalDeviceProperties(_gpuDevice, &_gpuProperties);
@@ -393,7 +387,7 @@ void VulkanManager::InitDevice()
 		//if (!bFound_Graphics && !bFound_Transfer)
 		if (!bFound_Graphics)
 		{
-			MessageOut(RendererLauguage::GetText("A000003").c_str(),true, true);
+			MessageOut(RendererLauguage::GetText("A000003").c_str(), false, true);
 		}
 	}
 	ConsoleDebug::print_endl("Get Device Layers and Extensions...", "0,255,0");
@@ -411,10 +405,13 @@ void VulkanManager::InitDevice()
 		ConsoleDebug::print_endl("------------Enumerate Device Layer Properties-----------");
 		for (uint32_t i = 0; i < count; i++) 
 		{
-			if (strcmp(availableLaters[i].layerName, "VK_LAYER_KHRONOS_validation") == 0 && _bDebugEnable)
+			if (_bDebugEnable)
 			{
-				layers.push_back("VK_LAYER_KHRONOS_validation");
-				layerLogs.push_back("hBBr:[Vulkan Device layer] Add VK_LAYER_KHRONOS_validation layer.");
+				if (strcmp(availableLaters[i].layerName, "VK_LAYER_KHRONOS_validation") == 0 && _bDebugEnable)
+				{
+					layers.push_back("VK_LAYER_KHRONOS_validation");
+					layerLogs.push_back("hBBr:[Vulkan Device layer] Add VK_LAYER_KHRONOS_validation layer.");
+				}
 			}
 			ConsoleDebug::print_endl(availableLaters[i].layerName + HString("  |  ") + availableLaters[i].description, "150,150,150");
 			ConsoleDebug::print_endl("\t------------------");
@@ -435,7 +432,7 @@ void VulkanManager::InitDevice()
 			ConsoleDebug::print_endl(HString("\t") + availableExts[i].extensionName, "150,150,150");
 			//Debug Marker
 			{
-				if (strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME) == 0)
+				if (_bDebugEnable && strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_debug_marker ext.");
@@ -631,7 +628,7 @@ void VulkanManager::InitDevice()
 	//device_create_info.pNext = &_gpuVk12Features;
 	auto result = vkCreateDevice(_gpuDevice, &device_create_info, VK_NULL_HANDLE, &_device);
 	if(result!= VK_SUCCESS) 
-		MessageOut((RendererLauguage::GetText("A000004") + GetVkResult(result)).c_str() , true, true);
+		MessageOut((RendererLauguage::GetText("A000004") + GetVkResult(result)).c_str() , false, true);
 	vkGetDeviceQueue(_device, _graphicsQueueFamilyIndex, 0, &_graphicsQueue);
 	//vkGetDeviceQueue(_device, _transferQueueFamilyIndex, 0, &_transfer_Queue);
 #ifdef _WIN32
@@ -713,7 +710,7 @@ void VulkanManager::CreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurfa
 	//SDL2
 	if (SDL_Vulkan_CreateSurface(handle, _instance, &newSurface) == SDL_FALSE)
 	{
-		MessageOut("sdl Create Window Surface Failed.", true, true);
+		MessageOut("sdl Create Window Surface Failed.", false, true);
 	}
 }
 
@@ -752,10 +749,10 @@ void VulkanManager::CheckSurfaceFormat(VkSurfaceKHR surface, VkSurfaceFormatKHR&
 	vkGetPhysicalDeviceSurfaceSupportKHR(_gpuDevice, _graphicsQueueFamilyIndex, surface, &IsSupportSurface);
 	if (!IsSupportSurface)
 	{
-		MessageOut(RendererLauguage::GetText("A000006").c_str(),true, true);
+		MessageOut(RendererLauguage::GetText("A000006").c_str(), false, true);
 	}
 	{
-		const VkFormat requestSurfaceImageFormat[] = { VK_FORMAT_B8G8R8A8_UNORM,VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8_UNORM };
+		const VkFormat requestSurfaceImageFormat[] = { VK_FORMAT_R8G8B8A8_UNORM , VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8_UNORM };
 		const VkColorSpaceKHR requestSurfaceColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
 		uint32_t avail_count;
 		vkGetPhysicalDeviceSurfaceFormatsKHR(_gpuDevice, surface, &avail_count, NULL);
@@ -810,7 +807,10 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		vkGetPhysicalDeviceSurfacePresentModesKHR(_gpuDevice, surface, &present_mode_count, VK_NULL_HANDLE);
 		if (present_mode_count <= 0)
 		{
-			MessageOut("Vulkan Error:Can not Find any VkPresentModeKHR!",true,true,"255,0,0");
+			MessageOut("Vulkan Error:Can not Find any VkPresentModeKHR!", false,true,"255,0,0");
+			_Sleep(50);
+			return CreateSwapchain(surfaceSize, surface, surfaceFormat, newSwapchain,
+				swapchainImages, swapchainImageViews, surfaceCapabilities, bIsFullScreen);
 		}
 		std::vector<VkPresentModeKHR> presentModes(present_mode_count);
 		vkGetPhysicalDeviceSurfacePresentModesKHR(_gpuDevice, surface, &present_mode_count, presentModes.data());
@@ -876,7 +876,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 
 			if (!bRequestSuccessful)
 			{
-				ConsoleDebug::printf_endl_error("Requested PresentMode (%d) is not handled or available, ignoring...", RequestedPresentMode);
+				ConsoleDebug::printf_endl_warning("Requested PresentMode (%d) is not handled or available, ignoring...", RequestedPresentMode);
 				RequestedPresentMode = -1;
 			}
 		}
@@ -908,14 +908,8 @@ VkExtent2D VulkanManager::CreateSwapchain(
 
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_gpuDevice, surface, &surfaceCapabilities);
 	VkSurfaceTransformFlagBitsKHR PreTransform;
-	if (surfaceCapabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
-	{
-		PreTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
-	}
-	else
-	{
-		PreTransform = surfaceCapabilities.currentTransform;
-	}
+
+	PreTransform = surfaceCapabilities.currentTransform;
 
 	VkCompositeAlphaFlagBitsKHR CompositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
 	if (surfaceCapabilities.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
@@ -926,8 +920,26 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	// 0 means no limit, so use the requested number
 	uint32_t DesiredNumBuffers = surfaceCapabilities.maxImageCount > 0 ? std::clamp(_swapchainBufferCount, surfaceCapabilities.minImageCount, surfaceCapabilities.maxImageCount) : _swapchainBufferCount;
 
-	uint32_t SizeX = true ? (surfaceCapabilities.currentExtent.width == 0xFFFFFFFF ? surfaceSize.width : surfaceCapabilities.currentExtent.width) : surfaceSize.width;
-	uint32_t SizeY = true ? (surfaceCapabilities.currentExtent.height == 0xFFFFFFFF ? surfaceSize.height : surfaceCapabilities.currentExtent.height) : surfaceSize.height;
+	//uint32_t SizeX = true ? (surfaceCapabilities.currentExtent.width == 0xFFFFFFFF ? surfaceSize.width : surfaceCapabilities.currentExtent.width) : surfaceSize.width;
+	//uint32_t SizeY = true ? (surfaceCapabilities.currentExtent.height == 0xFFFFFFFF ? surfaceSize.height : surfaceCapabilities.currentExtent.height) : surfaceSize.height;
+
+	if (surfaceCapabilities.currentExtent.width < UINT32_MAX && surfaceCapabilities.currentExtent.width>0) {
+		surfaceSize.width = surfaceCapabilities.currentExtent.width;
+		surfaceSize.height = surfaceCapabilities.currentExtent.height;
+	}
+	else {
+		surfaceSize.width = surfaceCapabilities.maxImageExtent.width < (uint32_t)surfaceSize.width ? surfaceCapabilities.maxImageExtent.width : (uint32_t)surfaceSize.width;
+		surfaceSize.width = surfaceCapabilities.minImageExtent.width > (uint32_t)surfaceSize.width ? surfaceCapabilities.minImageExtent.width : (uint32_t)surfaceSize.width;
+		surfaceSize.height = surfaceCapabilities.maxImageExtent.height < (uint32_t)surfaceSize.height ? surfaceCapabilities.maxImageExtent.height : (uint32_t)surfaceSize.height;
+		surfaceSize.height = surfaceCapabilities.minImageExtent.height > (uint32_t)surfaceSize.height ? surfaceCapabilities.minImageExtent.height : (uint32_t)surfaceSize.height;
+	}
+
+    //if (surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR ||
+    //    surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR)
+    //{
+    //    // Swap to get identity width and height
+    //    std::swap(SizeX,SizeY);
+    //}
 
 	VkSwapchainCreateInfoKHR info = {};
 	info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -935,8 +947,9 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	info.imageFormat = surfaceFormat.format;
 	info.imageColorSpace = surfaceFormat.colorSpace;
 	info.minImageCount = DesiredNumBuffers;
-	info.imageExtent.width = SizeX;
-	info.imageExtent.height = SizeY;
+	//info.imageExtent.width = SizeX;
+	//info.imageExtent.height = SizeY;
+	info.imageExtent = surfaceSize;
 	info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 	info.preTransform = PreTransform;
 	info.imageArrayLayers = 1;
@@ -970,6 +983,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		}
 	}
 
+#ifndef __ANDROID__
 	//fullscreen support
 	VkSurfaceFullScreenExclusiveInfoEXT FullScreenInfo = {};
 	if (_deviceExtensionOptionals.HasEXTFullscreenExclusive)
@@ -982,10 +996,13 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		FullScreenInfo.pNext = (void*)info.pNext;
 		info.pNext = &FullScreenInfo;
 	}
+#endif
 
 	auto result = vkCreateSwapchainKHR(_device, &info, VK_NULL_HANDLE, &newSwapchain);
+
 	if (result != VK_SUCCESS)
 	{
+#ifndef __ANDROID__
 		//全屏可能失败了,取消全屏
 		if (result == VK_ERROR_INITIALIZATION_FAILED)
 		{
@@ -993,18 +1010,26 @@ VkExtent2D VulkanManager::CreateSwapchain(
 			info.pNext = FullScreenInfo.pNext;
 			result = vkCreateSwapchainKHR(_device, &info, VK_NULL_HANDLE, &newSwapchain);
 		}
-		if (result != VK_SUCCESS)
+        if (result != VK_SUCCESS)
+#endif
 		{
 			MessageOut((RendererLauguage::GetText("A000007").c_str() + GetVkResult(result)).c_str(), false, true);
 		}
 	}
-	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, VK_NULL_HANDLE);
-	swapchainImages.resize(_swapchainBufferCount);
-	swapchainImageViews.resize(_swapchainBufferCount);
-	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, swapchainImages.data());
+	//获取交换链Image,注意数量可能与_swapchainBufferCount不一致
+	uint32_t numSwapchainImages = 0;
+	vkGetSwapchainImagesKHR(_device, newSwapchain, &numSwapchainImages, VK_NULL_HANDLE);
+	if (_bIsIgnoreVulkanSwapChainExtraImages)
+	{
+		numSwapchainImages = _swapchainBufferCount;
+	}
+	swapchainImages.resize(numSwapchainImages);
+	swapchainImageViews.resize(numSwapchainImages);
+	vkGetSwapchainImagesKHR(_device, newSwapchain, &numSwapchainImages, swapchainImages.data());
+
 	//创建ImageView
 	ConsoleDebug::print_endl("hBBr:Start Create Swapchain Image View.");
-	for (int i = 0; i < (int)_swapchainBufferCount; i++)
+	for (int i = 0; i < (int)numSwapchainImages; i++)
 	{
 		CreateImageView(swapchainImages[i], surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, swapchainImageViews[i]);
 	}
@@ -1013,7 +1038,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	VkCommandBuffer buf;
 	AllocateCommandBuffer(_commandPool, buf);
 	BeginCommandBuffer(buf, 0);
-	for (int i = 0; i < (int)_swapchainBufferCount; i++)
+	for (int i = 0; i < (int)numSwapchainImages; i++)
 	{
 		Transition(buf, swapchainImages[i], VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	}
@@ -1021,6 +1046,8 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	SubmitQueueImmediate({buf});
 	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
 	FreeCommandBuffers(_commandPool, { buf });
+
+	_swapchainBufferCount = numSwapchainImages;
 
 	return info.imageExtent;
 }
@@ -1079,7 +1106,7 @@ VkExtent2D VulkanManager::CreateSwapchainFromTextures(VkExtent2D surfaceSize, Vk
 	auto result = vkCreateSwapchainKHR(_device, &info, VK_NULL_HANDLE, &newSwapchain);
 	if (result != VK_SUCCESS)
 	{
-		MessageOut((RendererLauguage::GetText("A000007").c_str() + GetVkResult(result)).c_str(), true, true);
+		MessageOut((RendererLauguage::GetText("A000007").c_str() + GetVkResult(result)).c_str(), false, true);
 	}
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, VK_NULL_HANDLE);
 	textures.resize(_swapchainBufferCount);
@@ -1322,6 +1349,11 @@ void VulkanManager::CreateCommandPool()
 	CreateCommandPool(_commandPool);
 }
 
+void VulkanManager::ResetCommandPool()
+{
+	ResetCommandPool(_commandPool);
+}
+
 void VulkanManager::DestroyCommandPool()
 {
 	DestroyCommandPool(_commandPool);
@@ -1336,6 +1368,14 @@ void VulkanManager::CreateCommandPool(VkCommandPool& commandPool)
 	cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
 	vkCreateCommandPool(_device, &cmdPoolInfo, VK_NULL_HANDLE, &commandPool);
+}
+
+void VulkanManager::ResetCommandPool(VkCommandPool& commandPool)
+{
+	if (commandPool != VK_NULL_HANDLE)
+	{
+		vkResetCommandPool(_device, commandPool, 0);
+	}
 }
 
 void VulkanManager::DestroyCommandPool(VkCommandPool commandPool)
@@ -1442,7 +1482,7 @@ bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore 
 	}
 	else if (result != VK_SUCCESS)
 	{
-		MessageOut(RendererLauguage::GetText("A000010").c_str(), false, true);
+		MessageOut(RendererLauguage::GetText("A000010").c_str(), false, false);
 		return false;
 	}
 	return true;
@@ -1701,7 +1741,7 @@ void VulkanManager::CreateVkSemaphore(VkSemaphore& semaphore)
 	auto result = vkCreateSemaphore(_device, &semaphoreCreateInfo, VK_NULL_HANDLE, &semaphore);
 	if (result != VK_SUCCESS)
 	{
-		MessageOut((HString("Vulkan ERROR: Create Semaphore Failed : ")+ GetVkResult(result)).c_str() , true, true);
+		MessageOut((HString("Vulkan ERROR: Create Semaphore Failed : ")+ GetVkResult(result)).c_str() , false, true);
 	}
 }
 
@@ -1820,7 +1860,7 @@ void VulkanManager::CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info, V
 	auto result = vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &info, VK_NULL_HANDLE, &pipeline);
 	if (result != VK_SUCCESS)
 	{
-		MessageOut(RendererLauguage::GetText("A000012").c_str(), true, true);
+		MessageOut(RendererLauguage::GetText("A000012").c_str(), false, true);
 	}
 }
 
@@ -1858,7 +1898,7 @@ void VulkanManager::CreateBuffer(VkBufferUsageFlags usage, VkDeviceSize bufferSi
 	create_info.size = bufferSize;
 	create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	if (vkCreateBuffer(_device, &create_info, VK_NULL_HANDLE, &buffer) != VK_SUCCESS) {
-		MessageOut("[ Create Buffer ] Create Uniform Buffer Failed.", true, true, "255,2,0");
+		MessageOut("[ Create Buffer ] Create Uniform Buffer Failed.", false, true, "255,2,0");
 	}
 }
 
@@ -1881,10 +1921,10 @@ void VulkanManager::AllocateBufferMemory(VkBuffer buffer, VkDeviceMemory& buffer
 	mem_allocate_info.allocationSize = mem_requirement.size;
 	mem_allocate_info.memoryTypeIndex = FindMemoryTypeIndex(&mem_requirement, propertyFlags);
 	if (vkAllocateMemory(_device, &mem_allocate_info, VK_NULL_HANDLE, &bufferMemory) != VK_SUCCESS) {
-		MessageOut("[ Create Buffer ] Allocate Memory Failed! ", true, true, "255,2,0");
+		MessageOut("[ Create Buffer ] Allocate Memory Failed! ", false, true, "255,2,0");
 	}
 	if (vkBindBufferMemory(_device, buffer, bufferMemory, 0) != VK_SUCCESS) {
-		MessageOut("[ Create Buffer ] Bind Buffer Memory!  ", true, true, "255,2,0");
+		MessageOut("[ Create Buffer ] Bind Buffer Memory!  ", false, true, "255,2,0");
 	}
 }
 
@@ -1920,7 +1960,7 @@ void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, u
 	io.IniFilename = NULL;
 
 	if (!ImGui_ImplSDL3_InitForVulkan(handle))
-		MessageOut("Error,ImGui_ImplSDL3_InitForVulkan return false!",true,true,"255,0,0");
+		MessageOut("Error,ImGui_ImplSDL3_InitForVulkan return false!", false,true,"255,0,0");
 
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = _instance;
@@ -1973,7 +2013,7 @@ void VulkanManager::SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, V
 {
 	if (cmdBufs.size() <= 0)
 	{
-		MessageOut(RendererLauguage::GetText("A000013").c_str(), true, true);
+		MessageOut(RendererLauguage::GetText("A000013").c_str(), false, true);
 	}
 	VkSubmitInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1998,7 +2038,7 @@ void VulkanManager::SubmitQueue(std::vector<VkCommandBuffer> cmdBufs, std::vecto
 {
 	if (cmdBufs.size() <= 0)
 	{
-		MessageOut(RendererLauguage::GetText("A000013").c_str(), true, true);
+		MessageOut(RendererLauguage::GetText("A000013").c_str(), false, true);
 	}
 	VkSubmitInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

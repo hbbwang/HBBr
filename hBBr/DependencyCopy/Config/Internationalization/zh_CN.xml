@@ -11,7 +11,7 @@
     <A000007 tips="vkCreateSwapchainKHR Error" text="创建交换链(Swapchain)失败!,程序即将退出。"/>
     <A000008 tips="vkAllocateCommandBuffers Error" text="创建命令内存池失败!,程序即将退出。"/>
     <A000009 tips="vkAcquireNextImageKHR Error:VK_ERROR_OUT_OF_DATE_KHR" text="获取下一个可呈现的Swapchain image失败,交换链过时了!"/>
-    <A000010 tips="vkAcquireNextImageKHR Error" text="获取下一个可呈现的Swapchain image失败!,程序即将退出。"/>
+    <A000010 tips="vkAcquireNextImageKHR Error" text="获取下一个可呈现的Swapchain image失败!"/>
     <A000011 tips="vkQueuePresentKHR Error" text="呈现(Present)失败!,详情请开启Vulkan Debug查看。"/>
     <A000012 tips="vkCreateGraphicsPipelines Error" text="创建渲染管线(Graphics pipeline)失败!,程序即将退出。"/>
     <A000013 tips="SubmitQueueImmediate Error" text="你正准备提交了一个数量为0的Queue,渲染器禁止这种操作,程序即将退出。"/>
