@@ -390,7 +390,7 @@ int main(int argc, char* argv[])
 {
     //ConsoleDebug::CreateConsole("");
 	//Enable custom loop
-	VulkanApp::InitVulkanManager(true, false);
+	VulkanApp::InitVulkanManager(true, true);
 	VulkanApp::DeInitVulkanManager();
 	return 0;
 }
