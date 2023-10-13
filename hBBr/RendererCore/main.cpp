@@ -98,16 +98,20 @@ void DropCallBack(SDL_Window* window, int path_count, const char* paths[])
 		i(path_count, paths);
 	}
 }
-
+#if __ANDROID__
 void Android_Init()
 {
 
 }
+#endif
 
 VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDebug, void* parent)
 {
 	//must be successful.
-	if (SDL_Init(SDL_INIT_EVERYTHING) == -1)
+	if (SDL_Init(
+		SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS | 
+		SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMEPAD | SDL_INIT_SENSOR 
+	) == -1)
 	{
 		MessageOut("Init sdl3 failed.", true, true, "255,0,0");
 	}
@@ -118,21 +122,30 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	}
 
 	//Set sdl hints
-	SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "0");
 	SDL_SetHint(SDL_HINT_VIDEO_FOREIGN_WINDOW_VULKAN, "1");//SDL_WINDOW_VULKAN
 
+#if __ANDROID__
 	Android_Init();
+#endif
 
+	//Init Vulkan Manager
 	VulkanManager::InitManager(bEnableDebug);
+
+	//Create Main Window
+	auto win = CreateNewWindow(128, 128, "MainRenderer", false, parent);
 
 #if IS_EDITOR
 	Shaderc::ShaderCompiler::CompileAllShaders(FileSystem::GetShaderIncludeAbsPath().c_str());
 #endif
 	Shader::LoadShaderCache(FileSystem::GetShaderCacheAbsPath().c_str());
+	//Init Content Manager
 	ContentManager::Get();
 
-	//Create Main Window
-	auto win = CreateNewWindow(128, 128, "MainRenderer", true, parent);
+#if __ANDROID__
+	_Sleep(200);//延迟一点创建
+#endif
+
+	CreateRenderer(win);
 
 	//Try Refresh focus
 	SetFormVisiable(win, false);
@@ -281,7 +294,14 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 	if(!window)
 	{
 		window = SDL_CreateWindow(title, w, h,
-			SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+			SDL_WINDOW_VULKAN
+#if defined(__ANDROID__)
+			| SDL_WINDOW_FULLSCREEN
+#else
+			| SDL_WINDOW_RESIZABLE
+#endif
+
+		);
 	}
 
 	if (!window)
@@ -295,10 +315,19 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 	newForm.name = title;
 	if (bCreateRenderer)
 	{
-		newForm.renderer = new VulkanRenderer( window , title);
+		CreateRenderer(&newForm);
+
 	}
 	_forms.push_back(newForm);
 	return &_forms[_forms.size() - 1];
+}
+
+void VulkanApp::CreateRenderer(VulkanForm* form)
+{
+	if (form != NULL)
+	{
+		form->renderer = new VulkanRenderer(form->window, form->name.c_str());
+	}
 }
 
 bool VulkanApp::IsWindowFocus(SDL_Window* windowHandle)

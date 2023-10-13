@@ -128,6 +128,14 @@ VulkanManager::VulkanManager(bool bDebug)
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+#ifdef __ANDROID__
+	ImFontConfig font_cfg;
+	font_cfg.SizePixels = 22.0f;
+	io.Fonts->AddFontDefault(&font_cfg);
+	ImGui::GetStyle().ScaleAllSizes(3.0f);
+#endif
+
 }
 
 VulkanManager::~VulkanManager()
@@ -286,8 +294,6 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	createInfo.pNext = nullptr;
 	createInfo.pApplicationInfo = &appInfo;
-	createInfo.enabledExtensionCount = 0;
-	createInfo.ppEnabledExtensionNames = nullptr;
 
 	if (_bDebugEnable)
 	{
@@ -491,7 +497,13 @@ void VulkanManager::InitDevice()
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRDedicatedHostOperations = 1;
 				}
-				else if (strcmp(availableExts[i].extensionName, VK_KHR_SPIRV_1_4_EXTENSION_NAME) == 0)
+				else if (strcmp(availableExts[i].extensionName, VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasKHRShaderFloatControls = 1;
+				}
+				else if (_deviceExtensionOptionals.HasKHRShaderFloatControls && strcmp(availableExts[i].extensionName, VK_KHR_SPIRV_1_4_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_SPIRV_1_4_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SPIRV_1_4_EXTENSION_NAME ext.");
@@ -709,8 +721,13 @@ bool VulkanManager::IsGPUDeviceSuitable(VkPhysicalDevice device)
 	return deviceFeatures.tessellationShader && deviceFeatures.geometryShader;
 }
 
-void VulkanManager::CreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurface)
+void VulkanManager::ReCreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurface)
 {
+	if (newSurface != VK_NULL_HANDLE)
+	{
+		DestroySurface(newSurface);
+		newSurface = VK_NULL_HANDLE;
+	}
 	//SDL2
 	if (SDL_Vulkan_CreateSurface(handle, _instance, &newSurface) == SDL_FALSE)
 	{
@@ -718,11 +735,12 @@ void VulkanManager::CreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurfa
 	}
 }
 
-void VulkanManager::DestroySurface(VkSurfaceKHR surface)
+void VulkanManager::DestroySurface(VkSurfaceKHR& surface)
 {
 	if (surface != VK_NULL_HANDLE)
 	{
 		vkDestroySurfaceKHR(_instance, surface, VK_NULL_HANDLE);
+		surface = VK_NULL_HANDLE;
 	}
 }
 
@@ -800,7 +818,12 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	std::vector<VkImage>& swapchainImages, 
 	std::vector<VkImageView>& swapchainImageViews, 
 	VkSurfaceCapabilitiesKHR& surfaceCapabilities,
-	bool bIsFullScreen
+	std::vector<VkCommandBuffer>* cmdBuf,
+	std::vector<VkSemaphore>* acquireImageSemaphore,
+	std::vector<VkSemaphore>* queueSubmitSemaphore,
+	std::vector<VkFence>* fences,
+	bool bIsFullScreen,
+	bool bVSync
 )
 {
 	//ConsoleDebug::print_endl("Create Swapchain KHR.");
@@ -814,7 +837,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 			MessageOut("Vulkan Error:Can not Find any VkPresentModeKHR!", false,true,"255,0,0");
 			_Sleep(50);
 			return CreateSwapchain(surfaceSize, surface, surfaceFormat, newSwapchain,
-				swapchainImages, swapchainImageViews, surfaceCapabilities, bIsFullScreen);
+				swapchainImages, swapchainImageViews, surfaceCapabilities, cmdBuf, acquireImageSemaphore, queueSubmitSemaphore, fences, bIsFullScreen);
 		}
 		std::vector<VkPresentModeKHR> presentModes(present_mode_count);
 		vkGetPhysicalDeviceSurfacePresentModesKHR(_gpuDevice, surface, &present_mode_count, presentModes.data());
@@ -822,25 +845,37 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		bool bFoundPresentModeMailbox = false;
 		bool bFoundPresentModeImmediate = false;
 		bool bFoundPresentModeFIFO = false;
-
+		bool bFoundPresentModeFIFORelaxed = false;
+		bool bFoundPresentModeSharedDemandRefresh = false;
+		bool bFoundPresentModeSharedContinuous = false;
+		HString CurrentPresentMode = "";
 		for (size_t i = 0; i < present_mode_count; i++)
 		{
 			switch (presentModes[i])
 			{
 			case VK_PRESENT_MODE_MAILBOX_KHR:
 				bFoundPresentModeMailbox = true;
-				ConsoleDebug::printf_endl("- VK_PRESENT_MODE_MAILBOX_KHR : (%d)",(int)VK_PRESENT_MODE_MAILBOX_KHR);
+				//ConsoleDebug::printf_endl("- VK_PRESENT_MODE_MAILBOX_KHR : (%d)",(int)VK_PRESENT_MODE_MAILBOX_KHR);
 				break;
 			case VK_PRESENT_MODE_IMMEDIATE_KHR:
 				bFoundPresentModeImmediate = true;
-				ConsoleDebug::printf_endl("- VK_PRESENT_MODE_IMMEDIATE_KHR : (%d)", (int)VK_PRESENT_MODE_IMMEDIATE_KHR);
+				//ConsoleDebug::printf_endl("- VK_PRESENT_MODE_IMMEDIATE_KHR : (%d)", (int)VK_PRESENT_MODE_IMMEDIATE_KHR);
 				break;
 			case VK_PRESENT_MODE_FIFO_KHR:
 				bFoundPresentModeFIFO = true;
-				ConsoleDebug::printf_endl("- VK_PRESENT_MODE_FIFO_KHR : (%d)", (int)VK_PRESENT_MODE_FIFO_KHR);
+				//ConsoleDebug::printf_endl("- VK_PRESENT_MODE_FIFO_KHR : (%d)", (int)VK_PRESENT_MODE_FIFO_KHR);
 				break;
 			case VK_PRESENT_MODE_FIFO_RELAXED_KHR:
-				ConsoleDebug::printf_endl("- VK_PRESENT_MODE_FIFO_RELAXED_KHR : (%d)", (int)VK_PRESENT_MODE_FIFO_RELAXED_KHR);
+				//ConsoleDebug::printf_endl("- VK_PRESENT_MODE_FIFO_RELAXED_KHR : (%d)", (int)VK_PRESENT_MODE_FIFO_RELAXED_KHR);
+				bFoundPresentModeFIFORelaxed = true;
+				break;
+			case VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR:
+				//ConsoleDebug::printf_endl("- VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR : (%d)", (int)VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR);
+				bFoundPresentModeSharedDemandRefresh = true;
+				break;
+			case VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR:
+				//ConsoleDebug::printf_endl("- VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR : (%d)", (int)VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR);
+				bFoundPresentModeSharedContinuous = true;
 				break;
 			default:
 				ConsoleDebug::printf_endl("- Other VkPresentModeKHR : (%d)", (int)presentModes[i]);
@@ -853,17 +888,19 @@ VkExtent2D VulkanManager::CreateSwapchain(
 			bool bRequestSuccessful = false;
 			switch (RequestedPresentMode)
 			{
-			case VK_PRESENT_MODE_MAILBOX_KHR:
-				if (bFoundPresentModeMailbox)
-				{
-					present_mode = VK_PRESENT_MODE_MAILBOX_KHR;
-					bRequestSuccessful = true;
-				}
-				break;
 			case VK_PRESENT_MODE_IMMEDIATE_KHR:
 				if (bFoundPresentModeImmediate)
 				{
 					present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+					CurrentPresentMode = "VK_PRESENT_MODE_IMMEDIATE_KHR";
+					bRequestSuccessful = true;
+				}
+				break;
+			case VK_PRESENT_MODE_MAILBOX_KHR:
+				if (bFoundPresentModeMailbox)
+				{
+					present_mode = VK_PRESENT_MODE_MAILBOX_KHR;
+					CurrentPresentMode = "VK_PRESENT_MODE_MAILBOX_KHR";
 					bRequestSuccessful = true;
 				}
 				break;
@@ -871,6 +908,15 @@ VkExtent2D VulkanManager::CreateSwapchain(
 				if (bFoundPresentModeFIFO)
 				{
 					present_mode = VK_PRESENT_MODE_FIFO_KHR;
+					CurrentPresentMode = "VK_PRESENT_MODE_FIFO_KHR";
+					bRequestSuccessful = true;
+				}
+				break;
+			case VK_PRESENT_MODE_FIFO_RELAXED_KHR:
+				if (bFoundPresentModeFIFORelaxed)
+				{
+					present_mode = VK_PRESENT_MODE_FIFO_RELAXED_KHR;
+					CurrentPresentMode = "VK_PRESENT_MODE_FIFO_RELAXED_KHR";
 					bRequestSuccessful = true;
 				}
 				break;
@@ -888,19 +934,28 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		if (RequestedPresentMode == -1)
 		{
 			// Until FVulkanViewport::Present honors SyncInterval, we need to disable vsync for the spectator window if using an HMD.
-			const bool bEnableVSync = true;
-
-			if (bFoundPresentModeImmediate && !bEnableVSync)
+			if ( !bVSync)
 			{
-				present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-			}
-			else if (bFoundPresentModeMailbox)
-			{
-				present_mode = VK_PRESENT_MODE_MAILBOX_KHR;
+				if (bFoundPresentModeImmediate)
+				{
+					present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;//类似双缓冲
+					CurrentPresentMode = "VK_PRESENT_MODE_IMMEDIATE_KHR";
+				}
+				else if (bFoundPresentModeMailbox)
+				{
+					present_mode = VK_PRESENT_MODE_MAILBOX_KHR;//类似三缓冲
+					CurrentPresentMode = "VK_PRESENT_MODE_MAILBOX_KHR";
+				}
 			}
 			else if (bFoundPresentModeFIFO)
 			{
-				present_mode = VK_PRESENT_MODE_FIFO_KHR;
+				present_mode = VK_PRESENT_MODE_FIFO_KHR;//垂直同步
+				CurrentPresentMode = "VK_PRESENT_MODE_FIFO_KHR";
+			}
+			else if (bFoundPresentModeFIFORelaxed)
+			{
+				present_mode = VK_PRESENT_MODE_FIFO_RELAXED_KHR;//垂直同步
+				CurrentPresentMode = "VK_PRESENT_MODE_FIFO_RELAXED_KHR";
 			}
 			else
 			{
@@ -908,12 +963,29 @@ VkExtent2D VulkanManager::CreateSwapchain(
 				present_mode = presentModes[0];
 			}
 		}
+		ConsoleDebug::printf_endl("Current presene mode is : " + CurrentPresentMode + " :%d ", (int)VK_PRESENT_MODE_MAILBOX_KHR);
 	}
 
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_gpuDevice, surface, &surfaceCapabilities);
 	VkSurfaceTransformFlagBitsKHR PreTransform;
 
 	PreTransform = surfaceCapabilities.currentTransform;
+	switch (PreTransform)
+	{
+	case VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR:
+		ConsoleDebug::print_endl("Current preTransform is : VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR");
+		break;
+	case VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR:
+		ConsoleDebug::print_endl("Current preTransform is : VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR");
+		break;
+	case VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR:
+		ConsoleDebug::print_endl("Current preTransform is : VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR");
+		break;
+	case VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR:
+		ConsoleDebug::print_endl("Current preTransform is : VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR");
+		break;
+	default:break;
+	}
 
 	VkCompositeAlphaFlagBitsKHR CompositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
 	if (surfaceCapabilities.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
@@ -963,7 +1035,6 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	info.clipped = VK_TRUE;
 	info.compositeAlpha = CompositeAlpha;//是否半透明，用于组合其他表面,这里我们不需要
 
-	_swapchainBufferCount = DesiredNumBuffers;
 	{
 		//#todo-rco: Crappy workaround
 		if (info.imageExtent.width == 0)
@@ -1020,6 +1091,9 @@ VkExtent2D VulkanManager::CreateSwapchain(
 			MessageOut((RendererLauguage::GetText("A000007").c_str() + GetVkResult(result)).c_str(), false, true);
 		}
 	}
+
+	_swapchainBufferCount = DesiredNumBuffers;
+
 	//获取交换链Image,注意数量可能与_swapchainBufferCount不一致
 	uint32_t numSwapchainImages = 0;
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &numSwapchainImages, VK_NULL_HANDLE);
@@ -1052,6 +1126,58 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	FreeCommandBuffers(_commandPool, { buf });
 
 	_swapchainBufferCount = numSwapchainImages;
+
+	//init semaphores & fences
+	if (acquireImageSemaphore != NULL)
+	{
+		ConsoleDebug::print_endl("hBBr:Start Present Semaphore.");
+		for (int i = 0; i < acquireImageSemaphore->size(); i++)
+		{
+			DestroySemaphore(acquireImageSemaphore->at(i));		
+		}
+		acquireImageSemaphore->resize(_swapchainBufferCount);
+		for (int i = 0; i < _swapchainBufferCount; i++)
+		{
+			CreateVkSemaphore(acquireImageSemaphore->at(i));
+		}
+	}
+	if (queueSubmitSemaphore != NULL)
+	{
+		ConsoleDebug::print_endl("hBBr:Start Queue Submit Semaphore.");
+		for (int i = 0; i < queueSubmitSemaphore->size(); i++)
+		{
+			DestroySemaphore(queueSubmitSemaphore->at(i));
+		}
+		queueSubmitSemaphore->resize(_swapchainBufferCount);
+		for (int i = 0; i < _swapchainBufferCount; i++)
+		{
+			CreateVkSemaphore(queueSubmitSemaphore->at(i));
+		}
+	}
+	if (fences != NULL)
+	{
+		ConsoleDebug::print_endl("hBBr:Start image acquired fences.");
+		for (int i = 0; i < fences->size(); i++)
+		{
+			DestroyFence(fences->at(i));
+		}
+		fences->resize(_swapchainBufferCount);
+		for (int i = 0; i < _swapchainBufferCount; i++)
+		{
+			CreateFence(fences->at(i));
+		}
+	}
+
+	if (cmdBuf != NULL)
+	{
+		ConsoleDebug::print_endl("hBBr:Start Allocate Main CommandBuffers.");
+		FreeCommandBuffers(_commandPool, *cmdBuf);
+		cmdBuf->resize(_swapchainBufferCount);
+		for (int i = 0; i < _swapchainBufferCount; i++)
+		{
+			AllocateCommandBuffer(_commandPool, cmdBuf->at(i));
+		}
+	}
 
 	return info.imageExtent;
 }
@@ -1790,6 +1916,22 @@ void VulkanManager::CreateFence(VkFence& fence)
 	}
 }
 
+void VulkanManager::RecreateFences(std::vector<VkFence>& fences, uint32_t number)
+{
+	for (int i = 0; i < fences.size(); i++)
+	{
+		if (fences[i] != VK_NULL_HANDLE)
+		{
+			DestroyFence(fences[i]);
+		}
+	}
+	fences.resize(_swapchainBufferCount);
+	for (int i = 0; i < _swapchainBufferCount; i++)
+	{
+		CreateFence(fences[i]);
+	}
+}
+
 void VulkanManager::DestroyFence(VkFence& fence)
 {
 	if (fence != VK_NULL_HANDLE)
@@ -1977,6 +2119,39 @@ void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, u
 	init_info.Allocator = VK_NULL_HANDLE;
 	init_info.MinImageCount = 2;
 	init_info.ImageCount = _swapchainBufferCount;
+	init_info.MinImageCount = _swapchainBufferCount;
+	init_info.Subpass = subPassIndex;
+	init_info.CheckVkResultFn = VK_NULL_HANDLE;
+	//init_info.UseDynamicRendering = true;
+	ImGui_ImplVulkan_Init(&init_info, renderPass);
+
+	VkCommandBuffer buf;
+	AllocateCommandBuffer(_commandPool, buf);
+	BeginCommandBuffer(buf, 0);
+	ImGui_ImplVulkan_CreateFontsTexture(buf);
+	EndCommandBuffer(buf);
+	SubmitQueueImmediate({ buf });
+	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
+	FreeCommandBuffers(_commandPool, { buf });
+	ImGui_ImplVulkan_DestroyFontUploadObjects();
+}
+
+void VulkanManager::ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex)
+{
+	ImGui_ImplVulkan_Shutdown();
+	//
+	ImGui_ImplVulkan_InitInfo init_info = {};
+	init_info.Instance = _instance;
+	init_info.PhysicalDevice = _gpuDevice;
+	init_info.Device = _device;
+	init_info.QueueFamily = _graphicsQueueFamilyIndex;
+	init_info.Queue = _graphicsQueue;
+	init_info.PipelineCache = VK_NULL_HANDLE;
+	init_info.DescriptorPool = _descriptorPool;
+	init_info.Allocator = VK_NULL_HANDLE;
+	init_info.MinImageCount = 2;
+	init_info.ImageCount = _swapchainBufferCount;
+	init_info.MinImageCount = _swapchainBufferCount;
 	init_info.Subpass = subPassIndex;
 	init_info.CheckVkResultFn = VK_NULL_HANDLE;
 	//init_info.UseDynamicRendering = true;

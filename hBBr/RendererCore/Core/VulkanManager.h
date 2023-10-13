@@ -17,6 +17,7 @@
 
 #if !defined(_WIN32)
 #include "vulkan_wrapper/vulkan_wrapper.h"
+#define IMGUI_IMPL_VULKAN_NO_PROTOTYPES 1
 #endif
 
 // --------- IMGUI
@@ -78,6 +79,7 @@ struct OptionalVulkanDeviceExtensions
 	uint8_t HasKHRCreateRenderPass2 = 0;
 	uint8_t HasKHRSeparateDepthStencilLayouts = 0;
 	uint8_t HasEXTFullscreenExclusive = 1;
+	uint8_t HasKHRShaderFloatControls = 0;
 };
 
 class VulkanManager
@@ -118,10 +120,10 @@ public:
 	void InitDebug();
 
 	/* 创建Surface */
-	void CreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurface);
+	void ReCreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurface);
 
 	/* 释放Surface */
-	void DestroySurface(VkSurfaceKHR surface);
+	void DestroySurface(VkSurfaceKHR& surface);
 
 	/* 获取Surface的大小 */
 	VkExtent2D GetSurfaceSize(VkExtent2D windowSizeIn, VkSurfaceKHR surface);
@@ -131,14 +133,19 @@ public:
 
 	/* 创建Swapchain */
 	VkExtent2D CreateSwapchain(
-		VkExtent2D surfaceSize, 
-		VkSurfaceKHR surface, 
-		VkSurfaceFormatKHR surfaceFormat, 
-		VkSwapchainKHR& newSwapchain, 
-		std::vector<VkImage>& swapchainImages, 
-		std::vector<VkImageView>& swapchainImageViews , 
-		VkSurfaceCapabilitiesKHR& surfaceCapabilities , 
-		bool bIsFullScreen = false
+		VkExtent2D surfaceSize,
+		VkSurfaceKHR surface,
+		VkSurfaceFormatKHR surfaceFormat,
+		VkSwapchainKHR& newSwapchain,
+		std::vector<VkImage>& swapchainImages,
+		std::vector<VkImageView>& swapchainImageViews,
+		VkSurfaceCapabilitiesKHR& surfaceCapabilities,
+		std::vector<VkCommandBuffer>* cmdBuf,
+		std::vector<VkSemaphore>* acquireImageSemaphore ,
+		std::vector<VkSemaphore>* queueSubmitSemaphore,
+		std::vector<VkFence>* fences = NULL,
+		bool bIsFullScreen = false,
+		bool bVSync = true
 	);
 
 	/* 创建Swapchain From Texture Class */
@@ -241,6 +248,8 @@ public:
 
 	void CreateFence(VkFence& fence);
 
+	void RecreateFences(std::vector<VkFence>& fences , uint32_t number);
+
 	void DestroyFence(VkFence& fence);
 
 	void ResetFence(VkFence& fence);
@@ -274,7 +283,11 @@ public:
 
 	void CreateShaderModule(VkDevice device, std::vector<char> data, VkShaderModule& shaderModule);
 
+	void InitImguiContent();
+
 	void InitImgui_SDL(SDL_Window* handle , VkRenderPass renderPass , uint32_t subPassIndex = 0);
+
+	void ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex = 0);
 
 	void ShutdownImgui();
 

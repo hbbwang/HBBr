@@ -238,6 +238,13 @@ void ImguiPass::PassUpdate()
 	manager->EndRenderPass(cmdBuf);
 }
 
+void ImguiPass::PassReset()
+{
+	GraphicsPass::PassReset();
+	const auto manager = VulkanManager::GetManager();
+	manager->ResetImgui_SDL(_renderPass);
+}
+
 void ImguiPass::ShowPerformance()
 {
 	if (ImGui::Begin("Performance", nullptr,

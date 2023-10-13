@@ -60,29 +60,13 @@ void VulkanRenderer::Init()
 
 	//Surface
 	ConsoleDebug::print_endl("hBBr:Start init Surface.");
-	_vulkanManager->CreateSurface_SDL(_windowHandle, _surface);
+	_vulkanManager->ReCreateSurface_SDL(_windowHandle, _surface);
 
 	//Swapchain
 	ConsoleDebug::print_endl("hBBr:Start Check Surface Format.");
 	_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
 	ConsoleDebug::print_endl("hBBr:Start Create Swapchain.");
-	_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities);
-
-	//Fence & semaphore
-	ConsoleDebug::print_endl("hBBr:Start Present Semaphore.");
-	_vulkanManager->CreateRenderSemaphores(_presentSemaphore);
-	//ConsoleDebug::print_endl("hBBr:Start image acquired fences.");
-	//_vulkanManager->CreateRenderFences(_imageAcquiredFences);
-	ConsoleDebug::print_endl("hBBr:Start Queue Submit Semaphore.");
-	_vulkanManager->CreateRenderSemaphores(_queueSubmitSemaphore);
-
-	//CommandBuffer
-	ConsoleDebug::print_endl("hBBr:Start Allocate Main CommandBuffer.");
-	_cmdBuf.resize(_vulkanManager->GetSwapchainBufferCount());
-	for (int i = 0; i < _cmdBuf.size(); i++)
-	{
-		VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf[i]);
-	}
+	_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore ,&_queueSubmitSemaphore);
 
 	//Set renderer map , Add new renderer
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
@@ -165,10 +149,12 @@ void VulkanRenderer::Render()
 		//Present swapchain.
 		if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], _swapchainIndex))
 		{
-			Resizing(true);
+			_bResize = (true);
+			return;
 		}
 		//Get next frame index.
-		_currentFrameIndex = (_currentFrameIndex + 1) % _vulkanManager->GetSwapchainBufferCount();
+		uint32_t maxNumSwapchainImages = _vulkanManager->GetSwapchainBufferCount();
+		_currentFrameIndex = (_currentFrameIndex + 1) % maxNumSwapchainImages;
 	}
 }
 
@@ -239,8 +225,10 @@ bool VulkanRenderer::Resizing(bool bForce)
 #if __ANDROID__
 			_Sleep(200);
 #endif
+			//部分情况下重置窗口会出现Surface被销毁的问题，最好Surface也重新创建一个
+			_vulkanManager->ReCreateSurface_SDL(_windowHandle, _surface);
 			_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
-			_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities);
+			_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore, &_queueSubmitSemaphore);
 			if (_swapchain == VK_NULL_HANDLE)
 			{
 				return false;

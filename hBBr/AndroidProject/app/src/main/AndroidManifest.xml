@@ -26,15 +26,6 @@
         android:name="android.hardware.usb.host"
         android:required="false" />
 
-    <!-- Vulkan支持-->
-    <uses-feature android:name="android.hardware.vulkan.level"
-        android:version="0"
-        android:required="true" />
-    <uses-feature
-        android:name="android.hardware.vulkan.version"
-        android:version="0x400003"
-        android:required="true" />
-
     <!-- External mouse input events -->
     <uses-feature
         android:name="android.hardware.type.pc"

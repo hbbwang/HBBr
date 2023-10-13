@@ -9,8 +9,6 @@
 PassBase::PassBase(VulkanRenderer* renderer)
 {
 	_renderer = renderer;
-	//we will collect all passes we need, direct execute them by once.So need not create VkFence for the every alone pass.
-	//_fence.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
 }
 
 PassBase::~PassBase()

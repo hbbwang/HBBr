@@ -34,6 +34,7 @@ public:
 	virtual void PassInit()override;
 	virtual void PassBuild()override;
 	virtual void PassUpdate()override;
+	virtual void PassReset()override;
 private:
 	void ShowPerformance();
 };

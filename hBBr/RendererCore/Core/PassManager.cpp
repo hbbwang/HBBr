@@ -11,12 +11,8 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 		//Opaque Pass
 		std::shared_ptr<BasePass> opaque = std::make_shared<BasePass>(renderer);
 		AddPass(opaque, "Opaque");
-		//std::shared_ptr<ImguiPass> imgui = std::make_shared<ImguiPass>(renderer);
-		//AddPass(imgui, "Imgui");
-	}
-	if (_executeFence.size() <= 0)
-	{
-		VulkanManager::GetManager()->CreateRenderFences(_executeFence);
+		std::shared_ptr<ImguiPass> imgui = std::make_shared<ImguiPass>(renderer);
+		AddPass(imgui, "Imgui");
 	}
 	for (auto p : _passes)
 	{
@@ -30,6 +26,11 @@ void PassManager::PassesUpdate()
 	const auto manager = VulkanManager::GetManager();
 
 	const uint32_t frameIndex = VulkanRenderer::GetCurrentFrameIndex();
+
+	if (_executeFence.size() != manager->GetSwapchainBufferCount())
+	{
+		manager->RecreateFences(_executeFence, manager->GetSwapchainBufferCount());
+	}
 
 	manager->WaitForFences({ _executeFence[frameIndex] });
 

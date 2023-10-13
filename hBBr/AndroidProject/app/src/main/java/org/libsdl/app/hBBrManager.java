@@ -1,6 +1,7 @@
 package org.libsdl.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -9,6 +10,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.LocaleList;
 import android.util.Log;
+import android.view.WindowManager;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,6 +39,9 @@ public class hBBrManager {
     }
     public hBBrManager(SDLActivity a)
     {
+        //addLayerName，tid：xxx 屏蔽该消息刷屏
+        
+        a.getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 //            // 先判断有没有权限
 //            if (!Environment.isExternalStorageManager()) {
@@ -44,7 +50,6 @@ public class hBBrManager {
 //                startActivityForResult(intent, 100);
 //            }
 //        }
-
         Log.v("hBBrManager","hBBrManager: Init Paths...");
         file = a.getExternalFilesDir(null);
         externalStorageRoot = null;
