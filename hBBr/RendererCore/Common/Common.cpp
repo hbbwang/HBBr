@@ -27,7 +27,6 @@ void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textC
     }
 	if (bExit)
 	{
-		//exit(EXIT_FAILURE);
 		VulkanApp::AppQuit();
 	}
 }

@@ -11,11 +11,9 @@
 #include "GLFWInclude.h"
 #include "ConsoleDebug.h"
 #if defined(__ANDROID__)
-
 #ifndef IS_GAME
 #define IS_GAME 1
 #endif
-
 #endif
 
 //#if _DEBUG
@@ -414,11 +412,78 @@ void VulkanApp::AppQuit()
 
 #if defined(IS_GAME)
 
+//call stack
+#ifdef __ANDROID__
+#include <unwind.h>
+#include <dlfcn.h>
+#include <android/log.h>
+#include <cxxabi.h>
+#include <signal.h>
+struct BacktraceState
+{
+	void** current;
+	void** end;
+};
+static _Unwind_Reason_Code unwindCallback(struct _Unwind_Context* context, void* arg)
+{
+	BacktraceState* state = static_cast<BacktraceState*>(arg);
+	uintptr_t pc = _Unwind_GetIP(context);
+	if (pc)
+	{
+		if (state->current == state->end)
+		{
+			return _URC_END_OF_STACK;
+		}
+		else
+		{
+			*state->current++ = reinterpret_cast<void*>(pc);
+		}
+	}
+	return _URC_NO_REASON;
+}
+void captureBacktrace(void** buffer, size_t max)
+{
+	BacktraceState state = {buffer, buffer + max};
+	_Unwind_Backtrace(unwindCallback, &state);
+}
+void dumpBacktrace(void** buffer, size_t count)
+{
+	for (size_t idx = 0; idx < count; ++idx)
+	{
+		const void* addr = buffer[idx];
+
+		Dl_info info;
+		if (dladdr(addr, &info) && info.dli_sname)
+		{
+			int status = 0;
+			char* demangled = abi::__cxa_demangle(info.dli_sname, 0, 0, &status);
+			__android_log_print(ANDROID_LOG_ERROR, "APP_TAG", "#%zu 0x%p %s", idx, addr, status == 0 ? demangled : info.dli_sname);
+			free(demangled);
+		}
+		else
+		{
+			__android_log_print(ANDROID_LOG_ERROR, "APP_TAG", "#%zu 0x%p", idx, addr);
+		}
+	}
+}
+void handleSignal(int signum)
+{
+	const size_t maxStackFrames = 64;
+	void* stackFrames[maxStackFrames];
+	captureBacktrace(stackFrames, maxStackFrames);
+	dumpBacktrace(stackFrames, maxStackFrames);
+	_Exit(signum);
+}
+#endif
+
 int main(int argc, char* argv[])
 {
+#ifdef __ANDROID__
+	signal(SIGSEGV, handleSignal);
+#endif
+    //SDL_ShowSimpleMessageBox(0,"","",NULL);
     //ConsoleDebug::CreateConsole("");
 	//Enable custom loop
-    //SDL_ShowSimpleMessageBox(0,"","",NULL);
 	VulkanApp::InitVulkanManager(true, true);
 	VulkanApp::DeInitVulkanManager();
 	return 0;

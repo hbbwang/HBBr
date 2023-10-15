@@ -11,13 +11,12 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 		//Opaque Pass
 		std::shared_ptr<BasePass> opaque = std::make_shared<BasePass>(renderer);
 		AddPass(opaque, "Opaque");
-		std::shared_ptr<ImguiPass> imgui = std::make_shared<ImguiPass>(renderer);
+		std::shared_ptr<ImguiScreenPass> imgui = std::make_shared<ImguiScreenPass>(renderer);
 		AddPass(imgui, "Imgui");
 	}
 	for (auto p : _passes)
 	{
 		p->PassInit();
-		p->PassBuild();
 	}
 }
 

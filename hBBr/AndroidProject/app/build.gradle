@@ -40,8 +40,8 @@ android {
             // aidl.srcDirs = ['src'] // 指定aidl目录
             // renderscript.srcDirs = ['src'] // 指定source目录
         }
-        debug.setRoot('build-types/debug') // 指定debug模式的路径
-        release.setRoot('build-types/release') // 指定release模式的路径
+//        debug.setRoot('build-types/build/debug') // 指定debug模式的路径
+//        release.setRoot('build-types/build/release') // 指定release模式的路径
     }
 
     // signingConfigs {// 签名配置
@@ -61,18 +61,14 @@ android {
 
     buildTypes {
         debug {
-            zipAlignEnabled true  // 是否支持zip
             minifyEnabled false // 是否对代码进行混淆，true表示混淆
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             debuggable true  //是否支持调试
-            buildConfigField "boolean", "_DEBUG", "true"
         }
         release {
-            zipAlignEnabled true  // 是否支持zip
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             debuggable false  //是否支持调试
-            buildConfigField "boolean", "NDEBUG", "true"
         }
     }
     applicationVariants.all { variant ->

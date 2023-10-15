@@ -11,7 +11,6 @@ public:
 	virtual ~BasePass();
 
 	virtual void PassInit()override;
-	virtual void PassBuild()override;
 	virtual void PassUpdate()override;
 private:
 	void SetupBasePassAndDraw(Pass p, class DescriptorSet* pass , class DescriptorSet* obj , class DescriptorSet* mat, class Buffer* vb , class Buffer* ib);
@@ -26,13 +25,12 @@ private:
 };
 
 /* Imgui pass define */
-class ImguiPass :public GraphicsPass
+class ImguiScreenPass :public GraphicsPass
 {
 public:
-	ImguiPass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
-	virtual ~ImguiPass();
+	ImguiScreenPass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
+	virtual ~ImguiScreenPass();
 	virtual void PassInit()override;
-	virtual void PassBuild()override;
 	virtual void PassUpdate()override;
 	virtual void PassReset()override;
 private:

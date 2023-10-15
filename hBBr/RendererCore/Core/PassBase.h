@@ -19,7 +19,6 @@ class PassBase
 public:
 	PassBase(VulkanRenderer* renderer);
 	virtual ~PassBase();
-	virtual void PassBuild() {}
 	HBBR_INLINE HString GetName()const { return _passName; }
 protected:
 	virtual void PassInit() {}
@@ -40,7 +39,7 @@ public:
 	//Step 2 , Setup subpass by attachments.
 	virtual void AddSubpass(std::vector<uint32_t> inputAttachments, std::vector<uint32_t> colorAttachments, int depthStencilAttachments = -1);
 	//Step the last,custom.
-	virtual void PassBuild()override {}
+	virtual void PassInit()override {}
 	virtual void PassReset()override { _currentFrameBufferSize = { 999999 , 999999 }; }
 	virtual void ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> swapchainImageViews,std::vector<VkImageView> imageViews);
 	void CreateRenderPass();

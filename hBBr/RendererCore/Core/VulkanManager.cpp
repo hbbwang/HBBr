@@ -101,7 +101,6 @@ VulkanManager::VulkanManager(bool bDebug)
 		printf("Vulkan is not support on this device.");
 		std::cout<< "Vulkan is not support on this device." <<std::endl;
 		throw std::runtime_error("Vulkan is not support on this device.");
-		exit(0);
 	}
 #endif
 	ConsoleDebug::print_endl("hBBr:InitVulkan");
@@ -1018,13 +1017,6 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		surfaceSize.height = surfaceCapabilities.minImageExtent.height > (uint32_t)surfaceSize.height ? surfaceCapabilities.minImageExtent.height : (uint32_t)surfaceSize.height;
 	}
 
-    //if (surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR ||
-    //    surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR)
-    //{
-    //    // Swap to get identity width and height
-    //    std::swap(SizeX,SizeY);
-    //}
-
 	VkSwapchainCreateInfoKHR info = {};
 	info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 	info.surface = surface;
@@ -1055,6 +1047,13 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		}
 	}
 
+	//if (surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR ||
+	//	surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR)
+	//{
+	//	// Swap to get identity width and height
+	//	std::swap(info.imageExtent.width, info.imageExtent.height);
+	//}
+ 
 	if (_deviceExtensionOptionals.HasQcomRenderPassTransform)
 	{
 		QCOMRenderPassTransform = surfaceCapabilities.currentTransform;
@@ -1135,12 +1134,12 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	if (acquireImageSemaphore != NULL)
 	{
 		ConsoleDebug::print_endl("hBBr:Swapchain: Present Semaphore.");
-		for (int i = 0; i < acquireImageSemaphore->size(); i++)
+		for (int i = 0; i < (int)acquireImageSemaphore->size(); i++)
 		{
 			DestroySemaphore(acquireImageSemaphore->at(i));		
 		}
 		acquireImageSemaphore->resize(_swapchainBufferCount);
-		for (int i = 0; i < _swapchainBufferCount; i++)
+		for (int i = 0; i < (int)_swapchainBufferCount; i++)
 		{
 			CreateVkSemaphore(acquireImageSemaphore->at(i));
 		}
@@ -1148,12 +1147,12 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	if (queueSubmitSemaphore != NULL)
 	{
 		ConsoleDebug::print_endl("hBBr:Swapchain: Queue Submit Semaphore.");
-		for (int i = 0; i < queueSubmitSemaphore->size(); i++)
+		for (int i = 0; i < (int)queueSubmitSemaphore->size(); i++)
 		{
 			DestroySemaphore(queueSubmitSemaphore->at(i));
 		}
 		queueSubmitSemaphore->resize(_swapchainBufferCount);
-		for (int i = 0; i < _swapchainBufferCount; i++)
+		for (int i = 0; i < (int)_swapchainBufferCount; i++)
 		{
 			CreateVkSemaphore(queueSubmitSemaphore->at(i));
 		}
@@ -1161,12 +1160,12 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	if (fences != NULL)
 	{
 		ConsoleDebug::print_endl("hBBr:Swapchain: image acquired fences.");
-		for (int i = 0; i < fences->size(); i++)
+		for (int i = 0; i < (int)fences->size(); i++)
 		{
 			DestroyFence(fences->at(i));
 		}
 		fences->resize(_swapchainBufferCount);
-		for (int i = 0; i < _swapchainBufferCount; i++)
+		for (int i = 0; i < (int)_swapchainBufferCount; i++)
 		{
 			CreateFence(fences->at(i));
 		}
@@ -1177,7 +1176,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		ConsoleDebug::print_endl("hBBr:Swapchain: Allocate Main CommandBuffers.");
 		FreeCommandBuffers(_commandPool, *cmdBuf);
 		cmdBuf->resize(_swapchainBufferCount);
-		for (int i = 0; i < _swapchainBufferCount; i++)
+		for (int i = 0; i < (int)_swapchainBufferCount; i++)
 		{
 			AllocateCommandBuffer(_commandPool, cmdBuf->at(i));
 		}
@@ -1780,7 +1779,6 @@ void VulkanManager::CreateFrameBuffers(VkExtent2D FrameBufferSize, VkRenderPass 
 		if (vkCreateFramebuffer(_device, &framebufferInfo, VK_NULL_HANDLE, &frameBuffers[i]) != VK_SUCCESS) {
 			printf("failed to create framebuffer!");
 			throw std::runtime_error("failed to create framebuffer!");
-			exit(0);
 		}
 	}
 }
@@ -1930,7 +1928,7 @@ void VulkanManager::RecreateFences(std::vector<VkFence>& fences, uint32_t number
 		}
 	}
 	fences.resize(_swapchainBufferCount);
-	for (int i = 0; i < _swapchainBufferCount; i++)
+	for (int i = 0; i < (int)_swapchainBufferCount; i++)
 	{
 		CreateFence(fences[i]);
 	}
@@ -2201,7 +2199,7 @@ void VulkanManager::ImguiNewFrame()
 	ImGui::NewFrame();
 }
 
-void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf)
+void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf, float w, float h)
 {
 	ImGui::Render();
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuf);

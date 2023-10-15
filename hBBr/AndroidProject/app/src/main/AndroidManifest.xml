@@ -91,7 +91,7 @@
             android:configChanges="layoutDirection|locale|orientation|uiMode|screenLayout|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
             android:preferMinimalPostProcessing="true"
             android:exported="true"
-            android:screenOrientation="sensor">
+            android:screenOrientation="sensor"
             >
 <!--            android:screenOrientation支持的属性。众所周知，Android应用程序中，android:screenOrientation用于控制activity启动时方向，取值可以为：-->
 <!--            unspecified，默认值，由系统决定，不同手机可能不一致-->

@@ -35,6 +35,7 @@ LOCAL_LDLIBS += -L$(LOCAL_PATH)/../../libs/$(APP_ABI)/
 LOCAL_LDLIBS += -L$(THIRD_PARTY_PATH)/assimp/lib/
 LOCAL_LDLIBS += -L$(THIRD_PARTY_PATH)/sdl3/
 LOCAL_LDLIBS += -L$(THIRD_PARTY_PATH)/vulkan/
+LOCAL_CFLAGS += -funwind-tables -fno-omit-frame-pointer
 
 # 添加库
 LOCAL_LDLIBS += -lGLESv1_CM 
@@ -47,6 +48,7 @@ LOCAL_LDLIBS += -lc++_shared
 LOCAL_LDLIBS += -lVkLayer_khronos_validation
 #LOCAL_LDLIBS += -lVkLayer_core_validation
 LOCAL_LDLIBS += -lSDL3  -lassimp -lm 
+LOCAL_LDLIBS += -lunwind
 
 #头文件目录包含
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/
