@@ -43,6 +43,11 @@
 //#define IMGUI_IMPL_VULKAN_NO_PROTOTYPES
 
 // Vulkan includes
+
+#if defined(__ANDROID__)
+#include "vulkan_wrapper/vulkan_wrapper.h"
+#endif
+
 #if defined(IMGUI_IMPL_VULKAN_NO_PROTOTYPES) && !defined(VK_NO_PROTOTYPES)
 #define VK_NO_PROTOTYPES
 #endif
@@ -73,8 +78,19 @@ struct ImGui_ImplVulkan_InitInfo
     void                            (*CheckVkResultFn)(VkResult err);
 };
 
+//hBBr
+struct Imgui_Uniform_VS
+{
+    ImVec4 ProjectionMatrixX;
+    ImVec4 ProjectionMatrixY;
+    ImVec4 ProjectionMatrixZ;
+    ImVec4 ProjectionMatrixW;
+};
+//hBBr
+IMGUI_IMPL_API void         ImGui_ImplVulkan_EnableLoadFunctions();
+
 // Called by user code
-IMGUI_IMPL_API bool         ImGui_ImplVulkan_Init(ImGui_ImplVulkan_InitInfo* info, VkRenderPass render_pass);
+IMGUI_IMPL_API bool         ImGui_ImplVulkan_Init(ImGui_ImplVulkan_InitInfo* info, VkRenderPass render_pass , Imgui_Uniform_VS uniform);
 IMGUI_IMPL_API void         ImGui_ImplVulkan_Shutdown();
 IMGUI_IMPL_API void         ImGui_ImplVulkan_NewFrame();
 IMGUI_IMPL_API void         ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer command_buffer, VkPipeline pipeline = VK_NULL_HANDLE);

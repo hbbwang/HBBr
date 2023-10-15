@@ -15,9 +15,8 @@
 	#define VK_USE_PLATFORM_MACOS_MVK 1
 #endif
 
-#if !defined(_WIN32)
+#if defined(__ANDROID__)
 #include "vulkan_wrapper/vulkan_wrapper.h"
-#define IMGUI_IMPL_VULKAN_NO_PROTOTYPES 1
 #endif
 
 // --------- IMGUI
@@ -287,7 +286,14 @@ public:
 
 	void InitImgui_SDL(SDL_Window* handle , VkRenderPass renderPass , uint32_t subPassIndex = 0);
 
-	void ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex = 0);
+	void ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex = 0 , glm::mat4 projMat = 
+		glm::mat4(
+			glm::vec4(1, 0, 0, 0),
+			glm::vec4(0, 1, 0, 0),
+			glm::vec4(0, 0, 1, 0),
+			glm::vec4(0, 0, 0, 1)
+		)
+	);
 
 	void ShutdownImgui();
 

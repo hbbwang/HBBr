@@ -199,7 +199,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 }
 
 /*
-	Imgui pass
+	Imgui buffer pass 
 */
 
 void ImguiPass::PassInit()
@@ -231,9 +231,10 @@ void ImguiPass::PassUpdate()
 	manager->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0,0 });
 	manager->ImguiNewFrame();
 	//Begin
-	//ImGui::ShowDemoWindow((bool*)1);
+	ImGui::ShowDemoWindow((bool*)1);
 	ShowPerformance();
 	//End
+
 	manager->ImguiEndFrame(cmdBuf);
 	manager->EndRenderPass(cmdBuf);
 }
@@ -242,7 +243,28 @@ void ImguiPass::PassReset()
 {
 	GraphicsPass::PassReset();
 	const auto manager = VulkanManager::GetManager();
-	manager->ResetImgui_SDL(_renderPass);
+
+	//Screen Rotator
+	glm::mat4 pre_rotate_mat = glm::mat4(
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	);
+	//glm::vec3 rotation_axis = glm::vec3(0.0f, 0.0f, 1.0f);
+	//if (_renderer->_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR) 
+	//{
+	//	pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(90.0f), rotation_axis);
+	//}
+	//else if (_renderer->_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR)
+	//{
+	//	pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(270.0f), rotation_axis);
+	//}
+	//else if (_renderer->_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR)
+	//{
+	//	pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(180.0f), rotation_axis);
+	//}
+	manager->ResetImgui_SDL(_renderPass, 0, pre_rotate_mat);
 }
 
 void ImguiPass::ShowPerformance()

@@ -91,7 +91,19 @@
             android:configChanges="layoutDirection|locale|orientation|uiMode|screenLayout|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
             android:preferMinimalPostProcessing="true"
             android:exported="true"
+            android:screenOrientation="sensor">
             >
+<!--            android:screenOrientation支持的属性。众所周知，Android应用程序中，android:screenOrientation用于控制activity启动时方向，取值可以为：-->
+<!--            unspecified，默认值，由系统决定，不同手机可能不一致-->
+<!--            landscape，强制横屏显示-->
+<!--            portrait，强制竖屏显-->
+<!--            behind，与前一个activity方向相同-->
+<!--            sensor，根据物理传感器方向转动，用户90度、180度、270度旋转手机方向，activity都更着变化-->
+<!--            sensorLandscape，横屏旋转，一般横屏游戏会这样设置-->
+<!--            sensorPortrait，竖屏旋转-->
+<!--            nosensor，旋转设备时候，界面不会跟着旋转。初始化界面方向由系统控制-->
+<!--            user，用户当前设置的方向-->
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

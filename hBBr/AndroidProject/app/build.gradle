@@ -65,12 +65,14 @@ android {
             minifyEnabled false // 是否对代码进行混淆，true表示混淆
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             debuggable true  //是否支持调试
+            buildConfigField "boolean", "_DEBUG", "true"
         }
         release {
             zipAlignEnabled true  // 是否支持zip
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             debuggable false  //是否支持调试
+            buildConfigField "boolean", "NDEBUG", "true"
         }
     }
     applicationVariants.all { variant ->

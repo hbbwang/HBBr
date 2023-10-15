@@ -46,8 +46,8 @@ ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
 		return NULL;
 	}
 	//导入fbx文件
-#if IS_EDITOR
-	ConsoleDebug::print_endl("Ready import fbx model :" + filePath, "255,255,255");
+#if _DEBUG
+	ConsoleDebug::print_endl("Import fbx model :" + filePath, "255,255,255");
 #endif
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(filePath.c_str(),

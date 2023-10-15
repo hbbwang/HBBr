@@ -84,15 +84,15 @@ private:
 
 	class SceneManager* _scene = NULL;
 
-	bool _bActive;
+	bool _bActive = true;
 
-	bool _bWantDestroy;
+	bool _bWantDestroy = false;
 
-	bool _bInit;
+	bool _bInit = false;
 
 	std::vector<class Component*> _comps;
 
-	HString _name;
+	HString _name = "None";
 
 	GameObject* _parent = NULL;
 

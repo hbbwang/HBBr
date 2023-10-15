@@ -52,6 +52,7 @@ void SceneManager::SceneInit(class VulkanRenderer* renderer)
 	cube->GetTransform()->SetLocation(glm::vec3(0, 0.5f, 0));
 	modelComp->SetModel(FileSystem::GetResourceAbsPath() + "Content/Core/Baise/B32B0C1E-D358-464F-8F0C-52F0DD0FAA05.FBX");
 	cube->SetObjectName("TestFbx_Cube");
+
 }
 #include "HInput.h"
 void SceneManager::SceneUpdate()

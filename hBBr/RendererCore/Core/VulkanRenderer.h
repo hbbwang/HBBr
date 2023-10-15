@@ -121,6 +121,8 @@ public:
 	//Renderer map
 	static std::map<HString, VulkanRenderer*> _renderers;
 
+	VkSurfaceCapabilitiesKHR _surfaceCapabilities{};
+
 private:
 
 	void SetupPassUniformBuffer();
@@ -130,8 +132,6 @@ private:
 	HString _rendererName;
 
 	VkSurfaceKHR _surface = VK_NULL_HANDLE;
-
-	VkSurfaceCapabilitiesKHR _surfaceCapabilities{};
 
 	VkSurfaceFormatKHR _surfaceFormat{};
 

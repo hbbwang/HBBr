@@ -969,7 +969,15 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_gpuDevice, surface, &surfaceCapabilities);
 	VkSurfaceTransformFlagBitsKHR PreTransform;
 
-	PreTransform = surfaceCapabilities.currentTransform;
+	//if(surfaceCapabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
+	//{
+	//	PreTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+	//}
+	//else
+	{
+		PreTransform = surfaceCapabilities.currentTransform;
+	}
+
 	switch (PreTransform)
 	{
 	case VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR:
@@ -1058,26 +1066,22 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		}
 	}
 
-#ifndef __ANDROID__
-	//fullscreen support
-	VkSurfaceFullScreenExclusiveInfoEXT FullScreenInfo = {};
-	if (_deviceExtensionOptionals.HasEXTFullscreenExclusive)
-	{
-		#ifdef __ANDROID__
-			bIsFullScreen = true;
-		#endif
-		FullScreenInfo.sType = VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_INFO_EXT;
-		FullScreenInfo.fullScreenExclusive = bIsFullScreen ? VK_FULL_SCREEN_EXCLUSIVE_ALLOWED_EXT : VK_FULL_SCREEN_EXCLUSIVE_DISALLOWED_EXT;
-		FullScreenInfo.pNext = (void*)info.pNext;
-		info.pNext = &FullScreenInfo;
-	}
+#ifdef _WIN32
+    //fullscreen support
+    VkSurfaceFullScreenExclusiveInfoEXT FullScreenInfo = {};
+    if (_deviceExtensionOptionals.HasEXTFullscreenExclusive)
+    {
+        FullScreenInfo.sType = VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_INFO_EXT;
+        FullScreenInfo.fullScreenExclusive = bIsFullScreen ? VK_FULL_SCREEN_EXCLUSIVE_ALLOWED_EXT : VK_FULL_SCREEN_EXCLUSIVE_DISALLOWED_EXT;
+        FullScreenInfo.pNext = (void*)info.pNext;
+        info.pNext = &FullScreenInfo;
+    }
 #endif
 
 	auto result = vkCreateSwapchainKHR(_device, &info, VK_NULL_HANDLE, &newSwapchain);
-
 	if (result != VK_SUCCESS)
 	{
-#ifndef __ANDROID__
+#ifdef _WIN32
 		//全屏可能失败了,取消全屏
 		if (result == VK_ERROR_INITIALIZATION_FAILED)
 		{
@@ -1106,12 +1110,12 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &numSwapchainImages, swapchainImages.data());
 
 	//创建ImageView
-	ConsoleDebug::print_endl("hBBr:Start Create Swapchain Image View.");
+	ConsoleDebug::print_endl("hBBr:Swapchain: Create Swapchain Image View.");
 	for (int i = 0; i < (int)numSwapchainImages; i++)
 	{
 		CreateImageView(swapchainImages[i], surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, swapchainImageViews[i]);
 	}
-	ConsoleDebug::print_endl("hBBr:Start Transition Swapchain Image layout to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR.");
+	ConsoleDebug::print_endl("hBBr:Swapchain: Transition Swapchain Image layout to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR.");
 	//Swapchain转换到呈现模式
 	VkCommandBuffer buf;
 	AllocateCommandBuffer(_commandPool, buf);
@@ -1130,7 +1134,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	//init semaphores & fences
 	if (acquireImageSemaphore != NULL)
 	{
-		ConsoleDebug::print_endl("hBBr:Start Present Semaphore.");
+		ConsoleDebug::print_endl("hBBr:Swapchain: Present Semaphore.");
 		for (int i = 0; i < acquireImageSemaphore->size(); i++)
 		{
 			DestroySemaphore(acquireImageSemaphore->at(i));		
@@ -1143,7 +1147,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	}
 	if (queueSubmitSemaphore != NULL)
 	{
-		ConsoleDebug::print_endl("hBBr:Start Queue Submit Semaphore.");
+		ConsoleDebug::print_endl("hBBr:Swapchain: Queue Submit Semaphore.");
 		for (int i = 0; i < queueSubmitSemaphore->size(); i++)
 		{
 			DestroySemaphore(queueSubmitSemaphore->at(i));
@@ -1156,7 +1160,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	}
 	if (fences != NULL)
 	{
-		ConsoleDebug::print_endl("hBBr:Start image acquired fences.");
+		ConsoleDebug::print_endl("hBBr:Swapchain: image acquired fences.");
 		for (int i = 0; i < fences->size(); i++)
 		{
 			DestroyFence(fences->at(i));
@@ -1170,7 +1174,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 
 	if (cmdBuf != NULL)
 	{
-		ConsoleDebug::print_endl("hBBr:Start Allocate Main CommandBuffers.");
+		ConsoleDebug::print_endl("hBBr:Swapchain: Allocate Main CommandBuffers.");
 		FreeCommandBuffers(_commandPool, *cmdBuf);
 		cmdBuf->resize(_swapchainBufferCount);
 		for (int i = 0; i < _swapchainBufferCount; i++)
@@ -2123,7 +2127,15 @@ void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, u
 	init_info.Subpass = subPassIndex;
 	init_info.CheckVkResultFn = VK_NULL_HANDLE;
 	//init_info.UseDynamicRendering = true;
-	ImGui_ImplVulkan_Init(&init_info, renderPass);
+
+	ImGui_ImplVulkan_EnableLoadFunctions();
+
+	ImGui_ImplVulkan_Init(&init_info, renderPass, {
+		ImVec4(1,0,0,0),
+		ImVec4(0,1,0,0),
+		ImVec4(0,0,1,0),
+		ImVec4(0,0,0,1)
+		});
 
 	VkCommandBuffer buf;
 	AllocateCommandBuffer(_commandPool, buf);
@@ -2136,7 +2148,7 @@ void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, u
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
-void VulkanManager::ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex)
+void VulkanManager::ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex, glm::mat4 projMat)
 {
 	ImGui_ImplVulkan_Shutdown();
 	//
@@ -2155,7 +2167,14 @@ void VulkanManager::ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassInd
 	init_info.Subpass = subPassIndex;
 	init_info.CheckVkResultFn = VK_NULL_HANDLE;
 	//init_info.UseDynamicRendering = true;
-	ImGui_ImplVulkan_Init(&init_info, renderPass);
+
+	Imgui_Uniform_VS vsU = {};
+	vsU.ProjectionMatrixX = ImVec4(projMat[0].x, projMat[0].y, projMat[0].z, projMat[0].w);
+	vsU.ProjectionMatrixY = ImVec4(projMat[1].x, projMat[1].y, projMat[1].z, projMat[1].w);
+	vsU.ProjectionMatrixZ = ImVec4(projMat[2].x, projMat[2].y, projMat[2].z, projMat[2].w);
+	vsU.ProjectionMatrixW = ImVec4(projMat[3].x, projMat[3].y, projMat[3].z, projMat[3].w);
+
+	ImGui_ImplVulkan_Init(&init_info, renderPass, vsU);
 
 	VkCommandBuffer buf;
 	AllocateCommandBuffer(_commandPool, buf);

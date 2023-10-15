@@ -39,9 +39,8 @@ public class hBBrManager {
     }
     public hBBrManager(SDLActivity a)
     {
-        //addLayerName，tid：xxx 屏蔽该消息刷屏
-        
-        a.getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+        //a.getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 //            // 先判断有没有权限
 //            if (!Environment.isExternalStorageManager()) {

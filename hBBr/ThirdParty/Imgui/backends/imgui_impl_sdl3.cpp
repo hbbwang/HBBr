@@ -251,7 +251,10 @@ bool ImGui_ImplSDL3_ProcessEvent(const SDL_Event* event)
 {
     ImGuiIO& io = ImGui::GetIO();
     ImGui_ImplSDL3_Data* bd = ImGui_ImplSDL3_GetBackendData();
-
+    if(!bd)
+    {
+        return false;
+    }
     switch (event->type)
     {
         case SDL_EVENT_MOUSE_MOTION:

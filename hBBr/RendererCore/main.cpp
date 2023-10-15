@@ -1,16 +1,15 @@
-﻿#include "./Form/FormMain.h"
+﻿#include "./Core/VulkanManager.h"
+#include "./Core/VulkanRenderer.h"
+#include "./Form/FormMain.h"
 #include "./Core/Shader.h"
 #include "./Core/Pipeline.h"
 #include "./Common/HInput.h"
-#include "./Core/VulkanRenderer.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
 #include "./Resource/ContentManager.h"
-
 #include "GLFWInclude.h"
 #include "ConsoleDebug.h"
-
 #if defined(__ANDROID__)
 
 #ifndef IS_GAME
@@ -108,10 +107,7 @@ void Android_Init()
 VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDebug, void* parent)
 {
 	//must be successful.
-	if (SDL_Init(
-		SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS | 
-		SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMEPAD | SDL_INIT_SENSOR 
-	) == -1)
+    if (SDL_Init(SDL_INIT_EVERYTHING) == -1)
 	{
 		MessageOut("Init sdl3 failed.", true, true, "255,0,0");
 	}
@@ -122,6 +118,7 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	}
 
 	//Set sdl hints
+    SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "0");
 	SDL_SetHint(SDL_HINT_VIDEO_FOREIGN_WINDOW_VULKAN, "1");//SDL_WINDOW_VULKAN
 
 #if __ANDROID__
@@ -208,6 +205,7 @@ bool VulkanApp::UpdateForm()
 		{
 			winForm = &(*winForm);
 		}
+		ImGui_ImplSDL3_ProcessEvent(&event);
 		switch (event.type) 
 		{
 			//case 0x200://窗口事件,SDL3开始不再需要这个了
@@ -250,6 +248,9 @@ bool VulkanApp::UpdateForm()
 			case SDL_EVENT_WINDOW_MINIMIZED:
 			case SDL_EVENT_WINDOW_HIDDEN:
 				bStopRender = true;
+				break;
+			case SDL_EVENT_FINGER_DOWN:
+				//SDL_ShowSimpleMessageBox(0, "", "(test)手指按下", NULL);
 				break;
 		}
 	}
@@ -294,13 +295,11 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 	if(!window)
 	{
 		window = SDL_CreateWindow(title, w, h,
-			SDL_WINDOW_VULKAN
+			SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE
 #if defined(__ANDROID__)
 			| SDL_WINDOW_FULLSCREEN
 #else
-			| SDL_WINDOW_RESIZABLE
 #endif
-
 		);
 	}
 
@@ -419,6 +418,7 @@ int main(int argc, char* argv[])
 {
     //ConsoleDebug::CreateConsole("");
 	//Enable custom loop
+    //SDL_ShowSimpleMessageBox(0,"","",NULL);
 	VulkanApp::InitVulkanManager(true, true);
 	VulkanApp::DeInitVulkanManager();
 	return 0;
