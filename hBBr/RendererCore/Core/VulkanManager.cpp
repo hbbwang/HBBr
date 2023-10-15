@@ -2199,7 +2199,7 @@ void VulkanManager::ImguiNewFrame()
 	ImGui::NewFrame();
 }
 
-void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf, float w, float h)
+void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf)
 {
 	ImGui::Render();
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuf);
