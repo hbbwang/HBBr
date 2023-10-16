@@ -7,7 +7,6 @@ void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textC
 {
 	HString msgStr = msg;
 	msgStr = "[hBBr]:" + msgStr;
-	ConsoleDebug::print_endl(msgStr, textColor);
     if (bMessageBox)
     {
 #ifdef _DEBUG
@@ -25,6 +24,10 @@ void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textC
 #endif
 #endif
     }
+	else
+	{
+		ConsoleDebug::print_endl(msgStr, textColor);
+	}
 	if (bExit)
 	{
 		VulkanApp::AppQuit();

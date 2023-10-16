@@ -64,10 +64,19 @@ VulkanDebugCallback(
 	//	ConsoleDebug::print_endl(DString(": "));
 	//}
 	title = title + HString("@[") + layer_prefix + "]";
-	ConsoleDebug::print_endl(title, color);
-	ConsoleDebug::print_endl(msg, color);
-	if(bError)
-		MessageOut(HString(title + "\n" + msg).c_str(),false,true,"255,0,0");
+	//ConsoleDebug::print_endl(title, color);
+	//ConsoleDebug::print_endl(msg, color);
+	if (bError)
+	{
+		try {
+			MessageOut(HString(title + "\n" + msg).c_str(), false, true, "255,0,0");
+		}
+		catch(const std::system_error& e)
+		{
+			ConsoleDebug::print_endl(HString("Error: ")+ e.what());
+		}
+	}
+
 	return false;
 }
 
