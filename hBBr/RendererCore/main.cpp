@@ -457,12 +457,14 @@ void dumpBacktrace(void** buffer, size_t count)
 		{
 			int status = 0;
 			char* demangled = abi::__cxa_demangle(info.dli_sname, 0, 0, &status);
-			__android_log_print(ANDROID_LOG_ERROR, "APP_TAG", "#%zu 0x%p %s", idx, addr, status == 0 ? demangled : info.dli_sname);
+			//__android_log_print(ANDROID_LOG_ERROR, "APP_TAG", "#%zu 0x%p %s", idx, addr, status == 0 ? demangled : info.dli_sname);
+			ConsoleDebug::printf_endl_error("#%zu 0x%p %s",idx, addr, status == 0 ? demangled : info.dli_sname);
 			free(demangled);
 		}
 		else
 		{
-			__android_log_print(ANDROID_LOG_ERROR, "APP_TAG", "#%zu 0x%p", idx, addr);
+			//__android_log_print(ANDROID_LOG_ERROR, "APP_TAG", "#%zu 0x%p", idx, addr);
+			ConsoleDebug::printf_endl_error("#%zu 0x%p", idx, addr);
 		}
 	}
 }

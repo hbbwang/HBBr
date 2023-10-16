@@ -215,6 +215,33 @@ ImguiScreenPass::~ImguiScreenPass()
 	VulkanManager::GetManager()->ShutdownImgui();
 }
 
+void ImguiScreenPass::PassReset()
+{
+	GraphicsPass::PassReset();
+	const auto manager = VulkanManager::GetManager();
+
+	glm::mat4 pre_rotate_mat = glm::mat4(
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1
+	);
+	glm::vec3 rotation_axis = glm::vec3(0.0f, 0.0f, 1.0f);
+	if (_renderer->_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR)
+	{
+		pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(90.0f), rotation_axis);
+	}
+	else if (_renderer->_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR)
+	{
+		pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(270.0f), rotation_axis);
+	}
+	else if (_renderer->_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR)
+	{
+		pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(180.0f), rotation_axis);
+	}
+	manager->ResetImgui_SDL(_renderPass, 0, pre_rotate_mat);
+}
+
 void ImguiScreenPass::PassUpdate()
 {
 	const auto manager = VulkanManager::GetManager();
@@ -231,33 +258,6 @@ void ImguiScreenPass::PassUpdate()
 	//End
 	manager->ImguiEndFrame(cmdBuf);
 	manager->EndRenderPass(cmdBuf);
-}
-
-void ImguiScreenPass::PassReset()
-{
-	GraphicsPass::PassReset();
-	const auto manager = VulkanManager::GetManager();
-
-	glm::mat4 pre_rotate_mat = glm::mat4(
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1
-	);
-	glm::vec3 rotation_axis = glm::vec3(0.0f, 0.0f, 1.0f);
-	if (_renderer->_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR)
-	{
-		pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(90.0f), rotation_axis);
-	}
-	else if (_renderer->_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR)
-	{
-		pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(270.0f), rotation_axis);
-	}
-	else if (_renderer->_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR)
-	{
-		pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(180.0f), rotation_axis);
-	}
-	manager->ResetImgui_SDL(_renderPass, 0, pre_rotate_mat);
 }
 
 void ImguiScreenPass::ShowPerformance()
