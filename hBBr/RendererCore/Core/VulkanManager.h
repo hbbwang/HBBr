@@ -19,11 +19,6 @@
 #include "vulkan_wrapper/vulkan_wrapper.h"
 #endif
 
-// --------- IMGUI
-#include "Imgui/imgui.h"
-#include "Imgui/backends/imgui_impl_vulkan.h"
-#include "Imgui/backends/imgui_impl_sdl3.h"
-
 #include "GLFWInclude.h"
 #include <vulkan/vulkan.h>
 #include "../Common/Common.h"
@@ -299,7 +294,7 @@ public:
 
 	void ImguiNewFrame();
 
-	void ImguiEndFrame(VkCommandBuffer cmdBuf , VkExtent2D currentFrameBufferSize);
+	void ImguiEndFrame(VkCommandBuffer cmdBuf);
 
 	/* 立刻序列提交,为保证运行安全,会执行一次等待运行结束 */
 	void SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);

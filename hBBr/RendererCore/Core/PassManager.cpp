@@ -2,7 +2,7 @@
 #include "VulkanRenderer.h"
 #include "PassBase.h"
 #include "Pass/PassDefine.h"
-
+#include "Pass/ImguiPass.h"
 void PassManager::PassesInit(VulkanRenderer* renderer)
 {
 	_renderer = renderer;
@@ -11,8 +11,12 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 		//Opaque Pass
 		std::shared_ptr<BasePass> opaque = std::make_shared<BasePass>(renderer);
 		AddPass(opaque, "Opaque");
+
+#ifdef IS_EDITOR
 		std::shared_ptr<ImguiScreenPass> imgui = std::make_shared<ImguiScreenPass>(renderer);
 		AddPass(imgui, "Imgui");
+#endif
+
 	}
 	for (auto p : _passes)
 	{

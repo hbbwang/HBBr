@@ -208,6 +208,9 @@
     <ClInclude Include="Common\AndroidCommon.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Pass\ImguiPass.h">
+      <Filter>Renderer\Core\Pass</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -344,6 +347,9 @@
     </ClCompile>
     <ClCompile Include="Common\TypeConversion.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Pass\ImguiPass.cpp">
+      <Filter>Renderer\Core\Pass</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

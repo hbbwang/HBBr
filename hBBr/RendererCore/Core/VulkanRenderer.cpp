@@ -183,12 +183,7 @@ void VulkanRenderer::SetupPassUniformBuffer()
 		glm::mat4 flipYMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, -1.0f, 0.5f));
 
 		{//Screen Rotator
-			glm::mat4 pre_rotate_mat = glm::mat4(
-				1, 0, 0, 0,
-				0, 1, 0, 0,
-				0, 0, 1, 0,
-				0, 0, 0, 1
-			);
+			glm::mat4 pre_rotate_mat = glm::mat4(1);
 			glm::vec3 rotation_axis = glm::vec3(0.0f, 0.0f, 1.0f);
 			if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR) {
 				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(90.0f), rotation_axis);

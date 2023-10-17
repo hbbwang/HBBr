@@ -6,6 +6,7 @@
 #include "./Common/HInput.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
+#include "Imgui/backends/imgui_impl_sdl3.h"
 #endif
 #include "./Resource/ContentManager.h"
 #include "GLFWInclude.h"
@@ -203,7 +204,9 @@ bool VulkanApp::UpdateForm()
 		{
 			winForm = &(*winForm);
 		}
+#ifdef IS_EDITOR
 		ImGui_ImplSDL3_ProcessEvent(&event);
+#endif
 		switch (event.type) 
 		{
 			//case 0x200://窗口事件,SDL3开始不再需要这个了

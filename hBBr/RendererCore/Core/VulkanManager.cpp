@@ -11,6 +11,13 @@
 #include "DescriptorSet.h"
 #include "Primitive.h"
 
+#ifdef IS_EDITOR
+// --------- IMGUI
+#include "Imgui/imgui.h"
+#include "Imgui/backends/imgui_impl_vulkan.h"
+#include "Imgui/backends/imgui_impl_sdl3.h"
+#endif
+
 using namespace std;
 
 std::unique_ptr<VulkanManager> VulkanManager::_vulkanManager;
@@ -129,6 +136,7 @@ VulkanManager::VulkanManager(bool bDebug)
 	ConsoleDebug::print_endl("hBBr:Start Create Descripotr Pool.");
 	CreateDescripotrPool(_descriptorPool);
 	//
+#ifdef IS_EDITOR
 	ConsoleDebug::print_endl("hBBr:Start init imgui.");
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -143,12 +151,14 @@ VulkanManager::VulkanManager(bool bDebug)
 	io.Fonts->AddFontDefault(&font_cfg);
 	ImGui::GetStyle().ScaleAllSizes(3.0f);
 #endif
-
+#endif
 }
 
 VulkanManager::~VulkanManager()
 {
+#ifdef IS_EDITOR
 	ImGui::DestroyContext();
+#endif
 	DestroyDescriptorPool(_descriptorPool);
 	DestroyCommandPool();
 	if (_bDebugEnable)
@@ -829,7 +839,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 )
 {
 	//ConsoleDebug::print_endl("Create Swapchain KHR.");
-	VkPresentModeKHR present_mode = VK_PRESENT_MODE_FIFO_KHR;
+	VkPresentModeKHR present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
 	//if (_winInfo.vsync)
 	{
 		uint32_t present_mode_count = 0;
@@ -2096,6 +2106,7 @@ void VulkanManager::CreateShaderModule(VkDevice device, std::vector<char> data, 
 
 void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, uint32_t subPassIndex)
 {
+#ifdef IS_EDITOR
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.IniFilename = NULL;
 
@@ -2136,12 +2147,13 @@ void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, u
 	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
 	FreeCommandBuffers(_commandPool, { buf });
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
+#endif
 }
 
 void VulkanManager::ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex, glm::mat4 projMat)
 {
+#ifdef IS_EDITOR
 	ImGui_ImplVulkan_Shutdown();
-	//
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = _instance;
 	init_info.PhysicalDevice = _gpuDevice;
@@ -2175,27 +2187,33 @@ void VulkanManager::ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassInd
 	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
 	FreeCommandBuffers(_commandPool, { buf });
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
+#endif
 }
 
 void VulkanManager::ShutdownImgui()
 {
+#ifdef IS_EDITOR
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplSDL3_Shutdown();
+#endif
 }
 
 void VulkanManager::ImguiNewFrame()
 {
+#ifdef IS_EDITOR
 	ImGui_ImplVulkan_SetMinImageCount(_swapchainBufferCount);
 	ImGui_ImplVulkan_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
 	ImGui::NewFrame();
+#endif
 }
 
-void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf , VkExtent2D currentFrameBufferSize)
+void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf)
 {
+#ifdef IS_EDITOR
 	ImGui::Render();
-	//ImGui::GetDrawData()->DisplaySize = ImVec2(currentFrameBufferSize.width,currentFrameBufferSize.height);
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuf);
+#endif
 }
 
 void VulkanManager::SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask, VkQueue queue)
