@@ -299,7 +299,7 @@ public:
 
 	void ImguiNewFrame();
 
-	void ImguiEndFrame(VkCommandBuffer cmdBuf);
+	void ImguiEndFrame(VkCommandBuffer cmdBuf , VkExtent2D currentFrameBufferSize);
 
 	/* 立刻序列提交,为保证运行安全,会执行一次等待运行结束 */
 	void SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);

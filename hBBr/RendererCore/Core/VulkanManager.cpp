@@ -571,12 +571,6 @@ void VulkanManager::InitDevice()
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_QCOM_RENDER_PASS_TRANSFORM_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasQcomRenderPassTransform = 1;
 				}
-				else if (strcmp(availableExts[i].extensionName, VK_QCOM_RENDER_PASS_TRANSFORM_EXTENSION_NAME) == 0)
-				{
-				extensions.push_back(VK_QCOM_RENDER_PASS_TRANSFORM_EXTENSION_NAME);
-				layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_QCOM_RENDER_PASS_TRANSFORM_EXTENSION_NAME ext.");
-				_deviceExtensionOptionals.HasQcomRenderPassTransform = 1;
-				}
 
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME)==0)
 				{
@@ -1056,22 +1050,11 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		}
 	}
 
-	//if (surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR ||
-	//	surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR)
-	//{
-	//	// Swap to get identity width and height
-	//	std::swap(info.imageExtent.width, info.imageExtent.height);
-	//}
- 
-	if (_deviceExtensionOptionals.HasQcomRenderPassTransform)
+	if (surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR ||
+		surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR)
 	{
-		QCOMRenderPassTransform = surfaceCapabilities.currentTransform;
-		info.preTransform = QCOMRenderPassTransform;
-		if (info.preTransform == VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR ||
-			info.preTransform == VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR)
-		{
-			std::swap(info.imageExtent.width, info.imageExtent.height);
-		}
+		// Swap to get identity width and height
+		std::swap(info.imageExtent.width, info.imageExtent.height);
 	}
 
 #ifdef _WIN32
@@ -2208,9 +2191,10 @@ void VulkanManager::ImguiNewFrame()
 	ImGui::NewFrame();
 }
 
-void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf)
+void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf , VkExtent2D currentFrameBufferSize)
 {
 	ImGui::Render();
+	//ImGui::GetDrawData()->DisplaySize = ImVec2(currentFrameBufferSize.width,currentFrameBufferSize.height);
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuf);
 }
 

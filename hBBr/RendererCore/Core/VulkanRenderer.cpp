@@ -179,9 +179,6 @@ void VulkanRenderer::SetupPassUniformBuffer()
 		_passUniformBuffer.View = mainCamera->GetViewMatrix();
 		_passUniformBuffer.View_Inv = mainCamera->GetInvViewMatrix();
 		float aspect = (float)_surfaceSize.width / (float)_surfaceSize.height;
-		//DirectX Left hand.
-		_passUniformBuffer.Projection = glm::perspectiveLH(glm::radians(mainCamera->GetFOV()), aspect, mainCamera->GetNearClipPlane(), mainCamera->GetFarClipPlane());
-
 		//DirectX Left hand 
 		glm::mat4 flipYMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, -1.0f, 0.5f));
 
@@ -195,13 +192,17 @@ void VulkanRenderer::SetupPassUniformBuffer()
 			glm::vec3 rotation_axis = glm::vec3(0.0f, 0.0f, 1.0f);
 			if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR) {
 				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(90.0f), rotation_axis);
+                aspect = (float)_surfaceSize.height / (float)_surfaceSize.width;
 			}
 			else if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR) {
 				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(270.0f), rotation_axis);
+                aspect = (float)_surfaceSize.height / (float)_surfaceSize.width;
 			}
 			else if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR) {
 				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(180.0f), rotation_axis);
 			}
+            //DirectX Left hand.
+            _passUniformBuffer.Projection = glm::perspectiveLH(glm::radians(mainCamera->GetFOV()), aspect, mainCamera->GetNearClipPlane(), mainCamera->GetFarClipPlane());
 			_passUniformBuffer.Projection = pre_rotate_mat * flipYMatrix * _passUniformBuffer.Projection;
 		}
 

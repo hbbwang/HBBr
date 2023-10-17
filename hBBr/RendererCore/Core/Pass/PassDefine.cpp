@@ -156,9 +156,9 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 		{
 			obj->ResizeDescriptorBuffer(sizeof(ObjectUniformBuffer) * (objectCount + 1));
 		}
-		obj->NeedUpdate();
+		//obj->NeedUpdate();
 		obj->UpdateDescriptorSet(sizeof(ObjectUniformBuffer));
-		mat->NeedUpdate();
+		//mat->NeedUpdate();
 		mat->ResizeDescriptorBuffer(matOffset);
 		mat->UpdateDescriptorSet(matBufferSize, matBufferOffset);
 	}
@@ -254,7 +254,7 @@ void ImguiScreenPass::PassUpdate()
 	ImGui::ShowDemoWindow((bool*)1);
 	ShowPerformance();
 	//End
-	manager->ImguiEndFrame(cmdBuf);
+	manager->ImguiEndFrame(cmdBuf,VkExtent2D{_currentFrameBufferSize.width , _currentFrameBufferSize.height});
 	EndRenderPass();
 }
 
