@@ -41,13 +41,16 @@ public:
 	//Step the last,custom.
 	virtual void PassInit()override {}
 	virtual void PassReset()override { _currentFrameBufferSize = { 999999 , 999999 }; }
-	virtual void ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> swapchainImageViews,std::vector<VkImageView> imageViews);
+	virtual void ResetFrameBuffer(VkExtent2D size,std::vector<VkImageView> imageViews);
 	void CreateRenderPass();
 	HBBR_INLINE VkRenderPass GetRenderPass()const
 	{
 		return _renderPass;
 	}
 protected:
+	void BeginRenderPass(std::array<float, 4> clearColor = { 0.0f, 0.0f, 0.0f, 0.0f });
+	void EndRenderPass();
+	void SetViewport(VkExtent2D viewportSize);
 	VkFramebuffer GetFrameBuffer()const;
 	VkRenderPass _renderPass = VK_NULL_HANDLE;
 	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;

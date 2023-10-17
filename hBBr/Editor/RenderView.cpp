@@ -113,8 +113,12 @@ void RenderView::UpdateRender()
 
 void RenderView::focusInEvent(QFocusEvent* event)
 {
-	VulkanApp::SetFormFocus(_mainRenderer);
-	SetFocus(hwnd);
+	//if (GetFocus() != hwnd || VulkanApp::GetFocusForm() != _mainRenderer)
+	{
+		//SetFocus(NULL);
+		VulkanApp::SetFocusForm(_mainRenderer);
+		SetFocus(hwnd);
+	}
 }
 
 void RenderView::focusOutEvent(QFocusEvent* event)
@@ -124,7 +128,8 @@ void RenderView::focusOutEvent(QFocusEvent* event)
 
 void RenderView::mousePressEvent(QMouseEvent* event)
 {
-	setFocus();
+	VulkanApp::SetFocusForm(_mainRenderer);
+	SetFocus(hwnd);
 }
 
 void RenderView::mouseReleaseEvent(QMouseEvent* event)

@@ -21,7 +21,7 @@ std::shared_ptr<Texture> PassBase::GetSceneTexture(uint32_t descIndex)
 	return _renderer->GetPassManager()->GetSceneTexture()->GetTexture(SceneTextureDesc(descIndex));
 }
 
-void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> swapchainImageViews, std::vector<VkImageView> imageViews)
+void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> imageViews)
 {
 	if (_currentFrameBufferSize.width != size.width || _currentFrameBufferSize.height != size.height)
 	{
@@ -39,7 +39,7 @@ void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> sw
 		//VulkanManager::GetManager()->CreateFrameBuffers({ size.width, size.height }, _renderPass, imageViews, _framebuffers);
 		for (int i = 0; i < (int)VulkanManager::GetManager()->GetSwapchainBufferCount(); i++)
 		{
-			std::vector<VkImageView> ivs = { swapchainImageViews[i] };
+			std::vector<VkImageView> ivs = { _renderer->GetSwapchainImageViews()[i] };
 			if (imageViews.size() > 0)
 			{
 				ivs.insert(ivs.end(), imageViews.begin(), imageViews.end());
@@ -142,6 +142,21 @@ void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<ui
 		depen.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	}
 	_subpassDependencys.push_back(depen);
+}
+
+void GraphicsPass::BeginRenderPass(std::array<float, 4> clearColor)
+{
+	VulkanManager::GetManager()->BeginRenderPass(_renderer->GetCommandBuffer(), GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, clearColor);
+}
+
+void GraphicsPass::EndRenderPass()
+{
+	VulkanManager::GetManager()->EndRenderPass(_renderer->GetCommandBuffer());
+}
+
+void GraphicsPass::SetViewport(VkExtent2D viewportSize)
+{
+	VulkanManager::GetManager()->CmdSetViewport(_renderer->GetCommandBuffer(), { viewportSize });
 }
 
 VkFramebuffer GraphicsPass::GetFrameBuffer()const

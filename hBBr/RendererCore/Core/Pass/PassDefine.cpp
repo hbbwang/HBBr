@@ -48,10 +48,9 @@ void BasePass::PassUpdate()
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass,"Opaque Render Pass", glm::vec4(0.2, 1.0, 0.7, 0.2));
 	//Update FrameBuffer
-	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews(), { GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetTextureView() });
-	manager->CmdSetViewport(cmdBuf, { _currentFrameBufferSize });
-	manager->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0.0,0 });
-	
+	ResetFrameBuffer(_renderer->GetSurfaceSize(), { GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetTextureView() });
+	SetViewport(_currentFrameBufferSize);
+	BeginRenderPass({ 0,0,0,0 });
 	//Opaque Pass
 	SetupBasePassAndDraw(
 		Pass::OpaquePass,
@@ -67,7 +66,7 @@ void BasePass::PassUpdate()
 	//...
 
 	
-	manager->EndRenderPass(cmdBuf);
+	EndRenderPass();
 }
 
 void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* obj, DescriptorSet* mat, Buffer* vb, Buffer* ib)
@@ -219,7 +218,6 @@ void ImguiScreenPass::PassReset()
 {
 	GraphicsPass::PassReset();
 	const auto manager = VulkanManager::GetManager();
-
 	glm::mat4 pre_rotate_mat = glm::mat4(
 			1, 0, 0, 0,
 			0, 1, 0, 0,
@@ -248,16 +246,16 @@ void ImguiScreenPass::PassUpdate()
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, "Imgui Render Pass", glm::vec4(0.1, 0.4, 0.2, 0.2));
 	//Update FrameBuffer
-	ResetFrameBuffer(_renderer->GetSurfaceSize(), _renderer->GetSwapchainImageViews(), {});
-	manager->CmdSetViewport(cmdBuf, { _currentFrameBufferSize });
-	manager->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, { 0,0,0,0 });
+	ResetFrameBuffer(_renderer->GetSurfaceSize(), {});
+	SetViewport(_currentFrameBufferSize);
+	BeginRenderPass({ 0,0,0,0 });
 	manager->ImguiNewFrame();
 	//Begin
 	ImGui::ShowDemoWindow((bool*)1);
 	ShowPerformance();
 	//End
 	manager->ImguiEndFrame(cmdBuf);
-	manager->EndRenderPass(cmdBuf);
+	EndRenderPass();
 }
 
 void ImguiScreenPass::ShowPerformance()

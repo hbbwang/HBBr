@@ -56,10 +56,10 @@ void CloseCallBack(SDL_Window* window)
 
 void FocusCallBack(VulkanForm* window, int focused)
 {
-	if (focused == 1)
-		VulkanApp::_focusForm = window;
+	if (focused == 1 && window != VulkanApp::GetFocusForm())
+		VulkanApp::SetFocusForm(window);
 	else
-		VulkanApp::_focusForm = NULL;
+		VulkanApp::SetFocusForm(NULL);
 }
 
 void KeyBoardCallBack(SDL_Window* window, SDL_Keycode key, int scancode, int action, int mods)
@@ -380,14 +380,14 @@ void* VulkanApp::GetWindowHandle(VulkanForm* form)
 	return NULL;
 }
 
-void VulkanApp::SetFormFocus(VulkanForm* form)
+void VulkanApp::SetFocusForm(VulkanForm* form)
 {
 	if (form && form->window)
 	{
 		SDL_SetWindowInputFocus(form->window);
 		SDL_SetWindowFocusable(form->window, SDL_TRUE);
-		FocusCallBack(form, 1);
 	}
+	_focusForm = form;
 }
 
 void VulkanApp::SetFormVisiable(VulkanForm* form, bool bShow)

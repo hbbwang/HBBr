@@ -14,6 +14,7 @@ struct VulkanForm
 
 class VulkanApp
 {
+	friend class HInput;
 public:
 	/* 初始化Vulkan manager 和 第一个Vulkan渲染窗口
 		@bCustomRenderLoop :是否开启自循环
@@ -24,7 +25,6 @@ public:
 	HBBR_API static void DeInitVulkanManager();
 	HBBR_API static bool UpdateForm();
 	HBBR_API static void UpdateRender();
-
 	HBBR_API static VulkanForm* CreateNewWindow(uint32_t w = 512, uint32_t h = 512, const char* title = "Renderer",bool bCreateRenderer = false ,void* parent = NULL);
 	HBBR_API static void CreateRenderer(VulkanForm* form);
 	HBBR_API static bool IsWindowFocus(SDL_Window* windowHandle);
@@ -34,16 +34,16 @@ public:
 	HBBR_API static void SetWindowPos(VulkanForm* form, uint32_t x, uint32_t y);
 	HBBR_API static void* GetWindowHandle(VulkanForm* form);
 	HBBR_API static inline VulkanForm* GetMainForm() { return _mainForm; }
-	HBBR_API static void SetFormFocus(VulkanForm* form);
+	HBBR_API static void SetFocusForm(VulkanForm* form);
+	HBBR_API static VulkanForm* GetFocusForm() { return _focusForm; }
 	HBBR_API static void SetFormVisiable(VulkanForm* form, bool bShow);
 	HBBR_API static void AppQuit();
-
 	//Callbacks
 	static std::vector<FormDropFun> _dropFuns;
 
-	static VulkanForm* _focusForm;
-
 private:
+
+	static VulkanForm* _focusForm;
 
 	static bool _bFocusQuit;
 
