@@ -3,25 +3,23 @@
 #include <assert.h>
 #include "FormMain.h"
 #include <SDL3/SDL.h>
+#include "VulkanManager.h"
 void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textColor)
 {
 	HString msgStr = msg;
 	msgStr = "[hBBr]:" + msgStr;
-    if (bMessageBox)
+    if (bMessageBox && VulkanManager::GetManager()->_bDebugEnable)
     {
-#ifdef _DEBUG
 #if defined(_WIN32)
 		//MessageBoxA(NULL, msg, "message", MB_ICONERROR);
 		#if NDEBUG
-		MessageBoxA(NULL, msg, "message", MB_ICONERROR);
+		MessageBoxA(0, msg, "HBBr msg", 0);
 		#else
 		DE_ASSERT(0, msg);
 		#endif
-
 #else
 	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", msg, NULL);
 	//fflush(stdout);
-#endif
 #endif
     }
 	else

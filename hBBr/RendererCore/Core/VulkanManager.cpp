@@ -2014,6 +2014,15 @@ void VulkanManager::CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info, V
 	}
 }
 
+void VulkanManager::DestroyPipeline(VkPipeline& pipeline)
+{
+	if (pipeline != VK_NULL_HANDLE)
+	{
+		vkDestroyPipeline(_device, pipeline, VK_NULL_HANDLE);
+		pipeline = VK_NULL_HANDLE;
+	}
+}
+
 void VulkanManager::CreateRenderPass(std::vector<VkAttachmentDescription>attachmentDescs, std::vector<VkSubpassDependency>subpassDependencys, std::vector<VkSubpassDescription>subpassDescs, VkRenderPass& renderPass)
 {
 	VkRenderPassCreateInfo renderPassCreateInfo = {};
@@ -2237,7 +2246,7 @@ void VulkanManager::SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, V
 	else
 		result = vkQueueSubmit(queue, 1, &info, VK_NULL_HANDLE);
 	if(result != VK_SUCCESS)
-		MessageOut(" [Submit Queue Immediate]vkQueueSubmit error", false, false);
+		MessageOut(("[Submit Queue Immediate]vkQueueSubmit error: " + GetVkResult(result)).c_str(), false, false);
 	vkQueueWaitIdle(_graphicsQueue);
 }
 

@@ -39,13 +39,15 @@ void BasePass::PassInit()
 	, _pipelineLayout);
 	//Pass Uniform总是一尘不变的,并且我们用的是Dynamic uniform buffer ,所以只需要更新一次所有的DescriptorSet即可。
 	_opaque_descriptorSet_pass->UpdateDescriptorSetAll(sizeof(PassUniformBuffer));
+
+	_passName = "Opaque Render Pass";
 }
 
 void BasePass::PassUpdate()
 {
 	const auto manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
-	COMMAND_MAKER(cmdBuf, BasePass,"Opaque Render Pass", glm::vec4(0.2, 1.0, 0.7, 0.2));
+	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.2, 1.0, 0.7, 0.2));
 	//Update FrameBuffer
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), { GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetTextureView() });
 	SetViewport(_currentFrameBufferSize);

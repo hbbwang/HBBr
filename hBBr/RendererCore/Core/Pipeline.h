@@ -29,6 +29,8 @@ struct VkGraphicsPipelineCreateInfoCache
 	VkPipelineMultisampleStateCreateInfo			msInfo{};
 	//------------------------Depth Stencil
 	VkPipelineDepthStencilStateCreateInfo			depthStencilInfo{};
+	//Stages
+	std::vector<VkPipelineShaderStageCreateInfo>	stages;
 };
 
 enum class ColorWriteMask
@@ -259,6 +261,7 @@ public:
 
 	//Graphics pipeline setting step 4
 	static void SetVertexInput(VkGraphicsPipelineCreateInfoCache& createInfo, VertexInputLayout vertexInputLayout);
+	static void SetVertexInput(VkGraphicsPipelineCreateInfoCache& createInfo, uint32_t vertexInputStride ,VkVertexInputRate vertexInputRate,std::vector<VkFormat>inputLayout );
 
 	//Graphics pipeline setting step 5 , also not.
 	static void SetDepthStencil(VkGraphicsPipelineCreateInfoCache& createInfo);
@@ -273,9 +276,12 @@ public:
 
 	static void ClearPipelineObjects();
 
-private:
-	static void BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCache& createInfo, VkRenderPass renderPass, uint32_t subpassIndex , VkPipeline& pipelineObj);
+	static void BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCache& createInfo, VkRenderPass renderPass, uint32_t subpassIndex, VkPipeline& pipelineObj);
+
 	static void SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& createInfo, VkPipelineLayout pipelineLayout);
+
+	static void ClearCreateInfo(VkGraphicsPipelineCreateInfoCache& createInfo);
+private:
 	static std::map<PipelineIndex, std::unique_ptr<PipelineObject>> _graphicsPipelines;
 	static std::map<PipelineIndex, std::unique_ptr<PipelineObject>> _computePipelines;
 

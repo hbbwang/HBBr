@@ -135,35 +135,39 @@ void PipelineManager::SetRenderDepthStencil(VkGraphicsPipelineCreateInfoCache& c
 
 void PipelineManager::SetVertexInput(VkGraphicsPipelineCreateInfoCache& createInfo, VertexInputLayout vertexInputLayout)
 {
+	SetVertexInput(createInfo, vertexInputLayout.inputSize, vertexInputLayout.inputRate, vertexInputLayout.inputLayouts);
+}
+
+void PipelineManager::SetVertexInput(VkGraphicsPipelineCreateInfoCache& createInfo, uint32_t vertexInputStride, VkVertexInputRate vertexInputRate, std::vector<VkFormat>inputLayout)
+{
 	createInfo.vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	createInfo.vertexInputBindingDescs.resize(1);
 	createInfo.vertexInputBindingDescs[0] = {};
 	createInfo.vertexInputBindingDescs[0].binding = 0;
-	createInfo.vertexInputBindingDescs[0].stride = vertexInputLayout.inputSize;
-	createInfo.vertexInputBindingDescs[0].inputRate = vertexInputLayout.inputRate;
-	createInfo.vertexInputAttributes.resize(vertexInputLayout.inputLayouts.size());
+	createInfo.vertexInputBindingDescs[0].stride = vertexInputStride;
+	createInfo.vertexInputBindingDescs[0].inputRate = vertexInputRate;
+	createInfo.vertexInputAttributes.resize(inputLayout.size());
 	uint32_t offset = 0;
 	for (int i = 0; i < createInfo.vertexInputAttributes.size(); i++)
 	{
 		createInfo.vertexInputAttributes[i] = {};
-		createInfo.vertexInputAttributes[i].format = vertexInputLayout.inputLayouts[i];
+		createInfo.vertexInputAttributes[i].format = inputLayout[i];
 		createInfo.vertexInputAttributes[i].location = i;
 		createInfo.vertexInputAttributes[i].binding = 0;
 		createInfo.vertexInputAttributes[i].offset = offset;
-		if (vertexInputLayout.inputLayouts[i] == VK_FORMAT_R32G32B32A32_SFLOAT)
+		if (inputLayout[i] == VK_FORMAT_R32G32B32A32_SFLOAT)
 			offset += 4 * sizeof(float);
-		else if (vertexInputLayout.inputLayouts[i] == VK_FORMAT_R32G32B32_SFLOAT)
+		else if (inputLayout[i] == VK_FORMAT_R32G32B32_SFLOAT)
 			offset += 3 * sizeof(float);
-		else if (vertexInputLayout.inputLayouts[i] == VK_FORMAT_R32G32_SFLOAT)
+		else if (inputLayout[i] == VK_FORMAT_R32G32_SFLOAT)
 			offset += 2 * sizeof(float);
-		else if (vertexInputLayout.inputLayouts[i] == VK_FORMAT_R32_SFLOAT)
+		else if (inputLayout[i] == VK_FORMAT_R32_SFLOAT)
 			offset += 1 * sizeof(float);
 	}
 	createInfo.vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(createInfo.vertexInputAttributes.size());
 	createInfo.vertexInputInfo.pVertexAttributeDescriptions = createInfo.vertexInputAttributes.data();// Optional
 	createInfo.vertexInputInfo.vertexBindingDescriptionCount = 1;
 	createInfo.vertexInputInfo.pVertexBindingDescriptions = createInfo.vertexInputBindingDescs.data();// Optional
-
 	createInfo.CreateInfo.pVertexInputState = &createInfo.vertexInputInfo;
 }
 
@@ -182,12 +186,12 @@ void PipelineManager::SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfo
 	//set shader
 	//createInfo.CreateInfo.stageCount = _countof(shader_stage);
 	//createInfo.CreateInfo.pStages = shader_stage;
-	static VkPipelineShaderStageCreateInfo info[] = {
-		vs.shaderStageInfo, 
-		ps.shaderStageInfo
-	};
-	createInfo.CreateInfo.stageCount = 2;
-	createInfo.CreateInfo.pStages = info;
+
+	createInfo.stages.push_back(vs.shaderStageInfo);
+	createInfo.stages.push_back(ps.shaderStageInfo);
+
+	createInfo.CreateInfo.stageCount = (uint32_t)createInfo.stages.size();
+	createInfo.CreateInfo.pStages = createInfo.stages.data();
 
 }
 
@@ -233,4 +237,9 @@ void PipelineManager::BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCac
 	createInfo.CreateInfo.subpass = subpassIndex;
 
 	VulkanManager::GetManager()->CreateGraphicsPipeline(createInfo.CreateInfo, pipelineObj);
+}
+
+void PipelineManager::ClearCreateInfo(VkGraphicsPipelineCreateInfoCache& createInfo)
+{
+	createInfo = VkGraphicsPipelineCreateInfoCache();
 }

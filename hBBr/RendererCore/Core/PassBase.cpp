@@ -49,6 +49,21 @@ void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> im
 	}
 }
 
+void GraphicsPass::PassUpdate()
+{
+	const auto manager = VulkanManager::GetManager();
+	const auto cmdBuf = _renderer->GetCommandBuffer();
+	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.3, 1.0, 0.1, 0.2));
+	//Update FrameBuffer
+	ResetFrameBuffer(_renderer->GetSurfaceSize(), { GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetTextureView() });
+	SetViewport(_currentFrameBufferSize);
+	BeginRenderPass({ 0,0,0,0 });
+	//Begin...
+	PassRender();
+	//End...
+	EndRenderPass();
+}
+
 void GraphicsPass::CreateRenderPass()
 {
 	VulkanManager::GetManager()->CreateRenderPass(_attachmentDescs, _subpassDependencys, _subpassDescs, _renderPass);
@@ -77,6 +92,30 @@ void GraphicsPass::AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp 
 }
 
 void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<uint32_t> colorIndexes, int depthStencilIndex)
+{
+	if (depthStencilIndex >= 0)
+	{
+		AddSubpass(inputIndexes, colorIndexes, depthStencilIndex,
+			VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+			VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
+			);
+	}
+	else
+	{
+		AddSubpass(inputIndexes, colorIndexes, depthStencilIndex,
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			0,
+			VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
+		);
+	}
+
+}
+
+void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<uint32_t> colorIndexes, int depthStencilIndex,
+	VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask)
 {
 	_input_ref.resize(inputIndexes.size());
 	for (int i = 0; i < inputIndexes.size(); i++)
@@ -131,15 +170,15 @@ void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<ui
 		depen.dstAccessMask =
 			VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 		depen.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		depen.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		depen.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	}
 	else
 	{
 		depen.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 		depen.dstAccessMask =
-			VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 		depen.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		depen.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		depen.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	}
 	_subpassDependencys.push_back(depen);
 }

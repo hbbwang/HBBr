@@ -261,6 +261,8 @@ public:
 
 	void CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info , VkPipeline& pipeline);
 
+	void DestroyPipeline(VkPipeline& pipeline);
+
 	void CreateRenderPass(std::vector<VkAttachmentDescription>attachmentDescs, std::vector<VkSubpassDependency>subpassDependencys, std::vector<VkSubpassDescription>subpassDescs, VkRenderPass& renderPass);
 
 	void DestroyRenderPass(VkRenderPass& renderPass);
@@ -365,6 +367,8 @@ public:
 	//忽略vkGetSwapchainImagesKHR里获取到的Images数量，坚持使用我们设定的数量
 	bool _bIsIgnoreVulkanSwapChainExtraImages = false;
 
+	bool _bDebugEnable;
+
 private:
 
 	EPlatform _currentPlatform;
@@ -386,8 +390,6 @@ private:
 	VkPhysicalDevice _gpuDevice;
 
 	VkDebugReportCallbackCreateInfoEXT	debugCallbackCreateInfo{};
-
-	bool _bDebugEnable;
 
 	VkDebugReportCallbackEXT			_debugReport;
 

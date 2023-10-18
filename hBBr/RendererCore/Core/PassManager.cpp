@@ -3,6 +3,7 @@
 #include "PassBase.h"
 #include "Pass/PassDefine.h"
 #include "Pass/ImguiPass.h"
+#include "Pass/GUIPass.h"
 void PassManager::PassesInit(VulkanRenderer* renderer)
 {
 	_renderer = renderer;
@@ -11,12 +12,13 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 		//Opaque Pass
 		std::shared_ptr<BasePass> opaque = std::make_shared<BasePass>(renderer);
 		AddPass(opaque, "Opaque");
-
+		//Screen GUI Pass
+		std::shared_ptr<GUIPass> gui = std::make_shared<GUIPass>(renderer);
+		AddPass(gui, "GUI");
 #ifdef IS_EDITOR
 		std::shared_ptr<ImguiScreenPass> imgui = std::make_shared<ImguiScreenPass>(renderer);
 		AddPass(imgui, "Imgui");
 #endif
-
 	}
 	for (auto p : _passes)
 	{
@@ -66,7 +68,7 @@ void PassManager::PassesReset()
 {
 	for (auto& p : _passes)
 	{
-		p->PassReset();
+		p->Reset();
 	}
 }
 

@@ -15,6 +15,7 @@ public:
 private:
 	void SetupBasePassAndDraw(Pass p, class DescriptorSet* pass , class DescriptorSet* obj , class DescriptorSet* mat, class Buffer* vb , class Buffer* ib);
 
+	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
 #pragma region OpaquePass
 	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_pass;
 	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_obj;

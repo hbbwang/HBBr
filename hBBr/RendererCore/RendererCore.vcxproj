@@ -280,6 +280,7 @@
     <ClInclude Include="Core\Component\Transform.h" />
     <ClInclude Include="Core\DescriptorSet.h" />
     <ClInclude Include="Core\PassBase.h" />
+    <ClInclude Include="Core\Pass\GUIPass.h" />
     <ClInclude Include="Core\Pass\ImguiPass.h" />
     <ClInclude Include="Core\Pass\PassDefine.h" />
     <ClInclude Include="Core\Pass\PassType.h" />
@@ -331,6 +332,7 @@
     <ClCompile Include="Core\Component\Transform.cpp" />
     <ClCompile Include="Core\DescriptorSet.cpp" />
     <ClCompile Include="Core\PassBase.cpp" />
+    <ClCompile Include="Core\Pass\GUIPass.cpp" />
     <ClCompile Include="Core\Pass\ImguiPass.cpp" />
     <ClCompile Include="Core\Pass\PassDefine.cpp" />
     <ClCompile Include="Core\Pipeline.cpp" />

@@ -279,7 +279,8 @@ void VulkanApp::UpdateRender()
 {
 	for (auto w : _forms)
 	{
-		w.renderer->Render();
+		if(w.renderer != NULL)
+			w.renderer->Render();
 	}
 	HInput::ClearInput();
 }

@@ -23,6 +23,7 @@ public:
 protected:
 	virtual void PassInit() {}
 	virtual void PassUpdate() {}
+	virtual void Reset() {}
 	virtual void PassReset() {}
 	std::shared_ptr<Texture> GetSceneTexture(uint32_t descIndex);
 	VulkanRenderer* _renderer = NULL;
@@ -38,22 +39,31 @@ public:
 	virtual void AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, VkFormat attachmentFormat, VkImageLayout initLayout, VkImageLayout finalLayout);
 	//Step 2 , Setup subpass by attachments.
 	virtual void AddSubpass(std::vector<uint32_t> inputAttachments, std::vector<uint32_t> colorAttachments, int depthStencilAttachments = -1);
+	virtual void AddSubpass(std::vector<uint32_t> inputAttachments, std::vector<uint32_t> colorAttachments, int depthStencilAttachments ,
+		VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask,VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask);
+
 	//Step the last,custom.
 	virtual void PassInit()override {}
-	virtual void PassReset()override { _currentFrameBufferSize = { 999999 , 999999 }; }
+	virtual void PassUpdate()override;
+	virtual void PassReset()override {}
+	void Reset() override {
+		_currentFrameBufferSize = { 999999 , 999999 };
+		PassReset();
+	}
 	virtual void ResetFrameBuffer(VkExtent2D size,std::vector<VkImageView> imageViews);
 	void CreateRenderPass();
 	HBBR_INLINE VkRenderPass GetRenderPass()const
 	{
 		return _renderPass;
 	}
+	HString _passName = "Graphics Pass" ;
 protected:
+	virtual void PassRender() {}
 	void BeginRenderPass(std::array<float, 4> clearColor = { 0.0f, 0.0f, 0.0f, 0.0f });
 	void EndRenderPass();
 	void SetViewport(VkExtent2D viewportSize);
 	VkFramebuffer GetFrameBuffer()const;
 	VkRenderPass _renderPass = VK_NULL_HANDLE;
-	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
 	std::vector<VkAttachmentDescription>_attachmentDescs;
 	std::vector<VkSubpassDependency>_subpassDependencys;
 	std::vector<VkSubpassDescription>_subpassDescs;
