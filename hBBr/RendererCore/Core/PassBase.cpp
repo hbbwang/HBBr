@@ -97,7 +97,7 @@ void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<ui
 	{
 		AddSubpass(inputIndexes, colorIndexes, depthStencilIndex,
 			VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 			VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 			VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
 			);
@@ -164,22 +164,10 @@ void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<ui
 		depen.dstSubpass = (uint32_t)_subpassDependencys.size();//Next subpass.	
 	}
 	depen.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-	if (depthStencilIndex >= 0)
-	{
-		depen.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-		depen.dstAccessMask =
-			VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		depen.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		depen.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	}
-	else
-	{
-		depen.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		depen.dstAccessMask =
-			VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		depen.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		depen.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	}
+	depen.srcAccessMask = srcAccessMask;
+	depen.dstAccessMask = dstAccessMask;
+	depen.srcStageMask = srcStageMask;
+	depen.dstStageMask = dstStageMask;
 	_subpassDependencys.push_back(depen);
 }
 

@@ -5,16 +5,16 @@
 #include "PassBase.h"
 #include "HGuid.h"
 enum GUIAnchor
-{
-	TopLeft,
-	TopCenter,
-	TopRight,
-	CenterLeft,
-	CenterCenter,
-	CenterRight,
-	BottomLeft,
-	BottomCenter,
-	BottomRight,
+{	
+	GUIAnchor_TopLeft,
+	GUIAnchor_TopCenter,
+	GUIAnchor_TopRight,
+	GUIAnchor_CenterLeft,
+	GUIAnchor_CenterCenter,
+	GUIAnchor_CenterRight,
+	GUIAnchor_BottomLeft,
+	GUIAnchor_BottomCenter,
+	GUIAnchor_BottomRight,
 };
 
 struct GUIVertexData
@@ -32,8 +32,23 @@ struct GUIUniformBuffer
 
 struct GUIDrawState
 {
-	std::vector<GUIVertexData> Data;
 	GUIAnchor Anchor;
+	/* bFixed 填充模式，width和height以百分比为主 */
+	bool bFixed;
+	glm::vec4 Color;
+	GUIDrawState() {}
+	GUIDrawState(GUIAnchor anchor, bool fixed , glm::vec4 color)
+	{
+		Anchor = anchor;
+		bFixed = fixed;
+		Color = color;
+	}
+};
+
+struct GUIPrimitive
+{
+	std::vector<GUIVertexData> Data;
+	GUIDrawState State;
 	HString PipelineTag;
 };
 
@@ -46,12 +61,13 @@ public:
 	virtual void PassUpdate()override;
 	virtual void PassReset()override;
 
-	void AddImage(float x, float y, float w, float h, GUIAnchor anchor);
+	void AddImage(float w, float h, GUIDrawState state);
 
 private:
+	std::vector<GUIVertexData> GetGUIPanel(GUIDrawState state, float w, float h);
 	std::shared_ptr<class DescriptorSet> _descriptorSet;
 	std::shared_ptr<class Buffer>_vertexBuffer;
-	std::vector<GUIDrawState> _drawList;
+	std::vector<GUIPrimitive> _drawList;
 	std::unordered_map<HString, VkPipeline> _guiPipelines;
 	VkPipelineLayout _pipelineLayout;
 	GUIUniformBuffer _uniformBuffer;

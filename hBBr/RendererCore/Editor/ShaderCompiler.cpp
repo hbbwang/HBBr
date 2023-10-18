@@ -160,12 +160,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 					//[0]pos:POSITION , [1]nor:NORMAL , [2]tar:TANGENT , [3]col:COLOR , [4]uv01:TEXCOORD0 , [5]uv23:TEXCOORD1
 					bool bFind = false;
 					int size = 0;
-					if (s.Contains("float"))
-					{
-						bFind = true;
-						size = 1;
-					}
-					else if (s.Contains("float2"))
+					if (s.Contains("float2"))
 					{
 						bFind = true;
 						size = 2;

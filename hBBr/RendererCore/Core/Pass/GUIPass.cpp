@@ -1,15 +1,6 @@
 ﻿#include "GUIPass.h"
 #include "VulkanRenderer.h"
 
-GUIVertexData _guiPlane[6] = {
-	{glm::vec2(-0.5f,-0.5f),glm::vec2(0.0f, 0.0f),glm::vec4(1)},	// 左下角
-	{glm::vec2(0.5f, -0.5f),glm::vec2(1.0f, 0.0f),glm::vec4(1)},	// 右下角
-	{glm::vec2(-0.5f,  0.5f),glm::vec2(0.0f, 1.0f),glm::vec4(1)},	// 左上角
-	{glm::vec2(0.5f, -0.5f),glm::vec2(1.0f, 0.0f),glm::vec4(1)},	// 右下角
-	{glm::vec2(0.5f,  0.5f),glm::vec2(1.0f, 1.0f),glm::vec4(1)},	// 右上角
-	{glm::vec2(-0.5f,  0.5f),glm::vec2(0.0f, 1.0f),glm::vec4(1)},	// 左上角
-};
-
 GUIPass::~GUIPass()
 {
 	_descriptorSet.reset();
@@ -54,7 +45,7 @@ void GUIPass::PassUpdate()
 	SetViewport(_currentFrameBufferSize);
 	BeginRenderPass({ 0,0,0,0 });
 	//Begin...
-	AddImage(0, 0, 300, 300, GUIAnchor::TopLeft);
+	AddImage(100, 100 , GUIDrawState(GUIAnchor_TopLeft, false ,glm::vec4(1,1,0,0.35)));
 
 	uint32_t dynamic_offset[1] = { (uint32_t)0 };
 	vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet->GetDescriptorSet(), 1, dynamic_offset);
@@ -68,6 +59,7 @@ void GUIPass::PassUpdate()
 			pipeline = currentPipeline;
 			manager->CmdCmdBindPipeline(cmdBuf, pipeline);
 		}
+		_vertexBuffer->BufferMapping(i.Data.data(), vbOffset, sizeof(GUIUniformBuffer) * i.Data.size());
 		VkBuffer verBuf[] = { _vertexBuffer->GetBuffer() };
 		vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, &vbOffset);
 		vkCmdDraw(cmdBuf, i.Data.size(), 1, 0, 0);
@@ -83,22 +75,15 @@ void GUIPass::PassReset()
 
 }
 
-void GUIPass::AddImage(float lx, float ly, float w, float h , GUIAnchor anchor)
+void GUIPass::AddImage(float w, float h , GUIDrawState state)
 {
-	GUIDrawState state;
-	state.Data.resize(6);
-	state.Data[0] = { glm::vec2(-0.5f,-0.5f),glm::vec2(0.0f, 0.0f),glm::vec4(1) };// 左下角
-	state.Data[1] = { glm::vec2(0.5f, -0.5f),glm::vec2(1.0f, 0.0f),glm::vec4(1) };// 右下角
-	state.Data[2] = { glm::vec2(-0.5f,  0.5f),glm::vec2(0.0f, 1.0f),glm::vec4(1) };// 左上角
-	state.Data[3] = { glm::vec2(0.5f, -0.5f),glm::vec2(1.0f, 0.0f),glm::vec4(1) };// 右下角
-	state.Data[4] = { glm::vec2(0.5f,  0.5f),glm::vec2(1.0f, 1.0f),glm::vec4(1) };// 右上角
-	state.Data[5] = { glm::vec2(-0.5f,  0.5f),glm::vec2(0.0f, 1.0f),glm::vec4(1) };// 左上角
-
-	state.Anchor = anchor;
-	auto it = _guiPipelines.find("Image");
+	GUIPrimitive prim;
+	prim.Data = GetGUIPanel(state, w, h);
+	prim.State = state;
+	prim.PipelineTag = "Image";
+	auto it = _guiPipelines.find(prim.PipelineTag);
 	if (it == _guiPipelines.end())
 	{
-		state.PipelineTag = "Image";
 		//CraetePipeline..
 		VkPipeline pipeline = VK_NULL_HANDLE;
 		auto vsCache = Shader::_vsShader["GUIShader"];
@@ -125,5 +110,91 @@ void GUIPass::AddImage(float lx, float ly, float w, float h , GUIAnchor anchor)
 		PipelineManager::BuildGraphicsPipelineState(pipelineCreateInfo, _renderPass, 0 , pipeline);
 		_guiPipelines.emplace(std::make_pair("Image", pipeline));
 	}
-	_drawList.push_back(state);
+	_drawList.push_back(prim);
+}
+
+std::vector<GUIVertexData> GUIPass::GetGUIPanel(GUIDrawState state, float w, float h)
+{
+	std::vector<GUIVertexData> data;
+	data.resize(6);
+	glm::vec2 aspect = glm::vec2(_currentFrameBufferSize.width, _currentFrameBufferSize.height);
+	{
+		data[0] = { glm::vec2(-1.0f,	-1.0f),glm::vec2(0.0f, 0.0f),state.Color };
+		data[1] = { glm::vec2( 1.0f,	-1.0f),glm::vec2(1.0f, 0.0f),state.Color };
+		data[2] = { glm::vec2(-1.0f,	 1.0f),glm::vec2(0.0f, 1.0f),state.Color };
+		data[3] = { glm::vec2( 1.0f,	-1.0f),glm::vec2(1.0f, 0.0f),state.Color };
+		data[4] = { glm::vec2( 1.0f,	 1.0f),glm::vec2(1.0f, 1.0f),state.Color };
+		data[5] = { glm::vec2(-1.0f,	 1.0f),glm::vec2(0.0f, 1.0f),state.Color };
+	}
+	//data[0].Pos = glm::vec2(-1.0f, -1.0f);// 左上角
+	//data[1].Pos = glm::vec2(1.0f, -1.0f);// 右上角
+	//data[2].Pos = glm::vec2(-1.0f, 1.0f);// 左下角
+	//data[3].Pos = glm::vec2(1.0f, -1.0f);// 右上角
+	//data[4].Pos = glm::vec2(1.0f, 1.0f);// 右下角
+	//data[5].Pos = glm::vec2(-1.0f, 1.0f);// 左下角
+	if (state.Anchor == GUIAnchor_TopLeft)
+	{
+		if (state.bFixed)
+		{
+			glm::vec2 wh = glm::vec2(w,h) / 100.0f;
+			wh = wh * 2.0f - 1.0f;
+			data[0].Pos = glm::vec2(-1.0f		 , -1.0f);
+			data[1].Pos = glm::vec2( 1.0f * wh.x , -1.0f);
+			data[2].Pos = glm::vec2(-1.0f		 ,  1.0f * wh.y);
+			data[3].Pos = glm::vec2( 1.0f * wh.x , -1.0f);
+			data[4].Pos = glm::vec2( 1.0f * wh.x ,  1.0f * wh.y);
+			data[5].Pos = glm::vec2(-1.0f		 ,  1.0f * wh.y);
+		}
+		else
+		{
+			glm::vec2 wh = glm::vec2(w, h) / aspect;
+			wh = wh * 2.0f - 1.0f;
+			data[0].Pos = glm::vec2(-1.0f, -1.0f);
+			data[1].Pos = glm::vec2(1.0f * wh.x, -1.0f);
+			data[2].Pos = glm::vec2(-1.0f, 1.0f * wh.y);
+			data[3].Pos = glm::vec2(1.0f * wh.x, -1.0f);
+			data[4].Pos = glm::vec2(1.0f * wh.x, 1.0f * wh.y);
+			data[5].Pos = glm::vec2(-1.0f, 1.0f * wh.y);
+		}
+	}
+	else if (state.Anchor == GUIAnchor_TopCenter)
+	{
+
+	}
+	else if (state.Anchor == GUIAnchor_TopRight)
+	{
+
+	}
+	else if (state.Anchor == GUIAnchor_CenterLeft)
+	{
+
+	}
+	else if (state.Anchor == GUIAnchor_CenterCenter)
+	{
+		for (auto& i : data)
+		{
+			i.Pos *= glm::vec2(w, h);
+			if (state.bFixed)
+				i.Pos /= 100.0f;
+			else
+				i.Pos /= aspect;
+		}
+	}
+	else if (state.Anchor == GUIAnchor_CenterRight)
+	{
+
+	}
+	else if (state.Anchor == GUIAnchor_BottomLeft)
+	{
+
+	}
+	else if (state.Anchor == GUIAnchor_BottomCenter)
+	{
+
+	}
+	else if (state.Anchor == GUIAnchor_BottomRight)
+	{
+
+	}
+	return data;
 }
