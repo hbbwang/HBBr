@@ -39,7 +39,7 @@ ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
 		return dataPtr->GetData();
 	}
 	//获取实际路径
-	HString filePath = FileSystem::GetContentAbsPath() + it->second->relativePath + guidStr + ".fbx";
+	HString filePath = FileSystem::GetProgramPath() + it->second->relativePath + guidStr + ".fbx";
 	filePath.CorrectionPath();
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{

@@ -11,6 +11,7 @@
 #include <QLineEdit>
 #include <QWidgetAction>
 #include "EditorCommonFunction.h"
+#include "Resource/ContentManager.h"
 /*------------------------------------------------------List View*/
 CustomListView::CustomListView(QWidget *parent)
 	: QListView(parent)
@@ -161,14 +162,20 @@ void CustomListView::mouseMoveEvent(QMouseEvent* event)
 			CustomFileSystemModel* dmodel = reinterpret_cast<CustomFileSystemModel*>(this->model());
 			if (dmodel)
 			{
-				auto assetInfo = _fileInfos[index];
+				auto it = _fileInfos.find(index);
+				auto assetInfo = it.value();
 				QFileInfo fileInfo(dmodel->filePath(index));
 				QString fileName;
 				QString byteSize;
-				if (fileInfo.isDir() && !assetInfo)
+				if (fileInfo.isDir())
 				{
 					fileName = fileInfo.fileName();
 					byteSize = "ByteSize: " + fileInfo.size();
+				}
+				else if (!assetInfo)
+				{
+					fileName = fileInfo.fileName();
+					byteSize = "ByteSize: ???";
 				}
 				else
 				{
@@ -178,7 +185,7 @@ void CustomListView::mouseMoveEvent(QMouseEvent* event)
 				fileName = "Name: " + fileName;
 				QString suffix = "Type: ";
 				suffix += fileInfo.isDir() ? "folder" : fileInfo.suffix();
-				QString filePath = "Path: " + fileInfo.absolutePath();		
+				QString filePath = "Path: " + fileInfo.absolutePath();
 				QToolTip::showText(QCursor::pos(), fileName + "\n" + suffix + "\n" + byteSize + "\n" + filePath, this);
 				bShowToolTip = true;
 			}
@@ -283,12 +290,13 @@ void CustomListView::DeleteFile()
 			QMessageBox::NoButton,
 			this, Qt::FramelessWindowHint);
 		int result = msgBox.exec();
+		QList<QString> assetsGuids;
 		if (result == QMessageBox::Yes)
 		{
 			for (auto i : this->selectedIndexes())
 			{
 				QString filePath = dmodel->filePath(i);
-				DeleteAllFile(filePath);
+				DeleteAllFile(filePath, &assetsGuids);
 			}
 		}
 	}

@@ -122,7 +122,7 @@ public:
 	HBBR_API void UpdateAssetReference(HGUID obj);
 
 	/* 导入资产信息, 注意:该操作不会检查是否存在相同名字和路径的资产 */
-	HBBR_API AssetInfoBase* ImportAssetInfo(AssetType type , HString sourcePath, HString contentPath);
+	HBBR_API AssetInfoBase* ImportAssetInfo(AssetType type , HString sourcePath, HString contentPath_WithFileNameAndSuffix);
 
 	/* 删除资产 */
 	HBBR_API void  DeleteAsset(HString filePath);

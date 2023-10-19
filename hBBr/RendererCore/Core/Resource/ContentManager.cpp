@@ -151,34 +151,65 @@ void ContentManager::ReloadAssetInfo(AssetType type , pugi::xml_node & i)
 		newTemp.type = (AssetType)typeIndex;
 		info->refTemps.push_back(newTemp);
 	}
-	//卸载
+	//尝试卸载旧资产
 	ReleaseAsset(type, info->guid);
 	//
 	_assets[(uint32_t)type].emplace(info->guid, info);
 }
 
-AssetInfoBase* ContentManager::ImportAssetInfo(AssetType type, HString sourcePath,HString contentPath)
+AssetInfoBase* ContentManager::ImportAssetInfo(AssetType type, HString sourcePath,HString contentPath_WithFileNameAndSuffix)
 {
-	AssetInfoBase* result = NULL;
+	sourcePath.CorrectionPath();
+	contentPath_WithFileNameAndSuffix.Replace("\\", "/");
 	HString typeName = GetAssetTypeString(type);
+	HString contentPath = contentPath_WithFileNameAndSuffix.GetFilePath();
+	HString name = sourcePath.GetBaseName();
+	HString suffix = contentPath_WithFileNameAndSuffix.GetSuffix();
+	HString path = FileSystem::GetRelativePath(contentPath.c_str());
+	path.Replace("\\", "/");
 	auto root = _contentRefConfig.child(L"root");
-	pugi::xml_node subGroup = root.child(typeName.c_wstr());
-	if (!subGroup)
+	pugi::xml_node TypeNode = root.child(typeName.c_wstr());
+	pugi::xml_node item;
+	bool bExist = false;
+	if (!TypeNode)
 	{
-		subGroup = root.append_child(typeName.c_wstr());
+		TypeNode = root.append_child(typeName.c_wstr());
+		item = TypeNode.append_child(L"Item");
+	}
+	else
+	{
+		//find exist
+		auto existNode1 = TypeNode.find_child_by_attribute(L"Name", name.c_wstr());
+		auto existNode2 = TypeNode.find_child_by_attribute(L"Path", path.c_wstr());
+		if (existNode1 != NULL && existNode1 == existNode2)
+		{
+			item = existNode1;
+			bExist = true;
+		}
+		else
+		{
+			item = TypeNode.append_child(L"Item");
+		}
 	}
 	//配置xml
-	auto item = subGroup.append_child(L"Item");
-	auto guid = CreateGUID();
-	HString guidStr = GUIDToString(guid);
-	HString name = sourcePath.GetBaseName();
-	HString suffix = sourcePath.GetSuffix();
-	HString path = FileSystem::GetRelativePath(contentPath.GetFilePath().c_str());
-	item.append_attribute(L"GUID").set_value(guidStr.c_wstr());
-	item.append_attribute(L"Name").set_value(name.c_wstr());
-	item.append_attribute(L"Suffix").set_value(suffix.c_wstr());
-	item.append_attribute(L"Path").set_value(path.c_wstr());
-	item.append_attribute(L"ByteSize").set_value(FileSystem::GetFileSize(sourcePath.c_str()));
+	HGUID guid;
+	if (!bExist)
+	{
+		guid = CreateGUID();
+		HString guidStr = GUIDToString(guid);
+		item.append_attribute(L"GUID").set_value(guidStr.c_wstr());
+		item.append_attribute(L"Name").set_value(name.c_wstr());
+		item.append_attribute(L"Suffix").set_value(suffix.c_wstr());
+		item.append_attribute(L"Path").set_value(path.c_wstr());
+		item.append_attribute(L"ByteSize").set_value(FileSystem::GetFileSize(sourcePath.c_str()));
+	}
+	else
+	{
+		HString guidStr = item.attribute(L"GUID").as_string();
+		StringToGUID(guidStr.c_str(), &guid);
+		item.attribute(L"Path").set_value(FileSystem::GetFileSize(path.c_str()));
+		item.attribute(L"ByteSize").set_value(FileSystem::GetFileSize(sourcePath.c_str()));
+	}
 
 	//重新导入
 	ReloadAssetInfo(type,item);
@@ -192,7 +223,7 @@ AssetInfoBase* ContentManager::ImportAssetInfo(AssetType type, HString sourcePat
 
 	//保存
 	_contentRefConfig.save_file(_configPath.c_wstr());
-	return result;
+	return GetAssetInfo(guid, type);
 }
 
 void ContentManager::DeleteAsset(HString filePath)

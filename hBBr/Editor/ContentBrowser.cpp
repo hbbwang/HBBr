@@ -521,36 +521,44 @@ void ContentBrowser::ResourceImport()
 			QFile::remove(previewImagePath);
 		//
 		QString dirPath = _treeFileSystemModel->filePath(_treeWidget->currentIndex());
-		if (fileInfo.suffix().compare("fbx",Qt::CaseInsensitive) == 0)
+		QString dstPath = _treeFileSystemModel->filePath(_treeWidget->currentIndex()) + QDir::separator() + fileInfo.baseName();
+		AssetInfoBase* assetInfo = NULL;
+		if (_treeWidget->currentIndex().isValid())
 		{
-			if (_treeWidget->currentIndex().isValid())
+			if (fileInfo.suffix().compare("fbx", Qt::CaseInsensitive) == 0)
 			{
-				auto asset = ContentManager::Get()->ImportAssetInfo(AssetType::Model, i.toStdString().c_str(), dirPath.toStdString().c_str());
+				//导入Asset info
+				dstPath += ".fbx";
+				assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Model, i.toStdString().c_str(), dstPath.toStdString().c_str());
 				//复制fbx进content
+				HString guidStr = GUIDToString(assetInfo->guid);
 				dirPath += QDir::separator();
-				dirPath = dirPath + asset->guid.str().c_str() + ".fbx";
+				dirPath = dirPath + guidStr.c_str() + ".fbx";
 				FileSystem::FileCopy(i.toStdString().c_str(), dirPath.toStdString().c_str());
 			}
-		}
-		else if (fileInfo.suffix().compare("tga", Qt::CaseInsensitive) == 0 ||
-			fileInfo.suffix().compare("png", Qt::CaseInsensitive) == 0||
-			fileInfo.suffix().compare("jpg", Qt::CaseInsensitive) == 0||
-			fileInfo.suffix().compare("jpeg", Qt::CaseInsensitive) == 0
-			)
-		{
-			if(_treeWidget->currentIndex().isValid())
+			else if (fileInfo.suffix().compare("tga", Qt::CaseInsensitive) == 0 ||
+				fileInfo.suffix().compare("png", Qt::CaseInsensitive) == 0 ||
+				fileInfo.suffix().compare("jpg", Qt::CaseInsensitive) == 0 ||
+				fileInfo.suffix().compare("jpeg", Qt::CaseInsensitive) == 0
+				)
+			{
+				//导入dds压缩纹理
+				dstPath += ".dds";
+				assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Texture2D, i.toStdString().c_str(), dstPath.toStdString().c_str());
+				//转换图像格式为dds
+				HString guidStr = GUIDToString(assetInfo->guid);
+				dirPath += QDir::separator();
+				dirPath = dirPath + guidStr.c_str() + ".dds";
+				Texture::CompressionImage2D(i.toStdString().c_str(), dirPath.toStdString().c_str(), true, nvtt::Format_BC3, false, true);
+			}
+			else if (fileInfo.suffix().compare("hdr", Qt::CaseInsensitive) == 0 ||
+				fileInfo.suffix().compare("exr", Qt::CaseInsensitive) == 0
+				)
 			{
 
 			}
-		}
-		else if (fileInfo.suffix().compare("hdr", Qt::CaseInsensitive) == 0 ||
-			fileInfo.suffix().compare("exr", Qt::CaseInsensitive) == 0
-			)
-		{
-			if (_treeWidget->currentIndex().isValid())
-			{
-
-			}
+			if (assetInfo)
+				_listWidget->_fileInfos.insert(_listFileSystemModel->index(dirPath), assetInfo);
 		}
 	}
 }

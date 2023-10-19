@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['edgefixup_55',['EdgeFixup',['../namespacenvtt.html#acffe2adb946ca4eeae692ef547d57ca6',1,'nvtt']]],
+  ['edgefixup_5faverage_56',['EdgeFixup_Average',['../namespacenvtt.html#acffe2adb946ca4eeae692ef547d57ca6a424f99e9f5ca67b49765dec421c8c27f',1,'nvtt']]],
+  ['edgefixup_5fnone_57',['EdgeFixup_None',['../namespacenvtt.html#acffe2adb946ca4eeae692ef547d57ca6affcf62e8e27e7351dce5c92908419767',1,'nvtt']]],
+  ['edgefixup_5fstretch_58',['EdgeFixup_Stretch',['../namespacenvtt.html#acffe2adb946ca4eeae692ef547d57ca6aeda3d9a01b5bcf73994c5ebcc52c62d5',1,'nvtt']]],
+  ['edgefixup_5fwarp_59',['EdgeFixup_Warp',['../namespacenvtt.html#acffe2adb946ca4eeae692ef547d57ca6abbcabb8211cceed5c1074b98d8575e4b',1,'nvtt']]],
+  ['edgelength_60',['edgeLength',['../structnvtt_1_1_cube_surface.html#a0c9bd9e7c47ed7d8c4a74c6762299aa0',1,'nvtt::CubeSurface']]],
+  ['enablecudaacceleration_61',['enableCudaAcceleration',['../structnvtt_1_1_context.html#a8191fdc9c711b060013edccd0162f02f',1,'nvtt::Context']]],
+  ['enabletiming_62',['enableTiming',['../structnvtt_1_1_context.html#a9da3d5a2b7f4adcdf6e74f73f8dfff55',1,'nvtt::Context']]],
+  ['endimage_63',['endImage',['../structnvtt_1_1_output_handler.html#a887a2d54d3101f540b5a41d21e2da56a',1,'nvtt::OutputHandler']]],
+  ['error_64',['error',['../structnvtt_1_1_error_handler.html#a7ce72a6fb89743f9a42ef0dcfb284d71',1,'nvtt::ErrorHandler']]],
+  ['error_65',['Error',['../namespacenvtt.html#ad1b50bb1a5bd8c44ab56092b30b9cd36',1,'nvtt']]],
+  ['error_5fcudaerror_66',['Error_CudaError',['../namespacenvtt.html#ad1b50bb1a5bd8c44ab56092b30b9cd36a61ea8e163d282921fbb20d9c6d165c6a',1,'nvtt']]],
+  ['error_5ffileopen_67',['Error_FileOpen',['../namespacenvtt.html#ad1b50bb1a5bd8c44ab56092b30b9cd36a050e9ac65add6839c261409762f63e60',1,'nvtt']]],
+  ['error_5ffilewrite_68',['Error_FileWrite',['../namespacenvtt.html#ad1b50bb1a5bd8c44ab56092b30b9cd36a272b79737f04552ad274898397e73f45',1,'nvtt']]],
+  ['error_5finvalidinput_69',['Error_InvalidInput',['../namespacenvtt.html#ad1b50bb1a5bd8c44ab56092b30b9cd36a7ae62389be2e2e29a7a1690b8721c105',1,'nvtt']]],
+  ['error_5funknown_70',['Error_Unknown',['../namespacenvtt.html#ad1b50bb1a5bd8c44ab56092b30b9cd36aeb5d8ad9e386b13229cabf5ba1405475',1,'nvtt']]],
+  ['error_5funsupportedfeature_71',['Error_UnsupportedFeature',['../namespacenvtt.html#ad1b50bb1a5bd8c44ab56092b30b9cd36a0c76f5e3b3d2b2ab2dae1c3b7bd291e6',1,'nvtt']]],
+  ['error_5funsupportedoutputformat_72',['Error_UnsupportedOutputFormat',['../namespacenvtt.html#ad1b50bb1a5bd8c44ab56092b30b9cd36aab5dbcdd40172c02fce91bf18ac46f36',1,'nvtt']]],
+  ['errorhandler_73',['ErrorHandler',['../structnvtt_1_1_error_handler.html',1,'nvtt']]],
+  ['errorstring_74',['errorString',['../namespacenvtt.html#aa1ae97a643706ccf2940c94e3ca622fd',1,'nvtt']]],
+  ['estimatesize_75',['estimateSize',['../structnvtt_1_1_context.html#a6ab9514249cdd941594d510179e3d883',1,'nvtt::Context::estimateSize(const Surface &amp;img, int mipmapCount, const CompressionOptions &amp;compressionOptions) const'],['../structnvtt_1_1_context.html#aeaf581c39759fa50cd3b6fa66c314d7b',1,'nvtt::Context::estimateSize(const CubeSurface &amp;cube, int mipmapCount, const CompressionOptions &amp;compressionOptions) const'],['../structnvtt_1_1_context.html#a85b9dca67659a9f3c81f179cd52b46e0',1,'nvtt::Context::estimateSize(int w, int h, int d, int mipmapCount, const CompressionOptions &amp;compressionOptions) const']]],
+  ['expandnormals_76',['expandNormals',['../structnvtt_1_1_surface.html#a4259f830dd7fb302b2320f2bdc798193',1,'nvtt::Surface']]]
+];

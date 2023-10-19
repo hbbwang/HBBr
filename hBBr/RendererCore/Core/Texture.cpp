@@ -204,3 +204,379 @@ void Texture::CopyBufferToTexture(VkCommandBuffer cmdbuf, Texture* tex, std::vec
 
 	}
 }
+
+#ifdef IS_EDITOR
+
+/*
+#pragma region OpenCV
+
+using namespace cv;
+#define M_PI  3.14159265358979323846
+// Define our six cube faces.
+// 0 - 3 are side faces, clockwise order
+// 4 and 5 are top and bottom, respectively
+long double faceTransform[6][2] =
+{
+	{0, 0},
+	{M_PI, 0},
+	{0, -M_PI / 2}, //top
+	{0, M_PI / 2},  //bottom
+	{-M_PI / 2, 0},
+	{M_PI / 2, 0},
+};
+// Map a part of the equirectangular panorama (in) to a cube face
+// (face). The ID of the face is given by faceId. The desired
+// width and height are given by width and height.
+inline void createCubeMapFace(const Mat& in, Mat& face,
+	int faceId = 0, const int width = -1,
+	const int height = -1) {
+
+	float inWidth = in.cols;
+	float inHeight = in.rows;
+
+	// Allocate map
+	Mat mapx(height, width, CV_32F);
+	Mat mapy(height, width, CV_32F);
+
+	// Calculate adjacent (ak) and opposite (an) of the
+	// triangle that is spanned from the sphere center
+	//to our cube face.
+	const float an = sin(M_PI / 4);
+	const float ak = cos(M_PI / 4);
+
+	const float ftu = faceTransform[faceId][0];
+	const float ftv = faceTransform[faceId][1];
+
+	// For each point in the target image,
+	// calculate the corresponding source coordinates.
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+
+			// Map face pixel coordinates to [-1, 1] on plane
+			float nx = ((float)y / (float)height) * 2 - 1;
+			float ny = ((float)x / (float)width) * 2 - 1;
+
+			// Map [-1, 1] plane coords to [-an, an]
+			// thats the coordinates in respect to a unit sphere
+			// that contains our box.
+			nx *= an;
+			ny *= an;
+
+			float u, v;
+
+			// Project from plane to sphere surface.
+			if (ftv == 0) {
+				// Center faces
+				u = atan2(nx, ak);
+				v = atan2(ny * cos(u), ak);
+				u += ftu;
+			}
+			else if (ftv > 0) {
+				// Bottom face
+				float d = sqrt(nx * nx + ny * ny);//dot(nx,ny)
+				v = M_PI / 2 - atan2(d, ak);
+				u = atan2(ny, nx);
+			}
+			else {
+				// Top face
+				float d = sqrt(nx * nx + ny * ny);//dot(nx,ny)
+				v = -M_PI / 2 + atan2(d, ak);
+				u = atan2(-ny, nx);
+			}
+
+			// Map from angular coordinates to [-1, 1], respectively.
+			u = u / (M_PI);
+			v = v / (M_PI / 2);
+
+			// Warp around, if our coordinates are out of bounds.
+			while (v < -1) {
+				v += 2;
+				u += 1;
+			}
+			while (v > 1) {
+				v -= 2;
+				u += 1;
+			}
+
+			while (u < -1) {
+				u += 2;
+			}
+			while (u > 1) {
+				u -= 2;
+			}
+
+			// Map from [-1, 1] to in texture space
+			u = u / 2.0f + 0.5f;
+			v = v / 2.0f + 0.5f;
+
+			u = u * (inWidth - 1);
+			v = v * (inHeight - 1);
+
+			// Save the result for this pixel in map
+			mapx.at<float>(x, y) = u;
+			mapy.at<float>(x, y) = v;
+		}
+	}
+
+	// Recreate output image if it has wrong size or type.
+	if (face.cols != width || face.rows != height ||
+		face.type() != in.type()) {
+		face = Mat(width, height, in.type());
+	}
+
+	// Do actual resampling using OpenCV's remap
+	remap(in, face, mapx, mapy, INTER_LINEAR);
+}
+
+#pragma endregion OpenCV
+*/
+
+#pragma region NVTT
+
+void Texture::CompressionImage2D(const char* imagePath, const char* outputDDS, bool bGenerateMips, nvtt::Format format, bool bGenerateNormalMap, bool bAutoFormat)
+{
+	using namespace nvtt;
+
+	Context context;
+	context.enableCudaAcceleration(true);
+
+	Surface image;
+	bool hasAlpha = false;
+	if (!image.load(imagePath, &hasAlpha))
+	{
+		ConsoleDebug::print_endl("NVTT:CompressionImage2D error.Load image failed.");
+		return;
+	}
+
+	OutputOptions output;
+	output.setFileName(outputDDS);
+
+	int mipmaps = 1;
+	if (bGenerateMips)
+	{
+		mipmaps = image.countMipmaps();
+	}
+
+	image.toLinear(1.0f);
+
+	CompressionOptions options;
+	options.setFormat(format);
+	options.setQuality(Quality_Production);
+	if (bAutoFormat)
+	{
+		if (hasAlpha)
+		{
+			options.setFormat(Format_BC3);
+		}
+		else
+		{
+			options.setFormat(Format_BC1);
+		}
+	}
+	if (bGenerateNormalMap || format == Format_BC3n)
+	{
+		options.setFormat(Format_BC3n);
+		image.setNormalMap(true);
+		if (bGenerateNormalMap)
+		{
+			image.toGreyScale(2, 1, 4, 0);
+			image.copyChannel(image, 0, 3);
+			image.toNormalMap(1, 0, 0, 0);
+			image.packNormals();
+		}
+	}
+
+	context.outputHeader(image, mipmaps, options, output);
+	for (int i = 0; i < mipmaps; i++)
+	{
+		context.compress(image, 0, i, options, output);
+		if (image.canMakeNextMipmap())
+			image.buildNextMipmap(MipmapFilter_Triangle);
+	}
+}
+
+/*
+void Texture::CompressionImageCube(const char* imagePath, const char* outputDDS, bool bGenerateMips)
+{
+	using namespace nvtt;
+	//创建上下文
+	Context context;
+	//启动Cuda加速
+	context.enableCudaAcceleration(true);
+	//纹理加载
+	Surface image;
+	bool hasAlpha = false;
+	//使用OpenCV处理图像,从HDR全景图隐射到6面Cube
+	{
+		Mat hdrCube;
+		//导入HDR图
+		Mat in = imread(imagePath);
+		int size = in.rows * in.cols;
+		size /= 6;
+		size = std::sqrt(size);
+		for (int i = 0; i < 6; i++)
+		{
+			Mat newFace;
+			createCubeMapFace(in, newFace, i, size, size);
+			//合并每个图像，最终输出的是一张 size * (size * 6)的长条竖图
+			hdrCube.push_back(newFace);
+		}
+		//暂时找不到方法直接把Mat的图像数据转到Surface里
+		//猜测格式不一样，Mat应该是RGB,RGB...这样存的，
+		//Surface则是RRRRR...GGGGG....这样的，不一样。
+		//操作起来太麻烦了，就直接导出再重新导入一遍好了。
+		//导出缓存图，重载载入:
+		HString cachePath = imagePath;
+		cachePath = cachePath.GetFilePath() + cachePath.GetBaseName() + "_Cache.hdr";
+		cv::imwrite(cachePath.c_str(), hdrCube);
+		if (!image.load(cachePath.c_str(), &hasAlpha))
+		{
+			ConsoleDebug::print("Compression Image Cube Failed.Image load failed.", "255,255,0");
+			return;
+		}
+		//删除缓存图。
+		remove(cachePath.c_str());
+	}
+
+	//cube map 需要把HDR图拆出6份，必须保证不能小于6
+	if (image.height() < 6)
+	{
+		ConsoleDebug::print("Compression Image Cube Failed.Because HDR image height small than 6.", "255,255,0");
+		return;
+	}
+
+	//转线性颜色(HDR图像一般就是非sRGB所以可以不做这个操作)
+	image.toLinear(1.0);
+
+	//导出设置
+	OutputOptions output;
+	output.setFileName(outputDDS);
+
+	//设置图像HDR格式
+	CompressionOptions options;
+	options.setFormat(Format_BC6U);
+	options.setQuality(Quality_Production);
+
+	//把HDR纹理转换成Cube
+	CubeSurface cubeImage;
+
+	//因为是长条图，使用竖状排版拆分
+	cubeImage.fold(image, CubeLayout_Column);
+
+	//计算mipLevel
+	int mipmaps = 1;
+	if (bGenerateMips)
+		mipmaps = cubeImage.countMipmaps();
+
+	//设置DDS文件头
+	context.outputHeader(cubeImage, mipmaps, options, output);
+	//导出
+	for (int f = 0; f < 6; f++)
+	{
+		for (int i = 0; i < mipmaps; i++)
+		{
+			context.compress(cubeImage.face(f), i, 1, options, output);
+			if (cubeImage.face(f).canMakeNextMipmap())
+				cubeImage.face(f).buildNextMipmap(MipmapFilter_Box);
+		}
+	}
+}
+*/
+
+void Texture::DecompressionImage2D(const char* ddsPath, const char* outputPath, nvtt::Surface* outData, int32_t newWidth, int32_t newHeight, int32_t newDepth)
+{
+	using namespace nvtt;
+	SurfaceSet images;
+	images.loadDDS(ddsPath);
+	bool needResize = false;
+	int32_t width = images.GetWidth();
+	int32_t height = images.GetHeight();
+	int32_t depth = images.GetDepth();
+	if (newWidth != -1)
+	{
+		width = newWidth;
+		needResize = true;
+	}
+	if (newHeight != -1)
+	{
+		height = newHeight;
+		needResize = true;
+	}
+	if (newDepth != -1)
+	{
+		depth = newDepth;
+		needResize = true;
+	}
+	nvtt::Surface surface = images.GetSurface(0, 0);
+	if (needResize)
+		surface.resize(width, height, depth, ResizeFilter::ResizeFilter_Box);
+	if (outData != NULL)
+	{
+		*outData = surface;
+	}
+	//images.saveImage(outputPath, 0, 0);
+	surface.save(outputPath);
+}
+
+void Texture::DecompressionImageCube(const char* ddsPath, const char* outputPath, nvtt::Surface* outData, int32_t newWidth, int32_t newHeight, int32_t newDepth)
+{
+	using namespace nvtt;
+	CubeSurface cube;
+	cube.load(ddsPath, 0);
+	bool needResize = false;
+	if (outData != NULL)
+		*outData = cube.unfold(CubeLayout_VerticalCross);
+	else
+		return;
+	int32_t width = outData->width();
+	int32_t height = outData->height();
+	int32_t depth = outData->depth();
+	if (newWidth != -1)
+	{
+		width = newWidth;
+		needResize = true;
+	}
+	if (newHeight != -1)
+	{
+		height = newHeight;
+		needResize = true;
+	}
+	if (newDepth != -1)
+	{
+		depth = newDepth;
+		needResize = true;
+	}
+	if (needResize)
+		outData->resize(width, height, depth, ResizeFilter::ResizeFilter_Box);
+	//images.saveImage(outputPath, 0, 0);
+	outData->save(outputPath);
+}
+
+void Texture::OutputImage(const char* outputPath, int w, int h, void* outData)
+{
+	using namespace nvtt;
+	Surface image;
+	if (!image.setImage2D(Format_RGBA, w, h, outData))
+	{
+		ConsoleDebug::print_endl("set image 2d failed.", "255,255,0");
+	}
+	if (!image.save(outputPath))
+	{
+		ConsoleDebug::print_endl("Save output image failed.", "255,255,0");
+	}
+}
+
+void Texture::GetImageDataFromCompressionData(const char* ddsPath, nvtt::Surface* outData)
+{
+	using namespace nvtt;
+	SurfaceSet images;
+	images.loadDDS(ddsPath);
+	if (outData != NULL)
+	{
+		*outData = images.GetSurface(0, 0);
+	}
+}
+
+#pragma endregion NVTT
+
+#endif

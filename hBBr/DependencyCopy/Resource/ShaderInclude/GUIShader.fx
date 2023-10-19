@@ -20,8 +20,8 @@ struct VSToPS
     float2 UV               : TEXCOORD0;
 };
 
-SamplerState BaseTextureSampler : register(s1);
-Texture2D BaseTexture : register(t1);
+// SamplerState BaseTextureSampler : register(s1);
+// Texture2D BaseTexture : register(t1);
 
 VSToPS VSMain(VSInput IN)
 {
@@ -34,6 +34,7 @@ VSToPS VSMain(VSInput IN)
 
 float4 PSMain(VSToPS IN) :SV_Target0
 {   
-    half4 baseTexture = BaseTexture.Sample(BaseTextureSampler,IN.UV);
-    return baseTexture * IN.Color;
+    return IN.Color;
+    // half4 baseTexture = BaseTexture.Sample(BaseTextureSampler,IN.UV);
+    // return baseTexture * IN.Color;
 }

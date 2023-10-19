@@ -59,12 +59,14 @@ QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
 #include "Resource/HGuid.h"
 /*----------------------------------------------------*/
 
-bool DeleteAllFile(QString path)
+bool DeleteAllFile(QString path, QList<QString>*allAssetGuid)
 {
     QFileInfo checkInfo(path);
     if (checkInfo.isFile())
     {
         ContentManager::Get()->DeleteAsset(path.toStdString().c_str());
+        if(allAssetGuid)
+            allAssetGuid->append(checkInfo.baseName());
         QFile::remove(path);
         return true;
     }
@@ -86,6 +88,8 @@ bool DeleteAllFile(QString path)
             {
                 ContentManager::Get()->DeleteAsset(curFile.filePath().toStdString().c_str());
                 QFile fileTemp(curFile.filePath());
+                if (allAssetGuid)
+                    allAssetGuid->append(curFile.baseName());
                 fileTemp.remove();
                 fileList.removeAt(i);
             }
