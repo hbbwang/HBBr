@@ -7,7 +7,8 @@
 class DescriptorSet
 {
 public:
-	DescriptorSet(class VulkanRenderer* renderer , VkDescriptorType type, uint32_t bindingCount,VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+	DescriptorSet(class VulkanRenderer* renderer, VkDescriptorType type, uint32_t bindingCount, VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+	DescriptorSet(class VulkanRenderer* renderer, std::vector<VkDescriptorType> types, uint32_t bindingCount, VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 	~DescriptorSet();
 
 	HBBR_INLINE VkDescriptorSetLayout GetDescriptorSetLayout()const { return _descriptorSetLayout; }

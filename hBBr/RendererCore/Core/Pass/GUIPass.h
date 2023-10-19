@@ -36,12 +36,18 @@ struct GUIDrawState
 	/* bFixed 填充模式，width和height以百分比为主 */
 	bool bFixed;
 	glm::vec4 Color;
+	glm::vec2 Scale;
+	glm::vec2 Translate;
+	std::shared_ptr<class Texture> BaseTexture;
 	GUIDrawState() {}
-	GUIDrawState(GUIAnchor anchor, bool fixed , glm::vec4 color)
+	GUIDrawState(float x, float y, float w, float h, GUIAnchor anchor, bool fixed, glm::vec4 color , std::shared_ptr<class Texture> tex = NULL)
 	{
 		Anchor = anchor;
 		bFixed = fixed;
 		Color = color;
+		Translate = glm::vec2(x, y);
+		Scale = glm::vec2(w, h);
+		BaseTexture = tex;
 	}
 };
 
@@ -61,10 +67,10 @@ public:
 	virtual void PassUpdate()override;
 	virtual void PassReset()override;
 
-	void AddImage(float w, float h, GUIDrawState state);
+	void AddImage(GUIDrawState state);
 
 private:
-	std::vector<GUIVertexData> GetGUIPanel(GUIDrawState state, float w, float h);
+	std::vector<GUIVertexData> GetGUIPanel(GUIDrawState state);
 	std::shared_ptr<class DescriptorSet> _descriptorSet;
 	std::shared_ptr<class Buffer>_vertexBuffer;
 	std::vector<GUIPrimitive> _drawList;

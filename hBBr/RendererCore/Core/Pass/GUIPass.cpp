@@ -23,7 +23,7 @@ void GUIPass::PassInit()
 		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
 	CreateRenderPass();
 	//DescriptorSet
-	_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1, sizeof(GUIUniformBuffer)));
+	_descriptorSet.reset(new DescriptorSet(_renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC ,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }, 1, sizeof(GUIUniformBuffer)));
 	_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
 	VulkanManager::GetManager()->CreatePipelineLayout(
 		{
@@ -45,7 +45,7 @@ void GUIPass::PassUpdate()
 	SetViewport(_currentFrameBufferSize);
 	BeginRenderPass({ 0,0,0,0 });
 	//Begin...
-	AddImage(100, 100 , GUIDrawState(GUIAnchor_TopLeft, false ,glm::vec4(1,1,0,0.35)));
+	AddImage(GUIDrawState(0, 0, 100, 100, GUIAnchor_TopLeft, false, glm::vec4(1, 1, 0, 0.35)));
 
 	uint32_t dynamic_offset[1] = { (uint32_t)0 };
 	vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet->GetDescriptorSet(), 1, dynamic_offset);
@@ -75,10 +75,10 @@ void GUIPass::PassReset()
 
 }
 
-void GUIPass::AddImage(float w, float h , GUIDrawState state)
+void GUIPass::AddImage(GUIDrawState state)
 {
 	GUIPrimitive prim;
-	prim.Data = GetGUIPanel(state, w, h);
+	prim.Data = GetGUIPanel(state);
 	prim.State = state;
 	prim.PipelineTag = "Image";
 	auto it = _guiPipelines.find(prim.PipelineTag);
@@ -113,7 +113,7 @@ void GUIPass::AddImage(float w, float h , GUIDrawState state)
 	_drawList.push_back(prim);
 }
 
-std::vector<GUIVertexData> GUIPass::GetGUIPanel(GUIDrawState state, float w, float h)
+std::vector<GUIVertexData> GUIPass::GetGUIPanel(GUIDrawState state)
 {
 	std::vector<GUIVertexData> data;
 	data.resize(6);
@@ -132,69 +132,107 @@ std::vector<GUIVertexData> GUIPass::GetGUIPanel(GUIDrawState state, float w, flo
 	//data[3].Pos = glm::vec2(1.0f, -1.0f);// 右上角
 	//data[4].Pos = glm::vec2(1.0f, 1.0f);// 右下角
 	//data[5].Pos = glm::vec2(-1.0f, 1.0f);// 左下角
+
+	glm::vec2 xy = state.Translate;
+	glm::vec2 wh = state.Scale;
+	if (state.bFixed)
+	{
+		xy /= 100.0f;
+		wh /= 100.0f;
+	}
+	else
+	{	
+		xy = xy * 2.0f / aspect;
+		wh /= aspect;
+	}
+
 	if (state.Anchor == GUIAnchor_TopLeft)
 	{
-		if (state.bFixed)
-		{
-			glm::vec2 wh = glm::vec2(w,h) / 100.0f;
-			wh = wh * 2.0f - 1.0f;
-			data[0].Pos = glm::vec2(-1.0f		 , -1.0f);
-			data[1].Pos = glm::vec2( 1.0f * wh.x , -1.0f);
-			data[2].Pos = glm::vec2(-1.0f		 ,  1.0f * wh.y);
-			data[3].Pos = glm::vec2( 1.0f * wh.x , -1.0f);
-			data[4].Pos = glm::vec2( 1.0f * wh.x ,  1.0f * wh.y);
-			data[5].Pos = glm::vec2(-1.0f		 ,  1.0f * wh.y);
-		}
-		else
-		{
-			glm::vec2 wh = glm::vec2(w, h) / aspect;
-			wh = wh * 2.0f - 1.0f;
-			data[0].Pos = glm::vec2(-1.0f, -1.0f);
-			data[1].Pos = glm::vec2(1.0f * wh.x, -1.0f);
-			data[2].Pos = glm::vec2(-1.0f, 1.0f * wh.y);
-			data[3].Pos = glm::vec2(1.0f * wh.x, -1.0f);
-			data[4].Pos = glm::vec2(1.0f * wh.x, 1.0f * wh.y);
-			data[5].Pos = glm::vec2(-1.0f, 1.0f * wh.y);
-		}
+		wh = wh * 2.0f - 1.0f;
+		data[0].Pos = glm::vec2(-1.0f, -1.0f) + xy;
+		data[1].Pos = glm::vec2(1.0f * wh.x, -1.0f) + xy;
+		data[2].Pos = glm::vec2(-1.0f, 1.0f * wh.y) + xy;
+		data[3].Pos = glm::vec2(1.0f * wh.x, -1.0f) + xy;
+		data[4].Pos = glm::vec2(1.0f * wh.x, 1.0f * wh.y) + xy;
+		data[5].Pos = glm::vec2(-1.0f, 1.0f * wh.y) + xy;
 	}
 	else if (state.Anchor == GUIAnchor_TopCenter)
 	{
-
+		wh.y = wh.y * 2.0f - 1.0f;
+		data[0].Pos = glm::vec2(-1.0f * wh.x, -1.0f) + xy;
+		data[1].Pos = glm::vec2(1.0f * wh.x, -1.0f) + xy;
+		data[2].Pos = glm::vec2(-1.0f * wh.x, 1.0f * wh.y) + xy;
+		data[3].Pos = glm::vec2(1.0f * wh.x, -1.0f) + xy;
+		data[4].Pos = glm::vec2(1.0f * wh.x, 1.0f * wh.y) + xy;
+		data[5].Pos = glm::vec2(-1.0f * wh.x, 1.0f * wh.y) + xy;
 	}
 	else if (state.Anchor == GUIAnchor_TopRight)
 	{
-
+		wh = wh * 2.0f - 1.0f;
+		data[0].Pos = glm::vec2(-1.0f * wh.x, -1.0f) + xy;
+		data[1].Pos = glm::vec2(1.0f, -1.0f) + xy;
+		data[2].Pos = glm::vec2(-1.0f * wh.x, 1.0f * wh.y) + xy;
+		data[3].Pos = glm::vec2(1.0f, -1.0f) + xy;
+		data[4].Pos = glm::vec2(1.0f, 1.0f * wh.y) + xy;
+		data[5].Pos = glm::vec2(-1.0f * wh.x, 1.0f * wh.y) + xy;
 	}
 	else if (state.Anchor == GUIAnchor_CenterLeft)
 	{
-
+		wh.x = wh.x * 2.0f - 1.0f;
+		data[0].Pos = glm::vec2(-1.0f		, -1.0f * wh.y) + xy;
+		data[1].Pos = glm::vec2(1.0f * wh.x	, -1.0f * wh.y) + xy;
+		data[2].Pos = glm::vec2(-1.0f		,  1.0f * wh.y) + xy;
+		data[3].Pos = glm::vec2(1.0f * wh.x	, -1.0f * wh.y) + xy;
+		data[4].Pos = glm::vec2(1.0f * wh.x	,  1.0f * wh.y) + xy;
+		data[5].Pos = glm::vec2(-1.0f		,  1.0f * wh.y) + xy;
 	}
 	else if (state.Anchor == GUIAnchor_CenterCenter)
 	{
 		for (auto& i : data)
-		{
-			i.Pos *= glm::vec2(w, h);
-			if (state.bFixed)
-				i.Pos /= 100.0f;
-			else
-				i.Pos /= aspect;
+		{		
+			i.Pos *= wh;
+			i.Pos += xy;
 		}
 	}
 	else if (state.Anchor == GUIAnchor_CenterRight)
 	{
-
+		wh.x = wh.x * 2.0f - 1.0f;
+		data[0].Pos = glm::vec2(-1.0f * wh.x, -1.0f * wh.y) + xy;
+		data[1].Pos = glm::vec2( 1.0f		, -1.0f * wh.y) + xy;
+		data[2].Pos = glm::vec2(-1.0f * wh.x,  1.0f * wh.y) + xy;
+		data[3].Pos = glm::vec2( 1.0f		, -1.0f * wh.y) + xy;
+		data[4].Pos = glm::vec2( 1.0f		,  1.0f * wh.y) + xy;
+		data[5].Pos = glm::vec2(-1.0f * wh.x,  1.0f * wh.y) + xy;
 	}
 	else if (state.Anchor == GUIAnchor_BottomLeft)
 	{
-
+		wh = wh * 2.0f - 1.0f;
+		data[0].Pos = glm::vec2(-1.0f		, -1.0f * wh.y) + xy;
+		data[1].Pos = glm::vec2( 1.0f * wh.x, -1.0f * wh.y) + xy;
+		data[2].Pos = glm::vec2(-1.0f		,  1.0f) + xy;
+		data[3].Pos = glm::vec2( 1.0f * wh.x, -1.0f * wh.y) + xy;
+		data[4].Pos = glm::vec2( 1.0f * wh.x,  1.0f) + xy;
+		data[5].Pos = glm::vec2(-1.0f		,  1.0f) + xy;
 	}
 	else if (state.Anchor == GUIAnchor_BottomCenter)
 	{
-
+		wh.y = wh.y * 2.0f - 1.0f;
+		data[0].Pos = glm::vec2(-1.0f * wh.x, -1.0f * wh.y) + xy;
+		data[1].Pos = glm::vec2( 1.0f * wh.x, -1.0f * wh.y) + xy;
+		data[2].Pos = glm::vec2(-1.0f * wh.x,  1.0f) + xy;
+		data[3].Pos = glm::vec2( 1.0f * wh.x, -1.0f * wh.y) + xy;
+		data[4].Pos = glm::vec2( 1.0f * wh.x,  1.0f) + xy;
+		data[5].Pos = glm::vec2(-1.0f * wh.x,  1.0f) + xy;
 	}
 	else if (state.Anchor == GUIAnchor_BottomRight)
 	{
-
+		wh = wh * 2.0f - 1.0f;
+		data[0].Pos = glm::vec2(-1.0f * wh.x, -1.0f * wh.y) + xy;
+		data[1].Pos = glm::vec2( 1.0f		, -1.0f * wh.y) + xy;
+		data[2].Pos = glm::vec2(-1.0f * wh.x,  1.0f) + xy;
+		data[3].Pos = glm::vec2( 1.0f		, -1.0f * wh.y) + xy;
+		data[4].Pos = glm::vec2( 1.0f		,  1.0f) + xy;
+		data[5].Pos = glm::vec2(-1.0f * wh.x,  1.0f) + xy;
 	}
 	return data;
 }

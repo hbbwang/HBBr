@@ -3,6 +3,7 @@
 #include "FileSystem.h"
 #include "Resource/ModelData.h"
 #include "Component/Material.h"
+#include "Texture.h"
 std::unique_ptr<ContentManager> ContentManager::_ptr;
 
 ContentManager::ContentManager()
@@ -26,7 +27,7 @@ void ContentManager::ReloadAllAssetInfos()
 {
 	ReloadAssetInfos(AssetType::Model);
 	ReloadAssetInfos(AssetType::Material);
-
+	ReloadAssetInfos(AssetType::Texture2D);
 	UpdateAllAssetReference();
 }
 
@@ -34,6 +35,7 @@ void ContentManager::UpdateAllAssetReference()
 {
 	UpdateAssetReferenceByType(AssetType::Model);
 	UpdateAssetReferenceByType(AssetType::Material);
+	UpdateAssetReferenceByType(AssetType::Texture2D);
 }
 
 void ContentManager::UpdateAssetReferenceByType(AssetType type)
@@ -65,6 +67,7 @@ void ContentManager::Release()
 {
 	ReleaseAssetsByType(AssetType::Model);
 	ReleaseAssetsByType(AssetType::Material);
+	ReleaseAssetsByType(AssetType::Texture2D);
 }
 
 void ContentManager::ReleaseAssetsByType(AssetType type)
@@ -90,6 +93,7 @@ AssetInfoBase* CreateInfo(AssetType type)
 	{
 		case AssetType::Model:		return new AssetInfo<ModelData>(); 
 		case AssetType::Material:	return new AssetInfo<Material>();
+		case AssetType::Texture2D:	return new AssetInfo<Texture>();
 		default:break;
 	}
 	return NULL;

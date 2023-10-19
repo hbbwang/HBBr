@@ -4,8 +4,11 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <iostream>
+#include "HGuid.h"
 #include "HString.h"
+#include "ImageTool.h"
 //Vulkan api
 #include "VulkanManager.h"
 
@@ -27,7 +30,7 @@ public:
 		_sceneTexture.clear();
 	}
 	void UpdateTextures();
-	std::shared_ptr<Texture> GetTexture(SceneTextureDesc desc)
+	inline std::shared_ptr<Texture> GetTexture(SceneTextureDesc desc)
 	{
 		auto it = _sceneTexture.find(desc);
 		if (it != _sceneTexture.end())
@@ -78,9 +81,29 @@ public:
 
 	void TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1);
 
+	void CopyBufferToTexture(VkCommandBuffer cmdbuf, Texture* tex, std::vector<unsigned char> imageData);
+
 	void Resize(uint32_t width, uint32_t height);
 
 	static std::shared_ptr<Texture> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, HString textureName = "Texture", bool noMemory = false);
+
+	static Texture* ImportSystemTexture(HGUID guid , VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT);
+
+	static void AddSystemTexture(HString tag ,std::shared_ptr<Texture>tex)
+	{
+		_system_textures.emplace(tag, tex);
+	}
+
+	static Texture* GetSystemTexture(HString tag)
+	{
+		//_system_textures[tag];
+		auto it = _system_textures.find(tag);
+		if (it != _system_textures.end())
+		{
+			return it->second;
+		}
+		return NULL;
+	}
 
 	HString _textureName;
 
@@ -95,4 +118,7 @@ private:
 	uint32_t _mipCount = 1;
 	VkExtent2D _imageSize;
 	VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	//static std::unordered_map<HGUID, Texture> _all_textures;
+	ImageData* _imageData = NULL;
+	static std::unordered_map<HString, Texture*> _system_textures;
 };

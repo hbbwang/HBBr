@@ -152,6 +152,8 @@ VulkanManager::VulkanManager(bool bDebug)
 	ImGui::GetStyle().ScaleAllSizes(3.0f);
 #endif
 #endif
+	//Create BaseTexture
+	?
 }
 
 VulkanManager::~VulkanManager()
