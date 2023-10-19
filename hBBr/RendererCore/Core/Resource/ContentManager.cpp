@@ -183,12 +183,12 @@ AssetInfoBase* ContentManager::ImportAssetInfo(AssetType type, HString sourcePat
 	//重新导入
 	ReloadAssetInfo(type,item);
 
-	//
-	sourcePath.CorrectionPath();
-	contentPath += "/";
-	contentPath += guidStr + "." + suffix;
-	contentPath.CorrectionPath();
-	FileSystem::FileCopy(sourcePath.c_str(), contentPath .c_str());
+	//复制资产
+	//sourcePath.CorrectionPath();
+	//contentPath += "/";
+	//contentPath += guidStr + "." + suffix;
+	//contentPath.CorrectionPath();
+	//FileSystem::FileCopy(sourcePath.c_str(), contentPath .c_str());
 
 	//保存
 	_contentRefConfig.save_file(_configPath.c_wstr());

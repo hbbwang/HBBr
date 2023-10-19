@@ -89,21 +89,9 @@ public:
 
 	static Texture* ImportSystemTexture(HGUID guid , VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT);
 
-	static void AddSystemTexture(HString tag ,std::shared_ptr<Texture>tex)
-	{
-		_system_textures.emplace(tag, tex);
-	}
+	static void AddSystemTexture(HString tag, Texture* tex);
 
-	static Texture* GetSystemTexture(HString tag)
-	{
-		//_system_textures[tag];
-		auto it = _system_textures.find(tag);
-		if (it != _system_textures.end())
-		{
-			return it->second;
-		}
-		return NULL;
-	}
+	static Texture* GetSystemTexture(HString tag);
 
 	HString _textureName;
 

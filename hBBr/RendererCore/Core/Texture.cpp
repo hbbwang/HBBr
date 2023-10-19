@@ -130,7 +130,7 @@ Texture* Texture::ImportSystemTexture(HGUID guid, VkImageUsageFlags usageFlags)
 		if (it == texAssets.end())
 		{
 			MessageOut(HString("Can not find [" + guidStr + "] texture in content manager.").c_str(), false, false, "255,255,0");
-			return;
+			return NULL;
 		}
 	}
 	auto dataPtr = reinterpret_cast<AssetInfo<Texture>*>(it->second);
@@ -179,6 +179,22 @@ Texture* Texture::ImportSystemTexture(HGUID guid, VkImageUsageFlags usageFlags)
 
 	dataPtr->SetData(std::move(newTexture));
 	return dataPtr->GetData();
+}
+
+void Texture::AddSystemTexture(HString tag, Texture* tex)
+{
+	_system_textures.emplace(tag, tex);
+}
+
+Texture* Texture::GetSystemTexture(HString tag)
+{
+	//_system_textures[tag];
+	auto it = _system_textures.find(tag);
+	if (it != _system_textures.end())
+	{
+		return it->second;
+	}
+	return NULL;
 }
 
 void Texture::CopyBufferToTexture(VkCommandBuffer cmdbuf, Texture* tex, std::vector<unsigned char> imageData)

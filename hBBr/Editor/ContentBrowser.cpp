@@ -520,9 +520,17 @@ void ContentBrowser::ResourceImport()
 		if (previewImage.exists())
 			QFile::remove(previewImagePath);
 		//
+		QString dirPath = _treeFileSystemModel->filePath(_treeWidget->currentIndex());
 		if (fileInfo.suffix().compare("fbx",Qt::CaseInsensitive) == 0)
 		{
-			ContentManager::Get()->ImportAssetInfo(AssetType::Model, i.toStdString().c_str(), _treeFileSystemModel->filePath(_treeWidget->currentIndex()).toStdString().c_str());
+			if (_treeWidget->currentIndex().isValid())
+			{
+				auto asset = ContentManager::Get()->ImportAssetInfo(AssetType::Model, i.toStdString().c_str(), dirPath.toStdString().c_str());
+				//¸´ÖÆfbx½øcontent
+				dirPath += QDir::separator();
+				dirPath = dirPath + asset->guid.str().c_str() + ".fbx";
+				FileSystem::FileCopy(i.toStdString().c_str(), dirPath.toStdString().c_str());
+			}
 		}
 		else if (fileInfo.suffix().compare("tga", Qt::CaseInsensitive) == 0 ||
 			fileInfo.suffix().compare("png", Qt::CaseInsensitive) == 0||

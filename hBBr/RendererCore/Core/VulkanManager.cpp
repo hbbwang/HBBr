@@ -153,7 +153,7 @@ VulkanManager::VulkanManager(bool bDebug)
 #endif
 #endif
 	//Create BaseTexture
-	?
+	
 }
 
 VulkanManager::~VulkanManager()
