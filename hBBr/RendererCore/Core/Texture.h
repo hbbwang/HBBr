@@ -132,6 +132,9 @@ public:
 
 	static Texture* GetSystemTexture(HString tag);
 
+	//通过ttf生成dds纹理
+	static void CreateFontTexture(HString ttfFontPath, HString outTexturePath,bool bOverwrite = false);
+
 	HString _textureName;
 
 #ifdef IS_EDITOR
@@ -141,7 +144,7 @@ public:
 	//HBBR_API static void CompressionImageCube(const char* imagePath, const char* outputDDS, bool bGenerateMips);
 	HBBR_API static void DecompressionImage2D(const char* ddsPath, const char* outputPath, nvtt::Surface* outData = NULL, int32_t newWidth = -1, int32_t newHeight = -1, int32_t newDepth = -1);
 	HBBR_API static void DecompressionImageCube(const char* ddsPath, const char* outputPath, nvtt::Surface* outData = NULL, int32_t newWidth = -1, int32_t newHeight = -1, int32_t newDepth = -1);
-	HBBR_API static void OutputImage(const char* outputPath, int w, int h, void* outData);
+	HBBR_API static void OutputImage(const char* outputPath, int w, int h, nvtt::Format format , void* outData);
 	HBBR_API static void GetImageDataFromCompressionData(const char* ddsPath, nvtt::Surface* outData);
 #pragma endregion NVTT
 

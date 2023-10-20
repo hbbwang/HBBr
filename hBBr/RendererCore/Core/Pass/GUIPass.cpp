@@ -51,7 +51,7 @@ void GUIPass::PassUpdate()
 	SetViewport(_currentFrameBufferSize);
 	BeginRenderPass({ 0,0,0,0 });
 	//Begin...
-	AddImage("TestImage", GUIDrawState(0, 0, 200, 200, GUIAnchor_TopLeft, false, glm::vec4(1, 1, 1, 1), Texture::GetSystemTexture("TestTex")));
+	AddImage("TestImage", GUIDrawState(0, 0, 200, 200, GUIAnchor_TopLeft, false, glm::vec4(1, 1, 1, 0.95), Texture::GetSystemTexture("TestTex")));
 
 	uint32_t dynamic_offset[1] = { (uint32_t)0 };
 	vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet->GetDescriptorSet(), 1, dynamic_offset);
@@ -127,9 +127,10 @@ void GUIPass::AddImage(HString tag ,GUIDrawState state)
 		VkGraphicsPipelineCreateInfoCache pipelineCreateInfo = {};
 		PipelineManager::SetColorBlend(pipelineCreateInfo, true, 
 			StaticBlendState(
-				1,ColorWriteMask::CW_RGBA,BlendOperation::BO_ADD,
-				BlendFactor::BF_SRC_ALPHA,BlendFactor::BF_ONE,
-				BlendOperation::BO_ADD,BlendFactor::BF_ONE,BlendFactor::BF_ONE_MINUS_SRC_ALPHA
+				1,
+				CW_RGBA,
+				BO_ADD	,BF_SRC_ALPHA	, BF_ONE_MINUS_SRC_ALPHA,//color
+				BO_ADD	,BF_SRC_ALPHA	, BF_ONE_MINUS_SRC_ALPHA //alpha
 				));
 		PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
 		//PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);

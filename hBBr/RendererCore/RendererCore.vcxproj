@@ -179,7 +179,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir);$(SolutionDir)ThirdParty\freetype\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -203,7 +203,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir);$(SolutionDir)ThirdParty\freetype\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -229,7 +229,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\pugixml\;$(ProjectDir)Common\;$(ProjectDir)Core\;$(SolutionDir)ThirdParty\Imgui\;$(ProjectDir)Editor\;$(SolutionDir)ThirdParty\shaderc\;$(SolutionDir)ThirdParty\vld\;$(ProjectDir)Form\;$(SolutionDir)ThirdParty\assimp\include\;$(SolutionDir)ThirdParty\assimp\;$(SolutionDir)ThirdParty\;$(ProjectDir)Core\Resource;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir);$(SolutionDir)ThirdParty\freetype\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>

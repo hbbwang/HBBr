@@ -368,6 +368,10 @@ public:
 		return _descriptorPool;
 	}
 
+	HBBR_INLINE VkPhysicalDeviceFeatures GetPhysicalDeviceFeatures()const {
+		return _gpuFeatures;
+	}
+
 	//忽略vkGetSwapchainImagesKHR里获取到的Images数量，坚持使用我们设定的数量
 	bool _bIsIgnoreVulkanSwapChainExtraImages = false;
 

@@ -57,7 +57,6 @@ QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
 /*--------------------‰÷»æ∆˜œ‡πÿ----------------------*/
 #include "Resource/ContentManager.h"
 #include "Resource/HGuid.h"
-/*----------------------------------------------------*/
 
 bool DeleteAllFile(QString path, QList<QString>*allAssetGuid)
 {

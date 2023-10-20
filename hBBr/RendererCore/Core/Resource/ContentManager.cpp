@@ -179,14 +179,18 @@ AssetInfoBase* ContentManager::ImportAssetInfo(AssetType type, HString sourcePat
 	else
 	{
 		//find exist
-		auto existNode1 = TypeNode.find_child_by_attribute(L"Name", name.c_wstr());
-		auto existNode2 = TypeNode.find_child_by_attribute(L"Path", path.c_wstr());
-		if (existNode1 != NULL && existNode1 == existNode2)
+		for (auto n = TypeNode.first_child(); n != NULL; n = n.next_sibling())
 		{
-			item = existNode1;
-			bExist = true;
+			HString n_name = n.attribute(L"Name").as_string();
+			HString n_path = n.attribute(L"Path").as_string();
+			if (name.IsSame(n_name) && path.IsSame(n_path))
+			{
+				item = n;
+				bExist = true;
+				break;
+			}
 		}
-		else
+		if (!bExist)
 		{
 			item = TypeNode.append_child(L"Item");
 		}
@@ -207,7 +211,7 @@ AssetInfoBase* ContentManager::ImportAssetInfo(AssetType type, HString sourcePat
 	{
 		HString guidStr = item.attribute(L"GUID").as_string();
 		StringToGUID(guidStr.c_str(), &guid);
-		item.attribute(L"Path").set_value(FileSystem::GetFileSize(path.c_str()));
+		item.attribute(L"Path").set_value(path.c_wstr());
 		item.attribute(L"ByteSize").set_value(FileSystem::GetFileSize(sourcePath.c_str()));
 	}
 

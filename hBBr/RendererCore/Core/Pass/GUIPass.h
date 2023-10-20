@@ -67,9 +67,7 @@ public:
 	virtual void PassInit()override;
 	virtual void PassUpdate()override;
 	virtual void PassReset()override;
-
-	void AddImage(HString tag ,GUIDrawState state);
-
+	void AddImage(HString tag, GUIDrawState state);
 private:
 	std::vector<GUIVertexData> GetGUIPanel(GUIDrawState state);
 	std::shared_ptr<class DescriptorSet> _descriptorSet;

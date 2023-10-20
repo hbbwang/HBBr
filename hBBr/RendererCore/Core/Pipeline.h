@@ -33,7 +33,7 @@ struct VkGraphicsPipelineCreateInfoCache
 	std::vector<VkPipelineShaderStageCreateInfo>	stages;
 };
 
-enum class ColorWriteMask
+enum ColorWriteMask
 {
 	CW_R = VK_COLOR_COMPONENT_R_BIT,
 	CW_G = VK_COLOR_COMPONENT_G_BIT,
@@ -47,7 +47,7 @@ enum class ColorWriteMask
 	CW_RA = CW_R | CW_A,
 };
 
-enum class BlendOperation
+enum BlendOperation
 {
 	BO_ADD				= VK_BLEND_OP_ADD,
 	BO_SUBTRACT			= VK_BLEND_OP_SUBTRACT,
@@ -56,7 +56,7 @@ enum class BlendOperation
 	BO_MAX				= VK_BLEND_OP_MAX,
 };
 
-enum class BlendFactor
+enum BlendFactor
 {
 	BF_ZERO = VK_BLEND_FACTOR_ZERO,
 	BF_ONE = VK_BLEND_FACTOR_ONE,
@@ -112,20 +112,20 @@ struct StaticBlendState
 	{}
 };
 
-enum class PolygonMode {
+enum PolygonMode {
 	PM_FILL = VkPolygonMode::VK_POLYGON_MODE_FILL,
 	PM_LINE = VkPolygonMode::VK_POLYGON_MODE_LINE,
 	PM_POINT = VkPolygonMode::VK_POLYGON_MODE_POINT,
 };
 
-enum class CullMode {
+enum CullMode {
 	ECM_NONE = VkCullModeFlagBits::VK_CULL_MODE_NONE,
 	ECM_FRONT = VkCullModeFlagBits::VK_CULL_MODE_FRONT_BIT,
 	ECM_BACK = VkCullModeFlagBits::VK_CULL_MODE_BACK_BIT,
 	ECM_FRONT_AND_BACK = VkCullModeFlagBits::VK_CULL_MODE_FRONT_AND_BACK,
 };
 
-enum class PrimitiveTopology {
+enum PrimitiveTopology {
 	PT_POINT_LIST = 0,
 	PT_LINE_LIST = 1,
 	PT_LINE_STRIP = 2,
@@ -154,7 +154,7 @@ struct Rasterizer
 	{}
 };
 
-enum class CompareOp {
+enum CompareOp {
 	CO_NEVER = VK_COMPARE_OP_NEVER,
 	CO_LESS = VK_COMPARE_OP_LESS,
 	CO_EQUAL = VK_COMPARE_OP_EQUAL,
@@ -165,7 +165,7 @@ enum class CompareOp {
 	CO_ALWAYS = VK_COMPARE_OP_ALWAYS,
 };
 
-enum class StencilOp {
+enum StencilOp {
 	SO_KEEP = VK_STENCIL_OP_KEEP,
 	SO_ZERO = VK_STENCIL_OP_ZERO,
 	SO_REPLACE = VK_STENCIL_OP_REPLACE,

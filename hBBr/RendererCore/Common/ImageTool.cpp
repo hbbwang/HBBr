@@ -309,10 +309,16 @@ bool ImageTool::SaveTgaImage(const char* filename, uint16_t w, uint16_t h, uint1
 #endif
 }
 
-bool ImageTool::SavePngImage(const char* filename, uint16_t w, uint16_t h ,void* imageData)
+bool ImageTool::SavePngImageRGBA8(const char* filename, uint16_t w, uint16_t h ,void* imageData)
 {
 	//std::vector<unsigned char>buffer;
 	lodepng::encode(filename, (unsigned char*)imageData, w, h);
+	return true;
+}
+
+HBBR_API bool ImageTool::SavePngImageRGB8(const char* filename, uint16_t w, uint16_t h, void* imageData)
+{
+	lodepng::encode(filename, (unsigned char*)imageData, w, h, LCT_RGB);
 	return true;
 }
 

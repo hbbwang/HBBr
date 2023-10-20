@@ -203,9 +203,21 @@ void Texture::GlobalInitialize()
 	info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info.minLod = -1000;
-	info.maxLod = 1000;
-	info.maxAnisotropy = 1.0f;
+	info.minLod = 0;
+	info.maxLod = 15;//max 16384
+	//info.anisotropyEnable = VK_FALSE;
+	//info.maxAnisotropy = 1.0f;
+	//各项异性采样
+	if (manager->GetPhysicalDeviceFeatures().samplerAnisotropy == VK_TRUE)
+	{
+		info.anisotropyEnable = VK_TRUE;
+		info.maxAnisotropy = 16.0f;
+	}
+	else
+	{
+		info.anisotropyEnable = VK_FALSE;
+		info.maxAnisotropy = 1.0f;
+	}
 	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
 	_samplers.emplace(TextureSampler_Linear_Wrap, sampler);
 
@@ -751,11 +763,11 @@ void Texture::DecompressionImageCube(const char* ddsPath, const char* outputPath
 	outData->save(outputPath);
 }
 
-void Texture::OutputImage(const char* outputPath, int w, int h, void* outData)
+void Texture::OutputImage(const char* outputPath, int w, int h, nvtt::Format format, void* outData)
 {
 	using namespace nvtt;
 	Surface image;
-	if (!image.setImage2D(Format_RGBA, w, h, outData))
+	if (!image.setImage2D(format, w, h, outData))
 	{
 		ConsoleDebug::print_endl("set image 2d failed.", "255,255,0");
 	}
@@ -778,4 +790,164 @@ void Texture::GetImageDataFromCompressionData(const char* ddsPath, nvtt::Surface
 
 #pragma endregion NVTT
 
+/*--------------------字体库----------------------*/
+#include "freetype/include/ft2build.h"
+#include "freetype/include/freetype/freetype.h"
+#pragma comment(lib,"freetype/freetype.lib")
+
+struct Character {
+	wchar_t  font;
+	unsigned int sizeX;
+	unsigned int sizeY;
+	int offsetX;
+	int offsetY;
+	unsigned int advance;
+};
+
+void AddFont(
+	FT_Face& face, 
+	unsigned int& textureWidth,
+	unsigned int& textureHeight,
+	unsigned int& x,
+	std::vector<unsigned char>& textureData,
+	std::vector<Character>& characters,
+	wchar_t  c
+	)
+{
+	// 获取字形位图
+	FT_Bitmap& bitmap = face->glyph->bitmap;
+
+	// 复制位图数据到纹理图集
+	for (int y = 0; y < bitmap.rows; y++) {
+		for (int x2 = 0; x2 < bitmap.width; x2++) {
+			//textureData[(y * textureWidth) + x + x2] = bitmap.buffer[y * bitmap.pitch + x2];
+			int index = ((y * textureWidth) + x + x2) * 4;
+			unsigned char color = bitmap.buffer[y * bitmap.pitch + x2];
+			textureData[index + 0] = color; // R
+			textureData[index + 1] = color; // G
+			textureData[index + 2] = color; // B
+			textureData[index + 3] = color; // A
+		}
+	}
+
+	// 存储字符信息
+	Character character = {
+		c,
+		static_cast<unsigned int>(bitmap.width),
+		static_cast<unsigned int>(bitmap.rows),
+		face->glyph->bitmap_left,
+		face->glyph->bitmap_top,
+		static_cast<unsigned int>(face->glyph->advance.x)
+	};
+	characters.push_back(character);
+
+	// 更新纹理图集的x坐标
+	x += bitmap.width;
+}
+
+void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,bool bOverwrite)
+{
+	if (!bOverwrite)
+	{
+		if (FileSystem::FileExist(outTexturePath.c_str()))
+		{
+			return;
+		}
+	}
+
+	if (!FileSystem::FileExist(ttfFontPath.c_str()))
+	{
+		ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/bahnschrift.ttf";
+	}
+
+	ttfFontPath.CorrectionPath();
+	outTexturePath.CorrectionPath();
+	// 初始化FreeType库
+	FT_Library ft;
+	if (FT_Init_FreeType(&ft)) {
+		std::cerr << "Failed to initialize FreeType library!" << std::endl;
+		return;
+	}
+
+	// 加载字体文件
+	FT_Face face;
+	if (FT_New_Face(ft, ttfFontPath.c_str(), 0, &face)) {
+		std::cerr << "Failed to load font!" << std::endl;
+		return;
+	}
+
+	if (FT_Select_Charmap(face, FT_ENCODING_UNICODE))
+	{
+		std::cerr << "Failed to Select UNICODE Charmap!" << std::endl;
+		return ;
+	}
+
+	// 设置字体大小
+	unsigned int fontSize = 48;
+	FT_Set_Pixel_Sizes(face, 0, fontSize);
+
+	// 创建字符集
+	std::vector<Character> characters;
+
+	// 计算纹理图集的尺寸
+	unsigned int textureWidth = 0;
+	unsigned int textureHeight = 0;
+
+	for (wchar_t c = 32; c < 127; c++) {
+		// 加载字符的字形
+		if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+			std::cerr << "Failed to load glyph!" << std::endl;
+			return;
+		}
+
+		textureWidth += face->glyph->bitmap.width;
+		textureHeight = SDL_max(textureHeight, face->glyph->bitmap.rows);
+	}
+
+	// 创建纹理图集
+	std::vector<unsigned char> textureData(textureWidth * textureHeight * 4, 0);
+
+	// 将字符位图复制到纹理图集
+	unsigned int x = 0;
+	for (wchar_t  c = 32; c < 127; c++)
+	{
+		// 加载字符的字形
+		FT_Load_Char(face, c, FT_LOAD_RENDER);
+		AddFont(face, textureWidth, textureHeight, x, textureData, characters, c);
+	}
+
+	//wchar_t  character = L'我';
+	//FT_Load_Char(face, character, FT_LOAD_RENDER);
+	//AddFont(face, textureWidth, textureHeight, x, textureData, characters, character);
+
+	// 清理资源
+	FT_Done_Face(face);
+	FT_Done_FreeType(ft);
+
+	// 现在，textureData向量包含了纹理图集的数据，characters向量包含了每个字符的信息
+	// 你可以将textureData上传到GPU，并在图形API（如Vulkan或OpenGL）中使用它来渲染文本
+
+	//ImageTool::SavePngImageRGBA8(outTexturePath.c_str(), textureWidth, textureHeight, textureData.data());
+
+	using namespace nvtt;
+	Context context;
+	context.enableCudaAcceleration(true);
+
+	Surface image;
+	image.setImage(nvtt::InputFormat_BGRA_8UB, textureWidth, textureHeight, 1, &textureData[0]);
+
+	OutputOptions output;
+	output.setFileName(outTexturePath.c_str());
+	int mipmaps = 1;
+	CompressionOptions options;
+	options.setFormat(Format_BC7);
+	options.setQuality(Quality_Production);
+	context.outputHeader(image, mipmaps, options, output);
+	context.compress(image, 0, 0, options, output);
+}
+#else
+void GUIPass::CreateFontTexture(HString ttfFontPath, HString outTexturePath)
+{
+
+}
 #endif
