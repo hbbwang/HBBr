@@ -6,7 +6,9 @@
 #include "ConsoleDebug.h"
 #include "DDSTool.h"
 
+std::vector<Texture*> Texture::_upload_textures;
 std::unordered_map<HString, Texture*> Texture::_system_textures;
+std::unordered_map < TextureSampler, VkSampler > Texture::_samplers;
 
 SceneTexture::SceneTexture(VulkanRenderer* renderer)
 {
@@ -103,6 +105,7 @@ std::shared_ptr<Texture> Texture::CreateTexture2D(uint32_t width, uint32_t heigh
 	newTexture->_textureName = textureName;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = {width,height};
+	newTexture->_sampler = _samplers[TextureSampler_Linear_Wrap];
 	VulkanManager::GetManager()->CreateImage(width,height,format , usageFlags, newTexture->_image);
 	if (format == VK_FORMAT_R32_SFLOAT || format == VK_FORMAT_D32_SFLOAT)
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
@@ -120,7 +123,7 @@ std::shared_ptr<Texture> Texture::CreateTexture2D(uint32_t width, uint32_t heigh
 	return newTexture;
 }
 
-Texture* Texture::ImportSystemTexture(HGUID guid, VkImageUsageFlags usageFlags)
+Texture* Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags usageFlags)
 {
 	const auto texAssets = ContentManager::Get()->GetAssets(AssetType::Texture2D);
 	HString guidStr = GUIDToString(guid);
@@ -139,7 +142,7 @@ Texture* Texture::ImportSystemTexture(HGUID guid, VkImageUsageFlags usageFlags)
 		return dataPtr->GetData();
 	}
 	//获取实际路径
-	HString filePath = FileSystem::GetContentAbsPath() + it->second->relativePath + guidStr + ".dds";
+	HString filePath = FileSystem::GetProgramPath() + it->second->relativePath + guidStr + ".dds";
 	filePath.CorrectionPath();
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
@@ -176,9 +179,77 @@ Texture* Texture::ImportSystemTexture(HGUID guid, VkImageUsageFlags usageFlags)
 	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView);
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
+	newTexture->_sampler = _samplers[TextureSampler_Linear_Wrap];
 
 	dataPtr->SetData(std::move(newTexture));
+
+	//标记为需要CopyBufferToImage
+	_upload_textures.push_back(dataPtr->GetData());
 	return dataPtr->GetData();
+}
+
+void Texture::GlobalInitialize()
+{
+	const auto& manager = VulkanManager::GetManager();
+	//Create BaseTexture
+	auto blackTex = Texture::ImportTextureAsset(HGUID("dd5644a9-ae6a-44da-8f4f-4a686b083bcc"));
+	auto normalTex = Texture::ImportTextureAsset(HGUID("968561d0-8569-429c-a135-faa450b818fe"));
+	auto whiteTex = Texture::ImportTextureAsset(HGUID("ca1e3bec-26d7-4c1d-91ed-da3283142736"));
+	Texture::AddSystemTexture("Black", blackTex);
+	Texture::AddSystemTexture("Normal", normalTex);
+	Texture::AddSystemTexture("White", whiteTex);
+
+	//Create Sampler
+	VkSampler sampler = VK_NULL_HANDLE;
+	VkSamplerCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+	info.magFilter = VK_FILTER_LINEAR;
+	info.minFilter = VK_FILTER_LINEAR;
+	info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	info.minLod = -1000;
+	info.maxLod = 1000;
+	info.maxAnisotropy = 1.0f;
+	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
+	_samplers.emplace(TextureSampler_Linear_Wrap, sampler);
+
+	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
+	_samplers.emplace(TextureSampler_Linear_Mirror, sampler);
+
+	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
+	_samplers.emplace(TextureSampler_Linear_Clamp, sampler);
+
+	info.magFilter = info.minFilter = VK_FILTER_NEAREST;
+	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
+	_samplers.emplace(TextureSampler_Nearest_Wrap, sampler);
+
+	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
+	_samplers.emplace(TextureSampler_Nearest_Mirror, sampler);
+
+	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
+	_samplers.emplace(TextureSampler_Nearest_Clamp, sampler);
+
+}
+
+void Texture::GlobalUpdate()
+{
+}
+
+void Texture::GlobalRelease()
+{
+	const auto& manager = VulkanManager::GetManager();
+	for (auto& i : _samplers)
+	{
+		vkDestroySampler(manager->GetDevice(), i.second, nullptr);
+	}
+	_samplers.clear();
 }
 
 void Texture::AddSystemTexture(HString tag, Texture* tex)

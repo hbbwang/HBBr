@@ -24,3 +24,12 @@ private:
 	std::shared_ptr<class Buffer>_opaque_indexBuffer;
 #pragma endregion
 };
+
+class PreCommandPass :public CommandPass
+{
+public:
+	PreCommandPass(VulkanRenderer* renderer) :CommandPass(renderer) {}
+	virtual ~PreCommandPass();
+	virtual void PassInit()override;
+	virtual void PassUpdate()override;
+};

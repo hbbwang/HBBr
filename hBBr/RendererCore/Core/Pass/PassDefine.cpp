@@ -47,7 +47,7 @@ void BasePass::PassUpdate()
 {
 	const auto manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
-	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.2, 1.0, 0.7, 0.2));
+	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), _markColor);
 	//Update FrameBuffer
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), { GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetTextureView() });
 	SetViewport(_currentFrameBufferSize);
@@ -196,3 +196,22 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 	}
 }
 #pragma endregion OpaquePass
+
+PreCommandPass::~PreCommandPass()
+{
+}
+
+void PreCommandPass::PassInit()
+{
+	_passName = "Precommand Pass";
+	_markColor = glm::vec4(1, 1, 0, 0.5);
+}
+
+void PreCommandPass::PassUpdate()
+{
+	//Image data CPU to GPU
+	for (auto i : Texture::GetUploadTextures())
+	{
+		
+	}
+}

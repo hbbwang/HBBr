@@ -38,9 +38,9 @@ struct GUIDrawState
 	glm::vec4 Color;
 	glm::vec2 Scale;
 	glm::vec2 Translate;
-	std::shared_ptr<class Texture> BaseTexture;
+	Texture* BaseTexture;
 	GUIDrawState() {}
-	GUIDrawState(float x, float y, float w, float h, GUIAnchor anchor, bool fixed, glm::vec4 color , std::shared_ptr<class Texture> tex = NULL)
+	GUIDrawState(float x, float y, float w, float h, GUIAnchor anchor, bool fixed, glm::vec4 color , Texture* tex = NULL)
 	{
 		Anchor = anchor;
 		bFixed = fixed;
@@ -56,6 +56,7 @@ struct GUIPrimitive
 	std::vector<GUIVertexData> Data;
 	GUIDrawState State;
 	HString PipelineTag;
+	std::shared_ptr<class DescriptorSet> _obj_tex_descriptorSet;
 };
 
 class GUIPass :public GraphicsPass
@@ -67,14 +68,15 @@ public:
 	virtual void PassUpdate()override;
 	virtual void PassReset()override;
 
-	void AddImage(GUIDrawState state);
+	void AddImage(HString tag ,GUIDrawState state);
 
 private:
 	std::vector<GUIVertexData> GetGUIPanel(GUIDrawState state);
 	std::shared_ptr<class DescriptorSet> _descriptorSet;
 	std::shared_ptr<class Buffer>_vertexBuffer;
-	std::vector<GUIPrimitive> _drawList;
+	std::unordered_map<HString,GUIPrimitive> _drawList;
 	std::unordered_map<HString, VkPipeline> _guiPipelines;
-	VkPipelineLayout _pipelineLayout;
+	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
+	VkDescriptorSetLayout _guiObjectDescriptorSetLayout = VK_NULL_HANDLE;
 	GUIUniformBuffer _uniformBuffer;
 };

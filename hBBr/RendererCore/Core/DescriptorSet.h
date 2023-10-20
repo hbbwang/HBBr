@@ -8,6 +8,7 @@ class DescriptorSet
 {
 public:
 	DescriptorSet(class VulkanRenderer* renderer, VkDescriptorType type, uint32_t bindingCount, VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+	DescriptorSet(class VulkanRenderer* renderer, VkDescriptorType type,VkDescriptorSetLayout setLayout, uint32_t bindingCount, VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 	DescriptorSet(class VulkanRenderer* renderer, std::vector<VkDescriptorType> types, uint32_t bindingCount, VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 	~DescriptorSet();
 
@@ -26,6 +27,8 @@ public:
 
 	void UpdateDescriptorSetAll(uint32_t sameBufferSize);
 
+	void UpdateTextureDescriptorSet(std::vector<class Texture*> textures);
+
 	HBBR_INLINE Buffer* GetBuffer(int bufferIndex = 0)const { return _buffers[bufferIndex].get(); }
 
 	HBBR_INLINE std::vector<VkDescriptorType> GetTypes()const { return _descriptorTypes; }
@@ -39,6 +42,8 @@ public:
 	const VkDescriptorSet& GetDescriptorSet(int index);
 
 private:
+	std::vector<class Texture*> _textures;
+
 	std::vector<VkDescriptorType>	_descriptorTypes;
 
 	std::vector<VkDescriptorSet>	_descriptorSets;

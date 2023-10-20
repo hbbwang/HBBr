@@ -4,6 +4,7 @@
 #include "./Core/Shader.h"
 #include "./Core/Pipeline.h"
 #include "./Common/HInput.h"
+#include "./Core/Texture.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #include "Imgui/backends/imgui_impl_sdl3.h"
@@ -127,6 +128,8 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	//Init Vulkan Manager
 	VulkanManager::InitManager(bEnableDebug);
 
+	Texture::GlobalInitialize();
+
 	//Create Main Window
 	auto win = CreateNewWindow(128, 128, "MainRenderer", false, parent);
 
@@ -182,8 +185,9 @@ void VulkanApp::DeInitVulkanManager()
 	}
 	Shader::DestroyAllShaderCache();
 	PipelineManager::ClearPipelineObjects();
+	ContentManager::Get()->Release();
+	Texture::GlobalRelease();
 	VulkanManager::ReleaseManager();
-	//ContentManager::Get()->Release();
 	SDL_Quit();
 }
 
@@ -279,6 +283,7 @@ void VulkanApp::UpdateRender()
 {
 	for (auto w : _forms)
 	{
+		Texture::GlobalUpdate();
 		if(w.renderer != NULL)
 			w.renderer->Render();
 	}

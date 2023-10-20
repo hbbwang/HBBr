@@ -152,8 +152,7 @@ VulkanManager::VulkanManager(bool bDebug)
 	ImGui::GetStyle().ScaleAllSizes(3.0f);
 #endif
 #endif
-	//Create BaseTexture
-	
+
 }
 
 VulkanManager::~VulkanManager()
@@ -1758,11 +1757,12 @@ void VulkanManager::CreateDescripotrSetLayout(std::vector<VkDescriptorType> type
 	}
 }
 
-void VulkanManager::DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
+void VulkanManager::DestroyDescriptorSetLayout(VkDescriptorSetLayout& descriptorSetLayout)
 {
 	if (descriptorSetLayout != VK_NULL_HANDLE)
 	{
 		vkDestroyDescriptorSetLayout(_device, descriptorSetLayout, VK_NULL_HANDLE);
+		descriptorSetLayout = VK_NULL_HANDLE;
 	}
 }
 

@@ -17,6 +17,16 @@
 #pragma comment(lib,"nvtt/lib/x64-v142/nvtt30106.lib")
 #endif
 
+enum TextureSampler
+{
+	TextureSampler_Linear_Wrap = 0,
+	TextureSampler_Linear_Mirror = 1,
+	TextureSampler_Linear_Clamp = 2,
+	TextureSampler_Nearest_Wrap = 3,
+	TextureSampler_Nearest_Mirror = 4,
+	TextureSampler_Nearest_Clamp = 5,
+};
+
 enum class SceneTextureDesc {
 	SceneColor = 0,
 	SceneDepth = 1,
@@ -78,8 +88,20 @@ public:
 		return _imageAspectFlags;
 	}
 
+	HBBR_INLINE VkSampler GetSampler()const {
+		return _sampler;
+	}
+
 	HBBR_INLINE VkExtent2D GetImageSize()const {
 		return _imageSize;
+	}
+
+	HBBR_INLINE void SetSampler(TextureSampler sampler) {
+		_sampler = _samplers[sampler];
+	}
+
+	HBBR_INLINE static std::vector<Texture*>& GetUploadTextures(){
+		return _upload_textures;
 	}
 
 	void Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0 , uint32_t mipLevelCount = 1);
@@ -92,7 +114,13 @@ public:
 
 	static std::shared_ptr<Texture> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, HString textureName = "Texture", bool noMemory = false);
 
-	static Texture* ImportSystemTexture(HGUID guid , VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT);
+	static Texture* ImportTextureAsset(HGUID guid , VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+
+	static void GlobalInitialize();
+
+	static void GlobalUpdate();
+
+	static void GlobalRelease();
 
 	static void AddSystemTexture(HString tag, Texture* tex);
 
@@ -114,6 +142,7 @@ public:
 #endif
 
 private:
+	bool _bUploadToGPU = false;
 	bool _bNoMemory = false;
 	VkImage _image;
 	VkImageView _imageView;
@@ -124,7 +153,10 @@ private:
 	uint32_t _mipCount = 1;
 	VkExtent2D _imageSize;
 	VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	VkSampler _sampler;
 	//static std::unordered_map<HGUID, Texture> _all_textures;
 	ImageData* _imageData = NULL;
+	static std::vector<Texture*> _upload_textures;
 	static std::unordered_map<HString, Texture*> _system_textures;
+	static std::unordered_map < TextureSampler, VkSampler > _samplers;
 };

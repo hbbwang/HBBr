@@ -28,6 +28,7 @@ protected:
 	std::shared_ptr<Texture> GetSceneTexture(uint32_t descIndex);
 	VulkanRenderer* _renderer = NULL;
 	HString _passName = "PassBase";
+	glm::vec4 _markColor = glm::vec4(1,1,1,0.5);
 };
 
 class GraphicsPass : public PassBase
@@ -74,6 +75,13 @@ protected:
 	std::vector<VkFramebuffer> _framebuffers;
 	VkExtent2D _currentFrameBufferSize;
 };
+
+class CommandPass : public PassBase
+{
+public:
+	CommandPass(VulkanRenderer* renderer) :PassBase(renderer) {}
+};
+
 
 class ComputePass : public PassBase
 {

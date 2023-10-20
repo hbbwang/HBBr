@@ -3,18 +3,22 @@
 
 GUIPass::~GUIPass()
 {
+	const auto& manager = VulkanManager::GetManager();
 	_descriptorSet.reset();
 	_vertexBuffer.reset();
-	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout);
+	manager->DestroyPipelineLayout(_pipelineLayout);
 	for (auto i : _guiPipelines)
 	{
-		VulkanManager::GetManager()->DestroyPipeline(i.second);
+		manager->DestroyPipeline(i.second);
 	}
+	_drawList.clear();
 	_guiPipelines.clear();
+	manager->DestroyDescriptorSetLayout(_guiObjectDescriptorSetLayout);
 }
 
 void GUIPass::PassInit()
 {
+	const auto& manager = VulkanManager::GetManager();
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	AddSubpass({}, { 0 }, -1 , 
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
@@ -23,11 +27,13 @@ void GUIPass::PassInit()
 		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
 	CreateRenderPass();
 	//DescriptorSet
-	_descriptorSet.reset(new DescriptorSet(_renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC ,VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }, 1, sizeof(GUIUniformBuffer)));
+	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }, _guiObjectDescriptorSetLayout, VK_SHADER_STAGE_FRAGMENT_BIT);
+	_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1, sizeof(GUIUniformBuffer)));
 	_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
-	VulkanManager::GetManager()->CreatePipelineLayout(
+	manager->CreatePipelineLayout(
 		{
 			_descriptorSet->GetDescriptorSetLayout() ,
+			_guiObjectDescriptorSetLayout,
 		}
 	, _pipelineLayout);
 	_descriptorSet->UpdateDescriptorSetAll(sizeof(GUIUniformBuffer));
@@ -37,7 +43,7 @@ void GUIPass::PassInit()
 
 void GUIPass::PassUpdate()
 {
-	const auto manager = VulkanManager::GetManager();
+	const auto& manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.3, 1.0, 0.1, 0.2));
 	//Update FrameBuffer
@@ -45,7 +51,7 @@ void GUIPass::PassUpdate()
 	SetViewport(_currentFrameBufferSize);
 	BeginRenderPass({ 0,0,0,0 });
 	//Begin...
-	AddImage(GUIDrawState(0, 0, 100, 100, GUIAnchor_TopLeft, false, glm::vec4(1, 1, 0, 0.35)));
+	AddImage("TestImage", GUIDrawState(0, 0, 100, 100, GUIAnchor_TopLeft, false, glm::vec4(1, 1, 0, 0.35), Texture::GetSystemTexture("White")));
 
 	uint32_t dynamic_offset[1] = { (uint32_t)0 };
 	vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet->GetDescriptorSet(), 1, dynamic_offset);
@@ -53,21 +59,25 @@ void GUIPass::PassUpdate()
 	VkDeviceSize vbOffset = 0;
 	for (auto i : _drawList)
 	{
-		VkPipeline currentPipeline = _guiPipelines[i.PipelineTag];
+		VkPipeline currentPipeline = _guiPipelines[i.second.PipelineTag];
 		if (currentPipeline != pipeline)
 		{
 			pipeline = currentPipeline;
 			manager->CmdCmdBindPipeline(cmdBuf, pipeline);
 		}
-		_vertexBuffer->BufferMapping(i.Data.data(), vbOffset, sizeof(GUIUniformBuffer) * i.Data.size());
+		//textures
+		i.second._obj_tex_descriptorSet->UpdateTextureDescriptorSet({ i.second.State.BaseTexture });
+		vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &i.second._obj_tex_descriptorSet->GetDescriptorSet(), 0, 0);
+		//vertex buffer
+		_vertexBuffer->BufferMapping(i.second.Data.data(), vbOffset, sizeof(GUIUniformBuffer) * i.second.Data.size());
 		VkBuffer verBuf[] = { _vertexBuffer->GetBuffer() };
 		vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, &vbOffset);
-		vkCmdDraw(cmdBuf, i.Data.size(), 1, 0, 0);
+		//draw primitive
+		vkCmdDraw(cmdBuf, i.second.Data.size(), 1, 0, 0);
 	}
 
 	//End...
 	EndRenderPass();
-	_drawList.clear();
 }
 
 void GUIPass::PassReset()
@@ -75,13 +85,32 @@ void GUIPass::PassReset()
 
 }
 
-void GUIPass::AddImage(GUIDrawState state)
+void GUIPass::AddImage(HString tag ,GUIDrawState state)
 {
-	GUIPrimitive prim;
-	prim.Data = GetGUIPanel(state);
-	prim.State = state;
-	prim.PipelineTag = "Image";
-	auto it = _guiPipelines.find(prim.PipelineTag);
+	auto dit = _drawList.find(tag);
+	GUIPrimitive *prim = NULL;
+	if (dit != _drawList.end())
+	{
+		prim = &dit->second;
+		if (prim->State.BaseTexture != state.BaseTexture)
+		{
+			prim->_obj_tex_descriptorSet->NeedUpdate();
+		}
+		prim->State = state;
+	}
+	else
+	{
+		_drawList.emplace(tag, GUIPrimitive());
+		prim = &_drawList[tag];
+		prim->PipelineTag = "Image";
+		prim->State = state;
+	}
+	prim->Data = GetGUIPanel(state);
+	if (!prim->_obj_tex_descriptorSet)
+	{
+		prim->_obj_tex_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _guiObjectDescriptorSetLayout, 1, 0, VK_SHADER_STAGE_FRAGMENT_BIT));
+	}
+	auto it = _guiPipelines.find(prim->PipelineTag);
 	if (it == _guiPipelines.end())
 	{
 		//CraetePipeline..
@@ -110,7 +139,6 @@ void GUIPass::AddImage(GUIDrawState state)
 		PipelineManager::BuildGraphicsPipelineState(pipelineCreateInfo, _renderPass, 0 , pipeline);
 		_guiPipelines.emplace(std::make_pair("Image", pipeline));
 	}
-	_drawList.push_back(prim);
 }
 
 std::vector<GUIVertexData> GUIPass::GetGUIPanel(GUIDrawState state)

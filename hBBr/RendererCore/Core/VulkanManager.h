@@ -214,7 +214,7 @@ public:
 
 	void CreateDescripotrSetLayout(std::vector<VkDescriptorType> types, VkDescriptorSetLayout& descriptorSetLayout, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 
-	void DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout);
+	void DestroyDescriptorSetLayout(VkDescriptorSetLayout& descriptorSetLayout);
 
 	/* width and height must be same as attachments(ImageViews) size. */
 	void CreateFrameBuffer(uint32_t width, uint32_t height, VkRenderPass renderPass, std::vector<VkImageView>attachments, VkFramebuffer& framebuffer);

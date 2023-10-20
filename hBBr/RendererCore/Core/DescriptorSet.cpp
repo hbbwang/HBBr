@@ -1,6 +1,7 @@
 ﻿#include "DescriptorSet.h"
 #include "VulkanManager.h"
 #include "VulkanRenderer.h"
+#include "Texture.h"
 #include <vector>
 DescriptorSet::DescriptorSet(class VulkanRenderer* renderer , VkDescriptorType type, uint32_t bindingCount, VkDeviceSize bufferSizeInit, VkShaderStageFlags shaderStageFlags)
 {
@@ -16,11 +17,37 @@ DescriptorSet::DescriptorSet(class VulkanRenderer* renderer , VkDescriptorType t
 			VulkanManager::GetManager()->AllocateDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), _descriptorSetLayout, _descriptorSets[i]);
 		}
 	}
-	auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSizeInit);
 	if (type & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || type & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
 	{
+		auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSizeInit);
 		std::unique_ptr<Buffer> buffer;
 		buffer.reset(new Buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, alignmentSize ));
+		_buffers.push_back(std::move(buffer));
+	}
+	_needUpdates.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
+	NeedUpdate();
+}
+
+DescriptorSet::DescriptorSet(VulkanRenderer* renderer, VkDescriptorType type, VkDescriptorSetLayout setLayout, uint32_t bindingCount, VkDeviceSize bufferSizeInit, VkShaderStageFlags shaderStageFlags)
+{
+	_renderer = renderer;
+	_descriptorTypes.push_back(type);
+	_shaderStageFlags = shaderStageFlags;
+	//外部传递进来的有效DescriptorSetLayout，不需要储存
+	//_descriptorSetLayout = setLayout;
+	if (setLayout != VK_NULL_HANDLE)
+	{
+		_descriptorSets.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
+		for (int i = 0; i < (int)VulkanManager::GetManager()->GetSwapchainBufferCount(); i++)
+		{
+			VulkanManager::GetManager()->AllocateDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), setLayout, _descriptorSets[i]);
+		}
+	}
+	if (type & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || type & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
+	{
+		auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSizeInit);
+		std::unique_ptr<Buffer> buffer;
+		buffer.reset(new Buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, alignmentSize));
 		_buffers.push_back(std::move(buffer));
 	}
 	_needUpdates.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
@@ -41,12 +68,12 @@ DescriptorSet::DescriptorSet(VulkanRenderer* renderer, std::vector<VkDescriptorT
 			VulkanManager::GetManager()->AllocateDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), _descriptorSetLayout, _descriptorSets[i]);
 		}
 	}
-	auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSizeInit);
 	for (int i = 0; i < types.size(); i++)
 	{
 		std::unique_ptr<Buffer> buffer;
 		if (types[i] == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || types[i] == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
 		{
+			auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSizeInit);
 			buffer.reset(new Buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, alignmentSize));
 		}
 		else if (types[i] == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
@@ -130,6 +157,36 @@ void DescriptorSet::UpdateDescriptorSetAll(uint32_t sameBufferSize)
 {
 	auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(sameBufferSize);
 	VulkanManager::GetManager()->UpdateBufferDescriptorSetAll(this, 0, 0, alignmentSize);
+}
+
+void DescriptorSet::UpdateTextureDescriptorSet(std::vector<class Texture*> textures)
+{
+	if (_needUpdates[_renderer->GetCurrentFrameIndex()] == 1)
+	{
+		_needUpdates[_renderer->GetCurrentFrameIndex()] = 0;
+		//
+		const uint32_t count = (uint32_t)textures.size();
+		std::vector<VkWriteDescriptorSet> descriptorWrite(count);
+		std::vector<VkDescriptorImageInfo> imageInfo(count);
+		for (uint32_t o = 0; o < count; o++)
+		{
+			imageInfo[o] = {};
+			imageInfo[o].sampler = textures[o]->GetSampler();
+			imageInfo[o].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageInfo[o].imageView = textures[o]->GetTextureView();
+			descriptorWrite[o] = {};
+			descriptorWrite[o].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite[o].dstSet = this->GetDescriptorSet();
+			descriptorWrite[o].dstBinding = o;
+			descriptorWrite[o].dstArrayElement = 0;
+			descriptorWrite[o].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrite[o].descriptorCount = 1;
+			descriptorWrite[o].pBufferInfo = VK_NULL_HANDLE;
+			descriptorWrite[o].pImageInfo = VK_NULL_HANDLE; // Optional
+			descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE; // Optional
+		}
+		vkUpdateDescriptorSets(VulkanManager::GetManager()->GetDevice(), count, descriptorWrite.data(), 0, VK_NULL_HANDLE);
+	}
 }
 
 const VkDescriptorSet& DescriptorSet::GetDescriptorSet()

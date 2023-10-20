@@ -9,6 +9,9 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 	_renderer = renderer;
 	_sceneTextures.reset(new SceneTexture(renderer));
 	{
+		//Precommand Pass
+		std::shared_ptr<PreCommandPass> precommand = std::make_shared<PreCommandPass>(renderer);
+		AddPass(precommand, "PreCommand");
 		//Opaque Pass
 		std::shared_ptr<BasePass> opaque = std::make_shared<BasePass>(renderer);
 		AddPass(opaque, "Opaque");
