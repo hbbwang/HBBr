@@ -209,9 +209,14 @@ void PreCommandPass::PassInit()
 
 void PreCommandPass::PassUpdate()
 {
+	const auto cmdBuf = _renderer->GetCommandBuffer();
 	//Image data CPU to GPU
-	for (auto i : Texture::GetUploadTextures())
+	auto& uploadTexs = Texture::GetUploadTextures();
+	for (auto it = uploadTexs.begin(); it != uploadTexs.end(); it++)
 	{
-		
+		if ((*it)->CopyBufferToTexture(cmdBuf))
+		{
+			it = uploadTexs.erase(it) - 1;
+		}
 	}
 }

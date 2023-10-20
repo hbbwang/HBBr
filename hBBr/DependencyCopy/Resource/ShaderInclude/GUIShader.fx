@@ -20,8 +20,8 @@ struct VSToPS
     float2 UV               : TEXCOORD0;
 };
 
-SamplerState BaseTextureSampler : register(s0);
-Texture2D BaseTexture : register(t0);
+SamplerState BaseTextureSampler : register(s0,space1);
+Texture2D BaseTexture : register(t0,space1);
 
 VSToPS VSMain(VSInput IN)
 {

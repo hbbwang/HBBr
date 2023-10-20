@@ -51,7 +51,7 @@ void GUIPass::PassUpdate()
 	SetViewport(_currentFrameBufferSize);
 	BeginRenderPass({ 0,0,0,0 });
 	//Begin...
-	AddImage("TestImage", GUIDrawState(0, 0, 100, 100, GUIAnchor_TopLeft, false, glm::vec4(1, 1, 0, 0.35), Texture::GetSystemTexture("White")));
+	AddImage("TestImage", GUIDrawState(0, 0, 200, 200, GUIAnchor_TopLeft, false, glm::vec4(1, 1, 1, 1), Texture::GetSystemTexture("TestTex")));
 
 	uint32_t dynamic_offset[1] = { (uint32_t)0 };
 	vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet->GetDescriptorSet(), 1, dynamic_offset);
@@ -67,7 +67,7 @@ void GUIPass::PassUpdate()
 		}
 		//textures
 		i.second._obj_tex_descriptorSet->UpdateTextureDescriptorSet({ i.second.State.BaseTexture });
-		vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &i.second._obj_tex_descriptorSet->GetDescriptorSet(), 0, 0);
+		vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 1, 1, &i.second._obj_tex_descriptorSet->GetDescriptorSet(), 0, 0);
 		//vertex buffer
 		_vertexBuffer->BufferMapping(i.second.Data.data(), vbOffset, sizeof(GUIUniformBuffer) * i.second.Data.size());
 		VkBuffer verBuf[] = { _vertexBuffer->GetBuffer() };

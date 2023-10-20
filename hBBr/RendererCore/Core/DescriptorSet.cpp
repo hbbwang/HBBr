@@ -182,7 +182,7 @@ void DescriptorSet::UpdateTextureDescriptorSet(std::vector<class Texture*> textu
 			descriptorWrite[o].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			descriptorWrite[o].descriptorCount = 1;
 			descriptorWrite[o].pBufferInfo = VK_NULL_HANDLE;
-			descriptorWrite[o].pImageInfo = VK_NULL_HANDLE; // Optional
+			descriptorWrite[o].pImageInfo = &imageInfo[o]; // Optional
 			descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE; // Optional
 		}
 		vkUpdateDescriptorSets(VulkanManager::GetManager()->GetDevice(), count, descriptorWrite.data(), 0, VK_NULL_HANDLE);

@@ -152,7 +152,7 @@ public:
 	void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<std::shared_ptr<class Texture>>& textures);
 
 	/* 创建Vulkan image ,但是不带 mipmaps */
-	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image);
+	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image ,uint32_t miplevel = 1);
 
 	/* 根据VkImageView ,创建Vulkan image view*/
 	void CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags,  VkImageView& imageView);
@@ -230,7 +230,7 @@ public:
 	void FreeDescriptorSet(VkDescriptorPool pool, std::vector<VkDescriptorSet>& descriptorSet);
 
 	/* Image 布局转换 */
-	void Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1);
+	void Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
 
 	void CreateVkSemaphore(VkSemaphore& semaphore);
 
@@ -270,6 +270,10 @@ public:
 	void CreateBuffer(VkBufferUsageFlags usage, VkDeviceSize bufferSize, VkBuffer& buffer);
 
 	void AllocateBufferMemory(VkBuffer buffer , VkDeviceMemory& bufferMemory, VkMemoryPropertyFlags propertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+	void CreateBufferAndAllocateMemory(size_t bufferSize, uint32_t bufferUsage, uint32_t bufferMemoryProperty, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+
+	void DestroyBufferAndMemory(VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
 	void FreeBufferMemory(VkDeviceMemory& bufferMemory);
 

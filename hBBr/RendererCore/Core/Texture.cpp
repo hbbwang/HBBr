@@ -49,9 +49,9 @@ Texture::~Texture()
 	VulkanManager::GetManager()->DestroyImage(_image);
 }
 
-void Texture::Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin, uint32_t mipLevelCount)
+void Texture::Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin, uint32_t mipLevelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
-	VulkanManager::GetManager()->Transition(cmdBuffer, _image, _imageAspectFlags, oldLayout, newLayout, mipLevelBegin, mipLevelCount);
+	VulkanManager::GetManager()->Transition(cmdBuffer, _image, _imageAspectFlags, oldLayout, newLayout, mipLevelBegin, mipLevelCount, baseArrayLayer, layerCount);
 	_imageLayout = newLayout;
 }
 
@@ -165,7 +165,7 @@ Texture* Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags usageFlags)
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = { w, h };
 	newTexture->_imageData = out;
-	VulkanManager::GetManager()->CreateImage(w, h, format, usageFlags, newTexture->_image);
+	VulkanManager::GetManager()->CreateImage(w, h, format, usageFlags, newTexture->_image, newTexture->_imageData->mipLevel);
 	if (format == VK_FORMAT_R32_SFLOAT || format == VK_FORMAT_D32_SFLOAT)
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
 	else if (format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM_S8_UINT)
@@ -185,19 +185,13 @@ Texture* Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags usageFlags)
 
 	//标记为需要CopyBufferToImage
 	_upload_textures.push_back(dataPtr->GetData());
+
 	return dataPtr->GetData();
 }
 
 void Texture::GlobalInitialize()
 {
 	const auto& manager = VulkanManager::GetManager();
-	//Create BaseTexture
-	auto blackTex = Texture::ImportTextureAsset(HGUID("dd5644a9-ae6a-44da-8f4f-4a686b083bcc"));
-	auto normalTex = Texture::ImportTextureAsset(HGUID("968561d0-8569-429c-a135-faa450b818fe"));
-	auto whiteTex = Texture::ImportTextureAsset(HGUID("ca1e3bec-26d7-4c1d-91ed-da3283142736"));
-	Texture::AddSystemTexture("Black", blackTex);
-	Texture::AddSystemTexture("Normal", normalTex);
-	Texture::AddSystemTexture("White", whiteTex);
 
 	//Create Sampler
 	VkSampler sampler = VK_NULL_HANDLE;
@@ -236,6 +230,15 @@ void Texture::GlobalInitialize()
 	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
 	_samplers.emplace(TextureSampler_Nearest_Clamp, sampler);
 
+	//Create BaseTexture
+	auto blackTex = Texture::ImportTextureAsset(HGUID("dd5644a9-ae6a-44da-8f4f-4a686b083bcc"));
+	auto normalTex = Texture::ImportTextureAsset(HGUID("968561d0-8569-429c-a135-faa450b818fe"));
+	auto whiteTex = Texture::ImportTextureAsset(HGUID("ca1e3bec-26d7-4c1d-91ed-da3283142736"));
+	auto testTex = Texture::ImportTextureAsset(HGUID("94bd84aa-c8b3-4c8f-9239-015010a21d06"));
+	Texture::AddSystemTexture("Black", blackTex);
+	Texture::AddSystemTexture("Normal", normalTex);
+	Texture::AddSystemTexture("White", whiteTex);
+	Texture::AddSystemTexture("TestTex", testTex);
 }
 
 void Texture::GlobalUpdate()
@@ -254,6 +257,8 @@ void Texture::GlobalRelease()
 
 void Texture::AddSystemTexture(HString tag, Texture* tex)
 {
+	//系统纹理是渲染器底层预设纹理，需要直接准备就绪
+	tex->CopyBufferToTextureImmediate();
 	_system_textures.emplace(tag, tex);
 }
 
@@ -268,11 +273,134 @@ Texture* Texture::GetSystemTexture(HString tag)
 	return NULL;
 }
 
-void Texture::CopyBufferToTexture(VkCommandBuffer cmdbuf, Texture* tex, std::vector<unsigned char> imageData)
+bool Texture::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 {
-	if (tex && imageData.size() > 0)
+	const auto& manager = VulkanManager::GetManager();
+	if (_imageData)
 	{
+		//上一帧已经复制完成了,可以删除Upload buffer 和Memory了
+		if (_bUploadToGPU)
+		{
+			if (_uploadBuffer != VK_NULL_HANDLE)
+			{
+				vkDestroyBuffer(manager->GetDevice(), _uploadBuffer, nullptr);
+				_uploadBuffer = VK_NULL_HANDLE;
+			}
+			if (_uploadBufferMemory != VK_NULL_HANDLE)
+			{
+				vkFreeMemory(manager->GetDevice(), _uploadBufferMemory, nullptr);
+				_uploadBufferMemory = VK_NULL_HANDLE;
+			}
+			return true;
+		}
+		else if (_imageData->imageData.size() > 0)
+		{
+			//Copy image data to upload memory
+			uint64_t imageSize = _imageData->imageSize;
 
+			//Cube 有6面
+			int faceNum = 1;
+			if (_imageData->isCubeMap)
+			{
+				faceNum = 6;
+			}
+			imageSize *= faceNum;
+
+			//创建Buffer储存Image data
+			manager->CreateBufferAndAllocateMemory(
+				imageSize,
+				VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+				_uploadBuffer,
+				_uploadBufferMemory);
+			void* data = NULL;
+			vkMapMemory(manager->GetDevice(), _uploadBufferMemory, 0, imageSize, 0, &data);
+			memcpy(data, _imageData->imageData.data(), (size_t)imageSize);
+			vkUnmapMemory(manager->GetDevice(), _uploadBufferMemory);
+
+			//从Buffer copy到Vkimage
+			if (_imageData->blockSize > 0)
+			{
+				if (_imageData->isCubeMap)
+					Transition(cmdbuf, _imageLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, _imageData->mipLevel, 0, 6);
+				else
+					Transition(cmdbuf, _imageLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, _imageData->mipLevel);
+
+				std::vector<VkBufferImageCopy>region(_imageData->mipLevel * faceNum);
+				int regionIndex = 0;
+				uint32_t bufferOffset = 0;
+				for (uint32_t face = 0; face < faceNum; face++)
+				{
+					uint32_t mipWidth = _imageData->data_header.width;
+					uint32_t mipHeight = _imageData->data_header.height;
+					for (uint32_t i = 0; i < _imageData->mipLevel; i++)
+					{
+						region[regionIndex] = {};
+						region[regionIndex].bufferOffset = bufferOffset;
+						region[regionIndex].bufferRowLength = 0;
+						region[regionIndex].bufferImageHeight = 0;
+						region[regionIndex].imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+						region[regionIndex].imageSubresource.mipLevel = i;
+						region[regionIndex].imageSubresource.baseArrayLayer = face;
+						region[regionIndex].imageSubresource.layerCount = 1;
+						region[regionIndex].imageOffset = { 0,0,0 };
+						region[regionIndex].imageExtent = { mipWidth ,mipHeight,1 };
+						bufferOffset += SIZE_OF_BC((int32_t)mipWidth, (int32_t)mipHeight, _imageData->blockSize);
+						if (mipWidth > 1) mipWidth /= 2;
+						if (mipHeight > 1) mipHeight /= 2;
+						regionIndex++;
+					}
+				}
+				vkCmdCopyBufferToImage(cmdbuf, _uploadBuffer, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, (uint32_t)region.size(), region.data());
+
+				//复制完成后,把Layout转换到Shader read only,给shader采样使用
+				if (_imageData->isCubeMap)
+					Transition(cmdbuf, _imageLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, _imageData->mipLevel, 0, 6);
+				else
+					Transition(cmdbuf, _imageLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, _imageData->mipLevel);
+			}
+
+			//上传完成,标记
+			_bUploadToGPU = true;
+			//上传完成,清除图像的CPU数据
+			_imageData->imageData.clear();
+			return false;
+		}
+	}
+	return false;
+}
+
+void Texture::CopyBufferToTextureImmediate()
+{
+	const auto& manager = VulkanManager::GetManager();
+	VkCommandBuffer buf;
+	manager->AllocateCommandBuffer(manager->GetCommandPool(), buf);
+	manager->BeginCommandBuffer(buf, 0);
+	{
+		CopyBufferToTexture(buf);
+	}
+	manager->EndCommandBuffer(buf);
+	manager->SubmitQueueImmediate({ buf });
+	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
+	manager->FreeCommandBuffers(manager->GetCommandPool(), { buf });
+	//
+	if (_bUploadToGPU)
+	{
+		if (_uploadBuffer != VK_NULL_HANDLE)
+		{
+			vkDestroyBuffer(manager->GetDevice(), _uploadBuffer, nullptr);
+			_uploadBuffer = VK_NULL_HANDLE;
+		}
+		if (_uploadBufferMemory != VK_NULL_HANDLE)
+		{
+			vkFreeMemory(manager->GetDevice(), _uploadBufferMemory, nullptr);
+			_uploadBufferMemory = VK_NULL_HANDLE;
+		}
+	}
+	auto it = std::find(_upload_textures.begin(), _upload_textures.end(), this);
+	if (it != _upload_textures.end())
+	{
+		_upload_textures.erase(it);
 	}
 }
 

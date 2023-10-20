@@ -27,6 +27,7 @@
 		<Item GUID="dd5644a9-ae6a-44da-8f4f-4a686b083bcc" Name="T_System_Black" Suffix="dds" Path="./Resource/Content/Core/Texture/" ByteSize="1827" />
 		<Item GUID="968561d0-8569-429c-a135-faa450b818fe" Name="T_System_Normal" Suffix="dds" Path="./Resource/Content/Core/Texture/" ByteSize="1847" />
 		<Item GUID="ca1e3bec-26d7-4c1d-91ed-da3283142736" Name="T_System_White" Suffix="dds" Path="./Resource/Content/Core/Texture/" ByteSize="1420" />
+		<Item GUID="94bd84aa-c8b3-4c8f-9239-015010a21d06" Name="TestTex" Suffix="dds" Path="./Resource/Content/Core/Texture/" ByteSize="1637773" />
 	</Texture2D>
 	<TextureCube />
 	<Prefab />

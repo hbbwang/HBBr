@@ -1309,7 +1309,7 @@ void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<std:
 	}
 }
 
-void VulkanManager::CreateImage(uint32_t width , uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image)
+void VulkanManager::CreateImage(uint32_t width , uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image, uint32_t miplevel)
 {
 	VkExtent2D texSize = {};
 	texSize.width = width;
@@ -1322,7 +1322,7 @@ void VulkanManager::CreateImage(uint32_t width , uint32_t height, VkFormat forma
 	create_info.usage = usageFlags;
 	create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
 	create_info.arrayLayers = 1;
-	create_info.mipLevels = 1;
+	create_info.mipLevels = miplevel;
 	create_info.extent.depth = 1;
 	create_info.extent.width = texSize.width;
 	create_info.extent.height = texSize.height;
@@ -1381,7 +1381,16 @@ void VulkanManager::CreateImageMemory(VkImage inImage, VkDeviceMemory& imageView
 	}
 }
 
-void VulkanManager::Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin , uint32_t mipLevelCount)
+void VulkanManager::Transition(
+	VkCommandBuffer cmdBuffer, 
+	VkImage image, 
+	VkImageAspectFlags aspects, 
+	VkImageLayout oldLayout, 
+	VkImageLayout newLayout, 
+	uint32_t mipLevelBegin , 
+	uint32_t mipLevelCount, 
+	uint32_t baseArrayLayer, 
+	uint32_t layerCount)
 {
 	VkImageMemoryBarrier imageBarrier = {};
 	imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -1392,7 +1401,8 @@ void VulkanManager::Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImage
 	imageBarrier.subresourceRange.aspectMask = aspects;
 	imageBarrier.subresourceRange.baseMipLevel = mipLevelBegin;
 	imageBarrier.subresourceRange.levelCount = mipLevelCount;
-	imageBarrier.subresourceRange.layerCount = 1;
+	imageBarrier.subresourceRange.baseArrayLayer = baseArrayLayer;
+	imageBarrier.subresourceRange.layerCount = layerCount;
 	VkPipelineStageFlags srcFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 	VkPipelineStageFlags dstFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 	switch (oldLayout) {
@@ -1420,6 +1430,10 @@ void VulkanManager::Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImage
 		imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
 		srcFlags = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT | VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT | VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 		break;
+	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+		srcFlags = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		break;
 	default:
 		break;
 	}
@@ -1427,6 +1441,7 @@ void VulkanManager::Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImage
 	switch (newLayout) {
 	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
 		imageBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		dstFlags = VK_PIPELINE_STAGE_TRANSFER_BIT;
 		break;
 	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
 		imageBarrier.srcAccessMask |= VK_ACCESS_TRANSFER_READ_BIT;
@@ -1442,8 +1457,9 @@ void VulkanManager::Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImage
 		dstFlags = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 		break;
 	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-		imageBarrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+		imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 		imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		dstFlags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 		break;
 	case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
 		imageBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
@@ -2069,8 +2085,8 @@ void VulkanManager::DestroyBuffer(VkBuffer& buffer)
 	if (buffer != VK_NULL_HANDLE)
 	{
 		vkDestroyBuffer(_device, buffer, VK_NULL_HANDLE);
-		buffer = VK_NULL_HANDLE;
 	}
+	buffer = VK_NULL_HANDLE;
 }
 
 void VulkanManager::AllocateBufferMemory(VkBuffer buffer, VkDeviceMemory& bufferMemory, VkMemoryPropertyFlags propertyFlags)
@@ -2089,12 +2105,25 @@ void VulkanManager::AllocateBufferMemory(VkBuffer buffer, VkDeviceMemory& buffer
 	}
 }
 
+void VulkanManager::CreateBufferAndAllocateMemory(size_t bufferSize, uint32_t bufferUsage, uint32_t bufferMemoryProperty, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
+{
+	CreateBuffer(bufferUsage, bufferSize, buffer);
+	AllocateBufferMemory(buffer, bufferMemory, bufferMemoryProperty);
+}
+
+void VulkanManager::DestroyBufferAndMemory(VkBuffer& buffer, VkDeviceMemory& bufferMemory)
+{
+	FreeBufferMemory(bufferMemory);
+	DestroyBuffer(buffer);
+}
+
 void VulkanManager::FreeBufferMemory(VkDeviceMemory& bufferMemory)
 {
 	if (bufferMemory != VK_NULL_HANDLE)
 	{
 		vkFreeMemory(_device, bufferMemory, VK_NULL_HANDLE);
 	}
+	bufferMemory = VK_NULL_HANDLE;
 }
 
 void VulkanManager::CreateShaderModule(std::vector<char> data, VkShaderModule& shaderModule)

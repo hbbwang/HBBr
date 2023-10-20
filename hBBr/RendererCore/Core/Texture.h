@@ -104,13 +104,19 @@ public:
 		return _upload_textures;
 	}
 
-	void Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0 , uint32_t mipLevelCount = 1);
+	void Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
 
 	void TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1);
 
-	void CopyBufferToTexture(VkCommandBuffer cmdbuf, Texture* tex, std::vector<unsigned char> imageData);
+	bool CopyBufferToTexture(VkCommandBuffer cmdbuf);
+
+	void CopyBufferToTextureImmediate();
 
 	void Resize(uint32_t width, uint32_t height);
+
+	HBBR_INLINE bool IsValid()const {
+		return _bUploadToGPU;
+	}
 
 	static std::shared_ptr<Texture> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, HString textureName = "Texture", bool noMemory = false);
 
@@ -156,7 +162,13 @@ private:
 	VkSampler _sampler;
 	//static std::unordered_map<HGUID, Texture> _all_textures;
 	ImageData* _imageData = NULL;
+
+	//Upload object
+	VkBuffer _uploadBuffer = VK_NULL_HANDLE;
+	VkDeviceMemory _uploadBufferMemory = VK_NULL_HANDLE;
 	static std::vector<Texture*> _upload_textures;
+
+	//Global variable
 	static std::unordered_map<HString, Texture*> _system_textures;
 	static std::unordered_map < TextureSampler, VkSampler > _samplers;
 };
