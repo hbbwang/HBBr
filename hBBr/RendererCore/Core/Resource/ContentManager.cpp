@@ -136,6 +136,7 @@ void ContentManager::ReloadAssetInfo(AssetType type , pugi::xml_node & i)
 	StringToGUID(guidStr.c_str(), &info->guid);
 	XMLStream::LoadXMLAttributeString(i, L"Name", info->name);
 	XMLStream::LoadXMLAttributeString(i, L"Path", info->relativePath);
+	info->relativePath.CorrectionPath();
 	XMLStream::LoadXMLAttributeString(i, L"Suffix", info->suffix);
 	XMLStream::LoadXMLAttributeUint64(i, L"ByteSize", info->byteSize);
 	//Ref temps
@@ -326,4 +327,49 @@ AssetInfoBase* ContentManager::GetAssetInfo(HGUID guid, AssetType type)const
 		return NULL;
 	}
 	return NULL;
+}
+
+HGUID ContentManager::GetAssetGUID(HString contentBrowserFilePath)const
+{
+	HString filePath = contentBrowserFilePath.GetFilePath();
+	HString fileBaseName = contentBrowserFilePath.GetBaseName();
+	HString suffix = contentBrowserFilePath.GetSuffix();
+	AssetType type = AssetType::Unknow;
+	//获取路径下的同类型资产文件
+	auto files = FileSystem::GetFilesBySuffix(filePath.c_str(), suffix.c_str());
+	if (suffix.IsSame("fbx", false))
+	{
+		type = AssetType::Model;
+	}
+	else if (suffix.IsSame("mat", false))
+	{
+		type = AssetType::Material;
+	}
+	else if (suffix.IsSame("dds", false))
+	{
+		type = AssetType::Texture2D;
+	}
+
+	if (type != AssetType::Unknow)
+	{
+		auto& map = _assets[(uint32_t)type];
+		HString path = FileSystem::GetRelativePath(filePath.c_str());
+		auto fit = std::find_if(map.begin(), map.end(), [&](const std::pair<HGUID, AssetInfoBase*>& item) {
+			return item.second->relativePath == path && fileBaseName == item.second->name;
+			});
+		if (fit != map.end())
+		{
+			return fit->first;
+		}
+	}
+	return HGUID();
+
+	//auto it = std::find_if(files.begin(), files.end(), [fileName](FileEntry& entry) {
+	//	return entry.baseName == fileName;
+	//	});
+	//if (it != files.end())
+	//{
+	//	StringToGUID(it->baseName.c_str(), &guid);
+	//}
+	//return guid;
 }

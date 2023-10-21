@@ -128,9 +128,9 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	//Init Vulkan Manager
 	VulkanManager::InitManager(bEnableDebug);
 
-	Texture::GlobalInitialize();
+	Texture::CreateFontTexture("C:/Windows/Fonts/simhei.ttf", FileSystem::GetContentAbsPath() + "Core/Texture/font.dds", true);
 
-	Texture::CreateFontTexture("C:/Windows/Fonts/simhei.ttf", FileSystem::GetContentAbsPath() + "Core/Texture/font.dds");
+	Texture::GlobalInitialize();
 
 	//Create Main Window
 	auto win = CreateNewWindow(128, 128, "MainRenderer", false, parent);

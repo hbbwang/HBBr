@@ -40,8 +40,9 @@ extern "C" {
 		HBBR_API static bool FileExist(const char* path);
 		HBBR_API static bool IsDir(const char* path);
 		HBBR_API static bool IsNormalFile(const char* path);
-		HBBR_API static bool FileCopy(const char* srcFile, const char* newPath);
+		HBBR_API static void FileCopy(const char* srcFile, const char* newPath);
 		HBBR_API static bool FileRemove(const char* path);
+		HBBR_API static void FileRename(const char* src , const char* dst);
 		HBBR_API static uint64_t GetFileSize(const char* path);
 		static std::vector<FileEntry> GetFilesBySuffix(const char* path, const char* suffix);
 		static std::vector<char>ReadBinaryFile(const char* filePath);

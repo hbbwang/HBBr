@@ -126,15 +126,31 @@ bool FileSystem::IsNormalFile(const char* path)
     return  fs::is_regular_file(path);
 }
 
-bool FileSystem::FileCopy(const char* srcFile, const char* newPath)
+void FileSystem::FileCopy(const char* srcFile, const char* newPath)
 {
-    fs::copy(srcFile, newPath);
-    return 1;
+    std::error_code error;
+    fs::copy(srcFile, newPath, fs::copy_options::overwrite_existing, error);
+    if (error.value())
+    {
+        HString copyError = "FileCopy:";
+        copyError += srcFile;
+        copyError += " [to] \n" ;
+        copyError += newPath;
+        copyError += " : \n";
+        copyError += error.message().c_str();
+        MessageOut(copyError.c_str(), false, false, "255,255,0");
+    }
 }
 
 bool FileSystem::FileRemove(const char* path)
 {  
     return fs::remove(path);
+}
+
+void FileSystem::FileRename(const char* src, const char* dst)
+{
+    FileCopy(src, dst);
+    fs::remove(src);
 }
 
 uint64_t FileSystem::GetFileSize(const char* path)

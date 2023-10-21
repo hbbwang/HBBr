@@ -5,6 +5,7 @@
 #include "FileSystem.h"
 #include "ConsoleDebug.h"
 #include "DDSTool.h"
+#include "ContentManager.h"
 
 std::vector<Texture*> Texture::_upload_textures;
 std::unordered_map<HString, Texture*> Texture::_system_textures;
@@ -247,10 +248,12 @@ void Texture::GlobalInitialize()
 	auto normalTex = Texture::ImportTextureAsset(HGUID("968561d0-8569-429c-a135-faa450b818fe"));
 	auto whiteTex = Texture::ImportTextureAsset(HGUID("ca1e3bec-26d7-4c1d-91ed-da3283142736"));
 	auto testTex = Texture::ImportTextureAsset(HGUID("94bd84aa-c8b3-4c8f-9239-015010a21d06"));
+	auto fontTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/font.dds"));
 	Texture::AddSystemTexture("Black", blackTex);
 	Texture::AddSystemTexture("Normal", normalTex);
 	Texture::AddSystemTexture("White", whiteTex);
 	Texture::AddSystemTexture("TestTex", testTex);
+	Texture::AddSystemTexture("Font", fontTex);
 }
 
 void Texture::GlobalUpdate()
@@ -860,90 +863,97 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 		ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/bahnschrift.ttf";
 	}
 
-	ttfFontPath.CorrectionPath();
-	outTexturePath.CorrectionPath();
-	// 初始化FreeType库
-	FT_Library ft;
-	if (FT_Init_FreeType(&ft)) {
-		std::cerr << "Failed to initialize FreeType library!" << std::endl;
-		return;
-	}
-
-	// 加载字体文件
-	FT_Face face;
-	if (FT_New_Face(ft, ttfFontPath.c_str(), 0, &face)) {
-		std::cerr << "Failed to load font!" << std::endl;
-		return;
-	}
-
-	if (FT_Select_Charmap(face, FT_ENCODING_UNICODE))
 	{
-		std::cerr << "Failed to Select UNICODE Charmap!" << std::endl;
-		return ;
-	}
-
-	// 设置字体大小
-	unsigned int fontSize = 48;
-	FT_Set_Pixel_Sizes(face, 0, fontSize);
-
-	// 创建字符集
-	std::vector<Character> characters;
-
-	// 计算纹理图集的尺寸
-	unsigned int textureWidth = 0;
-	unsigned int textureHeight = 0;
-
-	for (wchar_t c = 32; c < 127; c++) {
-		// 加载字符的字形
-		if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-			std::cerr << "Failed to load glyph!" << std::endl;
+		ttfFontPath.CorrectionPath();
+		outTexturePath.CorrectionPath();
+		// 初始化FreeType库
+		FT_Library ft;
+		if (FT_Init_FreeType(&ft)) {
+			std::cerr << "Failed to initialize FreeType library!" << std::endl;
 			return;
 		}
 
-		textureWidth += face->glyph->bitmap.width;
-		textureHeight = SDL_max(textureHeight, face->glyph->bitmap.rows);
+		// 加载字体文件
+		FT_Face face;
+		if (FT_New_Face(ft, ttfFontPath.c_str(), 0, &face)) {
+			std::cerr << "Failed to load font!" << std::endl;
+			return;
+		}
+
+		if (FT_Select_Charmap(face, FT_ENCODING_UNICODE))
+		{
+			std::cerr << "Failed to Select UNICODE Charmap!" << std::endl;
+			return;
+		}
+
+		// 设置字体大小
+		unsigned int fontSize = 48;
+		FT_Set_Pixel_Sizes(face, 0, fontSize);
+
+		// 创建字符集
+		std::vector<Character> characters;
+
+		// 计算纹理图集的尺寸
+		unsigned int textureWidth = 0;
+		unsigned int textureHeight = 0;
+
+		for (wchar_t c = 32; c < 127; c++) {
+			// 加载字符的字形
+			if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+				std::cerr << "Failed to load glyph!" << std::endl;
+				return;
+			}
+
+			textureWidth += face->glyph->bitmap.width;
+			textureHeight = SDL_max(textureHeight, face->glyph->bitmap.rows);
+		}
+
+		// 创建纹理图集
+		std::vector<unsigned char> textureData(textureWidth * textureHeight * 4, 0);
+
+		// 将字符位图复制到纹理图集
+		unsigned int x = 0;
+		for (wchar_t c = 32; c < 127; c++)
+		{
+			// 加载字符的字形
+			FT_Load_Char(face, c, FT_LOAD_RENDER);
+			AddFont(face, textureWidth, textureHeight, x, textureData, characters, c);
+		}
+
+		//wchar_t  character = L'我';
+		//FT_Load_Char(face, character, FT_LOAD_RENDER);
+		//AddFont(face, textureWidth, textureHeight, x, textureData, characters, character);
+
+		// 清理资源
+		FT_Done_Face(face);
+		FT_Done_FreeType(ft);
+
+		// 现在，textureData向量包含了纹理图集的数据，characters向量包含了每个字符的信息
+		// 你可以将textureData上传到GPU，并在图形API（如Vulkan或OpenGL）中使用它来渲染文本
+
+		//ImageTool::SavePngImageRGBA8(outTexturePath.c_str(), textureWidth, textureHeight, textureData.data());
+
+		using namespace nvtt;
+		Context context;
+		context.enableCudaAcceleration(true);
+
+		Surface image;
+		image.setImage(nvtt::InputFormat_BGRA_8UB, textureWidth, textureHeight, 1, &textureData[0]);
+
+		OutputOptions output;
+		output.setFileName(outTexturePath.c_str());
+		int mipmaps = 1;
+		CompressionOptions options;
+		options.setFormat(Format_BC7);
+		options.setQuality(Quality_Production);
+		context.outputHeader(image, mipmaps, options, output);
+		context.compress(image, 0, 0, options, output);
 	}
 
-	// 创建纹理图集
-	std::vector<unsigned char> textureData(textureWidth * textureHeight * 4, 0);
-
-	// 将字符位图复制到纹理图集
-	unsigned int x = 0;
-	for (wchar_t  c = 32; c < 127; c++)
-	{
-		// 加载字符的字形
-		FT_Load_Char(face, c, FT_LOAD_RENDER);
-		AddFont(face, textureWidth, textureHeight, x, textureData, characters, c);
-	}
-
-	//wchar_t  character = L'我';
-	//FT_Load_Char(face, character, FT_LOAD_RENDER);
-	//AddFont(face, textureWidth, textureHeight, x, textureData, characters, character);
-
-	// 清理资源
-	FT_Done_Face(face);
-	FT_Done_FreeType(ft);
-
-	// 现在，textureData向量包含了纹理图集的数据，characters向量包含了每个字符的信息
-	// 你可以将textureData上传到GPU，并在图形API（如Vulkan或OpenGL）中使用它来渲染文本
-
-	//ImageTool::SavePngImageRGBA8(outTexturePath.c_str(), textureWidth, textureHeight, textureData.data());
-
-	using namespace nvtt;
-	Context context;
-	context.enableCudaAcceleration(true);
-
-	Surface image;
-	image.setImage(nvtt::InputFormat_BGRA_8UB, textureWidth, textureHeight, 1, &textureData[0]);
-
-	OutputOptions output;
-	output.setFileName(outTexturePath.c_str());
-	int mipmaps = 1;
-	CompressionOptions options;
-	options.setFormat(Format_BC7);
-	options.setQuality(Quality_Production);
-	context.outputHeader(image, mipmaps, options, output);
-	context.compress(image, 0, 0, options, output);
+	//重新导入
+	auto assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Texture2D, outTexturePath, outTexturePath);
+	HString newName = (outTexturePath.GetFilePath() + GUIDToString(assetInfo->guid) + ".dds");
+	FileSystem::FileRename(outTexturePath.c_str(), newName.c_str());
 }
 #else
 void GUIPass::CreateFontTexture(HString ttfFontPath, HString outTexturePath)
