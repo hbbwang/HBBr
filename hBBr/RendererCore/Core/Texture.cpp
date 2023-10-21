@@ -244,10 +244,10 @@ void Texture::GlobalInitialize()
 	_samplers.emplace(TextureSampler_Nearest_Clamp, sampler);
 
 	//Create BaseTexture
-	auto blackTex = Texture::ImportTextureAsset(HGUID("dd5644a9-ae6a-44da-8f4f-4a686b083bcc"));
-	auto normalTex = Texture::ImportTextureAsset(HGUID("968561d0-8569-429c-a135-faa450b818fe"));
-	auto whiteTex = Texture::ImportTextureAsset(HGUID("ca1e3bec-26d7-4c1d-91ed-da3283142736"));
-	auto testTex = Texture::ImportTextureAsset(HGUID("94bd84aa-c8b3-4c8f-9239-015010a21d06"));
+	auto blackTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Black.dds"));
+	auto normalTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Normal.dds"));
+	auto whiteTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/T_System_White.dds"));
+	auto testTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/TestTex.dds"));
 	auto fontTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/font.dds"));
 	Texture::AddSystemTexture("Black", blackTex);
 	Texture::AddSystemTexture("Normal", normalTex);
