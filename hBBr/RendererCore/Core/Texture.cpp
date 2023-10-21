@@ -799,11 +799,18 @@ void Texture::GetImageDataFromCompressionData(const char* ddsPath, nvtt::Surface
 #pragma comment(lib,"freetype/freetype.lib")
 
 struct Character {
+	//对应字符
 	wchar_t  font;
+	//记录UV
+	float u = 0;
+	float v = 0;
+	//字符大小
 	unsigned int sizeX;
 	unsigned int sizeY;
+	//字符偏移
 	int offsetX;
 	int offsetY;
+	//其他属性
 	unsigned int advance;
 };
 
@@ -814,7 +821,8 @@ void AddFont(
 	unsigned int& x,
 	std::vector<unsigned char>& textureData,
 	std::vector<Character>& characters,
-	wchar_t  c
+	wchar_t  c,
+	glm::vec2& uvOffset
 	)
 {
 	// 获取字形位图
@@ -836,12 +844,18 @@ void AddFont(
 	// 存储字符信息
 	Character character = {
 		c,
+		uvOffset.x,
+		uvOffset.y,
 		static_cast<unsigned int>(bitmap.width),
 		static_cast<unsigned int>(bitmap.rows),
 		face->glyph->bitmap_left,
 		face->glyph->bitmap_top,
 		static_cast<unsigned int>(face->glyph->advance.x)
 	};
+
+	//uvOffset += glm::vec2(bitmap.width, bitmap.rows);
+	uvOffset += glm::vec2(bitmap.width, 0);
+
 	characters.push_back(character);
 
 	// 更新纹理图集的x坐标
@@ -863,6 +877,9 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 		ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/bahnschrift.ttf";
 	}
 
+	// 创建字符集
+	glm::vec2 uvOffset = glm::vec2(0);
+	std::vector<Character> characters;
 	{
 		ttfFontPath.CorrectionPath();
 		outTexturePath.CorrectionPath();
@@ -890,9 +907,6 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 		unsigned int fontSize = 48;
 		FT_Set_Pixel_Sizes(face, 0, fontSize);
 
-		// 创建字符集
-		std::vector<Character> characters;
-
 		// 计算纹理图集的尺寸
 		unsigned int textureWidth = 0;
 		unsigned int textureHeight = 0;
@@ -917,7 +931,7 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 		{
 			// 加载字符的字形
 			FT_Load_Char(face, c, FT_LOAD_RENDER);
-			AddFont(face, textureWidth, textureHeight, x, textureData, characters, c);
+			AddFont(face, textureWidth, textureHeight, x, textureData, characters, c , uvOffset);
 		}
 
 		//wchar_t  character = L'我';
