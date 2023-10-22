@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Common.h"
 
 class GameObject;
@@ -80,10 +80,10 @@ public:
 
 	void ResetTransformForAttachment();
 
-	/* ¸üÐÂTransform */
+	/* æ›´æ–°Transform */
 	HBBR_API virtual void UpdateTransformByVariable();
 
-	/*Âß¼­¸üÐÂ*/
+	/*é€»è¾‘æ›´æ–°*/
 	virtual void Update();
 
 	HBBR_INLINE bool NeedUpdateUb()const { return _bNeedUpdateUniformBuffer; }

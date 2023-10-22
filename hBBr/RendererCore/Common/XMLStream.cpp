@@ -126,3 +126,11 @@ bool XMLStream::LoadXMLAttributeFloat(pugi::xml_node& node, const wchar_t* attri
 	}
 	return false;
 }
+
+void XMLStream::CreatesXMLFile(HString path, pugi::xml_document& doc)
+{
+	pugi::xml_node decl = doc.prepend_child(pugi::node_declaration);
+	decl.append_attribute(L"version") = L"1.0";
+	decl.append_attribute(L"encoding") = L"UTF-8";
+	doc.save_file(path.c_wstr());
+}

@@ -1,4 +1,4 @@
-#include "Transform.h"
+ï»¿#include "Transform.h"
 #include "GameObject.h"
 
 Transform::Transform(GameObject* parent, glm::vec3 pos , glm::vec3 eulerAge, glm::vec3 scale3D)
@@ -27,7 +27,7 @@ void Transform::Update()
 {
 	if (_bNeedUpdateUniformBuffer)
 	{
-		if (UpdateStateCount > 1)//±£³Ö1Ö¡µÄ¸üÐÂ×´Ì¬
+		if (UpdateStateCount > 1)//ä¿æŒ1å¸§çš„æ›´æ–°çŠ¶æ€
 		{
 			_bNeedUpdateUniformBuffer = false;
 			UpdateStateCount = 0;
@@ -120,7 +120,7 @@ void Transform::FSetWorldLocation(glm::vec3 newWorldLocation, bool bAffectChildr
 	else
 	{
 		//world to local
-		//inverseTranspose ÊÇ¸ø¹éÒ»»¯ºóµÄDirectionÓÃµÄ
+		//inverseTranspose æ˜¯ç»™å½’ä¸€åŒ–åŽçš„Directionç”¨çš„
 		location = glm::inverse(_gamebject->GetParent()->GetTransform()->worldMatrix) * w;
 	}
 
@@ -217,7 +217,7 @@ void Transform::FSetLocalRotation(glm::vec3 newAngle)
 		glm::radians(_eulerAngle.z)
 	);
 
-	//¸ù¾ÝEuler Angle»ñÈ¡µÄÐý×ª¾ØÕó
+	//æ ¹æ®Euler AngleèŽ·å–çš„æ—‹è½¬çŸ©é˜µ
 	glm::mat4 rot = glm::yawPitchRoll(_eulerAngle.y, _eulerAngle.x, _eulerAngle.z);
 
 	rot[0] = rot[0] * scale3D.x;
@@ -226,7 +226,7 @@ void Transform::FSetLocalRotation(glm::vec3 newAngle)
 
 	if (_gamebject->GetParent())
 	{
-		//¼ÙÉèËüÊÇ¾Ö²¿¿Õ¼ä£¬ÓÒ³ËParentµÄÊÀ½ç¾ØÕó£¬×ª»»µ½ÊÀ½ç×ø±ê
+		//å‡è®¾å®ƒæ˜¯å±€éƒ¨ç©ºé—´ï¼Œå³ä¹˜Parentçš„ä¸–ç•ŒçŸ©é˜µï¼Œè½¬æ¢åˆ°ä¸–ç•Œåæ ‡
 		rot = _gamebject->GetParent()->GetTransform()->worldMatrix * rot;
 	}
 	//

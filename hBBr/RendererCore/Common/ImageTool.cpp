@@ -1,4 +1,4 @@
-#include "ImageTool.h"
+ï»¿#include "ImageTool.h"
 #include <fstream>
 #include <istream>
 #ifdef _WIN32
@@ -18,9 +18,9 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 	//open TGA file
 	FILE* file = NULL;
 #ifdef _WIN32
-	fopen_s(&file, filename, "rb");//¶ÁÈ¡£¬¶ş½øÖÆÄ£Ê½
+	fopen_s(&file, filename, "rb");//è¯»å–ï¼ŒäºŒè¿›åˆ¶æ¨¡å¼
 #else
-	file = fopen(filename, "rb");//¶ÁÈ¡£¬¶ş½øÖÆÄ£Ê½
+	file = fopen(filename, "rb");//è¯»å–ï¼ŒäºŒè¿›åˆ¶æ¨¡å¼
 #endif
 	if (file == NULL )
 	{
@@ -28,10 +28,10 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 		return NULL;
 	}
 
-	//¶ÁÈ¡ÎÄ¼şÍ·
+	//è¯»å–æ–‡ä»¶å¤´
 	ImageHeader data_header;
 	{
-		//fread(&data_header, sizeof(ImageHeader), 1, file_tga);//Ö±½Ó¶ÁÈ¡»áÓĞ½á¹¹ÌåµÄ¶ÔÆëÎÊÌâ
+		//fread(&data_header, sizeof(ImageHeader), 1, file_tga);//ç›´æ¥è¯»å–ä¼šæœ‰ç»“æ„ä½“çš„å¯¹é½é—®é¢˜
 		fread(&data_header.idLength, sizeof(uint8_t), 1, file);
 		fread(&data_header.colormapType, sizeof(uint8_t), 1, file);
 		fread(&data_header.imageType, sizeof(uint8_t), 1, file);
@@ -50,7 +50,7 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 	out->data_header = data_header;
 
 	unsigned int pixelSize = data_header.height * data_header.width;
-	unsigned int imageSize = pixelSize * (data_header.bitsPerPixel / 8);//ÏñËØ ¡Á Ã¿¸öÏñËØÕ¼µÄ×Ö½ÚÊı = ×Ü³¤¶È
+	unsigned int imageSize = pixelSize * (data_header.bitsPerPixel / 8);//åƒç´  Ã— æ¯ä¸ªåƒç´ å çš„å­—èŠ‚æ•° = æ€»é•¿åº¦
 
 	ConsoleDebug::print_endl("Get targa image:" + HString(filename)
 		+ "\n\twidth:" + HString::FromInt(data_header.width)
@@ -59,7 +59,7 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 		+ "\n\timageSize:" + HString::FromInt(imageSize)
 		, "205,225,255");
 
-	//¶ÁÈ¡ÏñËØ
+	//è¯»å–åƒç´ 
 	byte* tgaData = new byte[imageSize];
 	if (fread(tgaData, 1, imageSize, file) != imageSize)
 	{
@@ -76,7 +76,7 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 		switch (data_header.bitsPerPixel)
 		{
 		case 8:
-			if (data_header.imageType == 3)//8Î»µ¥Í¨µÀ»Ò¶ÈÍ¼
+			if (data_header.imageType == 3)//8ä½å•é€šé“ç°åº¦å›¾
 			{
 				out->texFormat = VkFormat::VK_FORMAT_R8_UNORM;
 				out->imageData.resize(imageSize);
@@ -108,7 +108,7 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 		break;
 		case 24:
 			//rgb888 to rgb 555
-			//DX ²»Ö§³Öµ¥´¿µÄR8 G8 B8 :24bit£¬ËùÒÔÒª×ªÒ»ÏÂ16bit
+			//DX ä¸æ”¯æŒå•çº¯çš„R8 G8 B8 :24bitï¼Œæ‰€ä»¥è¦è½¬ä¸€ä¸‹16bit
 			out->imageData.resize(pixelSize * 2);
 			out->texFormat = VkFormat::VK_FORMAT_A1R5G5B5_UNORM_PACK16;
 			data_header.bitsPerPixel = 16;
@@ -129,7 +129,7 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 			}
 			out->imageSize = pixelSize * 2;
 			break;
-		case 32://32Î»BGRA
+		case 32://32ä½BGRA
 			out->texFormat = VkFormat::VK_FORMAT_B8G8R8A8_UNORM;
 			out->imageData.resize(imageSize);
 			out->imageSize = imageSize;
@@ -206,7 +206,7 @@ bool ImageTool::SaveTgaImage(const char* filename, ImageData* tgaData)
 		}
 		FILE* file = NULL;
 #ifdef _WIN32
-		if (fopen_s(&file, filename, "wb") != 0)//¶ş½øÖÆ+Ğ´
+		if (fopen_s(&file, filename, "wb") != 0)//äºŒè¿›åˆ¶+å†™
 #else
 		file = fopen(filename, "wb");
 		if (file == NULL)
@@ -264,7 +264,7 @@ bool ImageTool::SaveTgaImage(const char* filename, uint16_t w, uint16_t h, uint1
 		}
 		FILE* file = NULL;
 #ifdef _WIN32
-		if (fopen_s(&file, filename, "wb") != 0)//¶ş½øÖÆ+Ğ´
+		if (fopen_s(&file, filename, "wb") != 0)//äºŒè¿›åˆ¶+å†™
 #else
 		file = fopen(filename, "wb");
 		if (file ==NULL)
@@ -482,7 +482,7 @@ void ImageTool::ImageFlipY(uint32_t w, uint32_t h, uint32_t d,void *data)
 		uint32_t lineSize = width * depth;
 		char* top;
 		char* bottom;
-		char* temp = (char*)malloc(sizeof(char) * lineSize);//Ò»ĞĞµÄÊı¾İ;
+		char* temp = (char*)malloc(sizeof(char) * lineSize);//ä¸€è¡Œçš„æ•°æ®;
 		for (uint32_t i = 0; i < height / 2 ; i++)
 		{
 			top = (char*)data + i * lineSize;

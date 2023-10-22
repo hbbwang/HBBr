@@ -1,4 +1,4 @@
-#include "DDSTool.h"
+ï»¿#include "DDSTool.h"
 #include "ImageTool.h"
 #include "Texture.h"
 #include "ConsoleDebug.h"
@@ -422,7 +422,7 @@ ImageData* DDSLoader::LoadDDSToImage()
 		return NULL;
 	}
 
-	//»ñÈ¡ÎÄ¼şÍ·
+	//è·å–æ–‡ä»¶å¤´
 	const FDDSFileHeader* DDS = (FDDSFileHeader*)(DDSBuffer.data() + 4);
 	uint32_t AlwaysRequiredFlags = DDSF_Caps | DDSF_Height | DDSF_Width | DDSF_PixelFormat;
 	if (DDSBuffer.size() >= sizeof(FDDSFileHeader) + 4 &&
@@ -433,20 +433,20 @@ ImageData* DDSLoader::LoadDDSToImage()
 	{
 		DDSHeader = DDS;
 	}
-	// Check for dx10 dds format, ²¢²»ÊÇÌØÖ¸DX10,¶øÊÇÖ»Ö§³ÖDX10ÒÔÉÏ°æ±¾
-	// ±ÈÈç×îĞÂµÄBC6ºÍBC7¸ñÊ½
+	// Check for dx10 dds format, å¹¶ä¸æ˜¯ç‰¹æŒ‡DX10,è€Œæ˜¯åªæ”¯æŒDX10ä»¥ä¸Šç‰ˆæœ¬
+	// æ¯”å¦‚æœ€æ–°çš„BC6å’ŒBC7æ ¼å¼
 	if (DDS->ddpf.dwFourCC == DDSPF_DX10)
 	{
 		DDS10Header = (FDDS10FileHeader*)(DDSBuffer.data() + 4 + sizeof(FDDSFileHeader));
 	}
-	//ÊÇ·ñµ¼ÈëÊ§°Ü
+	//æ˜¯å¦å¯¼å…¥å¤±è´¥
 	if (!IsValid())
 	{
 		ConsoleDebug::print_endl((HString("load dds file failed.")).c_str(), "255,20,0");
 		return NULL;
 	}
 
-	//ÊÇ²»ÊÇCubeMap
+	//æ˜¯ä¸æ˜¯CubeMap
 	if (DDSHeader->dwCaps2 & DDSC_CubeMap)
 	{
 		isCubeMap = true;
@@ -457,7 +457,7 @@ ImageData* DDSLoader::LoadDDSToImage()
 	bool bcFormat = false;
 	uint8_t bitsPerPixel = 8;
 
-	//-----Get format »ñÈ¡ÎÆÀí¸ñÊ½
+	//-----Get format è·å–çº¹ç†æ ¼å¼
 	DXGI_FORMAT dxgiTextureFormat = DXGI_FORMAT_UNKNOWN;
 	if(DDS10Header)
 	{
@@ -468,7 +468,7 @@ ImageData* DDSLoader::LoadDDSToImage()
 		dxgiTextureFormat = GetDXGIFormat(DDSHeader->ddpf);
 	}
 
-	//Èç¹ûÃ»ÓĞ»ñÈ¡µ½¸ñÊ½,¾ÍÏàµ±ÓÚÊ§°ÜÁË¡£
+	//å¦‚æœæ²¡æœ‰è·å–åˆ°æ ¼å¼,å°±ç›¸å½“äºå¤±è´¥äº†ã€‚
 	if(dxgiTextureFormat == DXGI_FORMAT_UNKNOWN)
 	{
 		ConsoleDebug::print_endl((HString("load dds file failed.Unknow texture format.")).c_str(), "255,20,0");
@@ -477,9 +477,9 @@ ImageData* DDSLoader::LoadDDSToImage()
 
 	ImageData* out = new ImageData;
 
-	//»ñÈ¡BC block ´óĞ¡,Ö»ÓĞÑ¹ËõÎÆÀí²Å»áÓĞ
+	//è·å–BC block å¤§å°,åªæœ‰å‹ç¼©çº¹ç†æ‰ä¼šæœ‰
 	blockSize = GetCnumBytesPerBlock(dxgiTextureFormat);
-	//»ñÈ¡ÏñËØÎ»Êı
+	//è·å–åƒç´ ä½æ•°
 	bitsPerPixel = BitsPerPixel(dxgiTextureFormat);
 	bcFormat = blockSize != 0;
 
@@ -570,7 +570,7 @@ ImageData* DDSLoader::LoadDDSToImage()
 	out->data_header.bitsPerPixel = bitsPerPixel;
 	out->mipLevel = DDSHeader->dwMipMapCount;
 
-	//»ñÈ¡Í¼Ïñ×Ü´óĞ¡
+	//è·å–å›¾åƒæ€»å¤§å°
 	out->imageSize = 0;
 	int32_t mipWidth = DDSHeader->dwWidth;
 	int32_t mipHeight = DDSHeader->dwHeight;
@@ -578,7 +578,7 @@ ImageData* DDSLoader::LoadDDSToImage()
 	{
 		if (bcFormat)
 		{
-			uint32_t imageSize = SIZE_OF_BC(mipWidth, mipHeight, blockSize);//BCÑ¹Ëõ¸ñÊ½µÄ´óĞ¡¼ÆËã¹«Ê½
+			uint32_t imageSize = SIZE_OF_BC(mipWidth, mipHeight, blockSize);//BCå‹ç¼©æ ¼å¼çš„å¤§å°è®¡ç®—å…¬å¼
 			out->imageSize += imageSize;
 		}
 		else
@@ -587,7 +587,7 @@ ImageData* DDSLoader::LoadDDSToImage()
 		if (mipHeight > 1) mipHeight /= 2;
 	}
 
-	//-----Get image data pointer »ñÈ¡Í¼ÏñÊı¾İ
+	//-----Get image data pointer è·å–å›¾åƒæ•°æ®
 	const char* Ptr = (const char*)DDSHeader + sizeof(FDDSFileHeader);
 	// jump over dx10 header if available
 	if (DDS10Header)

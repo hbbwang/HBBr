@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Common.h"
 typedef unsigned char   byte;
 typedef short   int16;
@@ -13,9 +13,9 @@ typedef unsigned short   uint16;
 #define RGB565_BLUE     0x001f
 
 /*
-ÒªµãÌáÊ¾:
-1. floatºÍunsigned long¾ßÓĞÏàÍ¬µÄÊı¾İ½á¹¹³¤¶È
-2. union¾İÀàĞÍÀïµÄÊı¾İ´æ·ÅÔÚÏàÍ¬µÄÎïÀí¿Õ¼ä
+è¦ç‚¹æç¤º:
+1. floatå’Œunsigned longå…·æœ‰ç›¸åŒçš„æ•°æ®ç»“æ„é•¿åº¦
+2. unionæ®ç±»å‹é‡Œçš„æ•°æ®å­˜æ”¾åœ¨ç›¸åŒçš„ç‰©ç†ç©ºé—´
 */
 typedef union
 {
@@ -38,11 +38,11 @@ namespace TypeConversion
 	uint8_t* IntToBytes(int ui);
 
 	/*
-	½«¸¡µãÊıf×ª»¯Îª4¸ö×Ö½ÚÊı¾İ´æ·ÅÔÚuint8_t[4]ÖĞ
+	å°†æµ®ç‚¹æ•°fè½¬åŒ–ä¸º4ä¸ªå­—èŠ‚æ•°æ®å­˜æ”¾åœ¨uint8_t[4]ä¸­
 	*/
 	void Float_to_Byte(float f, unsigned char uint8_t[]);
 	/*
-	½«4¸ö×Ö½ÚÊı¾İbyte[4]×ª»¯Îª¸¡µãÊı´æ·ÅÔÚ*fÖĞ
+	å°†4ä¸ªå­—èŠ‚æ•°æ®byte[4]è½¬åŒ–ä¸ºæµ®ç‚¹æ•°å­˜æ”¾åœ¨*fä¸­
 	*/
 	void Byte_to_Float(float* f, unsigned char byte[]);
 

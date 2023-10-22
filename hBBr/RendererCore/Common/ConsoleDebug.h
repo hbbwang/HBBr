@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #if _WIN32
 #include<winsock.h>
 #pragma comment(lib,"ws2_32.lib")
@@ -44,12 +44,12 @@ namespace ConsoleDebug
     extern std::function<void(HString,float ,float,float, HString)> printFuncAdd;
 
 
-    //×Ô¶¨Òå¿ØÖÆÌ¨ÃüÁî£º
+    //è‡ªå®šä¹‰æ§åˆ¶å°å‘½ä»¤ï¼š
     extern std::map<HString, std::function<void()>> commandLists;
     extern void AddNewCommand(HString newCommand, std::function<void()>func, int ParamerterCount = 0, ...);
     extern void execCommand(HString key);
 
-    /* Êä³öĞÅÏ¢µ½¿ØÖÆÌ¨,´ø×ÖÌåÑÕÉ«£¬´ø×Ô¶¯»»ĞĞ */
+    /* è¾“å‡ºä¿¡æ¯åˆ°æ§åˆ¶å°,å¸¦å­—ä½“é¢œè‰²ï¼Œå¸¦è‡ªåŠ¨æ¢è¡Œ */
     HBBR_API extern void print_endl(HString in, HString color = "255,255,255", HString background = "0,0,0", HString type = " ");
     HBBR_API extern void print(HString in, HString color = "255,255,255", HString background = "0,0,0", HString type = " ");
 

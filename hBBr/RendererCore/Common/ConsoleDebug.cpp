@@ -1,4 +1,4 @@
-#include <ctime>
+﻿#include <ctime>
 #include "ConsoleDebug.h"
 #include "HTime.h"
 #include <mutex>
@@ -103,13 +103,13 @@ void ConsoleDebug::CreateConsole(HString consolePath ,bool bNoClient)
     err = WSAStartup(versionRequest, &wsaData);
     if (err != 0)
     {
-        printf("Ƕ����δ��");
+        printf("CreateConsole : WSAStartup 错误");
         WSACleanup();
         return;
     }
     else
     {
-        printf("�Ѵ��׽���");
+
     }
 #endif
     tcpSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -299,7 +299,7 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
                 if (send(consoleSockets[i], buffer, 4096, 0) < 0)
                 {
 #ifdef _DEBUG
-                    HString cs = "д������ʧ�ܣ�";
+                    HString cs = "消息发送失败...";
                     cs += HString::FromUInt(::GetLastError());
                     printf(cs.c_str());
                     printf("\n");
@@ -381,7 +381,7 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
                 if (send(consoleSockets[i], buffer, 4096, 0) < 0)
                 {
 #ifdef _DEBUG
-                    HString cs = "д������ʧ�ܣ�";
+                    HString cs = "消息发送失败...";
                     cs += HString::FromUInt(::GetLastError());
                     printf(cs.c_str());
                     printf("\n");

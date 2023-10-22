@@ -1,4 +1,4 @@
-//---------------------------------------
+ï»¿//---------------------------------------
 //ClassName:	HString
 //Date:			2020.6.23
 //Author:		SCcDaniel
@@ -62,7 +62,7 @@ public:
 		length = 0;
 	}
 
-	//×Ö·û´®³õÊ¼»¯
+	//å­—ç¬¦ä¸²åˆå§‹åŒ–
 	HString()
 	{
 		this->_str = new char[2];
@@ -76,8 +76,16 @@ public:
 			return;
 		clear();
 		this->length = strlen(str);
-		this->_str = new char[this->length + 1];//Ô¤Áô×îºóÒ»¸ö'/0'¿Õ×Ö·ûµÄÎ»ÖÃ
+		this->_str = new char[this->length + 1];//é¢„ç•™æœ€åä¸€ä¸ª'/0'ç©ºå­—ç¬¦çš„ä½ç½®
 		strcpy_s(this->_str, this->length + 1, str);
+	}
+	HString(const char str)
+	{
+		clear();
+		char strTemp[2] = { str , '\0' };
+		this->length = strlen(strTemp);
+		this->_str = new char[this->length + 1];//é¢„ç•™æœ€åä¸€ä¸ª'/0'ç©ºå­—ç¬¦çš„ä½ç½®
+		strcpy_s(this->_str, this->length + 1, strTemp);
 	}
 	HString(const wchar_t* str)
 	{
@@ -86,7 +94,16 @@ public:
 		clear();
 		const char* result = pws2s(str);
 		this->length = strlen(result);
-		this->_str = new char[this->length + 1];//Ô¤Áô×îºóÒ»¸ö'/0'¿Õ×Ö·ûµÄÎ»ÖÃ
+		this->_str = new char[this->length + 1];//é¢„ç•™æœ€åä¸€ä¸ª'/0'ç©ºå­—ç¬¦çš„ä½ç½®
+		strcpy_s(this->_str, this->length + 1, result);
+	}
+	HString(const wchar_t str)
+	{
+		clear();
+		wchar_t strTemp[2] = { str , L'\0' };
+		const char* result = pws2s(strTemp);
+		this->length = strlen(result);
+		this->_str = new char[this->length + 1];//é¢„ç•™æœ€åä¸€ä¸ª'/0'ç©ºå­—ç¬¦çš„ä½ç½®
 		strcpy_s(this->_str, this->length + 1, result);
 	}
 	HString(const HString& obj)
@@ -138,20 +155,20 @@ public:
 		if (obj._str == nullptr || obj._str == NULL)
 			return *this;
 		char* temp = new char[length + 1];
-		strcpy_s(temp, length + 1, _str);//ÏÈ°Ñ×Ö·û´®¸´ÖÆµ½temp
+		strcpy_s(temp, length + 1, _str);//å…ˆæŠŠå­—ç¬¦ä¸²å¤åˆ¶åˆ°temp
 		if (_str != NULL)
 		{
-			delete[] _str;//Çå¿Õ
+			delete[] _str;//æ¸…ç©º
 			_str = NULL;
 		}
-		//ÉêÇëĞÂµÄ´óĞ¡
+		//ç”³è¯·æ–°çš„å¤§å°
 		length = length + obj.length;
 		_str = new char[length + 1];
-		//¸´ÖÆ»ØÈ¥
+		//å¤åˆ¶å›å»
 		strcpy_s(_str, strlen(temp) + 1, temp);
-		//²¢ÇÒ°ÑĞÂµÄ×Ö·û´®Á¬½ÓÉÏÈ¥
+		//å¹¶ä¸”æŠŠæ–°çš„å­—ç¬¦ä¸²è¿æ¥ä¸Šå»
 		strcat_s(_str, length + 1, obj._str);
-		//ÊÍ·Åtemp
+		//é‡Šæ”¾temp
 		delete[] temp;
 		temp = NULL;
 		length = strlen(_str);
@@ -163,23 +180,23 @@ public:
 		if (obj1._str == nullptr || obj1._str == NULL)
 			return obj._str;
 		size_t len = obj.length + obj1.length;
-		char* temp = new char[len + 1];//ĞÂ½¨×Ö·ûÊı×é
-		strcpy_s(temp, obj.length + 1, obj._str);//¸´ÖÆµÚÒ»¸ö
-		strcat_s(temp, len + 1, obj1._str);	//°ÑĞÂµÄ×Ö·û´®Á¬½ÓÉÏÈ¥
-		HString result(temp);//¸³Öµµ½ĞÂµÄ±äÁ¿
-		//ÊÍ·Åtemp
+		char* temp = new char[len + 1];//æ–°å»ºå­—ç¬¦æ•°ç»„
+		strcpy_s(temp, obj.length + 1, obj._str);//å¤åˆ¶ç¬¬ä¸€ä¸ª
+		strcat_s(temp, len + 1, obj1._str);	//æŠŠæ–°çš„å­—ç¬¦ä¸²è¿æ¥ä¸Šå»
+		HString result(temp);//èµ‹å€¼åˆ°æ–°çš„å˜é‡
+		//é‡Šæ”¾temp
 		delete[] temp;
 		temp = NULL;
 		return result;
 	}
 
-	//ÏÂ±ê
+	//ä¸‹æ ‡
 	char operator[](size_t index)
 	{
 		return _str[index];
 	}
 
-	//¸ù¾İasciiÂëÅÅĞò
+	//æ ¹æ®asciiç æ’åº
 	bool operator<(const HString& obj)const
 	{
 		if (obj._str == nullptr)
@@ -253,7 +270,7 @@ public:
 		return *this;
 	}
 
-	//¸ù¾İÏÂ±êÉ¾³ıÄ³¶Î×Ö·û´®
+	//æ ¹æ®ä¸‹æ ‡åˆ é™¤æŸæ®µå­—ç¬¦ä¸²
 	void	Remove(size_t begin, size_t end)
 	{
 		if (end < begin)
@@ -266,11 +283,11 @@ public:
 		this->assign(resultStr.c_str());
 #else
 		size_t AllLen = length;
-		size_t leftLen = begin;//»ñÈ¡Ö®Ç°µÄ³¤¶È
-		size_t rightLen = length - (end + 1);//»ñÈ¡Ö®ºóµÄ³¤¶È
+		size_t leftLen = begin;//è·å–ä¹‹å‰çš„é•¿åº¦
+		size_t rightLen = length - (end + 1);//è·å–ä¹‹åçš„é•¿åº¦
 		if ((end + 1) - (begin) == length)
 		{
-			//ÒªÉ¾³ıµÄ×Ö·ûÊıÁ¿ºÍµ±Ç°×Ö·ûÊıÁ¿Ò»ÖÂ£¬Ö±½ÓÇå¿Õ
+			//è¦åˆ é™¤çš„å­—ç¬¦æ•°é‡å’Œå½“å‰å­—ç¬¦æ•°é‡ä¸€è‡´ï¼Œç›´æ¥æ¸…ç©º
 			clear();
 			this->_str = new char[1];
 			this->_str[0] = '\0';
@@ -278,21 +295,21 @@ public:
 			return;
 		}
 		length = leftLen + rightLen;
-		char* temp = new char[length + 2];//°üº¬0ºÍ\0
+		char* temp = new char[length + 2];//åŒ…å«0å’Œ\0
 		size_t index = 0;
 		for (size_t i = 0; i < leftLen; i++)
 		{
-			temp[index] = _str[i];//¶ÁÈ¡Ö®Ç°µÄ×Ö·û
+			temp[index] = _str[i];//è¯»å–ä¹‹å‰çš„å­—ç¬¦
 			index += 1;
 		}
 		for (size_t i = end + 1; i < AllLen; i++)
 		{
-			temp[index] = _str[i];//¶ÁÈ¡Ö®ºóµÄ×Ö·û
+			temp[index] = _str[i];//è¯»å–ä¹‹åçš„å­—ç¬¦
 			index += 1;
 		}
-		temp[length] = '\0';//×îºóÒ»¸ö×Ö·ûÌî³ä¿Õ×Ö·û
+		temp[length] = '\0';//æœ€åä¸€ä¸ªå­—ç¬¦å¡«å……ç©ºå­—ç¬¦
 		if (_str != NULL)
-			delete[] _str;//ÊÍ·Å×Ö·û´®
+			delete[] _str;//é‡Šæ”¾å­—ç¬¦ä¸²
 		_str = new char[length + 1];
 		strcpy_s(_str, strlen(temp) + 1, temp);
 		delete[] temp;
@@ -301,7 +318,7 @@ public:
 #endif
 	}
 
-	//¸ù¾İÄ³¶Î×Ö·û´®É¾³ı
+	//æ ¹æ®æŸæ®µå­—ç¬¦ä¸²åˆ é™¤
 	void Remove(const char* removeStr)
 	{
 #if 1
@@ -322,42 +339,42 @@ public:
 			result += s;
 		this->assign(result);
 #else
-		size_t len = strlen(removeStr);//»ñÈ¡×Ö·û´®µÄ³¤¶È
+		size_t len = strlen(removeStr);//è·å–å­—ç¬¦ä¸²çš„é•¿åº¦
 		char* temp = NULL;
-		temp = new char[len + 1];//¼ÓÉÏ×îºó´ú±í½áÊøµÄ\0×Ö·û
+		temp = new char[len + 1];//åŠ ä¸Šæœ€åä»£è¡¨ç»“æŸçš„\0å­—ç¬¦
 		temp[len] = '\0';
 		//resetRemove:
 		for (size_t i = 0; i < length; i++)
 		{
 			for (size_t j = 0; j < len; j++)
 			{
-				temp[j] = _str[i + j];//¶ÁÈ¡Á¬Ğø×Ö·û
+				temp[j] = _str[i + j];//è¯»å–è¿ç»­å­—ç¬¦
 			}
-			if (strcmp(temp, removeStr) == 0)//ÅĞ¶ÏÁ¬Ğø×Ö·ûÄÚÊÇ·ñºÍ º¯ÊıÊäÈë½øÀ´µÄ ²ÎÊıÏàÍ¬£¬ÏàÍ¬¾ÍÉ¾³ıµô¸Ã¶Î×Ö·û
+			if (strcmp(temp, removeStr) == 0)//åˆ¤æ–­è¿ç»­å­—ç¬¦å†…æ˜¯å¦å’Œ å‡½æ•°è¾“å…¥è¿›æ¥çš„ å‚æ•°ç›¸åŒï¼Œç›¸åŒå°±åˆ é™¤æ‰è¯¥æ®µå­—ç¬¦
 			{
 				size_t oldLen = length;
 				length = length - len;
 				size_t index = 0;
 				char* temp_str = new char[length + 1];
-				for (size_t j = 0; j < i; j++)//¶ÁÈ¡×ó×Ö·û´®
+				for (size_t j = 0; j < i; j++)//è¯»å–å·¦å­—ç¬¦ä¸²
 				{
 					temp_str[index] = _str[j];
 					index++;
 				}
-				for (size_t j = i + len; j < oldLen; j++)//¶ÁÈ¡ÓÒ×Ö·û´®
+				for (size_t j = i + len; j < oldLen; j++)//è¯»å–å³å­—ç¬¦ä¸²
 				{
 					temp_str[index] = _str[j];
 					index++;
 				}
-				temp_str[length] = '\0';//×îºóÒ»¸ö×Ö·ûÌî³ä¿Õ×Ö·û
+				temp_str[length] = '\0';//æœ€åä¸€ä¸ªå­—ç¬¦å¡«å……ç©ºå­—ç¬¦
 				if (_str != NULL)
-					delete[] _str;//ÊÍ·Å×Ö·û´®
+					delete[] _str;//é‡Šæ”¾å­—ç¬¦ä¸²
 				_str = new char[length + 1];
 				strcpy_s(_str, strlen(temp_str) + 1, temp_str);
 				_str[length] = '\0';
 				delete[] temp_str;
-				//goto resetRemove;//ÒòÎª×Ö·û´®·¢ÉúÁË±ä»¯£¬ÖØĞÂ¿ªÊ¼Ñ­»·
-				if (i <= len)//ÒòÎª×Ö·û´®·¢ÉúÁË±ä»¯£¬°ÑÑ­»·Öµi»ØÍËµ½ ¶ÔÓ¦É¾¼õºóµÄÖµ
+				//goto resetRemove;//å› ä¸ºå­—ç¬¦ä¸²å‘ç”Ÿäº†å˜åŒ–ï¼Œé‡æ–°å¼€å§‹å¾ªç¯
+				if (i <= len)//å› ä¸ºå­—ç¬¦ä¸²å‘ç”Ÿäº†å˜åŒ–ï¼ŒæŠŠå¾ªç¯å€¼iå›é€€åˆ° å¯¹åº”åˆ å‡åçš„å€¼
 					i = 0;
 				else
 					i -= len;
@@ -372,7 +389,7 @@ public:
 	{
 		clear();
 		length = strlen(str);
-		_str = new char[length + 1];//Ô¤Áô×îºóÒ»¸ö'/0'¿Õ×Ö·ûµÄÎ»ÖÃ
+		_str = new char[length + 1];//é¢„ç•™æœ€åä¸€ä¸ª'/0'ç©ºå­—ç¬¦çš„ä½ç½®
 		strcpy_s(_str, length + 1, str);
 	}
 
@@ -380,7 +397,7 @@ public:
 	{
 		clear();
 		length = str.length;
-		_str = new char[length + 1];//Ô¤Áô×îºóÒ»¸ö'/0'¿Õ×Ö·ûµÄÎ»ÖÃ
+		_str = new char[length + 1];//é¢„ç•™æœ€åä¸€ä¸ª'/0'ç©ºå­—ç¬¦çš„ä½ç½®
 		strcpy_s(_str, length + 1, str._str);
 	}
 
@@ -417,12 +434,12 @@ public:
 		strcat_s(temp, len + 1, str._str);
 		HString result(temp);
 		this->assign(result);
-		//ÊÍ·Åtemp
+		//é‡Šæ”¾temp
 		delete[] temp;
 		temp = NULL;
 	}
 
-	//ÅĞ¶Ï×Ö·ûÊÇ·ñÏàÍ¬£¬µÚ¶ş¸ö²ÎÊı×÷ÓÃ ÊÇ·ñÇø·Ö´óĞ¡
+	//åˆ¤æ–­å­—ç¬¦æ˜¯å¦ç›¸åŒï¼Œç¬¬äºŒä¸ªå‚æ•°ä½œç”¨ æ˜¯å¦åŒºåˆ†å¤§å°
 	inline bool IsSame(HString c, bool strict = true) const
 	{
 #ifdef _WIN32
@@ -481,11 +498,11 @@ public:
 		return resultVec;
 	}
 
-	//»ñÈ¡ÎÄ¼şÃû+ºó×º
+	//è·å–æ–‡ä»¶å+åç¼€
 	inline HString GetFileName()
 	{
 		size_t index = 0;
-		//ÕÒµ½×îºóÒ»¸ö '\'»òÕß'/'
+		//æ‰¾åˆ°æœ€åä¸€ä¸ª '\'æˆ–è€…'/'
 		for (size_t i = length - 1; i > 0; i--)
 		{
 			if (_str[i] == '/' || _str[i] == '\\')
@@ -499,13 +516,13 @@ public:
 		return out;
 	}
 
-	//»ñÈ¡ÎÄ¼şÃû
+	//è·å–æ–‡ä»¶å
 	HString GetBaseName()
 	{
 		size_t index = 0;
 		HString out = *this;
 		bool bFound = false;
-		//ÕÒµ½×îºóÒ»¸ö '\'»òÕß'/'
+		//æ‰¾åˆ°æœ€åä¸€ä¸ª '\'æˆ–è€…'/'
 		for (size_t i = length - 1; i > 0; i--)
 		{
 			if (_str[i] == '/' || _str[i] == '\\')
@@ -517,7 +534,7 @@ public:
 		}
 		if(bFound)
 			out.Remove(0, out.length - index);
-		//ÕÒµ½×îºóÒ»¸ö '.'
+		//æ‰¾åˆ°æœ€åä¸€ä¸ª '.'
 		index = 0;
 		bFound = false;
 		for (size_t i = out.length - 1; i > 0; i--)
@@ -554,7 +571,7 @@ public:
 		return _str;
 	}
 
-	/* »ñÈ¡ÎÄ¼şºó×º */
+	/* è·å–æ–‡ä»¶åç¼€ */
 	inline HString GetSuffix()
 	{
 #if 0
@@ -563,7 +580,7 @@ public:
 		size_t index = 0 ;
 		bool bFound = false;
 		HString out = *this;
-		//ÕÒµ½×îºóÒ»¸ö '.'
+		//æ‰¾åˆ°æœ€åä¸€ä¸ª '.'
 		const auto lenStr = strlen(_str);
 		for (size_t i = lenStr - 1; i > 0; i--)
 		{
@@ -574,19 +591,19 @@ public:
 			}
 			index++;
 		}
-		if (bFound)//²éÕÒµ½ÔÙÉ¾£¬²é²»µ½£¬¾Í´ú±íÃ»ÓĞ¡£
+		if (bFound)//æŸ¥æ‰¾åˆ°å†åˆ ï¼ŒæŸ¥ä¸åˆ°ï¼Œå°±ä»£è¡¨æ²¡æœ‰ã€‚
 			out.Remove(0, lenStr - index);
 		return out;
 #endif
 	}
 
-	/*  »ñÈ¡ÎÄ¼şÂ·¾¶ */
+	/*  è·å–æ–‡ä»¶è·¯å¾„ */
 	inline HString GetFilePath()
 	{
 		size_t index = 0;
 		bool bFound = false;
 		auto len = strlen(_str);
-		//ÕÒµ½×îºóÒ»¸ö '\'»òÕß'/'
+		//æ‰¾åˆ°æœ€åä¸€ä¸ª '\'æˆ–è€…'/'
 		for (size_t i = len - 1 ; i > 0; i--)
 		{
 			if (_str[i] == '/' || _str[i] == '\\')
@@ -602,7 +619,7 @@ public:
 		return out;
 	}
 
-	/*  Â·¾¶Ğ±¸Ü¸ñÊ½¾ÀÕı,Ä¿Ç°windowºÍLinux¶¼Ö§³Ö¡°/¡±£¬²»¹ıwindow»¹ÊÇÓÃ¡°\\¡±°É */
+	/*  è·¯å¾„æ–œæ æ ¼å¼çº æ­£,ç›®å‰windowå’ŒLinuxéƒ½æ”¯æŒâ€œ/â€ï¼Œä¸è¿‡windowè¿˜æ˜¯ç”¨â€œ\\â€å§ */
 	HBBR_INLINE  void  CorrectionPath()
 	{
 #ifdef WIN32
@@ -612,7 +629,7 @@ public:
 #endif
 	}
 
-	/* ×ª»»³É´¿×Ö·û´®ĞÎÊ½µÄÂ·¾¶ */
+	/* è½¬æ¢æˆçº¯å­—ç¬¦ä¸²å½¢å¼çš„è·¯å¾„ */
 	HBBR_INLINE void ToPathString()
 	{
 #ifdef WIN32
@@ -632,7 +649,7 @@ public:
 	}
 
 	/*
-		Ìæ»»×Ö·û£¬Ô­ÀíÊÇÏÈ·ÖÀë£¬ÔÙ²åÈë
+		æ›¿æ¢å­—ç¬¦ï¼ŒåŸç†æ˜¯å…ˆåˆ†ç¦»ï¼Œå†æ’å…¥
 	*/
 	inline void Replace(const char* whatStr, const char* newStr)
 	{
@@ -657,7 +674,7 @@ public:
 		this->assign(str.c_str());
 	}
 
-	/* ×Ö·û´®°üº¬ */
+	/* å­—ç¬¦ä¸²åŒ…å« */
 	HBBR_INLINE bool Contains(HString whatStr)
 	{
 		std::string strCache(_str);
@@ -777,7 +794,7 @@ public:
 	}
 #ifdef _WIN32
 
-	//char µ½ wchar_tµÄ ×ª»»
+	//char åˆ° wchar_tçš„ è½¬æ¢
 	wchar_t* ps2ws(const char* s)
 	{
 		ReleaseCache();
@@ -788,7 +805,7 @@ public:
 		return m_wchar;
 	}
 
-	//wchar_t µ½ charµÄ ×ª»»
+	//wchar_t åˆ° charçš„ è½¬æ¢
 	char* pws2s(const wchar_t* ws)
 	{
 		ReleaseCache();
@@ -802,7 +819,7 @@ public:
 #else
 	wchar_t* ps2ws(const char* src)
 	{
-		std::setlocale(LC_ALL, ""); // ÉèÖÃ±¾µØ»¯
+		std::setlocale(LC_ALL, ""); // è®¾ç½®æœ¬åœ°åŒ–
 		size_t wstr_size = std::mbsrtowcs(nullptr, &src, 0, nullptr);
 		if (wstr_size == static_cast<size_t>(-1)) {
 			//throw std::runtime_error("Invalid multibyte character sequence.");
@@ -815,9 +832,9 @@ public:
 		return m_wchar;
 	}
 
-	// ½« wchar_t* ×ª»»Îª char*
+	// å°† wchar_t* è½¬æ¢ä¸º char*
 	char* pws2s(const wchar_t* src) {
-		std::setlocale(LC_ALL, ""); // ÉèÖÃ±¾µØ»¯
+		std::setlocale(LC_ALL, ""); // è®¾ç½®æœ¬åœ°åŒ–
 
 		size_t str_size = std::wcsrtombs(nullptr, &src, 0, nullptr);
 		if (str_size == static_cast<size_t>(-1)) {

@@ -1,4 +1,4 @@
-#include "TypeConversion.h"
+ï»¿#include "TypeConversion.h"
 
 namespace TypeConversion
 {
@@ -55,7 +55,7 @@ namespace TypeConversion
 	}
 
 	/*
-	½«¸¡µãÊıf×ª»¯Îª4¸ö×Ö½ÚÊı¾İ´æ·ÅÔÚuint8_t[4]ÖĞ
+	å°†æµ®ç‚¹æ•°fè½¬åŒ–ä¸º4ä¸ªå­—èŠ‚æ•°æ®å­˜æ”¾åœ¨uint8_t[4]ä¸­
 	*/
 	void Float_to_Byte(float f, unsigned char uint8_t[])
 	{
@@ -67,7 +67,7 @@ namespace TypeConversion
 		uint8_t[3] = (unsigned char)(fl.ldata >> 24);
 	}
 	/*
-	½«4¸ö×Ö½ÚÊı¾İbyte[4]×ª»¯Îª¸¡µãÊı´æ·ÅÔÚ*fÖĞ
+	å°†4ä¸ªå­—èŠ‚æ•°æ®byte[4]è½¬åŒ–ä¸ºæµ®ç‚¹æ•°å­˜æ”¾åœ¨*fä¸­
 	*/
 	void Byte_to_Float(float* f, unsigned char byte[])
 	{

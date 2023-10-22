@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Common.h"
 #include "TypeConversion.h"
 #include "lodepng/lodepng.h"
@@ -19,20 +19,20 @@ inline const char* GetTGAImageTypeString(uint8_t imageType)
 	return "UnKnow";
 }
 
-//TGAÎÄ¼şÍ·
+//TGAæ–‡ä»¶å¤´
 struct ImageHeader
 {
 	uint8_t  idLength;
 	uint8_t  colormapType;
-	uint8_t  imageType;         //Í¼ÏñÀàĞÍ
+	uint8_t  imageType;         //å›¾åƒç±»å‹
 	uint16_t colormapOrigin;
 	uint16_t colormapLength;
 	uint8_t  colormapDepth;
 	uint16_t xOrigin;
 	uint16_t yOrigin;
-	uint16_t width;             //¿í¶È
-	uint16_t height;            //¸ß¶È
-	uint8_t  bitsPerPixel;      //Ã¿ÏñËØ¶àÉÙÎ»
+	uint16_t width;             //å®½åº¦
+	uint16_t height;            //é«˜åº¦
+	uint8_t  bitsPerPixel;      //æ¯åƒç´ å¤šå°‘ä½
 	uint8_t  imageDescriptor;
 };
 

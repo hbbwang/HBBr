@@ -37,4 +37,6 @@ public:
 	/* 读取xml节点的Float属性 */
 	static bool LoadXMLAttributeFloat(pugi::xml_node& node, const wchar_t* attributeName, float& attri);
 
+	static void CreatesXMLFile(HString path , pugi::xml_document& doc);
+
 };
