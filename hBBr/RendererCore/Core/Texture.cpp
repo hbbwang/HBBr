@@ -815,11 +815,9 @@ void Texture::GetImageDataFromCompressionData(const char* ddsPath, nvtt::Surface
 #pragma endregion NVTT
 
 /*--------------------字体库----------------------*/
-#include "freetype/include/ft2build.h"
-#include "freetype/include/freetype/freetype.h"
-#pragma comment(lib,"freetype/freetype.lib")
-
-uint32_t _fontSize = 32;
+#include <stdio.h>
+#define STB_TRUETYPE_IMPLEMENTATION  // force following include to generate implementation
+#include "stb_truetype.h"
 
 struct Character {
 	//对应字符
@@ -830,73 +828,7 @@ struct Character {
 	//字符大小
 	unsigned int sizeX;
 	unsigned int sizeY;
-	//字符偏移
-	unsigned int offsetX;
-	unsigned int offsetY;
-	//其他属性
-	unsigned int advance;
 };
-
-bool AddFont(
-	FT_Face& face,
-	unsigned int& textureWidth,
-	unsigned int& textureHeight,
-	unsigned int& x,
-	unsigned int& y,
-	std::vector<unsigned char>& textureData,
-	std::vector<Character>& characters,
-	wchar_t  c,
-	uint32_t& currentOffset
-	)
-{
-	// 获取字形位图
-	FT_Bitmap& bitmap = face->glyph->bitmap;
-	uint32_t needSize = ((((y + bitmap.rows) * textureWidth) + x + bitmap.width)) * 4;
-	if (currentOffset + needSize > textureWidth * textureHeight * 4)
-	{
-		return false;
-	}
-	else if (x + bitmap.width > textureWidth)
-	{
-		x = 0;
-		y += _fontSize;
-	}
-
-	// 复制位图数据到纹理图集
-	uint32_t xyIndex = 0;
-	for (unsigned int y2 = 0; y2 < bitmap.rows; y2++)
-	{
-		for (unsigned int x2 = 0; x2 < bitmap.width; x2++)
-		{
-			unsigned int index = ((( (y + y2) * textureWidth) + x + x2)) * 4;
-			unsigned char color = bitmap.buffer[y2 * bitmap.pitch + x2];
-			textureData[index + 0] = color; // R
-			textureData[index + 1] = color; // G
-			textureData[index + 2] = color; // B
-			textureData[index + 3] = color; // A
-			xyIndex = index + 3;
-		}
-	}
-	currentOffset = xyIndex;
-	// 存储字符信息
-	Character character = {
-		c,
-		x,
-		y,
-		static_cast<unsigned int>(bitmap.width),
-		static_cast<unsigned int>(bitmap.rows),
-		face->glyph->bitmap_left,
-		face->glyph->bitmap_top,
-		static_cast<unsigned int>(face->glyph->advance.x)
-	};
-
-	characters.push_back(character);
-
-	// 更新纹理图集的x坐标
-	x += bitmap.width;
-
-	return true;
-}
 
 void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,bool bOverwrite, uint32_t fontSize, uint32_t maxTextureSize)
 {
@@ -911,101 +843,94 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 	if (!FileSystem::FileExist(ttfFontPath.c_str()))
 	{
 		ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/bahnschrift.ttf";
+		ttfFontPath.CorrectionPath();
 	}
+
+	FILE* font_file = fopen(ttfFontPath.c_str(), "rb");
+	fseek(font_file, 0, SEEK_END);
+	size_t fontFileSize = ftell(font_file);
+	fseek(font_file, 0, SEEK_SET);
+
+	unsigned char* font_data = (unsigned char*)malloc(fontFileSize);
+	fread(font_data, 1, fontFileSize, font_file);
+	fclose(font_file);
+
+	stbtt_fontinfo font;
+	stbtt_InitFont(&font, font_data, stbtt_GetFontOffsetForIndex(font_data, 0));
+
+	int ascent, descent, line_gap;
+	stbtt_GetFontVMetrics(&font, &ascent, &descent, &line_gap);
+	float scale = stbtt_ScaleForPixelHeight(&font, fontSize);
+
+	//int text_width = 0;
+	//int text_height = font_size;
+	//for (wchar_t c = 32; c < 127; c++)
+	//{
+	//	int advance, lsb;
+	//	stbtt_GetCodepointHMetrics(&font, c, &advance, &lsb);
+	//	text_width += advance * scale;
+	//}
 
 	// 创建字符集
 	std::vector<Character> characters;
-	_fontSize = fontSize;
+	unsigned char* bitmap = (unsigned char*)calloc(maxTextureSize * maxTextureSize * 4, 1);
 	{
-		ttfFontPath.CorrectionPath();
-		outTexturePath.CorrectionPath();
-		// 初始化FreeType库
-		FT_Library ft;
-		if (FT_Init_FreeType(&ft)) {
-			std::cerr << "Failed to initialize FreeType library!" << std::endl;
-			return;
-		}
-
-		// 加载字体文件
-		FT_Face face;
-		if (FT_New_Face(ft, ttfFontPath.c_str(), 0, &face)) {
-			std::cerr << "Failed to load font!" << std::endl;
-			return;
-		}
-
-		if (FT_Select_Charmap(face, FT_ENCODING_UNICODE))
-		{
-			std::cerr << "Failed to Select UNICODE Charmap!" << std::endl;
-			return;
-		}
-
-		// 设置字体大小
-		FT_Set_Pixel_Sizes(face, 0, fontSize);
-
-		// 计算纹理图集的尺寸
-		uint32_t maxSize = maxTextureSize;
-
-		unsigned int textureWidth = maxSize;
-		unsigned int textureHeight = maxSize;
-		//textureWidth = 0;
-		//textureHeight = 0;
-		////32 - 127为Ascii
-		////我们取多一点试试
-		//for (wchar_t c = 32; c < 127; c++) {
-		//	// 加载字符的字形
-		//	if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-		//		std::cerr << "Failed to load glyph!" << std::endl;
-		//		return;
-		//	}
-
-		//	textureWidth += face->glyph->bitmap.width;
-		//	textureHeight = SDL_max(textureHeight, face->glyph->bitmap.rows);
-		//}
-
-		// 创建纹理图集
-		std::vector<unsigned char> textureData(textureWidth * textureHeight * 4, 0);
-
-		// 将字符位图复制到纹理图集
-		//32 - 127为Ascii
-		//我们取多一点试试
-		unsigned int x = 0;
-		unsigned int y = 0;
-		uint32_t offset = 0;
-		bool bOverflow = false;
+		int x = 0;
+		int y = 0;
 		for (wchar_t c = 32; c < 127; c++)
 		{
-			// 加载字符的字形
-			FT_Load_Char(face, c, FT_LOAD_RENDER);
-			if (!AddFont(face, textureWidth, textureHeight, x, y, textureData, characters, c, offset))
+			int c_x1, c_y1, c_x2, c_y2;
+			stbtt_GetCodepointBitmapBox(&font, c, scale, scale, &c_x1, &c_y1, &c_x2, &c_y2);
+
+			int glyph_width, glyph_height, glyph_xoff, glyph_yoff;
+			unsigned char* glyph_bitmap = stbtt_GetCodepointBitmap(
+				&font, scale, scale, c, &glyph_width, &glyph_height, &glyph_xoff, &glyph_yoff);
+
+			if (x + glyph_width > maxTextureSize)
 			{
-				bOverflow = true;
+				x = 0;
+				y += fontSize;
 			}
+
+			if (y + glyph_height > maxTextureSize)
+			{
+				break;
+			}
+
+			for (int y2 = 0; y2 < glyph_height; ++y2) {
+				for (int x2 = 0; x2 < glyph_width; ++x2) {
+					auto color = glyph_bitmap[y2 * glyph_width + x2];
+					int x_pos = x + glyph_xoff + x2;
+					int y_pos = ascent * scale + y2 + glyph_yoff;
+					int index = ((y_pos + y)*maxTextureSize + x_pos) * 4;
+					bitmap[index + 0] = color;
+					bitmap[index + 1] = color;
+					bitmap[index + 2] = color;
+					bitmap[index + 3] = color;
+				}
+			}
+
+			int advance, lsb;
+			stbtt_GetCodepointHMetrics(&font, c, &advance, &lsb);
+			Character newChar;
+			newChar.font = c;
+			newChar.sizeX = glyph_width;
+			newChar.sizeY = glyph_height;
+			newChar.u = x + lsb * scale;
+			newChar.v = y + lsb * scale;
+			characters.push_back(newChar);
+
+			x += advance * scale;
+
+			stbtt_FreeBitmap(glyph_bitmap, 0);
 		}
-
-		if (bOverflow)
-		{
-			MessageOut("CreateFontTexture:纹理大小不足以保存所有字符...", false, false, "255,255,0");
-		}
-
-		//wchar_t  character = L'我';
-		//FT_Load_Char(face, character, FT_LOAD_RENDER);
-		//AddFont(face, textureWidth, textureHeight, x, textureData, characters, character);
-
-		// 清理资源
-		FT_Done_Face(face);
-		FT_Done_FreeType(ft);
-
-		// 现在，textureData向量包含了纹理图集的数据，characters向量包含了每个字符的信息
-		// 你可以将textureData上传到GPU，并在图形API（如Vulkan或OpenGL）中使用它来渲染文本
-
-		//ImageTool::SavePngImageRGBA8(outTexturePath.c_str(), textureWidth, textureHeight, textureData.data());
 
 		using namespace nvtt;
 		Context context;
 		context.enableCudaAcceleration(true);
 
 		Surface image;
-		image.setImage(nvtt::InputFormat_BGRA_8UB, textureWidth, textureHeight, 1, &textureData[0]);
+		image.setImage(nvtt::InputFormat_BGRA_8UB, maxTextureSize, maxTextureSize, 1, bitmap);
 
 		OutputOptions output;
 		output.setFileName(outTexturePath.c_str());
@@ -1033,17 +958,17 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 	for (auto i : characters)
 	{
 		auto subNode = root.append_child(L"char");
-		subNode.append_attribute(L"char").set_value(std::wstring(1, i.font).c_str());
 		subNode.append_attribute(L"id").set_value((uint64_t)i.font);
 		subNode.append_attribute(L"x").set_value(i.u);
 		subNode.append_attribute(L"y").set_value(i.v);
 		subNode.append_attribute(L"w").set_value(i.sizeX);
 		subNode.append_attribute(L"h").set_value(i.sizeY);
+		subNode.append_attribute(L"char").set_value(std::wstring(1, i.font).c_str());
 	}
 	doc.save_file(fontDocPath.c_wstr());
 }
 #else
-void GUIPass::CreateFontTexture(HString ttfFontPath, HString outTexturePath)
+void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath, bool bOverwrite, uint32_t fontSize, uint32_t maxTextureSize)
 {
 
 }

@@ -128,7 +128,10 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	//Init Vulkan Manager
 	VulkanManager::InitManager(bEnableDebug);
 
-	Texture::CreateFontTexture("C:/Windows/Fonts/simhei.ttf", FileSystem::GetContentAbsPath() + "Core/Texture/font.dds", true);
+	//Import font
+	HString ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/bahnschrift.ttf";
+	ttfFontPath.CorrectionPath();
+	Texture::CreateFontTexture(ttfFontPath, FileSystem::GetContentAbsPath() + "Core/Texture/font.dds", true, 48U, 512U);
 
 	Texture::GlobalInitialize();
 
