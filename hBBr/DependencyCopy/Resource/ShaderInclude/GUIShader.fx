@@ -1,8 +1,7 @@
 //[Flags]EnableShaderDebug;
 cbuffer GUIPass :register(b0)
 {
-    float4x4 Projection;
-    float4 ScaleAndTranslate;
+    float4x4 ProjectionMatrix;
 };
 
 //[InputLayout]
@@ -26,7 +25,8 @@ Texture2D BaseTexture : register(t0,space1);
 VSToPS VSMain(VSInput IN)
 {
     VSToPS OUT;
-    OUT.SVPosition = float4(IN.Pos,0,1);
+    OUT.SVPosition = mul(ProjectionMatrix, float4(IN.Pos.xy, 0.f, 1.f));
+    OUT.SVPosition.y = -OUT.SVPosition.y;
     OUT.Color = IN.Color;
     OUT.UV = IN.UV;
     return OUT;

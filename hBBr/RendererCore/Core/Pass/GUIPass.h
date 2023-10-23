@@ -4,59 +4,26 @@
 #include <unordered_map>
 #include "PassBase.h"
 #include "HGuid.h"
-enum GUIAnchor
-{	
-	GUIAnchor_TopLeft,
-	GUIAnchor_TopCenter,
-	GUIAnchor_TopRight,
-	GUIAnchor_CenterLeft,
-	GUIAnchor_CenterCenter,
-	GUIAnchor_CenterRight,
-	GUIAnchor_BottomLeft,
-	GUIAnchor_BottomCenter,
-	GUIAnchor_BottomRight,
+
+struct GUITexture
+{
+	VkImageView ImageView;
+	VkDescriptorSet DescriptorSet;
 };
 
-struct GUIVertexData
+struct GUIBuffer
 {
-	glm::vec2 Pos;
-	glm::vec2 UV;
-	glm::vec4 Color;
+	VkBuffer vb;
+	VkDeviceMemory vbm;
+	VkBuffer ib;
+	VkDeviceMemory ibm;
+	VkBuffer ub;
+	VkDeviceMemory ubm;
 };
 
 struct GUIUniformBuffer
 {
 	glm::mat4 Projection;
-	glm::vec4 ScaleAndTranslate;
-};
-
-struct GUIDrawState
-{
-	GUIAnchor Anchor;
-	/* bFixed 填充模式，width和height以百分比为主 */
-	bool bFixed;
-	glm::vec4 Color;
-	glm::vec2 Scale;
-	glm::vec2 Translate;
-	Texture* BaseTexture;
-	GUIDrawState() {}
-	GUIDrawState(float x, float y, float w, float h, GUIAnchor anchor, bool fixed, glm::vec4 color , Texture* tex = NULL)
-	{
-		Anchor = anchor;
-		bFixed = fixed;
-		Color = color;
-		Translate = glm::vec2(x, y);
-		Scale = glm::vec2(w, h);
-		BaseTexture = tex;
-	}
-};
-
-struct GUIPrimitive
-{
-	std::vector<GUIVertexData> Data;
-	GUIDrawState State;
-	HString PipelineTag;
-	std::shared_ptr<class DescriptorSet> _obj_tex_descriptorSet;
 };
 
 class GUIPass :public GraphicsPass
@@ -67,14 +34,22 @@ public:
 	virtual void PassInit()override;
 	virtual void PassUpdate()override;
 	virtual void PassReset()override;
-	void AddImage(HString tag, GUIDrawState state);
 private:
-	std::vector<GUIVertexData> GetGUIPanel(GUIDrawState state);
+	void create_texture_descriptor_sets();
+	void nk_device_upload_atlas(VkQueue graphics_queue,const void* image, int width,int height);
+	void nk_sdl_font_stash_begin(struct nk_font_atlas** atlas);
+	void nk_sdl_font_stash_end(void);
+
 	std::shared_ptr<class DescriptorSet> _descriptorSet;
-	std::shared_ptr<class Buffer>_vertexBuffer;
-	std::unordered_map<HString,GUIPrimitive> _drawList;
+	uint32_t texture_descriptor_sets_len = 0 ;
+	GUIBuffer _buffer;
 	std::unordered_map<HString, VkPipeline> _guiPipelines;
 	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
-	VkDescriptorSetLayout _guiObjectDescriptorSetLayout = VK_NULL_HANDLE;
-	GUIUniformBuffer _uniformBuffer;
+	VkDescriptorSetLayout _texDescriptorSetLayout = VK_NULL_HANDLE;
+	VkPipeline _pipeline = VK_NULL_HANDLE;
+	std::vector<GUITexture> _guiTextures;
+	VkImage _fontImage = VK_NULL_HANDLE;
+	VkImageView _fontImageView = VK_NULL_HANDLE;
+	VkDeviceMemory _fontMemory = VK_NULL_HANDLE;
+	bool bSetFont = false;
 };

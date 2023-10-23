@@ -68,5 +68,4 @@ namespace TypeConversion
 	RGBA ConversionByteToRGB555A1(uint8_t* b5g5r5a1);
 
 	BYTE_16bit ConversionRGB555A1ToByte(RGBA rgb5);
-
 }

@@ -71,6 +71,11 @@ public:
 
 	VkBuffer GetBuffer();
 
+	HBBR_INLINE void*& GetData() {
+		return _bufferMapping
+			;
+	}
+
 private:
 
 	VkBuffer						_buffer = VK_NULL_HANDLE;
