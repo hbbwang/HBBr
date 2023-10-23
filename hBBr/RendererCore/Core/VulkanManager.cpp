@@ -1358,12 +1358,12 @@ void VulkanManager::CreateImageView(VkImage inImage, VkFormat format, VkImageAsp
 	vkCreateImageView(_device, &image_view_create_info, VK_NULL_HANDLE, &imageView);
 }
 
-VkDeviceSize VulkanManager::CreateImageMemory(VkImage inImage, VkDeviceMemory& imageViewMemory, VkMemoryPropertyFlags memoryPropertyFlag)
+void VulkanManager::CreateImageMemory(VkImage inImage, VkDeviceMemory& imageViewMemory, VkMemoryPropertyFlags memoryPropertyFlag)
 {
 	if (inImage == VK_NULL_HANDLE)
 	{
 		MessageOut("Create vulkan image view failed.VkImage is NULL.", false, false);
-		return 0;
+		return;
 	}
 	VkMemoryRequirements mem_requirement;
 	vkGetImageMemoryRequirements(_device, inImage, &mem_requirement);
@@ -1379,7 +1379,6 @@ VkDeviceSize VulkanManager::CreateImageMemory(VkImage inImage, VkDeviceMemory& i
 	if (VK_SUCCESS != err) {
 		MessageOut("Create vulkan image view failed.VkImage is NULL.", false, false);
 	}
-	return mem_requirement.size;
 }
 
 void VulkanManager::Transition(

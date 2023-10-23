@@ -17,6 +17,14 @@
 #pragma comment(lib,"nvtt/lib/x64-v142/nvtt30106.lib")
 #endif
 
+struct FontTextureInfo
+{
+	uint32_t posX;
+	uint32_t posY;
+	uint32_t sizeX;
+	uint32_t sizeY;
+};
+
 enum TextureSampler
 {
 	TextureSampler_Linear_Wrap = 0,
@@ -93,10 +101,6 @@ public:
 		return _sampler;
 	}
 
-	HBBR_INLINE static VkSampler GetSampler(TextureSampler sampler) {
-		return _samplers[sampler];
-	}
-
 	HBBR_INLINE VkExtent2D GetImageSize()const {
 		return _imageSize;
 	}
@@ -136,6 +140,9 @@ public:
 	static void AddSystemTexture(HString tag, Texture* tex);
 
 	static Texture* GetSystemTexture(HString tag);
+
+	//通过ttf生成dds纹理
+	static void CreateFontTexture(HString ttfFontPath, HString outTexturePath,bool bOverwrite = false,uint32_t fontSize = 48 , uint32_t maxTextureSize = 256);
 
 	HString _textureName;
 
@@ -177,5 +184,7 @@ private:
 	//Global variable
 	static std::unordered_map<HString, Texture*> _system_textures;
 	static std::unordered_map<TextureSampler, VkSampler> _samplers;
-
+	
+	// FontTextureInfo[wchar_t] 
+	static std::vector<FontTextureInfo> _fontTextureInfos;
 };

@@ -15,9 +15,9 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 		//Opaque Pass
 		std::shared_ptr<BasePass> opaque = std::make_shared<BasePass>(renderer);
 		AddPass(opaque, "Opaque");
-		//Nuklear Pass
-		std::shared_ptr<GUIPass> nuklear = std::make_shared<GUIPass>(renderer);
-		AddPass(nuklear, "Nuklear");
+		//Screen GUI Pass
+		std::shared_ptr<GUIPass> gui = std::make_shared<GUIPass>(renderer);
+		AddPass(gui, "GUI");
 #ifdef IS_EDITOR
 		std::shared_ptr<ImguiScreenPass> imgui = std::make_shared<ImguiScreenPass>(renderer);
 		AddPass(imgui, "Imgui");
