@@ -5,6 +5,8 @@
 #include "./Core/Pipeline.h"
 #include "./Common/HInput.h"
 #include "./Core/Texture.h"
+#include "./Common/XMLStream.h"
+#include "./Core/RendererConfig.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #include "Imgui/backends/imgui_impl_sdl3.h"
@@ -129,9 +131,14 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	VulkanManager::InitManager(bEnableDebug);
 
 	//Import font
-	HString ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/msyhl.ttc";
+	//HString ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/msyhl.ttc";
+	HString ttfFontPath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"Font").attribute(L"absPath").as_string();
 	ttfFontPath.CorrectionPath();
-	Texture::CreateFontTexture(ttfFontPath, FileSystem::GetResourceAbsPath() + "Font/font.png", true, 32U, 4096U);
+	HString outFontTexturePath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"FontTexture").attribute(L"path").as_string();
+	outFontTexturePath = FileSystem::GetRelativePath(outFontTexturePath.c_str());
+	outFontTexturePath = FileSystem::GetProgramPath() + outFontTexturePath;
+	outFontTexturePath.CorrectionPath();
+	Texture::CreateFontTexture(ttfFontPath, outFontTexturePath, true, 36U, 4096U);
 
 	Texture::GlobalInitialize();
 

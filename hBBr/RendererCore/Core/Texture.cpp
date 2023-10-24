@@ -8,11 +8,12 @@
 #include "DDSTool.h"
 #include "ContentManager.h"
 #include "XMLStream.h"
+#include "RendererConfig.h"
 std::vector<Texture*> Texture::_upload_textures;
 std::unordered_map<HString, Texture*> Texture::_system_textures;
 std::unordered_map < TextureSampler, VkSampler > Texture::_samplers;
-std::vector<FontTextureInfo> Texture::_fontTextureInfos;
-
+std::unordered_map<wchar_t, FontTextureInfo> Texture::_fontTextureInfos;
+std::shared_ptr<Texture>Texture::_fontTexture;
 SceneTexture::SceneTexture(VulkanRenderer* renderer)
 {
 	_renderer = renderer;
@@ -50,6 +51,11 @@ Texture::~Texture()
 	VulkanManager::GetManager()->DestroyImageMemory(_imageViewMemory);
 	VulkanManager::GetManager()->DestroyImageView(_imageView);
 	VulkanManager::GetManager()->DestroyImage(_image);
+	if (_imageData!=NULL)
+	{
+		delete _imageData;
+		_imageData = NULL;
+	}
 }
 
 void Texture::Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin, uint32_t mipLevelCount, uint32_t baseArrayLayer, uint32_t layerCount)
@@ -256,23 +262,35 @@ void Texture::GlobalInitialize()
 	Texture::AddSystemTexture("TestTex", testTex);
 
 	//导入文字纹理
-	.....Not finish.
+	{
+		HString fontTexturePath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"FontTexture").attribute(L"path").as_string();
+		fontTexturePath = FileSystem::GetRelativePath(fontTexturePath.c_str());
+		fontTexturePath = FileSystem::GetProgramPath() + fontTexturePath;
+		fontTexturePath.CorrectionPath();
+		auto imageData = ImageTool::ReadPngImage(fontTexturePath.c_str());
+		_fontTexture = CreateTexture2D(imageData->data_header.width, imageData->data_header.height, imageData->texFormat, VK_IMAGE_USAGE_SAMPLED_BIT, "FontTexture");
+		_fontTexture->_imageData = imageData;
+	}
+
 	//导入文字信息
 	{
-		HString fontDocPath = FileSystem::GetConfigAbsPath() + "Font.xml";
+		HString fontDocPath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"FontConfig").attribute(L"path").as_string();
+		fontDocPath = FileSystem::GetRelativePath(fontDocPath.c_str());
+		fontDocPath = FileSystem::GetProgramPath() + fontDocPath;
+		fontDocPath.CorrectionPath();
 		pugi::xml_document fontDoc;
 		fontDoc.load_file(fontDocPath.c_wstr());
 		auto root = fontDoc.child(L"root");
 		auto num = root.attribute(L"num").as_ullong();
-		_fontTextureInfos.resize(num);
 		for (auto i = root.first_child(); i != NULL; i = i.next_sibling())
 		{
 			FontTextureInfo info;
+			info.channel = i.attribute(L"channel").as_uint();
 			info.posX = i.attribute(L"x").as_uint();
 			info.posY = i.attribute(L"y").as_uint();
 			info.sizeX = i.attribute(L"w").as_uint();
 			info.sizeY = i.attribute(L"h").as_uint();
-			_fontTextureInfos[i.attribute(L"id").as_uint()] = (info);
+			_fontTextureInfos.emplace(std::make_pair(i.attribute(L"id").as_uint(), info));
 		}
 	}
 }
@@ -289,6 +307,7 @@ void Texture::GlobalRelease()
 		vkDestroySampler(manager->GetDevice(), i.second, nullptr);
 	}
 	_samplers.clear();
+	_fontTexture.reset();
 }
 
 void Texture::AddSystemTexture(HString tag, Texture* tex)
@@ -818,7 +837,7 @@ void Texture::GetImageDataFromCompressionData(const char* ddsPath, nvtt::Surface
 #include <stdio.h>
 #define STB_TRUETYPE_IMPLEMENTATION  // force following include to generate implementation
 #include "stb_truetype.h"
-
+#include "stb_image.h"
 struct Character {
 	//对应字符
 	wchar_t  font;
@@ -828,9 +847,11 @@ struct Character {
 	//字符大小
 	unsigned int sizeX;
 	unsigned int sizeY;
+	//保存在哪个通道//0R,1G,2B,3A
+	int channel = 0;
 };
 
-void GetFontCharacter(stbtt_fontinfo& font ,int& start_codepoint , int& end_codepoint , std::vector<Character>& characters ,float& scale,int& ascent, int& x, int& y, uint32_t& fontSize, uint32_t& maxTextureSize, unsigned char* &atlas_data)
+void GetFontCharacter(stbtt_fontinfo& font ,int& start_codepoint , int& end_codepoint , std::vector<Character>& characters ,float& scale,int& ascent, int& x, int& y,int& channel, uint32_t& fontSize, uint32_t& maxTextureSize, unsigned char* &atlas_data)
 {
 	for (wchar_t c = start_codepoint; c <= end_codepoint; c++)
 	{
@@ -841,15 +862,21 @@ void GetFontCharacter(stbtt_fontinfo& font ,int& start_codepoint , int& end_code
 		unsigned char* glyph_bitmap = stbtt_GetCodepointBitmap(
 			&font, scale, scale, c, &glyph_width, &glyph_height, &glyph_xoff, &glyph_yoff);
 
-		if (x + glyph_width > maxTextureSize)
+		if (x + glyph_width + 3 > maxTextureSize)
 		{
 			x = 0;
 			y += fontSize;
 		}
 
-		if (y + glyph_height > maxTextureSize)
+		if (y + glyph_height + 3 > maxTextureSize)
 		{
-			break;
+			channel++;
+			if (channel > 2)//超出通道
+			{
+				break;
+			}
+			x = 0;
+			y = 0;
 		}
 
 		for (int y2 = 0; y2 < glyph_height; ++y2) {
@@ -858,10 +885,29 @@ void GetFontCharacter(stbtt_fontinfo& font ,int& start_codepoint , int& end_code
 				int x_pos = x + glyph_xoff + x2;
 				int y_pos = ascent * scale + y2 + glyph_yoff;
 				int index = ((y_pos + y) * maxTextureSize + x_pos) * 4;
-				atlas_data[index + 0] = color;
-				atlas_data[index + 1] = color;
-				atlas_data[index + 2] = color;
-				atlas_data[index + 3] = color;
+				//BGRA
+				if (channel == 0)
+				{
+					atlas_data[index + 2] = color;
+				}
+				else if (channel == 1)
+				{
+					atlas_data[index + 1] = color;
+				}
+				else if (channel == 2)
+				{
+					atlas_data[index + 0] = color;
+				}
+
+				else if (channel == 3)
+				{
+					atlas_data[index + 3] = color;
+				}
+
+				//atlas_data[index + 0] = color;
+				//atlas_data[index + 1] = color;
+				//atlas_data[index + 2] = color;
+				//atlas_data[index + 3] = color;
 			}
 		}
 
@@ -873,6 +919,7 @@ void GetFontCharacter(stbtt_fontinfo& font ,int& start_codepoint , int& end_code
 		newChar.sizeY = glyph_height;
 		newChar.u = x + lsb * scale;
 		newChar.v = y + lsb * scale;
+		newChar.channel = channel;
 		characters.push_back(newChar);
 
 		x += advance * scale;
@@ -930,28 +977,127 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 	// 创建字符集
 	std::vector<Character> characters;
 	unsigned char* atlas_data = (unsigned char*)calloc(maxTextureSize * maxTextureSize * 4, 1);
+	memset(atlas_data, 0, maxTextureSize * maxTextureSize * 4);
 	{
 		int x = 0;
 		int y = 0;
-		//常用数字、大小写字母以及常见的标点符号和特殊字符
+		int channel = 0;
+		//基本拉丁字母（Basic Latin）：U+0020 - U+007F（包含一些特殊符号）
 		int start_codepoint = 0x20;
-		int end_codepoint = 0x7E; 
-		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, fontSize, maxTextureSize, atlas_data);
+		int end_codepoint = 0x7E;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
 		//常用全角数字、字母和标点符号（全角ASCII字符）
 		start_codepoint = 0xff01;
 		end_codepoint = 0xff5e;
-		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, fontSize, maxTextureSize, atlas_data);
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
 		//常用全角括号和其他符号
 		start_codepoint = 0x3000;
 		end_codepoint = 0x303f;
-		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, fontSize, maxTextureSize, atlas_data);
-		//所有常用中文字符
-		start_codepoint = 0x4E00; // Unicode BMP中的第一个汉字
-		end_codepoint = 0x9FFF;   // Unicode BMP中的最后一个汉字
-		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, fontSize, maxTextureSize, atlas_data);
-		
-		//字体纹理导出成png
-		//ImageTool::SavePngImageRGBA8(outTexturePath.c_str(), maxTextureSize, maxTextureSize, atlas_data);
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		//常用中文 CJK 统一表意符号（CJK Unified Ideographs）：U+4E00 - U+9FFF
+		start_codepoint = 0x4E00;
+		end_codepoint = 0x9FFF;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+
+		//常用中文 CJK 统一表意符号扩展 A（CJK Unified Ideographs Extension A）：U+3400 - U+4DBF
+		start_codepoint = 0x3400;
+		end_codepoint = 0x4DBF;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		////常用中文 CJK 统一表意符号扩展 B（CJK Unified Ideographs Extension B）：U+20000 - U+2A6DF
+		//start_codepoint = 0x20000;
+		//end_codepoint = 0x2A6DF;
+		//GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		////常用中文 CJK 统一表意符号扩展 C（CJK Unified Ideographs Extension C）：U+2A700 - U+2B73F
+		//start_codepoint = 0x2A700;
+		//end_codepoint = 0x2B73F;
+		//GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		////常用中文 CJK 统一表意符号扩展 D（CJK Unified Ideographs Extension D）：U+2B740 - U+2B81F
+		//start_codepoint = 0x2B740;
+		//end_codepoint = 0x2B81F;
+		//GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		////常用中文 CJK 统一表意符号扩展 E（CJK Unified Ideographs Extension E）：U+2B820 - U+2CEAF
+		//start_codepoint = 0x2B820;
+		//end_codepoint = 0x2CEAF;
+		//GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		////常用中文 CJK 统一表意符号扩展 F（CJK Unified Ideographs Extension F）：U+2CEB0 - U+2EBEF
+		//start_codepoint = 0x2CEB0;
+		//end_codepoint = 0x2EBEF;
+		//GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		////常用中文 CJK 统一表意符号扩展 G（CJK Unified Ideographs Extension G）：U+30000 - U+3134F
+		//start_codepoint = 0x30000;
+		//end_codepoint = 0x3134F;
+		//GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+
+		//日文 平假名（Hiragana）：U+3040 - U+309F
+		start_codepoint = 0x3040;
+		end_codepoint = 0x309F;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		//日文 片假名（Katakana）：U+30A0 - U+30FF
+		start_codepoint = 0x30A0;
+		end_codepoint = 0x30FF;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		//U+1100 - U+11FF：Hangul Jamo（韩文字母）
+		start_codepoint = 0x1100;
+		end_codepoint = 0x11FF;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		//U+3130 - U+318F：Hangul Compatibility Jamo（兼容韩文字母）
+		start_codepoint = 0x3130;
+		end_codepoint = 0x318F;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		//U+AC00 - U+D7AF：Hangul Syllables（韩文音节）
+		start_codepoint = 0xAC00;
+		end_codepoint = 0xD7AF;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		//U+A960 - U+A97F：Hangul Jamo Extended-A（扩展韩文字母A）
+		start_codepoint = 0xA960;
+		end_codepoint = 0xA97F;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		//U+D7B0 - U+D7FF：Hangul Jamo Extended-B（扩展韩文字母B）
+		start_codepoint = 0xD7B0;
+		end_codepoint = 0xD7FF;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+
+		////拉丁字母扩展-A（Latin-1 Supplement）：U+0080 - U+00FF 
+		//start_codepoint = 0x0080;
+		//end_codepoint = 0x00FF;
+		//GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		////阿拉伯数字：U+0030 - U+0039（包含在基本拉丁字母范围内）
+		//start_codepoint = 0x0030;
+		//end_codepoint = 0x0039;
+		//GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		////杂项符号（Miscellaneous Symbols）：U+2600 - U+26FF
+		//start_codepoint = 0x2600;
+		//end_codepoint = 0x26FF;
+		//GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		////杂项技术（Miscellaneous Technical）：U+2300 - U+23FF
+		//start_codepoint = 0x2300;
+		//end_codepoint = 0x23FF;
+		//GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		////几何形状（Geometric Shapes）：U+25A0 - U+25FF
+		//start_codepoint = 0x25A0;
+		//end_codepoint = 0x25FF;
+		//GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		//箭头（Arrows）：U+2190 - U+21FF
+		start_codepoint = 0x2190;
+		end_codepoint = 0x21FF;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		//数学运算符（Mathematical Operators）：U+2200 - U+22FF
+		start_codepoint = 0x2200;
+		end_codepoint = 0x22FF;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		////附加数学运算符（Supplemental Mathematical Operators）：U+2A00 - U+2AFF
+		//start_codepoint = 0x2A00;
+		//end_codepoint = 0x2AFF;
+		//GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		////数学字母数字符号（Mathematical Alphanumeric Symbols）：U+1D400 - U+1D7FF
+		//start_codepoint = 0x1D400;
+		//end_codepoint = 0x1D7FF;
+		//GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+		//通用标点（General Punctuation）：U+2000 - U+206F
+		start_codepoint = 0x2000;
+		end_codepoint = 0x206F;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, channel, fontSize, maxTextureSize, atlas_data);
+
 
 		//字体纹理压缩
 		using namespace nvtt;
@@ -964,11 +1110,10 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 		{
 			OutputOptions output;
 			output.setFileName(outTexturePath.c_str());
-			int mipmaps = 1;
 			CompressionOptions options;
 			options.setFormat(Format_BC7);
-			options.setQuality(Quality_Production);
-			context.outputHeader(image, mipmaps, options, output);
+			options.setQuality(Quality_Highest);
+			context.outputHeader(image, 1, options, output);
 			context.compress(image, 0, 0, options, output);
 		}
 		else
@@ -990,7 +1135,9 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 	pugi::xml_document doc;
 
 	//把文字信息保存到xml配置
-	HString fontDocPath = outTexturePath.GetFilePath() + "Font.xml";
+	HString fontDocPath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"FontConfig").attribute(L"path").as_string();
+	fontDocPath = FileSystem::GetRelativePath(fontDocPath.c_str());
+	fontDocPath = FileSystem::GetProgramPath() + fontDocPath;
 	fontDocPath.CorrectionPath();
 	XMLStream::CreatesXMLFile(fontDocPath, doc);
 	auto root = doc.append_child(L"root");
@@ -998,6 +1145,7 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 	for (auto i : characters)
 	{
 		auto subNode = root.append_child(L"char");
+		subNode.append_attribute(L"channel").set_value(i.channel);
 		subNode.append_attribute(L"id").set_value((uint64_t)i.font);
 		subNode.append_attribute(L"x").set_value(i.u);
 		subNode.append_attribute(L"y").set_value(i.v);

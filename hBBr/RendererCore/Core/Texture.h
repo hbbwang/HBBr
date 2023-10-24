@@ -19,6 +19,7 @@
 
 struct FontTextureInfo
 {
+	uint8_t channel;
 	uint32_t posX;
 	uint32_t posY;
 	uint32_t sizeX;
@@ -185,6 +186,7 @@ private:
 	static std::unordered_map<HString, Texture*> _system_textures;
 	static std::unordered_map<TextureSampler, VkSampler> _samplers;
 	
-	// FontTextureInfo[wchar_t] 
-	static std::vector<FontTextureInfo> _fontTextureInfos;
+	// vector<RGBA channel<wchar_t , FontTextureInfo>>
+	static std::unordered_map<wchar_t, FontTextureInfo> _fontTextureInfos;
+	static std::shared_ptr<Texture> _fontTexture;
 };
