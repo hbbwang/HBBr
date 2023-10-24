@@ -66,6 +66,8 @@ public:
 
 	HBBR_API static bool SaveTgaImage(const char* filename, uint16_t w , uint16_t h ,  uint16_t d ,  void* imageData);
 
+	HBBR_API static bool SavePngImageGrey(const char* filename, uint16_t w, uint16_t h, void* imageData);
+
 	HBBR_API static bool SavePngImageRGBA8(const char* filename, uint16_t w, uint16_t h, void* imageData);
 
 	HBBR_API static bool SavePngImageRGB8(const char* filename, uint16_t w, uint16_t h, void* imageData);

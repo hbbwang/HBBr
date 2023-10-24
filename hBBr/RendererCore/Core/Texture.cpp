@@ -250,13 +250,13 @@ void Texture::GlobalInitialize()
 	auto normalTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Normal.dds"));
 	auto whiteTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/T_System_White.dds"));
 	auto testTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/TestTex.dds"));
-	auto fontTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/font.dds"));
 	Texture::AddSystemTexture("Black", blackTex);
 	Texture::AddSystemTexture("Normal", normalTex);
 	Texture::AddSystemTexture("White", whiteTex);
 	Texture::AddSystemTexture("TestTex", testTex);
-	Texture::AddSystemTexture("Font", fontTex);
 
+	//导入文字纹理
+	.....Not finish.
 	//导入文字信息
 	{
 		HString fontDocPath = FileSystem::GetConfigAbsPath() + "Font.xml";
@@ -830,6 +830,58 @@ struct Character {
 	unsigned int sizeY;
 };
 
+void GetFontCharacter(stbtt_fontinfo& font ,int& start_codepoint , int& end_codepoint , std::vector<Character>& characters ,float& scale,int& ascent, int& x, int& y, uint32_t& fontSize, uint32_t& maxTextureSize, unsigned char* &atlas_data)
+{
+	for (wchar_t c = start_codepoint; c <= end_codepoint; c++)
+	{
+		int c_x1, c_y1, c_width, c_height;
+		stbtt_GetCodepointBitmapBox(&font, c, scale, scale, &c_x1, &c_y1, &c_width, &c_height);
+
+		int glyph_width, glyph_height, glyph_xoff, glyph_yoff;
+		unsigned char* glyph_bitmap = stbtt_GetCodepointBitmap(
+			&font, scale, scale, c, &glyph_width, &glyph_height, &glyph_xoff, &glyph_yoff);
+
+		if (x + glyph_width > maxTextureSize)
+		{
+			x = 0;
+			y += fontSize;
+		}
+
+		if (y + glyph_height > maxTextureSize)
+		{
+			break;
+		}
+
+		for (int y2 = 0; y2 < glyph_height; ++y2) {
+			for (int x2 = 0; x2 < glyph_width; ++x2) {
+				auto color = glyph_bitmap[y2 * glyph_width + x2];
+				int x_pos = x + glyph_xoff + x2;
+				int y_pos = ascent * scale + y2 + glyph_yoff;
+				int index = ((y_pos + y) * maxTextureSize + x_pos) * 4;
+				atlas_data[index + 0] = color;
+				atlas_data[index + 1] = color;
+				atlas_data[index + 2] = color;
+				atlas_data[index + 3] = color;
+			}
+		}
+
+		int advance, lsb;
+		stbtt_GetCodepointHMetrics(&font, c, &advance, &lsb);
+		Character newChar;
+		newChar.font = c;
+		newChar.sizeX = glyph_width;
+		newChar.sizeY = glyph_height;
+		newChar.u = x + lsb * scale;
+		newChar.v = y + lsb * scale;
+		characters.push_back(newChar);
+
+		x += advance * scale;
+
+		stbtt_FreeBitmap(glyph_bitmap, 0);
+	}
+
+}
+
 void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,bool bOverwrite, uint32_t fontSize, uint32_t maxTextureSize)
 {
 	if (!bOverwrite)
@@ -844,6 +896,10 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 	{
 		ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/bahnschrift.ttf";
 		ttfFontPath.CorrectionPath();
+		if (!FileSystem::FileExist(ttfFontPath.c_str()))
+		{
+			return;
+		}
 	}
 
 	FILE* font_file = fopen(ttfFontPath.c_str(), "rb");
@@ -851,12 +907,12 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 	size_t fontFileSize = ftell(font_file);
 	fseek(font_file, 0, SEEK_SET);
 
-	unsigned char* font_data = (unsigned char*)malloc(fontFileSize);
-	fread(font_data, 1, fontFileSize, font_file);
+	unsigned char* font_buffer = (unsigned char*)malloc(fontFileSize);
+	fread(font_buffer, 1, fontFileSize, font_file);
 	fclose(font_file);
 
 	stbtt_fontinfo font;
-	stbtt_InitFont(&font, font_data, stbtt_GetFontOffsetForIndex(font_data, 0));
+	stbtt_InitFont(&font, font_buffer, stbtt_GetFontOffsetForIndex(font_buffer, 0));
 
 	int ascent, descent, line_gap;
 	stbtt_GetFontVMetrics(&font, &ascent, &descent, &line_gap);
@@ -873,85 +929,69 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 
 	// 创建字符集
 	std::vector<Character> characters;
-	unsigned char* bitmap = (unsigned char*)calloc(maxTextureSize * maxTextureSize * 4, 1);
+	unsigned char* atlas_data = (unsigned char*)calloc(maxTextureSize * maxTextureSize * 4, 1);
 	{
 		int x = 0;
 		int y = 0;
-		for (wchar_t c = 32; c < 127; c++)
-		{
-			int c_x1, c_y1, c_x2, c_y2;
-			stbtt_GetCodepointBitmapBox(&font, c, scale, scale, &c_x1, &c_y1, &c_x2, &c_y2);
+		//常用数字、大小写字母以及常见的标点符号和特殊字符
+		int start_codepoint = 0x20;
+		int end_codepoint = 0x7E; 
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, fontSize, maxTextureSize, atlas_data);
+		//常用全角数字、字母和标点符号（全角ASCII字符）
+		start_codepoint = 0xff01;
+		end_codepoint = 0xff5e;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, fontSize, maxTextureSize, atlas_data);
+		//常用全角括号和其他符号
+		start_codepoint = 0x3000;
+		end_codepoint = 0x303f;
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, fontSize, maxTextureSize, atlas_data);
+		//所有常用中文字符
+		start_codepoint = 0x4E00; // Unicode BMP中的第一个汉字
+		end_codepoint = 0x9FFF;   // Unicode BMP中的最后一个汉字
+		GetFontCharacter(font, start_codepoint, end_codepoint, characters, scale, ascent, x, y, fontSize, maxTextureSize, atlas_data);
+		
+		//字体纹理导出成png
+		//ImageTool::SavePngImageRGBA8(outTexturePath.c_str(), maxTextureSize, maxTextureSize, atlas_data);
 
-			int glyph_width, glyph_height, glyph_xoff, glyph_yoff;
-			unsigned char* glyph_bitmap = stbtt_GetCodepointBitmap(
-				&font, scale, scale, c, &glyph_width, &glyph_height, &glyph_xoff, &glyph_yoff);
-
-			if (x + glyph_width > maxTextureSize)
-			{
-				x = 0;
-				y += fontSize;
-			}
-
-			if (y + glyph_height > maxTextureSize)
-			{
-				break;
-			}
-
-			for (int y2 = 0; y2 < glyph_height; ++y2) {
-				for (int x2 = 0; x2 < glyph_width; ++x2) {
-					auto color = glyph_bitmap[y2 * glyph_width + x2];
-					int x_pos = x + glyph_xoff + x2;
-					int y_pos = ascent * scale + y2 + glyph_yoff;
-					int index = ((y_pos + y)*maxTextureSize + x_pos) * 4;
-					bitmap[index + 0] = color;
-					bitmap[index + 1] = color;
-					bitmap[index + 2] = color;
-					bitmap[index + 3] = color;
-				}
-			}
-
-			int advance, lsb;
-			stbtt_GetCodepointHMetrics(&font, c, &advance, &lsb);
-			Character newChar;
-			newChar.font = c;
-			newChar.sizeX = glyph_width;
-			newChar.sizeY = glyph_height;
-			newChar.u = x + lsb * scale;
-			newChar.v = y + lsb * scale;
-			characters.push_back(newChar);
-
-			x += advance * scale;
-
-			stbtt_FreeBitmap(glyph_bitmap, 0);
-		}
-
+		//字体纹理压缩
 		using namespace nvtt;
 		Context context;
 		context.enableCudaAcceleration(true);
 
 		Surface image;
-		image.setImage(nvtt::InputFormat_BGRA_8UB, maxTextureSize, maxTextureSize, 1, bitmap);
+		image.setImage(nvtt::InputFormat_BGRA_8UB, maxTextureSize, maxTextureSize, 1, atlas_data);
+		if (outTexturePath.GetSuffix().IsSame("dds", false))
+		{
+			OutputOptions output;
+			output.setFileName(outTexturePath.c_str());
+			int mipmaps = 1;
+			CompressionOptions options;
+			options.setFormat(Format_BC7);
+			options.setQuality(Quality_Production);
+			context.outputHeader(image, mipmaps, options, output);
+			context.compress(image, 0, 0, options, output);
+		}
+		else
+		{
+			image.save(outTexturePath.c_str(), false);
+		}	
 
-		OutputOptions output;
-		output.setFileName(outTexturePath.c_str());
-		int mipmaps = 1;
-		CompressionOptions options;
-		options.setFormat(Format_BC7);
-		options.setQuality(Quality_Production);
-		context.outputHeader(image, mipmaps, options, output);
-		context.compress(image, 0, 0, options, output);
+		//释放
+		free(atlas_data);
+		free(font_buffer);
 	}
 
-	//刷新字体纹理信息
-	auto assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Texture2D, outTexturePath, outTexturePath);
-	HString newName = (outTexturePath.GetFilePath() + GUIDToString(assetInfo->guid) + ".dds");
-	FileSystem::FileRename(outTexturePath.c_str(), newName.c_str());
+	////刷新字体纹理信息
+	//auto assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Texture2D, outTexturePath, outTexturePath);
+	//HString newName = (outTexturePath.GetFilePath() + GUIDToString(assetInfo->guid) + ".dds");
+	//FileSystem::FileRename(outTexturePath.c_str(), newName.c_str());
 	
 	//导出文字UV信息
 	pugi::xml_document doc;
 
 	//把文字信息保存到xml配置
-	HString fontDocPath = FileSystem::GetConfigAbsPath() + "Font.xml";
+	HString fontDocPath = outTexturePath.GetFilePath() + "Font.xml";
+	fontDocPath.CorrectionPath();
 	XMLStream::CreatesXMLFile(fontDocPath, doc);
 	auto root = doc.append_child(L"root");
 	root.append_attribute(L"num").set_value(((uint64_t)characters[characters.size() - 1].font) + 1);

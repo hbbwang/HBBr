@@ -129,9 +129,9 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	VulkanManager::InitManager(bEnableDebug);
 
 	//Import font
-	HString ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/bahnschrift.ttf";
+	HString ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/msyhl.ttc";
 	ttfFontPath.CorrectionPath();
-	Texture::CreateFontTexture(ttfFontPath, FileSystem::GetContentAbsPath() + "Core/Texture/font.dds", true, 48U, 512U);
+	Texture::CreateFontTexture(ttfFontPath, FileSystem::GetResourceAbsPath() + "Font/font.png", true, 32U, 4096U);
 
 	Texture::GlobalInitialize();
 

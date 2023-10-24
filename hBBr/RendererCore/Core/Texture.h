@@ -142,7 +142,7 @@ public:
 	static Texture* GetSystemTexture(HString tag);
 
 	//通过ttf生成dds纹理
-	static void CreateFontTexture(HString ttfFontPath, HString outTexturePath,bool bOverwrite = false,uint32_t fontSize = 48 , uint32_t maxTextureSize = 256);
+	static void CreateFontTexture(HString ttfFontPath, HString outTexturePath,bool bOverwrite = true,uint32_t fontSize = 48 , uint32_t maxTextureSize = 256);
 
 	HString _textureName;
 
