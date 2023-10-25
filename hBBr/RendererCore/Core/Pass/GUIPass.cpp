@@ -51,10 +51,16 @@ void GUIPass::PassUpdate()
 	//Update FrameBuffer
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), {});
 	SetViewport(_currentFrameBufferSize);
-	BeginRenderPass({ 0,0,0,0 });
+	BeginRenderPass({ 0,0,0,0 }); 
 	//Begin...
 	//GUIDrawImage("TestImage", Texture::GetSystemTexture("TestTex"), 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1, 1, 1, 0.95)));
-	GUIDrawText("TestText", L"Hello,GUI文字测试测试!", 0, 0, 200, 200, GUIDrawState( GUIAnchor_TopLeft, false, glm::vec4(1, 1, 1, 0.95)));
+	GUIDrawText("TestText", L"Hello,GUI文字测试测试!", 0, 0, 200, 200, GUIDrawState( GUIAnchor_TopLeft, false, 
+		glm::vec4(
+			cosf(_renderer->GetGameTime()) * 0.5 + 0.5,
+			sinf(_renderer->GetGameTime()+0.25) * 0.5 + 0.5,
+			tanf(_renderer->GetGameTime()+0.5) * 0.5 + 0.5,
+			1)),
+		35.0f);
 
 	for (auto i : _drawList)
 	{
@@ -114,7 +120,7 @@ void GUIPass::GUIDrawText(HString tag, HString text, float x, float y, float w, 
 {
 	state.Translate += glm::vec2(x, y);
 	state.Scale *= glm::vec2(w, h);
-	GUIPrimitive* prim = GetPrimitve(tag, state, text.Length(), "Base");
+	GUIPrimitive* prim = GetPrimitve(tag, state, text.WLength(), "Base");
 	prim->viewport = { (int)x,(int)y,(uint32_t)w,(uint32_t)h };
 	std::vector<GUIVertexData>textMeshes;
 	if (prim->BaseTexture != Texture::GetFontTexture())
@@ -126,9 +132,8 @@ void GUIPass::GUIDrawText(HString tag, HString text, float x, float y, float w, 
 	//计算每个文字面片位置
 	float tx = 0;
 	float ty = 0;
-	prim->fontCharacter.resize(text.Length());
-
-	for (int i = 0; i < text.Length(); i++)
+	prim->fontCharacter.resize(text.WLength());
+	for (int i = 0; i < text.WLength(); i++)
 	{
 		//文字不存在fixed模式,文字的大小不应该被变形
 		prim->States[i].bFixed = false;
@@ -138,13 +143,13 @@ void GUIPass::GUIDrawText(HString tag, HString text, float x, float y, float w, 
 		prim->States[i].uniformBuffer.channel = info->channel;
 		prim->States[i].uniformBuffer.UVSetting = glm::vec4(info->posX, info->posY, info->sizeX, info->sizeY);
 		prim->States[i].uniformBuffer.TextureSize = Texture::GetFontTexture()->GetImageSize().width;
-		//文字按顺序偏移
-		prim->States[i].Translate += glm::vec2(tx, ty);
 		//文字像素大小
-		prim->States[i].Scale = glm::vec2(1, 1) * fontSize;	
+		prim->States[i].Scale = glm::vec2(info->sizeX / info->sizeY, 1) * fontSize * info->scale;
+		//文字按顺序偏移
+		prim->States[i].Translate += glm::vec2(tx, fontSize - prim->States[i].Scale.y);
 		auto newTextMesh = GetGUIPanel(prim->States[i]);
 		textMeshes.insert(textMeshes.end(), newTextMesh.begin(), newTextMesh.end());
-		tx += info->sizeX;
+		tx += prim->States[i].Scale.x;
 	}
 
 	prim->Data = textMeshes;

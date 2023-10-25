@@ -25,6 +25,8 @@ struct FontTextureInfo
 	float posY;
 	float sizeX;
 	float sizeY;
+	float scale;
+	float cy;
 };
 
 enum TextureSampler

@@ -2,7 +2,7 @@
 cbuffer GUIPass :register(b0)
 {
     float4 UVSetting;
-    float4 channel;
+    float channel;
     float TextureSize;
 };
 
@@ -37,6 +37,24 @@ float4 PSMain(VSToPS IN) :SV_Target0
 {   
     //return IN.Color;
     half4 baseTexture = BaseTexture.Sample(BaseTextureSampler,IN.UV * (UVSetting.zw / TextureSize) + (UVSetting.xy / TextureSize) );
-    baseTexture *= channel;
-    return baseTexture * IN.Color;
+    if(channel == 0)
+    {
+        return baseTexture.r * IN.Color;
+    }
+    else if(channel == 1)
+    {
+        return baseTexture.g * IN.Color;
+    }
+    else if(channel == 2)
+    {
+        return baseTexture.b * IN.Color;
+    }
+    else if(channel == 3)
+    {
+        return baseTexture.a * IN.Color;
+    }
+    else
+    {
+        return baseTexture * IN.Color;
+    }
 }

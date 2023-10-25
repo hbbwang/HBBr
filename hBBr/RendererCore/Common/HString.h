@@ -49,6 +49,7 @@ private:
 	char* m_char = NULL;
 	wchar_t* m_wchar = NULL;
 	char* _str = NULL;
+	wchar_t* _wstr = NULL;
 	size_t length = 0;
 public:
 	inline void clear()
@@ -401,7 +402,13 @@ public:
 		strcpy_s(_str, length + 1, str._str);
 	}
 
-	HBBR_INLINE size_t	Length()const { return length; }
+	/* char* length!!! not wchar_t*  */
+	HBBR_INLINE const size_t	Length()const { return length; }
+
+	/* wchar_t* length */
+	HBBR_INLINE const size_t	WLength() { return wcslen(ps2ws(_str)); }
+
+	HBBR_INLINE const wchar_t GetWChar(size_t i) { return ps2ws(_str)[i]; }
 
 	HBBR_INLINE const char* c_str() { return _str; }
 
