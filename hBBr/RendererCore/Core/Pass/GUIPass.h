@@ -26,8 +26,21 @@ struct GUIVertexData
 
 struct GUIUniformBuffer
 {
-	glm::mat4 Projection;
-	glm::vec4 ScaleAndTranslate;
+	//x,y,w,h
+	alignas(16)
+	glm::vec4 UVSetting;
+	alignas(4)
+	float channel = -1;
+	alignas(4)
+	float TextureSize = 512;
+
+	bool operator!=(const GUIUniformBuffer& c) const
+	{
+		return 
+			this->UVSetting != c.UVSetting || 
+			this->channel != c.channel
+			;
+	}
 };
 
 struct GUIDrawState
@@ -36,27 +49,28 @@ struct GUIDrawState
 	/* bFixed 填充模式，width和height以百分比为主 */
 	bool bFixed;
 	glm::vec4 Color;
-	glm::vec2 Scale;
-	glm::vec2 Translate;
-	Texture* BaseTexture;
+	glm::vec2 Scale = glm::vec2(1);
+	glm::vec2 Translate = glm::vec2(0);
+	GUIUniformBuffer uniformBuffer;
 	GUIDrawState() {}
-	GUIDrawState(float x, float y, float w, float h, GUIAnchor anchor, bool fixed, glm::vec4 color , Texture* tex = NULL)
+	GUIDrawState(GUIAnchor anchor, bool fixed, glm::vec4 color)
 	{
 		Anchor = anchor;
 		bFixed = fixed;
 		Color = color;
-		Translate = glm::vec2(x, y);
-		Scale = glm::vec2(w, h);
-		BaseTexture = tex;
 	}
 };
 
 struct GUIPrimitive
 {
 	std::vector<GUIVertexData> Data;
-	GUIDrawState State;
+	std::vector<GUIDrawState> States;
 	HString PipelineTag;
-	std::shared_ptr<class DescriptorSet> _obj_tex_descriptorSet;
+	std::vector<wchar_t> fontCharacter;
+	Texture* BaseTexture = NULL;
+	VkRect2D viewport;
+	std::shared_ptr<class DescriptorSet> ub_descriptorSet;
+	std::shared_ptr<class DescriptorSet> tex_descriptorSet;
 };
 
 class GUIPass :public GraphicsPass
@@ -67,14 +81,18 @@ public:
 	virtual void PassInit()override;
 	virtual void PassUpdate()override;
 	virtual void PassReset()override;
-	void AddImage(HString tag, GUIDrawState state);
+
+	void GUIDrawImage(HString tag, Texture* texture, float x, float y, float w, float h,GUIDrawState state);
+	void GUIDrawText(HString tag, HString text, float x, float y, float w, float h, GUIDrawState state , float fontSize = 20);
+
 private:
-	std::vector<GUIVertexData> GetGUIPanel(GUIDrawState state);
-	std::shared_ptr<class DescriptorSet> _descriptorSet;
+	void CreatePipeline(HString pipelineTag , HString shaderName);
+	GUIPrimitive* GetPrimitve(HString& tag,GUIDrawState& state , int stateCount,HString pipelineTag);
+	std::vector<GUIVertexData> GetGUIPanel(GUIDrawState& state);
 	std::shared_ptr<class Buffer>_vertexBuffer;
 	std::unordered_map<HString,GUIPrimitive> _drawList;
 	std::unordered_map<HString, VkPipeline> _guiPipelines;
 	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
-	VkDescriptorSetLayout _guiObjectDescriptorSetLayout = VK_NULL_HANDLE;
-	GUIUniformBuffer _uniformBuffer;
+	VkDescriptorSetLayout _ubDescriptorSetLayout = VK_NULL_HANDLE;
+	VkDescriptorSetLayout _texDescriptorSetLayout = VK_NULL_HANDLE;
 };

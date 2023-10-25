@@ -19,11 +19,12 @@
 
 struct FontTextureInfo
 {
+	//Font data
 	uint8_t channel;
-	uint32_t posX;
-	uint32_t posY;
-	uint32_t sizeX;
-	uint32_t sizeY;
+	float posX;
+	float posY;
+	float sizeX;
+	float sizeY;
 };
 
 enum TextureSampler
@@ -114,6 +115,22 @@ public:
 		return _upload_textures;
 	}
 
+	HBBR_INLINE static Texture* GetFontTexture() {
+		return _fontTexture.get();
+	}
+
+	HBBR_INLINE static FontTextureInfo* GetFontInfo(wchar_t c) {
+		auto it = _fontTextureInfos.find(c);
+		if (it != _fontTextureInfos.end())
+		{
+			return &it->second;
+		}
+		else
+		{
+			return &_fontTextureInfos.begin()->second;
+		}
+	}
+
 	void Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
 
 	void TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1);
@@ -189,4 +206,5 @@ private:
 	// vector<RGBA channel<wchar_t , FontTextureInfo>>
 	static std::unordered_map<wchar_t, FontTextureInfo> _fontTextureInfos;
 	static std::shared_ptr<Texture> _fontTexture;
+
 };

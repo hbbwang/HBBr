@@ -1,8 +1,9 @@
 //[Flags]EnableShaderDebug;
 cbuffer GUIPass :register(b0)
 {
-    float4x4 Projection;
-    float4 ScaleAndTranslate;
+    float4 UVSetting;
+    float4 channel;
+    float TextureSize;
 };
 
 //[InputLayout]
@@ -35,6 +36,7 @@ VSToPS VSMain(VSInput IN)
 float4 PSMain(VSToPS IN) :SV_Target0
 {   
     //return IN.Color;
-    half4 baseTexture = BaseTexture.Sample(BaseTextureSampler,IN.UV);
+    half4 baseTexture = BaseTexture.Sample(BaseTextureSampler,IN.UV * (UVSetting.zw / TextureSize) + (UVSetting.xy / TextureSize) );
+    baseTexture *= channel;
     return baseTexture * IN.Color;
 }

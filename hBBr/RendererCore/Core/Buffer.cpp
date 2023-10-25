@@ -19,16 +19,12 @@ void Buffer::Resize(uint64_t newSize)
 	//保存旧缓存,保证安全释放,我们必须保证Buffer不再被使用的时候再释放
 	//从GetBuffer里进行帧计算
 	BufferWaitToRelease oldBuffer;
-	oldBuffer.old_buffer = _buffer;
-	oldBuffer.old_bufferMemory = _bufferMemory;
+	oldBuffer.old_buffer = std::move(_buffer);
+	oldBuffer.old_bufferMemory = std::move(_bufferMemory);
 	_oldBuffer.push_back(oldBuffer);
 	//创建新Buffer
-	VkBuffer newBuffer;
-	VkDeviceMemory newMemory;
-	VulkanManager::GetManager()->CreateBuffer(_bufferUsage, newSize, newBuffer);
-	VulkanManager::GetManager()->AllocateBufferMemory(newBuffer, newMemory);
-	_buffer = newBuffer;
-	_bufferMemory = newMemory;
+	VulkanManager::GetManager()->CreateBuffer(_bufferUsage, newSize, _buffer);
+	VulkanManager::GetManager()->AllocateBufferMemory(_buffer, _bufferMemory);
 	MapMemory();
 }
 

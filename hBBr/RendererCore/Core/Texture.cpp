@@ -268,8 +268,10 @@ void Texture::GlobalInitialize()
 		fontTexturePath = FileSystem::GetProgramPath() + fontTexturePath;
 		fontTexturePath.CorrectionPath();
 		auto imageData = ImageTool::ReadPngImage(fontTexturePath.c_str());
-		_fontTexture = CreateTexture2D(imageData->data_header.width, imageData->data_header.height, imageData->texFormat, VK_IMAGE_USAGE_SAMPLED_BIT, "FontTexture");
+		_fontTexture = CreateTexture2D(imageData->data_header.width, imageData->data_header.height, imageData->texFormat, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, "FontTexture");
 		_fontTexture->_imageData = imageData;
+		//上传到GPU,并储存一份指针到System Texture
+		AddSystemTexture("Font", _fontTexture.get());
 	}
 
 	//导入文字信息
@@ -282,14 +284,16 @@ void Texture::GlobalInitialize()
 		fontDoc.load_file(fontDocPath.c_wstr());
 		auto root = fontDoc.child(L"root");
 		auto num = root.attribute(L"num").as_ullong();
+		float tw = root.attribute(L"width").as_ullong();
+		float th = root.attribute(L"height").as_ullong();
 		for (auto i = root.first_child(); i != NULL; i = i.next_sibling())
 		{
 			FontTextureInfo info;
 			info.channel = i.attribute(L"channel").as_uint();
-			info.posX = i.attribute(L"x").as_uint();
-			info.posY = i.attribute(L"y").as_uint();
-			info.sizeX = i.attribute(L"w").as_uint();
-			info.sizeY = i.attribute(L"h").as_uint();
+			info.posX = (float)i.attribute(L"x").as_uint();
+			info.posY = (float)i.attribute(L"y").as_uint();
+			info.sizeX = (float)i.attribute(L"w").as_uint();
+			info.sizeY = (float)i.attribute(L"h").as_uint();
 			_fontTextureInfos.emplace(std::make_pair(i.attribute(L"id").as_uint(), info));
 		}
 	}
@@ -374,7 +378,7 @@ bool Texture::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 			vkUnmapMemory(manager->GetDevice(), _uploadBufferMemory);
 
 			//从Buffer copy到Vkimage
-			if (_imageData->blockSize > 0)
+			//if (_imageData->blockSize > 0)
 			{
 				if (_imageData->isCubeMap)
 					Transition(cmdbuf, _imageLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, _imageData->mipLevel, 0, 6);
@@ -400,7 +404,10 @@ bool Texture::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 						region[regionIndex].imageSubresource.layerCount = 1;
 						region[regionIndex].imageOffset = { 0,0,0 };
 						region[regionIndex].imageExtent = { mipWidth ,mipHeight,1 };
-						bufferOffset += SIZE_OF_BC((int32_t)mipWidth, (int32_t)mipHeight, _imageData->blockSize);
+						if (_imageData->blockSize > 0)
+							bufferOffset += SIZE_OF_BC((int32_t)mipWidth, (int32_t)mipHeight, _imageData->blockSize);
+						else
+							bufferOffset += mipWidth * mipHeight;
 						if (mipWidth > 1) mipWidth /= 2;
 						if (mipHeight > 1) mipHeight /= 2;
 						regionIndex++;
@@ -851,12 +858,12 @@ struct Character {
 	int channel = 0;
 };
 
-void GetFontCharacter(stbtt_fontinfo& font ,int& start_codepoint , int& end_codepoint , std::vector<Character>& characters ,float& scale,int& ascent, int& x, int& y,int& channel, uint32_t& fontSize, uint32_t& maxTextureSize, unsigned char* &atlas_data)
+void GetFontCharacter(stbtt_fontinfo& font ,int& start_codepoint , int& end_codepoint , std::vector<Character>& characters ,float scale,int ascent, int& x, int& y,int& channel, uint32_t& fontSize, uint32_t& maxTextureSize, unsigned char* &atlas_data)
 {
 	for (wchar_t c = start_codepoint; c <= end_codepoint; c++)
 	{
-		int c_x1, c_y1, c_width, c_height;
-		stbtt_GetCodepointBitmapBox(&font, c, scale, scale, &c_x1, &c_y1, &c_width, &c_height);
+		int x0, y0, x1, y1;
+		stbtt_GetCodepointBitmapBox(&font, c, scale, scale, &x0, &y0, &x1, &y1);
 
 		int glyph_width, glyph_height, glyph_xoff, glyph_yoff;
 		unsigned char* glyph_bitmap = stbtt_GetCodepointBitmap(
@@ -915,12 +922,13 @@ void GetFontCharacter(stbtt_fontinfo& font ,int& start_codepoint , int& end_code
 		stbtt_GetCodepointHMetrics(&font, c, &advance, &lsb);
 		Character newChar;
 		newChar.font = c;
-		newChar.sizeX = glyph_width;
-		newChar.sizeY = glyph_height;
+		newChar.sizeX = x1 - x0 + 1 ;
+		newChar.sizeY = y1 - y0 + 1 ;
 		newChar.u = x + lsb * scale;
-		newChar.v = y + lsb * scale;
+		newChar.v = y + std::abs(ascent * scale + glyph_yoff - 1);
 		newChar.channel = channel;
 		characters.push_back(newChar);
+
 
 		x += advance * scale;
 
@@ -1141,7 +1149,9 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 	fontDocPath.CorrectionPath();
 	XMLStream::CreatesXMLFile(fontDocPath, doc);
 	auto root = doc.append_child(L"root");
-	root.append_attribute(L"num").set_value(((uint64_t)characters[characters.size() - 1].font) + 1);
+	root.append_attribute(L"num").set_value(characters.size());
+	root.append_attribute(L"width").set_value(maxTextureSize);
+	root.append_attribute(L"height").set_value(maxTextureSize);
 	for (auto i : characters)
 	{
 		auto subNode = root.append_child(L"char");
