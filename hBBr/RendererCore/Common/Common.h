@@ -75,4 +75,6 @@ constexpr std::size_t countof(const T(&)[N]) {
 #define _countof(x) countof(x)
 #endif
 
-
+#ifndef TEXT
+#define TEXT(s) L##s
+#endif

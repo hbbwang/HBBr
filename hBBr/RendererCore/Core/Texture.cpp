@@ -294,8 +294,7 @@ void Texture::GlobalInitialize()
 			info.posY = (float)i.attribute(L"y").as_uint();
 			info.sizeX = (float)i.attribute(L"w").as_uint();
 			info.sizeY = (float)i.attribute(L"h").as_uint();
-			info.scale = (float)i.attribute(L"scale").as_float();
-			info.cy = (float)i.attribute(L"cy").as_uint();
+			//info.scale = (float)i.attribute(L"scale").as_float();
 			_fontTextureInfos.emplace(std::make_pair(i.attribute(L"id").as_uint(), info));
 		}
 	}
@@ -851,8 +850,7 @@ struct Character {
 	//对应字符
 	wchar_t  font;
 	//字体比例，对比字体大小
-	float scale = 0;
-	unsigned int cy = 0;
+	//float scale = 0;
 	//记录UV
 	unsigned int posX = 0;
 	unsigned int posY = 0;
@@ -928,11 +926,12 @@ void GetFontCharacter(stbtt_fontinfo& font ,int& start_codepoint , int& end_code
 		Character newChar;
 		newChar.font = c;
 		newChar.sizeX = x1 - x0 + 1 ;
-		newChar.sizeY = y1 - y0 + 1 ;
+		//newChar.sizeY = y1 - y0 + 1 ;
+		newChar.sizeY = fontSize;
 		newChar.posX = x + lsb * scale;
-		newChar.posY = y + std::abs(ascent * scale + glyph_yoff - 1);
-		newChar.scale = (float)glyph_height / (float)fontSize;
-		newChar.cy = newChar.posY - y;
+		//newChar.posY = y + std::abs(ascent * scale + glyph_yoff - 1);
+		newChar.posY = y;
+		//newChar.scale = (float)glyph_height / (float)fontSize;
 		newChar.channel = channel;
 		characters.push_back(newChar);
 
@@ -1166,8 +1165,7 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath ,boo
 		subNode.append_attribute(L"id").set_value((uint64_t)i.font);
 		subNode.append_attribute(L"x").set_value(i.posX);
 		subNode.append_attribute(L"y").set_value(i.posY);
-		subNode.append_attribute(L"scale").set_value((float)i.scale);
-		subNode.append_attribute(L"cy").set_value(i.cy);
+		//subNode.append_attribute(L"scale").set_value((float)i.scale);
 		subNode.append_attribute(L"w").set_value(i.sizeX);
 		subNode.append_attribute(L"h").set_value(i.sizeY);
 		subNode.append_attribute(L"char").set_value(std::wstring(1, i.font).c_str());

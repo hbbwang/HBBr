@@ -87,8 +87,10 @@ public:
 
 private:
 	void CreatePipeline(HString pipelineTag , HString shaderName);
-	GUIPrimitive* GetPrimitve(HString& tag,GUIDrawState& state , int stateCount,HString pipelineTag);
-	std::vector<GUIVertexData> GetGUIPanel(GUIDrawState& state);
+	void ShowPerformance();
+
+	GUIPrimitive* GetPrimitve(HString& tag,GUIDrawState& state , int stateCount,HString pipelineTag, float x, float y, float w, float h);
+	std::vector<GUIVertexData> GetGUIPanel(GUIDrawState& state, float x, float y, float w, float h);
 	std::shared_ptr<class Buffer>_vertexBuffer;
 	std::unordered_map<HString,GUIPrimitive> _drawList;
 	std::unordered_map<HString, VkPipeline> _guiPipelines;

@@ -25,8 +25,6 @@ struct FontTextureInfo
 	float posY;
 	float sizeX;
 	float sizeY;
-	float scale;
-	float cy;
 };
 
 enum TextureSampler
@@ -129,7 +127,7 @@ public:
 		}
 		else
 		{
-			return &_fontTextureInfos.begin()->second;
+			return &_fontTextureInfos[32];
 		}
 	}
 

@@ -43,6 +43,16 @@ void GUIPass::PassInit()
 	CreatePipeline("Base", "GUIShader");
 }
 
+void GUIPass::ShowPerformance()
+{
+	GUIDrawText("ShowPerf_frame",
+		" Frame " + HString::FromFloat(_renderer->GetFrameRate(), 2) + " ms\n"
+		, 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1)), 20.0f);
+	GUIDrawText("ShowPerf_fps",
+		" FPS " + HString::FromUInt((uint32_t)(1.0f / (float)(_renderer->GetFrameRate() / 1000.0))) 
+		, 0, 20.0f, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1)), 20.0f);
+}
+
 void GUIPass::PassUpdate()
 {
 	const auto& manager = VulkanManager::GetManager();
@@ -51,21 +61,17 @@ void GUIPass::PassUpdate()
 	//Update FrameBuffer
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), {});
 	SetViewport(_currentFrameBufferSize);
-	BeginRenderPass({ 0,0,0,0 }); 
+	BeginRenderPass({ 0,0,0,0 });
 	//Begin...
-	//GUIDrawImage("TestImage", Texture::GetSystemTexture("TestTex"), 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1, 1, 1, 0.95)));
-	GUIDrawText("TestText", L"Hello,GUI文字测试测试!", 0, 0, 200, 200, GUIDrawState( GUIAnchor_TopLeft, false, 
-		glm::vec4(
-			cosf(_renderer->GetGameTime()) * 0.5 + 0.5,
-			sinf(_renderer->GetGameTime()+0.25) * 0.5 + 0.5,
-			tanf(_renderer->GetGameTime()+0.5) * 0.5 + 0.5,
-			1)),
-		35.0f);
+	GUIDrawImage("TestImage", Texture::GetSystemTexture("TestTex"), 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1, 1, 1, 0.95)));
+	ShowPerformance();
 
+	//收集顶点数据一次性使用
+	std::vector<GUIVertexData> vertices;
 	for (auto i : _drawList)
 	{
 		//vertex buffer
-		_vertexBuffer->BufferMapping(i.second.Data.data(), 0, sizeof(GUIVertexData) * i.second.Data.size());
+		vertices.insert(vertices.end(), i.second.Data.begin(), i.second.Data.end());
 		//textures
 		i.second.tex_descriptorSet->UpdateTextureDescriptorSet({ i.second.BaseTexture });
 		uint32_t ubSize = manager->GetMinUboAlignmentSize(sizeof(GUIUniformBuffer));
@@ -80,6 +86,12 @@ void GUIPass::PassUpdate()
 		}
 	}
 
+	//vertex buffer
+	_vertexBuffer->BufferMapping(vertices.data(), 0, sizeof(GUIVertexData) * vertices.size());
+	VkDeviceSize vbOffset = 0;
+	VkBuffer verBuf[] = { _vertexBuffer->GetBuffer() };
+	vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, &vbOffset);
+
 	VkPipeline pipeline = VK_NULL_HANDLE;
 	for (auto i : _drawList)
 	{
@@ -91,11 +103,8 @@ void GUIPass::PassUpdate()
 		}
 		//textures
 		vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 1, 1, &i.second.tex_descriptorSet->GetDescriptorSet(), 0, 0);
-		VkBuffer verBuf[] = { _vertexBuffer->GetBuffer() };
-		VkDeviceSize vbOffset = 0;
-		vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, &vbOffset);
-		uint32_t ubOffset = 0;
 		//vkCmdSetScissor(cmdBuf, 0, 1, &i.second.viewport);
+		uint32_t ubOffset = 0;
 		for (auto s : i.second.States)
 		{
 			//uniform buffers
@@ -106,62 +115,67 @@ void GUIPass::PassUpdate()
 			vbOffset += 6;
 		}
 	}
-
 	//End...
 	EndRenderPass();
 }
 
 void GUIPass::PassReset()
 {
-
 }
 
 void GUIPass::GUIDrawText(HString tag, HString text, float x, float y, float w, float h, GUIDrawState state , float fontSize)
 {
-	state.Translate += glm::vec2(x, y);
-	state.Scale *= glm::vec2(w, h);
-	GUIPrimitive* prim = GetPrimitve(tag, state, text.WLength(), "Base");
-	prim->viewport = { (int)x,(int)y,(uint32_t)w,(uint32_t)h };
+	auto textLength = text.WLength();
+	GUIPrimitive* prim = GetPrimitve(tag, state, textLength, "Base", x, y, w, h);
 	std::vector<GUIVertexData>textMeshes;
 	if (prim->BaseTexture != Texture::GetFontTexture())
 	{
 		prim->BaseTexture = Texture::GetFontTexture();
+		prim->BaseTexture->SetSampler(TextureSampler_Linear_Clamp);
 		prim->tex_descriptorSet->NeedUpdate();
 	}
-
 	//计算每个文字面片位置
 	float tx = 0;
 	float ty = 0;
-	prim->fontCharacter.resize(text.WLength());
-	for (int i = 0; i < text.WLength(); i++)
+	prim->fontCharacter.resize(textLength);
+	for (int i = 0; i < textLength; i++)
 	{
+		auto textChar = text.c_wstr()[i];
+		if (textChar == L'\n')//下一行
+		{
+			tx = 0;
+			ty += fontSize;
+		}
+		prim->fontCharacter[i] = textChar;
 		//文字不存在fixed模式,文字的大小不应该被变形
 		prim->States[i].bFixed = false;
 		//获取文字信息
-		prim->fontCharacter[i] = text.GetWChar(i);
 		auto info = Texture::GetFontInfo(prim->fontCharacter[i]);
 		prim->States[i].uniformBuffer.channel = info->channel;
 		prim->States[i].uniformBuffer.UVSetting = glm::vec4(info->posX, info->posY, info->sizeX, info->sizeY);
 		prim->States[i].uniformBuffer.TextureSize = Texture::GetFontTexture()->GetImageSize().width;
 		//文字像素大小
-		prim->States[i].Scale = glm::vec2(info->sizeX / info->sizeY, 1) * fontSize * info->scale;
+		prim->States[i].Scale = glm::vec2( std::fmax(info->sizeX/info->sizeY,0.25f)  , 1) * fontSize;
+		if (textChar == L' ')
+		{
+			prim->States[i].Scale.x = 10.0f;
+		}
 		//文字按顺序偏移
-		prim->States[i].Translate += glm::vec2(tx, fontSize - prim->States[i].Scale.y);
-		auto newTextMesh = GetGUIPanel(prim->States[i]);
+		prim->States[i].Translate = glm::vec2(tx, ty );
+		auto newTextMesh = GetGUIPanel(prim->States[i], x, y, 1, 1);
 		textMeshes.insert(textMeshes.end(), newTextMesh.begin(), newTextMesh.end());
 		tx += prim->States[i].Scale.x;
 	}
-
 	prim->Data = textMeshes;
 }
 
 void GUIPass::GUIDrawImage(HString tag, Texture* texture, float x, float y, float w, float h, GUIDrawState state)
 {
-	state.Translate += glm::vec2(x, y);
-	state.Scale *= glm::vec2(w, h);
-	GUIPrimitive* prim = GetPrimitve(tag, state, 1, "Base");
-	prim->viewport = { (int)x,(int)y,(uint32_t)w,(uint32_t)h };
-	prim->Data = GetGUIPanel(state);
+	GUIPrimitive* prim = GetPrimitve(tag, state, 1, "Base", x, y, w, h);
+	prim->Data = GetGUIPanel(state, x, y, w, h);
+	prim->States[0].uniformBuffer.channel = -1;
+	prim->States[0].uniformBuffer.UVSetting = glm::vec4(0, 0, 1, 1);
+	prim->States[0].uniformBuffer.TextureSize = 1.0f;
 	if (prim->BaseTexture != texture)
 	{
 		prim->BaseTexture = texture;
@@ -169,7 +183,7 @@ void GUIPass::GUIDrawImage(HString tag, Texture* texture, float x, float y, floa
 	}
 }
 
-std::vector<GUIVertexData> GUIPass::GetGUIPanel(GUIDrawState& state)
+std::vector<GUIVertexData> GUIPass::GetGUIPanel(GUIDrawState& state, float x, float y, float w, float h)
 {
 	std::vector<GUIVertexData> data;
 	data.resize(6);
@@ -182,15 +196,8 @@ std::vector<GUIVertexData> GUIPass::GetGUIPanel(GUIDrawState& state)
 		data[4] = { glm::vec2( 1.0f,	 1.0f),glm::vec2(1.0f, 1.0f),state.Color };
 		data[5] = { glm::vec2(-1.0f,	 1.0f),glm::vec2(0.0f, 1.0f),state.Color };
 	}
-	//data[0].Pos = glm::vec2(-1.0f, -1.0f);// 左上角
-	//data[1].Pos = glm::vec2(1.0f, -1.0f);// 右上角
-	//data[2].Pos = glm::vec2(-1.0f, 1.0f);// 左下角
-	//data[3].Pos = glm::vec2(1.0f, -1.0f);// 右上角
-	//data[4].Pos = glm::vec2(1.0f, 1.0f);// 右下角
-	//data[5].Pos = glm::vec2(-1.0f, 1.0f);// 左下角
-
-	glm::vec2 xy = state.Translate;
-	glm::vec2 wh = state.Scale;
+	glm::vec2 xy = state.Translate + glm::vec2(x, y);
+	glm::vec2 wh = state.Scale * glm::vec2(w, h);
 	if (state.bFixed)
 	{
 		xy /= 100.0f;
@@ -205,12 +212,12 @@ std::vector<GUIVertexData> GUIPass::GetGUIPanel(GUIDrawState& state)
 	if (state.Anchor == GUIAnchor_TopLeft)
 	{
 		wh = wh * 2.0f - 1.0f;
-		data[0].Pos = glm::vec2(-1.0f, -1.0f) + xy;
-		data[1].Pos = glm::vec2(1.0f * wh.x, -1.0f) + xy;
-		data[2].Pos = glm::vec2(-1.0f, 1.0f * wh.y) + xy;
-		data[3].Pos = glm::vec2(1.0f * wh.x, -1.0f) + xy;
-		data[4].Pos = glm::vec2(1.0f * wh.x, 1.0f * wh.y) + xy;
-		data[5].Pos = glm::vec2(-1.0f, 1.0f * wh.y) + xy;
+		data[0].Pos = glm::vec2(-1.0f		, -1.0f) + xy;
+		data[1].Pos = glm::vec2(1.0f * wh.x	, -1.0f) + xy;
+		data[2].Pos = glm::vec2(-1.0f		, 1.0f * wh.y) + xy;
+		data[3].Pos = glm::vec2(1.0f * wh.x	, -1.0f) + xy;
+		data[4].Pos = glm::vec2(1.0f * wh.x	, 1.0f * wh.y) + xy;
+		data[5].Pos = glm::vec2(-1.0f		, 1.0f * wh.y) + xy;
 	}
 	else if (state.Anchor == GUIAnchor_TopCenter)
 	{
@@ -290,10 +297,11 @@ std::vector<GUIVertexData> GUIPass::GetGUIPanel(GUIDrawState& state)
 		data[4].Pos = glm::vec2( 1.0f		,  1.0f) + xy;
 		data[5].Pos = glm::vec2(-1.0f * wh.x,  1.0f) + xy;
 	}
+
 	return data;
 }
 
-GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateCount, HString pipelineTag)
+GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateCount, HString pipelineTag, float x, float y, float w, float h)
 {
 	auto dit = _drawList.find(tag);
 	GUIPrimitive* prim = NULL;
@@ -322,7 +330,7 @@ GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateC
 	{
 		prim->tex_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _texDescriptorSetLayout, 1, 0, VK_SHADER_STAGE_FRAGMENT_BIT));
 	}
-
+	prim->viewport = { (int)x,(int)y,(uint32_t)w,(uint32_t)h };
 	return prim;
 }
 
