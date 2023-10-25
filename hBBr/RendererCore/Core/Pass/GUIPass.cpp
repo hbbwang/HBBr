@@ -158,7 +158,7 @@ void GUIPass::GUIDrawText(HString tag, HString text, float x, float y, float w, 
 		prim->States[i].Scale = glm::vec2( std::fmax(info->sizeX/info->sizeY,0.25f)  , 1) * fontSize;
 		if (textChar == L' ')
 		{
-			prim->States[i].Scale.x = 10.0f;
+			prim->States[i].Scale.x = fontSize;
 		}
 		//文字按顺序偏移
 		prim->States[i].Translate = glm::vec2(tx, ty );
