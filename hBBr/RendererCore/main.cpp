@@ -138,7 +138,7 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	outFontTexturePath = FileSystem::GetRelativePath(outFontTexturePath.c_str());
 	outFontTexturePath = FileSystem::GetProgramPath() + outFontTexturePath;
 	outFontTexturePath.CorrectionPath();
-	Texture::CreateFontTexture(ttfFontPath, outFontTexturePath, true, 16U, 4096U);
+	//Texture::CreateFontTexture(ttfFontPath, outFontTexturePath, true, 16U, 4096U);
 
 	Texture::GlobalInitialize();
 

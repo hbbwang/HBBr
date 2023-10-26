@@ -34,7 +34,10 @@ struct GUIUniformBuffer
 	//x,y,w,h
 	glm::vec4 UVSetting;
 	glm::vec4 Color = glm::vec4(1);
-	float TextureSize = 512;
+	float TextureSizeX = 512;
+	float TextureSizeY = 512;
+	float ScreenSizeX = 512;
+	float ScreenSizeY = 512;
 	int Flags = 0;
 
 	bool operator!=(const GUIUniformBuffer& c) const
@@ -42,7 +45,8 @@ struct GUIUniformBuffer
 		return
 			this->UVSetting != c.UVSetting ||
 			this->Color != c.Color ||
-			this->TextureSize != c.TextureSize ||
+			this->TextureSizeX != c.TextureSizeX ||
+			this->TextureSizeY != c.TextureSizeY ||
 			this->Flags != c.Flags;
 			;
 	}

@@ -162,7 +162,8 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 		//获取文字信息
 		auto info = Texture::GetFontInfo(prim->fontCharacter[i]);
 		prim->States[i].uniformBuffer.UVSetting = glm::vec4(info->posX, info->posY, info->sizeX, info->sizeY);
-		prim->States[i].uniformBuffer.TextureSize = Texture::GetFontTexture()->GetImageSize().width;
+		prim->States[i].uniformBuffer.TextureSizeX = Texture::GetFontTexture()->GetImageSize().width;
+		prim->States[i].uniformBuffer.TextureSizeY = Texture::GetFontTexture()->GetImageSize().width;
 		//文字像素大小
 		if (textChar == L' ')
 		{
@@ -186,7 +187,6 @@ void GUIPass::GUIDrawImage(HString tag, Texture* texture, float x, float y, floa
 	GUIPrimitive* prim = GetPrimitve(tag, state, 1, "Base", x, y, w, h);
 	prim->Data = GetGUIPanel(state, x, y, w, h);
 	prim->States[0].uniformBuffer.UVSetting = glm::vec4(0, 0, 1, 1);
-	prim->States[0].uniformBuffer.TextureSize = 1.0f;
 	if (prim->BaseTexture != texture)
 	{
 		prim->BaseTexture = texture;
@@ -331,6 +331,10 @@ GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateC
 	for (int i = 0; i < stateCount; i++)
 	{
 		prim->States[i] = state;
+		prim->States[i].uniformBuffer.TextureSizeX = 1;
+		prim->States[i].uniformBuffer.TextureSizeY = 1;
+		prim->States[i].uniformBuffer.ScreenSizeX = _currentFrameBufferSize.width;
+		prim->States[i].uniformBuffer.ScreenSizeY = _currentFrameBufferSize.width;
 	}
 
 	if (!prim->ub_descriptorSet)
@@ -342,6 +346,7 @@ GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateC
 		prim->tex_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _texDescriptorSetLayout, 1, 0, VK_SHADER_STAGE_FRAGMENT_BIT));
 	}
 	prim->viewport = { (int)x,(int)y,(uint32_t)w,(uint32_t)h };
+
 	return prim;
 }
 

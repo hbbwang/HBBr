@@ -212,8 +212,9 @@ void Texture::GlobalInitialize()
 	info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info.minLod = 0;
-	info.maxLod = 15;//max 16384
+	info.minLod = -100; 
+	info.maxLod = VK_LOD_CLAMP_NONE;
+	info.compareEnable = false;
 	//info.anisotropyEnable = VK_FALSE;
 	//info.maxAnisotropy = 1.0f;
 	//各项异性采样
@@ -228,28 +229,28 @@ void Texture::GlobalInitialize()
 		info.maxAnisotropy = 1.0f;
 	}
 	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
-	_samplers.emplace(TextureSampler_Linear_Wrap, sampler);
+	_samplers.emplace(TextureSampler_Linear_Wrap, std::move(sampler));
 
 	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
 	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
-	_samplers.emplace(TextureSampler_Linear_Mirror, sampler);
+	_samplers.emplace(TextureSampler_Linear_Mirror, std::move(sampler));
 
 	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
-	_samplers.emplace(TextureSampler_Linear_Clamp, sampler);
+	_samplers.emplace(TextureSampler_Linear_Clamp, std::move(sampler));
 
 	info.magFilter = info.minFilter = VK_FILTER_NEAREST;
 	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
-	_samplers.emplace(TextureSampler_Nearest_Wrap, sampler);
+	_samplers.emplace(TextureSampler_Nearest_Wrap, std::move(sampler));
 
 	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
 	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
-	_samplers.emplace(TextureSampler_Nearest_Mirror, sampler);
+	_samplers.emplace(TextureSampler_Nearest_Mirror, std::move(sampler));
 
 	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
-	_samplers.emplace(TextureSampler_Nearest_Clamp, sampler);
+	_samplers.emplace(TextureSampler_Nearest_Clamp, std::move(sampler));
 
 	//Create BaseTexture
 	auto blackTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Black.dds"));
