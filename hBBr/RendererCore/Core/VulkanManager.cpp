@@ -18,8 +18,6 @@
 #include "Imgui/backends/imgui_impl_sdl3.h"
 #endif
 
-using namespace std;
-
 std::unique_ptr<VulkanManager> VulkanManager::_vulkanManager;
 
 PFN_vkCreateDebugReportCallbackEXT  fvkCreateDebugReportCallbackEXT = VK_NULL_HANDLE;

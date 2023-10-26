@@ -1,9 +1,14 @@
+//Flags
+#define IsFont      0x00000001
+#define FontShadow  0x00000002
+
 //[Flags]EnableShaderDebug;
 cbuffer GUIPass :register(b0)
 {
     float4 UVSetting;
-    float channel;
+    float4 Color;
     float TextureSize;
+    int Flags;
 };
 
 //[InputLayout]
@@ -35,26 +40,24 @@ VSToPS VSMain(VSInput IN)
 
 float4 PSMain(VSToPS IN) :SV_Target0
 {   
+    half4 result = 1;
     //return IN.Color;
     half4 baseTexture = BaseTexture.Sample(BaseTextureSampler,IN.UV * (UVSetting.zw / TextureSize) + (UVSetting.xy / TextureSize) );
-    if(channel == 0)
+
+    if(Flags & IsFont)
     {
-        return baseTexture.r * IN.Color;
-    }
-    else if(channel == 1)
-    {
-        return baseTexture.g * IN.Color;
-    }
-    else if(channel == 2)
-    {
-        return baseTexture.b * IN.Color;
-    }
-    else if(channel == 3)
-    {
-        return baseTexture.a * IN.Color;
+        result = baseTexture.r;
+        result = smoothstep(0.4f , 1.0f , result) * 5.f;
+        if(! (Flags & FontShadow) )
+        {
+            result.rgb = 1.0f;
+        }
     }
     else
-    {
-        return baseTexture * IN.Color;
+    {    
+        result = baseTexture;
     }
+    result *= IN.Color * Color;
+
+    return result;
 }

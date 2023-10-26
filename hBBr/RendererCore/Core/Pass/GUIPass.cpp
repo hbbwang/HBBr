@@ -46,10 +46,10 @@ void GUIPass::PassInit()
 void GUIPass::ShowPerformance()
 {
 	GUIDrawText("ShowPerf_frame",
-		" Frame " + HString::FromFloat(_renderer->GetFrameRate(), 2) + " ms\n"
+		HString("Frame " + HString::FromFloat(_renderer->GetFrameRate(), 2) + " ms\n").c_wstr()
 		, 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1)), 20.0f);
 	GUIDrawText("ShowPerf_fps",
-		" FPS " + HString::FromUInt((uint32_t)(1.0f / (float)(_renderer->GetFrameRate() / 1000.0))) 
+		HString("FPS " + HString::FromUInt((uint32_t)(1.0f / (float)(_renderer->GetFrameRate() / 1000.0)))).c_wstr()
 		, 0, 20.0f, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1)), 20.0f);
 }
 
@@ -65,6 +65,10 @@ void GUIPass::PassUpdate()
 	//Begin...
 	GUIDrawImage("TestImage", Texture::GetSystemTexture("TestTex"), 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1, 1, 1, 0.95)));
 	ShowPerformance();
+
+	GUIDrawText("fonttest",
+		L"ABCD测试你好123我靠你妈的。 "
+		, 0, 20.0f, 200, 200, GUIDrawState(GUIAnchor_CenterCenter, false, glm::vec4(1)), 20.0f);
 
 	//收集顶点数据一次性使用
 	std::vector<GUIVertexData> vertices;
@@ -123,9 +127,15 @@ void GUIPass::PassReset()
 {
 }
 
-void GUIPass::GUIDrawText(HString tag, HString text, float x, float y, float w, float h, GUIDrawState state , float fontSize)
+void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, float w, float h, GUIDrawState state , float fontSize)
 {
-	auto textLength = text.WLength();
+	auto textLength = wcslen(text);
+	if (textLength <= 0)
+	{
+		return;
+	}
+	state.uniformBuffer.Color = glm::vec4(1,1,1,2);
+	state.uniformBuffer.Flags = IsFont;
 	GUIPrimitive* prim = GetPrimitve(tag, state, textLength, "Base", x, y, w, h);
 	std::vector<GUIVertexData>textMeshes;
 	if (prim->BaseTexture != Texture::GetFontTexture())
@@ -140,7 +150,7 @@ void GUIPass::GUIDrawText(HString tag, HString text, float x, float y, float w, 
 	prim->fontCharacter.resize(textLength);
 	for (int i = 0; i < textLength; i++)
 	{
-		auto textChar = text.c_wstr()[i];
+		auto textChar = text[i];
 		if (textChar == L'\n')//下一行
 		{
 			tx = 0;
@@ -151,20 +161,22 @@ void GUIPass::GUIDrawText(HString tag, HString text, float x, float y, float w, 
 		prim->States[i].bFixed = false;
 		//获取文字信息
 		auto info = Texture::GetFontInfo(prim->fontCharacter[i]);
-		prim->States[i].uniformBuffer.channel = info->channel;
 		prim->States[i].uniformBuffer.UVSetting = glm::vec4(info->posX, info->posY, info->sizeX, info->sizeY);
 		prim->States[i].uniformBuffer.TextureSize = Texture::GetFontTexture()->GetImageSize().width;
 		//文字像素大小
-		prim->States[i].Scale = glm::vec2( std::fmax(info->sizeX/info->sizeY,0.25f)  , 1) * fontSize;
 		if (textChar == L' ')
 		{
-			prim->States[i].Scale.x = fontSize;
+			prim->States[i].Scale.x = fontSize / 2.0f;
 		}
-		//文字按顺序偏移
+		else
+		{
+			prim->States[i].Scale = glm::vec2(info->sizeX / info->sizeY, 1) * fontSize;
+		}
+		//文字按顺序偏移 
 		prim->States[i].Translate = glm::vec2(tx, ty );
 		auto newTextMesh = GetGUIPanel(prim->States[i], x, y, 1, 1);
 		textMeshes.insert(textMeshes.end(), newTextMesh.begin(), newTextMesh.end());
-		tx += prim->States[i].Scale.x;
+		tx += prim->States[i].Scale.x + 1;
 	}
 	prim->Data = textMeshes;
 }
@@ -173,7 +185,6 @@ void GUIPass::GUIDrawImage(HString tag, Texture* texture, float x, float y, floa
 {
 	GUIPrimitive* prim = GetPrimitve(tag, state, 1, "Base", x, y, w, h);
 	prim->Data = GetGUIPanel(state, x, y, w, h);
-	prim->States[0].uniformBuffer.channel = -1;
 	prim->States[0].uniformBuffer.UVSetting = glm::vec4(0, 0, 1, 1);
 	prim->States[0].uniformBuffer.TextureSize = 1.0f;
 	if (prim->BaseTexture != texture)

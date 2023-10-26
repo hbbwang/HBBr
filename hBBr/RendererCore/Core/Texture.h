@@ -20,7 +20,6 @@
 struct FontTextureInfo
 {
 	//Font data
-	uint8_t channel;
 	float posX;
 	float posY;
 	float sizeX;

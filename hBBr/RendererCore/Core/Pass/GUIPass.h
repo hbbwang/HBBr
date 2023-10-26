@@ -4,6 +4,11 @@
 #include <unordered_map>
 #include "PassBase.h"
 #include "HGuid.h"
+
+//GUI Flags
+#define IsFont      0x00000001
+#define FontShadow  0x00000002
+
 enum GUIAnchor
 {	
 	GUIAnchor_TopLeft,
@@ -27,18 +32,18 @@ struct GUIVertexData
 struct GUIUniformBuffer
 {
 	//x,y,w,h
-	alignas(16)
 	glm::vec4 UVSetting;
-	alignas(4)
-	float channel = -1;
-	alignas(4)
+	glm::vec4 Color = glm::vec4(1);
 	float TextureSize = 512;
+	int Flags = 0;
 
 	bool operator!=(const GUIUniformBuffer& c) const
 	{
-		return 
-			this->UVSetting != c.UVSetting || 
-			this->channel != c.channel
+		return
+			this->UVSetting != c.UVSetting ||
+			this->Color != c.Color ||
+			this->TextureSize != c.TextureSize ||
+			this->Flags != c.Flags;
 			;
 	}
 };
@@ -83,7 +88,7 @@ public:
 	virtual void PassReset()override;
 
 	void GUIDrawImage(HString tag, Texture* texture, float x, float y, float w, float h,GUIDrawState state);
-	void GUIDrawText(HString tag, HString text, float x, float y, float w, float h, GUIDrawState state , float fontSize = 20);
+	void GUIDrawText(HString tag, const wchar_t* text, float x, float y, float w, float h, GUIDrawState state , float fontSize = 20);
 
 private:
 	void CreatePipeline(HString pipelineTag , HString shaderName);

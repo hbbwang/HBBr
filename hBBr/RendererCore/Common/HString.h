@@ -24,6 +24,7 @@
 #include "glm/glm.hpp"
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <windows.h>
 #pragma comment(lib, "comsuppw.lib")
 #define strcasecmp(str1, str2) _stricmp(str1, str2)
