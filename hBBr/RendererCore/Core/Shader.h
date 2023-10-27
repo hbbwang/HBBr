@@ -13,6 +13,15 @@ enum class MPType : uint8_t
 	Float4 = 4
 };
 
+enum class MTType : uint8_t
+{
+	Unknow = 0,
+	Texture2D = 1,
+	Texture3D = 2,
+	TextureCube = 3,
+	TextureArray = 4
+};
+
 enum class ShaderType
 {
 	VertexShader = 0,
@@ -35,19 +44,31 @@ struct ShaderCacheHeader
 	uint8_t vertexInput[6] = {0,0,0,0,0,0};
 	//Shader parameter count
 	uint8_t shaderParameterCount = 0;
+	//Shader texture count
+	uint8_t shaderTextureCount = 0;
 };
 
 struct ShaderParameterInfo
 {
 	MPType type;
-	char name[32];
+	char name[32]="\0";
 	glm::vec4 defaultValue;
+	uint16_t index = 0;
+};
+
+struct ShaderTextureInfo
+{
+	MPType type;
+	char name[32] = "\0";
+	char defaultTexture[16];//systemTexture
+	uint8_t index = 0;
 };
 
 struct ShaderCache
 {
 	ShaderCacheHeader header;
 	std::vector<ShaderParameterInfo> params;
+	std::vector<ShaderTextureInfo> texs;
 	//
 	ShaderType shaderType;
 	VkShaderModule shaderModule;
@@ -55,6 +76,9 @@ struct ShaderCache
 	HString shaderPath;
 	VkPipelineShaderStageCreateInfo shaderStageInfo={};
 	uint64_t shaderCacheIndex = 0;
+	//Default 默认参数模板
+	std::vector<std::shared_ptr<struct MaterialParameterInfo>>  pi;
+	std::vector<std::shared_ptr<struct MaterialTextureInfo>> ti;
 };
 
 class Shader

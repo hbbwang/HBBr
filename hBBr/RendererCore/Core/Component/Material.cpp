@@ -65,62 +65,139 @@ Material* Material::LoadMaterial(HGUID guid)
 		auto psCache = Shader::_psShader[mat->_primitive->psShader];
 		mat->_primitive->inputLayout = VertexFactory::VertexInput::BuildLayout(vsCache.header.vertexInput);
 		//Parameters
-		auto parameters = root.child(L"Parameters");
-		int paramCount = 0;
-		for (auto i = parameters.first_child(); i != NULL; i = i.next_sibling())
 		{
-			paramCount++;
-		}
-		mat->_paramterInfos.reserve(paramCount);
-		mat->_primitive->uniformBuffer.reserve( paramCount);
-		int alignmentFloat4 = 0; // float4 对齐
-		glm::vec4 param = glm::vec4(0);
-		uint32_t beginPos = 0;
-		paramCount = 0;
-		for (auto i = parameters.first_child(); i != NULL; i = i.next_sibling())
-		{
-			MaterialParameterInfo info = {};
-			info.beginPos = beginPos;
-			HString value;
-			int type;
-			XMLStream::LoadXMLAttributeString(i, L"name", info.name);
-			//保证Shader的材质参数 和 材质文件的参数信息一致
-			HString shaderParamName = psCache.params[paramCount].name;
-			if (shaderParamName != info.name)
+			auto parameters = root.child(L"Parameters");
+			//primitive参数的长度以shader为主
+			mat->_primitive->_paramterInfos.resize(psCache.header.shaderParameterCount);
+			mat->_primitive->uniformBuffer.resize(psCache.header.shaderParameterCount);
+			//初始化
+			for (int i = 0; i < psCache.header.shaderTextureCount; i++)
 			{
-				continue;
+				mat->_primitive->_paramterInfos[i] = *psCache.pi[i];
+				mat->_primitive->uniformBuffer[i] = psCache.pi[i]->value;
 			}
-			XMLStream::LoadXMLAttributeInt(i, L"type", type);
-			info.type = (MPType)type;
-			XMLStream::LoadXMLAttributeString(i, L"value", value);
-			XMLStream::LoadXMLAttributeString(i, L"ui", info.ui);
-			//
-			auto splitValue = value.Split(",");
-			if (alignmentFloat4 + splitValue.size() > 4)
+			glm::vec4 param = glm::vec4(0);
+			int alignmentFloat4 = 0; // float4 对齐
+			uint32_t arrayIndex = 0;
+			int paramIndex = 0;
+			for (auto i = parameters.first_child(); i != NULL; i = i.next_sibling())
 			{
-				mat->_primitive->uniformBuffer.push_back(param);
-				alignmentFloat4 = 0;
-				param = glm::vec4(0);
-			}
-			for (int i = 0; i < splitValue.size(); i++)
-			{
-				beginPos ++ ;
-				param[alignmentFloat4] = (float)HString::ToDouble(splitValue[i]);
-				alignmentFloat4++;
-				if (alignmentFloat4 >= 4)
+				int type;
+				XMLStream::LoadXMLAttributeInt(i, L"type", type);
+				HString matParamName;
+				XMLStream::LoadXMLAttributeString(i, L"name", matParamName);
+				//从shader中查找是否存在相同参数(名字&类型)
+				auto it = std::find_if(psCache.params.begin(), psCache.params.end(), [type , matParamName](ShaderParameterInfo& info) {
+					return matParamName == info.name && type == (int)info.type;
+				});
+				if (it != psCache.params.end())
 				{
-					mat->_primitive->uniformBuffer.push_back(param);
-					alignmentFloat4 = 0;
-					param = glm::vec4(0);
+					MaterialParameterInfo info = {};
+					//name
+					info.name = matParamName;
+					//type
+					info.type = (MPType)type;
+					//ui
+					XMLStream::LoadXMLAttributeString(i, L"ui", info.ui);
+					//value
+					HString value;
+					XMLStream::LoadXMLAttributeString(i, L"value", value);
+					auto splitValue = value.Split(",");
+					if (alignmentFloat4 + splitValue.size() > 4)//超出部分直接进行填充
+					{
+						mat->_primitive->uniformBuffer[arrayIndex] = (param);
+						alignmentFloat4 = 0;
+						param = glm::vec4(0);
+						info.arrayIndex = arrayIndex;
+						arrayIndex++;
+					}
+					info.vec4Index = alignmentFloat4;
+					for (int i = 0; i < splitValue.size(); i++)
+					{
+						param[alignmentFloat4] = (float)HString::ToDouble(splitValue[i]);
+						alignmentFloat4++;
+						if (alignmentFloat4 >= 4)
+						{
+							mat->_primitive->uniformBuffer[arrayIndex] = (param);
+							alignmentFloat4 = 0;
+							param = glm::vec4(0);
+							info.arrayIndex = arrayIndex;
+							arrayIndex++;
+						}
+					}
+					mat->_primitive->_paramterInfos[paramIndex] = (info);
+					paramIndex++;
 				}
 			}
-			mat->_paramterInfos.push_back(info);
-			paramCount++;
+			auto anlignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(sizeof(glm::vec4) * mat->_primitive->uniformBuffer.size());
+			mat->_primitive->uniformBufferSize = anlignmentSize;
 		}
-		auto anlignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(sizeof(glm::vec4) * mat->_primitive->uniformBuffer.size());
-		mat->_primitive->uniformBufferSize = anlignmentSize;
-		//
 		
+		//Textures
+		{
+			auto textures = root.child(L"Textures");
+			int texCount = 0;
+			//primitive参数的长度以shader为主
+			mat->_primitive->_textureInfos.reserve(psCache.header.shaderTextureCount);
+			mat->_primitive->textures.resize(psCache.header.shaderTextureCount);
+			//初始化
+			for (int i = 0; i < psCache.header.shaderTextureCount; i++)
+			{
+				mat->_primitive->_textureInfos.push_back(*psCache.ti[i]);
+				mat->_primitive->SetTexture(i, Texture::GetSystemTexture(psCache.texs[i].defaultTexture));
+			}
+			//赋值
+			for (auto i = textures.first_child(); i != NULL; i = i.next_sibling())
+			{
+				int type;
+				XMLStream::LoadXMLAttributeInt(i, L"type", type);
+				HString matParamName;
+				XMLStream::LoadXMLAttributeString(i, L"name", matParamName);
+				//从shader中查找是否存在相同参数(名字&类型)
+				auto it = std::find_if(psCache.texs.begin(), psCache.texs.end(), [type, matParamName](ShaderTextureInfo& info) {
+					return matParamName == info.name && type == (int)info.type;
+					});
+				if (it != psCache.texs.end())
+				{
+					MaterialTextureInfo info = {};
+					//name
+					info.name = matParamName;
+					//type
+					info.type = (MTType)type;
+					//index
+					info.index = it->index;
+					//ui
+					XMLStream::LoadXMLAttributeString(i, L"ui", info.ui);
+					//value
+					HString value;
+					XMLStream::LoadXMLAttributeString(i, L"value", value);
+					HGUID guid;
+					StringToGUID(value.c_str(), &guid);
+					if (!guid.isValid())
+					{
+						MessageOut(HString(("Material load texture failed : ") + value).c_str(), false, false, "255,0,0");
+						Texture::GetSystemTexture(it->defaultTexture);
+						mat->_primitive->SetTexture(it->index, Texture::GetSystemTexture(it->defaultTexture));
+					}
+					else
+					{
+						if (info.type == MTType::Texture2D)
+						{
+							auto asset = ContentManager::Get()->GetAsset<Texture>(guid, AssetType::Texture2D);
+							mat->_primitive->SetTexture(it->index, asset);
+						}					
+					}
+					mat->_primitive->_textureInfos.push_back(info);
+				}
+				else
+				{
+
+				}
+			}
+
+		}
+		//
+
 		PrimitiveProxy::GetNewMaterialPrimitiveIndex(mat->_primitive.get());
 		PrimitiveProxy::AddMaterialPrimitive( mat->_primitive.get());
 

@@ -156,6 +156,7 @@ public:
 
 	static void AddSystemTexture(HString tag, Texture* tex);
 
+	//获取渲染系统纹理,如果查找失败则返回第一张
 	static Texture* GetSystemTexture(HString tag);
 
 	//通过ttf生成dds纹理
@@ -180,6 +181,8 @@ private:
 
 	bool _bUploadToGPU = false;
 	bool _bNoMemory = false;
+
+	//Vulkan object
 	VkImage _image;
 	VkImageView _imageView;
 	VkDeviceMemory _imageViewMemory;
@@ -190,7 +193,8 @@ private:
 	VkExtent2D _imageSize;
 	VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	VkSampler _sampler;
-	//static std::unordered_map<HGUID, Texture> _all_textures;
+
+	//Image data
 	ImageData* _imageData = NULL;
 
 	//Upload object

@@ -31,6 +31,11 @@ struct VkGraphicsPipelineCreateInfoCache
 	VkPipelineDepthStencilStateCreateInfo			depthStencilInfo{};
 	//Stages
 	std::vector<VkPipelineShaderStageCreateInfo>	stages;
+
+	bool bHasMaterialParameter = false;
+
+	bool bHasMaterialTexture = false;
+	
 };
 
 enum ColorWriteMask
@@ -221,7 +226,12 @@ struct PipelineObject
 {
 	VkPipeline	pipeline;
 
+	VkPipelineLayout layout;
+
 	PipelineType pipelineType;
+
+	bool bHasMaterialParameter = false;
+	bool bHasMaterialTexture = false;
 
 	~PipelineObject();
 };
@@ -231,15 +241,19 @@ struct PipelineIndex
 	uint64_t vsIndex;
 	uint64_t psIndex;
 	uint64_t varients;
-
+	uint32_t layout;
 	bool operator<(const PipelineIndex& id) const {
-		return (vsIndex < id.vsIndex) && (psIndex < id.psIndex);
+		return (vsIndex < id.vsIndex) 
+			&& (psIndex < id.psIndex) 
+			&& (varients < id.varients) 
+			&& (layout < id.layout);
 	}
 
 	bool operator==(const PipelineIndex& id) const {
 		return (vsIndex == id.vsIndex)
 			&& (psIndex == id.psIndex)
-			&& (varients == id.varients);
+			&& (varients == id.varients)
+			&& (layout == id.layout);
 	}
 };
 
@@ -270,7 +284,10 @@ public:
 	static void SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache vs, ShaderCache ps);
 
 	//Graphics pipeline setting the last step
-	static PipelineObject* CreatePipelineObject(VkGraphicsPipelineCreateInfoCache& createInfo,VkPipelineLayout layout, VkRenderPass renderPass, PipelineIndex pipelineIndex, uint32_t subpassCount = 1, PipelineType pipelineType = PipelineType::Graphics);
+	static PipelineObject* CreatePipelineObject(
+		VkGraphicsPipelineCreateInfoCache& createInfo,VkPipelineLayout layout, 
+		VkRenderPass renderPass, PipelineIndex pipelineIndex, 
+		uint32_t subpassCount = 1, PipelineType pipelineType = PipelineType::Graphics);
 
 	static PipelineObject* GetGraphicsPipelineMap(PipelineIndex index);
 

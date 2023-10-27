@@ -158,6 +158,7 @@ VulkanManager::~VulkanManager()
 #ifdef IS_EDITOR
 	ImGui::DestroyContext();
 #endif
+	DestroyDescriptorSetLayout(_descriptorSetLayout_tex);
 	DestroyDescriptorPool(_descriptorPool);
 	DestroyCommandPool();
 	if (_bDebugEnable)
@@ -1883,6 +1884,15 @@ void VulkanManager::FreeDescriptorSet(VkDescriptorPool pool, std::vector<VkDescr
 	descriptorSet.clear();
 }
 
+void VulkanManager::FreeDescriptorSet(VkDescriptorPool pool, VkDescriptorSet& descriptorSet)
+{
+	if (descriptorSet != VK_NULL_HANDLE)
+	{
+		vkFreeDescriptorSets(_device, pool, 1, &descriptorSet);
+		descriptorSet = VK_NULL_HANDLE;
+	}
+}
+
 void VulkanManager::CreateVkSemaphore(VkSemaphore& semaphore)
 {
 	VkSemaphoreCreateInfo semaphoreCreateInfo = {};
@@ -2448,6 +2458,30 @@ void VulkanManager::UpdateBufferDescriptorSetAll(DescriptorSet* descriptorSet, u
 			}		
 			vkUpdateDescriptorSets(_device, _swapchainBufferCount, descriptorWrite.data(), 0, VK_NULL_HANDLE);
 		}
+	}
+}
+
+void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture*> textures)
+{
+	const uint32_t count = (uint32_t)textures.size();
+	std::vector<VkWriteDescriptorSet> descriptorWrite(count);
+	std::vector<VkDescriptorImageInfo> imageInfo(count);
+	for (uint32_t o = 0; o < count; o++)
+	{
+		imageInfo[o] = {};
+		imageInfo[o].sampler = textures[o]->GetSampler();
+		imageInfo[o].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo[o].imageView = textures[o]->GetTextureView();
+		descriptorWrite[o] = {};
+		descriptorWrite[o].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite[o].dstSet = descriptorSet;
+		descriptorWrite[o].dstBinding = o;
+		descriptorWrite[o].dstArrayElement = 0;
+		descriptorWrite[o].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorWrite[o].descriptorCount = 1;
+		descriptorWrite[o].pBufferInfo = VK_NULL_HANDLE;
+		descriptorWrite[o].pImageInfo = &imageInfo[o]; // Optional
+		descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE; // Optional
 	}
 }
 

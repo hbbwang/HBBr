@@ -350,7 +350,7 @@ Texture* Texture::GetSystemTexture(HString tag)
 	{
 		return it->second;
 	}
-	return NULL;
+	return _system_textures.begin()->second;
 }
 
 bool Texture::CopyBufferToTexture(VkCommandBuffer cmdbuf)

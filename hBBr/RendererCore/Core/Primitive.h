@@ -6,6 +6,28 @@
 #include "Component/Transform.h"
 #include "Texture.h"
 #include "Pipeline.h"
+#include "Shader.h"
+
+struct MaterialParameterInfo
+{
+	MPType type;
+	HString name, ui;
+	//shader uniform buffer 以vec4数组储存,这个索引用来读取数组对应的vec4
+	uint32_t arrayIndex;
+	//配合上面索引获取到的vec4,该索引用来表示该参数处于vec4的什么位置
+	uint32_t vec4Index;
+
+	glm::vec4 value;
+};
+
+struct MaterialTextureInfo
+{
+	MTType type;
+	HString name, ui;
+	uint32_t index = 0;
+
+	HString value;
+};
 
 //每个面的数据
 struct ModelPrimitive
@@ -38,8 +60,60 @@ struct ModelPrimitive
 	uint64_t					ibSize = 0;
 };
 
-struct MaterialPrimitive
+class MaterialPrimitive
 {
+	friend class Material;
+public:
+
+	//Get material instance texture descriptor set.
+	//If material instance number of textures is 0,it will return NULL.
+	HBBR_INLINE VkDescriptorSet GetDescriptorSet() {
+		auto manager = VulkanManager::GetManager();
+		if (textures.size() > 0)
+		{
+			if (_descriptorSet_tex == VK_NULL_HANDLE)
+			{
+				//Create DescriptorSet
+				manager->AllocateDescriptorSet(manager->GetDescriptorPool(), manager->GetImageDescriptorSetLayout(), _descriptorSet_tex);
+				_needUpdateDescriptorSet_tex = true;
+			}
+			return _descriptorSet_tex;
+		}
+		else
+		{
+			//Free DescriptorSet
+			if (_descriptorSet_tex != VK_NULL_HANDLE)
+			{
+				manager->FreeDescriptorSet(manager->GetDescriptorPool(), _descriptorSet_tex);
+				_descriptorSet_tex = VK_NULL_HANDLE;
+			}
+			return VK_NULL_HANDLE;
+		}
+	}
+
+	HBBR_INLINE const bool NeedUpdateTexture()const
+	{
+		return _needUpdateDescriptorSet_tex;
+	}
+
+	HBBR_INLINE std::vector<class Texture*> GetTextures() {
+		return textures;
+	}
+
+	void SetTexture(int index, class Texture* newTexture);
+
+	void SetTexture(HString textureName, class Texture* newTexture);
+
+	~MaterialPrimitive()
+	{
+		if (_descriptorSet_tex != VK_NULL_HANDLE)
+		{
+			std::vector<VkDescriptorSet> sets = { _descriptorSet_tex };
+			VulkanManager::GetManager()->FreeDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), sets);
+			_descriptorSet_tex = VK_NULL_HANDLE;
+		}
+	}
+
 	//Graphics用的什么vs
 	HString vsShader = "BasePassTemplate";
 
@@ -60,10 +134,6 @@ struct MaterialPrimitive
 	Pass passUsing;
 
 	//参数
-
-	//纹理贴图
-	std::vector<Texture*> textures;
-
 	//Shader参数
 	std::vector<glm::vec4> uniformBuffer;
 
@@ -71,6 +141,20 @@ struct MaterialPrimitive
 
 	//变体开关
 	uint64_t varients = 0;
+
+	std::vector<MaterialParameterInfo> _paramterInfos;
+
+	std::vector<MaterialTextureInfo> _textureInfos;
+private:
+
+	//纹理贴图
+	std::vector<class Texture*> textures;
+
+	//Image DescriptorSet
+	VkDescriptorSet _descriptorSet_tex;
+
+	bool _needUpdateDescriptorSet_tex;
+
 };
 
 class PrimitiveProxy

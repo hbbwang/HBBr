@@ -32,6 +32,9 @@ PipelineObject* PipelineManager::CreatePipelineObject(VkGraphicsPipelineCreateIn
 	//createInfo.graphicsName = pipelineName;
 	std::unique_ptr<PipelineObject> newPSO = std::make_unique<PipelineObject>();
 	newPSO->pipelineType = pipelineType;
+	newPSO->layout = layout;
+	newPSO->bHasMaterialParameter = createInfo.bHasMaterialParameter;
+	newPSO->bHasMaterialTexture = createInfo.bHasMaterialTexture;
 	SetPipelineLayout(createInfo, layout);
 	if (pipelineType == PipelineType::Graphics)
 	{
@@ -183,16 +186,14 @@ void PipelineManager::SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& creat
 
 void PipelineManager::SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache vs, ShaderCache ps)
 {
-	//set shader
-	//createInfo.CreateInfo.stageCount = _countof(shader_stage);
-	//createInfo.CreateInfo.pStages = shader_stage;
-
 	createInfo.stages.push_back(vs.shaderStageInfo);
 	createInfo.stages.push_back(ps.shaderStageInfo);
 
 	createInfo.CreateInfo.stageCount = (uint32_t)createInfo.stages.size();
 	createInfo.CreateInfo.pStages = createInfo.stages.data();
 
+	createInfo.bHasMaterialParameter = vs.params.size() > 0 && ps.params.size() > 0;
+	createInfo.bHasMaterialTexture = vs.texs.size() > 0 && ps.texs.size() > 0;
 }
 
 void PipelineManager::BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCache& createInfo, VkRenderPass renderPass, uint32_t subpassIndex, VkPipeline& pipelineObj)
@@ -221,10 +222,6 @@ void PipelineManager::BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCac
 	//-----------------------------------------------------------------------------------DepthStencilState
 	VkPipelineDepthStencilStateCreateInfo depthInfo = {};
 	depthInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-	// 
-	//set shader
-	//info.stageCount = _countof(shader_stage);
-	//info.pStages = shader_stage;
 	//
 	createInfo.CreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	createInfo.CreateInfo.flags = 0;

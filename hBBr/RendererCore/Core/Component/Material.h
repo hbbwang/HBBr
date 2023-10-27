@@ -5,19 +5,11 @@
 #include "Primitive.h"
 #include "Resource/HGuid.h"
 #include "XMLStream.h"
-#include "Shader.h"
 
 #include <unordered_map>
 #include <vector>
 
 #define DefaultMaterialGuid "61A147FF-32BD-48EC-B523-57BC75EB16BA"
-
-struct MaterialParameterInfo
-{
-	MPType type;
-	HString name, ui;
-	uint32_t beginPos;
-};
 
 class Material
 {
@@ -34,11 +26,9 @@ public:
 
 	HBBR_API HBBR_INLINE HGUID GetGUID()const { return _guid; }
 
-	HBBR_API HBBR_INLINE static Material* GetDefaultMaterial()
-	{	
-		return LoadMaterial(HGUID(DefaultMaterialGuid));
+	HBBR_INLINE std::vector<class Texture*> GetTextures() {
+		return _primitive->GetTextures();
 	}
-
 
 private:
 
@@ -48,5 +38,4 @@ private:
 
 	HGUID _guid;
 
-	std::vector<MaterialParameterInfo> _paramterInfos;
 };

@@ -13,7 +13,7 @@
 #pragma region OpaquePass
 BasePass::~BasePass()
 {
-	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout);
+	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_m_t);
 }
 
 void BasePass::PassInit()
@@ -24,22 +24,43 @@ void BasePass::PassInit()
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetFormat() , VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 	AddSubpass({}, { 0 }, 1);
 	CreateRenderPass();
-	//DescriptorSet
+	//Texture DescriptorSet
+	auto manager = VulkanManager::GetManager();
 	_opaque_descriptorSet_pass.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1, sizeof(PassUniformBuffer)));
 	_opaque_descriptorSet_obj.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1));
 	_opaque_descriptorSet_mat.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1));
 	_opaque_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
 	_opaque_indexBuffer.reset(new Buffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT));
-	VulkanManager::GetManager()->CreatePipelineLayout(
+	manager->CreatePipelineLayout(
 		{
-			_opaque_descriptorSet_pass->GetDescriptorSetLayout() ,
+			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
 			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
-			_opaque_descriptorSet_mat->GetDescriptorSetLayout()
+			_opaque_descriptorSet_mat->GetDescriptorSetLayout(),
+			manager->GetImageDescriptorSetLayout()
 		}
-	, _pipelineLayout);
+	, _pipelineLayout_p_o_m_t);
+	manager->CreatePipelineLayout(
+		{
+			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_mat->GetDescriptorSetLayout(),
+		}
+	, _pipelineLayout_p_o_m);
+	manager->CreatePipelineLayout(
+		{
+			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
+		}
+	, _pipelineLayout_p_o);
+	manager->CreatePipelineLayout(
+		{
+			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
+			manager->GetImageDescriptorSetLayout()
+		}
+	, _pipelineLayout_p_o_t);
 	//Pass Uniform总是一尘不变的,并且我们用的是Dynamic uniform buffer ,所以只需要更新一次所有的DescriptorSet即可。
 	_opaque_descriptorSet_pass->UpdateDescriptorSetAll(sizeof(PassUniformBuffer));
-
 	_passName = "Opaque Render Pass";
 }
 
@@ -80,9 +101,12 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 	uint32_t objectUboOffset = 0;
 	std::vector<uint32_t> matBufferOffset;
 	std::vector<uint32_t> matBufferSize;
-	PipelineObject* pipelineObj = NULL;
+	uint32_t textureDescriptorCount = 0;
+	pipelineTemps.clear();
 	//Reset buffer
 	{
+		auto& matPrim = PrimitiveProxy::GetMaterialPrimitives((uint32_t)p);
+
 		bool bUpdateObjUb = false;
 		//Update pass uniform buffers
 		{
@@ -90,14 +114,14 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 			pass->BufferMapping(&passUniformBuffer, 0, sizeof(PassUniformBuffer));
 		}
 		uint32_t objectCount = 0;
-		for (auto m : PrimitiveProxy::GetMaterialPrimitives((uint32_t)p))
+		for (auto m : matPrim)
 		{
 			//Get Pipeline
-			pipelineObj = PipelineManager::GetGraphicsPipelineMap(m->graphicsIndex);
+			auto pipelineObj = PipelineManager::GetGraphicsPipelineMap(m->graphicsIndex);
 			if (pipelineObj == NULL)
 			{
-				auto vsCache = Shader::_vsShader[m->vsShader];
-				auto psCache = Shader::_psShader[m->psShader];
+				auto& vsCache = Shader::_vsShader[m->vsShader];
+				auto& psCache = Shader::_psShader[m->psShader];
 				VkGraphicsPipelineCreateInfoCache pipelineCreateInfo = {};
 				PipelineManager::SetColorBlend(pipelineCreateInfo, false);
 				PipelineManager::SetColorBlend(pipelineCreateInfo, false);
@@ -106,9 +130,29 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 				PipelineManager::SetVertexInput(pipelineCreateInfo, m->inputLayout);
 				PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, vsCache, psCache);
 				//Setting pipeline end
-				pipelineObj = PipelineManager::CreatePipelineObject(pipelineCreateInfo, _pipelineLayout,
+				VkPipelineLayout pipelineLayout;
+				if (pipelineCreateInfo.bHasMaterialTexture)
+				{
+					if (pipelineCreateInfo.bHasMaterialParameter > 0)
+						pipelineLayout = _pipelineLayout_p_o_m_t;
+					else
+						pipelineLayout = _pipelineLayout_p_o_t;
+				}
+				else
+				{
+					if (pipelineCreateInfo.bHasMaterialParameter)
+						pipelineLayout = _pipelineLayout_p_o_m;
+					else
+						pipelineLayout = _pipelineLayout_p_o;
+				}
+				pipelineObj = PipelineManager::CreatePipelineObject(pipelineCreateInfo, pipelineLayout,
 					_renderPass, m->graphicsIndex, (uint32_t)_subpassDescs.size());
 			}
+
+			if (pipelineTemps.capacity() < pipelineTemps.size() + 1)
+				pipelineTemps.reserve(( pipelineTemps.size() + 1 ) * 2);
+			pipelineTemps.push_back(pipelineObj);
+
 			if (m->uniformBufferSize != 0)
 			{
 				////Test
@@ -118,10 +162,16 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 				matBufferSize.push_back((uint32_t)m->uniformBufferSize);
 				matOffset += m->uniformBufferSize;
 			}
-			auto prims = PrimitiveProxy::GetModelPrimitives(m);
-			for (size_t m = 0; m < prims.size(); m++)
+
+			if (m->GetDescriptorSet() != VK_NULL_HANDLE && m->NeedUpdateTexture())
 			{
-				ModelPrimitive* prim = prims[m];
+				manager->UpdateTextureDescriptorSet(m->GetDescriptorSet(), m->GetTextures());
+			}
+
+			auto prims = PrimitiveProxy::GetModelPrimitives(m);
+			for (size_t primIndex = 0; primIndex < prims.size(); primIndex++)
+			{
+				ModelPrimitive* prim = prims[primIndex];
 				//Vb,Ib
 				bool bRefreshBuffer = false;
 				if (vbOffset != prim->vbPos) //偏移信息不相同时,重新映射
@@ -157,9 +207,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 		{
 			obj->ResizeDescriptorBuffer(sizeof(ObjectUniformBuffer) * (objectCount + 1));
 		}
-		//obj->NeedUpdate();
 		obj->UpdateDescriptorSet(sizeof(ObjectUniformBuffer));
-		//mat->NeedUpdate();
 		mat->ResizeDescriptorBuffer(matOffset);
 		mat->UpdateDescriptorSet(matBufferSize, matBufferOffset);
 	}
@@ -170,17 +218,23 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 	objectUboOffset = 0;
 	uint32_t dynamicOffset[] = { 0 };
 	uint32_t matIndex = 0;
-	vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &pass->GetDescriptorSet(), 1, dynamicOffset);
+	auto curPipeline = pipelineTemps[matIndex];
+	vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 0, 1, &pass->GetDescriptorSet(), 1, dynamicOffset);
 	for (auto m : PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
 	{
-		manager->CmdCmdBindPipeline(cmdBuf, pipelineObj->pipeline);
-		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 2, 1, &mat->GetDescriptorSet(), 1, &matBufferOffset[matIndex]);
+		manager->CmdCmdBindPipeline(cmdBuf, curPipeline->pipeline);
+		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat->GetDescriptorSet(), 1, &matBufferOffset[matIndex]);
+		
+		VkDescriptorSet texSet = m->GetDescriptorSet();
+		uint32_t texSetOffset[] = {0};
+		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &texSet, 1, texSetOffset);
+		
 		auto prims = PrimitiveProxy::GetModelPrimitives(m);
 		for (size_t m = 0; m < prims.size(); m++)
 		{
 			ModelPrimitive* prim = prims[m];
 			{
-				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 1, 1, &obj->GetDescriptorSet(), 1, &objectUboOffset);
+				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 1, 1, &obj->GetDescriptorSet(), 1, &objectUboOffset);
 				objectUboOffset += sizeof(ObjectUniformBuffer);
 
 				VkBuffer verBuf[] = { vb->GetBuffer() };
@@ -195,6 +249,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 		matIndex++;
 	}
 }
+
 #pragma endregion OpaquePass
 
 PreCommandPass::~PreCommandPass()

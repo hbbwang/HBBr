@@ -20,6 +20,10 @@ void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim)
 	//uint64_t result = 0;
 	prim->graphicsIndex.vsIndex = Shader::_vsShader[prim->vsShader].shaderCacheIndex;
 	prim->graphicsIndex.psIndex = Shader::_vsShader[prim->vsShader].shaderCacheIndex;
+	prim->graphicsIndex.layout = 
+		(prim->GetTextures().size() > 0) | 
+		((prim->uniformBufferSize > 0) >> 1);
+
 	prim->graphicsIndex.varients = prim->varients;
 	//未来还会有混合模式的识别一起加入进来，目前就这样
 }
@@ -67,5 +71,22 @@ void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive
 				it->second.erase(pit);
 			}
 		}
+	}
+}
+
+void MaterialPrimitive::SetTexture(int index, Texture* newTexture)
+{
+	textures[index] = newTexture;
+	_needUpdateDescriptorSet_tex = true;
+}
+
+void MaterialPrimitive::SetTexture(HString textureName, Texture* newTexture)
+{
+	auto it = std::find_if(_textureInfos.begin(), _textureInfos.end(), [textureName](MaterialTextureInfo& info) {
+		return info.name.IsSame(textureName, false);
+	});
+	if (it != _textureInfos.end())
+	{
+		SetTexture(it->index, newTexture);
 	}
 }

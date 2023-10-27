@@ -111,11 +111,15 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 		shaderc::CompileOptions options;
 		ShaderCacheHeader header = {};
 		std::vector<ShaderParameterInfo> shaderParamInfos;
+		std::vector<ShaderTextureInfo> shaderTextureInfos;
 		//自定义的信息进去
 		{
 			auto line = _shaderSrcCode.Split("\n");
 			bool bSearchVertexInputLayout = false;
 			bool bCollectMaterialParameter = false;
+			int CollectMaterialParameterIndex = 0;
+			bool bCollectMaterialTexture = false;
+			int CollectMaterialTextureIndex = 0;
 			for (auto s : line)
 			{
 				HString setting = s.ClearSpace();
@@ -138,19 +142,49 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 				else if (settings[0].IsSame("//[MP"))
 				{
 					bCollectMaterialParameter = true;
+					shaderParamInfos.push_back(ShaderParameterInfo({}));
 					//提取每个属性
 					auto paramProperty = settings[1].Split(";");
 					for (auto i : paramProperty)
 					{
 						//提取属性里的值
 						auto value = i.Split("=");
-						shaderParamInfos.push_back(ShaderParameterInfo({}));
 						if (value[0].Contains("Default"))
 						{
 							auto values = value[1].Split(",");
 							auto maxCount = (((values.size()) < (3)) ? (values.size()) : (3));
 							for (int vv = 0; vv < maxCount; vv++)
 								shaderParamInfos[shaderParamInfos.size()-1].defaultValue[vv] = (float)HString::ToDouble(values[vv]);
+						}
+						else if (value[0].Contains("Name"))
+						{
+							std::string name = value[1].c_str();
+							name.copy(shaderParamInfos[shaderParamInfos.size() - 1].name, sizeof(shaderParamInfos[shaderParamInfos.size() - 1].name) - 1);
+							shaderParamInfos[shaderParamInfos.size() - 1].name[sizeof(shaderParamInfos[shaderParamInfos.size() - 1].name) - 1] = '\0';
+						}
+					}
+				}
+				else if (settings[0].IsSame("//[MT"))
+				{
+					shaderTextureInfos.push_back(ShaderTextureInfo({}));
+					bCollectMaterialTexture = true;
+					//提取每个属性
+					auto paramProperty = settings[1].Split(";");
+					for (auto i : paramProperty)
+					{
+						//提取属性里的值
+						auto value = i.Split("=");
+						if (value[0].Contains("Default"))
+						{
+							std::string defaultValue = value[1].c_str();
+							defaultValue.copy(shaderTextureInfos[shaderTextureInfos.size() - 1].defaultTexture, sizeof(shaderTextureInfos[shaderTextureInfos.size() - 1].defaultTexture) - 1);
+							shaderTextureInfos[shaderTextureInfos.size() - 1].defaultTexture[sizeof(shaderTextureInfos[shaderTextureInfos.size() - 1].defaultTexture) - 1] = '\0';
+						}
+						else if (value[0].Contains("Name"))
+						{
+							std::string name = value[1].c_str();
+							name.copy(shaderTextureInfos[shaderTextureInfos.size() - 1].name, sizeof(shaderTextureInfos[shaderTextureInfos.size() - 1].name) - 1);
+							shaderTextureInfos[shaderTextureInfos.size() - 1].name[sizeof(shaderTextureInfos[shaderTextureInfos.size() - 1].name) - 1] = '\0';
 						}
 					}
 				}
@@ -207,21 +241,49 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 					std::stringstream param(s.c_str());
 					std::string type, name;
 					param >> type >> name;
-					if (name[name.size()-1] == ';')
+					size_t shaderParamSize = shaderParamInfos.size();
+					if (strlen(shaderParamInfos[shaderParamSize - 1].name) <= 0)
 					{
-						name.erase(name.begin() + name.size() - 1);
-					}
-					name.copy(shaderParamInfos[shaderParamInfos.size() - 1].name, sizeof(shaderParamInfos[shaderParamInfos.size() - 1].name) - 1);
-					shaderParamInfos[shaderParamInfos.size()-1].name[sizeof(shaderParamInfos[shaderParamInfos.size() - 1].name) - 1] = '\0';
+						if (name[name.size() - 1] == ';')
+						{
+							name.erase(name.begin() + name.size() - 1);
+						}
+						name.copy(shaderParamInfos[shaderParamSize - 1].name, sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1);
+						shaderParamInfos[shaderParamSize - 1].name[sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1] = '\0';
+					}				
+					//
 					if (type.compare("float4") == 0)
-						shaderParamInfos[shaderParamInfos.size()-1].type = MPType::Float4;
+					{
+						shaderParamInfos[shaderParamSize - 1].type = MPType::Float4;
+						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						CollectMaterialParameterIndex += 4;
+					}
+
 					else if (type.compare("float3") == 0)
-						shaderParamInfos[shaderParamInfos.size()-1].type = MPType::Float3;
+					{
+						shaderParamInfos[shaderParamSize - 1].type = MPType::Float3;
+						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						CollectMaterialParameterIndex += 3;
+					}
 					else if (type.compare("float2") == 0)
-						shaderParamInfos[shaderParamInfos.size()-1].type = MPType::Float2;
+					{
+						shaderParamInfos[shaderParamSize - 1].type = MPType::Float2;
+						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						CollectMaterialParameterIndex += 2;
+					}
 					else if (type.compare("float") == 0)
-						shaderParamInfos[shaderParamInfos.size()-1].type = MPType::Float;
+					{
+						shaderParamInfos[shaderParamSize - 1].type = MPType::Float;
+						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						CollectMaterialParameterIndex += 1;
+					}
 					header.shaderParameterCount++;
+				}
+				else if (bCollectMaterialTexture)
+				{
+					bCollectMaterialTexture = false;
+					shaderTextureInfos[shaderTextureInfos.size() - 1].index = header.shaderTextureCount;
+					header.shaderTextureCount++;
 				}
 			}
 		}
@@ -299,6 +361,10 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 				for (auto s : shaderParamInfos)
 				{
 					out.write((char*)&s, sizeof(ShaderParameterInfo));
+				}
+				for (auto s : shaderTextureInfos)
+				{
+					out.write((char*)&s, sizeof(ShaderTextureInfo));
 				}
 				//ShaderCache
 				out.write((char*)resultChar.data(), resultChar.size() * sizeof(glm::uint));

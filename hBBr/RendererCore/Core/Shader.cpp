@@ -1,6 +1,7 @@
 ﻿#include "Shader.h"
 #include "FileSystem.h"
 #include "VulkanManager.h"
+#include "./Component/Material.h"
 #include <fstream>
 std::map<HString, ShaderCache> Shader::_vsShader;
 std::map<HString, ShaderCache> Shader::_psShader;
@@ -30,9 +31,22 @@ void Shader::LoadShaderCache(const char* cachePath)
 			file.read((char*)&newInfo, sizeof(ShaderParameterInfo));
 			cache.params.push_back(newInfo);
 		}
+		//shader textures infos
+		for (int i = 0; i < cache.header.shaderTextureCount; i++)
+		{
+			ShaderTextureInfo newInfo;
+			file.read((char*)&newInfo, sizeof(ShaderTextureInfo));
+			cache.texs.push_back(newInfo);
+		}
 		//cache
-		std::vector<char> shaderData(fileSize - sizeof(ShaderCacheHeader) - (sizeof(ShaderParameterInfo) * cache.header.shaderParameterCount));
-		file.read(shaderData.data(), fileSize - sizeof(ShaderCacheHeader) - (sizeof(ShaderParameterInfo) * cache.header.shaderParameterCount));
+		size_t shaderCodeSize =
+			fileSize 
+			- sizeof(ShaderCacheHeader) 
+			- (sizeof(ShaderParameterInfo) * cache.header.shaderParameterCount)
+			- (sizeof(ShaderTextureInfo) * cache.header.shaderTextureCount)
+			;
+		std::vector<char> shaderData(shaderCodeSize);
+		file.read(shaderData.data(), shaderCodeSize);
 		VulkanManager::GetManager()->CreateShaderModule(shaderData, cache.shaderModule);
 		file.close();
 		//
@@ -40,7 +54,97 @@ void Shader::LoadShaderCache(const char* cachePath)
 		cache.shaderName = split[0];
 		cache.shaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		cache.shaderStageInfo.module = cache.shaderModule;
-		
+		//创建模板
+		//ParameterInfo
+		{
+			for (auto i = 0; i < cache.params.size(); i++)
+			{
+				std::shared_ptr<MaterialParameterInfo> info;
+				info.reset(new MaterialParameterInfo);
+				info->name = cache.params[i].name;
+				info->type = (MPType)cache.params[i].type;
+				glm::vec4 param = glm::vec4(0);
+				int alignmentFloat4 = 0; // float4 对齐
+				uint32_t arrayIndex = 0;
+				if (info->type == MPType::Float)
+				{
+					if (alignmentFloat4 + 1 > 4)
+					{
+						info->value = (param);
+						alignmentFloat4 = 0;
+						param = glm::vec4(0);
+						info->arrayIndex = arrayIndex;
+						arrayIndex++;
+					}
+					info->vec4Index = alignmentFloat4;
+					param[alignmentFloat4] = (float)cache.params[i].defaultValue[alignmentFloat4];
+					alignmentFloat4 += 1;
+				}
+				else if (info->type == MPType::Float2)
+				{
+					if (alignmentFloat4 + 2 > 4)
+					{
+						info->value = (param);
+						alignmentFloat4 = 0;
+						param = glm::vec4(0);
+						info->arrayIndex = arrayIndex;
+						arrayIndex++;
+					}
+					info->vec4Index = alignmentFloat4;
+					param[alignmentFloat4] = (float)cache.params[i].defaultValue[alignmentFloat4];
+					param[alignmentFloat4 + 1] = (float)cache.params[i].defaultValue[alignmentFloat4 + 1];
+					alignmentFloat4 += 2;
+				}
+				else if (info->type == MPType::Float3)
+				{
+					if (alignmentFloat4 + 3 > 4)
+					{
+						info->value = (param);
+						alignmentFloat4 = 0;
+						param = glm::vec4(0);
+						info->arrayIndex = arrayIndex;
+						arrayIndex++;
+					}
+					info->vec4Index = alignmentFloat4;
+					param[alignmentFloat4] = (float)cache.params[i].defaultValue[alignmentFloat4];
+					param[alignmentFloat4 + 1] = (float)cache.params[i].defaultValue[alignmentFloat4 + 1];
+					param[alignmentFloat4 + 2] = (float)cache.params[i].defaultValue[alignmentFloat4 + 2];
+					alignmentFloat4 += 3;
+				}
+				else if (info->type == MPType::Float4)
+				{
+					if (alignmentFloat4 + 4 > 4)
+					{
+						info->value = (param);
+						alignmentFloat4 = 0;
+						param = glm::vec4(0);
+						info->arrayIndex = arrayIndex;
+						arrayIndex++;
+					}
+					info->vec4Index = alignmentFloat4;
+					param[alignmentFloat4] = (float)cache.params[i].defaultValue[alignmentFloat4];
+					param[alignmentFloat4 + 1] = (float)cache.params[i].defaultValue[alignmentFloat4 + 1];
+					param[alignmentFloat4 + 2] = (float)cache.params[i].defaultValue[alignmentFloat4 + 2];
+					param[alignmentFloat4 + 3] = (float)cache.params[i].defaultValue[alignmentFloat4 + 3];
+					alignmentFloat4 += 4;
+				}
+				cache.pi.push_back(info);
+			}
+		}
+		//TextureInfo
+		{
+			for (auto i = 0; i < cache.texs.size(); i++)
+			{
+				std::shared_ptr<MaterialTextureInfo> info;
+				info.reset(new MaterialTextureInfo);
+				info->name = cache.texs[i].name;
+				info->type = (MTType)cache.texs[i].type;
+				info->index = cache.texs[i].index;
+				info->value = cache.texs[i].defaultTexture;
+				cache.ti.push_back(info);
+			}
+		}
+		//
 		if (split[1] == "vs")
 		{
 			cache.shaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
@@ -62,6 +166,7 @@ void Shader::LoadShaderCache(const char* cachePath)
 			cache.shaderType = ShaderType::ComputeShader;
 			_csShader.emplace(std::make_pair(cache.shaderName, cache));
 		}
+
 		cacheIndex++;
 	}
 

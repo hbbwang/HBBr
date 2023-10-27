@@ -229,6 +229,8 @@ public:
 	/* Pool must created setting VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT */
 	void FreeDescriptorSet(VkDescriptorPool pool, std::vector<VkDescriptorSet>& descriptorSet);
 
+	void FreeDescriptorSet(VkDescriptorPool pool, VkDescriptorSet& descriptorSet);
+
 	/* Image 布局转换 */
 	void Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
 
@@ -319,6 +321,8 @@ public:
 
 	void UpdateBufferDescriptorSetAll(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
 
+	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture*> textures);
+
 	VkDeviceSize GetMinUboAlignmentSize(VkDeviceSize realSize);
 
 	void UpdateImageSamplerDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
@@ -372,6 +376,14 @@ public:
 		return _gpuFeatures;
 	}
 
+	HBBR_INLINE VkDescriptorSetLayout GetImageDescriptorSetLayout() {
+		if (_descriptorSetLayout_tex == VK_NULL_HANDLE)
+		{
+			CreateDescripotrSetLayout(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, _descriptorSetLayout_tex);
+		}
+		return _descriptorSetLayout_tex;
+	}
+
 	//忽略vkGetSwapchainImagesKHR里获取到的Images数量，坚持使用我们设定的数量
 	bool _bIsIgnoreVulkanSwapChainExtraImages = false;
 
@@ -408,6 +420,8 @@ private:
 	VkPhysicalDeviceFeatures			_gpuFeatures{};
 
 	VkPhysicalDeviceVulkan12Features	_gpuVk12Features{};
+
+	VkDescriptorSetLayout				_descriptorSetLayout_tex = VK_NULL_HANDLE;
 
 	VkQueue	_graphicsQueue;
 
