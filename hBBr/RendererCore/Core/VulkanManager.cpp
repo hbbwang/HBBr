@@ -1696,15 +1696,15 @@ void VulkanManager::CreateDescripotrPool(VkDescriptorPool& pool)
 {
 	VkDescriptorPoolSize pool_sizes[] =
 	{
-		{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_SAMPLER, 100 },
 		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },	//这是一个image和sampler的组合descriptor
 		{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },			//纯image,不带sampler
 		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 100 },
 		//{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
 		//{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 100 },
 		//{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 3000 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
 		//{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
 		{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 80 }
 	};
@@ -1865,9 +1865,9 @@ void VulkanManager::AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSet
 	//
 	VkDescriptorSetAllocateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	info.descriptorPool = pool;
+	info.descriptorPool = pool; 
 	info.descriptorSetCount = static_cast<uint32_t>(setLayout.size());
-	info.pSetLayouts = setLayout.data();
+	info.pSetLayouts = setLayout.data(); 
 	auto result = vkAllocateDescriptorSets(_device, &info, descriptorSet.data());
 	if (result != VK_SUCCESS)
 	{
@@ -2364,8 +2364,8 @@ void VulkanManager::UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet
 			descriptorWrite.descriptorType = descriptorSet->GetTypes()[i];
 			descriptorWrite.descriptorCount = 1;
 			descriptorWrite.pBufferInfo = &bufferInfo;
-			descriptorWrite.pImageInfo = VK_NULL_HANDLE; // Optional
-			descriptorWrite.pTexelBufferView = VK_NULL_HANDLE; // Optional
+			descriptorWrite.pImageInfo = VK_NULL_HANDLE; 
+			descriptorWrite.pTexelBufferView = VK_NULL_HANDLE;
 			vkUpdateDescriptorSets(_device, 1, &descriptorWrite, 0, VK_NULL_HANDLE);
 		}
 	}
@@ -2393,8 +2393,8 @@ void VulkanManager::UpdateBufferDescriptorSet(DescriptorSet* descriptorSet, uint
 				descriptorWrite[o].descriptorType = descriptorSet->GetTypes()[i];
 				descriptorWrite[o].descriptorCount = 1;
 				descriptorWrite[o].pBufferInfo = &bufferInfo[o];
-				descriptorWrite[o].pImageInfo = VK_NULL_HANDLE; // Optional
-				descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE; // Optional
+				descriptorWrite[o].pImageInfo = VK_NULL_HANDLE;
+				descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE;
 			}
 			vkUpdateDescriptorSets(_device, (uint32_t)offsets.size() , descriptorWrite.data(), 0, VK_NULL_HANDLE);
 		}
@@ -2423,8 +2423,8 @@ void VulkanManager::UpdateBufferDescriptorSet(DescriptorSet* descriptorSet, uint
 				descriptorWrite[o].descriptorType = descriptorSet->GetTypes()[i];
 				descriptorWrite[o].descriptorCount = 1;
 				descriptorWrite[o].pBufferInfo = &bufferInfo[o];
-				descriptorWrite[o].pImageInfo = VK_NULL_HANDLE; // Optional
-				descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE; // Optional
+				descriptorWrite[o].pImageInfo = VK_NULL_HANDLE;
+				descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE;
 			}
 			vkUpdateDescriptorSets(_device, (uint32_t)offsets.size(), descriptorWrite.data(), 0, VK_NULL_HANDLE);
 		}
@@ -2453,8 +2453,8 @@ void VulkanManager::UpdateBufferDescriptorSetAll(DescriptorSet* descriptorSet, u
 				descriptorWrite[d].descriptorType = descriptorSet->GetTypes()[i];
 				descriptorWrite[d].descriptorCount = 1;
 				descriptorWrite[d].pBufferInfo = &bufferInfo[d];
-				descriptorWrite[d].pImageInfo = VK_NULL_HANDLE; // Optional
-				descriptorWrite[d].pTexelBufferView = VK_NULL_HANDLE; // Optional
+				descriptorWrite[d].pImageInfo = VK_NULL_HANDLE;
+				descriptorWrite[d].pTexelBufferView = VK_NULL_HANDLE;
 			}		
 			vkUpdateDescriptorSets(_device, _swapchainBufferCount, descriptorWrite.data(), 0, VK_NULL_HANDLE);
 		}
@@ -2480,9 +2480,10 @@ void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, st
 		descriptorWrite[o].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		descriptorWrite[o].descriptorCount = 1;
 		descriptorWrite[o].pBufferInfo = VK_NULL_HANDLE;
-		descriptorWrite[o].pImageInfo = &imageInfo[o]; // Optional
-		descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE; // Optional
+		descriptorWrite[o].pImageInfo = &imageInfo[o];
+		descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE;
 	}
+	vkUpdateDescriptorSets(_device, descriptorWrite.size(), descriptorWrite.data(), 0, VK_NULL_HANDLE);
 }
 
 VkDeviceSize VulkanManager::GetMinUboAlignmentSize(VkDeviceSize realSize)

@@ -135,7 +135,7 @@ public:
 	HBBR_API AssetInfoBase* GetAssetInfo(HGUID guid, AssetType type = AssetType::Unknow)const;
 
 	/* 根据内容浏览器显示的文件名称查找(非实际GUID的名称)GUID */
-	HBBR_API HGUID GetAssetGUID(HString contentBrowserFilePath)const;
+	HBBR_API HGUID GetAssetGUID(AssetType type,HString contentBrowserFilePath)const;
 
 	template<class T>
 	HBBR_INLINE T* GetAsset(HGUID guid , AssetType type = AssetType::Unknow)

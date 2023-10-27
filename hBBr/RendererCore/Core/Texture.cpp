@@ -253,14 +253,21 @@ void Texture::GlobalInitialize()
 	_samplers.emplace(TextureSampler_Nearest_Clamp, std::move(sampler));
 
 	//Create BaseTexture
-	auto blackTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Black.dds"));
-	auto normalTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Normal.dds"));
-	auto whiteTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/T_System_White.dds"));
-	auto testTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(FileSystem::GetContentAbsPath() + "Core/Texture/TestTex.dds"));
-	Texture::AddSystemTexture("Black", blackTex);
-	Texture::AddSystemTexture("Normal", normalTex);
-	Texture::AddSystemTexture("White", whiteTex);
-	Texture::AddSystemTexture("TestTex", testTex);
+	auto uvGridTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_UVGrid"));
+	auto blackTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Black"));
+	auto normalTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Normal"));
+	auto whiteTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_White"));
+	auto testTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/TestTex"));
+	if(uvGridTex)
+		Texture::AddSystemTexture("UVGrid", uvGridTex);
+	if (whiteTex)
+		Texture::AddSystemTexture("White", whiteTex);
+	if (blackTex)
+		Texture::AddSystemTexture("Black", blackTex);
+	if (normalTex)
+		Texture::AddSystemTexture("Normal", normalTex);
+	if (testTex)
+		Texture::AddSystemTexture("TestTex", testTex);
 
 	//导入文字纹理
 	{

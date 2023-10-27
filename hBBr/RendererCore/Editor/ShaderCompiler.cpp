@@ -152,7 +152,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 						if (value[0].Contains("Default"))
 						{
 							auto values = value[1].Split(",");
-							auto maxCount = (((values.size()) < (3)) ? (values.size()) : (3));
+							auto maxCount = std::min((int)values.size(), 4);
 							for (int vv = 0; vv < maxCount; vv++)
 								shaderParamInfos[shaderParamInfos.size()-1].defaultValue[vv] = (float)HString::ToDouble(values[vv]);
 						}

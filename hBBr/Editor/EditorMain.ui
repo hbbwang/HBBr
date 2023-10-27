@@ -37,6 +37,7 @@
     <addaction name="Save"/>
     <addaction name="SaveAs"/>
     <addaction name="OpenProgramDir"/>
+    <addaction name="CompileAllShader"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -70,6 +71,11 @@
   <action name="OpenProgramDir">
    <property name="text">
     <string>打开程序路径</string>
+   </property>
+  </action>
+  <action name="CompileAllShader">
+   <property name="text">
+    <string>重新编译所有着色器</string>
    </property>
   </action>
  </widget>

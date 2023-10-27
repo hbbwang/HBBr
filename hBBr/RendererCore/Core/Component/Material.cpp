@@ -69,14 +69,22 @@ Material* Material::LoadMaterial(HGUID guid)
 			auto parameters = root.child(L"Parameters");
 			//primitive参数的长度以shader为主
 			mat->_primitive->_paramterInfos.resize(psCache.header.shaderParameterCount);
-			mat->_primitive->uniformBuffer.resize(psCache.header.shaderParameterCount);
+			mat->_primitive->uniformBuffer.reserve(psCache.header.shaderParameterCount);
 			//初始化
-			for (int i = 0; i < psCache.header.shaderTextureCount; i++)
+			glm::vec4 param = glm::vec4(0);
+			for (int i = 0; i < psCache.header.shaderParameterCount; i++)
 			{
 				mat->_primitive->_paramterInfos[i] = *psCache.pi[i];
-				mat->_primitive->uniformBuffer[i] = psCache.pi[i]->value;
+				for (int p = 0; p < psCache.pi[i]->value.size();p++)
+				{
+					if (mat->_primitive->uniformBuffer.size() <= psCache.pi[i]->arrayIndex)
+					{
+						mat->_primitive->uniformBuffer.push_back(glm::vec4());
+					}
+					mat->_primitive->uniformBuffer[psCache.pi[i]->arrayIndex][psCache.pi[i]->vec4Index + p] = psCache.pi[i]->value[p];				
+				}
 			}
-			glm::vec4 param = glm::vec4(0);
+			param = glm::vec4(0);
 			int alignmentFloat4 = 0; // float4 对齐
 			uint32_t arrayIndex = 0;
 			int paramIndex = 0;

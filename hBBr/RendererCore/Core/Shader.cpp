@@ -57,75 +57,66 @@ void Shader::LoadShaderCache(const char* cachePath)
 		//创建模板
 		//ParameterInfo
 		{
+			int alignmentFloat4 = 0; // float4 对齐
+			uint32_t arrayIndex = 0;
 			for (auto i = 0; i < cache.params.size(); i++)
 			{
 				std::shared_ptr<MaterialParameterInfo> info;
 				info.reset(new MaterialParameterInfo);
 				info->name = cache.params[i].name;
 				info->type = (MPType)cache.params[i].type;
-				glm::vec4 param = glm::vec4(0);
-				int alignmentFloat4 = 0; // float4 对齐
-				uint32_t arrayIndex = 0;
 				if (info->type == MPType::Float)
 				{
 					if (alignmentFloat4 + 1 > 4)
 					{
-						info->value = (param);
 						alignmentFloat4 = 0;
-						param = glm::vec4(0);
-						info->arrayIndex = arrayIndex;
 						arrayIndex++;
 					}
+					info->arrayIndex = arrayIndex;
 					info->vec4Index = alignmentFloat4;
-					param[alignmentFloat4] = (float)cache.params[i].defaultValue[alignmentFloat4];
+					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4]);
 					alignmentFloat4 += 1;
 				}
 				else if (info->type == MPType::Float2)
 				{
 					if (alignmentFloat4 + 2 > 4)
 					{
-						info->value = (param);
 						alignmentFloat4 = 0;
-						param = glm::vec4(0);
-						info->arrayIndex = arrayIndex;
 						arrayIndex++;
 					}
+					info->arrayIndex = arrayIndex;
 					info->vec4Index = alignmentFloat4;
-					param[alignmentFloat4] = (float)cache.params[i].defaultValue[alignmentFloat4];
-					param[alignmentFloat4 + 1] = (float)cache.params[i].defaultValue[alignmentFloat4 + 1];
+					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4]);
+					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4 + 1]);
 					alignmentFloat4 += 2;
 				}
 				else if (info->type == MPType::Float3)
 				{
 					if (alignmentFloat4 + 3 > 4)
 					{
-						info->value = (param);
 						alignmentFloat4 = 0;
-						param = glm::vec4(0);
-						info->arrayIndex = arrayIndex;
 						arrayIndex++;
 					}
+					info->arrayIndex = arrayIndex;
 					info->vec4Index = alignmentFloat4;
-					param[alignmentFloat4] = (float)cache.params[i].defaultValue[alignmentFloat4];
-					param[alignmentFloat4 + 1] = (float)cache.params[i].defaultValue[alignmentFloat4 + 1];
-					param[alignmentFloat4 + 2] = (float)cache.params[i].defaultValue[alignmentFloat4 + 2];
+					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4]);
+					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4 + 1]);
+					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4 + 2]);
 					alignmentFloat4 += 3;
 				}
 				else if (info->type == MPType::Float4)
 				{
 					if (alignmentFloat4 + 4 > 4)
 					{
-						info->value = (param);
 						alignmentFloat4 = 0;
-						param = glm::vec4(0);
-						info->arrayIndex = arrayIndex;
 						arrayIndex++;
 					}
+					info->arrayIndex = arrayIndex;
 					info->vec4Index = alignmentFloat4;
-					param[alignmentFloat4] = (float)cache.params[i].defaultValue[alignmentFloat4];
-					param[alignmentFloat4 + 1] = (float)cache.params[i].defaultValue[alignmentFloat4 + 1];
-					param[alignmentFloat4 + 2] = (float)cache.params[i].defaultValue[alignmentFloat4 + 2];
-					param[alignmentFloat4 + 3] = (float)cache.params[i].defaultValue[alignmentFloat4 + 3];
+					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4]);
+					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4 + 1]);
+					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4 + 2]);
+					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4 + 3]);
 					alignmentFloat4 += 4;
 				}
 				cache.pi.push_back(info);

@@ -14,6 +14,9 @@
 BasePass::~BasePass()
 {
 	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_m_t);
+	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_m);
+	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_t);
+	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o);
 }
 
 void BasePass::PassInit()
@@ -226,8 +229,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat->GetDescriptorSet(), 1, &matBufferOffset[matIndex]);
 		
 		VkDescriptorSet texSet = m->GetDescriptorSet();
-		uint32_t texSetOffset[] = {0};
-		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &texSet, 1, texSetOffset);
+		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &texSet, 0, NULL);
 		
 		auto prims = PrimitiveProxy::GetModelPrimitives(m);
 		for (size_t m = 0; m < prims.size(); m++)

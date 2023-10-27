@@ -7,7 +7,10 @@ cbuffer GUIPass :register(b0)
 {
     float4 UVSetting;
     float4 Color;
-    float TextureSize;
+	float TextureSizeX;
+	float TextureSizeY;
+	float ScreenSizeX;
+	float ScreenSizeY;
     int Flags;
 };
 
@@ -42,12 +45,14 @@ float4 PSMain(VSToPS IN) :SV_Target0
 {   
     half4 result = 1;
     //return IN.Color;
-    half4 baseTexture = BaseTexture.Sample(BaseTextureSampler,IN.UV * (UVSetting.zw / TextureSize) + (UVSetting.xy / TextureSize) );
+    half4 baseTexture = 
+    BaseTexture.SampleLevel(BaseTextureSampler,
+    IN.UV * (UVSetting.zw / float2(TextureSizeX,TextureSizeY)) + (UVSetting.xy / float2(TextureSizeX,TextureSizeY)) ,100);
 
     if(Flags & IsFont)
     {
         result = baseTexture.r;
-        result = smoothstep(0.4f , 1.0f , result) * 5.f;
+        result = saturate(smoothstep(0.4f , 1.0f , result) * 5.f);
         if(! (Flags & FontShadow) )
         {
             result.rgb = 1.0f;

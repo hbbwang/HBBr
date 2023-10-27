@@ -13,11 +13,11 @@ struct MaterialParameterInfo
 	MPType type;
 	HString name, ui;
 	//shader uniform buffer 以vec4数组储存,这个索引用来读取数组对应的vec4
-	uint32_t arrayIndex;
+	uint32_t arrayIndex = 0;
 	//配合上面索引获取到的vec4,该索引用来表示该参数处于vec4的什么位置
-	uint32_t vec4Index;
+	uint32_t vec4Index = 0;
 
-	glm::vec4 value;
+	std::vector<float> value;
 };
 
 struct MaterialTextureInfo
@@ -81,19 +81,18 @@ public:
 		}
 		else
 		{
-			//Free DescriptorSet
-			if (_descriptorSet_tex != VK_NULL_HANDLE)
-			{
-				manager->FreeDescriptorSet(manager->GetDescriptorPool(), _descriptorSet_tex);
-				_descriptorSet_tex = VK_NULL_HANDLE;
-			}
 			return VK_NULL_HANDLE;
 		}
 	}
 
-	HBBR_INLINE const bool NeedUpdateTexture()const
+	HBBR_INLINE const bool NeedUpdateTexture()
 	{
-		return _needUpdateDescriptorSet_tex;
+		bool result = _needUpdateDescriptorSet_tex;
+		if (result)
+		{
+			_needUpdateDescriptorSet_tex = false;
+		}
+		return result;
 	}
 
 	HBBR_INLINE std::vector<class Texture*> GetTextures() {
@@ -108,8 +107,8 @@ public:
 	{
 		if (_descriptorSet_tex != VK_NULL_HANDLE)
 		{
-			std::vector<VkDescriptorSet> sets = { _descriptorSet_tex };
-			VulkanManager::GetManager()->FreeDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), sets);
+			//std::vector<VkDescriptorSet> sets = { _descriptorSet_tex };
+			//VulkanManager::GetManager()->FreeDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), sets);
 			_descriptorSet_tex = VK_NULL_HANDLE;
 		}
 	}

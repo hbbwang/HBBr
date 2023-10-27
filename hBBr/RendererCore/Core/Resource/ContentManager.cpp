@@ -329,25 +329,23 @@ AssetInfoBase* ContentManager::GetAssetInfo(HGUID guid, AssetType type)const
 	return NULL;
 }
 
-HGUID ContentManager::GetAssetGUID(HString contentBrowserFilePath)const
+HGUID ContentManager::GetAssetGUID(AssetType type, HString contentBrowserFilePath)const
 {
 	HString filePath = contentBrowserFilePath.GetFilePath();
 	HString fileBaseName = contentBrowserFilePath.GetBaseName();
-	HString suffix = contentBrowserFilePath.GetSuffix();
-	AssetType type = AssetType::Unknow;
 	//获取路径下的同类型资产文件
-	auto files = FileSystem::GetFilesBySuffix(filePath.c_str(), suffix.c_str());
-	if (suffix.IsSame("fbx", false))
+	std::vector<FileEntry> files; 
+	if (type == AssetType::Model)
 	{
-		type = AssetType::Model;
+		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "fbx");
 	}
-	else if (suffix.IsSame("mat", false))
+	else if (type == AssetType::Material)
 	{
-		type = AssetType::Material;
+		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "mat");
 	}
-	else if (suffix.IsSame("dds", false))
+	else if (type == AssetType::Texture2D)
 	{
-		type = AssetType::Texture2D;
+		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "dds");
 	}
 
 	if (type != AssetType::Unknow)

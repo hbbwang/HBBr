@@ -172,7 +172,7 @@ std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char
         {
             HString ext = entry.path().extension().c_str();
             ext.Remove(".");
-            if (ext.IsSame(suffix))
+            if (ext.IsSame(suffix,false))
             {
                 FileEntry en = {};
                 en.absPath = entry.path().c_str();

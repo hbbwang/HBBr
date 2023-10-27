@@ -4,11 +4,11 @@
 
 cbuffer Material :register(b0, space2)
 {
-    //[MP]Default = 1;
+    //[MP]Name = F_1 ; Default = 1;
     float   F1;
-    //[MP]Default = 1,1;
+    //[MP]Name = F_2 ; Default = 1,1;
     float2  F2;
-    //[MP]Default = 1,1,1;
+    //[MP]Name = F_3 ; Default = 1,1,1;
     float3  F3;
     //[MP]Default = 1,1,1,1;
     float4  F4;
@@ -32,6 +32,10 @@ struct VSInput
 
 // }
 
+//[MT]Name=BaseTexture;Default =UVGrid;
+SamplerState BaseTextureSampler : register(s0,space3);
+Texture2D BaseTexture : register(t0,space3);
+
 //像素着色器补充
 void frag(in VSToPS IN , inout PixelShaderParameter Parameters)
 {
@@ -46,7 +50,8 @@ void frag(in VSToPS IN , inout PixelShaderParameter Parameters)
     Parameters.WorldPosition    = IN.WorldPosition;
     Parameters.LocalPosition    = IN.LocalPosition;
     //
-    Parameters.BaseColor        = F4.rgb * F4.a * F3 * F1;
+    half4 texSample = BaseTexture.SampleBias(BaseTextureSampler,IN.Texcoord01.xy , 0);
+    Parameters.BaseColor        = F4.rgb * F4.a * F3 * F1 * texSample;
 }
 
 #include "Include/BasePassVertexShader.hlsl"

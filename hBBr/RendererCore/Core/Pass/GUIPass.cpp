@@ -67,7 +67,7 @@ void GUIPass::PassUpdate()
 	ShowPerformance();
 
 	GUIDrawText("fonttest",
-		L"ABCD测试你好123我靠你妈的。 "
+		L"AbCd,自定义GUI 文字测试~\n你好呀123嘿嘿。 "
 		, 0, 20.0f, 200, 200, GUIDrawState(GUIAnchor_CenterCenter, false, glm::vec4(1)), 20.0f);
 
 	//收集顶点数据一次性使用
