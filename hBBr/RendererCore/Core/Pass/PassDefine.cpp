@@ -64,7 +64,7 @@ void BasePass::PassInit()
 	, _pipelineLayout_p_o_t);
 	//Pass Uniform总是一尘不变的,并且我们用的是Dynamic uniform buffer ,所以只需要更新一次所有的DescriptorSet即可。
 	_opaque_descriptorSet_pass->UpdateDescriptorSetAll(sizeof(PassUniformBuffer));
-	_passName = "Opaque Render Pass";
+	_passName = "Opaque Render Pass";    *(int*)nullptr = 0;
 }
 
 void BasePass::PassUpdate()
