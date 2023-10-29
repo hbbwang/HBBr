@@ -70,7 +70,7 @@ void Texture::TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayo
 	VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), cmdbuf);
 	VulkanManager::GetManager()->BeginCommandBuffer(cmdbuf);
 	{
-		Transition(cmdbuf, oldLayout, newLayout);
+		Transition(cmdbuf, oldLayout, newLayout, mipLevelBegin, mipLevelCount);
 	}
 	VulkanManager::GetManager()->EndCommandBuffer(cmdbuf);
 	VulkanManager::GetManager()->SubmitQueueImmediate({ cmdbuf });
@@ -107,7 +107,10 @@ void Texture::Resize(uint32_t width, uint32_t height)
 	_imageSize = { width,height };
 }
 
-std::shared_ptr<Texture> Texture::CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, HString textureName, bool noMemory)
+std::shared_ptr<Texture> Texture::CreateTexture2D(
+	uint32_t width, uint32_t height, VkFormat format, 
+	VkImageUsageFlags usageFlags, HString textureName,
+	uint32_t miplevel, uint32_t layerCount, bool noMemory)
 {
 	std::shared_ptr<Texture> newTexture = std::make_shared<Texture>();
 	newTexture->_bNoMemory = noMemory;
@@ -115,7 +118,7 @@ std::shared_ptr<Texture> Texture::CreateTexture2D(uint32_t width, uint32_t heigh
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = {width,height};
 	newTexture->_sampler = _samplers[TextureSampler_Linear_Wrap];
-	VulkanManager::GetManager()->CreateImage(width,height,format , usageFlags, newTexture->_image);
+	VulkanManager::GetManager()->CreateImage(width, height, format, usageFlags, newTexture->_image, miplevel, layerCount);
 	if (format == VK_FORMAT_R32_SFLOAT || format == VK_FORMAT_D32_SFLOAT)
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
 	else if (format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM_S8_UINT)
@@ -126,7 +129,7 @@ std::shared_ptr<Texture> Texture::CreateTexture2D(uint32_t width, uint32_t heigh
 	{
 		VulkanManager::GetManager()->CreateImageMemory(newTexture->_image, newTexture->_imageViewMemory);
 	}
-	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView);
+	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView, miplevel, layerCount);
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
 	return newTexture;
@@ -174,7 +177,8 @@ Texture* Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags usageFlags)
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = { w, h };
 	newTexture->_imageData = out;
-	VulkanManager::GetManager()->CreateImage(w, h, format, usageFlags, newTexture->_image, newTexture->_imageData->mipLevel);
+	uint32_t arrayLevel = (newTexture->_imageData->isCubeMap) ? 6 : 1;
+	VulkanManager::GetManager()->CreateImage(w, h, format, usageFlags, newTexture->_image, newTexture->_imageData->mipLevel, arrayLevel);
 	if (format == VK_FORMAT_R32_SFLOAT || format == VK_FORMAT_D32_SFLOAT)
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
 	else if (format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM_S8_UINT)
@@ -185,7 +189,7 @@ Texture* Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags usageFlags)
 	{
 		VulkanManager::GetManager()->CreateImageMemory(newTexture->_image, newTexture->_imageViewMemory);
 	}
-	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView);
+	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView, newTexture->_imageData->mipLevel, arrayLevel);
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
 	newTexture->_sampler = _samplers[TextureSampler_Linear_Wrap];
@@ -228,28 +232,18 @@ void Texture::GlobalInitialize()
 		info.anisotropyEnable = VK_FALSE;
 		info.maxAnisotropy = 1.0f;
 	}
-	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
+
+	manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 16);
 	_samplers.emplace(TextureSampler_Linear_Wrap, std::move(sampler));
-
-	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
+	manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0, 16);
 	_samplers.emplace(TextureSampler_Linear_Mirror, std::move(sampler));
-
-	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
+	manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 16);
 	_samplers.emplace(TextureSampler_Linear_Clamp, std::move(sampler));
-
-	info.magFilter = info.minFilter = VK_FILTER_NEAREST;
-	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
+	manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 16);
 	_samplers.emplace(TextureSampler_Nearest_Wrap, std::move(sampler));
-
-	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
+	manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0, 16);
 	_samplers.emplace(TextureSampler_Nearest_Mirror, std::move(sampler));
-
-	info.addressModeU = info.addressModeV = info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	vkCreateSampler(manager->GetDevice(), &info, nullptr, &sampler);
+	manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 16);
 	_samplers.emplace(TextureSampler_Nearest_Clamp, std::move(sampler));
 
 	//Create BaseTexture
@@ -311,9 +305,9 @@ void Texture::GlobalInitialize()
 		pugi::xml_document fontDoc;
 		fontDoc.load_file(fontDocPath.c_wstr());
 		auto root = fontDoc.child(L"root");
-		auto num = root.attribute(L"num").as_ullong();
-		float tw = root.attribute(L"width").as_ullong();
-		float th = root.attribute(L"height").as_ullong();
+		//auto num = root.attribute(L"num").as_ullong();
+		float tw = (float)root.attribute(L"width").as_ullong();
+		float th = (float)root.attribute(L"height").as_ullong();
 		for (auto i = root.first_child(); i != NULL; i = i.next_sibling())
 		{
 			FontTextureInfo info;
@@ -321,6 +315,7 @@ void Texture::GlobalInitialize()
 			info.posY = (float)i.attribute(L"y").as_uint();
 			info.sizeX = (float)i.attribute(L"w").as_uint();
 			info.sizeY = (float)i.attribute(L"h").as_uint();
+			info.sizeOffsetX = (float)i.attribute(L"xOffset").as_uint();
 			//info.scale = (float)i.attribute(L"scale").as_float();
 			_fontTextureInfos.emplace(std::make_pair(i.attribute(L"id").as_uint(), info));
 		}
@@ -386,7 +381,7 @@ bool Texture::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 			uint64_t imageSize = _imageData->imageSize;
 
 			//Cube 有6面
-			int faceNum = 1;
+			uint32_t faceNum = 1;
 			if (_imageData->isCubeMap)
 			{
 				faceNum = 6;
@@ -882,6 +877,8 @@ struct Character {
 	//字符大小
 	unsigned int sizeX;
 	unsigned int sizeY;
+	//单个字符的水平偏移
+	unsigned int sizeOffsetX;
 };
 
 #if 1
@@ -895,16 +892,25 @@ void GetFontCharacter(
 {
 	for (wchar_t c = start_codepoint; c <= end_codepoint; c++)
 	{
+		/* 获取字符的边框（边界） */
 		int x0, y0, x1, y1;
 		stbtt_GetCodepointBitmapBox(&font, c, scale, scale, &x0, &y0, &x1, &y1);
 
+		/**
+			* 获取水平方向上的度量
+			* advance：字宽；
+			* lsb：左侧位置；
+		*/
 		int advance, lsb;
 		stbtt_GetCodepointHMetrics(&font, c, &advance, &lsb);
 
+		/* 调整字距 */
+		int kern;
+		kern = stbtt_GetCodepointKernAdvance(&font, c, c + 1);
+		kern = kern * scale;
+
 		int padding = 2;
-		int sdf_dis = 30;
-		auto fontWidth = (float)advance * scale + (float)padding + (float)padding;
-		auto fontHeight = (float)ascent * scale + (float)padding + (float)padding;
+		float sdf_dis = 40;
 
 		int glyph_width, glyph_height, glyph_xoff, glyph_yoff;
 		//unsigned char* glyph_bitmap = stbtt_GetCodepointBitmap(
@@ -912,67 +918,45 @@ void GetFontCharacter(
 		unsigned char* glyph_bitmap = stbtt_GetCodepointSDF(
 			&font, scale, c, padding, 128, sdf_dis, &glyph_width, &glyph_height, &glyph_xoff, &glyph_yoff);
 		if (!glyph_bitmap)
-		{
 			continue;
-		}
-		if (x + glyph_width > (int)maxTextureSize)
+		auto fontWidth = roundf(advance * scale) + roundf(kern * scale) + (float)padding + (float)padding;
+		auto fontHeight = (float)ascent * scale + (float)padding + (float)padding;
+		/* 计算位图的y (不同字符的高度不同） */
+		if (x + (int)fontWidth > (int)maxTextureSize)
 		{
 			x = 0;
-			//y += fontSize + padding;
-			y += fontHeight;
+			y += (int)fontHeight + 1;
 		}
-
 		if (y + (int)glyph_height > (int)maxTextureSize)
 		{
-			//channel++;
-			//if (channel > 2)//超出通道
-			//{
-			//	break;
-			//}
-			//x = 0;
-			//y = 0;
 			return;
 		}
-
 		for (int y2 = 0; y2 < glyph_height; ++y2) {
 			for (int x2 = 0; x2 < glyph_width; ++x2) {
 				auto color = glyph_bitmap[y2 * glyph_width + x2];
 				int x_pos = x + x2 + glyph_xoff;
-				int y_pos = ascent * scale + y2 + y + glyph_yoff;
+				int y_pos = (int)((float)ascent * scale + (float)y2 + (float)y + (float)glyph_yoff);
 				int index = ((y_pos < 0 ? 0 : y_pos) * maxTextureSize + (x_pos < 0 ? 0 : x_pos))/* * 4*/;
-				////BGRA
-				//if (channel == 0)
-				//{
-				//	atlas_data[index + 2] = (float)color / 255.0f;
-				//}
-				//else if (channel == 1)
-				//{
-				//	atlas_data[index + 1] = (float)color / 255.0f;
-				//}
-				//else if (channel == 2)
-				//{
-				//	atlas_data[index + 0] = (float)color / 255.0f;
-				//}
-				//else if (channel == 3)
-				//{
-				//	atlas_data[index + 3] = color;
-				//}
-				atlas_data[index] = (float)color / 255.0f;
-
+				if (color > 5)
+					atlas_data[index] = (float)color / 255.0f;
 			}
 		}
 
+		//rect.w - 字体长度得到空余的位置
+		int ilen = std::max(0, (int)fontWidth - glyph_width);
 		Character newChar;
 		newChar.font = c;
-		newChar.sizeX = fontWidth - padding ;
-		newChar.sizeY = fontHeight - padding;
-		newChar.posX = x;
-		newChar.posY = y; 
+		newChar.sizeX = (uint32_t)fontWidth - (uint32_t)padding;
+		newChar.sizeY = (uint32_t)fontHeight;
+		newChar.posX = std::max(x - 1, 0);
+		newChar.posY = y;
+		newChar.sizeOffsetX = ilen;
 		characters.push_back(newChar);
-		x += fontWidth ;
+		/* 调整x */
+		x += (int)fontWidth ;
+
 		stbtt_FreeBitmap(glyph_bitmap, 0);
 	}
-
 }
 
 void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath, bool bOverwrite, uint32_t fontSize, uint32_t maxTextureSize)
@@ -987,7 +971,7 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath, boo
 
 	if (!FileSystem::FileExist(ttfFontPath.c_str()))
 	{
-		ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/bahnschrift.ttf";
+		ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/arial.ttf";
 		ttfFontPath.CorrectionPath();
 		if (!FileSystem::FileExist(ttfFontPath.c_str()))
 		{
@@ -1009,7 +993,7 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath, boo
 
 	int ascent, descent, line_gap;
 	stbtt_GetFontVMetrics(&font, &ascent, &descent, &line_gap);
-	float scale = stbtt_ScaleForPixelHeight(&font, fontSize);
+	float scale = stbtt_ScaleForPixelHeight(&font, (float)fontSize);
 
 	//int text_width = 0;
 	//int text_height = font_size;
@@ -1205,6 +1189,7 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath, boo
 		//subNode.append_attribute(L"scale").set_value((float)i.scale);
 		subNode.append_attribute(L"w").set_value(i.sizeX);
 		subNode.append_attribute(L"h").set_value(i.sizeY);
+		subNode.append_attribute(L"xOffset").set_value(i.sizeOffsetX);
 		subNode.append_attribute(L"char").set_value(std::wstring(1, i.font).c_str());
 	}
 	doc.save_file(fontDocPath.c_wstr());

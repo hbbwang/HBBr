@@ -1308,7 +1308,7 @@ void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<std:
 	}
 }
 
-void VulkanManager::CreateImage(uint32_t width , uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image, uint32_t miplevel)
+void VulkanManager::CreateImage(uint32_t width , uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image, uint32_t miplevel, uint32_t layerCount)
 {
 	VkExtent2D texSize = {};
 	texSize.width = width;
@@ -1320,7 +1320,7 @@ void VulkanManager::CreateImage(uint32_t width , uint32_t height, VkFormat forma
 	create_info.imageType = VK_IMAGE_TYPE_2D;
 	create_info.usage = usageFlags;
 	create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
-	create_info.arrayLayers = 1;
+	create_info.arrayLayers = layerCount;
 	create_info.mipLevels = miplevel;
 	create_info.extent.depth = 1;
 	create_info.extent.width = texSize.width;
@@ -1337,7 +1337,7 @@ void VulkanManager::CreateImage(uint32_t width , uint32_t height, VkFormat forma
 	}
 }
 
-void VulkanManager::CreateImageView(VkImage inImage, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView& imageView)
+void VulkanManager::CreateImageView(VkImage inImage, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView& imageView, uint32_t miplevel, uint32_t layerCount)
 {
 	VkImageViewCreateInfo image_view_create_info{};
 	image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -1352,8 +1352,8 @@ void VulkanManager::CreateImageView(VkImage inImage, VkFormat format, VkImageAsp
 	image_view_create_info.subresourceRange.aspectMask = aspectFlags;
 	image_view_create_info.subresourceRange.baseArrayLayer = 0;
 	image_view_create_info.subresourceRange.baseMipLevel = 0;
-	image_view_create_info.subresourceRange.layerCount = 1;
-	image_view_create_info.subresourceRange.levelCount = 1;
+	image_view_create_info.subresourceRange.layerCount = layerCount;
+	image_view_create_info.subresourceRange.levelCount = miplevel;
 	vkCreateImageView(_device, &image_view_create_info, VK_NULL_HANDLE, &imageView);
 }
 
@@ -1493,6 +1493,37 @@ void VulkanManager::DestroyImageView(VkImageView& imageView)
 	{
 		vkDestroyImageView(_device, imageView, VK_NULL_HANDLE);
 	}
+}
+
+void VulkanManager::CreateSampler(VkSampler& sampler, VkFilter filter, VkSamplerAddressMode address, float minMipLeve, float maxMipLevel)
+{
+	VkSamplerCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+	info.magFilter = filter;
+	info.minFilter = filter;
+	info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	info.addressModeU = address;
+	info.addressModeV = address;
+	info.addressModeW = address;
+	//各项异性采样
+	if (_gpuFeatures.samplerAnisotropy == VK_TRUE)
+	{
+		info.anisotropyEnable = VK_TRUE;
+		info.maxAnisotropy = 16.0f;
+	}
+	else
+	{
+		info.anisotropyEnable = VK_FALSE;
+		info.maxAnisotropy = 1.0f;
+	}
+	info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+	info.unnormalizedCoordinates = VK_FALSE;
+	info.compareEnable = VK_FALSE;
+	info.compareOp = VK_COMPARE_OP_ALWAYS;
+	info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	info.minLod = minMipLeve;
+	info.maxLod = maxMipLevel;
+	vkCreateSampler(_device, &info, nullptr, &sampler);
 }
 
 void VulkanManager::CreateCommandPool()
@@ -2483,7 +2514,7 @@ void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, st
 		descriptorWrite[o].pImageInfo = &imageInfo[o];
 		descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE;
 	}
-	vkUpdateDescriptorSets(_device, descriptorWrite.size(), descriptorWrite.data(), 0, VK_NULL_HANDLE);
+	vkUpdateDescriptorSets(_device, (uint32_t)descriptorWrite.size(), descriptorWrite.data(), 0, VK_NULL_HANDLE);
 }
 
 VkDeviceSize VulkanManager::GetMinUboAlignmentSize(VkDeviceSize realSize)
@@ -2496,11 +2527,6 @@ VkDeviceSize VulkanManager::GetMinUboAlignmentSize(VkDeviceSize realSize)
 		outSize = (outSize + (VkDeviceSize)minUboAlignment - 1) & ~((VkDeviceSize)minUboAlignment - 1);
 	}
 	return outSize;
-}
-
-void VulkanManager::UpdateImageSamplerDescriptorSet(DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range)
-{
-
 }
 
 void VulkanManager::CmdSetViewport(VkCommandBuffer cmdbuf, std::vector<VkExtent2D> viewports)

@@ -136,7 +136,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 				VkPipelineLayout pipelineLayout;
 				if (pipelineCreateInfo.bHasMaterialTexture)
 				{
-					if (pipelineCreateInfo.bHasMaterialParameter > 0)
+					if (pipelineCreateInfo.bHasMaterialParameter)
 						pipelineLayout = _pipelineLayout_p_o_m_t;
 					else
 						pipelineLayout = _pipelineLayout_p_o_t;

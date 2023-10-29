@@ -214,6 +214,9 @@
     <ClInclude Include="Core\Pass\GUIPass.h">
       <Filter>Renderer\Core\Pass</Filter>
     </ClInclude>
+    <ClInclude Include="Common\HRect.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -356,6 +359,9 @@
     </ClCompile>
     <ClCompile Include="Core\Pass\GUIPass.cpp">
       <Filter>Renderer\Core\Pass</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\HRect.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

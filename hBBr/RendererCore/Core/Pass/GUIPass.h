@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include "PassBase.h"
 #include "HGuid.h"
-
+#include "HRect.h"
 //GUI Flags
 #define IsFont      0x00000001
 #define FontShadow  0x00000002
@@ -99,7 +99,7 @@ private:
 	void ShowPerformance();
 
 	GUIPrimitive* GetPrimitve(HString& tag,GUIDrawState& state , int stateCount,HString pipelineTag, float x, float y, float w, float h);
-	std::vector<GUIVertexData> GetGUIPanel(GUIDrawState& state, float x, float y, float w, float h);
+	void SetupPanelAnchor(GUIDrawState state, float x, float y, float w, float h, GUIVertexData* vertexData);
 	std::shared_ptr<class Buffer>_vertexBuffer;
 	std::unordered_map<HString,GUIPrimitive> _drawList;
 	std::unordered_map<HString, VkPipeline> _guiPipelines;

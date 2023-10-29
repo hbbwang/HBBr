@@ -66,9 +66,7 @@ void GUIPass::PassUpdate()
 	GUIDrawImage("TestImage", Texture::GetSystemTexture("TestTex"), 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1, 1, 1, 0.95)));
 	ShowPerformance();
 
-	GUIDrawText("fonttest",
-		L"AbCd,自定义GUI 文字测试~\n你好呀123嘿嘿。 "
-		, 0, 20.0f, 200, 200, GUIDrawState(GUIAnchor_CenterCenter, false, glm::vec4(1)), 20.0f);
+	//GUIDrawText("fonttest",L"AbCd,自定义GUI文字测试~\n你好呀123嘿嘿。 ", 0, 20.0f, 200, 200, GUIDrawState(GUIAnchor_CenterLeft, false, glm::vec4(1)), 20.0f);
 
 	//收集顶点数据一次性使用
 	std::vector<GUIVertexData> vertices;
@@ -78,10 +76,10 @@ void GUIPass::PassUpdate()
 		vertices.insert(vertices.end(), i.second.Data.begin(), i.second.Data.end());
 		//textures
 		i.second.tex_descriptorSet->UpdateTextureDescriptorSet({ i.second.BaseTexture });
-		uint32_t ubSize = manager->GetMinUboAlignmentSize(sizeof(GUIUniformBuffer));
+		uint32_t ubSize = (uint32_t)manager->GetMinUboAlignmentSize(sizeof(GUIUniformBuffer));
 		uint32_t ubOffset = 0;
 		i.second.ub_descriptorSet->ResizeDescriptorBuffer(ubSize * (i.second.States.size()));
-		i.second.ub_descriptorSet->UpdateDescriptorSet(ubSize * (i.second.States.size()));
+		i.second.ub_descriptorSet->UpdateDescriptorSet(ubSize * ((uint32_t)i.second.States.size()));
 		for (auto s : i.second.States)
 		{
 			//uniform buffers
@@ -114,8 +112,8 @@ void GUIPass::PassUpdate()
 			//uniform buffers
 			vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &i.second.ub_descriptorSet->GetDescriptorSet(), 1, &ubOffset);
 			//draw primitive
-			vkCmdDraw(cmdBuf, 6, 1, vbOffset, 0);
-			ubOffset += manager->GetMinUboAlignmentSize(sizeof(GUIUniformBuffer));
+			vkCmdDraw(cmdBuf, 6, 1, (uint32_t)vbOffset, 0);
+			ubOffset += (uint32_t)manager->GetMinUboAlignmentSize(sizeof(GUIUniformBuffer));
 			vbOffset += 6;
 		}
 	}
@@ -131,13 +129,10 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 {
 	auto textLength = wcslen(text);
 	if (textLength <= 0)
-	{
 		return;
-	}
 	state.uniformBuffer.Color = glm::vec4(1,1,1,2);
 	state.uniformBuffer.Flags = IsFont;
-	GUIPrimitive* prim = GetPrimitve(tag, state, textLength, "Base", x, y, w, h);
-	std::vector<GUIVertexData>textMeshes;
+	GUIPrimitive* prim = GetPrimitve(tag, state, (int)textLength, "Base", x, y, w, h);
 	if (prim->BaseTexture != Texture::GetFontTexture())
 	{
 		prim->BaseTexture = Texture::GetFontTexture();
@@ -162,8 +157,8 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 		//获取文字信息
 		auto info = Texture::GetFontInfo(prim->fontCharacter[i]);
 		prim->States[i].uniformBuffer.UVSetting = glm::vec4(info->posX, info->posY, info->sizeX, info->sizeY);
-		prim->States[i].uniformBuffer.TextureSizeX = Texture::GetFontTexture()->GetImageSize().width;
-		prim->States[i].uniformBuffer.TextureSizeY = Texture::GetFontTexture()->GetImageSize().width;
+		prim->States[i].uniformBuffer.TextureSizeX = (float)Texture::GetFontTexture()->GetImageSize().width;
+		prim->States[i].uniformBuffer.TextureSizeY = (float)Texture::GetFontTexture()->GetImageSize().width;
 		//文字像素大小
 		if (textChar == L' ')
 		{
@@ -175,17 +170,15 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 		}
 		//文字按顺序偏移 
 		prim->States[i].Translate = glm::vec2(tx, ty );
-		auto newTextMesh = GetGUIPanel(prim->States[i], x, y, 1, 1);
-		textMeshes.insert(textMeshes.end(), newTextMesh.begin(), newTextMesh.end());
-		tx += prim->States[i].Scale.x + 1;
+		SetupPanelAnchor(prim->States[i], x, y, 1, 1, prim->Data.data() + i * 6 );
+		tx += prim->States[i].Scale.x;
 	}
-	prim->Data = textMeshes;
 }
 
 void GUIPass::GUIDrawImage(HString tag, Texture* texture, float x, float y, float w, float h, GUIDrawState state)
 {
 	GUIPrimitive* prim = GetPrimitve(tag, state, 1, "Base", x, y, w, h);
-	prim->Data = GetGUIPanel(state, x, y, w, h);
+	SetupPanelAnchor(state, x, y, w, h, prim->Data.data());
 	prim->States[0].uniformBuffer.UVSetting = glm::vec4(0, 0, 1, 1);
 	if (prim->BaseTexture != texture)
 	{
@@ -194,122 +187,73 @@ void GUIPass::GUIDrawImage(HString tag, Texture* texture, float x, float y, floa
 	}
 }
 
-std::vector<GUIVertexData> GUIPass::GetGUIPanel(GUIDrawState& state, float x, float y, float w, float h)
+void GUIPass::SetupPanelAnchor(GUIDrawState state, float x, float y, float w, float h, GUIVertexData* vertexData)
 {
-	std::vector<GUIVertexData> data;
-	data.resize(6);
 	glm::vec2 aspect = glm::vec2(_currentFrameBufferSize.width, _currentFrameBufferSize.height);
-	{
-		data[0] = { glm::vec2(-1.0f,	-1.0f),glm::vec2(0.0f, 0.0f),state.Color };
-		data[1] = { glm::vec2( 1.0f,	-1.0f),glm::vec2(1.0f, 0.0f),state.Color };
-		data[2] = { glm::vec2(-1.0f,	 1.0f),glm::vec2(0.0f, 1.0f),state.Color };
-		data[3] = { glm::vec2( 1.0f,	-1.0f),glm::vec2(1.0f, 0.0f),state.Color };
-		data[4] = { glm::vec2( 1.0f,	 1.0f),glm::vec2(1.0f, 1.0f),state.Color };
-		data[5] = { glm::vec2(-1.0f,	 1.0f),glm::vec2(0.0f, 1.0f),state.Color };
-	}
 	glm::vec2 xy = state.Translate + glm::vec2(x, y);
 	glm::vec2 wh = state.Scale * glm::vec2(w, h);
-	if (state.bFixed)
+	if (!state.bFixed)
 	{
-		xy /= 100.0f;
-		wh /= 100.0f;
+		xy = xy / aspect;
+		wh = wh / aspect;
 	}
-	else
-	{	
-		xy = xy * 2.0f / aspect;
-		wh /= aspect;
-	}
-
+	glm::vec2 lt = glm::vec2(0.0f, 0.0f) * wh;// 左上角
+	glm::vec2 rt = glm::vec2(1.0f, 0.0f) * wh;// 右上角
+	glm::vec2 lb = glm::vec2(0.0f, 1.0f) * wh;// 左下角
+	glm::vec2 rb = glm::vec2(1.0f, 1.0f) * wh;// 右下角
 	if (state.Anchor == GUIAnchor_TopLeft)
 	{
-		wh = wh * 2.0f - 1.0f;
-		data[0].Pos = glm::vec2(-1.0f		, -1.0f) + xy;
-		data[1].Pos = glm::vec2(1.0f * wh.x	, -1.0f) + xy;
-		data[2].Pos = glm::vec2(-1.0f		, 1.0f * wh.y) + xy;
-		data[3].Pos = glm::vec2(1.0f * wh.x	, -1.0f) + xy;
-		data[4].Pos = glm::vec2(1.0f * wh.x	, 1.0f * wh.y) + xy;
-		data[5].Pos = glm::vec2(-1.0f		, 1.0f * wh.y) + xy;
+
 	}
 	else if (state.Anchor == GUIAnchor_TopCenter)
 	{
-		wh.y = wh.y * 2.0f - 1.0f;
-		data[0].Pos = glm::vec2(-1.0f * wh.x, -1.0f) + xy;
-		data[1].Pos = glm::vec2(1.0f * wh.x, -1.0f) + xy;
-		data[2].Pos = glm::vec2(-1.0f * wh.x, 1.0f * wh.y) + xy;
-		data[3].Pos = glm::vec2(1.0f * wh.x, -1.0f) + xy;
-		data[4].Pos = glm::vec2(1.0f * wh.x, 1.0f * wh.y) + xy;
-		data[5].Pos = glm::vec2(-1.0f * wh.x, 1.0f * wh.y) + xy;
+		xy.x += 0.5f;
 	}
 	else if (state.Anchor == GUIAnchor_TopRight)
 	{
-		wh = wh * 2.0f - 1.0f;
-		data[0].Pos = glm::vec2(-1.0f * wh.x, -1.0f) + xy;
-		data[1].Pos = glm::vec2(1.0f, -1.0f) + xy;
-		data[2].Pos = glm::vec2(-1.0f * wh.x, 1.0f * wh.y) + xy;
-		data[3].Pos = glm::vec2(1.0f, -1.0f) + xy;
-		data[4].Pos = glm::vec2(1.0f, 1.0f * wh.y) + xy;
-		data[5].Pos = glm::vec2(-1.0f * wh.x, 1.0f * wh.y) + xy;
+		xy.x += 1.0f;
 	}
 	else if (state.Anchor == GUIAnchor_CenterLeft)
 	{
-		wh.x = wh.x * 2.0f - 1.0f;
-		data[0].Pos = glm::vec2(-1.0f		, -1.0f * wh.y) + xy;
-		data[1].Pos = glm::vec2(1.0f * wh.x	, -1.0f * wh.y) + xy;
-		data[2].Pos = glm::vec2(-1.0f		,  1.0f * wh.y) + xy;
-		data[3].Pos = glm::vec2(1.0f * wh.x	, -1.0f * wh.y) + xy;
-		data[4].Pos = glm::vec2(1.0f * wh.x	,  1.0f * wh.y) + xy;
-		data[5].Pos = glm::vec2(-1.0f		,  1.0f * wh.y) + xy;
+		xy.y += 0.5f;
 	}
 	else if (state.Anchor == GUIAnchor_CenterCenter)
 	{
-		for (auto& i : data)
-		{		
-			i.Pos *= wh;
-			i.Pos += xy;
-		}
+		xy += 0.5f;
 	}
 	else if (state.Anchor == GUIAnchor_CenterRight)
 	{
-		wh.x = wh.x * 2.0f - 1.0f;
-		data[0].Pos = glm::vec2(-1.0f * wh.x, -1.0f * wh.y) + xy;
-		data[1].Pos = glm::vec2( 1.0f		, -1.0f * wh.y) + xy;
-		data[2].Pos = glm::vec2(-1.0f * wh.x,  1.0f * wh.y) + xy;
-		data[3].Pos = glm::vec2( 1.0f		, -1.0f * wh.y) + xy;
-		data[4].Pos = glm::vec2( 1.0f		,  1.0f * wh.y) + xy;
-		data[5].Pos = glm::vec2(-1.0f * wh.x,  1.0f * wh.y) + xy;
+		xy.x += 1.0f;
+		xy.y += 0.5f;
 	}
 	else if (state.Anchor == GUIAnchor_BottomLeft)
 	{
-		wh = wh * 2.0f - 1.0f;
-		data[0].Pos = glm::vec2(-1.0f		, -1.0f * wh.y) + xy;
-		data[1].Pos = glm::vec2( 1.0f * wh.x, -1.0f * wh.y) + xy;
-		data[2].Pos = glm::vec2(-1.0f		,  1.0f) + xy;
-		data[3].Pos = glm::vec2( 1.0f * wh.x, -1.0f * wh.y) + xy;
-		data[4].Pos = glm::vec2( 1.0f * wh.x,  1.0f) + xy;
-		data[5].Pos = glm::vec2(-1.0f		,  1.0f) + xy;
+		xy.y += 1.0f;
 	}
 	else if (state.Anchor == GUIAnchor_BottomCenter)
 	{
-		wh.y = wh.y * 2.0f - 1.0f;
-		data[0].Pos = glm::vec2(-1.0f * wh.x, -1.0f * wh.y) + xy;
-		data[1].Pos = glm::vec2( 1.0f * wh.x, -1.0f * wh.y) + xy;
-		data[2].Pos = glm::vec2(-1.0f * wh.x,  1.0f) + xy;
-		data[3].Pos = glm::vec2( 1.0f * wh.x, -1.0f * wh.y) + xy;
-		data[4].Pos = glm::vec2( 1.0f * wh.x,  1.0f) + xy;
-		data[5].Pos = glm::vec2(-1.0f * wh.x,  1.0f) + xy;
+		xy.x += 0.5f;
+		xy.y += 1.0f;
 	}
 	else if (state.Anchor == GUIAnchor_BottomRight)
 	{
-		wh = wh * 2.0f - 1.0f;
-		data[0].Pos = glm::vec2(-1.0f * wh.x, -1.0f * wh.y) + xy;
-		data[1].Pos = glm::vec2( 1.0f		, -1.0f * wh.y) + xy;
-		data[2].Pos = glm::vec2(-1.0f * wh.x,  1.0f) + xy;
-		data[3].Pos = glm::vec2( 1.0f		, -1.0f * wh.y) + xy;
-		data[4].Pos = glm::vec2( 1.0f		,  1.0f) + xy;
-		data[5].Pos = glm::vec2(-1.0f * wh.x,  1.0f) + xy;
+		xy.x += 1.0f;
+		xy.y += 1.0f;
 	}
-
-	return data;
+	lt += xy;
+	rt += xy;
+	lb += xy;
+	rb += xy;
+	lt = lt * 2.0f - 1.0f;
+	rt = rt * 2.0f - 1.0f;
+	lb = lb * 2.0f - 1.0f;
+	rb = rb * 2.0f - 1.0f;
+	*(vertexData + 0) = GUIVertexData{ lt ,glm::vec2(0.0f, 0.0f),state.Color };
+	*(vertexData + 1) = GUIVertexData{ rt ,glm::vec2(1.0f, 0.0f),state.Color };
+	*(vertexData + 2) = GUIVertexData{ lb ,glm::vec2(0.0f, 1.0f),state.Color };
+	*(vertexData + 3) = GUIVertexData{ rt ,glm::vec2(1.0f, 0.0f),state.Color };
+	*(vertexData + 4) = GUIVertexData{ rb ,glm::vec2(1.0f, 1.0f),state.Color };
+	*(vertexData + 5) = GUIVertexData{ lb ,glm::vec2(0.0f, 1.0f),state.Color };
 }
 
 GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateCount, HString pipelineTag, float x, float y, float w, float h)
@@ -333,8 +277,8 @@ GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateC
 		prim->States[i] = state;
 		prim->States[i].uniformBuffer.TextureSizeX = 1;
 		prim->States[i].uniformBuffer.TextureSizeY = 1;
-		prim->States[i].uniformBuffer.ScreenSizeX = _currentFrameBufferSize.width;
-		prim->States[i].uniformBuffer.ScreenSizeY = _currentFrameBufferSize.width;
+		prim->States[i].uniformBuffer.ScreenSizeX = (float)_currentFrameBufferSize.width;
+		prim->States[i].uniformBuffer.ScreenSizeY = (float)_currentFrameBufferSize.width;
 	}
 
 	if (!prim->ub_descriptorSet)
@@ -346,7 +290,7 @@ GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateC
 		prim->tex_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _texDescriptorSetLayout, 1, 0, VK_SHADER_STAGE_FRAGMENT_BIT));
 	}
 	prim->viewport = { (int)x,(int)y,(uint32_t)w,(uint32_t)h };
-
+	prim->Data.resize(6 * stateCount);
 	return prim;
 }
 

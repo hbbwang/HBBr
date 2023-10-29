@@ -152,10 +152,10 @@ public:
 	void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<std::shared_ptr<class Texture>>& textures);
 
 	/* 创建Vulkan image ,但是不带 mipmaps */
-	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image ,uint32_t miplevel = 1);
+	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image ,uint32_t miplevel = 1, uint32_t layerCount = 1);
 
 	/* 根据VkImageView ,创建Vulkan image view*/
-	void CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags,  VkImageView& imageView);
+	void CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags,  VkImageView& imageView, uint32_t miplevel = 1, uint32_t layerCount = 1);
 
 	/* 创建Vulkan image view memory*/
 	void CreateImageMemory(VkImage image, VkDeviceMemory& imageViewMemory, VkMemoryPropertyFlags memoryPropertyFlag = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -165,6 +165,8 @@ public:
 	void DestroyImageMemory(VkDeviceMemory& imageViewMemory);
 
 	void DestroyImageView(VkImageView& imageView);
+
+	void CreateSampler(VkSampler& sampler, VkFilter filter = VK_FILTER_LINEAR, VkSamplerAddressMode address = VK_SAMPLER_ADDRESS_MODE_REPEAT, float minMipLeve = 0, float maxMipLevel = 16);
 
 	/* 创建Frame buffer */
 	void CreateFrameBuffers(VkExtent2D FrameBufferSize, VkRenderPass renderPass, std::vector<VkImageView> attachments, std::vector<VkFramebuffer>& frameBuffers);
@@ -324,8 +326,6 @@ public:
 	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture*> textures);
 
 	VkDeviceSize GetMinUboAlignmentSize(VkDeviceSize realSize);
-
-	void UpdateImageSamplerDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
 
 	/* CMD */
 	void CmdSetViewport(VkCommandBuffer cmdbuf, std::vector<VkExtent2D> viewports);
