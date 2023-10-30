@@ -148,11 +148,35 @@ Material* Material::LoadMaterial(HGUID guid)
 			//primitive参数的长度以shader为主
 			mat->_primitive->_textureInfos.reserve(psCache.header.shaderTextureCount);
 			mat->_primitive->textures.resize(psCache.header.shaderTextureCount);
+			mat->_primitive->_samplers.resize(psCache.header.shaderTextureCount);
 			//初始化
 			for (int i = 0; i < psCache.header.shaderTextureCount; i++)
 			{
 				mat->_primitive->_textureInfos.push_back(*psCache.ti[i]);
 				mat->_primitive->SetTexture(i, Texture::GetSystemTexture(psCache.texs[i].defaultTexture));
+				//Set Sampler
+				if (psCache.texs[i].msFilter == MSFilter::Nearest)
+				{
+					if (psCache.texs[i].msAddress == MSAddress::Clamp)
+						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp));
+					else if (psCache.texs[i].msAddress == MSAddress::Wrap)
+						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Nearest_Wrap));
+					else if (psCache.texs[i].msAddress == MSAddress::Mirror)
+						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Nearest_Mirror));
+					else if (psCache.texs[i].msAddress == MSAddress::Border)
+						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Nearest_Border));
+				}
+				else if (psCache.texs[i].msFilter == MSFilter::Linear)
+				{
+					if (psCache.texs[i].msAddress == MSAddress::Clamp)
+						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Linear_Clamp));
+					else if (psCache.texs[i].msAddress == MSAddress::Wrap)
+						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Linear_Wrap));
+					else if (psCache.texs[i].msAddress == MSAddress::Mirror)
+						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Linear_Mirror));
+					else if (psCache.texs[i].msAddress == MSAddress::Border)
+						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Linear_Border));
+				}
 			}
 			//赋值
 			for (auto i = textures.first_child(); i != NULL; i = i.next_sibling())
@@ -174,6 +198,10 @@ Material* Material::LoadMaterial(HGUID guid)
 					info.type = (MTType)type;
 					//index
 					info.index = it->index;
+					//address
+					info.samplerAddress = it->msAddress;
+					//filter
+					info.samplerFilter = it->msFilter;
 					//ui
 					XMLStream::LoadXMLAttributeString(i, L"ui", info.ui);
 					//value
@@ -202,10 +230,8 @@ Material* Material::LoadMaterial(HGUID guid)
 
 				}
 			}
-
 		}
 		//
-
 		PrimitiveProxy::GetNewMaterialPrimitiveIndex(mat->_primitive.get());
 		PrimitiveProxy::AddMaterialPrimitive( mat->_primitive.get());
 

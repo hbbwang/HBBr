@@ -132,6 +132,8 @@ void Shader::LoadShaderCache(const char* cachePath)
 				info->type = (MTType)cache.texs[i].type;
 				info->index = cache.texs[i].index;
 				info->value = cache.texs[i].defaultTexture;
+				info->samplerAddress = cache.texs[i].msAddress;
+				info->samplerFilter = cache.texs[i].msFilter;
 				cache.ti.push_back(info);
 			}
 		}

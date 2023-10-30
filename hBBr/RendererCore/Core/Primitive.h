@@ -23,9 +23,10 @@ struct MaterialParameterInfo
 struct MaterialTextureInfo
 {
 	MTType type;
+	MSAddress samplerAddress = MSAddress::Wrap;
+	MSFilter samplerFilter = MSFilter::Linear;
 	HString name, ui;
 	uint32_t index = 0;
-
 	HString value;
 };
 
@@ -99,6 +100,14 @@ public:
 		return textures;
 	}
 
+	HBBR_INLINE std::vector<VkSampler> GetSamplers() {
+		return _samplers;
+	}
+
+	void SetTextureSampler(int index, VkSampler sampler);
+
+	void SetTextureSampler(HString textureName, VkSampler sampler);
+
 	void SetTexture(int index, class Texture* newTexture);
 
 	void SetTexture(HString textureName, class Texture* newTexture);
@@ -148,6 +157,9 @@ private:
 
 	//纹理贴图
 	std::vector<class Texture*> textures;
+
+	//采样器选择
+	std::vector<VkSampler> _samplers;
 
 	//Image DescriptorSet
 	VkDescriptorSet _descriptorSet_tex;

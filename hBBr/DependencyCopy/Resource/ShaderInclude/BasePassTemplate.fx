@@ -4,14 +4,14 @@
 
 cbuffer Material :register(b0, space2)
 {
-    //[MP]Name = F_1 ; Default = 1;
-    float   F1;
-    //[MP]Name = F_2 ; Default = 1,1;
-    float2  F2;
-    //[MP]Name = F_3 ; Default = 1,1,1;
-    float3  F3;
-    //[MP]Default = 1,1,1,1;
-    float4  F4;
+    [Name=F_1; Default=1;]
+    float F1;
+    [Name=F_2; Default=1,1;]
+    float2 F2;
+    [Name=F_3; Default=1,1,1;]
+    float3 F3;
+    [Default=1,1,1,1;]
+    float4 F4;
 };
 
 //[InputLayout]
@@ -32,8 +32,9 @@ struct VSInput
 
 // }
 
-//[MT]Name=BaseTexture;Default =UVGrid;
+[Filter=Linear; Address=Wrap;]
 SamplerState BaseTextureSampler : register(s0,space3);
+[Name=BaseTexture; Default=UVGrid;]
 Texture2D BaseTexture : register(t0,space3);
 
 //像素着色器补充

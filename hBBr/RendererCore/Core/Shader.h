@@ -22,6 +22,22 @@ enum class MTType : uint8_t
 	TextureArray = 4
 };
 
+enum class MSFilter : uint8_t
+{
+	Unknow = 0,
+	Linear = 1,
+	Nearest = 2,
+};
+
+enum class MSAddress : uint8_t
+{
+	Unknow = 0,
+	Clamp = 1,
+	Wrap = 2,
+	Mirror = 3,
+	Border =4,
+};
+
 enum class ShaderType
 {
 	VertexShader = 0,
@@ -62,6 +78,8 @@ struct ShaderTextureInfo
 	char name[32] = "\0";
 	char defaultTexture[16];//systemTexture
 	uint8_t index = 0;
+	MSFilter msFilter = MSFilter::Linear;
+	MSAddress msAddress = MSAddress::Wrap;
 };
 
 struct ShaderCache

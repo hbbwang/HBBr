@@ -117,7 +117,6 @@ std::shared_ptr<Texture> Texture::CreateTexture2D(
 	newTexture->_textureName = textureName;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = {width,height};
-	newTexture->_sampler = _samplers[TextureSampler_Linear_Wrap];
 	VulkanManager::GetManager()->CreateImage(width, height, format, usageFlags, newTexture->_image, miplevel, layerCount);
 	if (format == VK_FORMAT_R32_SFLOAT || format == VK_FORMAT_D32_SFLOAT)
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
@@ -192,7 +191,6 @@ Texture* Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags usageFlags)
 	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView, newTexture->_imageData->mipLevel, arrayLevel);
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
-	newTexture->_sampler = _samplers[TextureSampler_Linear_Wrap];
 
 	dataPtr->SetData(std::move(newTexture));
 
@@ -232,19 +230,24 @@ void Texture::GlobalInitialize()
 		info.anisotropyEnable = VK_FALSE;
 		info.maxAnisotropy = 1.0f;
 	}
-
+	//Linear
 	manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 16);
 	_samplers.emplace(TextureSampler_Linear_Wrap, std::move(sampler));
 	manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0, 16);
 	_samplers.emplace(TextureSampler_Linear_Mirror, std::move(sampler));
 	manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 16);
 	_samplers.emplace(TextureSampler_Linear_Clamp, std::move(sampler));
+	manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, 0, 16);
+	_samplers.emplace(TextureSampler_Linear_Border, std::move(sampler));
+	//Nearest
 	manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 16);
 	_samplers.emplace(TextureSampler_Nearest_Wrap, std::move(sampler));
 	manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0, 16);
 	_samplers.emplace(TextureSampler_Nearest_Mirror, std::move(sampler));
 	manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 16);
 	_samplers.emplace(TextureSampler_Nearest_Clamp, std::move(sampler));
+	manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, 0, 16);
+	_samplers.emplace(TextureSampler_Nearest_Border, std::move(sampler));
 
 	//Create BaseTexture
 	auto uvGridTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_UVGrid"));

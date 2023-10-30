@@ -90,3 +90,20 @@ void MaterialPrimitive::SetTexture(HString textureName, Texture* newTexture)
 		SetTexture(it->index, newTexture);
 	}
 }
+
+void MaterialPrimitive::SetTextureSampler(int index, VkSampler sampler)
+{
+	_samplers[index] = sampler;
+	_needUpdateDescriptorSet_tex = true;
+}
+
+void MaterialPrimitive::SetTextureSampler(HString textureName, VkSampler sampler)
+{
+	auto it = std::find_if(_textureInfos.begin(), _textureInfos.end(), [textureName](MaterialTextureInfo& info) {
+		return info.name.IsSame(textureName, false);
+		});
+	if (it != _textureInfos.end())
+	{
+		SetTextureSampler(it->index, sampler);
+	}
+}

@@ -45,14 +45,13 @@ float4 PSMain(VSToPS IN) :SV_Target0
 {   
     half4 result = 1;
     //return IN.Color;
-    half4 baseTexture = 
-    BaseTexture.SampleLevel(BaseTextureSampler,
-    IN.UV * (UVSetting.zw / float2(TextureSizeX,TextureSizeY)) + (UVSetting.xy / float2(TextureSizeX,TextureSizeY)) ,100);
+    half4 baseTexture = BaseTexture.SampleBias(BaseTextureSampler,
+    IN.UV * (UVSetting.zw / float2(TextureSizeX,TextureSizeY)) + (UVSetting.xy / float2(TextureSizeX,TextureSizeY)) , -1);
 
     if(Flags & IsFont)
     {
         result = baseTexture.r;
-        result = saturate(smoothstep(0.4f , 1.0f , result) * 5.f);
+        result = saturate(smoothstep(0.25f , 1.0f , result) * 2.5f);
         if(! (Flags & FontShadow) )
         {
             result.rgb = 1.0f;

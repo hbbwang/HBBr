@@ -75,7 +75,7 @@ void GUIPass::PassUpdate()
 		//vertex buffer
 		vertices.insert(vertices.end(), i.second.Data.begin(), i.second.Data.end());
 		//textures
-		i.second.tex_descriptorSet->UpdateTextureDescriptorSet({ i.second.BaseTexture });
+		i.second.tex_descriptorSet->UpdateTextureDescriptorSet({ i.second.BaseTexture }, { Texture::GetSampler(TextureSampler::TextureSampler_Linear_Wrap) });
 		uint32_t ubSize = (uint32_t)manager->GetMinUboAlignmentSize(sizeof(GUIUniformBuffer));
 		uint32_t ubOffset = 0;
 		i.second.ub_descriptorSet->ResizeDescriptorBuffer(ubSize * (i.second.States.size()));
@@ -136,7 +136,6 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 	if (prim->BaseTexture != Texture::GetFontTexture())
 	{
 		prim->BaseTexture = Texture::GetFontTexture();
-		prim->BaseTexture->SetSampler(TextureSampler_Linear_Clamp);
 		prim->tex_descriptorSet->NeedUpdate();
 	}
 	//计算每个文字面片位置

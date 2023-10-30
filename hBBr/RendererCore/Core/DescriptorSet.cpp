@@ -159,7 +159,7 @@ void DescriptorSet::UpdateDescriptorSetAll(uint32_t sameBufferSize)
 	VulkanManager::GetManager()->UpdateBufferDescriptorSetAll(this, 0, 0, alignmentSize);
 }
 
-void DescriptorSet::UpdateTextureDescriptorSet(std::vector<class Texture*> textures)
+void DescriptorSet::UpdateTextureDescriptorSet(std::vector<class Texture*> textures, std::vector<VkSampler> samplers)
 {
 	if (_needUpdates[_renderer->GetCurrentFrameIndex()] == 1)
 	{
@@ -171,7 +171,7 @@ void DescriptorSet::UpdateTextureDescriptorSet(std::vector<class Texture*> textu
 		for (uint32_t o = 0; o < count; o++)
 		{
 			imageInfo[o] = {};
-			imageInfo[o].sampler = textures[o]->GetSampler();
+			imageInfo[o].sampler = samplers[o];
 			imageInfo[o].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			imageInfo[o].imageView = textures[o]->GetTextureView();
 			descriptorWrite[o] = {};

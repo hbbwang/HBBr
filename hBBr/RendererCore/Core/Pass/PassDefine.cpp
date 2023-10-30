@@ -168,7 +168,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 
 			if (m->GetDescriptorSet() != VK_NULL_HANDLE && m->NeedUpdateTexture())
 			{
-				manager->UpdateTextureDescriptorSet(m->GetDescriptorSet(), m->GetTextures());
+				manager->UpdateTextureDescriptorSet(m->GetDescriptorSet(), m->GetTextures(), m->GetSamplers());
 			}
 
 			auto prims = PrimitiveProxy::GetModelPrimitives(m);

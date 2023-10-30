@@ -38,6 +38,7 @@
 #endif
 
 #include <string>
+#include <algorithm>
 #include <cwchar>
 #include <locale>
 #include <codecvt>
@@ -53,6 +54,10 @@ private:
 	wchar_t* _wstr = NULL;
 	size_t length = 0;
 public:
+	/* 
+		this function is clear string memroy,not clear characters.
+		If want to clear string characters,please use empty().
+	*/
 	inline void clear()
 	{
 		ReleaseCache();
@@ -64,13 +69,17 @@ public:
 		length = 0;
 	}
 
+	inline void empty()
+	{
+		this->assign("");
+	}
+
 	//字符串初始化
 	HString()
 	{
-		this->_str = new char[2];
-		this->_str[0] = ' ';
+		this->_str = new char[1];
 		this->_str[0] = '\0';
-		this->length = 1;
+		this->length = 0;
 	}
 	HString(const char* str)
 	{
@@ -78,15 +87,16 @@ public:
 			return;
 		clear();
 		this->length = strlen(str);
-		this->_str = new char[this->length + 1];//预留最后一个'/0'空字符的位置
+		this->_str = new char[this->length + 1];
 		strcpy_s(this->_str, this->length + 1, str);
+		_str[length] = '\0';
 	}
 	HString(const char str)
 	{
 		clear();
 		char strTemp[2] = { str , '\0' };
 		this->length = strlen(strTemp);
-		this->_str = new char[this->length + 1];//预留最后一个'/0'空字符的位置
+		this->_str = new char[this->length + 1];
 		strcpy_s(this->_str, this->length + 1, strTemp);
 	}
 	HString(const wchar_t* str)
@@ -96,8 +106,9 @@ public:
 		clear();
 		const char* result = pws2s(str);
 		this->length = strlen(result);
-		this->_str = new char[this->length + 1];//预留最后一个'/0'空字符的位置
+		this->_str = new char[this->length + 1];
 		strcpy_s(this->_str, this->length + 1, result);
+		_str[length] = '\0';
 	}
 	HString(const wchar_t str)
 	{
@@ -105,7 +116,7 @@ public:
 		wchar_t strTemp[2] = { str , L'\0' };
 		const char* result = pws2s(strTemp);
 		this->length = strlen(result);
-		this->_str = new char[this->length + 1];//预留最后一个'/0'空字符的位置
+		this->_str = new char[this->length + 1];
 		strcpy_s(this->_str, this->length + 1, result);
 	}
 	HString(const HString& obj)
@@ -137,6 +148,7 @@ public:
 		this->length = obj.Length();
 		this->_str = new char[this->length + 1];
 		strcpy_s(this->_str, this->length + 1, obj._str);
+		_str[length] = '\0';
 	}
 
 	void operator/(const HString& obj)
@@ -393,6 +405,7 @@ public:
 		length = strlen(str);
 		_str = new char[length + 1];//预留最后一个'/0'空字符的位置
 		strcpy_s(_str, length + 1, str);
+		_str[length] = '\0';
 	}
 
 	HBBR_INLINE void assign(HString str)
@@ -401,6 +414,7 @@ public:
 		length = str.length;
 		_str = new char[length + 1];//预留最后一个'/0'空字符的位置
 		strcpy_s(_str, length + 1, str._str);
+		_str[length] = '\0';
 	}
 
 	/* char* length!!! not wchar_t*  */
@@ -426,6 +440,7 @@ public:
 		clear();
 		_str = temp;
 		length = strlen(_str);
+		_str[length] = '\0';
 	}
 
 	HBBR_INLINE void append(const wchar_t* str)
@@ -624,6 +639,7 @@ public:
 		HString out = *this;
 		if (bFound)
 			out.Remove(len - index, len);
+		out.CorrectionPath();
 		return out;
 	}
 
@@ -683,10 +699,17 @@ public:
 	}
 
 	/* 字符串包含 */
-	HBBR_INLINE bool Contains(HString whatStr)
+	HBBR_INLINE bool Contains(HString whatStr, bool strict = true)
 	{
-		std::string strCache(_str);
-		return strCache.find(whatStr.c_str()) != std::string::npos;
+		std::string str1(_str);
+		std::string str2(whatStr.c_str());
+		if (!strict)
+		{
+			// 将两个字符串转换为小写
+			std::transform(str1.begin(), str1.end(), str1.begin(), ::tolower);
+			std::transform(str2.begin(), str2.end(), str2.begin(), ::tolower);
+		}
+		return str1.find(str2) != std::string::npos;
 	}
 
 	HBBR_INLINE char* ToStr()

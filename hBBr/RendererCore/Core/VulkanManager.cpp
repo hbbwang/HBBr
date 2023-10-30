@@ -2492,7 +2492,7 @@ void VulkanManager::UpdateBufferDescriptorSetAll(DescriptorSet* descriptorSet, u
 	}
 }
 
-void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture*> textures)
+void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture*> textures, std::vector<VkSampler> samplers)
 {
 	const uint32_t count = (uint32_t)textures.size();
 	std::vector<VkWriteDescriptorSet> descriptorWrite(count);
@@ -2500,7 +2500,7 @@ void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, st
 	for (uint32_t o = 0; o < count; o++)
 	{
 		imageInfo[o] = {};
-		imageInfo[o].sampler = textures[o]->GetSampler();
+		imageInfo[o].sampler = samplers[o];
 		imageInfo[o].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		imageInfo[o].imageView = textures[o]->GetTextureView();
 		descriptorWrite[o] = {};

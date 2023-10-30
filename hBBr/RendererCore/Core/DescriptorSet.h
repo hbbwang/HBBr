@@ -27,7 +27,7 @@ public:
 
 	void UpdateDescriptorSetAll(uint32_t sameBufferSize);
 
-	void UpdateTextureDescriptorSet(std::vector<class Texture*> textures);
+	void UpdateTextureDescriptorSet(std::vector<class Texture*> textures, std::vector<VkSampler> samplers);
 
 	HBBR_INLINE Buffer* GetBuffer(int bufferIndex = 0)const { return _buffers[bufferIndex].get(); }
 

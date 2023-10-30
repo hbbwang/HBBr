@@ -32,9 +32,11 @@ enum TextureSampler
 	TextureSampler_Linear_Wrap = 0,
 	TextureSampler_Linear_Mirror = 1,
 	TextureSampler_Linear_Clamp = 2,
-	TextureSampler_Nearest_Wrap = 3,
-	TextureSampler_Nearest_Mirror = 4,
-	TextureSampler_Nearest_Clamp = 5,
+	TextureSampler_Linear_Border = 3,
+	TextureSampler_Nearest_Wrap = 4,
+	TextureSampler_Nearest_Mirror = 5,
+	TextureSampler_Nearest_Clamp = 6,
+	TextureSampler_Nearest_Border = 7,
 };
 
 enum class SceneTextureDesc {
@@ -99,16 +101,8 @@ public:
 		return _imageAspectFlags;
 	}
 
-	HBBR_INLINE VkSampler GetSampler()const {
-		return _sampler;
-	}
-
 	HBBR_INLINE VkExtent2D GetImageSize()const {
 		return _imageSize;
-	}
-
-	HBBR_INLINE void SetSampler(TextureSampler sampler) {
-		_sampler = _samplers[sampler];
 	}
 
 	HBBR_INLINE static std::vector<Texture*>& GetUploadTextures(){
@@ -117,6 +111,10 @@ public:
 
 	HBBR_INLINE static Texture* GetFontTexture() {
 		return _fontTexture.get();
+	}
+
+	HBBR_INLINE static VkSampler GetSampler(TextureSampler sampler) {
+		return _samplers[sampler];
 	}
 
 	HBBR_INLINE static FontTextureInfo* GetFontInfo(wchar_t c) {
@@ -193,7 +191,6 @@ private:
 	uint32_t _mipCount = 1;
 	VkExtent2D _imageSize;
 	VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	VkSampler _sampler;
 
 	//Image data
 	ImageData* _imageData = NULL;
