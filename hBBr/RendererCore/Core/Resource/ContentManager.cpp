@@ -360,7 +360,7 @@ HGUID ContentManager::GetAssetGUID(AssetType type, HString contentBrowserFilePat
 			return fit->first;
 		}
 	}
-	MessageOut((HString("错误,无法找到资产,请检查Resource目录是否完整或资产缺失:\n") + contentBrowserFilePath).c_str(), false, true, "255,0,0");
+	MessageOut((HString("Error, the asset cannot be found. Please check whether the Resource directory is complete or the asset is missing\n错误,无法找到资产,请检查Resource目录是否完整或资产缺失:\n") + contentBrowserFilePath).c_str(), false, true, "255,0,0");
 	return HGUID();
 
 	//auto it = std::find_if(files.begin(), files.end(), [fileName](FileEntry& entry) {
