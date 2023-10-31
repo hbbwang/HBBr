@@ -1,8 +1,13 @@
-//[Flags]EnableShaderDebug;
+[Flags]
+{
+    EnableShaderDebug;
+};
+
 //[Varient]USE_COLOR;
 #include "Include/Common.hlsl"
 
-cbuffer Material :register(b0, space2)
+[MaterialParameters]
+cbuffer Material
 {
     [Name=F_1; Default=1;]
     float F1;
@@ -14,7 +19,7 @@ cbuffer Material :register(b0, space2)
     float4 F4;
 };
 
-//[InputLayout]
+[InputLayout]
 struct VSInput
 {
     float3 Position     : POSITION;
@@ -29,13 +34,15 @@ struct VSInput
 // #define DefineVert
 // void vert(in VSInput IN , inout VSToPS vs2ps)
 // {
-
 // }
 
-[Filter=Linear; Address=Wrap;]
-SamplerState BaseTextureSampler : register(s0,space3);
-[Name=BaseTexture; Default=UVGrid;]
-Texture2D BaseTexture : register(t0,space3);
+Texture2D BaseTexture
+{
+    Name = BaseTexture;//Custom name
+    Default = UVGrid;//Default value
+    Filter = Linear;
+    Address = Wrap;
+};
 
 //像素着色器补充
 void frag(in VSToPS IN , inout PixelShaderParameter Parameters)

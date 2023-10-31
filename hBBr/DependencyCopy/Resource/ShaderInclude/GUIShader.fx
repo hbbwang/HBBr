@@ -1,9 +1,14 @@
-//Flags
+[Flags]
+{
+    NativeHLSL; //原生HLSL,不进行拓展编译,需遵循HLSL代码规范编写
+    EnableShaderDebug;
+};
+
+//GUI Flags
 #define IsFont      0x00000001
 #define FontShadow  0x00000002
 
-//[Flags]EnableShaderDebug;
-cbuffer GUIPass :register(b0)
+cbuffer GUIPass :register(b0,space0)
 {
     float4 UVSetting;
     float4 Color;
@@ -29,8 +34,8 @@ struct VSToPS
     float2 UV               : TEXCOORD0;
 };
 
-SamplerState BaseTextureSampler : register(s0,space1);
-Texture2D BaseTexture : register(t0,space1);
+Texture2D BaseTexture: register(t0,space1);
+SamplerState BaseTextureSampler: register(s0,space1);
 
 VSToPS VSMain(VSInput IN)
 {
