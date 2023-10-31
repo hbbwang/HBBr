@@ -50,6 +50,8 @@ typedef enum ShaderFlagBits
 {
 	EnableShaderDebug = 0x00000001,		//Useful for shader debug in renderdoc .
 	HiddenInMaterial = 0x00000002,		//Shader will not be show in Material.
+	NativeHLSL = 0x00000004,			//Native HLSL, no extended compilation, need to follow the HLSL code specification
+
 }ShaderFlagBits;
 
 struct ShaderCacheHeader

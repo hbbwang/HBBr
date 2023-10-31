@@ -285,15 +285,15 @@ public:
 	}
 
 	//根据下标删除某段字符串
-	void	Remove(size_t begin, size_t end)
+	void	Remove(size_t begin, size_t strLength)
 	{
-		if (end < begin)
+		if (strLength < begin)
 			return;
-		else if (end > length)
-			end = length;
+		else if (strLength > length)
+			strLength = length;
 #if 1
 		std::string resultStr = _str;
-		resultStr.erase(resultStr.begin() + begin , resultStr.begin() + end);
+		resultStr.erase(resultStr.begin() + begin , resultStr.begin() + strLength);
 		this->assign(resultStr.c_str());
 #else
 		size_t AllLen = length;
