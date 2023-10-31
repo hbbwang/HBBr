@@ -141,8 +141,6 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 	std::string shaderSrcCode((std::istreambuf_iterator<char>(shaderSrcFile)), std::istreambuf_iterator<char>());
 	HString _shaderSrcCode = shaderSrcCode.c_str();
 	//
-	shaderc::Compiler compiler;
-	shaderc::CompileOptions options;
 	ShaderCacheHeader header = {} ;
 	std::vector<ShaderParameterInfo> shaderParamInfos;
 	std::vector<ShaderTextureInfo> shaderTextureInfos;
@@ -425,10 +423,12 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 	_shaderSrcCode.empty();
 	for (auto i : line)
 	{
-		OutputDebugStringA((HString("\n") + i).c_str());
+		//OutputDebugStringA((HString("\n") + i).c_str());
 		_shaderSrcCode += "\n" + i;
 	}
 	//
+	shaderc::Compiler compiler;
+	shaderc::CompileOptions options;
 	if ((header.flags & EnableShaderDebug)) {
 		options.SetOptimizationLevel(shaderc_optimization_level_zero);
 		options.SetGenerateDebugInfo();
@@ -444,23 +444,20 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 	HString ResourcePath = FileSystem::GetShaderIncludeAbsPath();
 	ResourcePath.CorrectionPath();
 	options.SetIncluder(std::make_unique<ShaderIncluder>());
-	HString dTarget;
 	auto kind = shaderc_vertex_shader;
 	if (shaderType == CompileShaderType::VertexShader)
 	{
-		dTarget = "vs_6_5";
 		kind = shaderc_vertex_shader;
 	}
 	else if (shaderType == CompileShaderType::PixelShader)
 	{
-		dTarget = "ps_6_5";
 		kind = shaderc_fragment_shader;
 	}
 	else if (shaderType == CompileShaderType::ComputeShader)
 	{
-		dTarget = "cs_6_5";
 		kind = shaderc_compute_shader;
 	}
+	OutputDebugStringA(_shaderSrcCode.c_str());
 	shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(_shaderSrcCode.c_str(), _shaderSrcCode.Length(), kind, fileName.GetBaseName().c_str(), entryPoint, options);
 	auto resultStatus = result.GetCompilationStatus();
 	if (resultStatus != shaderc_compilation_status_success)

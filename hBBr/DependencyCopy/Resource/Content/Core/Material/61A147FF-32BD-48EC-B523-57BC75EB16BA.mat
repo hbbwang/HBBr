@@ -1,10 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root GUID="7117EDF7-FECB-45C3-AB7A-A4DD4A32FFAE" >
-    <MaterialPrimitive vsShader="BasePassTemplate" psShader="BasePassTemplate" pass="0" />
-    <Parameters>
-        <Param name="F1" type="1"  value="1" ui="" />
-        <Param name="F2" type="2" value="1,1" ui="" />
-        <Param name="F3" type="3" value="1,1,1" ui="" />
-        <Param name="F4" type="4" value="1,1,1,1" ui="" />
-    </Parameters>
+    <MaterialPrimitive vsShader="PBR" psShader="PBR" pass="0" />
 </root>

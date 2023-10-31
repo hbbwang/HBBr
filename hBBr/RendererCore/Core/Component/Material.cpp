@@ -6,6 +6,13 @@
 #include "RendererType.h"
 #include "ContentManager.h"
 
+static const char* DefaultMaterial = 
+"< ? xml version = \"1.0\" encoding = \"UTF - 8\" ? >"
+"<root GUID = \"7117EDF7-FECB-45C3-AB7A-A4DD4A32FFAE\" >"
+"<MaterialPrimitive vsShader = \"PBR\" psShader = \"PBR\" pass = \"0\" / >"
+"</root>"
+;
+
 Material::Material()
 {
 }
@@ -257,7 +264,6 @@ Material* Material::CreateMaterial(HString newMatFilePath)
 	//复制引擎自带材质实例
 	HGUID guid("61A147FF-32BD-48EC-B523-57BC75EB16BA");
 	FileSystem::FileCopy((FileSystem::GetContentAbsPath() + "Core/Material/61A147FF-32BD-48EC-B523-57BC75EB16BA.mat").c_str() ,newMatFilePath.c_str());
-
 
 	return NULL;
 }
