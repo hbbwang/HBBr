@@ -120,7 +120,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 		for (auto m : matPrim)
 		{
 			//Get Pipeline
-			auto pipelineObj = PipelineManager::GetGraphicsPipelineMap(m->graphicsIndex);
+ 			auto pipelineObj = PipelineManager::GetGraphicsPipelineMap(m->graphicsIndex);
 			if (pipelineObj == NULL)
 			{
 				auto& vsCache = Shader::_vsShader[m->vsShader];

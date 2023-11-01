@@ -16,7 +16,7 @@ void Shader::LoadShaderCache(const char* cachePath)
 		HString fileName = i.baseName;
 		auto split = fileName.Split("@");
 		ShaderCache cache = {};
-		cache.shaderCacheIndex = cacheIndex;
+		cache.shaderLoadIndex = cacheIndex;
 		//
 		//auto shaderData = FileSystem::ReadBinaryFile(i.absPath.c_str());
 		std::ifstream file(i.absPath.c_str(), std::ios::ate | std::ios::binary);

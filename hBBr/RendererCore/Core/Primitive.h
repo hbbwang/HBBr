@@ -148,7 +148,9 @@ public:
 	uint64_t		   uniformBufferSize = 0;
 
 	//变体开关
-	uint64_t varients = 0;
+	uint32_t vsVarients = 0;
+
+	uint32_t psVarients = 0;
 
 	std::vector<MaterialParameterInfo> _paramterInfos;
 

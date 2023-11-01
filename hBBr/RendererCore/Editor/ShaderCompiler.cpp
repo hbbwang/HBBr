@@ -457,7 +457,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 	{
 		kind = shaderc_compute_shader;
 	}
-	OutputDebugStringA(_shaderSrcCode.c_str());
+	//OutputDebugStringA(_shaderSrcCode.c_str());
 	shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(_shaderSrcCode.c_str(), _shaderSrcCode.Length(), kind, fileName.GetBaseName().c_str(), entryPoint, options);
 	auto resultStatus = result.GetCompilationStatus();
 	if (resultStatus != shaderc_compilation_status_success)
@@ -492,6 +492,8 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 		std::ofstream out(cachePath.c_str(), std::ios::binary);
 		if (out.is_open())
 		{
+			//保存变体(暂定)
+			header.varients = 0;
 			//Header 存入
 			out.write((char*)&header, sizeof(ShaderCacheHeader));
 			//Shader 参数信息存入

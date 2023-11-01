@@ -240,3 +240,16 @@ void PipelineManager::ClearCreateInfo(VkGraphicsPipelineCreateInfoCache& createI
 {
 	createInfo = VkGraphicsPipelineCreateInfoCache();
 }
+
+PipelineIndex PipelineManager::AddPipelineObject(ShaderCache* vs, ShaderCache* ps, VkPipeline pipeline, VkPipelineLayout pipelineLayout)
+{
+	PipelineIndex index = PipelineIndex::GetPipelineIndex(vs,ps);
+	std::unique_ptr<PipelineObject> newPSO = std::make_unique<PipelineObject>();
+	newPSO->pipeline = pipeline;
+	newPSO->bHasMaterialTexture = vs->texs.size() > 0;
+	newPSO->bHasMaterialParameter = vs->params.size() > 0;
+	newPSO->layout = pipelineLayout;
+	newPSO->pipelineType = PipelineType::Graphics;
+	_graphicsPipelines.emplace(std::make_pair(index, std::move(newPSO)));
+	return index;
+}

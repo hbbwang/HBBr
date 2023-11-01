@@ -3,7 +3,7 @@
 #include "HString.h"
 #include "VulkanManager.h"
 #include <map>
-
+#include "./Resource/HGuid.h"
 enum class MPType : uint8_t
 {
 	Unknow = 0,
@@ -64,6 +64,8 @@ struct ShaderCacheHeader
 	uint8_t shaderParameterCount = 0;
 	//Shader texture count
 	uint8_t shaderTextureCount = 0;
+	//Shader varients(32bit)
+	uint32_t varients = 0;
 };
 
 struct ShaderParameterInfo
@@ -95,7 +97,8 @@ struct ShaderCache
 	HString shaderName;
 	HString shaderPath;
 	VkPipelineShaderStageCreateInfo shaderStageInfo={};
-	uint64_t shaderCacheIndex = 0;
+	uint32_t shaderLoadIndex = 0;
+	uint32_t varients = 0;
 	//Default 默认参数模板
 	std::vector<std::shared_ptr<struct MaterialParameterInfo>>  pi;
 	std::vector<std::shared_ptr<struct MaterialTextureInfo>> ti;

@@ -74,7 +74,7 @@ struct GUIPrimitive
 {
 	std::vector<GUIVertexData> Data;
 	std::vector<GUIDrawState> States;
-	HString PipelineTag;
+	PipelineIndex pipelineIndex;
 	std::vector<wchar_t> fontCharacter;
 	Texture* BaseTexture = NULL;
 	VkRect2D viewport;
@@ -95,14 +95,17 @@ public:
 	void GUIDrawText(HString tag, const wchar_t* text, float x, float y, float w, float h, GUIDrawState state , float fontSize = 20);
 
 private:
-	void CreatePipeline(HString pipelineTag , HString shaderName);
+	PipelineIndex CreatePipeline(HString shaderName);
 	void ShowPerformance();
 
-	GUIPrimitive* GetPrimitve(HString& tag,GUIDrawState& state , int stateCount,HString pipelineTag, float x, float y, float w, float h);
+	GUIPrimitive* GetPrimitve(HString& tag,GUIDrawState& state , int stateCount, PipelineIndex index, float x, float y, float w, float h);
+
+	PipelineIndex _guiShaderIndex;
+
 	void SetupPanelAnchor(GUIDrawState state, float x, float y, float w, float h, GUIVertexData* vertexData);
 	std::shared_ptr<class Buffer>_vertexBuffer;
 	std::unordered_map<HString,GUIPrimitive> _drawList;
-	std::unordered_map<HString, VkPipeline> _guiPipelines;
+	//std::unordered_map<HString, VkPipeline> _guiPipelines;
 	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
 	VkDescriptorSetLayout _ubDescriptorSetLayout = VK_NULL_HANDLE;
 	VkDescriptorSetLayout _texDescriptorSetLayout = VK_NULL_HANDLE;

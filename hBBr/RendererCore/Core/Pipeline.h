@@ -238,21 +238,39 @@ struct PipelineObject
 
 struct PipelineIndex
 {
-	uint64_t vsIndex;
-	uint64_t psIndex;
-	uint64_t varients;
-	uint32_t layout;
+	uint32_t vsLoadIndex = 0 ;
+	uint32_t psLoadIndex = 0;
+	uint32_t vsVarients = 0;
+	uint32_t psVarients = 0;
+	uint32_t layout = 0;
+	static PipelineIndex GetPipelineIndex(
+		struct ShaderCache* vs,
+		struct ShaderCache* ps)
+	{
+		PipelineIndex index;
+		index.vsLoadIndex = vs->shaderLoadIndex;//顶点着色器序号
+		index.psLoadIndex = ps->shaderLoadIndex;
+		index.vsVarients = vs->varients;
+		index.psVarients = ps->varients;
+		index.layout =
+			(vs->texs.size() > 0) |
+			((ps->params.size() > 0) << 1);
+		return index;
+	}
+
 	bool operator<(const PipelineIndex& id) const {
-		return (vsIndex < id.vsIndex) 
-			&& (psIndex < id.psIndex) 
-			&& (varients < id.varients) 
-			&& (layout < id.layout);
+		return (vsLoadIndex < id.vsLoadIndex)
+			|| (psLoadIndex < id.psLoadIndex)
+			|| (vsVarients < id.vsVarients)
+			|| (psVarients < id.psVarients)
+			|| (layout < id.layout);
 	}
 
 	bool operator==(const PipelineIndex& id) const {
-		return (vsIndex == id.vsIndex)
-			&& (psIndex == id.psIndex)
-			&& (varients == id.varients)
+		return (vsLoadIndex == id.vsLoadIndex)
+			&& (psLoadIndex == id.psLoadIndex)
+			&& (vsVarients == id.vsVarients)
+			&& (psVarients == id.psVarients)
 			&& (layout == id.layout);
 	}
 };
@@ -298,6 +316,8 @@ public:
 	static void SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& createInfo, VkPipelineLayout pipelineLayout);
 
 	static void ClearCreateInfo(VkGraphicsPipelineCreateInfoCache& createInfo);
+
+	static PipelineIndex AddPipelineObject(ShaderCache* vs, ShaderCache* ps,VkPipeline pipeline,VkPipelineLayout pipelineLayout);
 private:
 	static std::map<PipelineIndex, std::unique_ptr<PipelineObject>> _graphicsPipelines;
 	static std::map<PipelineIndex, std::unique_ptr<PipelineObject>> _computePipelines;

@@ -6,12 +6,12 @@ GUIPass::~GUIPass()
 	const auto& manager = VulkanManager::GetManager();
 	_vertexBuffer.reset();
 	manager->DestroyPipelineLayout(_pipelineLayout);
-	for (auto i : _guiPipelines)
-	{
-		manager->DestroyPipeline(i.second);
-	}
+	//for (auto i : _guiPipelines)
+	//{
+	//	manager->DestroyPipeline(i.second);
+	//}
 	_drawList.clear();
-	_guiPipelines.clear();
+	//_guiPipelines.clear();
 	manager->DestroyDescriptorSetLayout(_texDescriptorSetLayout);
 	manager->DestroyDescriptorSetLayout(_ubDescriptorSetLayout);
 }
@@ -39,8 +39,6 @@ void GUIPass::PassInit()
 	//Set Pass Name
 	_passName = "GUI Render Pass";
 
-	//Create GUIShader Pipeline
-	CreatePipeline("Base", "GUIShader");
 }
 
 void GUIPass::ShowPerformance()
@@ -68,6 +66,13 @@ void GUIPass::PassUpdate()
 
 	//GUIDrawText("fonttest",L"AbCd,自定义GUI文字测试~\n你好呀123嘿嘿。 ", 0, 20.0f, 200, 200, GUIDrawState(GUIAnchor_CenterLeft, false, glm::vec4(1)), 20.0f);
 
+	//设置管线
+	//Create GUIShader Pipeline
+	auto pipelineObject = PipelineManager::GetGraphicsPipelineMap(_guiShaderIndex);
+	if (pipelineObject == NULL)
+	{
+		_guiShaderIndex = CreatePipeline("GUIShader");
+	}
 	//收集顶点数据一次性使用
 	std::vector<GUIVertexData> vertices;
 	for (auto i : _drawList)
@@ -97,7 +102,8 @@ void GUIPass::PassUpdate()
 	VkPipeline pipeline = VK_NULL_HANDLE;
 	for (auto i : _drawList)
 	{
-		VkPipeline currentPipeline = _guiPipelines[i.second.PipelineTag];
+		//VkPipeline currentPipeline = _guiPipelines[i.second.PipelineTag];
+		VkPipeline currentPipeline = PipelineManager::GetGraphicsPipelineMap(_guiShaderIndex)->pipeline;
 		if (currentPipeline != pipeline)
 		{
 			pipeline = currentPipeline;
@@ -132,7 +138,7 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 		return;
 	state.uniformBuffer.Color = glm::vec4(1,1,1,2);
 	state.uniformBuffer.Flags = IsFont;
-	GUIPrimitive* prim = GetPrimitve(tag, state, (int)textLength, "Base", x, y, w, h);
+	GUIPrimitive* prim = GetPrimitve(tag, state, (int)textLength, _guiShaderIndex, x, y, w, h);
 	if (prim->BaseTexture != Texture::GetFontTexture())
 	{
 		prim->BaseTexture = Texture::GetFontTexture();
@@ -176,7 +182,7 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 
 void GUIPass::GUIDrawImage(HString tag, Texture* texture, float x, float y, float w, float h, GUIDrawState state)
 {
-	GUIPrimitive* prim = GetPrimitve(tag, state, 1, "Base", x, y, w, h);
+	GUIPrimitive* prim = GetPrimitve(tag, state, 1, _guiShaderIndex, x, y, w, h);
 	SetupPanelAnchor(state, x, y, w, h, prim->Data.data());
 	prim->States[0].uniformBuffer.UVSetting = glm::vec4(0, 0, 1, 1);
 	if (prim->BaseTexture != texture)
@@ -255,7 +261,7 @@ void GUIPass::SetupPanelAnchor(GUIDrawState state, float x, float y, float w, fl
 	*(vertexData + 5) = GUIVertexData{ lb ,glm::vec2(0.0f, 1.0f),state.Color };
 }
 
-GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateCount, HString pipelineTag, float x, float y, float w, float h)
+GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateCount, PipelineIndex index, float x, float y, float w, float h)
 {
 	auto dit = _drawList.find(tag);
 	GUIPrimitive* prim = NULL;
@@ -267,7 +273,7 @@ GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateC
 	{
 		_drawList.emplace(tag, GUIPrimitive());
 		prim = &_drawList[tag];
-		prim->PipelineTag = pipelineTag;
+		prim->pipelineIndex = index;
 	}
 
 	prim->States.resize(stateCount);
@@ -293,7 +299,7 @@ GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateC
 	return prim;
 }
 
-void GUIPass::CreatePipeline(HString pipelineTag, HString shaderName)
+PipelineIndex GUIPass::CreatePipeline(HString shaderName)
 {
 	//CraetePipeline..
 	VkPipeline pipeline = VK_NULL_HANDLE;
@@ -320,5 +326,6 @@ void GUIPass::CreatePipeline(HString pipelineTag, HString shaderName)
 	PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, vsCache, psCache);
 	PipelineManager::SetPipelineLayout(pipelineCreateInfo, _pipelineLayout);
 	PipelineManager::BuildGraphicsPipelineState(pipelineCreateInfo, _renderPass, 0, pipeline);
-	_guiPipelines.emplace(std::make_pair(pipelineTag, pipeline));
+	//_guiPipelines.emplace(std::make_pair(pipelineTag, pipeline));
+	return PipelineManager::AddPipelineObject(&vsCache, &psCache, pipeline, _pipelineLayout);
 }
