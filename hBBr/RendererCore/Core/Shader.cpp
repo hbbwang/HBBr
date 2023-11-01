@@ -167,17 +167,19 @@ void Shader::LoadShaderCache(const char* cachePath)
 
 void Shader::DestroyAllShaderCache()
 {
+	auto manager = VulkanManager::GetManager();
+	vkDeviceWaitIdle(manager->GetDevice());
 	for (auto& i : _vsShader)
 	{
-		vkDestroyShaderModule(VulkanManager::GetManager()->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
+		vkDestroyShaderModule(manager->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
 	}
 	for (auto& i : _psShader)
 	{
-		vkDestroyShaderModule(VulkanManager::GetManager()->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
+		vkDestroyShaderModule(manager->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
 	}
 	for (auto& i : _csShader)
 	{
-		vkDestroyShaderModule(VulkanManager::GetManager()->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
+		vkDestroyShaderModule(manager->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
 	}
 	_vsShader.clear();
 	_psShader.clear();

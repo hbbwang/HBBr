@@ -47,7 +47,9 @@ EditorMain::EditorMain(QWidget *parent)
             QDesktopServices::openUrl(QUrl(info.absoluteFilePath()));
         }
     });
-
+    connect(ui.CompileAllShader, &QAction::triggered, this, [this](bool bChecked) {
+        VulkanApp::RecompileAllShader();
+    });
     EditorMain::_self = this;
 }
 

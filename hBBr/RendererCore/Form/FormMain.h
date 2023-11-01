@@ -38,6 +38,7 @@ public:
 	HBBR_API static VulkanForm* GetFocusForm() { return _focusForm; }
 	HBBR_API static void SetFormVisiable(VulkanForm* form, bool bShow);
 	HBBR_API static void AppQuit();
+	HBBR_API static void RecompileAllShader();
 	//Callbacks
 	static std::vector<FormDropFun> _dropFuns;
 
@@ -46,6 +47,8 @@ private:
 	static VulkanForm* _focusForm;
 
 	static bool _bFocusQuit;
+
+	static bool _bRecompilerShaders;
 
 	static std::vector<VulkanForm> _forms;
 

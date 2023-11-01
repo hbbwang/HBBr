@@ -32,6 +32,7 @@ VulkanForm* VulkanApp::_mainForm;
 VulkanForm* VulkanApp::_focusForm = NULL;
 std::vector<FormDropFun> VulkanApp::_dropFuns;
 bool VulkanApp::_bFocusQuit = false;
+bool VulkanApp::_bRecompilerShaders = false;
 void ResizeCallBack(SDL_Window* window, int width, int height)
 {
 	auto it = std::find_if(VulkanApp::GetForms().begin(),VulkanApp::GetForms().end(), [window](VulkanForm& form)
@@ -287,6 +288,16 @@ bool VulkanApp::UpdateForm()
 		MessageOut("SDL quit.", false, false, "255,255,255");
 		bQuit = true;
 	}
+	else if (_bRecompilerShaders)
+	{
+		_bRecompilerShaders = false;
+		Shader::DestroyAllShaderCache();
+		PipelineManager::ClearPipelineObjects();
+#if IS_EDITOR
+		Shaderc::ShaderCompiler::CompileAllShaders(FileSystem::GetShaderIncludeAbsPath().c_str());
+#endif
+		Shader::LoadShaderCache(FileSystem::GetShaderCacheAbsPath().c_str());
+	}
 	else if(!bStopRender)
 	{
 		UpdateRender();
@@ -433,6 +444,11 @@ void VulkanApp::SetFormVisiable(VulkanForm* form, bool bShow)
 void VulkanApp::AppQuit()
 {
 	_bFocusQuit = true;
+}
+
+void VulkanApp::RecompileAllShader()
+{
+	_bRecompilerShaders = true;
 }
 
 #if defined(IS_GAME)
