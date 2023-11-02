@@ -123,15 +123,17 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
  			auto pipelineObj = PipelineManager::GetGraphicsPipelineMap(m->graphicsIndex);
 			if (pipelineObj == NULL)
 			{
-				auto& vsCache = Shader::_vsShader[m->vsShader];
-				auto& psCache = Shader::_psShader[m->psShader];
+				HString vsShaderFullName = m->graphicsIndex.GetVSShaderFullName();
+				HString psShaderFullName = m->graphicsIndex.GetPSShaderFullName();
+				auto& vsCache = Shader::_vsShader[vsShaderFullName];
+				auto& psCache = Shader::_psShader[psShaderFullName];
 				VkGraphicsPipelineCreateInfoCache pipelineCreateInfo = {};
 				PipelineManager::SetColorBlend(pipelineCreateInfo, false);
 				PipelineManager::SetColorBlend(pipelineCreateInfo, false);
 				PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
 				PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
 				PipelineManager::SetVertexInput(pipelineCreateInfo, m->inputLayout);
-				PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, vsCache, psCache, m->graphicsIndex.varients);
+				PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, vsCache, psCache);
 				//Setting pipeline end
 				VkPipelineLayout pipelineLayout;
 				if (pipelineCreateInfo.bHasMaterialTexture)

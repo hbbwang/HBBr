@@ -285,8 +285,6 @@ public:
 
 	bool CreateShaderModule(std::vector<char> data , VkShaderModule& shaderModule);
 
-	void InitImguiContent();
-
 	void InitImgui_SDL(SDL_Window* handle , VkRenderPass renderPass , uint32_t subPassIndex = 0);
 
 	void ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex = 0 , glm::mat4 projMat = 

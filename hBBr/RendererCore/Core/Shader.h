@@ -54,6 +54,11 @@ typedef enum ShaderFlagBits
 
 }ShaderFlagBits;
 
+struct ShaderVarientGroup {
+	char name[31] = "\0";
+	char defaultValue = '\0';//bool
+};
+
 struct ShaderCacheHeader
 {
 	ShaderFlags flags;
@@ -64,8 +69,8 @@ struct ShaderCacheHeader
 	uint8_t shaderParameterCount = 0;
 	//Shader texture count
 	uint8_t shaderTextureCount = 0;
-	//Shader varients(32bit)
-	uint32_t varients = 0;
+	//Shader varients
+	uint8_t varientCount = 0;
 };
 
 struct ShaderParameterInfo
@@ -94,12 +99,15 @@ struct ShaderCache
 	//
 	ShaderType shaderType;
 	//<varients,VkShaderModule>
-	std::unordered_map<uint32_t, VkShaderModule> shaderModule;
+	VkShaderModule shaderModule;
 	HString shaderName;
+	HString shaderFullName;
 	HString shaderPath;
 	VkPipelineShaderStageCreateInfo shaderStageInfo={};
 	uint32_t shaderLoadIndex = 0;
 	//Default 默认参数模板
+	std::vector<ShaderVarientGroup> vi;
+	uint32_t varients;
 	std::vector<std::shared_ptr<struct MaterialParameterInfo>>  pi;
 	std::vector<std::shared_ptr<struct MaterialTextureInfo>> ti;
 };

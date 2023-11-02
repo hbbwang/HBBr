@@ -1,17 +1,20 @@
-[Flags]
+[Flag]//Shader flags
 {
     EnableShaderDebug;
 };
 
-#define MATERIAL_SHADINGMODEL_DEFAULT_LIT   1
+[Varient]//变体定义
+{
+    USE_COLOR = 1;
+};
 
-//[Varient]USE_COLOR;
+#define MATERIAL_SHADINGMODEL_DEFAULT_LIT   1
 
 #include "Include/Config.hlsl"
 #include "Include/Common.hlsl"
 #include "Include/ShadingModel.hlsl"
 
-[MaterialParameters]
+[MaterialParameter]
 cbuffer Material
 {
     [Name=Tint; Default=1,1,1,1;]
@@ -56,7 +59,10 @@ void frag(in VSToPS IN , inout PixelShaderParameter Parameters)
     Parameters.Roughness        = 1.0f;
     Parameters.Emissive         = 0.0f;
     //
-    half4 texSample = BaseTexture.SampleBias(BaseTextureSampler,IN.Texcoord01.xy , 0);
+    half4 texSample = 1;
+    #if USE_COLOR
+        texSample = BaseTexture.SampleBias(BaseTextureSampler,IN.Texcoord01.xy , 0);
+    #endif
     texSample *= Tint;
     Parameters.BaseColor = texSample;
     Parameters.Metallic = Metallic;

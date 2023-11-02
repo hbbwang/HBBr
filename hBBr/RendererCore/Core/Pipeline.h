@@ -236,12 +236,34 @@ struct PipelineObject
 	~PipelineObject();
 };
 
-struct PipelineIndex
+class PipelineIndex
 {
-	uint32_t vsLoadIndex = 0;//顶点着色器加载序号
-	uint32_t psLoadIndex = 0;//像素着色器加载序号
-	uint32_t varients = 0;//变体 32bit 相当于32个bool
-	uint32_t pipelineIndex = 0;//用来记录管线状态
+public:
+
+	HBBR_INLINE HString GetVSShaderFullName()
+	{
+		return vsShaderCacheFullName;
+	}
+
+	HBBR_INLINE HString GetPSShaderFullName()
+	{
+		return psShaderCacheFullName;
+	}
+
+	HBBR_INLINE uint32_t GetVarient()
+	{
+		return varients;
+	}
+
+	HBBR_INLINE void SetVarient(uint32_t newVarient)
+	{
+		varients = newVarient;
+		auto vsName = vsShaderCacheFullName.Split("@");
+		auto psName = psShaderCacheFullName.Split("@");
+		vsShaderCacheFullName = vsName[0] + "@" + HString::FromUInt(newVarient);
+		psShaderCacheFullName = psName[0] + "@" + HString::FromUInt(newVarient);
+	}
+
 	static PipelineIndex GetPipelineIndex(
 		struct ShaderCache* vs,
 		struct ShaderCache* ps)
@@ -249,8 +271,10 @@ struct PipelineIndex
 		PipelineIndex index;
 		index.vsLoadIndex = vs->shaderLoadIndex;
 		index.psLoadIndex = ps->shaderLoadIndex;
-		index.varients = ps->header.varients;//vs和ps共用一套32bit的变体
+		index.varients = ps->varients;//vs和ps共用一套32bit的变体
 		index.pipelineIndex = 0;
+		index.vsShaderCacheFullName = vs->shaderFullName;
+		index.psShaderCacheFullName = ps->shaderFullName;
 		return index;
 	}
 
@@ -267,6 +291,15 @@ struct PipelineIndex
 			&& (varients == id.varients)
 			&& (pipelineIndex == id.pipelineIndex);
 	}
+
+private:
+
+	uint32_t vsLoadIndex = 0;//顶点着色器加载序号
+	uint32_t psLoadIndex = 0;//像素着色器加载序号
+	uint32_t varients = 0;//变体 32bit 相当于32个bool
+	uint32_t pipelineIndex = 0;//用来记录管线状态
+	HString vsShaderCacheFullName = "";
+	HString psShaderCacheFullName = "";
 };
 
 class PipelineManager
@@ -293,7 +326,7 @@ public:
 	static void SetDepthStencil(VkGraphicsPipelineCreateInfoCache& createInfo);
 
 	//Graphics pipeline setting step 6
-	static void SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache vs, ShaderCache ps, uint32_t varient);
+	static void SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache vs, ShaderCache ps);
 
 	//Graphics pipeline setting the last step
 	static PipelineObject* CreatePipelineObject(

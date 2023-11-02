@@ -134,6 +134,161 @@ HString GetTextureNameFromShaderCodeLine(HString line)
 	return texName;
 }
 
+void ExecCompileShader(HString& _shaderSrcCode, HString& fileName, const char* entryPoint, CompileShaderType shaderType
+	, ShaderCacheHeader& header, std::vector<ShaderParameterInfo>& shaderParamInfos, std::vector<ShaderTextureInfo>& shaderTextureInfos, const char* srcShaderFileFullPath, std::vector<ShaderVarientGroup>&varients)
+{
+	shaderc::Compiler compiler;
+	shaderc::CompileOptions options;
+	if ((header.flags & EnableShaderDebug)) {
+		options.SetOptimizationLevel(shaderc_optimization_level_zero);
+		options.SetGenerateDebugInfo();
+	}
+	else {
+		options.SetOptimizationLevel(shaderc_optimization_level_performance);
+	}
+	options.SetSourceLanguage(shaderc_source_language_hlsl);
+	options.SetHlslIoMapping(true);
+	options.SetIncluder(std::make_unique<ShaderIncluder>());
+	//options.SetTargetSpirv(shaderc_spirv_version_1_3);
+
+	for (int i = 0; i < varients.size(); i++)
+	{
+		options.AddMacroDefinition(varients[i].name, std::string(1, varients[i].defaultValue));
+	}
+
+	shaderc_shader_kind kind = shaderc_vertex_shader;
+	if (shaderType == CompileShaderType::VertexShader)
+	{
+		kind = shaderc_vertex_shader;
+	}
+	else if (shaderType == CompileShaderType::PixelShader)
+	{
+		kind = shaderc_fragment_shader;
+	}
+	else if (shaderType == CompileShaderType::ComputeShader)
+	{
+		kind = shaderc_compute_shader;
+	}
+
+	//OutputDebugStringA(_shaderSrcCode.c_str());
+	shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(_shaderSrcCode.c_str(), _shaderSrcCode.Length(), kind, fileName.GetBaseName().c_str(), entryPoint, options);
+	auto resultStatus = result.GetCompilationStatus();
+	if (resultStatus != shaderc_compilation_status_success)
+	{
+		std::cerr << result.GetErrorMessage();
+		MessageOut(result.GetErrorMessage().c_str(), false, true, "255,0,0");
+		return;
+	}
+	else
+	{
+		std::vector<uint32_t> resultChar = { result.cbegin(), result.cend() };
+		HString cacheOnlyPath = (FileSystem::GetShaderCacheAbsPath()).c_str();
+		HString cachePath = cacheOnlyPath + fileName.GetBaseName();
+		if (shaderType == CompileShaderType::VertexShader)
+		{
+			cachePath += ("@vs");
+		}
+		else if (shaderType == CompileShaderType::PixelShader)
+		{
+			cachePath += ("@ps");
+		}
+		else if (shaderType == CompileShaderType::ComputeShader)
+		{
+			cachePath += ("@cs");
+		}
+
+		HString varientString;
+		if (varients.size() > 0)
+		{
+			for (int v = 0; v < varients.size(); v++)
+			{
+				varientString += varients[v].defaultValue;
+			}
+		}
+		else
+		{
+			varientString = "0";
+		}
+		cachePath += TEXT("@") + varientString;
+		cachePath += TEXT(".spv");
+		//Cache 路径不存在
+		if (!FileSystem::FileExist(cacheOnlyPath.c_str()))
+		{
+			std::filesystem::create_directory(cacheOnlyPath.c_str());
+		}
+		std::ofstream out(cachePath.c_str(), std::ios::binary);
+		if (out.is_open())
+		{
+			//Header 存入
+			out.write((char*)&header, sizeof(ShaderCacheHeader));
+			//保存变体名
+			for (int v = 0; v < varients.size(); v++)
+			{
+				out.write((char*)&varients[v], sizeof(ShaderVarientGroup));
+			}
+			//Shader 参数信息存入
+			for (auto s : shaderParamInfos)
+			{
+				out.write((char*)&s, sizeof(ShaderParameterInfo));
+			}
+			for (auto s : shaderTextureInfos)
+			{
+				out.write((char*)&s, sizeof(ShaderTextureInfo));
+			}
+			//ShaderCache
+			out.write((char*)resultChar.data(), resultChar.size() * sizeof(glm::uint));
+			out.close();
+			//Log
+			HString compileResultStr = TEXT("Compile shader [");
+			compileResultStr += srcShaderFileFullPath;
+			compileResultStr += TEXT("] successful.");
+			ConsoleDebug::print_endl(compileResultStr, TEXT("0,255,50"));
+		}
+		else
+		{
+		}
+	}
+}
+
+//编译所有排列组合
+void ProcessCombination(uint32_t bits, int count,
+	HString& _shaderSrcCode, HString& fileName, const char* entryPoint, CompileShaderType shaderType
+	, ShaderCacheHeader& header, std::vector<ShaderParameterInfo>& shaderParamInfos,
+	std::vector<ShaderTextureInfo>& shaderTextureInfos, const char* srcShaderFileFullPath, std::vector<ShaderVarientGroup>& varients)
+{
+	std::string out = "Bit ";
+	for (int i = 0; i < count; ++i)
+	{
+		bool value = (bits & (1 << i)) != 0;
+		out += ":" + std::to_string(value);
+		if (value)
+			varients[i].defaultValue = '1';
+		else
+			varients[i].defaultValue = '0';
+	}
+	ExecCompileShader(_shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
+	MessageOut(out.c_str(), false, false, "0,255,80");
+}
+
+void GenerateCombinations(int count, uint32_t bits, int bitIndex, 
+	HString& _shaderSrcCode, HString& fileName, const char* entryPoint, CompileShaderType shaderType
+	, ShaderCacheHeader& header, std::vector<ShaderParameterInfo>& shaderParamInfos, 
+	std::vector<ShaderTextureInfo>& shaderTextureInfos, const char* srcShaderFileFullPath, std::vector<ShaderVarientGroup>& varients)
+{
+	if (bitIndex >= count)
+		ProcessCombination(bits, count,
+			_shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
+	else
+	{
+		// 将当前位设置为 0 并递归
+		GenerateCombinations(count, bits & ~(1 << bitIndex), bitIndex + 1,
+			_shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
+		// 将当前位设置为 1 并递归
+		GenerateCombinations(count, bits | (1 << bitIndex), bitIndex + 1,
+			_shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
+	}
+}
+
 void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, const char* entryPoint, CompileShaderType shaderType)
 {
 	//导入shader源码
@@ -144,6 +299,8 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 	ShaderCacheHeader header = {} ;
 	std::vector<ShaderParameterInfo> shaderParamInfos;
 	std::vector<ShaderTextureInfo> shaderTextureInfos;
+	//
+	std::vector<ShaderVarientGroup>varients;
 	//自定义的信息进去
 	auto line = _shaderSrcCode.Split("\n");
 	{
@@ -158,25 +315,226 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 		for (int s = 0; s < line.size(); s++)
 		{
 			HString setting = line[s].ClearSpace();
-			if (setting.IsSame("[Flags]"))
+			//Flag
+			if (setting[0] == '[' && setting[1] == 'F' && setting[2] == 'l' && setting[3] == 'a'
+				&& setting[4] == 'g' && setting[5] == ']')
 			{
-				line[s] = "//" + line[s];//拓展信息非着色器正式代码,填充注释防止编译错误
+				line[s] = "//" + line[s];
 				bCollectMaterialFlags = true;
 			}
-			else if (setting.IsSame("[InputLayout]"))
+			else if (bCollectMaterialFlags)
+			{
+				auto flagStr = setting.Split(";");
+				for (auto i : flagStr)
+				{
+					if (i.Length() > 0 && i.IsSame("EnableShaderDebug"))
+					{
+						header.flags |= EnableShaderDebug;
+					}
+					else if (i.IsSame("NativeHLSL"))
+					{
+						header.flags |= NativeHLSL;
+					}
+				}
+				line[s] = "//" + line[s];
+				if (setting.Contains("}"))
+				{
+					bCollectMaterialFlags = false;
+					if (header.flags & NativeHLSL)//原生HLSL,不进行拓展处理
+					{
+						break;
+					}
+				}
+			}
+			//Varient
+			else if (setting[0] == '[' && setting[1] == 'V' && setting[2] == 'a' && setting[3] == 'r'
+				&& setting[4] == 'i' && setting[5] == 'e' && setting[6] == 'n' && setting[7] == 't' && setting[8] == ']')
+			{
+				line[s] = "//" + line[s];
+				bCollectMaterialVarients = true;
+			}
+			else if (bCollectMaterialVarients)
+			{
+				auto varientLine = setting.Split(";");
+				for (auto v : varientLine)
+				{
+					auto varientStr = v.Split("=");
+					if (varientStr.size() == 2)
+					{
+						ShaderVarientGroup newVarient;
+						//
+						std::string name = varientStr[0].c_str();
+						name.copy(newVarient.name, sizeof(newVarient.name));
+						newVarient.name[sizeof(newVarient.name)] = '\0';
+						//
+						//if (varientStr[1].IsSame("true", false) || varientStr[1].IsSame("false", false))
+						//{
+						//	newVarient.type = ShaderVarientType::Bool;
+						//}
+						//else if (varientStr[1].IsNumber())
+						//{
+						//	newVarient.type = ShaderVarientType::Int;
+						//}
+						varients.push_back(newVarient);
+						header.varientCount += 1;
+						line[s] = "//" + line[s];
+					}
+					else
+					{
+						line[s] = "//" + line[s];
+					}
+				}
+				if (setting.Contains("}"))
+				{
+					bCollectMaterialVarients = false;
+				}
+			}
+			//InputLayout
+			else if (setting[0] == '[' && setting[1] == 'I' && setting[2] == 'n' && setting[3] == 'p'
+				&& setting[4] == 'u' && setting[5] == 't' && setting[6] == 'L' && setting[7] == 'a' 
+				&& setting[8] == 'y' && setting[9] == 'o' && setting[10] == 'u' && setting[11] == 't' && setting[12] == ']')
 			{
 				line[s] = "//" + line[s];
 				bSearchVertexInputLayout = true;
 			}
-			else if (setting.IsSame("[MaterialParameters]"))//material cbuffer(uniform buffer)
+			else if (bSearchVertexInputLayout)
+			{
+				//查找类型符号
+				//[0]pos:POSITION , [1]nor:NORMAL , [2]tar:TANGENT , [3]col:COLOR , [4]uv01:TEXCOORD0 , [5]uv23:TEXCOORD1
+				bool bFind = false;
+				int size = 0;
+				if (line[s].Contains("float2"))
+				{
+					bFind = true;
+					size = 2;
+				}
+				else if (line[s].Contains("float3"))
+				{
+					bFind = true;
+					size = 3;
+				}
+				else if (line[s].Contains("float4"))
+				{
+					bFind = true;
+					size = 4;
+				}
+				if (bFind)
+				{
+					auto sem = line[s].Split(":");
+					if (sem.size() > 1)
+					{
+						if (sem[1].Contains("POSITION"))
+							header.vertexInput[0] = size;
+						else if (sem[1].Contains("NORMAL"))
+							header.vertexInput[1] = size;
+						else if (sem[1].Contains("TANGENT"))
+							header.vertexInput[2] = size;
+						else if (sem[1].Contains("COLOR"))
+							header.vertexInput[3] = size;
+						else if (sem[1].Contains("TEXCOORD0"))
+							header.vertexInput[4] = size;
+						else if (sem[1].Contains("TEXCOORD1"))
+							header.vertexInput[5] = size;
+					}
+				}
+				//结构体结束
+				if (line[s].Contains("}"))
+				{
+					bSearchVertexInputLayout = false;
+				}
+			}
+			//MaterialParameter
+			else if (setting[0] == '[' && setting[1] == 'M' && setting[2] == 'a' && setting[3] == 't'
+				&& setting[4] == 'e' && setting[5] == 'r' && setting[6] == 'i' && setting[7] == 'a' 
+				&& setting[8] == 'l' && setting[9] == 'P' && setting[10] == 'a' && setting[11] == 'r'
+				&& setting[12] == 'a' && setting[13] == 'm' && setting[14] == 'e' && setting[15] == 't' && setting[16] == 'e' && setting[17] == 'r' && setting[18] == ']')
 			{
 				bCollectMaterialParameter = true;
 				//下一行必须是  cbuffer 的register
 				cBufferMaterialRegisterLineIndex = s + 1;
-				line[s] = "//" + line[s];//拓展信息非着色器正式代码,填充注释防止编译错误
+				line[s] = "//" + line[s];
 			}
-			else if (
-				setting[0] == 'T' && setting[1] == 'e' && setting[2] == 'x' && setting[3] == 't'
+			else if (bCollectMaterialParameter)
+			{
+			if (setting.Contains("}"))
+			{
+				bCollectMaterialParameter = false;
+			}
+			if (setting[0] == 'f' && setting[1] == 'l' && setting[2] == 'o' && setting[3] == 'a' && setting[4] == 't')
+			{
+				shaderParamInfos.push_back(ShaderParameterInfo({}));
+				//提取param
+				std::stringstream param(line[s].c_str());
+				std::string type, name;
+				param >> type >> name;
+				size_t shaderParamSize = shaderParamInfos.size();
+				if (name[name.size() - 1] == ';')
+				{
+					name.erase(name.begin() + name.size() - 1);
+				}
+				name.copy(shaderParamInfos[shaderParamSize - 1].name, sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1);
+				shaderParamInfos[shaderParamSize - 1].name[sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1] = '\0';
+				//
+				if (type.compare("float4") == 0)
+				{
+					shaderParamInfos[shaderParamSize - 1].type = MPType::Float4;
+					shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+					CollectMaterialParameterIndex += 4;
+				}
+
+				else if (type.compare("float3") == 0)
+				{
+					shaderParamInfos[shaderParamSize - 1].type = MPType::Float3;
+					shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+					CollectMaterialParameterIndex += 3;
+				}
+				else if (type.compare("float2") == 0)
+				{
+					shaderParamInfos[shaderParamSize - 1].type = MPType::Float2;
+					shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+					CollectMaterialParameterIndex += 2;
+				}
+				else if (type.compare("float") == 0)
+				{
+					shaderParamInfos[shaderParamSize - 1].type = MPType::Float;
+					shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+					CollectMaterialParameterIndex += 1;
+				}
+				header.shaderParameterCount++;
+				auto lastLineStr = line[s - 1].ClearSpace();
+				if (lastLineStr[0] == '[')
+				{
+					//提取每个属性的拓展信息
+					lastLineStr.Replace("[", "");
+					lastLineStr.Replace("]", "");
+					auto paramProperty = lastLineStr.Split(";");//获取上一行的代码
+					line[s - 1] = "//" + line[s - 1];//拓展信息非着色器正式代码,填充注释防止编译错误
+					for (auto i : paramProperty)
+					{
+						//提取属性里的值
+						auto value = i.Split("=");
+						if (value.size() > 1)
+						{
+							if (value[0].Contains("Default", false))
+							{
+								auto values = value[1].Split(",");
+								auto maxCount = std::min((int)values.size(), 4);
+								for (int vv = 0; vv < maxCount; vv++)
+									shaderParamInfos[shaderParamSize - 1].defaultValue[vv] = (float)HString::ToDouble(values[vv]);
+							}
+							else if (value[0].Contains("Name", false))
+							{
+								std::string name = value[1].c_str();
+								name.copy(shaderParamInfos[shaderParamSize - 1].name, sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1);
+								shaderParamInfos[shaderParamSize - 1].name[sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1] = '\0';
+							}
+						}
+					}
+				}
+			}
+			}
+			//Texture
+			else if (setting[0] == 'T' && setting[1] == 'e' && setting[2] == 'x' && setting[3] == 't'
 				&& setting[4] == 'u' && setting[5] == 'r' && setting[6] == 'e')
 			{
 				textureRegisterLineIndex.push_back(s);
@@ -243,155 +601,6 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 					}
 				}
 			}
-			else if (bCollectMaterialFlags)
-			{
-				auto flagStr = setting.Split(";");
-				for (auto i : flagStr)
-				{
-					if (i.Length() > 0 && i.IsSame("EnableShaderDebug"))
-					{
-						header.flags |= EnableShaderDebug;
-					}
-					else if (i.IsSame("NativeHLSL"))
-					{
-						header.flags |= NativeHLSL;
-					}
-				}
-				line[s] = "//" + line[s];//拓展信息非着色器正式代码,填充注释防止编译错误
-				if (setting.Contains("}"))
-				{
-					bCollectMaterialFlags = false;
-					if (header.flags & NativeHLSL)//原生HLSL,不进行拓展处理
-					{
-						break;
-					}
-				}
-			}
-			else if (bSearchVertexInputLayout)
-			{
-				//查找类型符号
-				//[0]pos:POSITION , [1]nor:NORMAL , [2]tar:TANGENT , [3]col:COLOR , [4]uv01:TEXCOORD0 , [5]uv23:TEXCOORD1
-				bool bFind = false;
-				int size = 0;
-				if (line[s].Contains("float2"))
-				{
-					bFind = true;
-					size = 2;
-				}
-				else if (line[s].Contains("float3"))
-				{
-					bFind = true;
-					size = 3;
-				}
-				else if (line[s].Contains("float4"))
-				{
-					bFind = true;
-					size = 4;
-				}
-				if (bFind)
-				{
-					auto sem = line[s].Split(":");
-					if (sem.size() > 1)
-					{
-						if (sem[1].Contains("POSITION"))
-							header.vertexInput[0] = size;
-						else if (sem[1].Contains("NORMAL"))
-							header.vertexInput[1] = size;
-						else if (sem[1].Contains("TANGENT"))
-							header.vertexInput[2] = size;
-						else if (sem[1].Contains("COLOR"))
-							header.vertexInput[3] = size;
-						else if (sem[1].Contains("TEXCOORD0"))
-							header.vertexInput[4] = size;
-						else if (sem[1].Contains("TEXCOORD1"))
-							header.vertexInput[5] = size;
-					}
-				}
-				//结构体结束
-				if (line[s].Contains("}"))
-				{
-					bSearchVertexInputLayout = false;
-				}
-			}
-			else if (bCollectMaterialParameter)
-			{
-				if (setting.Contains("}"))
-				{
-					bCollectMaterialParameter = false;
-				}
-				if (setting[0] == 'f' && setting[1] == 'l' && setting[2] == 'o' && setting[3] == 'a' && setting[4] == 't')
-				{
-					shaderParamInfos.push_back(ShaderParameterInfo({}));
-					//提取param
-					std::stringstream param(line[s].c_str());
-					std::string type, name;
-					param >> type >> name;
-					size_t shaderParamSize = shaderParamInfos.size();
-					if (name[name.size() - 1] == ';')
-					{
-						name.erase(name.begin() + name.size() - 1);
-					}
-					name.copy(shaderParamInfos[shaderParamSize - 1].name, sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1);
-					shaderParamInfos[shaderParamSize - 1].name[sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1] = '\0';
-					//
-					if (type.compare("float4") == 0)
-					{
-						shaderParamInfos[shaderParamSize - 1].type = MPType::Float4;
-						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
-						CollectMaterialParameterIndex += 4;
-					}
-
-					else if (type.compare("float3") == 0)
-					{
-						shaderParamInfos[shaderParamSize - 1].type = MPType::Float3;
-						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
-						CollectMaterialParameterIndex += 3;
-					}
-					else if (type.compare("float2") == 0)
-					{
-						shaderParamInfos[shaderParamSize - 1].type = MPType::Float2;
-						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
-						CollectMaterialParameterIndex += 2;
-					}
-					else if (type.compare("float") == 0)
-					{
-						shaderParamInfos[shaderParamSize - 1].type = MPType::Float;
-						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
-						CollectMaterialParameterIndex += 1;
-					}
-					header.shaderParameterCount++;
-					auto lastLineStr = line[s - 1].ClearSpace();
-					if (lastLineStr[0] == '[')
-					{
-						//提取每个属性的拓展信息
-						lastLineStr.Replace("[", "");
-						lastLineStr.Replace("]", "");
-						auto paramProperty = lastLineStr.Split(";");//获取上一行的代码
-						line[s - 1] = "//" + line[s - 1];//拓展信息非着色器正式代码,填充注释防止编译错误
-						for (auto i : paramProperty)
-						{
-							//提取属性里的值
-							auto value = i.Split("=");
-							if (value.size() > 1)
-							{
-								if (value[0].Contains("Default", false))
-								{
-									auto values = value[1].Split(",");
-									auto maxCount = std::min((int)values.size(), 4);
-									for (int vv = 0; vv < maxCount; vv++)
-										shaderParamInfos[shaderParamSize - 1].defaultValue[vv] = (float)HString::ToDouble(values[vv]);
-								}
-								else if (value[0].Contains("Name", false))
-								{
-									std::string name = value[1].c_str();
-									name.copy(shaderParamInfos[shaderParamSize - 1].name, sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1);
-									shaderParamInfos[shaderParamSize - 1].name[sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1] = '\0';
-								}
-							}
-						}
-					}
-				}
-			}
 		}
 		if (!(header.flags & NativeHLSL))//原生HLSL,不进行拓展处理
 		{
@@ -427,100 +636,35 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 		_shaderSrcCode += "\n" + i;
 	}
 	//
-	shaderc::Compiler compiler;
-	shaderc::CompileOptions options;
-	if ((header.flags & EnableShaderDebug)) {
-		options.SetOptimizationLevel(shaderc_optimization_level_zero);
-		options.SetGenerateDebugInfo();
-	}
-	else {
-		options.SetOptimizationLevel(shaderc_optimization_level_performance);
-	}
-	options.SetSourceLanguage(shaderc_source_language_hlsl);
-	options.SetHlslIoMapping(true);
-	//options.SetTargetSpirv(shaderc_spirv_version_1_3);
 	HString fileName = srcShaderFileFullPath;
-	HString filePath = fileName.GetFilePath();
-	HString ResourcePath = FileSystem::GetShaderIncludeAbsPath();
-	ResourcePath.CorrectionPath();
-	options.SetIncluder(std::make_unique<ShaderIncluder>());
-	auto kind = shaderc_vertex_shader;
-	if (shaderType == CompileShaderType::VertexShader)
-	{
-		kind = shaderc_vertex_shader;
-	}
-	else if (shaderType == CompileShaderType::PixelShader)
-	{
-		kind = shaderc_fragment_shader;
-	}
-	else if (shaderType == CompileShaderType::ComputeShader)
-	{
-		kind = shaderc_compute_shader;
-	}
-	//OutputDebugStringA(_shaderSrcCode.c_str());
-	shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(_shaderSrcCode.c_str(), _shaderSrcCode.Length(), kind, fileName.GetBaseName().c_str(), entryPoint, options);
-	auto resultStatus = result.GetCompilationStatus();
-	if (resultStatus != shaderc_compilation_status_success)
-	{
-		std::cerr << result.GetErrorMessage();
-		MessageOut(result.GetErrorMessage().c_str(), false, true, "255,0,0");
-		return;
-	}
-	else
-	{
-		std::vector<uint32_t> resultChar = { result.cbegin(), result.cend() } ;
-		HString cacheOnlyPath = (FileSystem::GetShaderCacheAbsPath()).c_str();
-		HString cachePath = cacheOnlyPath + fileName.GetBaseName();
-		if (shaderType == CompileShaderType::VertexShader)
-		{
-			cachePath += ("@vs");
-		}
-		else if (shaderType == CompileShaderType::PixelShader)
-		{
-			cachePath += ("@ps");
-		}
-		else if (shaderType == CompileShaderType::ComputeShader)
-		{
-			cachePath += ("@cs");
-		}
-		cachePath += TEXT(".spv");
-		//Cache 路径不存在
-		if (!FileSystem::FileExist(cacheOnlyPath.c_str()))
-		{
-			std::filesystem::create_directory(cacheOnlyPath.c_str());
-		}
-		std::ofstream out(cachePath.c_str(), std::ios::binary);
-		if (out.is_open())
-		{
-			//保存变体(暂定)
-			header.varients = 0;
-			//Header 存入
-			out.write((char*)&header, sizeof(ShaderCacheHeader));
-			//Shader 参数信息存入
-			for (auto s : shaderParamInfos)
-			{
-				out.write((char*)&s, sizeof(ShaderParameterInfo));
-			}
-			for (auto s : shaderTextureInfos)
-			{
-				out.write((char*)&s, sizeof(ShaderTextureInfo));
-			}
-			//ShaderCache
-			out.write((char*)resultChar.data(), resultChar.size() * sizeof(glm::uint));
-			out.close();
-			//Log
-			HString compileResultStr = TEXT("Compile shader [");
-			compileResultStr += srcShaderFileFullPath;
-			compileResultStr += TEXT("] successful.");
-			ConsoleDebug::print_endl(compileResultStr, TEXT("0,255,50"));
-		}
-		else
-		{
-		}
-	}
+
+	//为每个变体编译ShaderCache
+	MessageOut("--");
+	MessageOut("-Start Compile Shader Permutation----------", false, false, "0,255,0");
+	GenerateCombinations(varients.size(), 0, 0, _shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
+	MessageOut("-End Compile Shader Permutation------------", false, false, "0,255,0");
+	MessageOut("--");
+	//for (int i = 0; i < varients.size(); i++)
+	//{
+	//	//Bool开和关  分别编一次
+	//	if (varients[i].type == ShaderVarientType::Bool)
+	//	{
+	//		for (int m = 0; m < 2; m++)
+	//		{
+	//			std::string value = HString::FromInt(m).c_str();
+	//			options.AddMacroDefinition(varients[i].name, value);
+	//			ExecCompileShader(options, _shaderSrcCode, fileName, entryPoint, shaderType
+	//				, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
+	//		}
+	//	}
+	//	//Int 只会编译一次
+	//	else if (varients[i].type == ShaderVarientType::Int)
+	//	{
+	//		options.AddMacroDefinition(varients[i].name, varients[i].defaultValue);
+
+	//	}
+	//}
 }
-
-
 
 
 #endif

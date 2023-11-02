@@ -794,6 +794,18 @@ public:
 		return atoi(str.c_str());
 	}
 
+	static HBBR_INLINE unsigned long ToULong(const char* str)
+	{
+		char* end;
+		return std::strtoul(str, &end, 10);
+	}
+
+	static HBBR_INLINE unsigned long ToULong(HString str)
+	{
+		char* end;
+		return std::strtoul(str.c_str(), &end, 10);
+	}
+
 	static HBBR_INLINE double ToDouble(HString str)
 	{
 		return atof(str.c_str());
@@ -823,6 +835,25 @@ public:
 	{
 		return atoll(str.c_str());
 	}
+
+	static HBBR_INLINE const bool IsNumber(const char* str)
+	{
+		std::string stdstr = str;
+		return std::all_of(stdstr.begin(), stdstr.end(), ::isdigit);
+	}
+
+	static HBBR_INLINE const bool IsNumber(HString str)
+	{
+		std::string stdstr = str.c_str();
+		return std::all_of(stdstr.begin(), stdstr.end(), ::isdigit);
+	}
+
+	HBBR_INLINE const bool IsNumber()
+	{
+		std::string stdstr = _str;
+		return std::all_of(stdstr.begin(), stdstr.end(), ::isdigit);
+	}
+
 #ifdef _WIN32
 
 	//char 到 wchar_t的 转换

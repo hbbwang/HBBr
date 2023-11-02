@@ -49,6 +49,8 @@ Material* Material::LoadMaterial(HGUID guid)
 	}
 
 	pugi::xml_document materialDoc;
+	HString vsFullName;
+	HString psFullName;
 	if (XMLStream::LoadXML(filePath.c_wstr(), materialDoc))
 	{
 		std::unique_ptr<Material> mat (new Material) ;
@@ -65,11 +67,17 @@ Material* Material::LoadMaterial(HGUID guid)
 		mat->_primitive->graphicsName = it->second->name;
 		XMLStream::LoadXMLAttributeString(materialPrim, L"vsShader", mat->_primitive->vsShader);
 		XMLStream::LoadXMLAttributeString(materialPrim, L"psShader", mat->_primitive->psShader);
+		uint32_t varient = 0;
+		XMLStream::LoadXMLAttributeUInt(materialPrim, L"varient", varient);
+		mat->_primitive->graphicsIndex.SetVarient(varient);
 		uint32_t pass;
 		XMLStream::LoadXMLAttributeUInt(materialPrim, L"pass", pass);
 		mat->_primitive->passUsing = (Pass)pass;
-		auto vsCache = Shader::_vsShader[mat->_primitive->vsShader];
-		auto psCache = Shader::_psShader[mat->_primitive->psShader];
+
+		vsFullName = mat->_primitive->vsShader + "@" + HString::FromUInt(mat->_primitive->graphicsIndex.GetVarient());
+		psFullName = mat->_primitive->psShader + "@" + HString::FromUInt(mat->_primitive->graphicsIndex.GetVarient());
+		auto vsCache = Shader::_vsShader[vsFullName];
+		auto psCache = Shader::_psShader[psFullName];
 		mat->_primitive->inputLayout = VertexFactory::VertexInput::BuildLayout(vsCache.header.vertexInput);
 		//Parameters
 		{
@@ -239,7 +247,7 @@ Material* Material::LoadMaterial(HGUID guid)
 			}
 		}
 		//
-		PrimitiveProxy::GetNewMaterialPrimitiveIndex(mat->_primitive.get());
+		PrimitiveProxy::GetNewMaterialPrimitiveIndex(mat->_primitive.get(), vsCache, psCache);
 		PrimitiveProxy::AddMaterialPrimitive( mat->_primitive.get());
 
 		dataPtr->SetData(std::move(mat));

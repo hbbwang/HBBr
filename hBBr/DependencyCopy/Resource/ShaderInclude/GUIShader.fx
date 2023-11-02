@@ -1,4 +1,4 @@
-[Flags]
+[Flag]
 {
     NativeHLSL; //原生HLSL,不进行拓展编译,需遵循HLSL代码规范编写
     EnableShaderDebug;
@@ -19,7 +19,6 @@ cbuffer GUIPass :register(b0,space0)
     int Flags;
 };
 
-//[InputLayout]
 struct VSInput
 {
     float2 Pos : POSITION;

@@ -147,11 +147,6 @@ public:
 
 	uint64_t		   uniformBufferSize = 0;
 
-	//变体开关
-	uint32_t vsVarients = 0;
-
-	uint32_t psVarients = 0;
-
 	std::vector<MaterialParameterInfo> _paramterInfos;
 
 	std::vector<MaterialTextureInfo> _textureInfos;
@@ -176,7 +171,9 @@ public:
 
 	static void AddMaterialPrimitive( MaterialPrimitive* prim);
 
-	static void GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim);
+	static void GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim ,HString vsFullName = "",HString psFullName = "");
+
+	static void GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, ShaderCache& vs, ShaderCache& ps);
 
 	static void RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim);
 

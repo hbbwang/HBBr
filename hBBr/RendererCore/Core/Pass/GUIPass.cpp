@@ -71,7 +71,7 @@ void GUIPass::PassUpdate()
 	auto pipelineObject = PipelineManager::GetGraphicsPipelineMap(_guiShaderIndex);
 	if (pipelineObject == NULL)
 	{
-		_guiShaderIndex = CreatePipeline("GUIShader");
+		_guiShaderIndex = CreatePipeline("GUIShader@0");
 	}
 	//收集顶点数据一次性使用
 	std::vector<GUIVertexData> vertices;
@@ -323,7 +323,7 @@ PipelineIndex GUIPass::CreatePipeline(HString shaderName)
 	PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
 	//PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
 	PipelineManager::SetVertexInput(pipelineCreateInfo, vertexInputLayout);
-	PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, vsCache, psCache, 0);
+	PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, vsCache, psCache);
 	PipelineManager::SetPipelineLayout(pipelineCreateInfo, _pipelineLayout);
 	PipelineManager::BuildGraphicsPipelineState(pipelineCreateInfo, _renderPass, 0, pipeline);
 	//_guiPipelines.emplace(std::make_pair(pipelineTag, pipeline));

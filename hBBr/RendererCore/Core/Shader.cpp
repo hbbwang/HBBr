@@ -29,6 +29,13 @@ void Shader::LoadShaderCache(const char* cachePath)
 		file.seekg(0);
 		//header
 		file.read((char*)&cache.header, sizeof(ShaderCacheHeader));
+		//shader varients
+		for (int v = 0; v < cache.header.varientCount; v++)
+		{
+			ShaderVarientGroup newVarient;
+			file.read((char*)&newVarient, sizeof(ShaderVarientGroup));
+			cache.vi.push_back(newVarient);
+		}
 		//shader parameter infos
 		for (int i = 0; i < cache.header.shaderParameterCount; i++)
 		{
@@ -47,6 +54,7 @@ void Shader::LoadShaderCache(const char* cachePath)
 		size_t shaderCodeSize =
 			fileSize 
 			- sizeof(ShaderCacheHeader) 
+			- (sizeof(ShaderVarientGroup) * cache.header.varientCount)
 			- (sizeof(ShaderParameterInfo) * cache.header.shaderParameterCount)
 			- (sizeof(ShaderTextureInfo) * cache.header.shaderTextureCount)
 			;
@@ -60,10 +68,18 @@ void Shader::LoadShaderCache(const char* cachePath)
 			MessageOut((HString("Load shader cache failed : ") + i.fileName).c_str()  ,false,false,"255,255,0");
 			return;
 		}
-		cache.shaderModule.emplace(cache.header.varients, shaderModule);
+		//从cache名字split[2]里获取varient bool value
+		cache.varients = 0;
+		if (split.size() > 2)
+		{
+			cache.varients = HString::ToULong(split[2]);
+		}
+		cache.shaderModule = shaderModule;
+		cache.shaderStageInfo.module = shaderModule;
 		//
 		cache.shaderPath = i.relativePath;
 		cache.shaderName = split[0];
+		cache.shaderFullName = split[0] + "@" + split[2];
 		cache.shaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		//创建模板
 		//ParameterInfo
@@ -154,21 +170,21 @@ void Shader::LoadShaderCache(const char* cachePath)
 			cache.shaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
 			cache.shaderStageInfo.pName = "VSMain";
 			cache.shaderType = ShaderType::VertexShader;
-			_vsShader.emplace(std::make_pair(cache.shaderName, cache));
+			_vsShader.emplace(std::make_pair(cache.shaderFullName, cache));
 		}
 		else if (split[1] == "ps")
 		{
 			cache.shaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 			cache.shaderStageInfo.pName = "PSMain";
 			cache.shaderType = ShaderType::PixelShader;
-			_psShader.emplace(std::make_pair(cache.shaderName, cache));
+			_psShader.emplace(std::make_pair(cache.shaderFullName, cache));
 		}
 		else if (split[1] == "cs")
 		{
 			cache.shaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
 			cache.shaderStageInfo.pName = "CSMain";
 			cache.shaderType = ShaderType::ComputeShader;
-			_csShader.emplace(std::make_pair(cache.shaderName, cache));
+			_csShader.emplace(std::make_pair(cache.shaderFullName, cache));
 		}
 
 		cacheIndex++;
@@ -182,24 +198,15 @@ void Shader::DestroyAllShaderCache()
 	vkDeviceWaitIdle(manager->GetDevice());
 	for (auto& i : _vsShader)
 	{
-		for (auto s : i.second.shaderModule)
-		{
-			vkDestroyShaderModule(manager->GetDevice(), s.second, VK_NULL_HANDLE);
-		}
+		vkDestroyShaderModule(manager->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
 	}
 	for (auto& i : _psShader)
 	{
-		for (auto s : i.second.shaderModule)
-		{
-			vkDestroyShaderModule(manager->GetDevice(), s.second, VK_NULL_HANDLE);
-		}
+		vkDestroyShaderModule(manager->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
 	}
 	for (auto& i : _csShader)
 	{
-		for (auto s : i.second.shaderModule)
-		{
-			vkDestroyShaderModule(manager->GetDevice(), s.second, VK_NULL_HANDLE);
-		}
+		vkDestroyShaderModule(manager->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
 	}
 	_vsShader.clear();
 	_psShader.clear();
