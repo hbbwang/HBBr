@@ -24,8 +24,6 @@ public:
 
 	HBBR_API HBBR_INLINE MaterialPrimitive* GetPrimitive()const { return _primitive.get(); }
 
-	HBBR_API HBBR_INLINE HGUID GetGUID()const { return _guid; }
-
 	HBBR_INLINE std::vector<class Texture*> GetTextures() {
 		return _primitive->GetTextures();
 	}
@@ -35,7 +33,5 @@ private:
 	HString _materialName = "Unknow material" ;
 
 	std::unique_ptr<MaterialPrimitive> _primitive;
-
-	HGUID _guid;
 
 };

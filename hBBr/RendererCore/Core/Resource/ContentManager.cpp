@@ -158,14 +158,13 @@ void ContentManager::ReloadAssetInfo(AssetType type , pugi::xml_node & i)
 	_assets[(uint32_t)type].emplace(info->guid, info);
 }
 
-AssetInfoBase* ContentManager::ImportAssetInfo(AssetType type, HString sourcePath,HString contentPath_WithFileNameAndSuffix)
+AssetInfoBase* ContentManager::ImportAssetInfo(AssetType type, HString sourcePath,HString contentPath)
 {
 	sourcePath.CorrectionPath();
-	contentPath_WithFileNameAndSuffix.Replace("\\", "/");
+	contentPath.Replace("\\", "/");
 	HString typeName = GetAssetTypeString(type);
-	HString contentPath = contentPath_WithFileNameAndSuffix.GetFilePath();
 	HString name = sourcePath.GetBaseName();
-	HString suffix = contentPath_WithFileNameAndSuffix.GetSuffix();
+	HString suffix = sourcePath.GetSuffix();
 	HString path = FileSystem::GetRelativePath(contentPath.c_str());
 	path.Replace("\\", "/");
 	auto root = _contentRefConfig.child(L"root");

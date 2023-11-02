@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<root GUID="7117EDF7-FECB-45C3-AB7A-A4DD4A32FFAE" >
-    <MaterialPrimitive vsShader="PBR" psShader="PBR" varient="1" pass="0" />
+<root>
+    <MaterialPrimitive vsShader="PBR" psShader="PBR" vsVarient="1" psVarient="1" pass="0" />
 </root>

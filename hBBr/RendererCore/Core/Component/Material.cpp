@@ -55,27 +55,23 @@ Material* Material::LoadMaterial(HGUID guid)
 	{
 		std::unique_ptr<Material> mat (new Material) ;
 		auto root = materialDoc.child(L"root");
-		if (!StringToGUID(guidStr.c_str(), &guid))
-		{
-			guid = CreateGUID();
-			guidStr = GUIDToString(guid);
-		}
-		mat->_guid = guid;
 		auto materialPrim = root.child(L"MaterialPrimitive");
 		//MaterialPrimitive
 		mat->_primitive.reset(new MaterialPrimitive());
 		mat->_primitive->graphicsName = it->second->name;
 		XMLStream::LoadXMLAttributeString(materialPrim, L"vsShader", mat->_primitive->vsShader);
 		XMLStream::LoadXMLAttributeString(materialPrim, L"psShader", mat->_primitive->psShader);
-		uint32_t varient = 0;
-		XMLStream::LoadXMLAttributeUInt(materialPrim, L"varient", varient);
-		mat->_primitive->graphicsIndex.SetVarient(varient);
+		uint32_t vs_varient = 0;
+		uint32_t ps_varient = 0;
+		XMLStream::LoadXMLAttributeUInt(materialPrim, L"vsVarient", vs_varient);
+		XMLStream::LoadXMLAttributeUInt(materialPrim, L"psVarient", ps_varient);
+		mat->_primitive->graphicsIndex.SetVarient(vs_varient, ps_varient);
 		uint32_t pass;
 		XMLStream::LoadXMLAttributeUInt(materialPrim, L"pass", pass);
 		mat->_primitive->passUsing = (Pass)pass;
 
-		vsFullName = mat->_primitive->vsShader + "@" + HString::FromUInt(mat->_primitive->graphicsIndex.GetVarient());
-		psFullName = mat->_primitive->psShader + "@" + HString::FromUInt(mat->_primitive->graphicsIndex.GetVarient());
+		vsFullName = mat->_primitive->vsShader + "@" + HString::FromUInt(mat->_primitive->graphicsIndex.GetVSVarient());
+		psFullName = mat->_primitive->psShader + "@" + HString::FromUInt(mat->_primitive->graphicsIndex.GetPSVarient());
 		auto vsCache = Shader::_vsShader[vsFullName];
 		auto psCache = Shader::_psShader[psFullName];
 		mat->_primitive->inputLayout = VertexFactory::VertexInput::BuildLayout(vsCache.header.vertexInput);
@@ -261,17 +257,16 @@ Material* Material::LoadMaterial(HGUID guid)
 
 Material* Material::CreateMaterial(HString newMatFilePath)
 {
-	if (!FileSystem::IsNormalFile(newMatFilePath.c_str()))
-	{
-		return NULL;
-	}
-	if (!newMatFilePath.GetSuffix().IsSame("mat"))
+	if (!FileSystem::IsDir(newMatFilePath.c_str()))
 	{
 		return NULL;
 	}
 	//复制引擎自带材质实例
 	HGUID guid("61A147FF-32BD-48EC-B523-57BC75EB16BA");
-	FileSystem::FileCopy((FileSystem::GetContentAbsPath() + "Core/Material/61A147FF-32BD-48EC-B523-57BC75EB16BA.mat").c_str() ,newMatFilePath.c_str());
-
+	HString srcMat = (FileSystem::GetContentAbsPath() + "Core/Material/61A147FF-32BD-48EC-B523-57BC75EB16BA.mat");
+	FileSystem::FileCopy(srcMat.c_str() ,newMatFilePath.c_str());
+	HString newName = (newMatFilePath + "/NewMaterial.mat");
+	FileSystem::FileRename(srcMat.c_str(), newName.c_str());
+	auto assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Material, newName.c_str(), newMatFilePath);
 	return NULL;
 }

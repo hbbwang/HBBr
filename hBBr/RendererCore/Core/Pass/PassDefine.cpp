@@ -125,6 +125,9 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 			{
 				HString vsShaderFullName = m->graphicsIndex.GetVSShaderFullName();
 				HString psShaderFullName = m->graphicsIndex.GetPSShaderFullName();
+				//auto vsCacheIt = Shader::_vsShader.find(vsShaderFullName);
+				//auto psCacheIt = Shader::_psShader.find(psShaderFullName);
+
 				auto& vsCache = Shader::_vsShader[vsShaderFullName];
 				auto& psCache = Shader::_psShader[psShaderFullName];
 				VkGraphicsPipelineCreateInfoCache pipelineCreateInfo = {};

@@ -2,6 +2,7 @@
 #ifndef _BASE_PASS_VERTEX_SHADER_HLSL
 #define _BASE_PASS_VERTEX_SHADER_HLSL
 
+#ifndef CustomVSMain
 VSToPS VSMain(VSInput IN)
 {
     VSToPS OUT;
@@ -34,5 +35,6 @@ VSToPS VSMain(VSInput IN)
 
     return OUT;
 }
+#endif
 
 #endif

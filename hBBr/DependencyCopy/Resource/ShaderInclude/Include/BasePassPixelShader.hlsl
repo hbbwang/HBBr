@@ -24,9 +24,9 @@ void InitPSOut(inout PSOutput psInout)
 
 void SetShadingModelID(PixelShaderParameter Parameters)
 {
-    #if MATERIAL_SHADINGMODEL_DEFAULT_LIT
+    #if defined(MATERIAL_SHADINGMODEL_DEFAULT_LIT) 
         Parameters.ShadingModelID = SHADINGMODELID_DEFAULT_LIT;
-    #else //MATERIAL_SHADINGMODEL_UNLIT
+    #elif defined(MATERIAL_SHADINGMODEL_UNLIT)
         Parameters.ShadingModelID = SHADINGMODELID_UNLIT;
     #endif
 }
