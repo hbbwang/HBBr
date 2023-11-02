@@ -323,7 +323,7 @@ PipelineIndex GUIPass::CreatePipeline(HString shaderName)
 	PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
 	//PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
 	PipelineManager::SetVertexInput(pipelineCreateInfo, vertexInputLayout);
-	PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, vsCache, psCache);
+	PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, vsCache, psCache, 0);
 	PipelineManager::SetPipelineLayout(pipelineCreateInfo, _pipelineLayout);
 	PipelineManager::BuildGraphicsPipelineState(pipelineCreateInfo, _renderPass, 0, pipeline);
 	//_guiPipelines.emplace(std::make_pair(pipelineTag, pipeline));

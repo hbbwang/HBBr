@@ -283,9 +283,7 @@ public:
 
 	void DestroyBuffer(VkBuffer& buffer);
 
-	void CreateShaderModule(std::vector<char> data , VkShaderModule& shaderModule);
-
-	void CreateShaderModule(VkDevice device, std::vector<char> data, VkShaderModule& shaderModule);
+	bool CreateShaderModule(std::vector<char> data , VkShaderModule& shaderModule);
 
 	void InitImguiContent();
 

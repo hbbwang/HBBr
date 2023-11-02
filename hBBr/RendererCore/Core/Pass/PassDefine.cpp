@@ -131,7 +131,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 				PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
 				PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
 				PipelineManager::SetVertexInput(pipelineCreateInfo, m->inputLayout);
-				PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, vsCache, psCache);
+				PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, vsCache, psCache, m->graphicsIndex.varients);
 				//Setting pipeline end
 				VkPipelineLayout pipelineLayout;
 				if (pipelineCreateInfo.bHasMaterialTexture)

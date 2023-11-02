@@ -93,12 +93,12 @@ struct ShaderCache
 	std::vector<ShaderTextureInfo> texs;
 	//
 	ShaderType shaderType;
-	VkShaderModule shaderModule;
+	//<varients,VkShaderModule>
+	std::unordered_map<uint32_t, VkShaderModule> shaderModule;
 	HString shaderName;
 	HString shaderPath;
 	VkPipelineShaderStageCreateInfo shaderStageInfo={};
 	uint32_t shaderLoadIndex = 0;
-	uint32_t varients = 0;
 	//Default 默认参数模板
 	std::vector<std::shared_ptr<struct MaterialParameterInfo>>  pi;
 	std::vector<std::shared_ptr<struct MaterialTextureInfo>> ti;

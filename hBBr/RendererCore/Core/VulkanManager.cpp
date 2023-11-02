@@ -2165,22 +2165,14 @@ void VulkanManager::FreeBufferMemory(VkDeviceMemory& bufferMemory)
 	bufferMemory = VK_NULL_HANDLE;
 }
 
-void VulkanManager::CreateShaderModule(std::vector<char> data, VkShaderModule& shaderModule)
+bool VulkanManager::CreateShaderModule(std::vector<char> data, VkShaderModule& shaderModule)
 {
 	VkShaderModuleCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 	info.codeSize = data.size();
 	info.pCode = reinterpret_cast<const uint32_t*>(data.data());
-	vkCreateShaderModule(_device, &info, VK_NULL_HANDLE, &shaderModule);
-}
-
-void VulkanManager::CreateShaderModule(VkDevice device, std::vector<char> data, VkShaderModule& shaderModule)
-{
-	VkShaderModuleCreateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	info.codeSize = data.size();
-	info.pCode = reinterpret_cast<const uint32_t*>(data.data());
-	vkCreateShaderModule(device, &info, VK_NULL_HANDLE, &shaderModule);
+	auto result = vkCreateShaderModule(_device, &info, VK_NULL_HANDLE, &shaderModule);
+	return result == VK_SUCCESS;
 }
 
 void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, uint32_t subPassIndex)

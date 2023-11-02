@@ -238,40 +238,34 @@ struct PipelineObject
 
 struct PipelineIndex
 {
-	uint32_t vsLoadIndex = 0 ;
-	uint32_t psLoadIndex = 0;
-	uint32_t vsVarients = 0;
-	uint32_t psVarients = 0;
-	uint32_t layout = 0;
+	uint32_t vsLoadIndex = 0;//顶点着色器加载序号
+	uint32_t psLoadIndex = 0;//像素着色器加载序号
+	uint32_t varients = 0;//变体 32bit 相当于32个bool
+	uint32_t pipelineIndex = 0;//用来记录管线状态
 	static PipelineIndex GetPipelineIndex(
 		struct ShaderCache* vs,
 		struct ShaderCache* ps)
 	{
 		PipelineIndex index;
-		index.vsLoadIndex = vs->shaderLoadIndex;//顶点着色器序号
+		index.vsLoadIndex = vs->shaderLoadIndex;
 		index.psLoadIndex = ps->shaderLoadIndex;
-		index.vsVarients = vs->varients;
-		index.psVarients = ps->varients;
-		index.layout =
-			(vs->texs.size() > 0) |
-			((ps->params.size() > 0) << 1);
+		index.varients = ps->header.varients;//vs和ps共用一套32bit的变体
+		index.pipelineIndex = 0;
 		return index;
 	}
 
 	bool operator<(const PipelineIndex& id) const {
 		return (vsLoadIndex < id.vsLoadIndex)
 			|| (psLoadIndex < id.psLoadIndex)
-			|| (vsVarients < id.vsVarients)
-			|| (psVarients < id.psVarients)
-			|| (layout < id.layout);
+			|| (varients < id.varients)
+			|| (pipelineIndex < id.pipelineIndex);
 	}
 
 	bool operator==(const PipelineIndex& id) const {
 		return (vsLoadIndex == id.vsLoadIndex)
 			&& (psLoadIndex == id.psLoadIndex)
-			&& (vsVarients == id.vsVarients)
-			&& (psVarients == id.psVarients)
-			&& (layout == id.layout);
+			&& (varients == id.varients)
+			&& (pipelineIndex == id.pipelineIndex);
 	}
 };
 
@@ -299,7 +293,7 @@ public:
 	static void SetDepthStencil(VkGraphicsPipelineCreateInfoCache& createInfo);
 
 	//Graphics pipeline setting step 6
-	static void SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache vs, ShaderCache ps);
+	static void SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache vs, ShaderCache ps, uint32_t varient);
 
 	//Graphics pipeline setting the last step
 	static PipelineObject* CreatePipelineObject(

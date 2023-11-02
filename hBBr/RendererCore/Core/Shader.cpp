@@ -21,6 +21,11 @@ void Shader::LoadShaderCache(const char* cachePath)
 		//auto shaderData = FileSystem::ReadBinaryFile(i.absPath.c_str());
 		std::ifstream file(i.absPath.c_str(), std::ios::ate | std::ios::binary);
 		size_t fileSize = static_cast<size_t>(file.tellg());
+		if (fileSize <= 1)
+		{
+			MessageOut((HString("Load shader cache failed : ") + i.fileName + " : Small size.").c_str(), false, false, "255,255,0");
+			return;
+		}
 		file.seekg(0);
 		//header
 		file.read((char*)&cache.header, sizeof(ShaderCacheHeader));
@@ -47,13 +52,19 @@ void Shader::LoadShaderCache(const char* cachePath)
 			;
 		std::vector<char> shaderData(shaderCodeSize);
 		file.read(shaderData.data(), shaderCodeSize);
-		VulkanManager::GetManager()->CreateShaderModule(shaderData, cache.shaderModule);
+		VkShaderModule shaderModule;
+		auto bSuccess = VulkanManager::GetManager()->CreateShaderModule(shaderData, shaderModule);
 		file.close();
+		if (!bSuccess)
+		{
+			MessageOut((HString("Load shader cache failed : ") + i.fileName).c_str()  ,false,false,"255,255,0");
+			return;
+		}
+		cache.shaderModule.emplace(cache.header.varients, shaderModule);
 		//
 		cache.shaderPath = i.relativePath;
 		cache.shaderName = split[0];
 		cache.shaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		cache.shaderStageInfo.module = cache.shaderModule;
 		//创建模板
 		//ParameterInfo
 		{
@@ -171,15 +182,24 @@ void Shader::DestroyAllShaderCache()
 	vkDeviceWaitIdle(manager->GetDevice());
 	for (auto& i : _vsShader)
 	{
-		vkDestroyShaderModule(manager->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
+		for (auto s : i.second.shaderModule)
+		{
+			vkDestroyShaderModule(manager->GetDevice(), s.second, VK_NULL_HANDLE);
+		}
 	}
 	for (auto& i : _psShader)
 	{
-		vkDestroyShaderModule(manager->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
+		for (auto s : i.second.shaderModule)
+		{
+			vkDestroyShaderModule(manager->GetDevice(), s.second, VK_NULL_HANDLE);
+		}
 	}
 	for (auto& i : _csShader)
 	{
-		vkDestroyShaderModule(manager->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
+		for (auto s : i.second.shaderModule)
+		{
+			vkDestroyShaderModule(manager->GetDevice(), s.second, VK_NULL_HANDLE);
+		}
 	}
 	_vsShader.clear();
 	_psShader.clear();

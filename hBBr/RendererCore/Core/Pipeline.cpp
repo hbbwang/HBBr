@@ -184,8 +184,11 @@ void PipelineManager::SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& creat
 	createInfo.CreateInfo.layout = pipelineLayout;
 }
 
-void PipelineManager::SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache vs, ShaderCache ps)
+void PipelineManager::SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache vs, ShaderCache ps, uint32_t varient)
 {
+	vs.shaderStageInfo.module = vs.shaderModule[varient];
+	ps.shaderStageInfo.module = ps.shaderModule[varient];
+
 	createInfo.stages.push_back(vs.shaderStageInfo);
 	createInfo.stages.push_back(ps.shaderStageInfo);
 
