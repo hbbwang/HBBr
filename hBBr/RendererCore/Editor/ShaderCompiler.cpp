@@ -151,6 +151,20 @@ void ExecCompileShader(HString& _shaderSrcCode, HString& fileName, const char* e
 	options.SetIncluder(std::make_unique<ShaderIncluder>());
 	//options.SetTargetSpirv(shaderc_spirv_version_1_3);
 
+	//Platform
+	if (VulkanManager::GetManager()->GetPlatform() == EPlatform::Windows)//Default
+	{
+		options.AddMacroDefinition("PLATFORM_WINDOWS","1");
+	}
+	else if (VulkanManager::GetManager()->GetPlatform() == EPlatform::Android)
+	{
+		options.AddMacroDefinition("PLATFORM_ANDROID", "1");
+	}
+	else if (VulkanManager::GetManager()->GetPlatform() == EPlatform::Linux)
+	{
+		options.AddMacroDefinition("PLATFORM_LINUX", "1");
+	}
+
 	for (int i = 0; i < varients.size(); i++)
 	{
 		options.AddMacroDefinition(varients[i].name, std::string(1, varients[i].defaultValue));
@@ -242,7 +256,7 @@ void ExecCompileShader(HString& _shaderSrcCode, HString& fileName, const char* e
 			HString compileResultStr = TEXT("Compile shader [");
 			compileResultStr += srcShaderFileFullPath;
 			compileResultStr += TEXT("] successful.");
-			ConsoleDebug::print_endl(compileResultStr, TEXT("0,255,50"));
+			MessageOut(compileResultStr.c_str(), false, false, "0,255,50");
 		}
 		else
 		{
@@ -259,17 +273,23 @@ void ProcessCombination(uint32_t bits, int count,
 	std::string out = "Bit ";
 	if (count == 0)
 		out += ":0";
+	else
+	{
+	}
 	for (int i = 0; i < count; ++i)
 	{
 		bool value = (bits & (1 << i)) != 0;
 		out += ":" + std::to_string(value);
-		if (value)
+		if (value) 
 			varients[i].defaultValue = '1';
 		else
 			varients[i].defaultValue = '0';
+		std::string varientMsg(1, varients[i].defaultValue);
+		varientMsg = std::string("Varient : ") + varients[i].name + std::string(":") + varientMsg;
+		MessageOut(varientMsg.c_str(), false, false, "50,125,80");
 	}
+	MessageOut(out.c_str(), false, false);
 	ExecCompileShader(_shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
-	MessageOut(out.c_str(), false, false, "0,255,80");
 }
 
 void GenerateCombinations(int count, uint32_t bits, int bitIndex, 
@@ -655,9 +675,8 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 	{
 		shaderTypeStr = ("Compute");
 	}
-	MessageOut((HString("-Start Compile ") + shaderTypeStr + " Shader Permutation--").c_str(), false, false, "0,255,0");
+	MessageOut((HString("-Start Compile ") + shaderTypeStr + " Shader Permutation--").c_str(), false, false);
 	GenerateCombinations(varients.size(), 0, 0, _shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
-	MessageOut("--End-------", false, false, "0,255,0");
 	//for (int i = 0; i < varients.size(); i++)
 	//{
 	//	//Bool开和关  分别编一次

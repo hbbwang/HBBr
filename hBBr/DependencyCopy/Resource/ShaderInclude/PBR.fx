@@ -59,15 +59,12 @@ void frag(in VSToPS IN , inout PixelShaderParameter Parameters)
     Parameters.Roughness        = 1.0f;
     Parameters.Emissive         = 0.0f;
     //
-    half4 texSample = 1;
-    #if USE_COLOR
-        texSample = BaseTexture.SampleBias(BaseTextureSampler,IN.Texcoord01.xy , 0);
-    #endif
-    texSample *= Tint;
-    Parameters.BaseColor = texSample;
+    half4 BaseSample = BaseTexture.SampleBias(BaseTextureSampler,IN.Texcoord01.xy , 0);
+    BaseSample *= Tint;
+    Parameters.BaseColor = BaseSample;
     Parameters.Metallic = Metallic;
     Parameters.Roughness = Roughness;
-    Parameters.Emissive = texSample;
+    Parameters.Emissive = BaseSample;
 }
 
 #include "Include/BasePassVertexShader.hlsl"

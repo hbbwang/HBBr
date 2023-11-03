@@ -55,7 +55,7 @@ float4 PSMain(VSToPS IN) :SV_Target0
     if(Flags & IsFont)
     {
         result = baseTexture.r;
-        result = saturate(smoothstep(0.25f , 1.0f , result) * 2.5f);
+        result = saturate(smoothstep(0.3f , 1.0f , result) * 2.5f);
         if(! (Flags & FontShadow) )
         {
             result.rgb = 1.0f;

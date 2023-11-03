@@ -7,7 +7,7 @@
 void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textColor)
 {
 	HString msgStr = msg;
-	msgStr = "[hBBr]:" + msgStr;
+	//msgStr = "[hBBr]:" + msgStr;
     if (bMessageBox && VulkanManager::GetManager()->_bDebugEnable)
     {
 #if defined(_WIN32)
