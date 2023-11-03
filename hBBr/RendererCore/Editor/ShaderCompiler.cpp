@@ -257,6 +257,8 @@ void ProcessCombination(uint32_t bits, int count,
 	std::vector<ShaderTextureInfo>& shaderTextureInfos, const char* srcShaderFileFullPath, std::vector<ShaderVarientGroup>& varients)
 {
 	std::string out = "Bit ";
+	if (count == 0)
+		out += ":0";
 	for (int i = 0; i < count; ++i)
 	{
 		bool value = (bits & (1 << i)) != 0;
@@ -640,10 +642,22 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 
 	//为每个变体编译ShaderCache
 	MessageOut("--");
-	MessageOut("-Start Compile Shader Permutation----------", false, false, "0,255,0");
+	HString shaderTypeStr;
+	if (shaderType == CompileShaderType::VertexShader)
+	{
+		shaderTypeStr = ("Vertex");
+	}
+	else if (shaderType == CompileShaderType::PixelShader)
+	{
+		shaderTypeStr = ("Pixel");
+	}
+	else if (shaderType == CompileShaderType::ComputeShader)
+	{
+		shaderTypeStr = ("Compute");
+	}
+	MessageOut((HString("-Start Compile ") + shaderTypeStr + " Shader Permutation--").c_str(), false, false, "0,255,0");
 	GenerateCombinations(varients.size(), 0, 0, _shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
-	MessageOut("-End Compile Shader Permutation------------", false, false, "0,255,0");
-	MessageOut("--");
+	MessageOut("--End-------", false, false, "0,255,0");
 	//for (int i = 0; i < varients.size(); i++)
 	//{
 	//	//Bool开和关  分别编一次

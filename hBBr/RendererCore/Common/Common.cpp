@@ -13,9 +13,9 @@ void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textC
 #if defined(_WIN32)
 		//MessageBoxA(NULL, msg, "message", MB_ICONERROR);
 		#if NDEBUG
-		MessageBoxA(0, msg, "HBBr msg", 0);
+		MessageBoxA(0, msgStr.c_str(), "HBBr msg", 0);
 		#else
-		DE_ASSERT(0, msg);
+		DE_ASSERT(0, msgStr.c_str());
 		#endif
 #else
 	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", msg, NULL);
