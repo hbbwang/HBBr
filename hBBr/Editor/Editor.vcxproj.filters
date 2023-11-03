@@ -70,6 +70,9 @@
     <ClCompile Include="CustomSearchLine.cpp">
       <Filter>Widgets\Custom</Filter>
     </ClCompile>
+    <ClCompile Include="ToolBox.cpp">
+      <Filter>Widgets\Custom</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="EditorMain.h">
@@ -101,12 +104,18 @@
     <ClInclude Include="CustomFileIconProvider.h">
       <Filter>Widgets\Custom</Filter>
     </ClInclude>
+    <ClInclude Include="ToolBox.h">
+      <Filter>Widgets\Custom</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ContentBrowser.ui">
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="CustomSearchLine.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ToolBox.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

@@ -172,6 +172,7 @@
     <ClCompile Include="EditorCommonFunction.cpp" />
     <ClCompile Include="RenderView.cpp" />
     <ClCompile Include="SceneOutline.cpp" />
+    <ClCompile Include="ToolBox.cpp" />
     <QtRcc Include="EditorMain.qrc" />
     <QtUic Include="ContentBrowser.ui" />
     <QtUic Include="CustomSearchLine.ui" />
@@ -179,6 +180,7 @@
     <QtMoc Include="EditorMain.h" />
     <ClCompile Include="EditorMain.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="ToolBox.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="RenderView.h" />
@@ -187,6 +189,7 @@
     <QtMoc Include="SceneOutline.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ToolBox.h" />
     <QtMoc Include="ContentBrowser.h" />
     <ClInclude Include="CustomFileIconProvider.h" />
     <QtMoc Include="CustomFileSystemModel.h" />
