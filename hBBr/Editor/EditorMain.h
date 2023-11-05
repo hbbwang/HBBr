@@ -28,6 +28,10 @@ public:
     class ContentBrowser* _contentBrowser = NULL;
     class QDockWidget* _contentBrowser_dock = NULL;
 
+    //¼ì²éÆ÷/²ÎÊý±à¼­Æ÷
+    class Inspector* _inspector = NULL;
+    class QDockWidget* _inspector_dock = NULL;
+
     virtual void closeEvent(QCloseEvent* event);
 
     virtual void resizeEvent(QResizeEvent* event)override;

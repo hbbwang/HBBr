@@ -20,10 +20,18 @@ QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
 		path = dir.path();
 
 		QFile styleFile(path);
+
 		if (styleFile.open(QFile::ReadOnly | QIODevice::Text))
 		{
 			QTextStream in(&styleFile);
 			QString strLine;
+            bool bFoundVariable = false;
+            struct qssVarible
+            {
+                QString name;
+                QString value;
+            };
+            QList<qssVarible> vars;
 			while (!in.atEnd())
 			{
 				strLine = in.readLine();//逐行读取
@@ -38,17 +46,42 @@ QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
 				{
 					bFound = true;
 				}
+                //替换变量定义
+                if (strLine.contains("VariableDefine", Qt::CaseSensitive))
+                {
+                    bFoundVariable = true;
+                    strLine = "/*" + strLine;
+                }
+                if (bFoundVariable)
+                {
+                    auto noSpace = strLine.remove(" ");
+                    noSpace = noSpace.remove("\t");
+                    auto l = noSpace.split(':');
+                    if (l.size() > 1)
+                    {
+                        vars.append({ l[0] , l[1].remove(';') });
+                    }
+                }
+                if (bFoundVariable && strLine.contains("}", Qt::CaseSensitive))
+                {
+                    bFoundVariable = false;
+                    strLine = strLine + "*/";
+                }
 				if (bFound)
 				{
 					result += strLine;
 				}
 			}
+            styleFile.close();
+            for (auto i : vars)
+            {
+                result.replace(i.name, i.value);
+            }
 		}
 		else
 		{
 			QMessageBox::information(NULL, "Error", "Load [" + objectName + "] style sheet file failed");
 		}
-		styleFile.close();
 	}
 	//QMessageBox::information(this, "Check", result);
 	return result;

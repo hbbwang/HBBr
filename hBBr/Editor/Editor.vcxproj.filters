@@ -73,6 +73,9 @@
     <ClCompile Include="ToolBox.cpp">
       <Filter>Widgets\Custom</Filter>
     </ClCompile>
+    <ClCompile Include="Inspector.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="EditorMain.h">
@@ -96,15 +99,18 @@
     <QtMoc Include="CustomSearchLine.h">
       <Filter>Widgets\Custom</Filter>
     </QtMoc>
+    <QtMoc Include="ToolBox.h">
+      <Filter>Widgets\Custom</Filter>
+    </QtMoc>
+    <QtMoc Include="Inspector.h">
+      <Filter>Widgets</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditorCommonFunction.h">
       <Filter>Widgets\Common</Filter>
     </ClInclude>
     <ClInclude Include="CustomFileIconProvider.h">
-      <Filter>Widgets\Custom</Filter>
-    </ClInclude>
-    <ClInclude Include="ToolBox.h">
       <Filter>Widgets\Custom</Filter>
     </ClInclude>
   </ItemGroup>
@@ -116,6 +122,12 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ToolBox.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ToolPage.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="Inspector.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

@@ -170,6 +170,7 @@
     <ClCompile Include="CustomFileSystemView.cpp" />
     <ClCompile Include="CustomSearchLine.cpp" />
     <ClCompile Include="EditorCommonFunction.cpp" />
+    <ClCompile Include="Inspector.cpp" />
     <ClCompile Include="RenderView.cpp" />
     <ClCompile Include="SceneOutline.cpp" />
     <ClCompile Include="ToolBox.cpp" />
@@ -180,7 +181,9 @@
     <QtMoc Include="EditorMain.h" />
     <ClCompile Include="EditorMain.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="Inspector.ui" />
     <QtUic Include="ToolBox.ui" />
+    <QtUic Include="ToolPage.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="RenderView.h" />
@@ -189,7 +192,8 @@
     <QtMoc Include="SceneOutline.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ToolBox.h" />
+    <QtMoc Include="Inspector.h" />
+    <QtMoc Include="ToolBox.h" />
     <QtMoc Include="ContentBrowser.h" />
     <ClInclude Include="CustomFileIconProvider.h" />
     <QtMoc Include="CustomFileSystemModel.h" />

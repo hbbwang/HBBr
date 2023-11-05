@@ -197,7 +197,7 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     setFocusPolicy(Qt::FocusPolicy::ClickFocus);
     setObjectName("SceneOutline");
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(1,1,1,1);
+    mainLayout->setContentsMargins(0,0,0,0);
     mainLayout->setSpacing(0);
     this->setLayout(mainLayout);
 

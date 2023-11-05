@@ -2,6 +2,7 @@
 #include "RenderView.h"
 #include "SceneOutline.h"
 #include "ContentBrowser.h"
+#include "Inspector.h"
 #include "FormMain.h"
 #include "EditorCommonFunction.h"
 #include <QDesktopServices>
@@ -32,6 +33,13 @@ EditorMain::EditorMain(QWidget *parent)
     _contentBrowser_dock->setWindowTitle("Content Browser");
     _contentBrowser_dock->setObjectName("ContentBrowser");
     addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, _contentBrowser_dock);
+
+    _inspector = new Inspector(this);
+    _inspector_dock = new QDockWidget(this);
+    _inspector_dock->setWidget(_inspector);
+    _inspector_dock->setWindowTitle("Inspector");
+    _inspector_dock->setObjectName("Inspector");
+    addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, _inspector_dock);
 
     setObjectName("EditorMain");
     setStyleSheet(GetWidgetStyleSheetFromFile("EditorMain"));
@@ -72,6 +80,8 @@ void EditorMain::focusOutEvent(QFocusEvent* event)
 
 void EditorMain::closeEvent(QCloseEvent* event)
 {
+    if (_inspector)
+        _inspector->close();
     if(_sceneOutline)
         _sceneOutline->close();
     if(_mainRenderView)

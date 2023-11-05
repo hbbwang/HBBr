@@ -1,3 +1,6 @@
+VariableDefine {
+    BackgroundColor: rgba(30,30,30,0.95);
+}
 #EditorMain
 {
     background-image: url(./Config/Theme/Images/MainWindowBackgroundImage.jpg) repeat ;
@@ -12,7 +15,7 @@
 }
 QWidget
 {
-    background-color: rgb(40,40,40);
+    background-color: BackgroundColor;
     color: rgb(190, 190, 190);
     border: 0px;
     selection-color:rgb(125,125,125);
@@ -56,10 +59,10 @@ QLabel
 QComboBox
 {    
     font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
-    background-color: rgba(25,25,25,0.1);
+    background-color: rgba(25,25,25,0.9);
     color:rgb(180,180,180);
     border:1px solid  rgb(80,80,80);
-    height: 29px;
+    height: 999;
 }
 QComboBox QAbstractItemView
 {    
@@ -76,6 +79,7 @@ QLineEdit
     color:rgb(160,160,160);
     border:1px solid  rgb(80,80,80);
     font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
+    height: 999;
 }
 QLineEdit:focus
 {
@@ -371,13 +375,13 @@ QSplitter::handle
 {
     color:rgb(151, 151, 151);
     font-family:  Microsoft Yahei, Arial, Helvetica, sans-serif;
-    background-color: rgba(30,30,30 , 0.9);
+    background-color: BackgroundColor;
     border: 1.2px solid rgb(140, 90, 100);
 }
 /* Content Browser */
 #ContentBrowser
 {
-    background-color: rgba(30,30,30 , 0.9);
+    background-color: BackgroundColor;
     font-family: Microsoft Yahei Light,Arial, Helvetica, sans-serif;
 }
 /* Content Browser PathLabel */
@@ -389,7 +393,7 @@ QSplitter::handle
 /* SearchLine */
 #SearchLine
 {
-
+    
 }
 #SearchLine_ComboBox
 {
@@ -402,4 +406,9 @@ QSplitter::handle
 #SearchLine .QLabel
 {
     border-image: url(./Config/Theme/Icons/ICON_SEARCH.png);
+}
+/* Inspector */
+#Inspector
+{
+    background-color: BackgroundColor;
 };
