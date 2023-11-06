@@ -24,6 +24,7 @@ public:
     virtual void mousePressEvent(QMouseEvent* event)override ;
     virtual void mouseMoveEvent(QMouseEvent* event)override;
     virtual void dropEvent(class QDropEvent* event) override;
+    QList<class GameObject*> GetSelectionObjects();
 protected:
 
     virtual void commitData(QWidget* editor)
@@ -67,8 +68,8 @@ public:
 
     virtual void closeEvent(QCloseEvent* event);
     virtual void focusInEvent(QFocusEvent* event);
-    VulkanRenderer* _renderer = NULL;
-    SceneOutlineTree* _treeWidget = NULL;
+    class  VulkanRenderer* _renderer = NULL;
+    static SceneOutlineTree* _treeWidget;
     class CustomSearchLine* _search;
 
 private slots:

@@ -7,6 +7,7 @@
 #include "Component/ModelComponent.h"
 GameObject::GameObject(HString objectName, SceneManager* scene, bool SceneEditorHide)
 {
+	_guid = CreateGUID();
 #if IS_EDITOR
 	_sceneEditorHide = SceneEditorHide;
 #endif
@@ -50,9 +51,12 @@ GameObject* GameObject::CreateModelGameObject(HString modelPath, SceneManager* s
 void GameObject::SetActive(bool newActive)
 {
 	_bActive = newActive;
+	for (auto c : _comps)
+	{
+		c->SetActive(c->IsActive());
+	}
 	if (!newActive)//When object disable,what's going to happen?
 	{
-
 	}
 }
 

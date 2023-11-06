@@ -13,6 +13,8 @@
 #include "EditorCommonFunction.h"
 #include "CustomSearchLine.h"
 
+SceneOutlineTree* SceneOutline::_treeWidget = NULL;
+
 GameObjectItem::GameObjectItem(GameObject* gameObject, QTreeWidget* view)
     :QTreeWidgetItem(view)
 {
@@ -170,6 +172,20 @@ void SceneOutlineTree::dropEvent(QDropEvent* event)
         }
         _curItem = NULL;
     }
+}
+
+QList<class GameObject*> SceneOutlineTree::GetSelectionObjects()
+{
+    QList<class GameObject*> result;
+    for (auto i : this->selectedItems())
+    {
+        auto item = dynamic_cast<GameObjectItem*>(i);
+        if (item != nullptr)
+        {
+            result.append(item->_gameObject);
+        }
+    }
+    return result;
 }
 
 void SceneOutlineTree::ItemDoubleClicked(QTreeWidgetItem* item, int column)

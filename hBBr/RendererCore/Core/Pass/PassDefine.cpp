@@ -180,35 +180,52 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 			for (size_t primIndex = 0; primIndex < prims.size(); primIndex++)
 			{
 				ModelPrimitive* prim = prims[primIndex];
-				//Vb,Ib
-				bool bRefreshBuffer = false;
-				if (vbOffset != prim->vbPos) //偏移信息不相同时,重新映射
+				bool bRefreshBuffer = prim->bNeedUpdate;
 				{
-					vb->BufferMapping(prim->vertexData.data(), vbOffset, prim->vbSize);
-					prim->vbPos = vbOffset;
-					bRefreshBuffer = true;
-				}
-				if (ibOffset != prim->ibPos || bRefreshBuffer) //偏移信息不相同时,重新映射
-				{
-					ib->BufferMapping(prim->vertexIndices.data(), ibOffset, prim->ibSize);
-					prim->ibPos = ibOffset;
-					bRefreshBuffer = true;
-				}
-				vbOffset += prim->vbSize;
-				ibOffset += prim->ibSize;
-				//Object uniform
-				if (prim->transform &&
-					(prim->transform->NeedUpdateUb()
-						|| bRefreshBuffer //当顶点发生改变的时候,UniformBuffer也应该一起更新。
-						))
-				{
-					ObjectUniformBuffer objectUniformBuffer = {};
-					objectUniformBuffer.WorldMatrix = prim->transform->GetWorldMatrix();
-					obj->BufferMapping(&objectUniformBuffer, (uint64_t)objectUboOffset, sizeof(ObjectUniformBuffer));
-					bUpdateObjUb = true;
-				}
-				objectCount++;
-				objectUboOffset += (uint32_t)sizeof(ObjectUniformBuffer);
+					//Vb,Ib
+					if (vbOffset != prim->vbPos || bRefreshBuffer) //偏移信息不相同时,重新映射
+					{
+						if (prim->bActive)
+						{
+							vb->BufferMapping(prim->vertexData.data(), vbOffset, prim->vbSize);
+							prim->vbPos = vbOffset;
+						}
+						bRefreshBuffer = true;
+					}
+					if (ibOffset != prim->ibPos || bRefreshBuffer) //偏移信息不相同时,重新映射
+					{
+						if (prim->bActive)
+						{
+							ib->BufferMapping(prim->vertexIndices.data(), ibOffset, prim->ibSize);
+							prim->ibPos = ibOffset;
+						}
+						bRefreshBuffer = true;
+					}
+					if (prim->bActive)
+					{
+						vbOffset += prim->vbSize;
+						ibOffset += prim->ibSize;
+					}
+					//Object uniform
+					if (prim->transform &&
+						(prim->transform->NeedUpdateUb()
+							|| bRefreshBuffer //当顶点发生改变的时候,UniformBuffer也应该一起更新。
+							))
+					{
+						if (prim->bActive)
+						{
+							ObjectUniformBuffer objectUniformBuffer = {};
+							objectUniformBuffer.WorldMatrix = prim->transform->GetWorldMatrix();
+							obj->BufferMapping(&objectUniformBuffer, (uint64_t)objectUboOffset, sizeof(ObjectUniformBuffer));
+						}
+						bUpdateObjUb = true;
+					}
+					if (prim->bActive)
+					{
+						objectCount++;
+						objectUboOffset += (uint32_t)sizeof(ObjectUniformBuffer);
+					}
+				}			
 			}
 		}
 		if (bUpdateObjUb)
@@ -240,6 +257,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 		for (size_t m = 0; m < prims.size(); m++)
 		{
 			ModelPrimitive* prim = prims[m];
+			if (prim->bActive)
 			{
 				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 1, 1, &obj->GetDescriptorSet(), 1, &objectUboOffset);
 				objectUboOffset += sizeof(ObjectUniformBuffer);
@@ -251,7 +269,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 
 				vbOffset += prim->vbSize;
 				ibOffset += prim->ibSize;
-			}
+			}	
 		}
 		matIndex++;
 	}

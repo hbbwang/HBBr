@@ -3,11 +3,12 @@
 #include <vector>
 #include "HString.h"
 #include "Transform.h"
-
+#include "HGuid.h"
 class GameObject
 {
 	friend class SceneManager;
 	friend class Component;
+	friend class Inspector;
 public:
 
 	GameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL , bool SceneEditorHide = false);
@@ -58,6 +59,10 @@ public:
 		return _selfWeak;
 	}
 
+	HBBR_API HBBR_INLINE HGUID GetGUID() {
+		return _guid;
+	}
+
 	HBBR_API void SetParent(GameObject* newParent);
 
 	template<typename T, typename ...Args>
@@ -103,4 +108,6 @@ private:
 	Transform* _transform;
 
 	std::weak_ptr<GameObject>_selfWeak;
+
+	HGUID _guid;
 };

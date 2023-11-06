@@ -33,6 +33,10 @@ struct MaterialTextureInfo
 //每个面的数据
 struct ModelPrimitive
 {
+	bool						bNeedUpdate = true;
+
+	bool						bActive = true;
+
 	HString						modelPrimitiveName;
 
 	VertexFactory::VertexInput  vertexInput;
@@ -59,6 +63,13 @@ struct ModelPrimitive
 	uint64_t					ibPos = UINT64_MAX;
 
 	uint64_t					ibSize = 0;
+
+	void SetActive(bool newActive)
+	{
+		if (newActive != bActive)
+			bNeedUpdate = true;
+		bActive = newActive;
+	}
 };
 
 class MaterialPrimitive

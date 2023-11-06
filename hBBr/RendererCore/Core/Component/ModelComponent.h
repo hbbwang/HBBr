@@ -18,13 +18,15 @@ public:
 
 	virtual void ExecuteDestroy()override;
 
+	virtual void Update()override;
+
 private:
 
 	HGUID _model;
 
 	struct ModelData* _modelData = NULL ;
 
-	std::vector<ModelPrimitive> _primitive;
+	std::vector<ModelPrimitive*> _primitive;
 
 	std::vector<Material*>		_materials;
 

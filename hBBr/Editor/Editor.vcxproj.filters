@@ -30,6 +30,9 @@
     <Filter Include="Widgets\Custom">
       <UniqueIdentifier>{669de6a2-b8df-446d-9d3f-66f103f73d9c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Widgets\Extension">
+      <UniqueIdentifier>{26e3ddb3-cb37-4cbe-8494-b6ad4b86c3e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="EditorMain.qrc">
@@ -76,6 +79,36 @@
     <ClCompile Include="Inspector.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="VectorSetting.cpp">
+      <Filter>Widgets\Extension</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceLine.cpp">
+      <Filter>Widgets\Extension</Filter>
+    </ClCompile>
+    <ClCompile Include="FloatSetting.cpp">
+      <Filter>Widgets\Extension</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomDockPanelTitleBar.cpp">
+      <Filter>Widgets\Extension</Filter>
+    </ClCompile>
+    <ClCompile Include="ComboBox.cpp">
+      <Filter>Widgets\Extension</Filter>
+    </ClCompile>
+    <ClCompile Include="ColorSettting.cpp">
+      <Filter>Widgets\Extension</Filter>
+    </ClCompile>
+    <ClCompile Include="CollapsedWidget.cpp">
+      <Filter>Widgets\Extension</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckBox.cpp">
+      <Filter>Widgets\Extension</Filter>
+    </ClCompile>
+    <ClCompile Include="ArraySetting.cpp">
+      <Filter>Widgets\Extension</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyClass.cpp">
+      <Filter>Widgets\Extension</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="EditorMain.h">
@@ -105,6 +138,36 @@
     <QtMoc Include="Inspector.h">
       <Filter>Widgets</Filter>
     </QtMoc>
+    <QtMoc Include="VectorSetting.h">
+      <Filter>Widgets\Extension</Filter>
+    </QtMoc>
+    <QtMoc Include="ResourceLine.h">
+      <Filter>Widgets\Extension</Filter>
+    </QtMoc>
+    <QtMoc Include="FloatSetting.h">
+      <Filter>Widgets\Extension</Filter>
+    </QtMoc>
+    <QtMoc Include="CustomDockPanelTitleBar.h">
+      <Filter>Widgets\Extension</Filter>
+    </QtMoc>
+    <QtMoc Include="ComboBox.h">
+      <Filter>Widgets\Extension</Filter>
+    </QtMoc>
+    <QtMoc Include="ColorSettting.h">
+      <Filter>Widgets\Extension</Filter>
+    </QtMoc>
+    <QtMoc Include="CollapsedWidget.h">
+      <Filter>Widgets\Extension</Filter>
+    </QtMoc>
+    <QtMoc Include="CheckBox.h">
+      <Filter>Widgets\Extension</Filter>
+    </QtMoc>
+    <QtMoc Include="ArraySetting.h">
+      <Filter>Widgets\Extension</Filter>
+    </QtMoc>
+    <QtMoc Include="PropertyClass.h">
+      <Filter>Widgets\Extension</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditorCommonFunction.h">
@@ -128,6 +191,30 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="Inspector.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ResourceLine.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="VectorSetting.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ArraySetting.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="CheckBox.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="CollapsedWidget.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ColorSettting.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ComboBox.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="CustomDockPanelTitleBar.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

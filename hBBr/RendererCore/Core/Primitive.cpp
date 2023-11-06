@@ -71,6 +71,7 @@ void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* p
 
 void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim)
 {
+	if(prim)
 	{
 		auto it = _allModelPrimitives.find(mat);
 		if (it != _allModelPrimitives.end())

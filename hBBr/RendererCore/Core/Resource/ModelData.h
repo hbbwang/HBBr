@@ -151,6 +151,6 @@ public:
 	
 	HBBR_API static ModelData* ImportFbxToMemory(HGUID guid);
 
-	HBBR_API static bool BuildModelPrimitives(ModelData* data ,std::vector<ModelPrimitive>& prims);
+	HBBR_API static bool BuildModelPrimitives(ModelData* data ,std::vector<ModelPrimitive*>& prims);
 
 };

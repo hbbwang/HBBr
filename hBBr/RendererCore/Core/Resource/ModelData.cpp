@@ -207,18 +207,19 @@ ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
 	return dataPtr->GetData();
 }
 
-bool ModelFileStream::BuildModelPrimitives(ModelData* data, std::vector<ModelPrimitive>& prims)
+bool ModelFileStream::BuildModelPrimitives(ModelData* data, std::vector<ModelPrimitive*>& prims)
 {
 	if (data != NULL)
 	{
 		prims.resize(data->faces.size());
 		for (int i = 0; i < data->faces.size(); i++)
 		{
-			prims[i].matSocketName = data->faces[i].matName;
-			prims[i].boundingBox_min = data->boundingBox_min;
-			prims[i].boundingBox_max = data->boundingBox_max;
-			prims[i].vertexInput = data->faces[i].vertexData;
-			prims[i].modelPrimitiveName = data->filePath;
+			prims[i] = new ModelPrimitive();
+			prims[i]->matSocketName = data->faces[i].matName;
+			prims[i]->boundingBox_min = data->boundingBox_min;
+			prims[i]->boundingBox_max = data->boundingBox_max;
+			prims[i]->vertexInput = data->faces[i].vertexData;
+			prims[i]->modelPrimitiveName = data->filePath;
 		}
 		return true;
 	}
