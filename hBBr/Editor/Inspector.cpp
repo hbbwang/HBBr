@@ -1,5 +1,7 @@
 #include "Inspector.h"
-
+#include "qlabel.h"
+#include "qtextedit.h"
+#include "Component/GameObject.h"
 Inspector::Inspector(QWidget *parent)
 	: QWidget(parent)
 {
@@ -17,14 +19,30 @@ Inspector::~Inspector()
 
 }
 
+void Inspector::RefreshInspector()
+{
+	if (!_currentGameObject.expired())
+	{
+		LoadInspector_GameObject(_currentGameObject);
+	}
+	else
+	{
+		LoadInspector_Empty();
+	}
+}
+
 void Inspector::ClearInspector()
 {
 	QLayoutItem* child;
 	while ((child = _layoutMain->takeAt(0)) != 0) {
 		if (child->widget())
-			delete child->widget();
-		delete child;
+		{
+			child->widget()->deleteLater();
+			//delete child->widget();
+		}		
+		//delete child;
 	}
+	_currentGameObject.reset();
 }
 
 void Inspector::LoadInspector_Empty()
@@ -35,9 +53,28 @@ void Inspector::LoadInspector_Empty()
 	_layoutMain->addWidget(mainWidget);
 }
 
-void Inspector::LoadInspector_GameObject(GameObject* gameObj)
+void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj)
 {
+	if (gameObj.expired())
+		return;
+	_currentGameObject = gameObj;
+	std::shared_ptr<GameObject> obj = gameObj.lock();
 	ClearInspector();
+	//---------------------- Title (GameObject Name)
+	QTextEdit* title = new QTextEdit(this);
+	title->setObjectName("InspectorTitle");
+	_layoutMain->addWidget(title);
+	title->setText(obj->GetObjectName().c_str());
+	connect(title, &QTextEdit::textChanged, this, 
+		[&]() {
+			if (title->toPlainText().endsWith('\n'))
+				obj->SetObjectName(title->toPlainText().toStdString().c_str());
+		});
+	//---------------------- GameObject active check box
+
+
+	//
+	_layoutMain->addStretch(9999);
 }
 
 void Inspector::closeEvent(QCloseEvent* event)

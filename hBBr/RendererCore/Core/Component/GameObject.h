@@ -54,6 +54,10 @@ public:
 		return _scene;
 	}
 
+	HBBR_API HBBR_INLINE std::weak_ptr<GameObject> GetSelfWeekPtr() {
+		return _selfWeak;
+	}
+
 	HBBR_API void SetParent(GameObject* newParent);
 
 	template<typename T, typename ...Args>
@@ -63,8 +67,6 @@ public:
 		_comps.push_back(result);
 		return result;
 	}
-
-	std::weak_ptr<GameObject>_selfWeak;
 
 #if IS_EDITOR
 	void* _editorObject = NULL;
@@ -100,4 +102,5 @@ private:
 
 	Transform* _transform;
 
+	std::weak_ptr<GameObject>_selfWeak;
 };

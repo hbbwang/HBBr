@@ -15,15 +15,19 @@ public:
 
 	QVBoxLayout* _layoutMain = NULL;
 
+	void RefreshInspector();
+
 	void ClearInspector();
 
 	void LoadInspector_Empty();
 
-	void LoadInspector_GameObject(class GameObject* gameObj);
+	void LoadInspector_GameObject(std::weak_ptr<class GameObject> gameObj);
 
 protected:
 
 	virtual void closeEvent(QCloseEvent* event)override;
+
+	std::weak_ptr<GameObject> _currentGameObject;
 
 private:
 	Ui::InspectorClass ui;

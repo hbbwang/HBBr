@@ -15,9 +15,8 @@
 void Shaderc::ShaderCompiler::CompileAllShaders(const char* srcShaderPath)
 {
 	auto allFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath , "fx");
-	//不打算单独编译顶点或者像素着色器
-	//auto allvFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath, "vfx");
-	//auto allpFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath, "pfx");
+	auto allvFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath, "vfx");
+	auto allpFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath, "pfx");
 	auto allcFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath, "cfx");
 	//fx
 	if (allFxShaders.size() > 0)
@@ -28,22 +27,22 @@ void Shaderc::ShaderCompiler::CompileAllShaders(const char* srcShaderPath)
 			CompileShader(i.absPath.c_str(), "PSMain", CompileShaderType::PixelShader);
 		}
 	}
-	////vfx
-	//if (allvFxShaders.size() > 0)
-	//{
-	//	for (auto i : allvFxShaders)
-	//	{
-	//		CompileShader(i.absPath.c_str(), "VSMain", CompileShaderType::VertexShader);
-	//	}
-	//}
-	////pfx
-	//if (allpFxShaders.size() > 0)
-	//{
-	//	for (auto i : allpFxShaders)
-	//	{
-	//		CompileShader(i.absPath.c_str(), "PSMain", CompileShaderType::PixelShader);
-	//	}
-	//}
+	//vfx
+	if (allvFxShaders.size() > 0)
+	{
+		for (auto i : allvFxShaders)
+		{
+			CompileShader(i.absPath.c_str(), "VSMain", CompileShaderType::VertexShader);
+		}
+	}
+	//pfx
+	if (allpFxShaders.size() > 0)
+	{
+		for (auto i : allpFxShaders)
+		{
+			CompileShader(i.absPath.c_str(), "PSMain", CompileShaderType::PixelShader);
+		}
+	}
 	//cfx
 	if (allcFxShaders.size() > 0)
 	{

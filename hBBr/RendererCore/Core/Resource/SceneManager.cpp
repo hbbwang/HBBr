@@ -47,7 +47,7 @@ void SceneManager::SceneInit(class VulkanRenderer* renderer)
 	test->SetObjectName("TestFbx_1_Combine");
 
 	GameObject* cube = new GameObject();
-	testObj = cube->_selfWeak;
+	testObj = cube->GetSelfWeekPtr();
 	auto modelComp = cube->AddComponent<ModelComponent>();
 	cube->GetTransform()->SetLocation(glm::vec3(0, 0.5f, 0));
 	modelComp->SetModel(FileSystem::GetResourceAbsPath() + "Content/Core/Baise/B32B0C1E-D358-464F-8F0C-52F0DD0FAA05.FBX");
