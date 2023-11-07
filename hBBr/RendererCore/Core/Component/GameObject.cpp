@@ -53,7 +53,7 @@ void GameObject::SetActive(bool newActive)
 	_bActive = newActive;
 	for (auto c : _comps)
 	{
-		c->SetActive(c->IsActive());
+		c->GameObjectActiveChanged(_bActive);
 	}
 	if (!newActive)//When object disable,what's going to happen?
 	{

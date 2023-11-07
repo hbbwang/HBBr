@@ -22,6 +22,10 @@ void Component::SetActive(bool newActive)
 	}
 }
 
+void Component::GameObjectActiveChanged(bool gameObjectActive)
+{
+}
+
 void Component::Init()
 {
 	_bInit = true;

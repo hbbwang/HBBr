@@ -4,12 +4,15 @@
 #include "Component/GameObject.h"
 #include "SceneOutline.h"
 #include "CheckBox.h"
+
+Inspector* Inspector::_currentInspector = NULL;
+
 Inspector::Inspector(QWidget *parent)
 	: QWidget(parent)
 {
 	setObjectName("Inspector");
 	ui.setupUi(this);
-
+	this->setFocusPolicy(Qt::FocusPolicy::ClickFocus);
 	mainWidget = new QWidget(this);
 	mainWidget->setObjectName("Inspector");
 
@@ -22,6 +25,8 @@ Inspector::Inspector(QWidget *parent)
 	_updateTimer->setInterval(50);
 	connect(_updateTimer, SIGNAL(timeout()), this, SLOT(TimerUpdate()));
 	_updateTimer->start();
+
+	_currentInspector = this;
 }
 
 Inspector::~Inspector()
@@ -51,10 +56,11 @@ void Inspector::ClearInspector()
 	_currentGameObject.reset();
 }
 
-void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj)
+void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool bFoucsUpdate)
 {
 	if (gameObj.expired() || 
-		(!_currentGameObject.expired() && _currentGameObject.lock()->GetGUID() == gameObj.lock()->GetGUID()))
+		(!bFoucsUpdate && !_currentGameObject.expired() && _currentGameObject.lock()->GetGUID() == gameObj.lock()->GetGUID())
+		)
 		return;
 	ClearInspector();
 	_currentGameObject = gameObj.lock()->GetSelfWeekPtr();
@@ -104,6 +110,8 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj)
 void Inspector::closeEvent(QCloseEvent* event)
 {
 	QWidget::closeEvent(event);
+	if (_currentInspector == this)
+		_currentInspector = NULL;
 }
 
 void Inspector::resizeEvent(QResizeEvent* event)
@@ -114,11 +122,17 @@ void Inspector::resizeEvent(QResizeEvent* event)
 	}
 }
 
+void Inspector::focusInEvent(QFocusEvent* event)
+{
+	_currentInspector = this;
+}
+
+void Inspector::focusOutEvent(QFocusEvent* event)
+{
+
+}
+
 void Inspector::TimerUpdate()
 {
-	auto objects = SceneOutline::_treeWidget->GetSelectionObjects();
-	if (objects.size() > 0)
-	{
-		LoadInspector_GameObject(objects[0]->GetSelfWeekPtr());
-	}
+
 }

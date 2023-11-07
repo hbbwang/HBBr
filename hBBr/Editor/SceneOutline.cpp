@@ -12,7 +12,7 @@
 #include <qmenu.h>
 #include "EditorCommonFunction.h"
 #include "CustomSearchLine.h"
-
+#include "Inspector.h"
 SceneOutlineTree* SceneOutline::_treeWidget = NULL;
 
 GameObjectItem::GameObjectItem(GameObject* gameObject, QTreeWidget* view)
@@ -73,8 +73,9 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
     _menu->addAction(_deleteGameObject);
 
     //setRootIsDecorated(false);
-    connect(this,SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),this,SLOT(ItemDoubleClicked(QTreeWidgetItem*, int)));
+    connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),this,SLOT(ItemDoubleClicked(QTreeWidgetItem*, int)));
     connect(this, SIGNAL(sigEditFinished(QString)), this, SLOT(ItemEditFinished(QString)));
+    connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(ItemSelectionChanged()));
     connect(_createNewGameObject, &QAction::triggered, this, [this](bool bChecked) 
 		{
             _renderer->ExecFunctionOnRenderThread([]() 
@@ -130,6 +131,16 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
 void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
 {
     _menu->exec(event->globalPos());
+}
+
+void SceneOutlineTree::ItemSelectionChanged()
+{
+    auto objects = GetSelectionObjects();
+    if (objects.size() > 0)
+    {
+        if (Inspector::_currentInspector != NULL)
+            Inspector::_currentInspector->LoadInspector_GameObject(objects[0]->GetSelfWeekPtr());
+    }
 }
 
 void SceneOutlineTree::mousePressEvent(QMouseEvent* event)
@@ -243,6 +254,13 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     {
         if (object->_bEditorNeedUpdate)
         {
+            object->_bEditorNeedUpdate = false;
+            auto objects = SceneOutline::_treeWidget->GetSelectionObjects();
+            if (objects.size() > 0)
+            {
+                if (Inspector::_currentInspector != NULL)
+                    Inspector::_currentInspector->LoadInspector_GameObject(objects[0]->GetSelfWeekPtr(), true);
+            }
             auto item = (GameObjectItem*)object->_editorObject;
             //rename?
             item->setText(0, object->GetObjectName().c_str());

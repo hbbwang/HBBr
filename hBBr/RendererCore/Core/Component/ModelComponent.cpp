@@ -18,58 +18,64 @@ void ModelComponent::SetModel(HString path)
 		return;
 	}
 	_model = guid;
-	//clear
-	for (int i = 0; i < (int)_materials.size(); i++)
-	{
-		if (_primitive[i])
-		{
-			PrimitiveProxy::RemoveModelPrimitive(_materials[i]->GetPrimitive(), _primitive[i]);
-			delete _primitive[i];
-			_primitive[i] = NULL;
-		}
-	}
-	_primitive.clear();
+	SetModel(_model);
+}
+
+void ModelComponent::SetModel(HGUID guid)
+{
+	if (!_model.isValid())
+		return;
+	ClearPrimitves();
 	//create
 	_modelData = ModelFileStream::ImportFbxToMemory(guid);
 	if (_modelData)
 	{
-		ModelFileStream::BuildModelPrimitives(_modelData, _primitive);
-		_materials.resize(_primitive.size());
-		for (int i = 0; i < (int)_primitive.size(); i++)
+		ModelFileStream::BuildModelPrimitives(_modelData, _primitives);
+		_materials.resize(_primitives.size());
+		for (int i = 0; i < (int)_primitives.size(); i++)
 		{
-			_primitive[i]->transform = GetGameObject()->GetTransform();
+			_primitives[i]->transform = GetGameObject()->GetTransform();
 			if (_materials[i] == NULL)
-				//_materials[i] = Material::GetDefaultMaterial();//Set default material
 				_materials[i] = Material::LoadMaterial(HGUID("61A147FF-32BD-48EC-B523-57BC75EB16BA"));
-			PrimitiveProxy::AddModelPrimitive(_materials[i]->GetPrimitive(), _primitive[i]);
+			PrimitiveProxy::AddModelPrimitive(_materials[i]->GetPrimitive(), _primitives[i]);
 		}
 	}
 }
 
-void ModelComponent::SetActive(bool newActive)
+void ModelComponent::GameObjectActiveChanged(bool objActive)
 {
-	Component::SetActive(newActive);
-	for (auto i : _primitive)
+	if (_bActive && objActive)
 	{
-		i->SetActive(_bActive && _gameObject->IsActive());
+		SetModel(_model);
 	}
-	if (!newActive)
+	else
 	{
-
+		ClearPrimitves();
 	}
-}
-
-void ModelComponent::ExecuteDestroy()
-{
-	for (int i = 0; i < (int)_materials.size(); i++)
-	{
-		PrimitiveProxy::RemoveModelPrimitive(_materials[i]->GetPrimitive(), _primitive[i]);
-		delete _primitive[i];
-		_primitive[i] = NULL;
-	}
-	_primitive.clear();
 }
 
 void ModelComponent::Update()
 {
+}
+
+void ModelComponent::ExecuteDestroy()
+{
+	ClearPrimitves();
+}
+
+void ModelComponent::ClearPrimitves()
+{
+	//clear
+	if (_primitives.size() <= 0)
+		return;
+	for (int i = 0; i < (int)_materials.size(); i++)
+	{
+		if (_primitives.size() > i && _primitives[i] != NULL)
+		{
+			PrimitiveProxy::RemoveModelPrimitive(_materials[i]->GetPrimitive(), _primitives[i]);
+			delete _primitives[i];
+			_primitives[i] = NULL;
+		}
+	}
+	_primitives.clear();
 }

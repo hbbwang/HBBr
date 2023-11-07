@@ -17,17 +17,23 @@ public:
 
 	QTimer* _updateTimer = NULL;
 
+	static Inspector* _currentInspector;
+
 	void RefreshInspector();
 
 	void ClearInspector();
 
-	void LoadInspector_GameObject(std::weak_ptr<class GameObject> gameObj);
+	void LoadInspector_GameObject(std::weak_ptr<class GameObject> gameObj , bool bFoucsUpdate = false);
 
 protected:
 
 	virtual void closeEvent(QCloseEvent* event)override;
 
-	virtual void resizeEvent(QResizeEvent* event);
+	virtual void resizeEvent(QResizeEvent* event)override;
+
+	virtual void focusInEvent(QFocusEvent* event)override;
+
+	virtual void focusOutEvent(QFocusEvent* event)override;
 
 	std::weak_ptr<GameObject> _currentGameObject;
 

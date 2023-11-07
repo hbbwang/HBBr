@@ -14,11 +14,15 @@ public:
 
 	void SetModel(HString path);
 
-	virtual void SetActive(bool newActive)override;
+	void SetModel(HGUID guid);
+
+	virtual void GameObjectActiveChanged(bool objActive)override;
 
 	virtual void ExecuteDestroy()override;
 
 	virtual void Update()override;
+
+	virtual void ClearPrimitves();
 
 private:
 
@@ -26,7 +30,7 @@ private:
 
 	struct ModelData* _modelData = NULL ;
 
-	std::vector<ModelPrimitive*> _primitive;
+	std::vector<ModelPrimitive*> _primitives;
 
 	std::vector<Material*>		_materials;
 

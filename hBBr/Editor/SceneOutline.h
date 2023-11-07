@@ -54,7 +54,7 @@ private slots:
 
     void ItemDoubleClicked(QTreeWidgetItem* item, int column);
     void ItemEditFinished(QString newText);
-
+    void ItemSelectionChanged();
 signals:
     void sigEditFinished(QString newText);
 };

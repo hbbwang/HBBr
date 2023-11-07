@@ -27,6 +27,8 @@ public:
 
 protected:
 
+	virtual void GameObjectActiveChanged(bool gameObjectActive);
+
 	virtual void Init();
 
 	virtual void Update();
