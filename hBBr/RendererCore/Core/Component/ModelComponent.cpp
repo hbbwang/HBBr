@@ -3,50 +3,63 @@
 #include "Primitive.h"
 #include "GameObject.h"
 #include "FileSystem.h"
+#include "ContentManager.h"
 ModelComponent::ModelComponent(GameObject* parent) :Component(parent)
 {
 }
 
-void ModelComponent::SetModel(HString path)
+void ModelComponent::SetModelByRealPath(HString path)
 {
 	HGUID guid;
 	path.CorrectionPath();
 	HString guidStr = path.GetBaseName();
 	StringToGUID(guidStr.c_str(), &guid);
-	if (_model == guid)
+	if (!_modelData.expired() && _modelData.lock()->guid == guid)
 	{
 		return;
 	}
-	_model = guid;
-	SetModel(_model);
+	SetModel(guid);
+}
+
+void ModelComponent::SetModelByVirtualPath(HString path)
+{
+	path.CorrectionPath();
+	auto info = ContentManager::Get()->GetAssetInfo(AssetType::Model, path);
+	if (info == NULL)
+		return;
+	if (!_modelData.expired() && _modelData.lock()->guid == info->guid)
+	{
+		return;
+	}
+	SetModel(info->guid);
 }
 
 void ModelComponent::SetModel(HGUID guid)
 {
-	if (!_model.isValid())
+	if (!guid.isValid())
 		return;
 	ClearPrimitves();
 	//create
 	_modelData = ModelFileStream::ImportFbxToMemory(guid);
-	if (_modelData)
+	if (!_modelData.expired())
 	{
-		ModelFileStream::BuildModelPrimitives(_modelData, _primitives);
+		ModelFileStream::BuildModelPrimitives(_modelData.lock().get(), _primitives);
 		_materials.resize(_primitives.size());
 		for (int i = 0; i < (int)_primitives.size(); i++)
 		{
 			_primitives[i]->transform = GetGameObject()->GetTransform();
-			if (_materials[i] == NULL)
+			if (_materials[i].expired())
 				_materials[i] = Material::LoadMaterial(HGUID("61A147FF-32BD-48EC-B523-57BC75EB16BA"));
-			PrimitiveProxy::AddModelPrimitive(_materials[i]->GetPrimitive(), _primitives[i]);
+			PrimitiveProxy::AddModelPrimitive(_materials[i].lock()->GetPrimitive(), _primitives[i]);
 		}
 	}
 }
 
 void ModelComponent::GameObjectActiveChanged(bool objActive)
 {
-	if (_bActive && objActive)
+	if (!_modelData.expired() && _bActive && objActive)
 	{
-		SetModel(_model);
+		SetModel(_modelData.lock()->guid);
 	}
 	else
 	{
@@ -70,9 +83,9 @@ void ModelComponent::ClearPrimitves()
 		return;
 	for (int i = 0; i < (int)_materials.size(); i++)
 	{
-		if (_primitives.size() > i && _primitives[i] != NULL)
+		if (_primitives.size() > i && _primitives[i] != NULL && !_materials[i].expired())
 		{
-			PrimitiveProxy::RemoveModelPrimitive(_materials[i]->GetPrimitive(), _primitives[i]);
+			PrimitiveProxy::RemoveModelPrimitive(_materials[i].lock()->GetPrimitive(), _primitives[i]);
 			delete _primitives[i];
 			_primitives[i] = NULL;
 		}

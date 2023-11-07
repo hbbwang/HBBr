@@ -16,7 +16,7 @@ public:
 
 	HBBR_API static GameObject* CreateGameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL);
 
-	HBBR_API static GameObject* CreateModelGameObject(HString modelPath, class SceneManager* scene = NULL);
+	HBBR_API static GameObject* CreateModelGameObject(HString virtualPath, class SceneManager* scene = NULL);
 
 	HBBR_API HBBR_INLINE void Destroy() {
 		SetActive(false);

@@ -43,14 +43,14 @@ void SceneManager::SceneInit(class VulkanRenderer* renderer)
 	//Test model
 	auto test = new GameObject();
 	auto modelComp0 = test->AddComponent<ModelComponent>();
-	modelComp0->SetModel(FileSystem::GetResourceAbsPath() + "Content/Core/Baise/B7CF5F97-BFB9-4C36-893C-448B57776F69.FBX");
+	modelComp0->SetModelByVirtualPath(FileSystem::GetResourceAbsPath() + "Content/Core/Basic/TestFbx_1_Combine");
 	test->SetObjectName("TestFbx_1_Combine");
 
 	GameObject* cube = new GameObject();
 	testObj = cube->GetSelfWeekPtr();
 	auto modelComp = cube->AddComponent<ModelComponent>();
 	cube->GetTransform()->SetLocation(glm::vec3(0, 0.5f, 0));
-	modelComp->SetModel(FileSystem::GetResourceAbsPath() + "Content/Core/Baise/B32B0C1E-D358-464F-8F0C-52F0DD0FAA05.FBX");
+	modelComp->SetModelByVirtualPath(FileSystem::GetResourceAbsPath() + "Content/Core/Basic/Cube");
 	cube->SetObjectName("TestFbx_Cube");
 
 }

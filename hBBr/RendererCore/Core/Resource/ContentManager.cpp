@@ -139,6 +139,11 @@ void ContentManager::ReloadAssetInfo(AssetType type , pugi::xml_node & i)
 	info->relativePath.CorrectionPath();
 	XMLStream::LoadXMLAttributeString(i, L"Suffix", info->suffix);
 	XMLStream::LoadXMLAttributeUint64(i, L"ByteSize", info->byteSize);
+
+	HString path = FileSystem::GetProgramPath() + info->relativePath;
+	info->absPath = path + "./" + guidStr + info->suffix;
+	info->virtualPath = info->relativePath + "./" + info->name;
+
 	//Ref temps
 	for (auto j = i.first_child(); j; j = j.next_sibling())
 	{
@@ -328,12 +333,12 @@ AssetInfoBase* ContentManager::GetAssetInfo(HGUID guid, AssetType type)const
 	return NULL;
 }
 
-HGUID ContentManager::GetAssetGUID(AssetType type, HString contentBrowserFilePath)const
+AssetInfoBase* ContentManager::GetAssetInfo(AssetType type, HString contentBrowserFilePath) const
 {
 	HString filePath = contentBrowserFilePath.GetFilePath();
 	HString fileBaseName = contentBrowserFilePath.GetBaseName();
 	//获取路径下的同类型资产文件
-	std::vector<FileEntry> files; 
+	std::vector<FileEntry> files;
 	if (type == AssetType::Model)
 	{
 		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "fbx");
@@ -356,18 +361,18 @@ HGUID ContentManager::GetAssetGUID(AssetType type, HString contentBrowserFilePat
 			});
 		if (fit != map.end())
 		{
-			return fit->first;
+			return fit->second;
 		}
 	}
-	MessageOut((HString("Error, the asset cannot be found. Please check whether the Resource directory is complete or the asset is missing\n错误,无法找到资产,请检查Resource目录是否完整或资产缺失:\n") + contentBrowserFilePath).c_str(), false, true, "255,0,0");
-	return HGUID();
+	MessageOut((HString(L"Error, the asset cannot be found. Please check whether the Resource directory is complete or the asset is missing.\n错误,无法找到资产,请检查Resource目录是否完整或资产缺失:\n") + contentBrowserFilePath).c_str(), false, false, "255,0,0");
+	return NULL;
+}
 
-	//auto it = std::find_if(files.begin(), files.end(), [fileName](FileEntry& entry) {
-	//	return entry.baseName == fileName;
-	//	});
-	//if (it != files.end())
-	//{
-	//	StringToGUID(it->baseName.c_str(), &guid);
-	//}
-	//return guid;
+HGUID ContentManager::GetAssetGUID(AssetType type, HString contentBrowserFilePath)const
+{
+	auto info = GetAssetInfo(type, contentBrowserFilePath);
+	if (info != NULL)
+		return info->guid;
+	else
+		return HGUID();
 }

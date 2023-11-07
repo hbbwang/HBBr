@@ -22,7 +22,7 @@ Material::~Material()
 	PrimitiveProxy::RemoveMaterialPrimitive(_primitive->passUsing, _primitive.get());
 }
 
-Material* Material::LoadMaterial(HGUID guid)
+std::weak_ptr<Material> Material::LoadMaterial(HGUID guid)
 {
 	const auto matAssets = ContentManager::Get()->GetAssets(AssetType::Material);
 	HString guidStr = GUIDToString(guid);
@@ -32,7 +32,7 @@ Material* Material::LoadMaterial(HGUID guid)
 		if (it == matAssets.end())
 		{
 			MessageOut(HString("Can not find [" + guidStr + "] material in content manager.").c_str(), false, false, "255,255,0");
-			return NULL;
+			return std::weak_ptr<Material>();
 		}
 	}
 	auto dataPtr = reinterpret_cast<AssetInfo<Material>*>(it->second);
@@ -45,7 +45,7 @@ Material* Material::LoadMaterial(HGUID guid)
 	filePath.CorrectionPath();
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
-		return NULL;
+		return std::weak_ptr<Material>();
 	}
 
 	pugi::xml_document materialDoc;
@@ -53,7 +53,7 @@ Material* Material::LoadMaterial(HGUID guid)
 	HString psFullName;
 	if (XMLStream::LoadXML(filePath.c_wstr(), materialDoc))
 	{
-		std::unique_ptr<Material> mat (new Material) ;
+		std::shared_ptr<Material> mat (new Material) ;
 		auto root = materialDoc.child(L"root");
 		auto materialPrim = root.child(L"MaterialPrimitive");
 		//MaterialPrimitive
@@ -231,7 +231,7 @@ Material* Material::LoadMaterial(HGUID guid)
 						if (info.type == MTType::Texture2D)
 						{
 							auto asset = ContentManager::Get()->GetAsset<Texture>(guid, AssetType::Texture2D);
-							mat->_primitive->SetTexture(it->index, asset);
+							mat->_primitive->SetTexture(it->index, asset.lock().get());
 						}					
 					}
 					mat->_primitive->_textureInfos.push_back(info);
@@ -252,7 +252,7 @@ Material* Material::LoadMaterial(HGUID guid)
 
 		return dataPtr->GetData();
 	}
-	return NULL;
+	return std::weak_ptr<Material>();
 }
 
 Material* Material::CreateMaterial(HString newMatFilePath)

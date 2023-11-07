@@ -20,7 +20,7 @@
 
 #include "ContentManager.h"
 
-ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
+std::weak_ptr<ModelData> ModelFileStream::ImportFbxToMemory(HGUID guid)
 {
 	const auto modelAssets = ContentManager::Get()->GetAssets(AssetType::Model);
 	HString guidStr = GUIDToString(guid);
@@ -30,7 +30,7 @@ ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
 		if (it == modelAssets.end())
 		{
 			MessageOut(HString("Can not find [" + guidStr + "] model in content manager.").c_str(), false, false, "255,255,0");
-			return NULL;
+			return std::weak_ptr<ModelData>();
 		}
 	}
 	auto dataPtr = reinterpret_cast<AssetInfo<ModelData>*>(it->second);
@@ -43,7 +43,7 @@ ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
 	filePath.CorrectionPath();
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
-		return NULL;
+		return std::weak_ptr<ModelData>();
 	}
 	//导入fbx文件
 #if _DEBUG
@@ -62,20 +62,20 @@ ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
 	if (!scene)
 	{
 		MessageOut(importer.GetErrorString(), false, true, "255,255,0");
-		return NULL;
+		return std::weak_ptr<ModelData>();
 	}
 	if (!scene->HasMaterials())
 	{
 		MessageOut("Error,cannot find materials in this fbx file.Import failed.", false, true, "255,255,0");
-		return NULL;
+		return std::weak_ptr<ModelData>();
 	}
 	if (!scene->HasMeshes())
 	{
 		MessageOut("Error,cannot find meshes in this fbx file.Import failed.", false, true, "255,255,0");
-		return NULL;
+		return std::weak_ptr<ModelData>();
 	}
 
-	auto modelData = std::make_unique<ModelData>();
+	auto modelData = std::make_shared<ModelData>();
 	modelData->guid = guid;
 	glm::vec3 boundingBox_min = glm::vec3(0, 0, 0);
 	glm::vec3 boundingBox_max = glm::vec3(0, 0, 0);
@@ -177,7 +177,7 @@ ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
 			{
 				MessageOut("Face indices number was not equal 3.", false, true, "255,255,0");
 				modelData.reset();
-				return NULL;
+				return std::weak_ptr<ModelData>();
 			}
 			//
 			newData.vertexData.vertexIndices.push_back(mesh->mFaces[i].mIndices[0]);
@@ -200,6 +200,7 @@ ModelData* ModelFileStream::ImportFbxToMemory(HGUID guid)
 	}
 	//----------------------
 	modelData->filePath = filePath;
+	modelData->virtualFilePath = dataPtr->virtualPath;
 	//_modelCache.emplace(std::make_pair(fbxPath, std::move(modelData)));
 
 	dataPtr->SetData(std::move(modelData));

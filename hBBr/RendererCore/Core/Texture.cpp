@@ -134,7 +134,7 @@ std::shared_ptr<Texture> Texture::CreateTexture2D(
 	return newTexture;
 }
 
-Texture* Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags usageFlags)
+std::weak_ptr<Texture> Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags usageFlags)
 {
 	const auto texAssets = ContentManager::Get()->GetAssets(AssetType::Texture2D);
 	HString guidStr = GUIDToString(guid);
@@ -144,7 +144,7 @@ Texture* Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags usageFlags)
 		if (it == texAssets.end())
 		{
 			MessageOut(HString("Can not find [" + guidStr + "] texture in content manager.").c_str(), false, false, "255,255,0");
-			return NULL;
+			return std::weak_ptr<Texture>();
 		}
 	}
 	auto dataPtr = reinterpret_cast<AssetInfo<Texture>*>(it->second);
@@ -157,7 +157,7 @@ Texture* Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags usageFlags)
 	filePath.CorrectionPath();
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
-		return NULL;
+		return std::weak_ptr<Texture>();
 	}
 #if _DEBUG
 	ConsoleDebug::print_endl("Import dds texture :" + filePath, "255,255,255");
@@ -170,7 +170,7 @@ Texture* Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags usageFlags)
 	uint32_t w = out->data_header.width;
 	uint32_t h = out->data_header.height;
 	VkFormat format = out->texFormat;
-	std::unique_ptr<Texture> newTexture = std::make_unique<Texture>();
+	std::shared_ptr<Texture> newTexture = std::make_shared<Texture>();
 	newTexture->_bNoMemory = false;
 	newTexture->_textureName = dataPtr->name;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -195,7 +195,7 @@ Texture* Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags usageFlags)
 	dataPtr->SetData(std::move(newTexture));
 
 	//标记为需要CopyBufferToImage
-	_upload_textures.push_back(dataPtr->GetData());
+	_upload_textures.push_back(dataPtr->GetData().lock().get());
 
 	return dataPtr->GetData();
 }
@@ -255,16 +255,16 @@ void Texture::GlobalInitialize()
 	auto normalTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Normal"));
 	auto whiteTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_White"));
 	auto testTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/TestTex"));
-	if(uvGridTex)
-		Texture::AddSystemTexture("UVGrid", uvGridTex);
-	if (whiteTex)
-		Texture::AddSystemTexture("White", whiteTex);
-	if (blackTex)
-		Texture::AddSystemTexture("Black", blackTex);
-	if (normalTex)
-		Texture::AddSystemTexture("Normal", normalTex);
-	if (testTex)
-		Texture::AddSystemTexture("TestTex", testTex);
+	if(!uvGridTex.expired())
+		Texture::AddSystemTexture("UVGrid", uvGridTex.lock().get());
+	if (!whiteTex.expired())
+		Texture::AddSystemTexture("White", whiteTex.lock().get());
+	if (!blackTex.expired())
+		Texture::AddSystemTexture("Black", blackTex.lock().get());
+	if (!normalTex.expired())
+		Texture::AddSystemTexture("Normal", normalTex.lock().get());
+	if (!testTex.expired())
+		Texture::AddSystemTexture("TestTex", testTex.lock().get());
 
 	//导入文字纹理
 	{

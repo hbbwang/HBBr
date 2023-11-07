@@ -160,7 +160,7 @@ uint64_t FileSystem::GetFileSize(const char* path)
 
 std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char* suffix)
 {
-    if (!fs::exists(path))
+    if (!fs::is_directory(path))
     {
         MessageOut("Get Files By Suffix Failed.Path is not exists.",false,false);
         return {};

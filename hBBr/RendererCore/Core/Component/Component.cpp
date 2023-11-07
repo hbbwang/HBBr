@@ -6,6 +6,7 @@ Component::Component(GameObject* parent)
 {
 	_bActive = true;
 	_gameObject = parent;
+	InitProperties();
 }
 
 Component::~Component()
@@ -21,6 +22,7 @@ void Component::SetActive(bool newActive)
 
 	}
 }
+
 
 void Component::GameObjectActiveChanged(bool gameObjectActive)
 {

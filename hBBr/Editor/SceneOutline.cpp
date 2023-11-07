@@ -106,7 +106,7 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
         {
             _renderer->ExecFunctionOnRenderThread([]()
                 {
-                    QFileInfo fi("./Resource/Content/Core/Basic/Cube.FBX");
+                    QFileInfo fi("./Resource/Content/Core/Basic/Cube");
                     GameObject::CreateModelGameObject(fi.absolutePath().toStdString().c_str());
                 });
         });
@@ -114,7 +114,7 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
         {
             _renderer->ExecFunctionOnRenderThread([]()
                 {
-                    QFileInfo fi("./Resource/Content/Core/Basic/Sphere.FBX");
+                    QFileInfo fi("./Resource/Content/Core/Basic/Sphere");
                     GameObject::CreateModelGameObject(fi.absolutePath().toStdString().c_str());
                 });
         });
@@ -122,7 +122,7 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
         {
             _renderer->ExecFunctionOnRenderThread([]()
                 {
-                    QFileInfo fi("./Resource/Content/Core/Basic/Plane.FBX");
+                    QFileInfo fi("./Resource/Content/Core/Basic/Plane");
                     GameObject::CreateModelGameObject(fi.absolutePath().toStdString().c_str());
                 });
         });

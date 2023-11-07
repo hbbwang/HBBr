@@ -142,6 +142,7 @@ struct ModelData
 	glm::vec4					uv_2_3_abs_max = glm::vec4(0, 0, 0, 0);
 	//
 	HString						filePath;
+	HString						virtualFilePath;
 	HGUID						guid;
 };
 
@@ -149,7 +150,7 @@ class ModelFileStream
 {
 public:
 	
-	HBBR_API static ModelData* ImportFbxToMemory(HGUID guid);
+	HBBR_API static std::weak_ptr<ModelData> ImportFbxToMemory(HGUID guid);
 
 	HBBR_API static bool BuildModelPrimitives(ModelData* data ,std::vector<ModelPrimitive*>& prims);
 

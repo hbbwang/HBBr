@@ -57,6 +57,8 @@ public:
 	HString name;
 	HString suffix;
 	HString relativePath;
+	HString virtualPath;
+	HString absPath;
 	uint64_t byteSize;
 	std::vector<AssetInfoBase*> refs;
 	//用来暂时储存引用的guid和type,没有太多实际意义,通常是空的
@@ -73,19 +75,19 @@ public:
 template<class T>
 class AssetInfo : public AssetInfoBase
 {
-	std::unique_ptr<T> data = NULL;
+	std::shared_ptr<T> data = NULL;
 public:
 	AssetInfo():AssetInfoBase(){}
 	virtual ~AssetInfo() { ReleaseData(); }
-	inline T* GetData()const{
-		return data.get();
+	inline std::weak_ptr<T> GetData()const{
+		return data;
 	}
 	inline void ReleaseData(){
 		data.reset();
 		data = NULL;
 		bAssetLoad = false;
 	}
-	inline void SetData(std::unique_ptr<T> newData){
+	inline void SetData(std::shared_ptr<T> newData){
 		data = std::move(newData);
 		bAssetLoad = true;
 	}
@@ -134,16 +136,19 @@ public:
 
 	HBBR_API AssetInfoBase* GetAssetInfo(HGUID guid, AssetType type = AssetType::Unknow)const;
 
-	/* 根据内容浏览器显示的文件名称查找(非实际GUID的名称)GUID */
+	/* 根据内容浏览器显示的文件名称(虚拟路径)查找 AssetInfo */
+	HBBR_API AssetInfoBase* GetAssetInfo(AssetType type, HString contentBrowserFilePath)const;
+
+	/* 根据内容浏览器显示的文件名称(虚拟路径)查找(非实际GUID的名称)GUID */
 	HBBR_API HGUID GetAssetGUID(AssetType type,HString contentBrowserFilePath)const;
 
 	template<class T>
-	HBBR_INLINE T* GetAsset(HGUID guid , AssetType type = AssetType::Unknow)
+	HBBR_INLINE std::weak_ptr<T> GetAsset(HGUID guid , AssetType type = AssetType::Unknow)
 	{
 		auto assetInfo = GetAssetInfo(guid , type);
 		if (!assetInfo)
 		{
-			return NULL;
+			return std::weak_ptr<T>();
 		}
 		auto asset = reinterpret_cast<AssetInfo<T>*>(assetInfo);
 		return asset->GetData();

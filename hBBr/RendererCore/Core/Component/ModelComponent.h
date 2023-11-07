@@ -12,7 +12,9 @@ public:
 	
 	ModelComponent(class GameObject* parent);
 
-	void SetModel(HString path);
+	void SetModelByRealPath(HString path);
+
+	void SetModelByVirtualPath(HString path);
 
 	void SetModel(HGUID guid);
 
@@ -24,14 +26,23 @@ public:
 
 	virtual void ClearPrimitves();
 
+protected:
+
+	//Component Property Reflection Add.
+	HBBR_INLINE virtual void InitProperties()override
+	{
+		Component::InitProperties();
+		//AddProperty("Model",);
+	}
+
 private:
 
-	HGUID _model;
+	HString _modelVirtualPath;
 
-	struct ModelData* _modelData = NULL ;
+	std::weak_ptr<struct ModelData> _modelData;
 
 	std::vector<ModelPrimitive*> _primitives;
 
-	std::vector<Material*>		_materials;
+	std::vector<std::weak_ptr<Material>>_materials;
 
 };

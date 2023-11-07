@@ -39,12 +39,12 @@ GameObject* GameObject::CreateGameObject(HString objectName, SceneManager* scene
 	return new GameObject(objectName, scene);
 }
 
-GameObject* GameObject::CreateModelGameObject(HString modelPath, SceneManager* scene)
+GameObject* GameObject::CreateModelGameObject(HString virtualPath, SceneManager* scene)
 {
-	GameObject* cube = new GameObject(modelPath.GetBaseName(), scene);
+	GameObject* cube = new GameObject(virtualPath.GetBaseName(), scene);
 	auto modelComp = cube->AddComponent<ModelComponent>();
 	cube->GetTransform()->SetLocation(glm::vec3(0, 0.5f, 0));
-	modelComp->SetModel(modelPath);
+	modelComp->SetModelByVirtualPath(virtualPath);
 	return cube;
 }
 
