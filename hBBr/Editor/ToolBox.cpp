@@ -82,7 +82,7 @@ ToolBox::ToolBox(QWidget* parent) :
     m_pContentVBoxLayout(nullptr)
 {
     ui.setupUi(this);
-
+    ui.scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     QWidget* widget = new QWidget(this);
     m_pContentVBoxLayout = new QVBoxLayout;
     m_pContentVBoxLayout->setContentsMargins(0, 0, 0, 0);

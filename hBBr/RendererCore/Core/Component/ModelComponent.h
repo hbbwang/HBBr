@@ -32,7 +32,7 @@ protected:
 	HBBR_INLINE virtual void InitProperties()override
 	{
 		Component::InitProperties();
-		//AddProperty("Model",);
+		AddProperty("Model", &_modelVirtualPath, CPT_TextInput, "");
 	}
 
 private:

@@ -4,6 +4,8 @@
 #include <qlayout.h>
 #include "ui_Inspector.h"
 #include <qtimer.h>
+#include "qscrollarea.h"
+
 class Inspector : public QWidget
 {
 	Q_OBJECT
@@ -38,8 +40,11 @@ protected:
 	std::weak_ptr<GameObject> _currentGameObject;
 
 private:
+
 	Ui::InspectorClass ui;
-	QWidget* mainWidget = NULL;
+	QScrollArea* scrollArea = NULL;
+	QWidget* scrollWidget = NULL;
+
 private slots:
 	void TimerUpdate();
 };

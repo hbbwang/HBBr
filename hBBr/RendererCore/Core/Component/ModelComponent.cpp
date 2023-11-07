@@ -4,6 +4,7 @@
 #include "GameObject.h"
 #include "FileSystem.h"
 #include "ContentManager.h"
+
 ModelComponent::ModelComponent(GameObject* parent) :Component(parent)
 {
 }
@@ -43,6 +44,7 @@ void ModelComponent::SetModel(HGUID guid)
 	_modelData = ModelFileStream::ImportFbxToMemory(guid);
 	if (!_modelData.expired())
 	{
+		_modelVirtualPath = _modelData.lock()->virtualFilePath;
 		ModelFileStream::BuildModelPrimitives(_modelData.lock().get(), _primitives);
 		_materials.resize(_primitives.size());
 		for (int i = 0; i < (int)_primitives.size(); i++)

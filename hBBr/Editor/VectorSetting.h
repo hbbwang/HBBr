@@ -14,6 +14,8 @@ class VectorSetting : public PropertyClass
 public:
 	VectorSetting(QString name, QWidget* parent = Q_NULLPTR, const int demensionality = 1, float step = 0.01f, int precision = 3);
 
+	VectorSetting(QWidget* parent = Q_NULLPTR, const int demensionality = 1, float step = 0.01f, int precision = 3);
+
 	~VectorSetting();
 
 	QList<FloatSetting*> floatSetting ;

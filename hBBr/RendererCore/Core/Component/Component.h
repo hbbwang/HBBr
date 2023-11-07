@@ -35,17 +35,21 @@ public:
 
 	virtual  ~Component();
 
-	void Destroy();
+	HBBR_API void Destroy();
 
-	HBBR_INLINE bool IsActive() const {
+	HBBR_API virtual void SetActive(bool newActive = true);
+
+	HBBR_API HBBR_INLINE bool IsActive() const {
 		return _bActive;
 	}
 
-	HBBR_INLINE GameObject* GetGameObject() const {
+	HBBR_API HBBR_INLINE GameObject* GetGameObject() const {
 		return _gameObject;
 	}
 
-	virtual void SetActive(bool newActive = true);
+	HBBR_API HBBR_INLINE std::map<HString, ComponentProperty> GetProperties() const {
+		return _compProperties;
+	}
 
 protected:
 

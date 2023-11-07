@@ -4,6 +4,9 @@
 #include "Component/GameObject.h"
 #include "SceneOutline.h"
 #include "CheckBox.h"
+#include "Component.h"
+#include "ToolBox.h"
+#include "VectorSetting.h"
 
 Inspector* Inspector::_currentInspector = NULL;
 
@@ -13,11 +16,18 @@ Inspector::Inspector(QWidget *parent)
 	setObjectName("Inspector");
 	ui.setupUi(this);
 	this->setFocusPolicy(Qt::FocusPolicy::ClickFocus);
-	mainWidget = new QWidget(this);
-	mainWidget->setObjectName("Inspector");
-
+	scrollArea = new QScrollArea(this);
+	scrollArea->setWidgetResizable(true);
+	scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);  // 禁用横向滚动条
 	_layoutMain = new QVBoxLayout(this);
-	mainWidget->setLayout(_layoutMain);
+	scrollWidget = new QWidget(scrollArea);
+	scrollWidget->setLayout(_layoutMain);
+
+	scrollWidget->setObjectName("Inspector");
+	scrollArea->setObjectName("Inspector");
+
+	scrollArea->setWidget(scrollWidget);
+
 	_layoutMain->setContentsMargins(0, 0, 0, 0);
 	_layoutMain->setSpacing(0);
 	_updateTimer = new QTimer(this);
@@ -70,7 +80,6 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 	QHBoxLayout* horLayout = new QHBoxLayout(this);
 	_layoutMain->addWidget(titleWidget);
 	titleWidget->setLayout(horLayout);
-	//
 	CheckBox* active = new CheckBox(this, obj->IsActive());
 	active->_callback = [obj](bool bb) {
 		if (obj)
@@ -100,11 +109,40 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				title->clearFocus();
 			}
 		});
-	//---------------------- 
+	//---------------------- Transform
+	{
+		QWidget* transformWidget = new QWidget(this);
+		transformWidget->setLayout(new QVBoxLayout(this));
+		ToolBox* box = new ToolBox(this);
+		_layoutMain->addWidget(box);
+		box->addWidget("Transform", transformWidget, true);
+		auto transform = obj->_transform;
+		VectorSetting* pos =	new VectorSetting("Position", this, 3, 0.001f, 3);
+		VectorSetting* rot =	new VectorSetting("Rotation", this, 3, 0.001f, 3);
+		VectorSetting* scale =	new VectorSetting("Scale   ", this, 3, 0.001f, 3);
+		pos->ui.Name->setMinimumWidth(50);
+		rot->ui.Name->setMinimumWidth(50);
+		scale->ui.Name->setMinimumWidth(50);
+		transformWidget->layout()->addWidget(pos);
+		transformWidget->layout()->addWidget(rot);
+		transformWidget->layout()->addWidget(scale);
+	}
+	//---------------------- Components
+	//for (auto i : obj->_comps)
+	//{
+	//	auto pro = i->GetProperties();
+	//	for (auto p : pro)
+	//	{
+	//		if (p.second.type == CPT_TextInput)
+	//		{
+	//			ToolBox* box = new ToolBox(this);
 
+	//		}
+	//	}
+	//}
 
 	//
-	_layoutMain->addStretch(9999);
+	_layoutMain->addStretch(999);
 }
 
 void Inspector::closeEvent(QCloseEvent* event)
@@ -116,9 +154,9 @@ void Inspector::closeEvent(QCloseEvent* event)
 
 void Inspector::resizeEvent(QResizeEvent* event)
 {
-	if (mainWidget)
+	if (scrollArea)
 	{
-		mainWidget->setGeometry(0, 0, this->width(), this->height());
+		scrollArea->setGeometry(0, 0, this->width(), this->height());
 	}
 }
 
