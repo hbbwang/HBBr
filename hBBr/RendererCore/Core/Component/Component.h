@@ -4,6 +4,29 @@
 #include <vector>
 #include <map>
 
+#define COMPONENT_DEFINE(ComponentClassName)\
+public:\
+	HBBR_API ComponentClassName();\
+	HBBR_API ComponentClassName(class GameObject* parent);
+
+#define COMPONENT_IMPLEMENT(ComponentClassName)\
+ComponentClassName::ComponentClassName() :Component() \
+{\
+	this->_typeName = #ComponentClassName; \
+	GameObject::GetCompSpawnMap().emplace(this->_typeName, [](GameObject* obj)->ComponentClassName*\
+		{\
+		auto comp = obj->AddComponent<ComponentClassName>(); \
+		return comp; \
+		}); \
+}\
+ComponentClassName::ComponentClassName(class GameObject* parent) :Component(parent)\
+{\
+	this->_typeName = #ComponentClassName; \
+	this->InitProperties();\
+}\
+\
+ComponentClassName  _component_construct_##ComponentClassName;
+
 enum ComponentPropertyType
 {
 	CPT_Float,
@@ -30,6 +53,7 @@ class Component
 	friend class SceneManager;
 	friend class VulkanRenderer;
 public:
+	Component() {}
 
 	Component(class GameObject* parent);
 
@@ -51,6 +75,10 @@ public:
 		return _compProperties;
 	}
 
+	HBBR_API HBBR_INLINE HString GetComponentName() const {
+		return _typeName;
+	}
+	
 protected:
 
 	//Component Property Reflection Add.
@@ -82,6 +110,8 @@ protected:
 	bool _bActive;
 
 	bool _bInit;
+
+	HString _typeName = "Component";
 
 	class GameObject* _gameObject = NULL;
 	

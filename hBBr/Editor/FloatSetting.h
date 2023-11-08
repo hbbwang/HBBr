@@ -33,7 +33,7 @@ public:
 		rx.setPattern("(\\.){0,1}0+$");
 		return QString("%1").arg(val, 0, 'f', -1).replace(rx, "");
 	}
-	std::function<void()> BindValue = []() {};
+
 private:
 	//QDoubleSpinBox* the_x;
 
@@ -50,8 +50,6 @@ private:
 	float AddStore;
 	float CurrentValue;
 
-private slots:
-	void ValueChanged(double newValue);
 };
 
 

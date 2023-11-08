@@ -13,29 +13,17 @@ class VectorSetting : public PropertyClass
 
 public:
 	VectorSetting(QString name, QWidget* parent = Q_NULLPTR, const int demensionality = 1, float step = 0.01f, int precision = 3);
-
-	VectorSetting(QWidget* parent = Q_NULLPTR, const int demensionality = 1, float step = 0.01f, int precision = 3);
-
 	~VectorSetting();
 
 	QList<FloatSetting*> floatSetting ;
 	std::function<void(QList<FloatSetting*>)> BindValue = [](QList<FloatSetting*>) {};
 	float* _vec4_f[4] = {NULL,NULL,NULL,NULL};
 	float _old_vec4_f[4] = { 0,0,0,0 };
-
-	void* _bindParent = NULL;
-	std::function<void(int channel,float newValue)>		bindCallBack = [](int channel,float newValue) {};
-
 	void SetValue(float x  ,float y  , float z  ,float w = 0);
 	void SetValue(glm::vec4 v4 = glm::vec4(0));
 	void SetValue(glm::vec3 v3 = glm::vec3(0));
 	void SetValue(glm::vec2 v2 = glm::vec2(0));
 	void SetValue(float v1 = 0);
-
-	void BindV1(float* v1);
-	void BindV2(glm::vec2* v2);
-	void BindV3(glm::vec3* v3);
-	void BindV4(glm::vec4* v4);
 
 	int Demensionality = 0;
 	float GetX()const { return floatSetting[0]->GetValue(); }
@@ -49,7 +37,6 @@ public:
 		ui.Name->setText(newName);
 
 	}
-	void updateValue()override;
 	QTimer* timer;
 	virtual void paintEvent(QPaintEvent* event)override;
 	virtual void closeEvent(QCloseEvent* event)override;

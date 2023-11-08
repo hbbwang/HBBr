@@ -5,9 +5,7 @@
 #include "FileSystem.h"
 #include "ContentManager.h"
 
-ModelComponent::ModelComponent(GameObject* parent) :Component(parent)
-{
-}
+COMPONENT_IMPLEMENT(ModelComponent)
 
 void ModelComponent::SetModelByRealPath(HString path)
 {

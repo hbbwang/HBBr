@@ -38,14 +38,17 @@
     <Filter Include="Renderer\Core\Resource">
       <UniqueIdentifier>{94d3536f-235e-41d5-a018-d48eeba67e6e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderer\Core\Component">
-      <UniqueIdentifier>{8fca5c07-0f8b-4d2d-b71f-d2357de10820}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ThirdParty\lodepng">
       <UniqueIdentifier>{0390f21e-7636-4424-957a-d6637c1a97ae}</UniqueIdentifier>
     </Filter>
     <Filter Include="ThirdParty\GUID">
       <UniqueIdentifier>{e35db4b3-bdf8-449f-baf8-19718adf72f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\Core\Object">
+      <UniqueIdentifier>{c3972e76-5868-4036-a0cb-8f61928c13e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\Core\Object\Component">
+      <UniqueIdentifier>{8fca5c07-0f8b-4d2d-b71f-d2357de10820}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -148,29 +151,20 @@
     <ClInclude Include="Core\Resource\ModelData.h">
       <Filter>Renderer\Core\Resource</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Component\GameObject.h">
-      <Filter>Renderer\Core\Component</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Component\CameraComponent.h">
-      <Filter>Renderer\Core\Component</Filter>
+      <Filter>Renderer\Core\Object\Component</Filter>
     </ClInclude>
     <ClInclude Include="Core\Resource\SceneManager.h">
       <Filter>Renderer\Core\Resource</Filter>
     </ClInclude>
     <ClInclude Include="Core\Component\Component.h">
-      <Filter>Renderer\Core\Component</Filter>
+      <Filter>Renderer\Core\Object\Component</Filter>
     </ClInclude>
     <ClInclude Include="Core\Component\ModelComponent.h">
-      <Filter>Renderer\Core\Component</Filter>
+      <Filter>Renderer\Core\Object\Component</Filter>
     </ClInclude>
     <ClInclude Include="Core\Pass\PassType.h">
       <Filter>Renderer\Core\Pass</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Component\Transform.h">
-      <Filter>Renderer\Core\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Component\Material.h">
-      <Filter>Renderer\Core\Component</Filter>
     </ClInclude>
     <ClInclude Include="Common\HInput.h">
       <Filter>Common</Filter>
@@ -216,6 +210,15 @@
     </ClInclude>
     <ClInclude Include="Common\HRect.h">
       <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Component\Material.h">
+      <Filter>Renderer\Core\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Component\GameObject.h">
+      <Filter>Renderer\Core\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Component\Transform.h">
+      <Filter>Renderer\Core\Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -303,29 +306,20 @@
     <ClCompile Include="Core\VertexFactory.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Component\GameObject.cpp">
-      <Filter>Renderer\Core\Component</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Component\CameraComponent.cpp">
-      <Filter>Renderer\Core\Component</Filter>
+      <Filter>Renderer\Core\Object\Component</Filter>
     </ClCompile>
     <ClCompile Include="Core\Resource\SceneManager.cpp">
       <Filter>Renderer\Core\Resource</Filter>
     </ClCompile>
     <ClCompile Include="Core\Component\Component.cpp">
-      <Filter>Renderer\Core\Component</Filter>
+      <Filter>Renderer\Core\Object\Component</Filter>
     </ClCompile>
     <ClCompile Include="Core\Component\ModelComponent.cpp">
-      <Filter>Renderer\Core\Component</Filter>
+      <Filter>Renderer\Core\Object\Component</Filter>
     </ClCompile>
     <ClCompile Include="Core\Primitive.cpp">
       <Filter>Renderer\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Component\Transform.cpp">
-      <Filter>Renderer\Core\Component</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Component\Material.cpp">
-      <Filter>Renderer\Core\Component</Filter>
     </ClCompile>
     <ClCompile Include="Common\HInput.cpp">
       <Filter>Common</Filter>
@@ -362,6 +356,15 @@
     </ClCompile>
     <ClCompile Include="Common\HRect.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Component\GameObject.cpp">
+      <Filter>Renderer\Core\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Component\Material.cpp">
+      <Filter>Renderer\Core\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Component\Transform.cpp">
+      <Filter>Renderer\Core\Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

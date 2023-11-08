@@ -7,29 +7,21 @@
 #include <QLabel>
 #include <QFile>
 #include <QPushButton>
-
+#include "FileSystem.h"
 ToolPage::ToolPage(bool isExpanded, QWidget* parent) :
     QWidget(parent),
     m_bIsExpanded(true),
     m_pLabel(nullptr)
 {
     ui.setupUi(this);
-
     ui.widgetContent->setAttribute(Qt::WA_StyledBackground);
 
     m_pLabel = new QLabel(this);
     m_pLabel->setFixedSize(20, 20);
-    m_pLabel->setPixmap(QPixmap(":/img/down-arrow.png").scaled(m_pLabel->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     QHBoxLayout* layout = new QHBoxLayout(ui.pushButtonFold);
     layout->setContentsMargins(0, 0, 5, 0);
     layout->addStretch(1);
     layout->addWidget(m_pLabel);
-
-    QFile file(":/qss/toolpage.qss");
-    if (file.open(QIODevice::ReadOnly)) {
-        setStyleSheet(file.readAll());
-    }
-    file.close();
 
     connect(ui.pushButtonFold, &QPushButton::clicked, this, &ToolPage::onPushButtonFoldClicked);
 
@@ -55,14 +47,14 @@ void ToolPage::expand()
 {
     ui.widgetContent->show();
     m_bIsExpanded = true;
-    m_pLabel->setPixmap(QPixmap(":/img/down-arrow.png").scaled(m_pLabel->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    m_pLabel->setPixmap(QPixmap((HString(FileSystem::GetConfigAbsPath()) + "/Theme/Icons/TreeWidget_Open.png").c_str()).scaled(m_pLabel->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
 void ToolPage::collapse()
 {
     ui.widgetContent->hide();
     m_bIsExpanded = false;
-    m_pLabel->setPixmap(QPixmap(":/img/left-arrow.png").scaled(m_pLabel->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    m_pLabel->setPixmap(QPixmap((HString(FileSystem::GetConfigAbsPath()) + "/Theme/Icons/TreeWidget_Close.png").c_str()).scaled(m_pLabel->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
 void ToolPage::onPushButtonFoldClicked()

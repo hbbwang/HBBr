@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Common.h"
 #include <vector>
+#include <map>
 #include "HString.h"
 #include "Transform.h"
 #include "HGuid.h"
@@ -65,9 +66,12 @@ public:
 
 	HBBR_API void SetParent(GameObject* newParent);
 
-	HBBR_API static bool IsValid(std::weak_ptr<GameObject> obj)
-	{
+	HBBR_API static bool IsValid(std::weak_ptr<GameObject> obj){
 		return !obj.expired() && !obj.lock()->_bWantDestroy && obj.lock()->_transform != NULL;
+	}
+
+	HBBR_INLINE static std::map<HString, std::function<class Component* (class GameObject*)>> GetCompSpawnMap()	{
+		return _componentSpawnFunctions;
 	}
 
 	template<typename T, typename ...Args>
@@ -76,6 +80,18 @@ public:
 		T* result = new T(this, args...);
 		_comps.push_back(result);
 		return result;
+	}
+
+	class Component* AddComponent(HString className)
+	{
+		auto it = _componentSpawnFunctions.find(className);
+		if (it != _componentSpawnFunctions.end())
+		{
+			auto newComp = it->second(this);
+			_comps.push_back(newComp);
+			return newComp;
+		}
+		return NULL;
 	}
 
 #if IS_EDITOR
@@ -115,4 +131,7 @@ private:
 	std::weak_ptr<GameObject>_selfWeak;
 
 	HGUID _guid;
+
+	//Component spawn by name <class name , spawn function>
+	static std::map<HString, std::function<class Component*(class GameObject*)>> _componentSpawnFunctions;
 };

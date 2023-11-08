@@ -8,9 +8,9 @@
 
 class ModelComponent :public Component
 {
+	COMPONENT_DEFINE(ModelComponent)
+
 public:
-	
-	ModelComponent(class GameObject* parent);
 
 	void SetModelByRealPath(HString path);
 

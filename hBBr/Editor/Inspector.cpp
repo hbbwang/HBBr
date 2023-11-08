@@ -110,22 +110,27 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 			}
 		});
 	//---------------------- Transform
+	ToolBox* box = new ToolBox(this);
+	_layoutMain->addWidget(box);
 	{
 		QWidget* transformWidget = new QWidget(this);
 		transformWidget->setLayout(new QVBoxLayout(this));
-		ToolBox* box = new ToolBox(this);
-		_layoutMain->addWidget(box);
 		box->addWidget("Transform", transformWidget, true);
 		auto transform = obj->_transform;
-		VectorSetting* pos =	new VectorSetting("Position", this, 3, 0.001f, 3);
-		VectorSetting* rot =	new VectorSetting("Rotation", this, 3, 0.001f, 3);
-		VectorSetting* scale =	new VectorSetting("Scale   ", this, 3, 0.001f, 3);
+		VectorSetting* pos =	new VectorSetting("Position", this, 3, 0.001f, 4);
+		VectorSetting* rot =	new VectorSetting("Rotation", this, 3, 0.01f, 4);
+		VectorSetting* scale =	new VectorSetting("Scale   ", this, 3, 0.001f, 4);
 		pos->ui.Name->setMinimumWidth(50);
 		rot->ui.Name->setMinimumWidth(50);
 		scale->ui.Name->setMinimumWidth(50);
 		transformWidget->layout()->addWidget(pos);
 		transformWidget->layout()->addWidget(rot);
 		transformWidget->layout()->addWidget(scale);
+
+		pos->SetValue(transform->location);
+		pos->_vec4_f[0] = &transform->location.x;
+		pos->_vec4_f[1] = &transform->location.y;
+		pos->_vec4_f[2] = &transform->location.z;
 		pos->BindValue = [gameObj](QList<FloatSetting*> v) {
 			glm::vec3 newValue = glm::vec3(v[0]->GetValue(), v[1]->GetValue(), v[2]->GetValue());
 			if (GameObject::IsValid(gameObj))
@@ -133,27 +138,47 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				gameObj.lock()->GetTransform()->SetLocation(newValue);
 			}
 		};
-		pos->_vec4_f[0] = &transform->location.x;
-		pos->_vec4_f[1] = &transform->location.y;
-		pos->_vec4_f[2] = &transform->location.z;
-		//rot->BindV3(&transform->eulerAngle);
-		//scale->BindV3(&transform->scale3D);
+
+		rot->SetValue(transform->eulerAngle);
+		rot->_vec4_f[0] = &transform->eulerAngle.x;
+		rot->_vec4_f[1] = &transform->eulerAngle.y;
+		rot->_vec4_f[2] = &transform->eulerAngle.z;
+		rot->BindValue = [gameObj](QList<FloatSetting*> v) {
+			glm::vec3 newValue = glm::vec3(v[0]->GetValue(), v[1]->GetValue(), v[2]->GetValue());
+			if (GameObject::IsValid(gameObj))
+			{
+				gameObj.lock()->GetTransform()->SetRotation(newValue);
+			}
+		};
+
+		scale->SetValue(transform->scale3D);
+		scale->_vec4_f[0] = &transform->scale3D.x;
+		scale->_vec4_f[1] = &transform->scale3D.y;
+		scale->_vec4_f[2] = &transform->scale3D.z;
+		scale->BindValue = [gameObj](QList<FloatSetting*> v) {
+			glm::vec3 newValue = glm::vec3(v[0]->GetValue(), v[1]->GetValue(), v[2]->GetValue());
+			if (GameObject::IsValid(gameObj))
+			{
+				gameObj.lock()->GetTransform()->SetScale3D(newValue);
+			}
+		};
 	}
 	//---------------------- Components
-	//for (auto i : obj->_comps)
-	//{
-	//	auto pro = i->GetProperties();
-	//	for (auto p : pro)
-	//	{
-	//		if (p.second.type == CPT_TextInput)
-	//		{
-	//			ToolBox* box = new ToolBox(this);
+	for (auto i : obj->_comps)
+	{
+		QWidget* compWidget = new QWidget(this);
+		compWidget->setLayout(new QVBoxLayout(this));
+		box->addWidget(i->GetComponentName().c_str(), compWidget, true);
+		auto pro = i->GetProperties();
+		for (auto p : pro)
+		{
+			if (p.second.type == CPT_TextInput)
+			{
 
-	//		}
-	//	}
-	//}
+			}
+		}
+	}
 
-	//
 	_layoutMain->addStretch(999);
 }
 
