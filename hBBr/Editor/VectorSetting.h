@@ -22,10 +22,7 @@ public:
 	std::function<void(QList<FloatSetting*>)> BindValue = [](QList<FloatSetting*>) {};
 	float* _vec4_f[4] = {NULL,NULL,NULL,NULL};
 	float _old_vec4_f[4] = { 0,0,0,0 };
-	float* _v1 = NULL;
-	glm::vec4* _v4 = NULL;
-	glm::vec3* _v3 = NULL;
-	glm::vec2* _v2 = NULL;
+
 	void* _bindParent = NULL;
 	std::function<void(int channel,float newValue)>		bindCallBack = [](int channel,float newValue) {};
 

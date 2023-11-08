@@ -126,6 +126,18 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 		transformWidget->layout()->addWidget(pos);
 		transformWidget->layout()->addWidget(rot);
 		transformWidget->layout()->addWidget(scale);
+		pos->BindValue = [gameObj](QList<FloatSetting*> v) {
+			glm::vec3 newValue = glm::vec3(v[0]->GetValue(), v[1]->GetValue(), v[2]->GetValue());
+			if (GameObject::IsValid(gameObj))
+			{
+				gameObj.lock()->GetTransform()->SetLocation(newValue);
+			}
+		};
+		pos->_vec4_f[0] = &transform->location.x;
+		pos->_vec4_f[1] = &transform->location.y;
+		pos->_vec4_f[2] = &transform->location.z;
+		//rot->BindV3(&transform->eulerAngle);
+		//scale->BindV3(&transform->scale3D);
 	}
 	//---------------------- Components
 	//for (auto i : obj->_comps)

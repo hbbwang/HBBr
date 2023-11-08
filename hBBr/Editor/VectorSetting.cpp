@@ -60,7 +60,7 @@ VectorSetting::VectorSetting(QString name, QWidget *parent,const int demensional
 	}
 
 	timer = new QTimer(this);
-	timer->setInterval(200);
+	timer->setInterval(100);
 	timer->start();
 	connect(timer, &QTimer::timeout, this, [this]() {
 		if (Demensionality >= 1 && !floatSetting[0]->hasFocus() && _vec4_f[0] != NULL && *_vec4_f[0] != _old_vec4_f[0])
@@ -269,26 +269,26 @@ void VectorSetting::updateValue()
 		break;
 	}
 
-	if (_vec4_f[0] != NULL && Demensionality >= 1 && floatSetting[0]->hasFocus())
-	{
-		*_vec4_f[0] = floatSetting[0]->value();
-		_old_vec4_f[0] = *_vec4_f[0];
-	}
-	if (_vec4_f[1] != NULL && Demensionality >= 2 && floatSetting[1]->hasFocus())
-	{
-		*_vec4_f[1] = floatSetting[1]->value();
-		_old_vec4_f[1] = *_vec4_f[1];
-	}
-	if (_vec4_f[2] != NULL && Demensionality >= 3 && floatSetting[2]->hasFocus())
-	{
-		*_vec4_f[2] = floatSetting[2]->value();
-		_old_vec4_f[2] = *_vec4_f[2];
-	}
-	if (_vec4_f[3] != NULL && Demensionality >= 4 && floatSetting[3]->hasFocus())
-	{
-		*_vec4_f[3] = floatSetting[3]->value();
-		_old_vec4_f[3] = *_vec4_f[3];
-	}
+	//if (_vec4_f[0] != NULL && Demensionality >= 1 && floatSetting[0]->hasFocus())
+	//{
+	//	*_vec4_f[0] = floatSetting[0]->value();
+	//	_old_vec4_f[0] = *_vec4_f[0];
+	//}
+	//if (_vec4_f[1] != NULL && Demensionality >= 2 && floatSetting[1]->hasFocus())
+	//{
+	//	*_vec4_f[1] = floatSetting[1]->value();
+	//	_old_vec4_f[1] = *_vec4_f[1];
+	//}
+	//if (_vec4_f[2] != NULL && Demensionality >= 3 && floatSetting[2]->hasFocus())
+	//{
+	//	*_vec4_f[2] = floatSetting[2]->value();
+	//	_old_vec4_f[2] = *_vec4_f[2];
+	//}
+	//if (_vec4_f[3] != NULL && Demensionality >= 4 && floatSetting[3]->hasFocus())
+	//{
+	//	*_vec4_f[3] = floatSetting[3]->value();
+	//	_old_vec4_f[3] = *_vec4_f[3];
+	//}
 }
 
 void VectorSetting::paintEvent(QPaintEvent* event)
@@ -348,6 +348,12 @@ void VectorSetting::setX(double val)
 	if (Demensionality >= 1)
 		floatSetting[0]->setValue(val);
 	bindCallBack(0,val);
+
+	if (_vec4_f[0] != NULL && Demensionality >= 1 && floatSetting[0]->hasFocus())
+	{
+		*_vec4_f[0] = floatSetting[0]->value();
+		_old_vec4_f[0] = *_vec4_f[0];
+	}
 }
 
 void VectorSetting::setY(double val)
@@ -356,6 +362,12 @@ void VectorSetting::setY(double val)
 	if(Demensionality>=2)
 		floatSetting[1]->setValue(val);
 	bindCallBack(1, val);
+
+	if (_vec4_f[1] != NULL && Demensionality >= 2 && floatSetting[1]->hasFocus())
+	{
+		*_vec4_f[1] = floatSetting[1]->value();
+		_old_vec4_f[1] = *_vec4_f[1];
+	}
 }
 
 void VectorSetting::setZ(double val)
@@ -364,6 +376,12 @@ void VectorSetting::setZ(double val)
 	if (Demensionality >= 3)
 		floatSetting[2]->setValue(val);
 	bindCallBack(2, val);
+
+	if (_vec4_f[2] != NULL && Demensionality >= 3 && floatSetting[2]->hasFocus())
+	{
+		*_vec4_f[2] = floatSetting[2]->value();
+		_old_vec4_f[2] = *_vec4_f[2];
+	}
 }
 
 void VectorSetting::setW(double val)
@@ -372,4 +390,10 @@ void VectorSetting::setW(double val)
 	if (Demensionality >= 4)
 		floatSetting[3]->setValue(val);
 	bindCallBack(3, val);
+
+	if (_vec4_f[3] != NULL && Demensionality >= 4 && floatSetting[3]->hasFocus())
+	{
+		*_vec4_f[3] = floatSetting[3]->value();
+		_old_vec4_f[3] = *_vec4_f[3];
+	}
 }
