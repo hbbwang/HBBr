@@ -172,7 +172,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 		auto pro = i->GetProperties();
 		for (auto p : pro)
 		{
-			if (p.second.type == CPT_TextInput)
+			if (p.second.type == CPT_Resource)
 			{
 
 			}

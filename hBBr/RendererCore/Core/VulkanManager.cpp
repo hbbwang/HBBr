@@ -1251,7 +1251,7 @@ VkExtent2D VulkanManager::CreateSwapchainFromTextures(VkExtent2D surfaceSize, Vk
 	swapchainImageViews.clear();
 	for (int i = 0; i < (int)_swapchainBufferCount; i++)
 	{
-		textures[i].reset(new Texture(true));
+		textures[i].reset(new Texture());
 		textures[i]->_image = images[i];
 		textures[i]->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		textures[i]->_imageAspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -1357,12 +1357,12 @@ void VulkanManager::CreateImageView(VkImage inImage, VkFormat format, VkImageAsp
 	vkCreateImageView(_device, &image_view_create_info, VK_NULL_HANDLE, &imageView);
 }
 
-void VulkanManager::CreateImageMemory(VkImage inImage, VkDeviceMemory& imageViewMemory, VkMemoryPropertyFlags memoryPropertyFlag)
+VkDeviceSize VulkanManager::CreateImageMemory(VkImage inImage, VkDeviceMemory& imageViewMemory, VkMemoryPropertyFlags memoryPropertyFlag)
 {
 	if (inImage == VK_NULL_HANDLE)
 	{
 		MessageOut("Create vulkan image view failed.VkImage is NULL.", false, false);
-		return;
+		return 0 ;
 	}
 	VkMemoryRequirements mem_requirement;
 	vkGetImageMemoryRequirements(_device, inImage, &mem_requirement);
@@ -1378,6 +1378,10 @@ void VulkanManager::CreateImageMemory(VkImage inImage, VkDeviceMemory& imageView
 	if (VK_SUCCESS != err) {
 		MessageOut("Create vulkan image view failed.VkImage is NULL.", false, false);
 	}
+	if (VK_SUCCESS == err) {
+		return mem_requirement.size;
+	}
+	return 0;
 }
 
 void VulkanManager::Transition(
@@ -1476,14 +1480,6 @@ void VulkanManager::DestroyImage(VkImage& image)
 	if (image != VK_NULL_HANDLE)
 	{
 		vkDestroyImage(_device, image, VK_NULL_HANDLE);
-	}
-}
-
-void VulkanManager::DestroyImageMemory(VkDeviceMemory& imageViewMemory)
-{
-	if (imageViewMemory != VK_NULL_HANDLE)
-	{
-		vkFreeMemory(_device, imageViewMemory, VK_NULL_HANDLE);
 	}
 }
 

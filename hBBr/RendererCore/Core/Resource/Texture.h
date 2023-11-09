@@ -9,6 +9,7 @@
 #include "./Resource/HGuid.h"
 #include "HString.h"
 #include "ImageTool.h"
+#include "ResourceObject.h"
 //Vulkan api
 #include "VulkanManager.h"
 
@@ -71,13 +72,12 @@ private:
 	class VulkanRenderer* _renderer;
 };
 
-class Texture
+class Texture : public ResourceObject
 {
 	friend class VulkanManager;
 	friend class ContentManager;
 public:
 	Texture() {}
-	Texture(bool bNoMemory) {_bNoMemory = bNoMemory;}
 	~Texture();
 	HBBR_INLINE VkImage GetTexture()const {
 		return _image;
@@ -113,8 +113,13 @@ public:
 		return _fontTexture.get();
 	}
 
-	HBBR_INLINE static VkSampler GetSampler(TextureSampler sampler) {
-		return _samplers[sampler];
+	HBBR_INLINE static VkSampler GetSampler(TextureSampler sampler , int mipBias = -1) {
+		auto samplers = _samplers[sampler];
+		if (mipBias <0 || (int)samplers.size() <= mipBias)
+		{
+			mipBias = 0;
+		}
+		return samplers[mipBias];
 	}
 
 	HBBR_INLINE static FontTextureInfo* GetFontInfo(wchar_t c) {
@@ -127,6 +132,10 @@ public:
 		{
 			return &_fontTextureInfos[32];
 		}
+	}
+
+	HBBR_INLINE static uint64_t GetTextureStreamingSize() {
+		return _textureStreamingSize;
 	}
 
 	void Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
@@ -143,7 +152,7 @@ public:
 		return _bUploadToGPU;
 	}
 
-	static std::shared_ptr<Texture> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, HString textureName = "Texture", uint32_t miplevel = 1, uint32_t layerCount = 1, bool noMemory = false);
+	static std::shared_ptr<Texture> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, HString textureName = "Texture", uint32_t miplevel = 1, uint32_t layerCount = 1);
 
 	static std::weak_ptr<Texture> ImportTextureAsset(HGUID guid , VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
@@ -179,7 +188,6 @@ public:
 private:
 
 	bool _bUploadToGPU = false;
-	bool _bNoMemory = false;
 
 	//Vulkan object
 	VkImage _image;
@@ -190,6 +198,8 @@ private:
 	VkImageAspectFlags _imageAspectFlags;
 	uint32_t _mipCount = 1;
 	VkExtent2D _imageSize;
+	uint64_t _textureMemorySize =0;
+	uint8_t _mipBias = 0;
 	VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 	//Image data
@@ -202,10 +212,14 @@ private:
 
 	//Global variable
 	static std::unordered_map<HString, Texture*> _system_textures;
-	static std::unordered_map<TextureSampler, VkSampler> _samplers;
+	//<mipLod,sampler>
+	static std::unordered_map<TextureSampler, std::vector<VkSampler>> _samplers;
 	
 	// vector<RGBA channel<wchar_t , FontTextureInfo>>
 	static std::unordered_map<wchar_t, FontTextureInfo> _fontTextureInfos;
 	static std::shared_ptr<Texture> _fontTexture;
 
+	//Texture streaming
+	static uint64_t _textureStreamingSize;
+	static uint64_t _maxTextureStreamingSize;
 };

@@ -4,7 +4,7 @@
 #include "./Core/Shader.h"
 #include "./Core/Pipeline.h"
 #include "./Common/HInput.h"
-#include "./Core/Texture.h"
+#include "./Resource/Texture.h"
 #include "./Common/XMLStream.h"
 #include "./Core/RendererConfig.h"
 #if IS_EDITOR

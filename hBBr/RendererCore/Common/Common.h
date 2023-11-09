@@ -33,6 +33,8 @@
 
 #include <chrono>
 #include <thread>
+#include <vector>
+#include <functional>
 #include <assert.h>
 
 //Math include

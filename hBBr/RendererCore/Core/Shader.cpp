@@ -1,7 +1,7 @@
 ﻿#include "Shader.h"
 #include "FileSystem.h"
 #include "VulkanManager.h"
-#include "./Component/Material.h"
+#include "./Resource/Material.h"
 #include <fstream>
 std::map<HString, ShaderCache> Shader::_vsShader;
 std::map<HString, ShaderCache> Shader::_psShader;

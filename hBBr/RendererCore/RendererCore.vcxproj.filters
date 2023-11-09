@@ -76,9 +76,6 @@
     <ClInclude Include="Core\VulkanRenderer.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Texture.h">
-      <Filter>Renderer\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Core\PassManager.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
@@ -211,14 +208,20 @@
     <ClInclude Include="Common\HRect.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Component\Material.h">
-      <Filter>Renderer\Core\Object</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Component\GameObject.h">
       <Filter>Renderer\Core\Object</Filter>
     </ClInclude>
     <ClInclude Include="Core\Component\Transform.h">
       <Filter>Renderer\Core\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\Material.h">
+      <Filter>Renderer\Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\Texture.h">
+      <Filter>Renderer\Core\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\ResourceObject.h">
+      <Filter>Renderer\Core\Resource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -235,9 +238,6 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Core\VulkanRenderer.cpp">
-      <Filter>Renderer\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Texture.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\PassManager.cpp">
@@ -360,11 +360,17 @@
     <ClCompile Include="Core\Component\GameObject.cpp">
       <Filter>Renderer\Core\Object</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Component\Material.cpp">
-      <Filter>Renderer\Core\Object</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Component\Transform.cpp">
       <Filter>Renderer\Core\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\Material.cpp">
+      <Filter>Renderer\Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\Texture.cpp">
+      <Filter>Renderer\Core\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\ResourceObject.cpp">
+      <Filter>Renderer\Core\Resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

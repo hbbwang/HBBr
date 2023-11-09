@@ -89,6 +89,12 @@ public:
 
 	HBBR_INLINE bool NeedUpdateUb()const { return _bNeedUpdateUniformBuffer; }
 
+#if IS_EDITOR
+	std::function<void()> _editor_locationCallBack = []() {};
+	std::function<void()> _editor_rotationCallBack = []() {};
+	std::function<void()> _editor_scaleCallBack = []() {};
+#endif
+
 private:
 
 	glm::vec3 scale3D = glm::vec3(1, 1, 1);

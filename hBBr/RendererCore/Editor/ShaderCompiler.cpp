@@ -5,7 +5,7 @@
 #include "ConsoleDebug.h"
 #include "glm/glm.hpp"
 #include "ThirdParty/shaderc/shaderc.hpp"
-#include "Component/Material.h"
+#include "Resource/Material.h"
 
 #include <string>  
 #include <iostream> 

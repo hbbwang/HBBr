@@ -128,6 +128,9 @@ void Transform::FSetWorldLocation(glm::vec3 newWorldLocation, bool bAffectChildr
 		UpdateChildrenLocation();
 
 	_bNeedUpdateUniformBuffer = true;
+#if IS_EDITOR
+	_editor_locationCallBack();
+#endif
 }
 
 void Transform::FSetWorldRotation(glm::vec3 newAngle, bool bAffectChildren)
@@ -177,6 +180,9 @@ void Transform::FSetWorldRotation(glm::vec3 newAngle, bool bAffectChildren)
 		UpdateChildrenTransform();
 
 	_bNeedUpdateUniformBuffer = true;
+#if IS_EDITOR
+	_editor_rotationCallBack();
+#endif
 }
 
 void Transform::FSetScale3D(glm::vec3 newSize, bool bAffectChildren)
@@ -202,6 +208,9 @@ void Transform::FSetScale3D(glm::vec3 newSize, bool bAffectChildren)
 		UpdateChildrenScale3D();
 
 	_bNeedUpdateUniformBuffer = true;
+#if IS_EDITOR
+	_editor_scaleCallBack();
+#endif
 }
 
 void Transform::FSetLocalRotation(glm::vec3 newAngle)
@@ -262,6 +271,9 @@ void Transform::FSetLocalRotation(glm::vec3 newAngle)
 	UpdateChildrenTransform();
 
 	_bNeedUpdateUniformBuffer = true;
+#if IS_EDITOR
+	_editor_rotationCallBack();
+#endif
 }
 
 void Transform::FSetLocation(glm::vec3 newLocation)

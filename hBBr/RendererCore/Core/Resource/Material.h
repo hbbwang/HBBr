@@ -5,13 +5,13 @@
 #include "Primitive.h"
 #include "Resource/HGuid.h"
 #include "XMLStream.h"
-
+#include "ResourceObject.h"
 #include <unordered_map>
 #include <vector>
 
 #define DefaultMaterialGuid "61A147FF-32BD-48EC-B523-57BC75EB16BA"
 
-class Material
+class Material :public ResourceObject
 {
 public:
 	Material();

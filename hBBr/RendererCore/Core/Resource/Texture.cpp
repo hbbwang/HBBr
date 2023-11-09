@@ -9,11 +9,15 @@
 #include "ContentManager.h"
 #include "XMLStream.h"
 #include "RendererConfig.h"
+
 std::vector<Texture*> Texture::_upload_textures;
 std::unordered_map<HString, Texture*> Texture::_system_textures;
-std::unordered_map < TextureSampler, VkSampler > Texture::_samplers;
+std::unordered_map<TextureSampler, std::vector<VkSampler>>Texture::_samplers;
 std::unordered_map<wchar_t, FontTextureInfo> Texture::_fontTextureInfos;
 std::shared_ptr<Texture>Texture::_fontTexture;
+uint64_t Texture::_textureStreamingSize = 0;
+uint64_t Texture::_maxTextureStreamingSize = 1024 * 1024 * 4; //4 GB
+
 SceneTexture::SceneTexture(VulkanRenderer* renderer)
 {
 	_renderer = renderer;
@@ -48,7 +52,11 @@ void SceneTexture::UpdateTextures()
 
 Texture::~Texture()
 {
-	VulkanManager::GetManager()->DestroyImageMemory(_imageViewMemory);
+	if (_imageViewMemory != VK_NULL_HANDLE)
+	{
+		VulkanManager::GetManager()->FreeBufferMemory(_imageViewMemory);
+		_textureStreamingSize = std::max((uint64_t)0, _textureStreamingSize - _textureMemorySize);
+	}
 	VulkanManager::GetManager()->DestroyImageView(_imageView);
 	VulkanManager::GetManager()->DestroyImage(_image);
 	if (_imageData!=NULL)
@@ -84,13 +92,23 @@ void Texture::Resize(uint32_t width, uint32_t height)
 		return;
 
 	if (_imageViewMemory != VK_NULL_HANDLE)
+	{
 		VulkanManager::GetManager()->FreeBufferMemory(_imageViewMemory);
+		_textureStreamingSize = std::max((uint64_t)0, _textureStreamingSize - _textureMemorySize);
+	}
 	VulkanManager::GetManager()->DestroyImageView(_imageView);
 	VulkanManager::GetManager()->DestroyImage(_image);
 	//
 	VulkanManager::GetManager()->CreateImage(width, height, _format, _usageFlags, _image);
-	if (!_bNoMemory)
-		VulkanManager::GetManager()->CreateImageMemory(_image, _imageViewMemory);
+
+	_textureMemorySize = VulkanManager::GetManager()->CreateImageMemory(_image, _imageViewMemory);
+	_textureStreamingSize += _textureMemorySize;
+
+	if (_textureStreamingSize > _maxTextureStreamingSize)
+	{
+		MessageOut((HString("Max texture streaming size is ") + HString::FromSize_t(_maxTextureStreamingSize) + ", but current texture streaming size is  " + HString::FromSize_t(_textureStreamingSize)).c_str(), false, false, "255,255,0");
+	}
+
 	VulkanManager::GetManager()->CreateImageView(_image, _format, _imageAspectFlags, _imageView);
 	//
 	VkCommandBuffer cmdbuf;
@@ -110,10 +128,9 @@ void Texture::Resize(uint32_t width, uint32_t height)
 std::shared_ptr<Texture> Texture::CreateTexture2D(
 	uint32_t width, uint32_t height, VkFormat format, 
 	VkImageUsageFlags usageFlags, HString textureName,
-	uint32_t miplevel, uint32_t layerCount, bool noMemory)
+	uint32_t miplevel, uint32_t layerCount)
 {
 	std::shared_ptr<Texture> newTexture = std::make_shared<Texture>();
-	newTexture->_bNoMemory = noMemory;
 	newTexture->_textureName = textureName;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = {width,height};
@@ -124,10 +141,8 @@ std::shared_ptr<Texture> Texture::CreateTexture2D(
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
 	else
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
-	if (!newTexture->_bNoMemory)
-	{
-		VulkanManager::GetManager()->CreateImageMemory(newTexture->_image, newTexture->_imageViewMemory);
-	}
+	newTexture->_textureMemorySize = VulkanManager::GetManager()->CreateImageMemory(newTexture->_image, newTexture->_imageViewMemory);
+	_textureStreamingSize += newTexture->_textureMemorySize;
 	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView, miplevel, layerCount);
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
@@ -171,7 +186,6 @@ std::weak_ptr<Texture> Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags
 	uint32_t h = out->data_header.height;
 	VkFormat format = out->texFormat;
 	std::shared_ptr<Texture> newTexture = std::make_shared<Texture>();
-	newTexture->_bNoMemory = false;
 	newTexture->_textureName = dataPtr->name;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = { w, h };
@@ -184,10 +198,10 @@ std::weak_ptr<Texture> Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
 	else
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
-	if (!newTexture->_bNoMemory)
-	{
-		VulkanManager::GetManager()->CreateImageMemory(newTexture->_image, newTexture->_imageViewMemory);
-	}
+
+	newTexture->_textureMemorySize = VulkanManager::GetManager()->CreateImageMemory(newTexture->_image, newTexture->_imageViewMemory);
+	_textureStreamingSize += newTexture->_textureMemorySize;
+
 	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView, newTexture->_imageData->mipLevel, arrayLevel);
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
@@ -230,24 +244,41 @@ void Texture::GlobalInitialize()
 		info.anisotropyEnable = VK_FALSE;
 		info.maxAnisotropy = 1.0f;
 	}
-	//Linear
-	manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 16);
-	_samplers.emplace(TextureSampler_Linear_Wrap, std::move(sampler));
-	manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0, 16);
-	_samplers.emplace(TextureSampler_Linear_Mirror, std::move(sampler));
-	manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 16);
-	_samplers.emplace(TextureSampler_Linear_Clamp, std::move(sampler));
-	manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, 0, 16);
-	_samplers.emplace(TextureSampler_Linear_Border, std::move(sampler));
-	//Nearest
-	manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 16);
-	_samplers.emplace(TextureSampler_Nearest_Wrap, std::move(sampler));
-	manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0, 16);
-	_samplers.emplace(TextureSampler_Nearest_Mirror, std::move(sampler));
-	manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 16);
-	_samplers.emplace(TextureSampler_Nearest_Clamp, std::move(sampler));
-	manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, 0, 16);
-	_samplers.emplace(TextureSampler_Nearest_Border, std::move(sampler));
+
+	_samplers.emplace(TextureSampler_Linear_Wrap, std::vector<VkSampler>());
+	_samplers.emplace(TextureSampler_Linear_Mirror, std::vector<VkSampler>());
+	_samplers.emplace(TextureSampler_Linear_Clamp, std::vector<VkSampler>());
+	_samplers.emplace(TextureSampler_Linear_Border, std::vector<VkSampler>());
+	_samplers.emplace(TextureSampler_Nearest_Wrap, std::vector<VkSampler>());
+	_samplers.emplace(TextureSampler_Nearest_Mirror, std::vector<VkSampler>());
+	_samplers.emplace(TextureSampler_Nearest_Clamp, std::vector<VkSampler>());
+	_samplers.emplace(TextureSampler_Nearest_Border, std::vector<VkSampler>());
+
+	//mip level
+	for (int t = 0; t < 8; t++)
+	{
+		_samplers.emplace((TextureSampler)t, std::vector<VkSampler>());
+		for (int i = 0; i < 16; i++)
+		{
+			if ((TextureSampler)t == TextureSampler_Linear_Wrap)
+				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, i, 16);
+			else if ((TextureSampler)t == TextureSampler_Linear_Mirror)
+				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, i, 16);
+			else if ((TextureSampler)t == TextureSampler_Linear_Clamp)
+				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, i, 16);
+			else if ((TextureSampler)t == TextureSampler_Linear_Border)
+				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, i, 16);
+			else if ((TextureSampler)t == TextureSampler_Nearest_Wrap)
+				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_REPEAT, i, 16);
+			else if ((TextureSampler)t == TextureSampler_Nearest_Mirror)
+				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, i, 16);
+			else if ((TextureSampler)t == TextureSampler_Nearest_Clamp)
+				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, i, 16);
+			else if ((TextureSampler)t == TextureSampler_Nearest_Border)
+				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, i, 16);
+			_samplers[(TextureSampler)t].push_back(std::move(sampler));
+		}
+	}	
 
 	//Create BaseTexture
 	auto uvGridTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_UVGrid"));
@@ -332,9 +363,13 @@ void Texture::GlobalUpdate()
 void Texture::GlobalRelease()
 {
 	const auto& manager = VulkanManager::GetManager();
-	for (auto& i : _samplers)
+	for (auto i : _samplers)
 	{
-		vkDestroySampler(manager->GetDevice(), i.second, nullptr);
+		for (auto& t : i.second)
+		{
+			vkDestroySampler(manager->GetDevice(), t, nullptr);
+		}
+		i.second.clear();
 	}
 	_samplers.clear();
 	_fontTexture.reset();

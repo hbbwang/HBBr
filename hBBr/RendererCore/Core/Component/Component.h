@@ -33,7 +33,7 @@ enum ComponentPropertyType
 	CPT_Float2,
 	CPT_Float3,
 	CPT_Float4,
-	CPT_TextInput,
+	CPT_Resource,
 	CPT_Bool,
 };
 

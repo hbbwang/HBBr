@@ -158,11 +158,9 @@ public:
 	void CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags,  VkImageView& imageView, uint32_t miplevel = 1, uint32_t layerCount = 1);
 
 	/* 创建Vulkan image view memory*/
-	void CreateImageMemory(VkImage image, VkDeviceMemory& imageViewMemory, VkMemoryPropertyFlags memoryPropertyFlag = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	VkDeviceSize CreateImageMemory(VkImage image, VkDeviceMemory& imageViewMemory, VkMemoryPropertyFlags memoryPropertyFlag = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 	void DestroyImage(VkImage& inImage);
-
-	void DestroyImageMemory(VkDeviceMemory& imageViewMemory);
 
 	void DestroyImageView(VkImageView& imageView);
 

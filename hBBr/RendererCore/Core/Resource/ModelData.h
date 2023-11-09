@@ -7,6 +7,7 @@
 #include "VertexFactory.h"
 #include "Primitive.h"
 #include "HGuid.h"
+#include "ResourceObject.h"
 
 struct VertexData
 {
@@ -129,8 +130,9 @@ struct Vec4ColorFileData
 	}
 };
 
-struct ModelData
+class ModelData :public ResourceObject
 {
+public:
 	//根据材质区分面
 	std::vector<FaceData>		faces;
 	ModelFileDataStructFlags	fileFlags = //文件结构枚举,用于识别可能内容不同的模型文件

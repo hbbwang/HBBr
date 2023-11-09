@@ -21,7 +21,7 @@
 #include "QDesktopServices.h"
 #include "qabstractitemview.h"
 #include "FileSystem.h"
-#include "Component/Material.h"
+#include "Resource/Material.h"
 #include "Resource/ContentManager.h"
 
 QWidget* ContentBrowser::_currentFocusContentBrowser = NULL;

@@ -2,7 +2,7 @@
 #include "XMLStream.h"
 #include "FileSystem.h"
 #include "Resource/ModelData.h"
-#include "Component/Material.h"
+#include "Resource/Material.h"
 #include "Texture.h"
 std::unique_ptr<ContentManager> ContentManager::_ptr;
 
