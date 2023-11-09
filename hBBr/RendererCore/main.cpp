@@ -138,11 +138,11 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	//Import font
 	//HString ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/msyhl.ttc";
 	HString ttfFontPath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"Font").attribute(L"absPath").as_string();
-	ttfFontPath.CorrectionPath();
+	FileSystem::CorrectionPath(ttfFontPath);
 	HString outFontTexturePath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"FontTexture").attribute(L"path").as_string();
 	outFontTexturePath = FileSystem::GetRelativePath(outFontTexturePath.c_str());
 	outFontTexturePath = FileSystem::GetProgramPath() + outFontTexturePath;
-	outFontTexturePath.CorrectionPath();
+	FileSystem::CorrectionPath(outFontTexturePath);
 	//Texture::CreateFontTexture(ttfFontPath, outFontTexturePath, true, 16U, 4096U);
 
 	Texture::GlobalInitialize();

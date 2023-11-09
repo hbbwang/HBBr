@@ -17,6 +17,7 @@ Component::~Component()
 void Component::SetActive(bool newActive)
 {
 	_bActive = newActive;
+	GameObjectActiveChanged(_gameObject->_bActive);
 	if (!newActive)
 	{
 

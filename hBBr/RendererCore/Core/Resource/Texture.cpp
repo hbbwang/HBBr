@@ -169,7 +169,7 @@ std::weak_ptr<Texture> Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags
 	}
 	//获取实际路径
 	HString filePath = FileSystem::GetProgramPath() + it->second->relativePath + guidStr + ".dds";
-	filePath.CorrectionPath();
+	FileSystem::CorrectionPath(filePath);
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
 		return std::weak_ptr<Texture>();
@@ -186,6 +186,7 @@ std::weak_ptr<Texture> Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags
 	uint32_t h = out->data_header.height;
 	VkFormat format = out->texFormat;
 	std::shared_ptr<Texture> newTexture = std::make_shared<Texture>();
+	newTexture->_assetInfo = dataPtr;
 	newTexture->_textureName = dataPtr->name;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = { w, h };
@@ -302,7 +303,7 @@ void Texture::GlobalInitialize()
 		HString fontTexturePath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"FontTexture").attribute(L"path").as_string();
 		fontTexturePath = FileSystem::GetRelativePath(fontTexturePath.c_str());
 		fontTexturePath = FileSystem::GetProgramPath() + fontTexturePath;
-		fontTexturePath.CorrectionPath();
+		FileSystem::CorrectionPath(fontTexturePath);
 		ImageData* imageData = NULL;
 		if (fontTexturePath.GetSuffix().IsSame("png", false))
 		{
@@ -335,7 +336,7 @@ void Texture::GlobalInitialize()
 		HString fontDocPath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"FontConfig").attribute(L"path").as_string();
 		fontDocPath = FileSystem::GetRelativePath(fontDocPath.c_str());
 		fontDocPath = FileSystem::GetProgramPath() + fontDocPath;
-		fontDocPath.CorrectionPath();
+		FileSystem::CorrectionPath(fontDocPath);
 		pugi::xml_document fontDoc;
 		fontDoc.load_file(fontDocPath.c_wstr());
 		auto root = fontDoc.child(L"root");
@@ -1010,7 +1011,7 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath, boo
 	if (!FileSystem::FileExist(ttfFontPath.c_str()))
 	{
 		ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/arial.ttf";
-		ttfFontPath.CorrectionPath();
+		FileSystem::CorrectionPath(ttfFontPath);
 		if (!FileSystem::FileExist(ttfFontPath.c_str()))
 		{
 			return;
@@ -1212,7 +1213,7 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath, boo
 	HString fontDocPath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"FontConfig").attribute(L"path").as_string();
 	fontDocPath = FileSystem::GetRelativePath(fontDocPath.c_str());
 	fontDocPath = FileSystem::GetProgramPath() + fontDocPath;
-	fontDocPath.CorrectionPath();
+	FileSystem::CorrectionPath(fontDocPath);
 	XMLStream::CreatesXMLFile(fontDocPath, doc);
 	auto root = doc.append_child(L"root");
 	root.append_attribute(L"num").set_value(characters.size());

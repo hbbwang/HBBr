@@ -40,7 +40,7 @@ std::weak_ptr<ModelData> ModelFileStream::ImportFbxToMemory(HGUID guid)
 	}
 	//获取实际路径
 	HString filePath = FileSystem::GetProgramPath() + it->second->relativePath + guidStr + ".fbx";
-	filePath.CorrectionPath();
+	FileSystem::CorrectionPath(filePath);
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
 		return std::weak_ptr<ModelData>();
@@ -76,6 +76,7 @@ std::weak_ptr<ModelData> ModelFileStream::ImportFbxToMemory(HGUID guid)
 	}
 
 	auto modelData = std::make_shared<ModelData>();
+	modelData->_assetInfo = dataPtr;
 	modelData->guid = guid;
 	glm::vec3 boundingBox_min = glm::vec3(0, 0, 0);
 	glm::vec3 boundingBox_max = glm::vec3(0, 0, 0);

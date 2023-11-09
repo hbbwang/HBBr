@@ -7,6 +7,8 @@
 #include "Component.h"
 #include "ToolBox.h"
 #include "VectorSetting.h"
+#include "ResourceLine.h"
+#include "ResourceObject.h"
 
 Inspector* Inspector::_currentInspector = NULL;
 
@@ -87,9 +89,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 			obj->SetActive(bb);
 		}
 	};
-	active->SetAlignmentLeft();
 	active->_boolBind = &obj->_bActive;
-	active->setMaximumWidth(20);
 	horLayout->addWidget(active);
 	QTextEdit* title = new QTextEdit(this);
 	title->setObjectName("InspectorTitle");
@@ -166,6 +166,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 	//---------------------- Components
 	for (auto i : obj->_comps)
 	{
+		Component* comp = i ;
 		QWidget* compWidget = new QWidget(this);
 		compWidget->setLayout(new QVBoxLayout(this));
 		box->addWidget(i->GetComponentName().c_str(), compWidget, true);
@@ -174,11 +175,26 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 		{
 			if (p.second.type == CPT_Resource)
 			{
-
+				std::weak_ptr<ResourceObject> obj = *(std::weak_ptr<ResourceObject>*)p.second.valuePtr;
+				if (!obj.expired())
+				{
+					ResourceLine* line = new ResourceLine(p.first, this, obj.lock()->_assetInfo->virtualPath, obj.lock()->_assetInfo->suffix);
+					compWidget->layout()->addWidget(line);
+				}			
+			}
+			else if (p.second.type == CPT_Bool)
+			{
+				CheckBox* checkBox = new CheckBox(p.first, this, i->IsActive());
+				checkBox->_callback = [comp](bool b) {
+					if (comp)
+						comp->SetActive(b);
+				};
+				checkBox->_boolBind = (bool*)p.second.valuePtr;
+				compWidget->layout()->addWidget(checkBox);
 			}
 		}
 	}
-
+	box->ui.verticalLayout->addStretch(999);
 	_layoutMain->addStretch(999);
 }
 

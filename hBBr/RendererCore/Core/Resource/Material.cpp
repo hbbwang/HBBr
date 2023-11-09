@@ -42,7 +42,7 @@ std::weak_ptr<Material> Material::LoadMaterial(HGUID guid)
 	}
 	//获取实际路径
 	HString filePath = FileSystem::GetProgramPath() + it->second->relativePath + guidStr + ".mat";
-	filePath.CorrectionPath();
+	FileSystem::CorrectionPath(filePath);
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
 		return std::weak_ptr<Material>();
@@ -58,6 +58,7 @@ std::weak_ptr<Material> Material::LoadMaterial(HGUID guid)
 		auto materialPrim = root.child(L"MaterialPrimitive");
 		//MaterialPrimitive
 		mat->_primitive.reset(new MaterialPrimitive());
+		mat->_assetInfo = dataPtr;
 		mat->_primitive->graphicsName = it->second->name;
 		XMLStream::LoadXMLAttributeString(materialPrim, L"vsShader", mat->_primitive->vsShader);
 		XMLStream::LoadXMLAttributeString(materialPrim, L"psShader", mat->_primitive->psShader);

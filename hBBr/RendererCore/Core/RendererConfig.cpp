@@ -10,7 +10,7 @@ RendererConfig* RendererConfig::Get()
 	{
 		_rendererConfig.reset(new RendererConfig);
 		HString path = FileSystem::GetProgramPath() + "Config/Renderer.xml";
-		path.CorrectionPath();
+		FileSystem::CorrectionPath(path);
 		auto pathChar = path.c_wstr();
 		if (!XMLStream::LoadXML(pathChar, _rendererConfig->_configFile))
 		{
@@ -27,7 +27,7 @@ HString RendererLauguage::GetText(HString key)
 		HString LauguageFilePath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"Language").attribute(L"path").as_string();
 		LauguageFilePath = FileSystem::GetRelativePath(LauguageFilePath.c_str());
 		LauguageFilePath = FileSystem::GetProgramPath() + LauguageFilePath;
-		LauguageFilePath.CorrectionPath();
+		FileSystem::CorrectionPath(LauguageFilePath);
 		pugi::xml_document doc;
 		if (!XMLStream::LoadXML(LauguageFilePath.c_wstr(), doc))
 		{

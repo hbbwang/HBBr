@@ -6,9 +6,24 @@ CheckBox::CheckBox(QWidget* parent , bool bEnbale )
 	ui.setupUi(this);
 	//ui.ComboBox_0->setStyleSheet("border:2px solid rgb(10,10,10);border-radius:8px;background-color:rgb(75,75,75);color:rgb(255,255,255);height:22;outline: none;}");
 	//ui.checkBox->setGeometry(0, 0, 30, 30);
+	ui.Name->setHidden(true);
+	ui.horizontalSpacer->setGeometry(QRect(0, 0, 0, 0));
+	ui.checkBox->resize(20,20);
 	ui.checkBox->setChecked(bEnbale);
 	ui.checkBox->setObjectName("PropertyCheckBox");
 	connect(ui.checkBox,SIGNAL(stateChanged(int)),this,SLOT(stateChanged(int)));
+}
+
+CheckBox::CheckBox(HString name, QWidget* parent, bool bEnbale)
+{
+	ui.setupUi(this);
+	ui.Name->setText(name.c_str());
+	ui.Name->setObjectName("PropertyName");
+	//ui.ComboBox_0->setStyleSheet("border:2px solid rgb(10,10,10);border-radius:8px;background-color:rgb(75,75,75);color:rgb(255,255,255);height:22;outline: none;}");
+	//ui.checkBox->setGeometry(0, 0, 30, 30);
+	ui.checkBox->setChecked(bEnbale);
+	ui.checkBox->setObjectName("PropertyCheckBox");
+	connect(ui.checkBox, SIGNAL(stateChanged(int)), this, SLOT(stateChanged(int)));
 }
 
 CheckBox::~CheckBox()
@@ -18,8 +33,8 @@ CheckBox::~CheckBox()
 
 void CheckBox::SetAlignmentLeft()
 {
-	ui.verticalLayout->setAlignment(Qt::AlignLeft);
-	//ui.verticalLayout->addStretch(1);
+	ui.horizontalLayout->setAlignment(Qt::AlignLeft);
+	ui.horizontalLayout->addStretch(1);
 }
 
 

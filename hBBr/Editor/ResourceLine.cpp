@@ -10,13 +10,13 @@
 #include <qpixmap.h>
 #include "EditorCommonFunction.h"
 #include "FileSystem.h"
-ResourceLine::ResourceLine(QString name, QWidget *parent, HString text, QString condition)
+ResourceLine::ResourceLine(HString name, QWidget *parent, HString text, HString condition)
 	: PropertyClass(parent)
 {
 	ui.setupUi(this);
-	mCondition = condition;
+	mCondition = condition.c_str();
 	//
-	ui.Name->setText(name);
+	ui.Name->setText(name.c_str());
 	ui.LineEdit->setText(text.c_str());
 	ui.LineEdit->setReadOnly(true);
 	ui.LineEdit->setDragEnabled(true);
@@ -27,8 +27,10 @@ ResourceLine::ResourceLine(QString name, QWidget *parent, HString text, QString 
 	//
 	ui.Name->setObjectName("PropertyName");
 	ui.LineEdit->setObjectName("PropertyResourceLine_LineEdit");
+	ui.FindButton->setObjectName("PropertyResourceLine_Button");
 	ui.pushButton->setObjectName("PropertyResourceLine_Button");
-	ui.pushButton->setMaximumSize(24,24);
+	ui.FindButton->setMaximumSize(20, 20);
+	ui.pushButton->setMaximumSize(20, 20);
 	//
 	ui.picture->setText("");
 	//

@@ -40,7 +40,7 @@ HString FileSystem::GetShaderCacheAbsPath()
     fs::path p = GetProgramPath().c_str();
     HString path = (p / "Resource"/ "ShaderCache").c_str();
     path += "/";
-    path.CorrectionPath();
+    FileSystem::CorrectionPath(path);
     return path;
 }
 
@@ -49,7 +49,7 @@ HString FileSystem::GetResourceAbsPath()
     fs::path p = GetProgramPath().c_str();
     HString path = (p / "Resource").c_str();
     path += "/";
-    path.CorrectionPath();
+    FileSystem::CorrectionPath(path);
     return path;
 }
 
@@ -58,7 +58,7 @@ HString FileSystem::GetContentAbsPath()
     fs::path p = GetProgramPath().c_str();
     HString path = (p / "Resource" / "Content").c_str();
     path += "/";
-    path.CorrectionPath();
+    FileSystem::CorrectionPath(path);
     return path;
 }
 
@@ -67,7 +67,7 @@ HString FileSystem::GetConfigAbsPath()
     fs::path p = GetProgramPath().c_str();
     HString path = (p / "Config").c_str();
     path += "/";
-    path.CorrectionPath();
+    FileSystem::CorrectionPath(path);
     return path;
 }
 
@@ -75,17 +75,17 @@ HString FileSystem::GetShaderIncludeAbsPath()
 {
     fs::path p = GetProgramPath().c_str();
     HString path = (p / "Resource" / "ShaderInclude").c_str();
-    path += "/";
-    path.CorrectionPath();
+	path += "/";
+    FileSystem::CorrectionPath(path);
     return path;
 }
 
 HString FileSystem::GetRelativePath(const char* filePath)
 {
     HString programPath = GetProgramPath().c_str();
-    programPath.CorrectionPath();
+    FileSystem::CorrectionPath(programPath);
     HString path = fs::path(filePath).c_str();
-    path.CorrectionPath();
+    FileSystem::CorrectionPath(path);
     if (path.Contains(programPath))
     {
         path.Remove(0, programPath.Length());
@@ -156,6 +156,43 @@ void FileSystem::FileRename(const char* src, const char* dst)
 uint64_t FileSystem::GetFileSize(const char* path)
 {
     return fs::file_size(path);
+}
+
+HString FileSystem::CorrectionPath(const char* path)
+{
+    //std::filesystem::path::preferred_separator
+    return fs::path(path).make_preferred().c_str();
+}
+
+void FileSystem::CorrectionPath(HString& path)
+{
+    path = fs::path(path.c_str()).make_preferred().c_str();
+}
+
+HString FileSystem::GetFilePath(HString path)
+{
+    std::string result = fs::path(path.c_str()).parent_path().string();
+    result += fs::path::preferred_separator;
+    return result.c_str();
+}
+
+HString FileSystem::GetFileName(HString path)
+{
+    return fs::path(path.c_str()).filename().c_str();
+}
+
+HString FileSystem::GetBaseName(HString path)
+{
+    std::string fileName = fs::path(path.c_str()).filename().string();
+    fileName = fileName.substr(0, fileName.rfind("."));
+    return fileName.c_str();
+}
+
+HString FileSystem::GetFileExt(HString path)
+{
+    std::string result = fs::path(path.c_str()).extension().string();
+    result = result.erase(0, 1);
+    return result.c_str();
 }
 
 std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char* suffix)

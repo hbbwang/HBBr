@@ -21,7 +21,7 @@ ColorSettting::ColorSettting(QString name, QWidget *parent)
     connect(ui.pushButton,SIGNAL(clicked()),this,SLOT(PickColor()));
     colorWindow->UpdateColorButton();
     ui.Name->setText(name);
-
+    ui.Name->setObjectName("PropertyName");
     QFont font("Microsoft YaHei", 11, 50); //第一个属性是字体（微软雅黑），第二个是大小，第三个是加粗
     ui.Name->setFont(font);
     ui.label->setFont(font);

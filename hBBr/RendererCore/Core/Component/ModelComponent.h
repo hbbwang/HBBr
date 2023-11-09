@@ -32,12 +32,10 @@ protected:
 	HBBR_INLINE virtual void InitProperties()override
 	{
 		Component::InitProperties();
-		AddProperty("Model", &_modelVirtualPath, CPT_Resource, "");
+		AddProperty("Model", &_modelData, CPT_Resource, "");
 	}
 
 private:
-
-	HString _modelVirtualPath;
 
 	std::weak_ptr<class ModelData> _modelData;
 

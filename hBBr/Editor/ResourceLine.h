@@ -9,7 +9,7 @@ class ResourceLine : public PropertyClass
 	Q_OBJECT
 
 public:
-	ResourceLine(QString name , QWidget *parent, HString text, QString condition = "");
+	ResourceLine(HString name , QWidget *parent, HString text, HString condition = "");
 	~ResourceLine();
 
 	QString mCondition;

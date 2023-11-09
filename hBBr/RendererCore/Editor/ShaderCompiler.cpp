@@ -67,7 +67,7 @@ public:
 		auto* result = new shaderc_include_result;
 		// 读取文件内容。
 		HString IncludePath = FileSystem::GetShaderIncludeAbsPath() + requested_source;
-		IncludePath.CorrectionPath();
+		FileSystem::CorrectionPath(IncludePath);
 		std::ifstream file(IncludePath.c_str());
 		if (file.good()) {
 			contents.push_back(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()).c_str());

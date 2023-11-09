@@ -10,7 +10,7 @@ COMPONENT_IMPLEMENT(ModelComponent)
 void ModelComponent::SetModelByRealPath(HString path)
 {
 	HGUID guid;
-	path.CorrectionPath();
+	FileSystem::CorrectionPath(path);
 	HString guidStr = path.GetBaseName();
 	StringToGUID(guidStr.c_str(), &guid);
 	if (!_modelData.expired() && _modelData.lock()->guid == guid)
@@ -22,7 +22,7 @@ void ModelComponent::SetModelByRealPath(HString path)
 
 void ModelComponent::SetModelByVirtualPath(HString path)
 {
-	path.CorrectionPath();
+	FileSystem::CorrectionPath(path);
 	auto info = ContentManager::Get()->GetAssetInfo(AssetType::Model, path);
 	if (info == NULL)
 		return;
@@ -42,7 +42,6 @@ void ModelComponent::SetModel(HGUID guid)
 	_modelData = ModelFileStream::ImportFbxToMemory(guid);
 	if (!_modelData.expired())
 	{
-		_modelVirtualPath = _modelData.lock()->virtualFilePath;
 		ModelFileStream::BuildModelPrimitives(_modelData.lock().get(), _primitives);
 		_materials.resize(_primitives.size());
 		for (int i = 0; i < (int)_primitives.size(); i++)

@@ -44,6 +44,12 @@ extern "C" {
 		HBBR_API static bool FileRemove(const char* path);
 		HBBR_API static void FileRename(const char* src , const char* dst);
 		HBBR_API static uint64_t GetFileSize(const char* path);
+		HBBR_API static HString CorrectionPath(const char* path);
+		HBBR_API static void CorrectionPath(HString& path);
+		HBBR_API static HString GetFilePath(HString path);
+		HBBR_API static HString GetFileName(HString path);
+		HBBR_API static HString GetBaseName(HString path);
+		HBBR_API static HString GetFileExt(HString path);
 		static std::vector<FileEntry> GetFilesBySuffix(const char* path, const char* suffix);
 		static std::vector<char>ReadBinaryFile(const char* filePath);
 		static HString _appPath;

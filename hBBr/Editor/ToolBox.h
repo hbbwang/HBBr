@@ -32,7 +32,7 @@ public:
     explicit ToolBox(QWidget* parent = nullptr);
     ~ToolBox();
     void addWidget(const QString& title, QWidget* widget , bool isExpanded = false);
-private:
     Ui::ToolBoxClass ui;
+private:
     QVBoxLayout* m_pContentVBoxLayout;
 };

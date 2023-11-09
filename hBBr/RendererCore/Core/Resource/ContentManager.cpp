@@ -136,13 +136,16 @@ void ContentManager::ReloadAssetInfo(AssetType type , pugi::xml_node & i)
 	StringToGUID(guidStr.c_str(), &info->guid);
 	XMLStream::LoadXMLAttributeString(i, L"Name", info->name);
 	XMLStream::LoadXMLAttributeString(i, L"Path", info->relativePath);
-	info->relativePath.CorrectionPath();
+	FileSystem::CorrectionPath(info->relativePath);
 	XMLStream::LoadXMLAttributeString(i, L"Suffix", info->suffix);
 	XMLStream::LoadXMLAttributeUint64(i, L"ByteSize", info->byteSize);
 
 	HString path = FileSystem::GetProgramPath() + info->relativePath;
 	info->absPath = path + "./" + guidStr + info->suffix;
 	info->virtualPath = info->relativePath + "./" + info->name;
+
+	FileSystem::CorrectionPath(info->absPath);
+	FileSystem::CorrectionPath(info->virtualPath);
 
 	//Ref temps
 	for (auto j = i.first_child(); j; j = j.next_sibling())
@@ -165,7 +168,7 @@ void ContentManager::ReloadAssetInfo(AssetType type , pugi::xml_node & i)
 
 AssetInfoBase* ContentManager::ImportAssetInfo(AssetType type, HString sourcePath,HString contentPath)
 {
-	sourcePath.CorrectionPath();
+	FileSystem::CorrectionPath(sourcePath);
 	contentPath.Replace("\\", "/");
 	HString typeName = GetAssetTypeString(type);
 	HString name = sourcePath.GetBaseName();
@@ -222,13 +225,6 @@ AssetInfoBase* ContentManager::ImportAssetInfo(AssetType type, HString sourcePat
 
 	//重新导入
 	ReloadAssetInfo(type,item);
-
-	//复制资产
-	//sourcePath.CorrectionPath();
-	//contentPath += "/";
-	//contentPath += guidStr + "." + suffix;
-	//contentPath.CorrectionPath();
-	//FileSystem::FileCopy(sourcePath.c_str(), contentPath .c_str());
 
 	//保存
 	_contentRefConfig.save_file(_configPath.c_wstr());
@@ -335,8 +331,8 @@ AssetInfoBase* ContentManager::GetAssetInfo(HGUID guid, AssetType type)const
 
 AssetInfoBase* ContentManager::GetAssetInfo(AssetType type, HString contentBrowserFilePath) const
 {
-	HString filePath = contentBrowserFilePath.GetFilePath();
-	HString fileBaseName = contentBrowserFilePath.GetBaseName();
+	HString filePath = FileSystem::GetFilePath(contentBrowserFilePath);
+	HString fileBaseName = FileSystem::GetBaseName(contentBrowserFilePath);
 	//获取路径下的同类型资产文件
 	std::vector<FileEntry> files;
 	if (type == AssetType::Model)

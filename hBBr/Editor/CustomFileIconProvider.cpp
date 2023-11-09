@@ -20,7 +20,7 @@ QIcon CustomFileIconProvider::icon(const QFileInfo& info) const
         if (info.isDir())
         {
             pp += "Config/Theme/Icons/ICON_DIR.png";
-            pp.CorrectionPath();
+            FileSystem::CorrectionPath(pp);
             return QIcon(pp.c_str());
         }
         else if (
@@ -29,25 +29,25 @@ QIcon CustomFileIconProvider::icon(const QFileInfo& info) const
             )
         {
             pp += "Config/Theme/Icons/ICON_SHADER_FILE.png";
-            pp.CorrectionPath();
+            FileSystem::CorrectionPath(pp);
             return QIcon(pp.c_str());
         }
         else if (info.suffix().compare("mat", Qt::CaseInsensitive) == 0 )
         {
             pp += "Config/Theme/Icons/ICON_FILE_MAT.png";
-            pp.CorrectionPath();
+            FileSystem::CorrectionPath(pp);
             return QIcon(pp.c_str());
         }
         else if (info.suffix().compare("xml", Qt::CaseInsensitive) == 0)
         {
             pp += "Config/Theme/Icons/ICON_FILE_XML.png";
-            pp.CorrectionPath();
+            FileSystem::CorrectionPath(pp);
             return QIcon(pp.c_str());
         }
         else if (info.suffix().compare("ini", Qt::CaseInsensitive) == 0)
         {
             pp += "Config/Theme/Icons/ICON_FILE_INI.png";
-            pp.CorrectionPath();
+            FileSystem::CorrectionPath(pp);
             return QIcon(pp.c_str());
         }
         else if (
@@ -63,14 +63,14 @@ QIcon CustomFileIconProvider::icon(const QFileInfo& info) const
             else
             {
                 pp += "Config/Theme/Icons/ICON_FILE.png";
-                pp.CorrectionPath();
+                FileSystem::CorrectionPath(pp);
                 return QIcon(pp.c_str());
             }
         }
         else
         {
             pp += "Config/Theme/Icons/ICON_FILE.png";
-            pp.CorrectionPath();
+            FileSystem::CorrectionPath(pp);
             return QIcon(pp.c_str());
         }
     }
