@@ -18,6 +18,8 @@ public:
 
 	void SetModel(HGUID guid);
 
+	void SetModel(std::weak_ptr<class ModelData> model);
+
 	virtual void GameObjectActiveChanged(bool objActive)override;
 
 	virtual void ExecuteDestroy()override;
@@ -38,6 +40,8 @@ protected:
 private:
 
 	std::weak_ptr<class ModelData> _modelData;
+
+	std::weak_ptr<class ModelData> _lastModelData;
 
 	std::vector<ModelPrimitive*> _primitives;
 

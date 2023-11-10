@@ -1,9 +1,10 @@
 ﻿#include "ContentManager.h"
 #include "XMLStream.h"
 #include "FileSystem.h"
+#include "Resource/ResourceObject.h"
 #include "Resource/ModelData.h"
 #include "Resource/Material.h"
-#include "Texture.h"
+#include "Resource/Texture.h"
 std::unique_ptr<ContentManager> ContentManager::_ptr;
 
 ContentManager::ContentManager()
@@ -362,6 +363,55 @@ AssetInfoBase* ContentManager::GetAssetInfo(AssetType type, HString contentBrows
 	}
 	MessageOut((HString(L"Error, the asset cannot be found. Please check whether the Resource directory is complete or the asset is missing.\n错误,无法找到资产,请检查Resource目录是否完整或资产缺失:\n") + contentBrowserFilePath).c_str(), false, false, "255,0,0");
 	return NULL;
+}
+
+AssetInfoBase* ContentManager::GetAssetInfo(HString realAbsPath) const
+{
+	HString guidStr = FileSystem::GetBaseName(realAbsPath);
+	HString suffix = FileSystem::GetFileExt(realAbsPath);
+	HGUID guid;
+	StringToGUID(guidStr.c_str(), &guid);
+	AssetType type = AssetType::Unknow;
+	if (suffix.IsSame("fbx"))
+	{
+		type = AssetType::Model;
+	}
+	else if (suffix.IsSame("dds"))
+	{
+		type = AssetType::Texture2D;
+	}
+	else if (suffix.IsSame("mat"))
+	{
+		type = AssetType::Material;
+	}
+	return GetAssetInfo(guid , type);
+}
+
+std::weak_ptr<class ResourceObject> ContentManager::LoadAsset(HGUID guid, AssetType type)
+{
+	std::weak_ptr<ResourceObject> result;
+	if (type == AssetType::Unknow)
+	{
+		throw "[ContentManager::LoadAsset] Unknow type!";
+	}
+	else if (type == AssetType::Model)
+	{
+		result = ModelFileStream::ImportFbxToMemory(guid);
+	}
+	else if (type == AssetType::Texture2D)
+	{
+		result = Texture::ImportTextureAsset(guid);
+	}
+	else if (type == AssetType::Material)
+	{
+		result = Material::LoadMaterial(guid);
+	}
+	return result;
+}
+
+std::weak_ptr<ResourceObject>ContentManager::LoadAsset(AssetInfoBase* info)
+{
+	return LoadAsset(info->guid, info->type);;
 }
 
 HGUID ContentManager::GetAssetGUID(AssetType type, HString contentBrowserFilePath)const

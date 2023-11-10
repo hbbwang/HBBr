@@ -136,6 +136,9 @@ public:
 
 	HBBR_API AssetInfoBase* GetAssetInfo(HGUID guid, AssetType type = AssetType::Unknow)const;
 
+	/* 根据实际路径实际文件获取 */
+	HBBR_API AssetInfoBase* GetAssetInfo(HString realAbsPath)const;
+
 	/* 根据内容浏览器显示的文件名称(虚拟路径)查找 AssetInfo */
 	HBBR_API AssetInfoBase* GetAssetInfo(AssetType type, HString contentBrowserFilePath)const;
 
@@ -153,6 +156,10 @@ public:
 		auto asset = reinterpret_cast<AssetInfo<T>*>(assetInfo);
 		return asset->GetData();
 	}
+
+	HBBR_API std::weak_ptr<class ResourceObject> LoadAsset(AssetInfoBase* info);
+
+	HBBR_API std::weak_ptr<class ResourceObject> LoadAsset(HGUID guid, AssetType type);
 
 private:
 

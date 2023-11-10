@@ -37,12 +37,18 @@ void ModelComponent::SetModel(HGUID guid)
 {
 	if (!guid.isValid())
 		return;
-	ClearPrimitves();
 	//create
 	_modelData = ModelFileStream::ImportFbxToMemory(guid);
-	if (!_modelData.expired())
+	SetModel(_modelData);
+}
+
+void ModelComponent::SetModel(std::weak_ptr<class ModelData> model)
+{
+	if (!model.expired())
 	{
-		ModelFileStream::BuildModelPrimitives(_modelData.lock().get(), _primitives);
+		ClearPrimitves();
+		_lastModelData = model;
+		ModelFileStream::BuildModelPrimitives(model.lock().get(), _primitives);
 		_materials.resize(_primitives.size());
 		for (int i = 0; i < (int)_primitives.size(); i++)
 		{
@@ -68,6 +74,11 @@ void ModelComponent::GameObjectActiveChanged(bool objActive)
 
 void ModelComponent::Update()
 {
+	if (!_modelData.expired() && !_lastModelData.expired() 
+		&& _modelData.lock().get() != _lastModelData.lock().get())
+	{
+		SetModel(_modelData);
+	}
 }
 
 void ModelComponent::ExecuteDestroy()

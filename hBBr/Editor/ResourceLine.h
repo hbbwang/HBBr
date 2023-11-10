@@ -4,6 +4,7 @@
 #include <qlabel.h>
 #include "PropertyClass.h"
 #include "HString.h"
+
 class ResourceLine : public PropertyClass
 {
 	Q_OBJECT
@@ -17,6 +18,8 @@ public:
 	QLabel* highLight;
 
 	HString* _stringBind = NULL;
+
+	std::weak_ptr<class ResourceObject> *_objectBind = NULL;
 
 	std::vector<HString>* _stringArrayBind = NULL;
 

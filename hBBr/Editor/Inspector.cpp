@@ -9,7 +9,8 @@
 #include "VectorSetting.h"
 #include "ResourceLine.h"
 #include "ResourceObject.h"
-
+#include "ModelData.h"
+#include "FileSystem.h"
 Inspector* Inspector::_currentInspector = NULL;
 
 Inspector::Inspector(QWidget *parent)
@@ -175,11 +176,30 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 		{
 			if (p.second.type == CPT_Resource)
 			{
-				std::weak_ptr<ResourceObject> obj = *(std::weak_ptr<ResourceObject>*)p.second.valuePtr;
+				void* ptr = p.second.valuePtr;
+				std::weak_ptr<ResourceObject> obj = *(std::weak_ptr<ResourceObject>*)ptr;
 				if (!obj.expired())
 				{
 					ResourceLine* line = new ResourceLine(p.first, this, obj.lock()->_assetInfo->virtualPath, obj.lock()->_assetInfo->suffix);
 					compWidget->layout()->addWidget(line);
+					line->_bindFindButtonFunc = [](const char* p) {
+
+					};
+					line->_bindStringFunc = [ptr](const char* s) {
+						std::weak_ptr<ResourceObject> obj = *(std::weak_ptr<ResourceObject>*)ptr;
+						if (!obj.expired())
+						{
+							auto guidStr = FileSystem::GetBaseName(s);
+							HGUID guid; StringToGUID(guidStr.c_str(), &guid);
+							if (guid.isValid())
+							{
+								auto newObject = ContentManager::Get()->LoadAsset(guid, obj.lock()->_assetInfo->type);//
+								if (!newObject.expired())
+									*(std::weak_ptr<ResourceObject>*)ptr = newObject;
+							}
+						}
+					};
+					line->_objectBind = (std::weak_ptr<ResourceObject>*)p.second.valuePtr;
 				}			
 			}
 			else if (p.second.type == CPT_Bool)
