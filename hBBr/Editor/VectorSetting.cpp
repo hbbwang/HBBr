@@ -63,19 +63,19 @@ VectorSetting::VectorSetting(QString name, QWidget *parent,const int demensional
 	timer->setInterval(100);
 	timer->start();
 	connect(timer, &QTimer::timeout, this, [this]() {
-		if (Demensionality >= 1 && !floatSetting[0]->hasFocus() && _vec4_f[0] != NULL && *_vec4_f[0] != _old_vec4_f[0])
+		if (Demensionality >= 1 && !floatSetting[0]->hasFocus() && _vec4_f[0] != NULL && _old_vec4_f[0] != NULL && *_vec4_f[0] != _old_vec4_f[0])
 		{
 			floatSetting[0]->setValue(*_vec4_f[0]);
 		}
-		if (Demensionality >= 2 && !floatSetting[1]->hasFocus() && _vec4_f[1] != NULL && *_vec4_f[1] != _old_vec4_f[1])
+		if (Demensionality >= 2 && !floatSetting[1]->hasFocus() && _vec4_f[1] != NULL && _old_vec4_f[0] != NULL && *_vec4_f[1] != _old_vec4_f[1])
 		{
 			floatSetting[1]->setValue(*_vec4_f[1]);
 		}
-		if (Demensionality >= 3 && !floatSetting[2]->hasFocus() && _vec4_f[2] != NULL && *_vec4_f[2] != _old_vec4_f[2])
+		if (Demensionality >= 3 && !floatSetting[2]->hasFocus() && _vec4_f[2] != NULL && _old_vec4_f[0] != NULL && *_vec4_f[2] != _old_vec4_f[2])
 		{
 			floatSetting[2]->setValue(*_vec4_f[2]);
 		}
-		if (Demensionality >= 4 && !floatSetting[3]->hasFocus() && _vec4_f[3] != NULL && *_vec4_f[3] != _old_vec4_f[3])
+		if (Demensionality >= 4 && !floatSetting[3]->hasFocus() && _vec4_f[3] != NULL && _old_vec4_f[0] != NULL && *_vec4_f[3] != _old_vec4_f[3])
 		{
 			floatSetting[3]->setValue(*_vec4_f[3]);
 		}
