@@ -43,10 +43,13 @@ public:
     virtual void focusOutEvent(QFocusEvent* event);
 
 private:
+
     Ui::EditorMainClass ui;
+
+    QTimer* _renderTimer;
 
 private slots:
 
-
+    void UpdateRender();
 };
 

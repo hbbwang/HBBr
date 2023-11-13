@@ -28,12 +28,6 @@ RenderView::RenderView(QWidget* parent)
 
 	setObjectName("RenderView");
 
-	_renderTimer = new QTimer(this);
-	_renderTimer->setInterval(1);
-	connect(_renderTimer, SIGNAL(timeout()), this, SLOT(UpdateRender()));
-	_renderTimer->start();
-
-
 	if (_mainRendererWidget == NULL)
 	{
 		//Enable custom loop
@@ -45,18 +39,17 @@ RenderView::RenderView(QWidget* parent)
 		//_mainRendererWidget = QWidget::createWindowContainer(mainRendererWindow, this);
 		//_mainRendererWidget->setFocusPolicy(Qt::ClickFocus);
 		//_mainRendererWidget->setObjectName("RenderView");
-
-		_renderTimer = new QTimer(this);
-		_renderTimer->setInterval(1);
-		connect(_renderTimer, SIGNAL(timeout()), this, SLOT(UpdateRender()));
-		_renderTimer->start();
 	}
-
 }
 
 RenderView::~RenderView()
 {
 
+}
+
+void RenderView::Update()
+{
+	VulkanApp::UpdateForm();
 }
 
 void RenderView::showEvent(QShowEvent* event)
@@ -82,7 +75,6 @@ bool RenderView::event(QEvent* event)
 
 void RenderView::closeEvent(QCloseEvent* event)
 {
-	_renderTimer->stop();
 	VulkanApp::DeInitVulkanManager();
 }
 
@@ -104,11 +96,6 @@ void RenderView::keyPressEvent(QKeyEvent* event)
 void RenderView::keyReleaseEvent(QKeyEvent* event)
 {
 
-}
-
-void RenderView::UpdateRender()
-{
-	VulkanApp::UpdateForm();
 }
 
 void RenderView::focusInEvent(QFocusEvent* event)

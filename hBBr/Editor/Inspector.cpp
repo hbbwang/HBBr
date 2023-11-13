@@ -48,7 +48,7 @@ Inspector::Inspector(QWidget *parent)
 
 Inspector::~Inspector()
 {
-
+	ClearInspector();
 }
 
 void Inspector::RefreshInspector()
@@ -71,6 +71,7 @@ void Inspector::ClearInspector()
 		//delete child;
 	}
 	_currentGameObject.reset();
+	_property_needUpdate.clear();
 }
 
 void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool bFoucsUpdate)
@@ -125,6 +126,9 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 		VectorSetting* pos =	new VectorSetting("Position", this, 3, 0.001f, 4);
 		VectorSetting* rot =	new VectorSetting("Rotation", this, 3, 0.01f, 4);
 		VectorSetting* scale =	new VectorSetting("Scale   ", this, 3, 0.001f, 4);
+		_property_needUpdate.append(pos);
+		_property_needUpdate.append(rot);
+		_property_needUpdate.append(scale);
 		pos->ui.Name->setMinimumWidth(50);
 		rot->ui.Name->setMinimumWidth(50);
 		scale->ui.Name->setMinimumWidth(50);
@@ -186,10 +190,10 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				{
 					ResourceLine* line = new ResourceLine(p.first, this, obj.lock()->_assetInfo->virtualPath, obj.lock()->_assetInfo->suffix);
 					compWidget->layout()->addWidget(line);
-					line->_bindFindButtonFunc = [](const char* p) {
+					line->_bindFindButtonFunc = [](const char* p) { //查找按钮回调函数
 
 					};
-					line->_bindStringFunc = [ptr](const char* s) {
+					line->_bindStringFunc = [ptr](const char* s) { //文件拖拽回调函数
 						std::weak_ptr<ResourceObject> obj = *(std::weak_ptr<ResourceObject>*)ptr;
 						if (!obj.expired())
 						{
@@ -233,6 +237,14 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 	}
 	box->ui.verticalLayout->addStretch(999);
 	_layoutMain->addStretch(999);
+}
+
+void Inspector::PropertyUpdate()
+{
+	for (auto i : _property_needUpdate)
+	{
+		i->Update();
+	}
 }
 
 void Inspector::closeEvent(QCloseEvent* event)

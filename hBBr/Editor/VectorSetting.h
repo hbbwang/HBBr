@@ -24,7 +24,7 @@ public:
 	void SetValue(glm::vec3 v3 = glm::vec3(0));
 	void SetValue(glm::vec2 v2 = glm::vec2(0));
 	void SetValue(float v1 = 0);
-
+	void Update()override;
 	int Demensionality = 0;
 	float GetX()const { return floatSetting[0]->GetValue(); }
 	float GetY()const { if (Demensionality >= 2) return floatSetting[1]->GetValue(); return 0; }
@@ -37,8 +37,9 @@ public:
 		ui.Name->setText(newName);
 
 	}
-	QTimer* timer;
 	virtual void paintEvent(QPaintEvent* event)override;
+	int updatePoint;
+	int maxUpdatePoint = 10;
 public slots:
 	void setX(double val);
 	void setY(double val);

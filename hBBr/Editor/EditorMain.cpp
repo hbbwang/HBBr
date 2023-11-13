@@ -59,6 +59,13 @@ EditorMain::EditorMain(QWidget *parent)
         VulkanApp::RecompileAllShader();
     });
     EditorMain::_self = this;
+
+    //Update timer
+    _renderTimer = new QTimer(this);
+    _renderTimer->setInterval(1);
+    connect(_renderTimer, SIGNAL(timeout()), this, SLOT(UpdateRender()));
+    _renderTimer->start();
+
 }
 
 EditorMain::~EditorMain()
@@ -78,8 +85,17 @@ void EditorMain::focusOutEvent(QFocusEvent* event)
 {
 }
 
+void EditorMain::UpdateRender()
+{
+    if (_inspector)
+        _inspector->PropertyUpdate();
+    if (_mainRenderView)
+        _mainRenderView->Update();
+}
+
 void EditorMain::closeEvent(QCloseEvent* event)
 {
+    _renderTimer->stop();
     if (_inspector)
         _inspector->close();
     if(_sceneOutline)

@@ -12,7 +12,7 @@ public:
 
 	virtual void SetName(QString newName = "");
 	
-	virtual void updateValue() {
+	virtual void Update() {
 	}
 
 	void* TempObject = NULL;

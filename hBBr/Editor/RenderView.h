@@ -13,7 +13,7 @@ public:
 
 	~RenderView();
 
-	QTimer* _renderTimer;
+	void Update();
 
 	QWidget* _mainRendererWidget = NULL;
 
@@ -22,7 +22,6 @@ public:
 protected:
 	//不使用Qt默认的绘制引擎
 	//virtual QPaintEngine* paintEngine() const { return 0; }
-
 
 	bool event(QEvent* event) override;
 
@@ -45,9 +44,4 @@ protected:
 	virtual void keyPressEvent(QKeyEvent* event)override;
 
 	virtual void keyReleaseEvent(QKeyEvent* event)override;
-
-private slots:
-
-	void UpdateRender();
-
 };

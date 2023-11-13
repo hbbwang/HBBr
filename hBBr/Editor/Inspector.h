@@ -15,11 +15,16 @@ public:
 	
 	~Inspector();
 
+	//添加需要一同进行渲染主循环的PropertyClass
+	QList<class PropertyClass*> _property_needUpdate;
+
 	QVBoxLayout* _layoutMain = NULL;
 
 	QTimer* _updateTimer = NULL;
 
 	static Inspector* _currentInspector;
+
+	void PropertyUpdate();
 
 	void RefreshInspector();
 
