@@ -74,6 +74,14 @@ void Inspector::ClearInspector()
 	_property_needUpdate.clear();
 }
 
+#define AssetValue(className)\
+std::weak_ptr<class className>** className##_value = std::any_cast<std::weak_ptr<class className>*>(&p.value);\
+if (className##_value)\
+{\
+	assetInfo = (*className##_value)->lock()->_assetInfo;\
+}\
+
+
 void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool bFoucsUpdate)
 {
 	if (gameObj.expired() || 
@@ -182,55 +190,51 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 		auto pro = i->GetProperties();
 		for (auto p : pro)
 		{
-			if (p.second.type == CPT_Resource)
-			{
-				void* ptr = p.second.valuePtr;
-				std::weak_ptr<ResourceObject> obj = *(std::weak_ptr<ResourceObject>*)ptr;
-				if (!obj.expired())
-				{
-					ResourceLine* line = new ResourceLine(p.first, this, obj.lock()->_assetInfo->virtualPath, obj.lock()->_assetInfo->suffix);
-					compWidget->layout()->addWidget(line);
-					line->_bindFindButtonFunc = [](const char* p) { //查找按钮回调函数
+			//Bool value
+			auto boolValue = std::any_cast<bool*>(&p.value);
 
-					};
-					line->_bindStringFunc = [ptr](const char* s) { //文件拖拽回调函数
-						std::weak_ptr<ResourceObject> obj = *(std::weak_ptr<ResourceObject>*)ptr;
-						if (!obj.expired())
+			//AssetObject value
+			AssetInfoBase* assetInfo = NULL;
+			AssetValue(ModelData);
+			AssetValue(Texture);
+			AssetValue(Material);
+			const bool bIsAsset = assetInfo && (
+				(ModelData_value && !(*ModelData_value)->expired())
+				|| (Texture_value && !(*Texture_value)->expired())
+				|| (Material_value && !(*Material_value)->expired())
+				);
+
+			if (bIsAsset)
+			{	
+				ResourceLine* line = new ResourceLine(p.name, this, assetInfo->virtualPath, assetInfo->suffix);
+				compWidget->layout()->addWidget(line);
+				line->_bindFindButtonFunc = [](const char* p) { //查找按钮回调函数
+
+				};
+				line->_bindStringFunc = [p](const char* s) { //文件拖拽回调函数
+					auto value = std::any_cast<std::weak_ptr<class ModelData>*>(&p.value);
+					if (!(*value)->expired())
+					{
+						auto guidStr = FileSystem::GetBaseName(s);
+						HGUID guid; StringToGUID(guidStr.c_str(), &guid);
+						if (guid.isValid())
 						{
-							auto guidStr = FileSystem::GetBaseName(s);
-							HGUID guid; StringToGUID(guidStr.c_str(), &guid);
-							if (guid.isValid())
-							{
-								auto objType = obj.lock()->_assetInfo->type;
-								std::weak_ptr<ResourceObject> newObject;
-								if (objType == AssetType::Model)
-								{
-									newObject = ContentManager::Get()->LoadAsset<ModelData>(guid);//
-								}
-								else if(objType == AssetType::Material)
-								{
-									newObject = ContentManager::Get()->LoadAsset<Material>(guid);//
-								}
-								else if (objType == AssetType::Texture2D)
-								{
-									newObject = ContentManager::Get()->LoadAsset<Texture>(guid);//
-								}
-								if (!newObject.expired())
-									*(std::weak_ptr<ResourceObject>*)ptr = newObject;
-							}
+							auto newObject = (*value)->lock()->LoadAsset(guid);
+							if (!newObject.expired())
+								*(*value) = newObject;
 						}
-					};
-					line->_objectBind = (std::weak_ptr<ResourceObject>*)p.second.valuePtr;
-				}			
+					}
+				};
+				line->_objectBind = (std::weak_ptr<class ResourceObject>*)std::any_cast<std::weak_ptr<class ModelData>*>(p.value);
 			}
-			else if (p.second.type == CPT_Bool)
+			else if (boolValue)
 			{
-				CheckBox* checkBox = new CheckBox(p.first, this, i->IsActive());
+				CheckBox* checkBox = new CheckBox(p.name, this, i->IsActive());
 				checkBox->_callback = [comp](bool b) {
 					if (comp)
 						comp->SetActive(b);
 				};
-				checkBox->_boolBind = (bool*)p.second.valuePtr;
+				checkBox->_boolBind = *boolValue;
 				compWidget->layout()->addWidget(checkBox);
 			}
 		}

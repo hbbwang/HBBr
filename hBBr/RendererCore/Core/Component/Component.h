@@ -3,6 +3,9 @@
 #include "Common.h"
 #include <vector>
 #include <map>
+#include <functional>
+#include <typeinfo>
+#include <any>
 
 #define COMPONENT_DEFINE(ComponentClassName)\
 public:\
@@ -27,24 +30,15 @@ ComponentClassName::ComponentClassName(class GameObject* parent) :Component(pare
 \
 ComponentClassName  _component_construct_##ComponentClassName;
 
-enum ComponentPropertyType
-{
-	CPT_Float,
-	CPT_Float2,
-	CPT_Float3,
-	CPT_Float4,
-	CPT_Resource,
-	CPT_Bool,
-};
-
 struct ComponentProperty
 {
+	HString name;
 	//指向参数的指针
-	void*	valuePtr;
+	std::any value;
 	//分类
 	HString category;
-	//类型
-	ComponentPropertyType type;
+	//排序
+	int sort = 32;
 };
 
 class Component
@@ -71,8 +65,19 @@ public:
 		return _gameObject;
 	}
 
-	HBBR_API HBBR_INLINE std::map<HString, ComponentProperty> GetProperties() const {
+	HBBR_API HBBR_INLINE std::vector<ComponentProperty> GetProperties() const {
 		return _compProperties;
+	}
+
+	HBBR_API HBBR_INLINE ComponentProperty* FindProperty(HString name) const {
+		auto it = std::find_if(_compProperties.begin(), _compProperties.end(), [name](const ComponentProperty& p) {
+			return name == p.name;
+		});
+		if (it != _compProperties.end())
+		{
+			return (it._Ptr);
+		}
+		return NULL;
 	}
 
 	HBBR_API HBBR_INLINE HString GetComponentName() const {
@@ -83,20 +88,25 @@ protected:
 
 	HBBR_INLINE virtual void OnConstruction() {
 		//Component Property Reflection Add.
-		AddProperty("bActive", &_bActive, CPT_Bool, "");
+		AddProperty("bActive", &_bActive, "" , 0);
 	}
 
-	void AddProperty(HString name, void* valuePtr, ComponentPropertyType type, HString category)
+	void AddProperty(HString name, std::any valuePtr, HString category , int sort = 32)
 	{
 		ComponentProperty pro;
-		pro.valuePtr = valuePtr;
+		pro.name = name;
+		pro.value = valuePtr;
 		pro.category = category;
-		pro.type = type;
-		_compProperties.emplace(name, pro);
+		pro.sort = sort;
+		_compProperties.push_back(pro);
+		auto valueCompare = [](const ComponentProperty& p1, const ComponentProperty& p2)->bool {
+			return p1.sort < p2.sort;
+		};
+		std::sort(_compProperties.begin(), _compProperties.end(), valueCompare);
 	}
-
+	
 	//<displayName , component>
-	std::map<HString, ComponentProperty> _compProperties;
+	std::vector<ComponentProperty> _compProperties;
 
 	virtual void GameObjectActiveChanged(bool gameObjectActive);
 

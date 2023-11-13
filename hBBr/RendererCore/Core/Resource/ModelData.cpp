@@ -77,7 +77,6 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 
 	auto modelData = std::make_shared<ModelData>();
 	modelData->_assetInfo = dataPtr;
-	modelData->guid = guid;
 	glm::vec3 boundingBox_min = glm::vec3(0, 0, 0);
 	glm::vec3 boundingBox_max = glm::vec3(0, 0, 0);
 	for (unsigned int nm = 0; nm < scene->mNumMeshes; nm++)

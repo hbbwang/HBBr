@@ -10,7 +10,7 @@ COMPONENT_IMPLEMENT(ModelComponent)
 void ModelComponent::OnConstruction()
 {
 	Component::OnConstruction();
-	AddProperty("Model", &_modelData, CPT_Resource, "");
+	AddProperty("Model", &_modelData, "");
 }
 
 void ModelComponent::SetModelByRealPath(HString path)
@@ -19,7 +19,7 @@ void ModelComponent::SetModelByRealPath(HString path)
 	FileSystem::CorrectionPath(path);
 	HString guidStr = path.GetBaseName();
 	StringToGUID(guidStr.c_str(), &guid);
-	if (!_modelData.expired() && _modelData.lock()->guid == guid)
+	if (!_modelData.expired() && _modelData.lock()->_assetInfo->guid == guid)
 	{
 		return;
 	}
@@ -32,7 +32,7 @@ void ModelComponent::SetModelByVirtualPath(HString path)
 	auto info = ContentManager::Get()->GetAssetInfo(AssetType::Model, path);
 	if (info == NULL)
 		return;
-	if (!_modelData.expired() && _modelData.lock()->guid == info->guid)
+	if (!_modelData.expired() && _modelData.lock()->_assetInfo->guid == info->guid)
 	{
 		return;
 	}
@@ -70,7 +70,7 @@ void ModelComponent::GameObjectActiveChanged(bool objActive)
 {
 	if (!_modelData.expired() && _bActive && objActive)
 	{
-		SetModel(_modelData.lock()->guid);
+		SetModel(_modelData.lock()->_assetInfo->guid);
 	}
 	else
 	{

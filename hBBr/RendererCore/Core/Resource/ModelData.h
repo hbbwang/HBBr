@@ -150,5 +150,4 @@ public:
 	//
 	HString						filePath;
 	HString						virtualFilePath;
-	HGUID						guid;
 };
