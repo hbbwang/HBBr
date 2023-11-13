@@ -387,33 +387,6 @@ AssetInfoBase* ContentManager::GetAssetInfo(HString realAbsPath) const
 	return GetAssetInfo(guid , type);
 }
 
-std::weak_ptr<class ResourceObject> ContentManager::LoadAsset(HGUID guid, AssetType type)
-{
-	std::weak_ptr<ResourceObject> result;
-	if (type == AssetType::Unknow)
-	{
-		throw "[ContentManager::LoadAsset] Unknow type!";
-	}
-	else if (type == AssetType::Model)
-	{
-		result = ModelFileStream::ImportFbxToMemory(guid);
-	}
-	else if (type == AssetType::Texture2D)
-	{
-		result = Texture::ImportTextureAsset(guid);
-	}
-	else if (type == AssetType::Material)
-	{
-		result = Material::LoadMaterial(guid);
-	}
-	return result;
-}
-
-std::weak_ptr<ResourceObject>ContentManager::LoadAsset(AssetInfoBase* info)
-{
-	return LoadAsset(info->guid, info->type);;
-}
-
 HGUID ContentManager::GetAssetGUID(AssetType type, HString contentBrowserFilePath)const
 {
 	auto info = GetAssetInfo(type, contentBrowserFilePath);

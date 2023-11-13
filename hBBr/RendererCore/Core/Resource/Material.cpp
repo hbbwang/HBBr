@@ -22,7 +22,7 @@ Material::~Material()
 	PrimitiveProxy::RemoveMaterialPrimitive(_primitive->passUsing, _primitive.get());
 }
 
-std::weak_ptr<Material> Material::LoadMaterial(HGUID guid)
+std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 {
 	const auto matAssets = ContentManager::Get()->GetAssets(AssetType::Material);
 	HString guidStr = GUIDToString(guid);

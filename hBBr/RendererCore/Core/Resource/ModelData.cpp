@@ -20,7 +20,7 @@
 
 #include "ContentManager.h"
 
-std::weak_ptr<ModelData> ModelFileStream::ImportFbxToMemory(HGUID guid)
+std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 {
 	const auto modelAssets = ContentManager::Get()->GetAssets(AssetType::Model);
 	HString guidStr = GUIDToString(guid);
@@ -209,7 +209,7 @@ std::weak_ptr<ModelData> ModelFileStream::ImportFbxToMemory(HGUID guid)
 	return dataPtr->GetData();
 }
 
-bool ModelFileStream::BuildModelPrimitives(ModelData* data, std::vector<ModelPrimitive*>& prims)
+bool ModelData::BuildModelPrimitives(ModelData* data, std::vector<ModelPrimitive*>& prims)
 {
 	if (data != NULL)
 	{

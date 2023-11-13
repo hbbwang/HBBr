@@ -22,7 +22,7 @@ ComponentClassName::ComponentClassName() :Component() \
 ComponentClassName::ComponentClassName(class GameObject* parent) :Component(parent)\
 {\
 	this->_typeName = #ComponentClassName; \
-	this->InitProperties();\
+	this->OnConstruction();\
 }\
 \
 ComponentClassName  _component_construct_##ComponentClassName;
@@ -81,9 +81,8 @@ public:
 	
 protected:
 
-	//Component Property Reflection Add.
-	HBBR_INLINE virtual void InitProperties()
-	{
+	HBBR_INLINE virtual void OnConstruction() {
+		//Component Property Reflection Add.
 		AddProperty("bActive", &_bActive, CPT_Bool, "");
 	}
 

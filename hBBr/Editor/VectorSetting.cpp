@@ -85,10 +85,15 @@ VectorSetting::VectorSetting(QString name, QWidget *parent,const int demensional
 VectorSetting::~VectorSetting()
 {
 	timer->stop();
+	delete timer;
 	_vec4_f[0] = NULL;
 	_vec4_f[1] = NULL;
 	_vec4_f[2] = NULL;
 	_vec4_f[3] = NULL;
+	_old_vec4_f[0] = NULL;
+	_old_vec4_f[1] = NULL;
+	_old_vec4_f[2] = NULL;
+	_old_vec4_f[3] = NULL;
 }
 
 void VectorSetting::SetValue(float x, float y , float z , float w)
@@ -154,17 +159,6 @@ void VectorSetting::SetValue(glm::vec4 v4)
 void VectorSetting::paintEvent(QPaintEvent* event)
 {
 	__super::paintEvent(event);
-}
-
-void VectorSetting::closeEvent(QCloseEvent* event)
-{
-	__super::closeEvent(event);
-	timer->stop();
-	_vec4_f[0] = NULL;
-	_vec4_f[1] = NULL;
-	_vec4_f[2] = NULL;
-	_vec4_f[3] = NULL;
-
 }
 
 void VectorSetting::setX(double val)

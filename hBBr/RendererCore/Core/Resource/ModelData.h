@@ -133,6 +133,11 @@ struct Vec4ColorFileData
 class ModelData :public ResourceObject
 {
 public:
+
+	HBBR_API static std::weak_ptr<ModelData> LoadAsset(HGUID guid);
+
+	HBBR_API static bool BuildModelPrimitives(ModelData* data, std::vector<ModelPrimitive*>& prims);
+
 	//根据材质区分面
 	std::vector<FaceData>		faces;
 	ModelFileDataStructFlags	fileFlags = //文件结构枚举,用于识别可能内容不同的模型文件
@@ -146,14 +151,4 @@ public:
 	HString						filePath;
 	HString						virtualFilePath;
 	HGUID						guid;
-};
-
-class ModelFileStream
-{
-public:
-	
-	HBBR_API static std::weak_ptr<ModelData> ImportFbxToMemory(HGUID guid);
-
-	HBBR_API static bool BuildModelPrimitives(ModelData* data ,std::vector<ModelPrimitive*>& prims);
-
 };

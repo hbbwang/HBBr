@@ -4,3 +4,4 @@
 #define HBBR_API __declspec(dllexport)
 #define HBBR_API __declspec(dllimport)
 #define HBBR_API __attribute__((visibility("default")))
+#define HBBR_INLINE

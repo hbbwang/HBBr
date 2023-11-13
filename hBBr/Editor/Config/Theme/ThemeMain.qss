@@ -454,7 +454,7 @@ QSplitter::handle
     border: 1px solid;
     background-color:rgb(75,75,75);
     color:rgb(220,220,220);
-    border-radius: 4px; 
+    border-radius: 2px; 
 }
 #PropertyResourceLine_Button:hover
 {  
@@ -462,7 +462,6 @@ QSplitter::handle
     background-color:rgb(150, 61, 55);
     color:rgb(255,255,255);
     border-radius:2px;
-    font:60 16pt;
 }
 #PropertyResourceLine_Button:pressed
 {  

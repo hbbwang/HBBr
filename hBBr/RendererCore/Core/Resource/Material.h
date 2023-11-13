@@ -18,7 +18,7 @@ public:
 	
 	~Material();
 
-	HBBR_API static std::weak_ptr<Material> LoadMaterial(HGUID guid);
+	HBBR_API static std::weak_ptr<Material> LoadAsset(HGUID guid);
 
 	HBBR_API static Material* CreateMaterial(HString newMatFilePath);
 

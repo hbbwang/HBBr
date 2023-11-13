@@ -6,7 +6,6 @@ Component::Component(GameObject* parent)
 {
 	_bActive = true;
 	_gameObject = parent;
-	//InitProperties();
 }
 
 Component::~Component()

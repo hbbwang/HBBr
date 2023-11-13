@@ -39,7 +39,6 @@ public:
 	}
 	QTimer* timer;
 	virtual void paintEvent(QPaintEvent* event)override;
-	virtual void closeEvent(QCloseEvent* event)override;
 public slots:
 	void setX(double val);
 	void setY(double val);

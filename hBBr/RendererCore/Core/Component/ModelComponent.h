@@ -31,11 +31,7 @@ public:
 protected:
 
 	//Component Property Reflection Add.
-	HBBR_INLINE virtual void InitProperties()override
-	{
-		Component::InitProperties();
-		AddProperty("Model", &_modelData, CPT_Resource, "");
-	}
+	HBBR_INLINE virtual void OnConstruction()override;
 
 private:
 

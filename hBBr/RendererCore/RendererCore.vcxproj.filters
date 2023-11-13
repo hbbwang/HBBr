@@ -50,6 +50,9 @@
     <Filter Include="Renderer\Core\Object\Component">
       <UniqueIdentifier>{8fca5c07-0f8b-4d2d-b71f-d2357de10820}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderer\Core\Resource\Asset">
+      <UniqueIdentifier>{155f6a91-dbaa-4948-8952-ff3219806098}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\VulkanManager.h">
@@ -145,9 +148,6 @@
     <ClInclude Include="Core\Buffer.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Resource\ModelData.h">
-      <Filter>Renderer\Core\Resource</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Component\CameraComponent.h">
       <Filter>Renderer\Core\Object\Component</Filter>
     </ClInclude>
@@ -215,13 +215,16 @@
       <Filter>Renderer\Core\Object</Filter>
     </ClInclude>
     <ClInclude Include="Core\Resource\Material.h">
-      <Filter>Renderer\Core\Resource</Filter>
+      <Filter>Renderer\Core\Resource\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\ModelData.h">
+      <Filter>Renderer\Core\Resource\Asset</Filter>
     </ClInclude>
     <ClInclude Include="Core\Resource\Texture.h">
-      <Filter>Renderer\Core\Resource</Filter>
+      <Filter>Renderer\Core\Resource\Asset</Filter>
     </ClInclude>
     <ClInclude Include="Core\Resource\ResourceObject.h">
-      <Filter>Renderer\Core\Resource</Filter>
+      <Filter>Renderer\Core\Resource\Asset</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -300,9 +303,6 @@
     <ClCompile Include="Core\Buffer.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Resource\ModelData.cpp">
-      <Filter>Renderer\Core\Resource</Filter>
-    </ClCompile>
     <ClCompile Include="Core\VertexFactory.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
@@ -364,13 +364,16 @@
       <Filter>Renderer\Core\Object</Filter>
     </ClCompile>
     <ClCompile Include="Core\Resource\Material.cpp">
-      <Filter>Renderer\Core\Resource</Filter>
+      <Filter>Renderer\Core\Resource\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\ModelData.cpp">
+      <Filter>Renderer\Core\Resource\Asset</Filter>
     </ClCompile>
     <ClCompile Include="Core\Resource\Texture.cpp">
-      <Filter>Renderer\Core\Resource</Filter>
+      <Filter>Renderer\Core\Resource\Asset</Filter>
     </ClCompile>
     <ClCompile Include="Core\Resource\ResourceObject.cpp">
-      <Filter>Renderer\Core\Resource</Filter>
+      <Filter>Renderer\Core\Resource\Asset</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -9,8 +9,12 @@
 #include "VectorSetting.h"
 #include "ResourceLine.h"
 #include "ResourceObject.h"
-#include "ModelData.h"
 #include "FileSystem.h"
+
+#include "ModelData.h"
+#include "Material.h"
+#include "Texture.h"
+
 Inspector* Inspector::_currentInspector = NULL;
 
 Inspector::Inspector(QWidget *parent)
@@ -193,7 +197,20 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 							HGUID guid; StringToGUID(guidStr.c_str(), &guid);
 							if (guid.isValid())
 							{
-								auto newObject = ContentManager::Get()->LoadAsset(guid, obj.lock()->_assetInfo->type);//
+								auto objType = obj.lock()->_assetInfo->type;
+								std::weak_ptr<ResourceObject> newObject;
+								if (objType == AssetType::Model)
+								{
+									newObject = ContentManager::Get()->LoadAsset<ModelData>(guid);//
+								}
+								else if(objType == AssetType::Material)
+								{
+									newObject = ContentManager::Get()->LoadAsset<Material>(guid);//
+								}
+								else if (objType == AssetType::Texture2D)
+								{
+									newObject = ContentManager::Get()->LoadAsset<Texture>(guid);//
+								}
 								if (!newObject.expired())
 									*(std::weak_ptr<ResourceObject>*)ptr = newObject;
 							}

@@ -675,7 +675,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 		shaderTypeStr = ("Compute");
 	}
 	MessageOut((HString("-Start Compile ") + shaderTypeStr + " Shader Permutation--").c_str(), false, false);
-	GenerateCombinations(varients.size(), 0, 0, _shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
+	GenerateCombinations((int)varients.size(), 0, 0, _shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
 	//for (int i = 0; i < varients.size(); i++)
 	//{
 	//	//Bool开和关  分别编一次

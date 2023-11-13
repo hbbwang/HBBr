@@ -157,9 +157,17 @@ public:
 		return asset->GetData();
 	}
 
-	HBBR_API std::weak_ptr<class ResourceObject> LoadAsset(AssetInfoBase* info);
+	template<class T>
+	HBBR_INLINE std::weak_ptr<class ResourceObject> LoadAsset(HGUID guid)
+	{
+		return T::LoadAsset(guid);
+	}
 
-	HBBR_API std::weak_ptr<class ResourceObject> LoadAsset(HGUID guid, AssetType type);
+	template<class T>
+	HBBR_INLINE std::weak_ptr<class ResourceObject> LoadAsset(AssetInfoBase* info)
+	{
+		return LoadAsset(info->guid);
+	}
 
 private:
 

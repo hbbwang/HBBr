@@ -3,5 +3,7 @@
 class ResourceObject
 {
 public:
+
 	AssetInfoBase* _assetInfo = NULL;
+
 };

@@ -10,7 +10,7 @@ std::map<HString, ShaderCache> Shader::_csShader;
 void Shader::LoadShaderCache(const char* cachePath)
 {
 	auto allCacheFiles = FileSystem::GetFilesBySuffix(cachePath, "spv");
-	uint64_t cacheIndex = 0;
+	uint32_t cacheIndex = 0;
 	for (auto i : allCacheFiles)
 	{
 		HString fileName = i.baseName;

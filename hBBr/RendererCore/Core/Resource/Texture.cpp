@@ -149,7 +149,7 @@ std::shared_ptr<Texture> Texture::CreateTexture2D(
 	return newTexture;
 }
 
-std::weak_ptr<Texture> Texture::ImportTextureAsset(HGUID guid, VkImageUsageFlags usageFlags)
+std::weak_ptr<Texture> Texture::LoadAsset(HGUID guid, VkImageUsageFlags usageFlags)
 {
 	const auto texAssets = ContentManager::Get()->GetAssets(AssetType::Texture2D);
 	HString guidStr = GUIDToString(guid);
@@ -262,31 +262,31 @@ void Texture::GlobalInitialize()
 		for (int i = 0; i < 16; i++)
 		{
 			if ((TextureSampler)t == TextureSampler_Linear_Wrap)
-				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, i, 16);
+				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, (float)i, 16);
 			else if ((TextureSampler)t == TextureSampler_Linear_Mirror)
-				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, i, 16);
+				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, (float)i, 16);
 			else if ((TextureSampler)t == TextureSampler_Linear_Clamp)
-				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, i, 16);
+				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, (float)i, 16);
 			else if ((TextureSampler)t == TextureSampler_Linear_Border)
-				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, i, 16);
+				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, (float)i, 16);
 			else if ((TextureSampler)t == TextureSampler_Nearest_Wrap)
-				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_REPEAT, i, 16);
+				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_REPEAT, (float)i, 16);
 			else if ((TextureSampler)t == TextureSampler_Nearest_Mirror)
-				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, i, 16);
+				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, (float)i, 16);
 			else if ((TextureSampler)t == TextureSampler_Nearest_Clamp)
-				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, i, 16);
+				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, (float)i, 16);
 			else if ((TextureSampler)t == TextureSampler_Nearest_Border)
-				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, i, 16);
+				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, (float)i, 16);
 			_samplers[(TextureSampler)t].push_back(std::move(sampler));
 		}
 	}	
 
 	//Create BaseTexture
-	auto uvGridTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_UVGrid"));
-	auto blackTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Black"));
-	auto normalTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Normal"));
-	auto whiteTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_White"));
-	auto testTex = Texture::ImportTextureAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/TestTex"));
+	auto uvGridTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_UVGrid"));
+	auto blackTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Black"));
+	auto normalTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Normal"));
+	auto whiteTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_White"));
+	auto testTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/TestTex"));
 	if(!uvGridTex.expired())
 		Texture::AddSystemTexture("UVGrid", uvGridTex.lock().get());
 	if (!whiteTex.expired())
@@ -944,8 +944,8 @@ void GetFontCharacter(
 		stbtt_GetCodepointHMetrics(&font, c, &advance, &lsb);
 
 		/* 调整字距 */
-		int kern;
-		kern = stbtt_GetCodepointKernAdvance(&font, c, c + 1);
+		float kern;
+		kern = (float)stbtt_GetCodepointKernAdvance(&font, c, c + 1);
 		kern = kern * scale;
 
 		int padding = 2;

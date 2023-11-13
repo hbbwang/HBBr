@@ -138,23 +138,23 @@ public:
 		return _textureStreamingSize;
 	}
 
-	void Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
+	HBBR_API void Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
 
-	void TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1);
+	HBBR_API void TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1);
 
-	bool CopyBufferToTexture(VkCommandBuffer cmdbuf);
+	HBBR_API bool CopyBufferToTexture(VkCommandBuffer cmdbuf);
 
-	void CopyBufferToTextureImmediate();
+	HBBR_API void CopyBufferToTextureImmediate();
 
-	void Resize(uint32_t width, uint32_t height);
+	HBBR_API void Resize(uint32_t width, uint32_t height);
 
 	HBBR_INLINE bool IsValid()const {
 		return _bUploadToGPU;
 	}
 
-	static std::shared_ptr<Texture> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, HString textureName = "Texture", uint32_t miplevel = 1, uint32_t layerCount = 1);
+	HBBR_API static std::shared_ptr<Texture> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, HString textureName = "Texture", uint32_t miplevel = 1, uint32_t layerCount = 1);
 
-	static std::weak_ptr<Texture> ImportTextureAsset(HGUID guid , VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+	HBBR_API static std::weak_ptr<Texture> LoadAsset(HGUID guid , VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
 	static void GlobalInitialize();
 
@@ -162,10 +162,10 @@ public:
 
 	static void GlobalRelease();
 
-	static void AddSystemTexture(HString tag, Texture* tex);
+	HBBR_API static void AddSystemTexture(HString tag, Texture* tex);
 
 	//获取渲染系统纹理,如果查找失败则返回第一张
-	static Texture* GetSystemTexture(HString tag);
+	HBBR_API static Texture* GetSystemTexture(HString tag);
 
 	//通过ttf生成dds纹理
 	static void CreateFontTexture(HString ttfFontPath, HString outTexturePath,bool bOverwrite = true,uint32_t fontSize = 48 , uint32_t maxTextureSize = 256);
