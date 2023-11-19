@@ -74,13 +74,15 @@ void Inspector::ClearInspector()
 	_property_needUpdate.clear();
 }
 
-#define AssetValue(className)\
-std::weak_ptr<class className>** className##_value = std::any_cast<std::weak_ptr<class className>*>(&p.value);\
-if (className##_value)\
+#define IsAsset(className)\
+for (int i = 0; i < p.value.size(); i++)\
 {\
-	assetInfo = (*className##_value)->lock()->_assetInfo;\
+	std::weak_ptr<className>** className##_value = std::any_cast<std::weak_ptr<className>*>(&p.value[i]);\
+	if(className##_value)\
+	{\
+		assetInfoArray.push_back((*className##_value)->lock()->_assetInfo);\
+	}\
 }\
-
 
 void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool bFoucsUpdate)
 {
@@ -181,61 +183,86 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 		};
 	}
 	//---------------------- Components
-	for (auto i : obj->_comps)
+	for (auto c : obj->_comps)
 	{
-		Component* comp = i ;
+		Component* comp = c ;
 		QWidget* compWidget = new QWidget(this);
 		compWidget->setLayout(new QVBoxLayout(this));
-		box->addWidget(i->GetComponentName().c_str(), compWidget, true);
-		auto pro = i->GetProperties();
+		box->addWidget(c->GetComponentName().c_str(), compWidget, true);
+		auto pro = c->GetProperties();
 		for (auto p : pro)
 		{
 			//Bool value
-			auto boolValue = std::any_cast<bool*>(&p.value);
+			std::vector<bool**> boolValue;
+			for (int v = 0; v < p.value.size(); v++)
+			{
+				auto v_value = std::any_cast<bool*>(&p.value[v]);
+				if (v_value)
+				{
+					boolValue.push_back(v_value);
+				}
+			}
 
 			//AssetObject value
-			AssetInfoBase* assetInfo = NULL;
-			AssetValue(ModelData);
-			AssetValue(Texture);
-			AssetValue(Material);
-			const bool bIsAsset = assetInfo && (
-				(ModelData_value && !(*ModelData_value)->expired())
-				|| (Texture_value && !(*Texture_value)->expired())
-				|| (Material_value && !(*Material_value)->expired())
-				);
+			std::vector<AssetInfoBase*> assetInfoArray;
+			IsAsset(ModelData);
+			IsAsset(Texture);
+			IsAsset(Material);
 
-			if (bIsAsset)
+			if (assetInfoArray.size() > 0)
 			{	
-				ResourceLine* line = new ResourceLine(p.name, this, assetInfo->virtualPath, assetInfo->suffix);
-				compWidget->layout()->addWidget(line);
-				line->_bindFindButtonFunc = [](const char* p) { //查找按钮回调函数
+				for (int vi = 0; vi < assetInfoArray.size(); vi++)
+				{
+					ResourceLine* line = new ResourceLine(p.name, this, assetInfoArray[vi]->virtualPath, assetInfoArray[vi]->suffix);
+					compWidget->layout()->addWidget(line);
+					line->_bindFindButtonFunc = [](const char* p) { //查找按钮回调函数
 
-				};
-				line->_bindStringFunc = [p](const char* s) { //文件拖拽回调函数
-					auto value = std::any_cast<std::weak_ptr<class ModelData>*>(&p.value);
-					if (!(*value)->expired())
-					{
+					};
+					line->_bindStringFunc = [vi,p, assetInfoArray](ResourceLine* line, const char* s) { //文件拖拽回调函数
 						auto guidStr = FileSystem::GetBaseName(s);
-						HGUID guid; StringToGUID(guidStr.c_str(), &guid);
+						HGUID guid;
+						StringToGUID(guidStr.c_str(), &guid);
 						if (guid.isValid())
 						{
-							auto newObject = (*value)->lock()->LoadAsset(guid);
-							if (!newObject.expired())
-								*(*value) = newObject;
+							auto assetInfo = assetInfoArray[vi];
+							auto pp = p;
+							if (assetInfo)
+							{
+								if (assetInfo->type == AssetType::Model)
+								{
+									std::weak_ptr<ModelData>** ModelData_value = std::any_cast<std::weak_ptr<ModelData>*>(&pp.value[vi]);
+									auto newObject = ModelData::LoadAsset(guid);
+									if (!newObject.expired())
+									{
+										*(*ModelData_value) = newObject;
+									}
+									line->_objectBind = ((std::weak_ptr<class ResourceObject>*) * ModelData_value);
+								}
+								else if (assetInfo->type == AssetType::Material)
+								{
+									//newObject = Material::LoadAsset(guid);
+								}
+								else if (assetInfo->type == AssetType::Texture2D)
+								{
+									//newObject = Texture::LoadAsset(guid);
+								}
+							}
 						}
-					}
-				};
-				line->_objectBind = (std::weak_ptr<class ResourceObject>*)std::any_cast<std::weak_ptr<class ModelData>*>(p.value);
+					};
+				}
 			}
-			else if (boolValue)
+			else if (boolValue.size() > 0)
 			{
-				CheckBox* checkBox = new CheckBox(p.name, this, i->IsActive());
-				checkBox->_callback = [comp](bool b) {
-					if (comp)
-						comp->SetActive(b);
-				};
-				checkBox->_boolBind = *boolValue;
-				compWidget->layout()->addWidget(checkBox);
+				for (int i = 0; i < boolValue.size(); i++)
+				{
+					CheckBox* checkBox = new CheckBox(p.name, this, c->IsActive());
+					checkBox->_callback = [comp](bool b) {
+						if (comp)
+							comp->SetActive(b);
+					};
+					checkBox->_boolBind = *boolValue[i];
+					compWidget->layout()->addWidget(checkBox);
+				}				
 			}
 		}
 	}

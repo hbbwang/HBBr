@@ -122,13 +122,13 @@ void ResourceLine::lineChanged(QString newStr)
 	//QMessageBox::information(0,0,0,0);
 	if(_stringBind)
 		_stringBind->assign(newStr.toStdString().c_str());
+	_bindStringFunc(this, newStr.toStdString().c_str());
 	if (_objectBind && !_objectBind->expired())
 	{
 		ui.LineEdit->setText((_objectBind->lock()->_assetInfo->relativePath + _objectBind->lock()->_assetInfo->name).c_str());
 	}
 	if (_stringArrayBind)
 		_stringArrayBind->at(_stringArrayBindIndex) = newStr.toStdString().c_str();
-	_bindStringFunc(newStr.toStdString().c_str());
 }
 
 void ResourceLine::clear()

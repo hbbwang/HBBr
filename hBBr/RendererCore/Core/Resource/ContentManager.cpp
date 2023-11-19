@@ -24,21 +24,32 @@ ContentManager::~ContentManager()
 	Release();
 }
 
-void ContentManager::ReloadAllAssetInfos()
+//重载某个类型的所有Info
+void ContentManager::ReloadAssetInfos(AssetType type)
 {
-	ReloadAssetInfos(AssetType::Model);
-	ReloadAssetInfos(AssetType::Material);
-	ReloadAssetInfos(AssetType::Texture2D);
-	UpdateAllAssetReference();
+	HString typeName = GetAssetTypeString(type);
+
+	pugi::xml_node subGroup = _contentRefConfig.child(L"root").child(typeName.c_wstr());
+	if (subGroup)
+	{
+		//卸载已经加载的信息
+		ReleaseAssetsByType(type);
+
+		//重新从引用配置文件里读取
+		for (auto i = subGroup.first_child(); i; i = i.next_sibling())
+		{
+			ReloadAssetInfo(type, i);
+		}
+	}
 }
 
-void ContentManager::UpdateAllAssetReference()
+//更新某个类型的单个GUID的引用
+void ContentManager::UpdateAssetReference(AssetType type, HGUID obj)
 {
-	UpdateAssetReferenceByType(AssetType::Model);
-	UpdateAssetReferenceByType(AssetType::Material);
-	UpdateAssetReferenceByType(AssetType::Texture2D);
+	UpdateAssetReference(_assets[(uint32_t)type][obj]);
 }
 
+//通过类型更新资产引用
 void ContentManager::UpdateAssetReferenceByType(AssetType type)
 {
 	for (auto i : _assets[(uint32_t)type])
@@ -47,10 +58,100 @@ void ContentManager::UpdateAssetReferenceByType(AssetType type)
 	}
 }
 
-void ContentManager::UpdateAssetReference(AssetType type , HGUID obj)
+#pragma region Asset Type Function
+//更新所有资产的引用
+void ContentManager::UpdateAllAssetReference()
 {
-	UpdateAssetReference(_assets[(uint32_t)type][obj]);
+	UpdateAssetReferenceByType(AssetType::Model);
+	UpdateAssetReferenceByType(AssetType::Material);
+	UpdateAssetReferenceByType(AssetType::Texture2D);
 }
+
+//重载所有资产Info
+void ContentManager::ReloadAllAssetInfos()
+{
+	ReloadAssetInfos(AssetType::Model);
+	ReloadAssetInfos(AssetType::Material);
+	ReloadAssetInfos(AssetType::Texture2D);
+	UpdateAllAssetReference();
+}
+
+void ContentManager::Release()
+{
+	ReleaseAssetsByType(AssetType::Model);
+	ReleaseAssetsByType(AssetType::Material);
+	ReleaseAssetsByType(AssetType::Texture2D);
+}
+
+AssetInfoBase* CreateInfo(AssetType type)
+{
+	switch (type)//新增资产类型需要在这里添加实际对象,未来打包资产的时候会根据类型进行删留
+	{
+		case AssetType::Model:		return new AssetInfo<ModelData>(); 
+		case AssetType::Material:	return new AssetInfo<Material>();
+		case AssetType::Texture2D:	return new AssetInfo<Texture>();
+		default:break;
+	}
+	return NULL;
+}
+
+AssetInfoBase* ContentManager::GetAssetInfo(AssetType type, HString contentBrowserFilePath) const
+{
+	HString filePath = FileSystem::GetFilePath(contentBrowserFilePath);
+	HString fileBaseName = FileSystem::GetBaseName(contentBrowserFilePath);
+	//获取路径下的同类型资产文件
+	std::vector<FileEntry> files;
+	if (type == AssetType::Model)
+	{
+		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "fbx");
+	}
+	else if (type == AssetType::Material)
+	{
+		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "mat");
+	}
+	else if (type == AssetType::Texture2D)
+	{
+		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "dds");
+	}
+
+	if (type != AssetType::Unknow)
+	{
+		auto& map = _assets[(uint32_t)type];
+		HString path = FileSystem::GetRelativePath(filePath.c_str());
+		auto fit = std::find_if(map.begin(), map.end(), [&](const std::pair<HGUID, AssetInfoBase*>& item) {
+			return item.second->relativePath == path && fileBaseName == item.second->name;
+			});
+		if (fit != map.end())
+		{
+			return fit->second;
+		}
+	}
+	MessageOut((HString(L"Error, the asset cannot be found. Please check whether the Resource directory is complete or the asset is missing.\n错误,无法找到资产,请检查Resource目录是否完整或资产缺失:\n") + contentBrowserFilePath).c_str(), false, false, "255,0,0");
+	return NULL;
+}
+
+AssetInfoBase* ContentManager::GetAssetInfo(HString realAbsPath) const
+{
+	HString guidStr = FileSystem::GetBaseName(realAbsPath);
+	HString suffix = FileSystem::GetFileExt(realAbsPath);
+	HGUID guid;
+	StringToGUID(guidStr.c_str(), &guid);
+	AssetType type = AssetType::Unknow;
+	if (suffix.IsSame("fbx"))
+	{
+		type = AssetType::Model;
+	}
+	else if (suffix.IsSame("dds"))
+	{
+		type = AssetType::Texture2D;
+	}
+	else if (suffix.IsSame("mat"))
+	{
+		type = AssetType::Material;
+	}
+	return GetAssetInfo(guid, type);
+}
+#pragma endregion Asset Type Function(资产类型硬相关方法)
 
 void ContentManager::UpdateAssetReference(HGUID obj)
 {
@@ -62,13 +163,6 @@ void ContentManager::UpdateAssetReference(HGUID obj)
 			UpdateAssetReference(it->second);
 		}
 	}
-}
-
-void ContentManager::Release()
-{
-	ReleaseAssetsByType(AssetType::Model);
-	ReleaseAssetsByType(AssetType::Material);
-	ReleaseAssetsByType(AssetType::Texture2D);
 }
 
 void ContentManager::ReleaseAssetsByType(AssetType type)
@@ -86,36 +180,6 @@ void ContentManager::ReleaseAsset(AssetType type, HGUID obj)
 	{
 		_assets[(uint32_t)type].erase(it);
 	}
-}
-
-AssetInfoBase* CreateInfo(AssetType type)
-{
-	switch (type)//新增资产类型需要在这里添加实际对象,未来打包资产的时候会根据类型进行删留
-	{
-		case AssetType::Model:		return new AssetInfo<ModelData>(); 
-		case AssetType::Material:	return new AssetInfo<Material>();
-		case AssetType::Texture2D:	return new AssetInfo<Texture>();
-		default:break;
-	}
-	return NULL;
-}
-
-void ContentManager::ReloadAssetInfos(AssetType type)
-{
-	HString typeName = GetAssetTypeString(type);
-
-	pugi::xml_node subGroup = _contentRefConfig.child(L"root").child(typeName.c_wstr());
-	if (subGroup)
-	{
-		//卸载已经加载的信息
-		ReleaseAssetsByType(type);
-
-		//重新从引用配置文件里读取
-		for (auto i = subGroup.first_child(); i; i = i.next_sibling())
-		{
-			ReloadAssetInfo(type, i);
-		}
-	}	
 }
 
 void ContentManager::UpdateAssetReference(AssetInfoBase* info)
@@ -328,63 +392,6 @@ AssetInfoBase* ContentManager::GetAssetInfo(HGUID guid, AssetType type)const
 		return NULL;
 	}
 	return NULL;
-}
-
-AssetInfoBase* ContentManager::GetAssetInfo(AssetType type, HString contentBrowserFilePath) const
-{
-	HString filePath = FileSystem::GetFilePath(contentBrowserFilePath);
-	HString fileBaseName = FileSystem::GetBaseName(contentBrowserFilePath);
-	//获取路径下的同类型资产文件
-	std::vector<FileEntry> files;
-	if (type == AssetType::Model)
-	{
-		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "fbx");
-	}
-	else if (type == AssetType::Material)
-	{
-		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "mat");
-	}
-	else if (type == AssetType::Texture2D)
-	{
-		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "dds");
-	}
-
-	if (type != AssetType::Unknow)
-	{
-		auto& map = _assets[(uint32_t)type];
-		HString path = FileSystem::GetRelativePath(filePath.c_str());
-		auto fit = std::find_if(map.begin(), map.end(), [&](const std::pair<HGUID, AssetInfoBase*>& item) {
-			return item.second->relativePath == path && fileBaseName == item.second->name;
-			});
-		if (fit != map.end())
-		{
-			return fit->second;
-		}
-	}
-	MessageOut((HString(L"Error, the asset cannot be found. Please check whether the Resource directory is complete or the asset is missing.\n错误,无法找到资产,请检查Resource目录是否完整或资产缺失:\n") + contentBrowserFilePath).c_str(), false, false, "255,0,0");
-	return NULL;
-}
-
-AssetInfoBase* ContentManager::GetAssetInfo(HString realAbsPath) const
-{
-	HString guidStr = FileSystem::GetBaseName(realAbsPath);
-	HString suffix = FileSystem::GetFileExt(realAbsPath);
-	HGUID guid;
-	StringToGUID(guidStr.c_str(), &guid);
-	AssetType type = AssetType::Unknow;
-	if (suffix.IsSame("fbx"))
-	{
-		type = AssetType::Model;
-	}
-	else if (suffix.IsSame("dds"))
-	{
-		type = AssetType::Texture2D;
-	}
-	else if (suffix.IsSame("mat"))
-	{
-		type = AssetType::Material;
-	}
-	return GetAssetInfo(guid , type);
 }
 
 HGUID ContentManager::GetAssetGUID(AssetType type, HString contentBrowserFilePath)const

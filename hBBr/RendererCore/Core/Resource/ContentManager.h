@@ -157,16 +157,11 @@ public:
 		return asset->GetData();
 	}
 
+	//通过已知类型和guid加载资产
 	template<class T>
 	HBBR_INLINE std::weak_ptr<class ResourceObject> LoadAsset(HGUID guid)
 	{
 		return T::LoadAsset(guid);
-	}
-
-	template<class T>
-	HBBR_INLINE std::weak_ptr<class ResourceObject> LoadAsset(AssetInfoBase* info)
-	{
-		return LoadAsset(info->guid);
 	}
 
 private:

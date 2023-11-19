@@ -25,7 +25,7 @@ public:
 
 	int	_stringArrayBindIndex = 0;
 
-	std::function<void(const char*)> _bindStringFunc = [](const char*) {};
+	std::function<void(ResourceLine* ,const char*)> _bindStringFunc = [](ResourceLine*,const char*) {};
 	std::function<void(const char*)> _bindFindButtonFunc = [](const char*) {};
 	void ShowClearButton(bool bShow);
 
