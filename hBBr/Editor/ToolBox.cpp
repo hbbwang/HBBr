@@ -67,8 +67,6 @@ void ToolPage::onPushButtonFoldClicked()
     }
 }
 
-
-
 ToolBox::ToolBox(QWidget* parent) :
     QWidget(parent),
     m_pContentVBoxLayout(nullptr)
@@ -88,14 +86,46 @@ ToolBox::ToolBox(QWidget* parent) :
     ui.scrollArea->setWidget(widget);
 }
 
+ToolBox::ToolBox(QString title, bool isExpanded, QWidget* parent)
+{
+    ui.setupUi(this);
+    ui.scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    QWidget* widget = new QWidget(this);
+    m_pContentVBoxLayout = new QVBoxLayout;
+    m_pContentVBoxLayout->setContentsMargins(0, 0, 0, 0);
+    m_pContentVBoxLayout->setSpacing(2);
+
+    QVBoxLayout* vBoxLayout = new QVBoxLayout(widget);
+    vBoxLayout->setContentsMargins(0, 0, 0, 0);
+    vBoxLayout->addLayout(m_pContentVBoxLayout);
+    vBoxLayout->addStretch(1);
+
+    ui.scrollArea->setWidget(widget);
+
+    m_widget = new QWidget(this);
+    m_widget->setLayout(new QVBoxLayout(this));
+    ToolPage* page = new ToolPage(isExpanded, this);
+    page->addWidget(title, m_widget);
+    m_pContentVBoxLayout->addWidget(page);
+}
+
 ToolBox::~ToolBox()
 {
-
+    m_widget = NULL;
 }
 
 void ToolBox::addWidget(const QString& title, QWidget* widget, bool isExpanded)
 {
+    m_widget = widget;
     ToolPage* page = new ToolPage(isExpanded, this);
     page->addWidget(title, widget);
     m_pContentVBoxLayout->addWidget(page);
+}
+
+void ToolBox::addSubWidget(QWidget* widget)
+{
+    if (m_widget && m_widget->layout())
+    {
+        m_widget->layout()->addWidget(widget);
+    }
 }

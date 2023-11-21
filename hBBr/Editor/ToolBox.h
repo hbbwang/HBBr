@@ -30,9 +30,13 @@ class ToolBox : public QWidget
 
 public:
     explicit ToolBox(QWidget* parent = nullptr);
+    explicit ToolBox(QString title, bool isExpanded = false, QWidget* parent = nullptr);
     ~ToolBox();
     void addWidget(const QString& title, QWidget* widget , bool isExpanded = false);
+    void addSubWidget(QWidget* widget);
+    QWidget* getWidget()const {return m_widget;}
     Ui::ToolBoxClass ui;
 private:
     QVBoxLayout* m_pContentVBoxLayout;
+    QWidget* m_widget = NULL;
 };

@@ -202,72 +202,80 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 		auto pro = c->GetProperties();
 		for (auto p : pro)
 		{
+			std::string type = p.type;
+
 			//Bool value
-			std::vector<bool**> boolValue;
-			for (int v = 0; v < p.value.size(); v++)
+			if (p.type == typeid(bool).name())
 			{
-				auto v_value = std::any_cast<bool*>(&p.value[v]);
-				if (v_value)
-				{
-					boolValue.push_back(v_value);
-				}
+				auto value = (bool*)p.value;
+				CheckBox* checkBox = new CheckBox(p.name, this, c->IsActive());
+				checkBox->_callback = [comp](bool b) {
+					if (comp)
+						comp->SetActive(b);
+				};
+				checkBox->_boolBind = value;
+				compWidget->layout()->addWidget(checkBox);
+				continue;
 			}
+			//std::weak_ptr<ModelData> value
+			else if (p.type == typeid(std::weak_ptr<ModelData>).name())
+			{
+				auto value = ((std::weak_ptr<ModelData>*)p.value);
+				ResourceLine* line = new ResourceLine(p.name, this, value->lock()->_assetInfo->virtualPath, value->lock()->_assetInfo->suffix);
+				compWidget->layout()->addWidget(line);
+				line->_bindFindButtonFunc = [](const char* p) { //查找按钮回调函数
 
-			//AssetObject value
-			std::vector<AssetInfoBase*> assetInfoArray;
-			IsAsset(ModelData);
-			IsAsset(Texture);
-			IsAsset(Material);
-
-			if (assetInfoArray.size() > 0)
-			{	
-				for (int vi = 0; vi < assetInfoArray.size(); vi++)
+				};
+				line->_bindStringFunc = [p, value](ResourceLine* line, const char* s) { //文件拖拽回调函数
+					auto guidStr = FileSystem::GetBaseName(s);
+					HGUID guid;
+					StringToGUID(guidStr.c_str(), &guid);
+					if (guid.isValid() && !value->expired())
+					{
+						auto newObject = ModelData::LoadAsset(guid);
+						if (!newObject.expired())
+						{
+							*value = newObject; 
+						}
+						line->_objectBind = ((std::weak_ptr<class ResourceObject>*)value);
+					}
+					else
+					{
+						*value = std::weak_ptr<ModelData>();
+					}
+				};
+				continue;
+			}
+			//std::vector<std::weak_ptr<Material>> value array
+			else if (p.type == typeid(std::vector<std::weak_ptr<Material>>).name())
+			{
+				auto value = ((std::vector<std::weak_ptr<Material>>*)p.value);
+				ToolBox* box = new ToolBox("Material", true, this);
+				compWidget->layout()->addWidget(box);
+				for (int i = 0; i < value->size(); i++)
 				{
-					ResourceLine* line = new ResourceLine(p.name, this, assetInfoArray[vi]->virtualPath, assetInfoArray[vi]->suffix);
-					compWidget->layout()->addWidget(line);
-					line->_bindFindButtonFunc = [](const char* p) { //查找按钮回调函数
-
+					ResourceLine* line = new ResourceLine(value->at(i).lock()->GetPrimitive()->graphicsName, this, value->at(i).lock()->_assetInfo->virtualPath, value->at(i).lock()->_assetInfo->suffix);
+					box->addSubWidget(line);
+					line->_bindFindButtonFunc = [](const char* p) {
 					};
-					line->_bindStringFunc = [vi,p, assetInfoArray](ResourceLine* line, const char* s) { //文件拖拽回调函数
+					line->_bindStringFunc = [value,i](ResourceLine* line, const char* s) {
 						auto guidStr = FileSystem::GetBaseName(s);
 						HGUID guid;
 						StringToGUID(guidStr.c_str(), &guid);
-						if (guid.isValid())
+						if (guid.isValid() && !value->at(i).expired())
 						{
-							auto assetInfo = assetInfoArray[vi];
-							auto pp = p;
-							if (assetInfo)
+							auto newObject = Material::LoadAsset(guid);
+							if (!newObject.expired())
 							{
-								if (assetInfo->type == AssetType::Model)
-								{
-									AssetStringBinding(ModelData)
-								}
-								else if (assetInfo->type == AssetType::Material)
-								{
-									AssetStringBinding(Material)
-								}
-								else if (assetInfo->type == AssetType::Texture2D)
-								{
-									AssetStringBinding(Texture)
-								}
+								value->at(i) = newObject;
 							}
+							line->_objectBind = ((std::weak_ptr<class ResourceObject>*)value);
 						}
 					};
 				}
+				continue;
 			}
-			else if (boolValue.size() > 0)
-			{
-				for (int i = 0; i < boolValue.size(); i++)
-				{
-					CheckBox* checkBox = new CheckBox(p.name, this, c->IsActive());
-					checkBox->_callback = [comp](bool b) {
-						if (comp)
-							comp->SetActive(b);
-					};
-					checkBox->_boolBind = *boolValue[i];
-					compWidget->layout()->addWidget(checkBox);
-				}				
-			}
+
 		}
 	}
 	box->ui.verticalLayout->addStretch(999);

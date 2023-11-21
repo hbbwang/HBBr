@@ -51,9 +51,9 @@ void ModelComponent::SetModel(HGUID guid)
 
 void ModelComponent::SetModel(std::weak_ptr<class ModelData> model)
 {
+	ClearPrimitves();
 	if (!model.expired())
 	{
-		ClearPrimitves();
 		_lastModelData = model;
 		ModelData::BuildModelPrimitives(model.lock().get(), _primitives);
 		_materials.resize(_primitives.size());
@@ -81,8 +81,7 @@ void ModelComponent::GameObjectActiveChanged(bool objActive)
 
 void ModelComponent::Update()
 {
-	if (!_modelData.expired() && !_lastModelData.expired() 
-		&& _modelData.lock().get() != _lastModelData.lock().get())
+	if (_modelData.lock().get() != _lastModelData.lock().get())
 	{
 		SetModel(_modelData);
 	}
