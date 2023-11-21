@@ -84,6 +84,16 @@ for (int i = 0; i < p.value.size(); i++)\
 	}\
 }\
 
+#define AssetStringBinding(className)\
+std::weak_ptr<className>** className##_value = std::any_cast<std::weak_ptr<className>*>(&pp.value[vi]);\
+auto newObject = className::LoadAsset(guid);\
+if (!newObject.expired())\
+{\
+	*(*className##_value) = newObject;\
+}\
+line->_objectBind = ((std::weak_ptr<class ResourceObject>*) * className##_value);
+
+
 void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool bFoucsUpdate)
 {
 	if (gameObj.expired() || 
@@ -230,21 +240,15 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 							{
 								if (assetInfo->type == AssetType::Model)
 								{
-									std::weak_ptr<ModelData>** ModelData_value = std::any_cast<std::weak_ptr<ModelData>*>(&pp.value[vi]);
-									auto newObject = ModelData::LoadAsset(guid);
-									if (!newObject.expired())
-									{
-										*(*ModelData_value) = newObject;
-									}
-									line->_objectBind = ((std::weak_ptr<class ResourceObject>*) * ModelData_value);
+									AssetStringBinding(ModelData)
 								}
 								else if (assetInfo->type == AssetType::Material)
 								{
-									//newObject = Material::LoadAsset(guid);
+									AssetStringBinding(Material)
 								}
 								else if (assetInfo->type == AssetType::Texture2D)
 								{
-									//newObject = Texture::LoadAsset(guid);
+									AssetStringBinding(Texture)
 								}
 							}
 						}

@@ -34,13 +34,13 @@ struct ComponentProperty
 {
 	HString name;
 	//指向参数的指针
-	std::vector<std::any> value;
+	std::any value;
 	//分类
 	HString category;
 	//排序
 	int sort = 32;
-	//是否是数组
-	bool bArray = false;
+	//
+	std::type_info type(void);
 };
 
 class Component
@@ -90,22 +90,32 @@ protected:
 
 	HBBR_INLINE virtual void OnConstruction() {
 		//Component Property Reflection Add.
-		AddProperty("bActive", { &_bActive }, "", 0);
+		AddProperty("bActive", &_bActive, "", 0);
 	}
 
-	void AddProperty(HString name, std::vector<std::any> valuePtr, HString category , int sort = 32)
+	void AddProperty(HString name, std::any valuePtr, HString category , int sort = 32)
 	{
 		ComponentProperty pro;
 		pro.name = name;
 		pro.value = valuePtr;
 		pro.category = category;
 		pro.sort = sort;
-		pro.bArray = valuePtr.size() > 1;
 		_compProperties.push_back(pro);
 		auto valueCompare = [](const ComponentProperty& p1, const ComponentProperty& p2)->bool {
 			return p1.sort < p2.sort;
 		};
 		std::sort(_compProperties.begin(), _compProperties.end(), valueCompare);
+	}
+
+	template<class T>
+	void AddProperty(HString name, std::vector<T> valuePtr, HString category, int sort = 32)
+	{
+		std::vector<std::any> value;
+		for (int i = 0; i < valuePtr.size(); i++)
+		{
+			value.push_back(&valuePtr[i]);
+		}
+		AddProperty(name, value,category, sort);
 	}
 	
 	//<displayName , component>

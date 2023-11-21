@@ -10,8 +10,8 @@ COMPONENT_IMPLEMENT(ModelComponent)
 void ModelComponent::OnConstruction()
 {
 	Component::OnConstruction();
-	AddProperty("Model", { &_modelData }, "");
-	AddProperty("Material", { &_materials }, "");
+	AddProperty("Model",  &_modelData , "");
+	AddProperty("Material", &_materials , "");
 }
 
 void ModelComponent::SetModelByRealPath(HString path)
