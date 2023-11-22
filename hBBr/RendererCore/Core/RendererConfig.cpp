@@ -24,7 +24,7 @@ HString RendererLauguage::GetText(HString key)
 {
 	if (_rendererLauguageItem.size() <= 0)
 	{
-		HString LauguageFilePath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"Language").attribute(L"path").as_string();
+		HString LauguageFilePath = RendererConfig::Get()->_configFile.child(L"root").child(L"Language").attribute(L"path").as_string();
 		LauguageFilePath = FileSystem::GetRelativePath(LauguageFilePath.c_str());
 		LauguageFilePath = FileSystem::GetProgramPath() + LauguageFilePath;
 		FileSystem::CorrectionPath(LauguageFilePath);

@@ -17,16 +17,13 @@ SceneManager::~SceneManager()
 	}
 }
 
-//Test 
-std::weak_ptr<GameObject> testObj;
-
 void SceneManager::SceneInit(class VulkanRenderer* renderer)
 {
 	_renderer = renderer;
 
 #if IS_EDITOR
 	//create editor camera
-	auto backCamera = new GameObject("EditorCamera", NULL, true);
+	auto backCamera = new GameObject("EditorCamera", this, true);
 	backCamera->GetTransform()->SetWorldLocation(glm::vec3(0, 2, -3.0));
 	auto cameraComp = backCamera->AddComponent<CameraComponent>();
 	cameraComp->OverrideMainCamera();
@@ -41,12 +38,12 @@ void SceneManager::SceneInit(class VulkanRenderer* renderer)
 #endif
 
 	//Test model
-	auto test = new GameObject();
+	auto test = new GameObject(this);
 	auto modelComp0 = test->AddComponent<ModelComponent>();
 	modelComp0->SetModelByVirtualPath(FileSystem::GetResourceAbsPath() + "Content/Core/Basic/TestFbx_1_Combine");
 	test->SetObjectName("TestFbx_1_Combine");
 
-	GameObject* cube = new GameObject();
+	GameObject* cube = new GameObject(this);
 	testObj = cube->GetSelfWeekPtr();
 	auto modelComp = cube->AddComponent<ModelComponent>();
 	cube->GetTransform()->SetLocation(glm::vec3(0, 0.5f, 0));

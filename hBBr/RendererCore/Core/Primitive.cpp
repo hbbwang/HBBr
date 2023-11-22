@@ -3,7 +3,7 @@
 
 std::vector<std::vector<MaterialPrimitive*>> PrimitiveProxy::_allGraphicsPrimitives;
 
-std::map<MaterialPrimitive* ,std::vector<ModelPrimitive*>> PrimitiveProxy::_allModelPrimitives;
+std::map<MaterialPrimitive*, std::map<class VulkanRenderer*, std::vector<ModelPrimitive*>>>  PrimitiveProxy::_allModelPrimitives;
 
 
 void PrimitiveProxy::AddMaterialPrimitive(MaterialPrimitive* prim)
@@ -40,12 +40,6 @@ void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, Shade
 
 void PrimitiveProxy::RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
 {
-	//auto mit = _allModelPrimitives.find(prim);
-	//if (mit != _allModelPrimitives.end())
-	//{
-	//	_allModelPrimitives.erase(mit);
-	//}
-
 	if ((uint32_t)PrimitiveProxy::_allGraphicsPrimitives.size() != (uint32_t)Pass::MaxNum)
 	{
 		_allGraphicsPrimitives.resize((uint32_t)Pass::MaxNum);
@@ -58,7 +52,7 @@ void PrimitiveProxy::RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
 	}
 }
 
-void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim)
+void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim, class VulkanRenderer* renderer)
 {
 	prim->vertexData = prim->vertexInput.GetData(Shader::_vsShader[mat->vsShader + "@" + HString::FromUInt(mat->graphicsIndex.GetVSVarient())].header.vertexInput);
 	prim->vertexIndices = prim->vertexInput.vertexIndices;
@@ -66,20 +60,29 @@ void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* p
 	prim->ibSize = prim->vertexIndices.size() * sizeof(uint32_t);
 	//
 	prim->vertexInput = VertexFactory::VertexInput();
-	_allModelPrimitives[mat].push_back(prim);
+	auto it = _allModelPrimitives[mat].find(renderer);
+	if (it == _allModelPrimitives[mat].end())
+	{
+		_allModelPrimitives[mat].emplace(renderer, std::vector<ModelPrimitive*>());
+	}
+	_allModelPrimitives[mat][renderer].push_back(prim);
 }
 
-void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim)
+void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim, class VulkanRenderer* renderer)
 {
 	if(prim)
 	{
 		auto it = _allModelPrimitives.find(mat);
 		if (it != _allModelPrimitives.end())
 		{
-			auto pit = std::find(it->second.begin(), it->second.end(), prim);
-			if (pit != it->second.end())
+			auto rit = it->second.find(renderer);
+			if (rit != it->second.end())
 			{
-				it->second.erase(pit);
+				auto pit = std::find(rit->second.begin(), rit->second.end(), prim);
+				if (pit != rit->second.end())
+				{
+					rit->second.erase(pit);
+				}
 			}
 		}
 	}

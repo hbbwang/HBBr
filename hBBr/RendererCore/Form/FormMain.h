@@ -28,7 +28,7 @@ public:
 	HBBR_API static VulkanForm* CreateNewWindow(uint32_t w = 512, uint32_t h = 512, const char* title = "Renderer",bool bCreateRenderer = false ,void* parent = NULL);
 	HBBR_API static void CreateRenderer(VulkanForm* form);
 	HBBR_API static bool IsWindowFocus(SDL_Window* windowHandle);
-	HBBR_API static std::vector<VulkanForm>& GetForms() { return _forms; }
+	HBBR_API static std::vector<VulkanForm*>& GetForms() { return _forms; }
 	HBBR_API static void RemoveWindow(VulkanForm* form);
 	HBBR_API static void ResizeWindow(VulkanForm* form, uint32_t w, uint32_t h);
 	HBBR_API static void SetWindowPos(VulkanForm* form, uint32_t x, uint32_t y);
@@ -50,7 +50,7 @@ private:
 
 	static bool _bRecompilerShaders;
 
-	static std::vector<VulkanForm> _forms;
+	static std::vector<VulkanForm*> _forms;
 
 	static VulkanForm* _mainForm;
 

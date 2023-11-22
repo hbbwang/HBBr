@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <BaseSetting>
-        <Language path="Config/Internationalization/zh_CN.xml"/>
-        <Font absPath="C:/Windows/Fonts/msyh.ttc"/>
-        <FontTexture path="Resource/Font/font.png"/>
-        <FontConfig path="Resource/Font/Font.xml"/>
-    </BaseSetting>
+    <Language path="Config/Internationalization/zh_CN.xml"/>
+    <Font absPath="C:/Windows/Fonts/msyh.ttc"/>
+    <FontTexture path="Resource/Font/font.png"/>
+    <FontConfig path="Resource/Font/Font.xml"/>
 </root>

@@ -27,36 +27,36 @@
 //#pragma comment(lib ,"vld.lib")
 //#endif
 
-std::vector<VulkanForm> VulkanApp::_forms;
-VulkanForm* VulkanApp::_mainForm;
+std::vector<VulkanForm*> VulkanApp::_forms;
+VulkanForm* VulkanApp::_mainForm = NULL;
 VulkanForm* VulkanApp::_focusForm = NULL;
 std::vector<FormDropFun> VulkanApp::_dropFuns;
 bool VulkanApp::_bFocusQuit = false;
 bool VulkanApp::_bRecompilerShaders = false;
 void ResizeCallBack(SDL_Window* window, int width, int height)
 {
-	auto it = std::find_if(VulkanApp::GetForms().begin(),VulkanApp::GetForms().end(), [window](VulkanForm& form)
+	auto it = std::find_if(VulkanApp::GetForms().begin(),VulkanApp::GetForms().end(), [window](VulkanForm*&form)
 	{
-		return form.window == window;
+		return form->window == window;
 	});
-	if (it != VulkanApp::GetForms().end() && it->renderer)
+	if (it != VulkanApp::GetForms().end() && (*it)->renderer)
 	{
-		it->renderer->RendererResize((uint32_t)width, (uint32_t)height);
+		(*it)->renderer->RendererResize((uint32_t)width, (uint32_t)height);
 	}
 }
 
 void CloseCallBack(SDL_Window* window)
 {
-	auto it = std::find_if(VulkanApp::GetForms().begin(), VulkanApp::GetForms().end(), [window](VulkanForm& form)
+	auto it = std::find_if(VulkanApp::GetForms().begin(), VulkanApp::GetForms().end(), [window](VulkanForm*&form)
 	{
-		return form.window == window;
+		return form->window == window;
 	});
 	if (it != VulkanApp::GetForms().end())
 	{
-		if (it->renderer)
+		if ((*it)->renderer)
 		{
-			it->renderer->Release();
-			it->renderer = NULL;
+			(*it)->renderer->Release();
+			(*it)->renderer = NULL;
 		}
 	}
 }
@@ -137,9 +137,9 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 
 	//Import font
 	//HString ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/msyhl.ttc";
-	HString ttfFontPath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"Font").attribute(L"absPath").as_string();
+	HString ttfFontPath = RendererConfig::Get()->_configFile.child(L"root").child(L"Font").attribute(L"absPath").as_string();
 	FileSystem::CorrectionPath(ttfFontPath);
-	HString outFontTexturePath = RendererConfig::Get()->_configFile.child(L"root").child(L"BaseSetting").child(L"FontTexture").attribute(L"path").as_string();
+	HString outFontTexturePath = RendererConfig::Get()->_configFile.child(L"root").child(L"FontTexture").attribute(L"path").as_string();
 	outFontTexturePath = FileSystem::GetRelativePath(outFontTexturePath.c_str());
 	outFontTexturePath = FileSystem::GetProgramPath() + outFontTexturePath;
 	FileSystem::CorrectionPath(outFontTexturePath);
@@ -163,10 +163,6 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 
 	CreateRenderer(win);
 
-	//Try Refresh focus
-	SetFormVisiable(win, false);
-	SetFormVisiable(win, true);
-
 	_mainForm = win;
 
 	if (bCustomRenderLoop)
@@ -188,15 +184,17 @@ void VulkanApp::DeInitVulkanManager()
 	{
 		for (int i = 0; i < _forms.size(); i++)
 		{
-			if (_forms[i].renderer)
+			if (_forms[i]->renderer)
 			{
-				_forms[i].renderer->Release();
-				_forms[i].renderer = NULL;
+				_forms[i]->renderer->Release();
+				_forms[i]->renderer = NULL;
 			}
-			if (_forms[i].window)
+			if (_forms[i]->window)
 			{
-				SDL_DestroyWindow(_forms[i].window);
+				SDL_DestroyWindow(_forms[i]->window);
 			}
+			delete _forms[i];
+			_forms[i] = NULL;
 		}
 		_forms.clear();
 	}
@@ -216,10 +214,18 @@ bool VulkanApp::UpdateForm()
 	bool bStopRender = false; 
 	while (SDL_PollEvent(&event))
 	{
-		auto win = SDL_GetWindowFromID(event.window.windowID);
-		auto winFormIt = std::find_if(_forms.begin(), _forms.end(), [win](VulkanForm& form) {
-			return form.window == win;
-		});
+		SDL_Window* win = SDL_GetWindowFromID(event.window.windowID);
+		if(!win)
+			win = SDL_GetWindowFromID(event.key.windowID);
+		if (!win)
+			win = SDL_GetWindowFromID(event.button.windowID);
+		if (!win)
+			win = SDL_GetWindowFromID(event.wheel.windowID);
+		if (!win)
+			win = GetMainForm()->window;
+		auto winFormIt = std::find_if(_forms.begin(), _forms.end(), [win](VulkanForm*& form) {
+			return form->window == win;
+			});
 		VulkanForm* winForm = NULL;
 		if (winFormIt == _forms.end())
 		{
@@ -281,9 +287,9 @@ bool VulkanApp::UpdateForm()
 	{
 		for (auto w : _forms)
 		{
-			CloseCallBack(w.window);
-			SDL_DestroyWindow(w.window);
-			RemoveWindow(&w);
+			CloseCallBack(w->window);
+			SDL_DestroyWindow(w->window);
+			RemoveWindow(w);
 		}
 		MessageOut("SDL quit.", false, false, "255,255,255");
 		bQuit = true;
@@ -311,8 +317,8 @@ void VulkanApp::UpdateRender()
 	for (auto w : _forms)
 	{
 		Texture::GlobalUpdate();
-		if(w.renderer != NULL)
-			w.renderer->Render();
+		if(w->renderer != NULL)
+			w->renderer->Render();
 	}
 	HInput::ClearInput();
 }
@@ -343,16 +349,15 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 		SDL_Quit();
 	}
 
-	VulkanForm newForm = {};
-	newForm.window = window;
-	newForm.name = title;
+	VulkanForm* newForm = new VulkanForm;
+	newForm->window = window;
+	newForm->name = title;
 	if (bCreateRenderer)
 	{
-		CreateRenderer(&newForm);
-
+		CreateRenderer(newForm);
 	}
 	_forms.push_back(newForm);
-	return &_forms[_forms.size() - 1];
+	return _forms[_forms.size() - 1];
 }
 
 void VulkanApp::CreateRenderer(VulkanForm* form)
@@ -360,6 +365,9 @@ void VulkanApp::CreateRenderer(VulkanForm* form)
 	if (form != NULL)
 	{
 		form->renderer = new VulkanRenderer(form->window, form->name.c_str());
+		//Try Refresh focus
+		SetFormVisiable(form, false);
+		SetFormVisiable(form, true);
 	}
 }
 
@@ -377,8 +385,8 @@ void VulkanApp::RemoveWindow(VulkanForm* form)
 	if (form != NULL && form != nullptr)
 	{
 		auto window = form->window;
-		auto it = std::remove_if(_forms.begin(), _forms.end(), [window](VulkanForm& glfw) {
-			return window == glfw.window;
+		auto it = std::remove_if(_forms.begin(), _forms.end(), [window](VulkanForm* &glfw) {
+			return window == glfw->window;
 			});
 		if (it != _forms.end())
 		{

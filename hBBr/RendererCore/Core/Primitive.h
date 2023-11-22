@@ -64,6 +64,8 @@ struct ModelPrimitive
 
 	uint64_t					ibSize = 0;
 
+	std::vector<class VulkanRenderer*> rendererFrom;
+
 	void SetActive(bool newActive)
 	{
 		if (newActive != bActive)
@@ -188,9 +190,9 @@ public:
 
 	static void RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim);
 
-	static void AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim);
+	static void AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim, class VulkanRenderer* renderer);
 
-	static void RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim);
+	static void RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim, class VulkanRenderer* renderer);
 
 	inline static std::vector<std::vector<MaterialPrimitive*>> &GetAllMaterialPrimitiveArray() {
 		return _allGraphicsPrimitives;
@@ -200,18 +202,14 @@ public:
 		return _allGraphicsPrimitives[index];
 	}
 
-	inline static std::map<MaterialPrimitive*, std::vector<ModelPrimitive*>> &GetAllModelPrimitiveArray() {
-		return _allModelPrimitives;
-	}
-
-	inline static std::vector<ModelPrimitive*> &GetModelPrimitives(MaterialPrimitive* index) {
-		return _allModelPrimitives[index];
+	inline static std::vector<ModelPrimitive*> &GetModelPrimitives(MaterialPrimitive* index, class VulkanRenderer* renderer) {
+		return _allModelPrimitives[index][renderer];
 	}
 
 private:
 
 	static std::vector<std::vector<MaterialPrimitive*>> _allGraphicsPrimitives;
 
-	static std::map<MaterialPrimitive*, std::vector<ModelPrimitive*>> _allModelPrimitives;
+	static std::map<MaterialPrimitive*, std::map<class VulkanRenderer*, std::vector<ModelPrimitive*>>> _allModelPrimitives;
 
 };

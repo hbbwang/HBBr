@@ -10,6 +10,21 @@ std::map<HString, std::function<class Component* (class GameObject*)>> GameObjec
 
 GameObject::GameObject(HString objectName, SceneManager* scene, bool SceneEditorHide)
 {
+	ObjectInit(objectName, scene, SceneEditorHide);
+}
+
+GameObject::GameObject(SceneManager* scene, bool SceneEditorHide)
+{
+	ObjectInit("NewGameObject", scene, SceneEditorHide);
+}
+
+GameObject::~GameObject()
+{
+
+}
+
+void GameObject::ObjectInit(HString objectName, SceneManager* scene, bool SceneEditorHide)
+{
 	_guid = CreateGUID();
 #if IS_EDITOR
 	_sceneEditorHide = SceneEditorHide;
@@ -30,11 +45,6 @@ GameObject::GameObject(HString objectName, SceneManager* scene, bool SceneEditor
 	auto sharedPtr = std::shared_ptr<GameObject>(this);
 	_selfWeak = sharedPtr;
 	_scene->AddNewObject(sharedPtr);
-}
-
-GameObject::~GameObject()
-{
-
 }
 
 GameObject* GameObject::CreateGameObject(HString objectName, SceneManager* scene)

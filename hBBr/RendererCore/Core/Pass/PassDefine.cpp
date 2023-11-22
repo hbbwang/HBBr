@@ -176,7 +176,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 				manager->UpdateTextureDescriptorSet(m->GetDescriptorSet(), m->GetTextures(), m->GetSamplers());
 			}
 
-			auto prims = PrimitiveProxy::GetModelPrimitives(m);
+			auto prims = PrimitiveProxy::GetModelPrimitives(m, _renderer);
 			for (size_t primIndex = 0; primIndex < prims.size(); primIndex++)
 			{
 				ModelPrimitive* prim = prims[primIndex];
@@ -253,7 +253,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 		VkDescriptorSet texSet = m->GetDescriptorSet();
 		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &texSet, 0, NULL);
 		
-		auto prims = PrimitiveProxy::GetModelPrimitives(m);
+		auto prims = PrimitiveProxy::GetModelPrimitives(m, _renderer);
 		for (size_t m = 0; m < prims.size(); m++)
 		{
 			ModelPrimitive* prim = prims[m];

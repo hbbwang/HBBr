@@ -17,7 +17,7 @@ public:
 
 	QWidget* _mainRendererWidget = NULL;
 
-	class VulkanForm* _mainRenderer;
+	class VulkanForm* _mainRenderer = NULL;
 
 protected:
 	//不使用Qt默认的绘制引擎

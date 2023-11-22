@@ -5,6 +5,7 @@
 #include "HString.h"
 #include "Transform.h"
 #include "HGuid.h"
+
 class GameObject
 {
 	friend class SceneManager;
@@ -12,8 +13,11 @@ class GameObject
 	friend class Inspector;
 public:
 
-	GameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL , bool SceneEditorHide = false);
+	GameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL, bool SceneEditorHide = false);
+	GameObject(class SceneManager* scene = NULL, bool SceneEditorHide = false);
 	~GameObject();
+
+	void ObjectInit(HString objectName = "NewGameObject", class SceneManager* scene = NULL, bool SceneEditorHide = false);
 
 	HBBR_API static GameObject* CreateGameObject(HString objectName = "NewGameObject", class SceneManager* scene = NULL);
 

@@ -21,6 +21,8 @@
 #include "QDesktopServices.h"
 #include "qabstractitemview.h"
 #include "FileSystem.h"
+#include "RendererCore/Core/VulkanRenderer.h"
+#include "RendererCore/Form/FormMain.h"
 #include "Resource/Material.h"
 #include "Resource/ContentManager.h"
 
@@ -266,7 +268,8 @@ void ContentBrowser::ListDoubleClicked(const QModelIndex& index)
 			//Open material editor
 			if (fileInfo.suffix().compare("mat",Qt::CaseInsensitive) == 0 )
 			{
-				
+				auto form = VulkanApp::CreateNewWindow(512,512,"Material",false);
+				VulkanApp::CreateRenderer(form);
 			}
 		}
 	}

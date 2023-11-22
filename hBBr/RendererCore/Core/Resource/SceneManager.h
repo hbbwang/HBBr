@@ -56,6 +56,9 @@ private:
 
 	//需要进行销毁的Objects
 	std::vector<std::shared_ptr<GameObject>> _gameObjectNeedDestroy;
+
+	//Test 
+	std::weak_ptr<GameObject> testObj;
 };
 
 
