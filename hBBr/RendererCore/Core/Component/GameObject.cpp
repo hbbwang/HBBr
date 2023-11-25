@@ -1,19 +1,19 @@
 ﻿#include"GameObject.h"
 #include "FormMain.h"
 #include "VulkanRenderer.h"
-#include "Resource/SceneManager.h"
+#include "Resource/WorldManager.h"
 #include "Component.h"
 #include "ConsoleDebug.h"
 #include "Component/ModelComponent.h"
 
 std::map<HString, std::function<class Component* (class GameObject*)>> GameObject::_componentSpawnFunctions;
 
-GameObject::GameObject(HString objectName, SceneManager* scene, bool SceneEditorHide)
+GameObject::GameObject(HString objectName, WorldManager* scene, bool SceneEditorHide)
 {
 	ObjectInit(objectName, scene, SceneEditorHide);
 }
 
-GameObject::GameObject(SceneManager* scene, bool SceneEditorHide)
+GameObject::GameObject(WorldManager* scene, bool SceneEditorHide)
 {
 	ObjectInit("NewGameObject", scene, SceneEditorHide);
 }
@@ -23,7 +23,7 @@ GameObject::~GameObject()
 
 }
 
-void GameObject::ObjectInit(HString objectName, SceneManager* scene, bool SceneEditorHide)
+void GameObject::ObjectInit(HString objectName, WorldManager* scene, bool SceneEditorHide)
 {
 	_guid = CreateGUID();
 #if IS_EDITOR
@@ -47,12 +47,12 @@ void GameObject::ObjectInit(HString objectName, SceneManager* scene, bool SceneE
 	_scene->AddNewObject(sharedPtr);
 }
 
-GameObject* GameObject::CreateGameObject(HString objectName, SceneManager* scene)
+GameObject* GameObject::CreateGameObject(HString objectName, WorldManager* scene)
 {
 	return new GameObject(objectName, scene);
 }
 
-GameObject* GameObject::CreateModelGameObject(HString virtualPath, SceneManager* scene)
+GameObject* GameObject::CreateModelGameObject(HString virtualPath, WorldManager* scene)
 {
 	GameObject* cube = new GameObject(virtualPath.GetBaseName(), scene);
 	auto modelComp = cube->AddComponent<ModelComponent>();

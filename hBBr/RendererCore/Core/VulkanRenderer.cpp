@@ -7,7 +7,7 @@
 #include "FileSystem.h"
 #include "Shader.h"
 #include "Thread.h"
-#include "Resource/SceneManager.h"
+#include "Resource/WorldManager.h"
 #include "Component/GameObject.h"
 #include "Component/CameraComponent.h"
 #if IS_EDITOR
@@ -39,7 +39,7 @@ void VulkanRenderer::Release()
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
 	_passManager.reset();
-	_sceneManager.reset();
+	_worldManager.reset();
 	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf);
 	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
 	_vulkanManager->DestroyRenderSemaphores(_presentSemaphore);
@@ -91,7 +91,7 @@ void VulkanRenderer::Init()
 	_renderThreadFuncs.reserve(10);
 
 	//Init scene
-	_sceneManager.reset(new SceneManager());
+	_worldManager.reset(new WorldManager());
 	 
 	//Init passes
 	_passManager.reset(new PassManager());
@@ -106,7 +106,7 @@ void VulkanRenderer::Render()
 	if (!_bInit)
 	{
 		_passManager->PassesInit(this);
-		_sceneManager->SceneInit(this);
+		_worldManager->WorldInit(this);
 		_bInit = true;
 	}
 	else if (!_bRendererRelease && _bInit)
@@ -140,7 +140,7 @@ void VulkanRenderer::Render()
 			func();
 		}
 
-		_sceneManager->SceneUpdate();
+		_worldManager->WorldUpdate();
 
 		SetupPassUniformBuffer();
 
@@ -169,10 +169,10 @@ void VulkanRenderer::SetupPassUniformBuffer()
 {
 	const CameraComponent* mainCamera = NULL;
 	if (_bIsInGame)
-		mainCamera = _sceneManager->_mainCamera;
+		mainCamera = _worldManager->_mainCamera;
 #if IS_EDITOR
 	else
-		mainCamera = _sceneManager->_editorCamera;
+		mainCamera = _worldManager->_editorCamera;
 #endif
 	if (mainCamera != NULL)
 	{

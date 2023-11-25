@@ -1214,7 +1214,7 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath, boo
 	fontDocPath = FileSystem::GetRelativePath(fontDocPath.c_str());
 	fontDocPath = FileSystem::GetProgramPath() + fontDocPath;
 	FileSystem::CorrectionPath(fontDocPath);
-	XMLStream::CreatesXMLFile(fontDocPath, doc);
+	XMLStream::CreateXMLFile(fontDocPath, doc);
 	auto root = doc.append_child(L"root");
 	root.append_attribute(L"num").set_value(characters.size());
 	root.append_attribute(L"width").set_value(maxTextureSize);

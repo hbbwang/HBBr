@@ -5,7 +5,7 @@
 
 class CameraComponent :public Component
 {
-	friend class SceneManager;
+	friend class WorldManager;
 public:
 	
 	CameraComponent(class GameObject* parent);

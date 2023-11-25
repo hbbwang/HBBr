@@ -151,9 +151,6 @@
     <ClInclude Include="Core\Component\CameraComponent.h">
       <Filter>Renderer\Core\Object\Component</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Resource\SceneManager.h">
-      <Filter>Renderer\Core\Resource</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Component\Component.h">
       <Filter>Renderer\Core\Object\Component</Filter>
     </ClInclude>
@@ -225,6 +222,9 @@
     </ClInclude>
     <ClInclude Include="Core\Resource\ResourceObject.h">
       <Filter>Renderer\Core\Resource\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\WorldManager.h">
+      <Filter>Renderer\Core\Resource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -309,9 +309,6 @@
     <ClCompile Include="Core\Component\CameraComponent.cpp">
       <Filter>Renderer\Core\Object\Component</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Resource\SceneManager.cpp">
-      <Filter>Renderer\Core\Resource</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Component\Component.cpp">
       <Filter>Renderer\Core\Object\Component</Filter>
     </ClCompile>
@@ -374,6 +371,9 @@
     </ClCompile>
     <ClCompile Include="Core\Resource\ResourceObject.cpp">
       <Filter>Renderer\Core\Resource\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\WorldManager.cpp">
+      <Filter>Renderer\Core\Resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

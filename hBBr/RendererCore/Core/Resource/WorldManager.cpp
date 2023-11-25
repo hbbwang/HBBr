@@ -1,10 +1,13 @@
-﻿#include"SceneManager.h"
+﻿#include"WorldManager.h"
 #include "VulkanRenderer.h"
 #include "Component/GameObject.h"
 #include "Component/ModelComponent.h"
 #include "Component/CameraComponent.h"
 #include "FileSystem.h"
-SceneManager::~SceneManager()
+#include "XMLStream.h"
+#include "HInput.h"
+
+WorldManager::~WorldManager()
 {
 	//wait gameobject destroy
 	while (_gameObjects.size() > 0 || _gameObjectNeedDestroy.size() > 0)
@@ -13,11 +16,42 @@ SceneManager::~SceneManager()
 		{
 			_gameObjects[i]->Destroy();
 		}
-		SceneUpdate();
+		WorldUpdate();
 	}
 }
+//
+//void WorldManager::LoadAsset(HGUID guid)
+//{
+//
+//}
+//
+//void WorldManager::SaveWorld(HString path)
+//{
+//	if (FileSystem::IsDir(path.c_str()))
+//	{
+//		HString filePath = path + _worldName + ".xml";
+//		pugi::xml_document doc;
+//		XMLStream::CreateXMLFile("", doc);
+//		auto root = doc.append_child(L"root");
+//		//save scenes
+//		auto scene = root.append_child(L"scene");
+//		for (auto& i : _sceneDocs)
+//		{
+//			HString name = i.first;
+//			HString guidStr = i.second.str().c_str();
+//			auto item = scene.append_child(L"Item");
+//			item.append_attribute(L"Name").set_value(name.c_wstr());
+//			item.append_attribute(L"GUID").set_value(guidStr.c_wstr());
+//		}
+//		doc.save_file(filePath.c_wstr());
+//	}
+//	else
+//	{
+//		MessageOut("[SaveWorld] function parameter 'path' is not a valid directory.", false, false, "255,255,0");
+//	}
+//}
 
-void SceneManager::SceneInit(class VulkanRenderer* renderer)
+void WorldManager::WorldInit(class VulkanRenderer* renderer)
 {
 	_renderer = renderer;
 
@@ -51,8 +85,8 @@ void SceneManager::SceneInit(class VulkanRenderer* renderer)
 	cube->SetObjectName("TestFbx_Cube");
 
 }
-#include "HInput.h"
-void SceneManager::SceneUpdate()
+
+void WorldManager::WorldUpdate()
 {
 	//Test
 	if (!testObj.expired() && testObj.lock()->GetTransform())
@@ -92,7 +126,7 @@ void SceneManager::SceneUpdate()
 	#endif
 }
 
-void SceneManager::AddNewObject(std::shared_ptr<GameObject> newObject)
+void WorldManager::AddNewObject(std::shared_ptr<GameObject> newObject)
 {
 	_gameObjects.push_back(newObject);
 	#if IS_EDITOR
@@ -104,7 +138,7 @@ void SceneManager::AddNewObject(std::shared_ptr<GameObject> newObject)
 	#endif
 }
 
-void SceneManager::RemoveObject(GameObject* object)
+void WorldManager::RemoveObject(GameObject* object)
 {
 	auto it = std::find_if(_gameObjects.begin(),_gameObjects.end(), [object](std::shared_ptr<GameObject>& obj)
 		{

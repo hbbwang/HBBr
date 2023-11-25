@@ -80,8 +80,8 @@ public:
 		return _frameRate/1000.0f;
 	}
 
-	HBBR_API HBBR_INLINE class SceneManager* GetScene() {
-		return _sceneManager.get();
+	HBBR_API HBBR_INLINE class WorldManager* GetScene() {
+		return _worldManager.get();
 	}
 
 	HBBR_API HBBR_INLINE bool HasFocus() {
@@ -172,7 +172,7 @@ private:
 	std::unique_ptr<class PassManager> _passManager;
 
 	//Scene
-	std::unique_ptr<class SceneManager> _sceneManager;
+	std::unique_ptr<class WorldManager> _worldManager;
 
 	HTime _frameTime;
 

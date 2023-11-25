@@ -1,6 +1,6 @@
 #include "SceneOutline.h"
 #include "VulkanRenderer.h"
-#include "Resource/SceneManager.h"
+#include "Resource/WorldManager.h"
 #include "Component/GameObject.h"
 #include <qheaderview.h>
 #include <qaction.h>
@@ -243,14 +243,14 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     _renderer = renderer;
     auto scene = _renderer->GetScene();
     scene->_editorSceneUpdateFunc = [this, scene]
-    (SceneManager* scene, std::vector<std::shared_ptr<GameObject>> aliveObjects)
+    (WorldManager* scene, std::vector<std::shared_ptr<GameObject>> aliveObjects)
     {
 
     };
 
     //Editor GameObject更新委托
     scene->_editorGameObjectUpdateFunc = [this, scene]
-    (SceneManager* scene, std::shared_ptr<GameObject> object)
+    (WorldManager* scene, std::shared_ptr<GameObject> object)
     {
         if (object->_bEditorNeedUpdate)
         {
@@ -269,14 +269,14 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
 
     //Editor GameObject Spawn委托
     scene->_editorGameObjectAddFunc = [this, scene]
-    (SceneManager* scene, std::shared_ptr<GameObject> object) 
+    (WorldManager* scene, std::shared_ptr<GameObject> object) 
     {
         _treeWidget->addTopLevelItem(new GameObjectItem(object.get(), _treeWidget));
     };
 
     //Editor GameObject Destroy委托
     scene->_editorGameObjectRemoveFunc = [this, scene]
-    (SceneManager* scene, std::shared_ptr<GameObject> object)
+    (WorldManager* scene, std::shared_ptr<GameObject> object)
     {
         auto item = (GameObjectItem*)object->_editorObject;
         //QT5 QTreeWidgetItem 删除了父节点,子节点内存也会更着一起销毁,
