@@ -223,6 +223,7 @@ bool VulkanRenderer::Resizing(bool bForce)
 		{
 			vkDeviceWaitIdle(_vulkanManager->GetDevice());
 			_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
+
 #if __ANDROID__
 			_Sleep(200);
 #endif

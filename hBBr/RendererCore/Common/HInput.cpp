@@ -7,7 +7,7 @@ std::vector<KeyCallBack> HInput::_keyRegisterRepeat;
 std::vector<MouseCallBack> HInput::_mouseRegisterDefault;
 std::vector<MouseCallBack> HInput::_mouseRegisterRepeat;
 
-void HInput::KeyProcess(void* focusWindowHandle , KeyCode key, KeyMod mod, Action action)
+void HInput::KeyProcess(VulkanForm* focusWindowHandle , KeyCode key, KeyMod mod, Action action)
 {
 	KeyCallBack callBack;
 	callBack.key = key;
@@ -36,7 +36,7 @@ void HInput::KeyProcess(void* focusWindowHandle , KeyCode key, KeyMod mod, Actio
 	}
 }
 
-void HInput::MouseProcess(void* focusWindowHandle, MouseButton mouse, Action action)
+void HInput::MouseProcess(VulkanForm* focusWindowHandle, MouseButton mouse, Action action)
 {
 	MouseCallBack callBack;
 	callBack.button = mouse;

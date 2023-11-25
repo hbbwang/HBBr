@@ -10,6 +10,7 @@ struct VulkanForm
 	HString name;
 	SDL_Window* window = NULL;
 	class VulkanRenderer* renderer = NULL;
+	bool bMinimized = false;
 };
 
 class VulkanApp

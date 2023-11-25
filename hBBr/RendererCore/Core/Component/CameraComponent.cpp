@@ -41,39 +41,39 @@ void CameraComponent::Update()
 	{
 		static glm::vec2 lastMousePos;
 		static glm::vec2 lockMousePos;
-		glm::vec2 currentMousePos = HInput::GetMousePos();
-		if (HInput::GetMouse(Button_Right))
+		glm::vec2 currentMousePos = GetMousePos();
+		if (GetMouse(Button_Right))
 		{					
 			glm::vec2 mouseAxis = lastMousePos - currentMousePos;
 			HInput::SetCursorPos(lockMousePos);
-			lastMousePos = HInput::GetMousePos();
+			lastMousePos = GetMousePos();
 			
 			float frameRate = (float)renderer->GetFrameRateS();
 			worldRot.y -= mouseAxis.x * _editorMouseSpeed;
 			worldRot.x -= mouseAxis.y * _editorMouseSpeed;
 			trans->SetWorldRotation(worldRot);
 			//
-			if (HInput::GetKey(Key_W))
+			if (GetKey(Key_W))
 			{
 				worldPos += trans->GetForwardVector() * _editorMoveSpeed * frameRate;
 			}
-			if (HInput::GetKey(Key_S))
+			if (GetKey(Key_S))
 			{
 				worldPos -= trans->GetForwardVector() * _editorMoveSpeed * frameRate;
 			}
-			if (HInput::GetKey(Key_A))
+			if (GetKey(Key_A))
 			{
 				worldPos -= trans->GetRightVector() * _editorMoveSpeed * frameRate;
 			}
-			if (HInput::GetKey(Key_D))
+			if (GetKey(Key_D))
 			{
 				worldPos += trans->GetRightVector() * _editorMoveSpeed * frameRate;
 			}
-			if (HInput::GetKey(Key_Q))
+			if (GetKey(Key_Q))
 			{
 				worldPos -= trans->GetUpVector() * _editorMoveSpeed * frameRate;
 			}
-			if (HInput::GetKey(Key_E))
+			if (GetKey(Key_E))
 			{
 				worldPos += trans->GetUpVector() * _editorMoveSpeed * frameRate;
 			}		

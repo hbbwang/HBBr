@@ -335,14 +335,14 @@ struct KeyCallBack
 	KeyCode key;
 	Action  action;
 	KeyMod  mod;
-	void* focusWindowHandle = NULL; 
+    VulkanForm* focusWindowHandle = NULL;
 };
 
 struct MouseCallBack
 {
 	MouseButton button;
 	Action  action;
-	void* focusWindowHandle = NULL;
+	VulkanForm* focusWindowHandle = NULL;
 };
 
 class HInput
@@ -355,62 +355,67 @@ class HInput
     static std::vector<MouseCallBack> _mouseRegisterDefault;
     static std::vector<MouseCallBack> _mouseRegisterRepeat;
 
-    inline static VulkanForm* HasFocus()
-    {
-        if (VulkanApp::_focusForm && VulkanApp::_focusForm->renderer)
-        {
-            return VulkanApp::_focusForm;
-        }
-        else if (VulkanApp::GetMainForm() && VulkanApp::GetMainForm()->renderer)
-        {
-            return VulkanApp::GetMainForm();
-        }
-        return NULL;
-    }
-
 public:
 	//Keyboard	注册当前帧反馈按键
 
-	static inline bool GetKey(KeyCode key) {
-        auto focusForm = HasFocus();
-		if (!focusForm)
+	static inline bool GetKey(KeyCode key, class VulkanRenderer* renderer = NULL) {
+        if (!renderer)
+        {
+            renderer = VulkanApp::_mainForm->renderer;
+        }
+		if (!renderer)
 			return false;
-		return FindRepeatKey(key, focusForm) != NULL;
+		return FindRepeatKey(key, renderer) != NULL;
 	}
 
-	static inline bool GetKeyDown(KeyCode key) {
-        auto focusForm = HasFocus();
-        if (!focusForm)
+	static inline bool GetKeyDown(KeyCode key, class VulkanRenderer* renderer = NULL) {
+        if (!renderer)
+        {
+            renderer = VulkanApp::_mainForm->renderer;
+        }
+        if (!renderer)
             return false;
-		return FindDefaultKey(key, Action::PRESS, focusForm) != NULL;
+		return FindDefaultKey(key, Action::PRESS, renderer) != NULL;
 	}
 
-	static inline bool GetKeyUp(KeyCode key) {
-        auto focusForm = HasFocus();
-        if (!focusForm)
+	static inline bool GetKeyUp(KeyCode key, class VulkanRenderer* renderer = NULL) {
+        if (!renderer)
+        {
+            renderer = VulkanApp::_mainForm->renderer;
+        }
+        if (!renderer)
             return false;
-		return FindDefaultKey(key, Action::RELEASE, focusForm) != NULL;
+		return FindDefaultKey(key, Action::RELEASE, renderer) != NULL;
 	}
 
-	static inline bool GetMouse(MouseButton button) {
-        auto focusForm = HasFocus();
-        if (!focusForm)
+	static inline bool GetMouse(MouseButton button, class VulkanRenderer* renderer = NULL) {
+        if (!renderer)
+        {
+            renderer = VulkanApp::_mainForm->renderer;
+        }
+        if (!renderer)
             return false;
-		return FindRepeatMouse(button, focusForm) != NULL;
+		return FindRepeatMouse(button, renderer) != NULL;
 	}
 
-	static inline bool GetMouseDown(MouseButton button) {
-        auto focusForm = HasFocus();
-        if (!focusForm)
+	static inline bool GetMouseDown(MouseButton button, class VulkanRenderer* renderer = NULL) {
+        if (!renderer)
+        {
+            renderer = VulkanApp::_mainForm->renderer;
+        }
+        if (!renderer)
             return false;
-		return FindDefaultMouse(button, Action::PRESS, focusForm) != NULL;
+		return FindDefaultMouse(button, Action::PRESS, renderer) != NULL;
 	}
 
-	static inline bool GetMouseUp(MouseButton button) {
-        auto focusForm = HasFocus();
-        if (!focusForm)
+	static inline bool GetMouseUp(MouseButton button, class VulkanRenderer* renderer = NULL) {
+        if (!renderer)
+        {
+            renderer = VulkanApp::_mainForm->renderer;
+        }
+        if (!renderer)
             return false;
-		return FindDefaultMouse(button, Action::RELEASE, focusForm) != NULL;
+		return FindDefaultMouse(button, Action::RELEASE, renderer) != NULL;
 	}
 
     static inline void SetCursorPos(glm::vec2 pos)
@@ -420,9 +425,9 @@ public:
 
     static inline void SetCursorPosClient(glm::vec2 pos)
     {
-        if (VulkanApp::_focusForm && VulkanApp::_focusForm->window)
+        if (VulkanApp::GetFocusForm() && VulkanApp::GetFocusForm()->window)
         {
-            SDL_WarpMouseInWindow(VulkanApp::_focusForm->window, pos.x, pos.y);
+            SDL_WarpMouseInWindow(VulkanApp::GetFocusForm()->window, pos.x, pos.y);
         }     
     }
 
@@ -451,17 +456,17 @@ public:
     }
 
 	//键盘输入的回调函数中调用,记录当前帧按下的按键,其他时候不要主动调用该函数!
-	static void KeyProcess(void* focusWindowHandle , KeyCode key, KeyMod mod ,Action action);
+	static void KeyProcess(VulkanForm* focusWindowHandle , KeyCode key, KeyMod mod ,Action action);
 
 	//鼠标输入的回调函数中调用,记录当前帧按下的按键,其他时候不要主动调用该函数!
-	static void MouseProcess(void* focusWindowHandle, MouseButton mouse, Action action);
+	static void MouseProcess(VulkanForm* focusWindowHandle, MouseButton mouse, Action action);
 
 private:
 
-	static inline KeyCallBack* FindDefaultKey(KeyCode key , Action action, VulkanForm* form)
+	static inline KeyCallBack* FindDefaultKey(KeyCode key , Action action, class VulkanRenderer* renderer)
 	{
-		auto it = std::find_if(_keyRegisterDefault.begin(), _keyRegisterDefault.end(), [key, action, form](KeyCallBack& callback) {
-			return callback.key == key && callback.action == action && (SDL_Window*)callback.focusWindowHandle == form->window;
+		auto it = std::find_if(_keyRegisterDefault.begin(), _keyRegisterDefault.end(), [key, action, renderer](KeyCallBack& callback) {
+			return callback.key == key && callback.action == action && callback.focusWindowHandle && callback.focusWindowHandle->renderer == renderer;
 			});
 		if (it != _keyRegisterDefault.end())
 			return &(*it);
@@ -469,10 +474,10 @@ private:
 			return NULL;
 	}
 
-	static inline KeyCallBack* FindRepeatKey(KeyCode key, VulkanForm* form)
+	static inline KeyCallBack* FindRepeatKey(KeyCode key, class VulkanRenderer* renderer)
 	{
-		auto it = std::find_if(_keyRegisterRepeat.begin(), _keyRegisterRepeat.end(), [form,key](KeyCallBack& callback) {
-            return callback.key == key && (SDL_Window*)callback.focusWindowHandle == form->window;
+		auto it = std::find_if(_keyRegisterRepeat.begin(), _keyRegisterRepeat.end(), [renderer,key](KeyCallBack& callback) {
+            return callback.key == key && callback.focusWindowHandle && callback.focusWindowHandle->renderer == renderer;
 			});
 		if (it != _keyRegisterRepeat.end())
 			return &(*it);
@@ -481,10 +486,10 @@ private:
 	}
 
 	//
-	static inline MouseCallBack* FindDefaultMouse(MouseButton mouse, Action action, VulkanForm* form)
+	static inline MouseCallBack* FindDefaultMouse(MouseButton mouse, Action action, class VulkanRenderer* renderer)
 	{
-		auto it = std::find_if(_mouseRegisterDefault.begin(), _mouseRegisterDefault.end(), [mouse, action, form](MouseCallBack& callback) {
-			return callback.button == mouse && callback.action == action && (SDL_Window*)callback.focusWindowHandle == form->window;
+		auto it = std::find_if(_mouseRegisterDefault.begin(), _mouseRegisterDefault.end(), [mouse, action, renderer](MouseCallBack& callback) {
+			return callback.button == mouse && callback.action == action && callback.focusWindowHandle && callback.focusWindowHandle->renderer == renderer;
 			});
 		if (it != _mouseRegisterDefault.end())
 			return &(*it);
@@ -492,13 +497,15 @@ private:
 			return NULL;
 	}
 
-	static inline MouseCallBack* FindRepeatMouse(MouseButton mouse, VulkanForm* form)
+	static inline MouseCallBack* FindRepeatMouse(MouseButton mouse, class VulkanRenderer* renderer)
 	{
-		auto it = std::find_if(_mouseRegisterRepeat.begin(), _mouseRegisterRepeat.end(), [mouse, form](MouseCallBack& callback) {
-			return callback.button == mouse && (SDL_Window*)callback.focusWindowHandle == form->window;
+		auto it = std::find_if(_mouseRegisterRepeat.begin(), _mouseRegisterRepeat.end(), [mouse, renderer](MouseCallBack& callback) {
+			return callback.button == mouse && callback.focusWindowHandle && callback.focusWindowHandle->renderer == renderer;
 			});
-		if (it != _mouseRegisterRepeat.end())
-			return &(*it);
+        if (it != _mouseRegisterRepeat.end())
+        {
+            return &(*it);
+        }
 		else
 			return NULL;
 	}

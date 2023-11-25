@@ -840,6 +840,9 @@ VkExtent2D VulkanManager::CreateSwapchain(
 {
 	//ConsoleDebug::print_endl("Create Swapchain KHR.");
 	VkPresentModeKHR present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+
+	//我们用锁帧的方式实现垂直同步吧
+#if 0
 	//if (_winInfo.vsync)
 	{
 		uint32_t present_mode_count = 0;
@@ -977,7 +980,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		}
 		ConsoleDebug::printf_endl("Current presene mode is : " + CurrentPresentMode + " :%d ", (int)VK_PRESENT_MODE_MAILBOX_KHR);
 	}
-
+#endif
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_gpuDevice, surface, &surfaceCapabilities);
 	VkSurfaceTransformFlagBitsKHR PreTransform;
 

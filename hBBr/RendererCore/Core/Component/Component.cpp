@@ -6,6 +6,7 @@ Component::Component(GameObject* parent)
 {
 	_bActive = true;
 	_gameObject = parent;
+	_renderer = _gameObject->_scene->GetRenderer();
 }
 
 Component::~Component()

@@ -6,6 +6,7 @@
 #include <functional>
 #include <typeinfo>
 #include <any>
+#include "HInput.h"
 
 #define COMPONENT_DEFINE(ComponentClassName)\
 public:\
@@ -120,6 +121,41 @@ protected:
 
 	virtual void ExecuteDestroy();
 
+	//input fallback
+	inline bool GetKey(KeyCode key) {
+		return HInput::GetKey(key,_renderer);
+	}
+
+	inline bool GetKeyDown(KeyCode key) {
+		return HInput::GetKeyDown(key, _renderer);
+	}
+
+	inline bool GetKeyUp(KeyCode key) {
+		return HInput::GetKeyUp(key, _renderer);
+	}
+
+	inline bool GetMouse(MouseButton button) {
+		return HInput::GetMouse(button, _renderer);
+	}
+
+	inline bool GetMouseDown(MouseButton button) {
+		return HInput::GetMouseDown(button, _renderer);
+	}
+
+	inline bool GetMouseUp(MouseButton button) {
+		return HInput::GetMouseUp(button, _renderer);
+	}
+
+	inline glm::vec2 GetMousePos()
+	{
+		return HInput::GetMousePos();
+	}
+
+	inline glm::vec2 GetMousePosClient()
+	{
+		return HInput::GetMousePosClient();
+	}
+
 	bool _bActive;
 
 	bool _bInit;
@@ -128,4 +164,5 @@ protected:
 
 	class GameObject* _gameObject = NULL;
 	
+	class VulkanRenderer* _renderer = NULL;
 };
