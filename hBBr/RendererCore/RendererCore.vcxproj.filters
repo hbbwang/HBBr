@@ -223,8 +223,11 @@
     <ClInclude Include="Core\Resource\ResourceObject.h">
       <Filter>Renderer\Core\Resource\Asset</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Resource\WorldManager.h">
-      <Filter>Renderer\Core\Resource</Filter>
+    <ClInclude Include="Core\Resource\World.h">
+      <Filter>Renderer\Core\Resource\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resource\Level.h">
+      <Filter>Renderer\Core\Resource\Asset</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -372,8 +375,11 @@
     <ClCompile Include="Core\Resource\ResourceObject.cpp">
       <Filter>Renderer\Core\Resource\Asset</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Resource\WorldManager.cpp">
-      <Filter>Renderer\Core\Resource</Filter>
+    <ClCompile Include="Core\Resource\World.cpp">
+      <Filter>Renderer\Core\Resource\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Resource\Level.cpp">
+      <Filter>Renderer\Core\Resource\Asset</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

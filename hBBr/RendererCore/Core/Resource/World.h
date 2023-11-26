@@ -2,8 +2,8 @@
 
 //世界类,每个渲染器必须有一个场景管理类,用来储存当前场景的所有对象(GameObject)
 //世界文件后缀为.world
-//场景的结构由多个场景（.scene）组成
-
+//场景的结构由多个场景（.level）组成
+#include "Resource/ResourceObject.h"
 #include <vector>
 #include <memory>
 #include <functional>

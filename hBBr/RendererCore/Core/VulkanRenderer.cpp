@@ -7,7 +7,7 @@
 #include "FileSystem.h"
 #include "Shader.h"
 #include "Thread.h"
-#include "Resource/WorldManager.h"
+#include "Resource/World.h"
 #include "Component/GameObject.h"
 #include "Component/CameraComponent.h"
 #if IS_EDITOR
@@ -90,7 +90,7 @@ void VulkanRenderer::Init()
 	_renderThreadFuncsOnce.reserve(10);
 	_renderThreadFuncs.reserve(10);
 
-	//Init scene
+	//Init world
 	_worldManager.reset(new WorldManager());
 	 
 	//Init passes

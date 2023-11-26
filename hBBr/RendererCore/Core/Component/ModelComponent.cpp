@@ -4,7 +4,7 @@
 #include "GameObject.h"
 #include "FileSystem.h"
 #include "ContentManager.h"
-#include "WorldManager.h"
+#include "World.h"
 COMPONENT_IMPLEMENT(ModelComponent)
 
 void ModelComponent::OnConstruction()

@@ -293,11 +293,12 @@
     <ClInclude Include="Core\PassManager.h" />
     <ClInclude Include="Core\Resource\ContentManager.h" />
     <ClInclude Include="Core\Resource\HGuid.h" />
+    <ClInclude Include="Core\Resource\Level.h" />
     <ClInclude Include="Core\Resource\Material.h" />
     <ClInclude Include="Core\Resource\ModelData.h" />
     <ClInclude Include="Core\Resource\ResourceObject.h" />
     <ClInclude Include="Core\Resource\Texture.h" />
-    <ClInclude Include="Core\Resource\WorldManager.h" />
+    <ClInclude Include="Core\Resource\World.h" />
     <ClInclude Include="Core\Thread.h" />
     <ClInclude Include="Core\Shader.h" />
     <ClInclude Include="Core\VertexFactory.h" />
@@ -346,11 +347,12 @@
     <ClCompile Include="Core\PassManager.cpp" />
     <ClCompile Include="Core\Resource\ContentManager.cpp" />
     <ClCompile Include="Core\Resource\HGuid.cpp" />
+    <ClCompile Include="Core\Resource\Level.cpp" />
     <ClCompile Include="Core\Resource\Material.cpp" />
     <ClCompile Include="Core\Resource\ModelData.cpp" />
     <ClCompile Include="Core\Resource\ResourceObject.cpp" />
     <ClCompile Include="Core\Resource\Texture.cpp" />
-    <ClCompile Include="Core\Resource\WorldManager.cpp" />
+    <ClCompile Include="Core\Resource\World.cpp" />
     <ClCompile Include="Core\Thread.cpp" />
     <ClCompile Include="Core\Shader.cpp" />
     <ClCompile Include="Core\VertexFactory.cpp" />

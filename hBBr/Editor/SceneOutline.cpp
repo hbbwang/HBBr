@@ -1,6 +1,6 @@
 #include "SceneOutline.h"
 #include "VulkanRenderer.h"
-#include "Resource/WorldManager.h"
+#include "Resource/World.h"
 #include "Component/GameObject.h"
 #include <qheaderview.h>
 #include <qaction.h>
