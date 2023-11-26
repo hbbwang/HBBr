@@ -421,6 +421,7 @@ void VulkanApp::RemoveWindow(VulkanForm* form)
 			});
 		if (it != _forms.end())
 		{
+			delete (*it);
 			_forms.erase(it);
 		}
 	}
