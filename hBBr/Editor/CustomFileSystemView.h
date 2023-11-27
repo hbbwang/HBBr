@@ -3,7 +3,7 @@
 #include <QListView>
 #include <qtreeview.h>
 #include <qtooltip.h>
-#include "Resource/ContentManager.h"
+#include "Asset/ContentManager.h"
 
 class QWidgetAction;
 class QLineEdit;

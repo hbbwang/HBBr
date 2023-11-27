@@ -1,4 +1,4 @@
-#include "Inspector.h"
+ï»¿#include "Inspector.h"
 #include "qlabel.h"
 #include "qtextedit.h"
 #include "Component/GameObject.h"
@@ -7,8 +7,8 @@
 #include "Component.h"
 #include "ToolBox.h"
 #include "VectorSetting.h"
-#include "ResourceLine.h"
-#include "ResourceObject.h"
+#include "AssetLine.h"
+#include "AssetObject.h"
 #include "FileSystem.h"
 
 #include "ModelData.h"
@@ -25,7 +25,7 @@ Inspector::Inspector(QWidget *parent)
 	this->setFocusPolicy(Qt::FocusPolicy::ClickFocus);
 	scrollArea = new QScrollArea(this);
 	scrollArea->setWidgetResizable(true);
-	scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);  // ½ûÓÃºáÏò¹ö¶¯Ìõ
+	scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);  // ï¿½ï¿½ï¿½Ãºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	_layoutMain = new QVBoxLayout(this);
 	scrollWidget = new QWidget(scrollArea);
 	scrollWidget->setLayout(_layoutMain);
@@ -91,7 +91,7 @@ if (!newObject.expired())\
 {\
 	*(*className##_value) = newObject;\
 }\
-line->_objectBind = ((std::weak_ptr<class ResourceObject>*) * className##_value);
+line->_objectBind = ((std::weak_ptr<class AssetObject>*) * className##_value);
 
 
 void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool bFoucsUpdate)
@@ -221,12 +221,12 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 			else if (p.type == typeid(std::weak_ptr<ModelData>).name())
 			{
 				auto value = ((std::weak_ptr<ModelData>*)p.value);
-				ResourceLine* line = new ResourceLine(p.name, this, value->lock()->_assetInfo->virtualPath, value->lock()->_assetInfo->suffix);
+				AssetLine* line = new AssetLine(p.name, this, value->lock()->_assetInfo->virtualPath, value->lock()->_assetInfo->suffix);
 				compWidget->layout()->addWidget(line);
-				line->_bindFindButtonFunc = [](const char* p) { //²éÕÒ°´Å¥»Øµ÷º¯Êý
+				line->_bindFindButtonFunc = [](const char* p) { //ï¿½ï¿½ï¿½Ò°ï¿½Å¥ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½
 
 				};
-				line->_bindStringFunc = [p, value](ResourceLine* line, const char* s) { //ÎÄ¼þÍÏ×§»Øµ÷º¯Êý
+				line->_bindStringFunc = [p, value](AssetLine* line, const char* s) { //ï¿½Ä¼ï¿½ï¿½ï¿½×§ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½
 					auto guidStr = FileSystem::GetBaseName(s);
 					HGUID guid;
 					StringToGUID(guidStr.c_str(), &guid);
@@ -237,7 +237,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 						{
 							*value = newObject; 
 						}
-						line->_objectBind = ((std::weak_ptr<class ResourceObject>*)value);
+						line->_objectBind = ((std::weak_ptr<class AssetObject>*)value);
 					}
 					else
 					{
@@ -254,11 +254,11 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				compWidget->layout()->addWidget(box);
 				for (int i = 0; i < value->size(); i++)
 				{
-					ResourceLine* line = new ResourceLine(value->at(i).lock()->GetPrimitive()->graphicsName, this, value->at(i).lock()->_assetInfo->virtualPath, value->at(i).lock()->_assetInfo->suffix);
+					AssetLine* line = new AssetLine(value->at(i).lock()->GetPrimitive()->graphicsName, this, value->at(i).lock()->_assetInfo->virtualPath, value->at(i).lock()->_assetInfo->suffix);
 					box->addSubWidget(line);
 					line->_bindFindButtonFunc = [](const char* p) {
 					};
-					line->_bindStringFunc = [value,i](ResourceLine* line, const char* s) {
+					line->_bindStringFunc = [value,i](AssetLine* line, const char* s) {
 						auto guidStr = FileSystem::GetBaseName(s);
 						HGUID guid;
 						StringToGUID(guidStr.c_str(), &guid);
@@ -269,7 +269,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 							{
 								value->at(i) = newObject;
 							}
-							line->_objectBind = ((std::weak_ptr<class ResourceObject>*)value);
+							line->_objectBind = ((std::weak_ptr<class AssetObject>*)value);
 						}
 					};
 				}

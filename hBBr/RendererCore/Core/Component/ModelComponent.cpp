@@ -1,5 +1,5 @@
 ﻿#include "ModelComponent.h"
-#include "Resource/ModelData.h"
+#include "Asset/ModelData.h"
 #include "Primitive.h"
 #include "GameObject.h"
 #include "FileSystem.h"

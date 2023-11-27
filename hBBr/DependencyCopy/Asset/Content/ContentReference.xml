@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<root>
+	<Model>
+		<Item GUID="B32B0C1E-D358-464F-8F0C-52F0DD0FAA05" Name="Cube" Suffix="fbx" Path="./Asset/Content/Core/Basic/" ByteSize="0">
+			<Ref Type="2">61A147FF-32BD-48EC-B523-57BC75EB16BA</Ref>
+		</Item>
+		<Item GUID="7700EA47-D382-40DE-A64F-D97C125A4472" Name="Plane" Suffix="fbx" Path="./Asset/Content/Core/Basic/" ByteSize="0">
+			<Ref Type="2">61A147FF-32BD-48EC-B523-57BC75EB16BA</Ref>
+		</Item>
+		<Item GUID="E4F2CC0F-32CD-4167-BDA2-FCF7DA537363" Name="Sphere" Suffix="fbx" Path="./Asset/Content/Core/Basic/" ByteSize="0">
+			<Ref Type="2">61A147FF-32BD-48EC-B523-57BC75EB16BA</Ref>
+		</Item>
+		<Item GUID="B7CF5F97-BFB9-4C36-893C-448B57776F69" Name="TestFbx_1_Combine" Suffix="fbx" Path="./Asset/Content/Core/Basic/" ByteSize="0">
+			<Ref Type="2">61A147FF-32BD-48EC-B523-57BC75EB16BA</Ref>
+		</Item>
+	</Model>
+	<Material>
+		<Item GUID="61A147FF-32BD-48EC-B523-57BC75EB16BA" Name="DefaultPBR" Suffix="mat" Path="./Asset/Content/Core/Material/" ByteSize="0">
+			<Ref Type="1">B32B0C1E-D358-464F-8F0C-52F0DD0FAA05</Ref>
+			<Ref Type="1">7700EA47-D382-40DE-A64F-D97C125A4472</Ref>
+			<Ref Type="1">E4F2CC0F-32CD-4167-BDA2-FCF7DA537363</Ref>
+			<Ref Type="1">B7CF5F97-BFB9-4C36-893C-448B57776F69</Ref>
+		</Item>
+	</Material>
+	<Scene />
+	<Texture2D>
+		<Item GUID="dd5644a9-ae6a-44da-8f4f-4a686b083bcc" Name="T_System_Black" Suffix="dds" Path="./Asset/Content/Core/Texture/" ByteSize="1827" />
+		<Item GUID="968561d0-8569-429c-a135-faa450b818fe" Name="T_System_Normal" Suffix="dds" Path="./Asset/Content/Core/Texture/" ByteSize="1847" />
+		<Item GUID="ca1e3bec-26d7-4c1d-91ed-da3283142736" Name="T_System_White" Suffix="dds" Path="./Asset/Content/Core/Texture/" ByteSize="1420" />
+		<Item GUID="a7b3cad8-9ea5-4d95-9c33-13793f062879" Name="T_System_UVGrid" Suffix="dds" Path="./Asset/Content/Core/Texture/" ByteSize="63312" />
+		<Item GUID="94bd84aa-c8b3-4c8f-9239-015010a21d06" Name="TestTex" Suffix="dds" Path="./Asset/Content/Core/Texture/" ByteSize="1637773" />
+	</Texture2D>
+	<TextureCube />
+	<Prefab />
+</root>

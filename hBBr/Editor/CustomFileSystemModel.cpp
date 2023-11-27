@@ -5,7 +5,7 @@
 #include <QFileInfo>
 #include "CustomFileSystemView.h"
 
-#include "Resource/ContentManager.h"
+#include "Asset/ContentManager.h"
 
 CustomFileSystemModel::CustomFileSystemModel(QObject *parent)
 	: QFileSystemModel(parent)

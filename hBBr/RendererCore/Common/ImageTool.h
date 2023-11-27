@@ -4,7 +4,7 @@
 #include "lodepng/lodepng.h"
 #include "HString.h"
 #include <algorithm>
-#include "Resource/HGuid.h"
+#include "Asset/HGuid.h"
 #include "VulkanManager.h"
 
 inline const char* GetTGAImageTypeString(uint8_t imageType)

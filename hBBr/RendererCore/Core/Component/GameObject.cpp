@@ -1,7 +1,7 @@
 ﻿#include"GameObject.h"
 #include "FormMain.h"
 #include "VulkanRenderer.h"
-#include "Resource/World.h"
+#include "Asset/World.h"
 #include "Component.h"
 #include "ConsoleDebug.h"
 #include "Component/ModelComponent.h"

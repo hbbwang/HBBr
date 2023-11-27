@@ -86,7 +86,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core;$(SolutionDir)RendererCore\Editor;$(SolutionDir)RendererCore\Form;$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir);$(SolutionDir)ThirdParty\Imgui;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)RendererCore\Core\Resource;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core;$(SolutionDir)RendererCore\Editor;$(SolutionDir)RendererCore\Form;$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir);$(SolutionDir)ThirdParty\Imgui;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)RendererCore\Core\Asset;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>IS_EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>
@@ -102,7 +102,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core;$(SolutionDir)RendererCore\Editor;$(SolutionDir)RendererCore\Form;$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir);$(SolutionDir)ThirdParty\Imgui;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)RendererCore\Core\Resource;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core;$(SolutionDir)RendererCore\Editor;$(SolutionDir)RendererCore\Form;$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir);$(SolutionDir)ThirdParty\Imgui;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)RendererCore\Core\Asset;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>IS_EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>
@@ -165,6 +165,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ArraySetting.cpp" />
+    <ClCompile Include="AssetLine.cpp" />
     <ClCompile Include="CheckBox.cpp" />
     <ClCompile Include="CollapsedWidget.cpp" />
     <ClCompile Include="ColorSettting.cpp" />
@@ -180,12 +181,12 @@
     <ClCompile Include="Inspector.cpp" />
     <ClCompile Include="PropertyClass.cpp" />
     <ClCompile Include="RenderView.cpp" />
-    <ClCompile Include="ResourceLine.cpp" />
     <ClCompile Include="SceneOutline.cpp" />
     <ClCompile Include="ToolBox.cpp" />
     <ClCompile Include="VectorSetting.cpp" />
     <QtRcc Include="EditorMain.qrc" />
     <QtUic Include="ArraySetting.ui" />
+    <QtUic Include="AssetLine.ui" />
     <QtUic Include="CheckBox.ui" />
     <QtUic Include="CollapsedWidget.ui" />
     <QtUic Include="ColorSettting.ui" />
@@ -198,7 +199,6 @@
     <ClCompile Include="EditorMain.cpp" />
     <ClCompile Include="main.cpp" />
     <QtUic Include="Inspector.ui" />
-    <QtUic Include="ResourceLine.ui" />
     <QtUic Include="ToolBox.ui" />
     <QtUic Include="ToolPage.ui" />
     <QtUic Include="VectorSetting.ui" />
@@ -213,7 +213,6 @@
     <QtMoc Include="PropertyClass.h" />
     <QtMoc Include="FloatSetting.h" />
     <QtMoc Include="VectorSetting.h" />
-    <QtMoc Include="ResourceLine.h" />
     <QtMoc Include="Inspector.h" />
     <QtMoc Include="ToolBox.h" />
     <QtMoc Include="ContentBrowser.h" />
@@ -223,6 +222,7 @@
     <QtMoc Include="ColorSettting.h" />
     <QtMoc Include="ComboBox.h" />
     <QtMoc Include="CustomDockPanelTitleBar.h" />
+    <QtMoc Include="AssetLine.h" />
     <ClInclude Include="CustomFileIconProvider.h" />
     <QtMoc Include="CustomFileSystemModel.h" />
     <QtMoc Include="CustomFileSystemView.h" />

@@ -1,6 +1,6 @@
 ﻿#include"Component.h"
 #include "GameObject.h"
-#include "Resource/World.h"
+#include "Asset/World.h"
 #include "VulkanRenderer.h"
 Component::Component(GameObject* parent)
 {

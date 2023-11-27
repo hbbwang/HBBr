@@ -4,14 +4,14 @@
 #include "./Core/Shader.h"
 #include "./Core/Pipeline.h"
 #include "./Common/HInput.h"
-#include "./Resource/Texture.h"
+#include "./Asset/Texture.h"
 #include "./Common/XMLStream.h"
 #include "./Core/RendererConfig.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #include "Imgui/backends/imgui_impl_sdl3.h"
 #endif
-#include "./Resource/ContentManager.h"
+#include "./Asset/ContentManager.h"
 #include "GLFWInclude.h"
 #include "ConsoleDebug.h"
 #if defined(__ANDROID__)
@@ -145,7 +145,7 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	VulkanManager::InitManager(bEnableDebug);
 
 	//Import font
-	//HString ttfFontPath = FileSystem::GetResourceAbsPath() + "Font/msyhl.ttc";
+	//HString ttfFontPath = FileSystem::GetAssetAbsPath() + "Font/msyhl.ttc";
 	HString ttfFontPath = RendererConfig::Get()->_configFile.child(L"root").child(L"Font").attribute(L"absPath").as_string();
 	FileSystem::CorrectionPath(ttfFontPath);
 	HString outFontTexturePath = RendererConfig::Get()->_configFile.child(L"root").child(L"FontTexture").attribute(L"path").as_string();

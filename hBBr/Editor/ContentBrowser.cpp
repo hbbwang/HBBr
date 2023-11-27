@@ -1,5 +1,4 @@
-#include "ContentBrowser.h"
-
+ï»¿#include "ContentBrowser.h"
 #include <QStyleOption>
 #include <qpainter.h>
 #include <qsplitter.h>
@@ -23,8 +22,8 @@
 #include "FileSystem.h"
 #include "RendererCore/Core/VulkanRenderer.h"
 #include "RendererCore/Form/FormMain.h"
-#include "Resource/Material.h"
-#include "Resource/ContentManager.h"
+#include "Asset/Material.h"
+#include "Asset/ContentManager.h"
 
 QWidget* ContentBrowser::_currentFocusContentBrowser = NULL;
 QList<QWidget*> ContentBrowser::_allContentBrowser;
@@ -75,7 +74,7 @@ ContentBrowser::ContentBrowser(QWidget *parent)
 	_treeFileSystemModel = new CustomFileSystemModel(_treeWidget);
 	_treeFileSystemModel->_contentBrowserTreeView = _treeWidget;
 	_treeWidget->setModel(_treeFileSystemModel);
-	_treeFileSystemModel->setRootPath((FileSystem::GetProgramPath() + "Resource").c_str()  );
+	_treeFileSystemModel->setRootPath((FileSystem::GetProgramPath() + "Asset").c_str()  );
 	_treeWidget->setRootIndex(_treeFileSystemModel->index(_treeFileSystemModel->rootPath()));
 	_treeWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	for (int i = 1; i < _treeFileSystemModel->columnCount(); i++)
@@ -104,7 +103,7 @@ ContentBrowser::ContentBrowser(QWidget *parent)
 	_listFileSystemModel->setNameFilterDisables(false);
 	_listFileSystemModel->setNameFilters(list_filterCache);
 	_listWidget->setModel(_listFileSystemModel);
-	_listFileSystemModel->setRootPath((FileSystem::GetProgramPath() + "Resource").c_str());
+	_listFileSystemModel->setRootPath((FileSystem::GetProgramPath() + "Asset").c_str());
 	_listWidget->setRootIndex(_listFileSystemModel->index(_listFileSystemModel->rootPath()));
 	_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	_listWidget->setViewMode(QListView::IconMode);
@@ -147,9 +146,9 @@ ContentBrowser::ContentBrowser(QWidget *parent)
 	connect(_listSearchLine->ui.lineEdit, SIGNAL(returnPressed()), this, SLOT(ListSearch()));
 	connect(_listSearchLine->ui.comboBox, SIGNAL(currentTextChanged(const QString&)), this, SLOT(ListFilter(const QString&)));
 	connect(ui.BackspaceButton,SIGNAL(clicked(bool)),this,SLOT(Backspace()));
-	connect(ui.ImportButton , SIGNAL(clicked(bool)), this, SLOT(ResourceImport()));
-	connect(_treeWidget->_import, SIGNAL(triggered(bool)), this, SLOT(ResourceImport()));
-	connect(_listWidget->_import, SIGNAL(triggered(bool)), this, SLOT(ResourceImport()));
+	connect(ui.ImportButton , SIGNAL(clicked(bool)), this, SLOT(AssetImport()));
+	connect(_treeWidget->_import, SIGNAL(triggered(bool)), this, SLOT(AssetImport()));
+	connect(_listWidget->_import, SIGNAL(triggered(bool)), this, SLOT(AssetImport()));
 	connect(_listWidget->_createMaterialInstance, &QAction::triggered, this, [this]() {
 		Material::CreateMaterial(_treeFileSystemModel->filePath(_treeWidget->currentIndex()).toStdString().c_str());
 	});
@@ -234,7 +233,7 @@ void ContentBrowser::TreeClicked(const QModelIndex& index)
 		}
 		else
 		{
-			_listFileSystemModel->setRootPath((FileSystem::GetProgramPath() + "Resource").c_str());
+			_listFileSystemModel->setRootPath((FileSystem::GetProgramPath() + "Asset").c_str());
 			_listWidget->setRootIndex(_listFileSystemModel->index(_listFileSystemModel->rootPath()));
 		}
 	}
@@ -358,11 +357,11 @@ void ContentBrowser::ListSearch()
 	_listFileSystemModel->setNameFilters(lineList);
 }
 
-void ContentBrowser::SearchResourceFile(HString filePath, ContentBrowser* cb)
+void ContentBrowser::SearchAssetFile(HString filePath, ContentBrowser* cb)
 {
 	HString fileName = filePath.GetFileName();
 	HString path = filePath.GetFilePath();
-	//Ê÷ĞÎÍ¼ÇĞ»»
+	//ï¿½ï¿½ï¿½ï¿½Í¼ï¿½Ğ»ï¿½
 	ContentBrowser* contentBrowser = cb;
 	if (!contentBrowser)
 		contentBrowser = dynamic_cast<ContentBrowser*>(_currentFocusContentBrowser);
@@ -498,18 +497,18 @@ void ContentBrowser::Backspace()
 	}
 }
 
-void ContentBrowser::ResourceImport()
+void ContentBrowser::AssetImport()
 {
-	QStringList file_names = QFileDialog::getOpenFileNames(this, QString::fromLocal8Bit("×ÊÔ´µ¼Èë"), _listFileSystemModel->rootPath(),
+	QStringList file_names = QFileDialog::getOpenFileNames(this, "Import Assets", _listFileSystemModel->rootPath(),
 		" All (*.fbx *.png *.tga *.jpg *.jpeg *.hdr *.exr );;\
 		Model (*.fbx);;\
 		Images (*.png *.tga *.jpg *.jpeg *.hdr *.exr);;"
 	);
-		//²ÎÊı1 ¸¸¿Ø¼ş
-		//²ÎÊı2 ±êÌâ
-		//²ÎÊı3  Ä¬ÈÏÂ·¾¶
-		//²ÎÊı4 ¹ıÂËÎÄ¼ş¸ñÊ½
-		//·µ»ØÖµ  ÎÄ¼şÈ«Â·¾¶---"D:/ss/×¢ÒâÊÂÏî.txt"
+		//å‚æ•°1 çˆ¶æ§ä»¶
+		//å‚æ•°2 æ ‡é¢˜
+		//å‚æ•°3  é»˜è®¤è·¯å¾„
+		//å‚æ•°4 è¿‡æ»¤æ–‡ä»¶æ ¼å¼
+		//è¿”å›å€¼  æ–‡ä»¶å…¨è·¯å¾„---"D:/ss/æ³¨æ„äº‹é¡¹.txt"
 	//qDebug() << file_names;
 
 	for (auto i : file_names)
@@ -517,7 +516,7 @@ void ContentBrowser::ResourceImport()
 		QFileInfo fileInfo(i);
 		QString typeText;
 
-		//É¾³ıÔ¤ÀÀÍ¼£¬Èç¹û´æÔÚ£¬ÖØĞÂ¼ÓÔØ×ÊÔ´µÄÊ±ºòÖØĞÂÉú³ÉÔ¤ÀÀÍ¼
+		//åˆ é™¤é¢„è§ˆå›¾ï¼Œå¦‚æœå­˜åœ¨ï¼Œé‡æ–°åŠ è½½èµ„æºçš„æ—¶å€™é‡æ–°ç”Ÿæˆé¢„è§ˆå›¾
 		QString previewImagePath = QString(fileInfo.path() + QDir::separator() + fileInfo.baseName() + "." +fileInfo.suffix() + "@Preview.jpg");
 		QFileInfo previewImage(previewImagePath);
 		if (previewImage.exists())
@@ -530,10 +529,10 @@ void ContentBrowser::ResourceImport()
 		{
 			if (fileInfo.suffix().compare("fbx", Qt::CaseInsensitive) == 0)
 			{
-				//µ¼ÈëAsset info
+				//å¯¼å…¥Asset info
 				dstPath += ".fbx";
 				assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Model, i.toStdString().c_str(), dstPath.toStdString().c_str());
-				//¸´ÖÆfbx½øcontent
+				//å¤åˆ¶fbxè¿›content
 				HString guidStr = GUIDToString(assetInfo->guid);
 				dirPath += QDir::separator();
 				dirPath = dirPath + guidStr.c_str() + ".fbx";
@@ -545,10 +544,10 @@ void ContentBrowser::ResourceImport()
 				fileInfo.suffix().compare("jpeg", Qt::CaseInsensitive) == 0
 				)
 			{
-				//µ¼ÈëddsÑ¹ËõÎÆÀí
+		        //å¯¼å…¥ddså‹ç¼©çº¹ç†
 				dstPath += ".dds";
 				assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Texture2D, i.toStdString().c_str(), dstPath.toStdString().c_str());
-				//×ª»»Í¼Ïñ¸ñÊ½Îªdds
+				//è½¬æ¢å›¾åƒæ ¼å¼ä¸ºdds
 				HString guidStr = GUIDToString(assetInfo->guid);
 				dirPath += QDir::separator();
 				dirPath = dirPath + guidStr.c_str() + ".dds";

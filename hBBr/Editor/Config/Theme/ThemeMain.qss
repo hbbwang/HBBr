@@ -437,11 +437,11 @@ QSplitter::handle
     border:4px double rgb(20,20,20);
     border-radius:	2px;		
 }
-/* Property ResourceLine */
-#PropertyResourceLine
+/* Property AssetLine */
+#PropertyAssetLine
 {
 }
-#PropertyResourceLine_LineEdit
+#PropertyAssetLine_LineEdit
 {
     border:1px solid rgb(10,10,10);
     border-radius:8px;
@@ -449,21 +449,21 @@ QSplitter::handle
     color:rgb(200,200,200);
     height: 20px;
 }
-#PropertyResourceLine_Button
+#PropertyAssetLine_Button
 {  
     border: 1px solid;
     background-color:rgb(75,75,75);
     color:rgb(220,220,220);
     border-radius: 2px; 
 }
-#PropertyResourceLine_Button:hover
+#PropertyAssetLine_Button:hover
 {  
     border: 1px solid;
     background-color:rgb(150, 61, 55);
     color:rgb(255,255,255);
     border-radius:2px;
 }
-#PropertyResourceLine_Button:pressed
+#PropertyAssetLine_Button:pressed
 {  
     border: 1px solid;
     background-color:rgb(230, 165, 149);

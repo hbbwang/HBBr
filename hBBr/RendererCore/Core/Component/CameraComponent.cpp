@@ -1,6 +1,6 @@
 ﻿#include "CameraComponent.h"
 #include "GameObject.h"
-#include "Resource/World.h"
+#include "Asset/World.h"
 #include "VulkanRenderer.h"
 #include "HInput.h"
 #include "ConsoleDebug.h"

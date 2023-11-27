@@ -30,7 +30,7 @@ extern "C" {
 
 		HBBR_API static HString GetProgramPath();
 		HBBR_API static HString GetShaderCacheAbsPath();
-		HBBR_API static HString GetResourceAbsPath();
+		HBBR_API static HString GetAssetAbsPath();
 		HBBR_API static HString GetContentAbsPath();
 		HBBR_API static HString GetConfigAbsPath();
 		/* editor only */

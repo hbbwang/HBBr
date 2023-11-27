@@ -1,6 +1,6 @@
 #include "SceneOutline.h"
 #include "VulkanRenderer.h"
-#include "Resource/World.h"
+#include "Asset/World.h"
 #include "Component/GameObject.h"
 #include <qheaderview.h>
 #include <qaction.h>
@@ -106,7 +106,7 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
         {
             _renderer->ExecFunctionOnRenderThread([]()
                 {
-                    QFileInfo fi("./Resource/Content/Core/Basic/Cube");
+                    QFileInfo fi("./Asset/Content/Core/Basic/Cube");
                     GameObject::CreateModelGameObject(fi.absolutePath().toStdString().c_str());
                 });
         });
@@ -114,7 +114,7 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
         {
             _renderer->ExecFunctionOnRenderThread([]()
                 {
-                    QFileInfo fi("./Resource/Content/Core/Basic/Sphere");
+                    QFileInfo fi("./Asset/Content/Core/Basic/Sphere");
                     GameObject::CreateModelGameObject(fi.absolutePath().toStdString().c_str());
                 });
         });
@@ -122,7 +122,7 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
         {
             _renderer->ExecFunctionOnRenderThread([]()
                 {
-                    QFileInfo fi("./Resource/Content/Core/Basic/Plane");
+                    QFileInfo fi("./Asset/Content/Core/Basic/Plane");
                     GameObject::CreateModelGameObject(fi.absolutePath().toStdString().c_str());
                 });
         });

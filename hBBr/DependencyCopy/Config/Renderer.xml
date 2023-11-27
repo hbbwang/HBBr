@@ -2,6 +2,6 @@
 <root>
     <Language path="Config/Internationalization/zh_CN.xml"/>
     <Font absPath="C:/Windows/Fonts/msyh.ttc"/>
-    <FontTexture path="Resource/Font/font.png"/>
-    <FontConfig path="Resource/Font/Font.xml"/>
+    <FontTexture path="Asset/Font/font.png"/>
+    <FontConfig path="Asset/Font/Font.xml"/>
 </root>

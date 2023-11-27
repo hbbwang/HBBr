@@ -104,14 +104,14 @@ task CopyConfig(type: Copy) {
     into 'src/main/assets/Config/'
 }
 
-task CopyResource(type: Copy) {
-    from '../../DependencyCopy/Resource'
-    into 'src/main/assets/Resource/'
+task CopyAsset(type: Copy) {
+    from '../../DependencyCopy/Asset'
+    into 'src/main/assets/Asset/'
 }
 
 //编译之前执行上面的这个任务
 preBuild.dependsOn CopyConfig
-preBuild.dependsOn CopyResource
+preBuild.dependsOn CopyAsset
 
 // 指定当前项目的所有依赖关系：本地依赖、库依赖、远程依赖
 // 本地依赖：可以对本地 Jar 包或目录添加依赖关系

@@ -35,9 +35,6 @@
     <Filter Include="Renderer\Core\Pass">
       <UniqueIdentifier>{4d0dd611-afb8-444c-8f92-a917cb95313e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderer\Core\Resource">
-      <UniqueIdentifier>{94d3536f-235e-41d5-a018-d48eeba67e6e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ThirdParty\lodepng">
       <UniqueIdentifier>{0390f21e-7636-4424-957a-d6637c1a97ae}</UniqueIdentifier>
     </Filter>
@@ -50,7 +47,10 @@
     <Filter Include="Renderer\Core\Object\Component">
       <UniqueIdentifier>{8fca5c07-0f8b-4d2d-b71f-d2357de10820}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderer\Core\Resource\Asset">
+    <Filter Include="Renderer\Core\Asset">
+      <UniqueIdentifier>{94d3536f-235e-41d5-a018-d48eeba67e6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\Core\Asset\AssetType">
       <UniqueIdentifier>{155f6a91-dbaa-4948-8952-ff3219806098}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -163,9 +163,6 @@
     <ClInclude Include="Common\HInput.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Resource\HGuid.h">
-      <Filter>Renderer\Core\Resource</Filter>
-    </ClInclude>
     <ClInclude Include="Common\ImageTool.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -180,9 +177,6 @@
     </ClInclude>
     <ClInclude Include="Common\RendererType.h">
       <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Resource\ContentManager.h">
-      <Filter>Renderer\Core\Resource</Filter>
     </ClInclude>
     <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h">
       <Filter>ThirdParty\Imgui\backends</Filter>
@@ -211,23 +205,29 @@
     <ClInclude Include="Core\Component\Transform.h">
       <Filter>Renderer\Core\Object</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Resource\Material.h">
-      <Filter>Renderer\Core\Resource\Asset</Filter>
+    <ClInclude Include="Core\Asset\HGuid.h">
+      <Filter>Renderer\Core\Asset</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Resource\ModelData.h">
-      <Filter>Renderer\Core\Resource\Asset</Filter>
+    <ClInclude Include="Core\Asset\ContentManager.h">
+      <Filter>Renderer\Core\Asset</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Resource\Texture.h">
-      <Filter>Renderer\Core\Resource\Asset</Filter>
+    <ClInclude Include="Core\Asset\Level.h">
+      <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Resource\ResourceObject.h">
-      <Filter>Renderer\Core\Resource\Asset</Filter>
+    <ClInclude Include="Core\Asset\Material.h">
+      <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Resource\World.h">
-      <Filter>Renderer\Core\Resource\Asset</Filter>
+    <ClInclude Include="Core\Asset\ModelData.h">
+      <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Resource\Level.h">
-      <Filter>Renderer\Core\Resource\Asset</Filter>
+    <ClInclude Include="Core\Asset\AssetObject.h">
+      <Filter>Renderer\Core\Asset\AssetType</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Asset\Texture.h">
+      <Filter>Renderer\Core\Asset\AssetType</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Asset\World.h">
+      <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -324,9 +324,6 @@
     <ClCompile Include="Common\HInput.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Resource\HGuid.cpp">
-      <Filter>Renderer\Core\Resource</Filter>
-    </ClCompile>
     <ClCompile Include="Common\ImageTool.cpp">
       <Filter>Common</Filter>
     </ClCompile>
@@ -335,9 +332,6 @@
     </ClCompile>
     <ClCompile Include="..\ThirdParty\lodepng\lodepng.cpp">
       <Filter>ThirdParty\lodepng</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Resource\ContentManager.cpp">
-      <Filter>Renderer\Core\Resource</Filter>
     </ClCompile>
     <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp">
       <Filter>ThirdParty\Imgui\backends</Filter>
@@ -363,23 +357,29 @@
     <ClCompile Include="Core\Component\Transform.cpp">
       <Filter>Renderer\Core\Object</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Resource\Material.cpp">
-      <Filter>Renderer\Core\Resource\Asset</Filter>
+    <ClCompile Include="Core\Asset\HGuid.cpp">
+      <Filter>Renderer\Core\Asset</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Resource\ModelData.cpp">
-      <Filter>Renderer\Core\Resource\Asset</Filter>
+    <ClCompile Include="Core\Asset\ContentManager.cpp">
+      <Filter>Renderer\Core\Asset</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Resource\Texture.cpp">
-      <Filter>Renderer\Core\Resource\Asset</Filter>
+    <ClCompile Include="Core\Asset\Level.cpp">
+      <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Resource\ResourceObject.cpp">
-      <Filter>Renderer\Core\Resource\Asset</Filter>
+    <ClCompile Include="Core\Asset\Material.cpp">
+      <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Resource\World.cpp">
-      <Filter>Renderer\Core\Resource\Asset</Filter>
+    <ClCompile Include="Core\Asset\ModelData.cpp">
+      <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Resource\Level.cpp">
-      <Filter>Renderer\Core\Resource\Asset</Filter>
+    <ClCompile Include="Core\Asset\AssetObject.cpp">
+      <Filter>Renderer\Core\Asset\AssetType</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Asset\Texture.cpp">
+      <Filter>Renderer\Core\Asset\AssetType</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Asset\World.cpp">
+      <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

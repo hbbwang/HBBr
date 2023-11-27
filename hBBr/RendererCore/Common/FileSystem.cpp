@@ -38,16 +38,16 @@ HString FileSystem::GetProgramPath()
 HString FileSystem::GetShaderCacheAbsPath()
 {
     fs::path p = GetProgramPath().c_str();
-    HString path = (p / "Resource"/ "ShaderCache").c_str();
+    HString path = (p / "Asset"/ "ShaderCache").c_str();
     path += "/";
     FileSystem::CorrectionPath(path);
     return path;
 }
 
-HString FileSystem::GetResourceAbsPath()
+HString FileSystem::GetAssetAbsPath()
 {
     fs::path p = GetProgramPath().c_str();
-    HString path = (p / "Resource").c_str();
+    HString path = (p / "Asset").c_str();
     path += "/";
     FileSystem::CorrectionPath(path);
     return path;
@@ -56,7 +56,7 @@ HString FileSystem::GetResourceAbsPath()
 HString FileSystem::GetContentAbsPath()
 {
     fs::path p = GetProgramPath().c_str();
-    HString path = (p / "Resource" / "Content").c_str();
+    HString path = (p / "Asset" / "Content").c_str();
     path += "/";
     FileSystem::CorrectionPath(path);
     return path;
@@ -74,7 +74,7 @@ HString FileSystem::GetConfigAbsPath()
 HString FileSystem::GetShaderIncludeAbsPath()
 {
     fs::path p = GetProgramPath().c_str();
-    HString path = (p / "Resource" / "ShaderInclude").c_str();
+    HString path = (p / "Asset" / "ShaderInclude").c_str();
 	path += "/";
     FileSystem::CorrectionPath(path);
     return path;

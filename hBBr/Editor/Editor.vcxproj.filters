@@ -82,9 +82,6 @@
     <ClCompile Include="VectorSetting.cpp">
       <Filter>Widgets\Extension</Filter>
     </ClCompile>
-    <ClCompile Include="ResourceLine.cpp">
-      <Filter>Widgets\Extension</Filter>
-    </ClCompile>
     <ClCompile Include="FloatSetting.cpp">
       <Filter>Widgets\Extension</Filter>
     </ClCompile>
@@ -107,6 +104,9 @@
       <Filter>Widgets\Extension</Filter>
     </ClCompile>
     <ClCompile Include="PropertyClass.cpp">
+      <Filter>Widgets\Extension</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetLine.cpp">
       <Filter>Widgets\Extension</Filter>
     </ClCompile>
   </ItemGroup>
@@ -141,9 +141,6 @@
     <QtMoc Include="VectorSetting.h">
       <Filter>Widgets\Extension</Filter>
     </QtMoc>
-    <QtMoc Include="ResourceLine.h">
-      <Filter>Widgets\Extension</Filter>
-    </QtMoc>
     <QtMoc Include="FloatSetting.h">
       <Filter>Widgets\Extension</Filter>
     </QtMoc>
@@ -166,6 +163,9 @@
       <Filter>Widgets\Extension</Filter>
     </QtMoc>
     <QtMoc Include="PropertyClass.h">
+      <Filter>Widgets\Extension</Filter>
+    </QtMoc>
+    <QtMoc Include="AssetLine.h">
       <Filter>Widgets\Extension</Filter>
     </QtMoc>
   </ItemGroup>
@@ -193,9 +193,6 @@
     <QtUic Include="Inspector.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="ResourceLine.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtUic Include="VectorSetting.ui">
       <Filter>Form Files</Filter>
     </QtUic>
@@ -215,6 +212,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="CustomDockPanelTitleBar.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="AssetLine.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

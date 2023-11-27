@@ -11,7 +11,7 @@
 #include <QLineEdit>
 #include <QWidgetAction>
 #include "EditorCommonFunction.h"
-#include "Resource/ContentManager.h"
+#include "Asset/ContentManager.h"
 /*------------------------------------------------------List View*/
 CustomListView::CustomListView(QWidget *parent)
 	: QListView(parent)

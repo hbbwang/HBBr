@@ -58,7 +58,7 @@ LOCAL_C_INCLUDES += $(RESOLUTION_PATH)/RendererCore/Common/
 LOCAL_C_INCLUDES += $(RESOLUTION_PATH)/RendererCore/Core/
 LOCAL_C_INCLUDES += $(RESOLUTION_PATH)/RendererCore/Core/Component/
 LOCAL_C_INCLUDES += $(RESOLUTION_PATH)/RendererCore/Core/Pass/
-LOCAL_C_INCLUDES += $(RESOLUTION_PATH)/RendererCore/Core/Resource/
+LOCAL_C_INCLUDES += $(RESOLUTION_PATH)/RendererCore/Core/Asset/
 LOCAL_C_INCLUDES += $(RESOLUTION_PATH)/RendererCore/Editor/
 LOCAL_C_INCLUDES += $(RESOLUTION_PATH)/RendererCore/Form/
 LOCAL_C_INCLUDES += $(THIRD_PARTY_PATH)/
@@ -90,7 +90,7 @@ $(wildcard $(RESOLUTION_PATH)/RendererCore/Common/*.cpp) \
 $(wildcard $(RESOLUTION_PATH)/RendererCore/Core/*.cpp) \
 $(wildcard $(RESOLUTION_PATH)/RendererCore/Core/Component/*.cpp) \
 $(wildcard $(RESOLUTION_PATH)/RendererCore/Core/Pass/*.cpp) \
-$(wildcard $(RESOLUTION_PATH)/RendererCore/Core/Resource/*.cpp) \
+$(wildcard $(RESOLUTION_PATH)/RendererCore/Core/Asset/*.cpp) \
 $(wildcard $(RESOLUTION_PATH)/RendererCore/Editor/*.cpp) \
 $(wildcard $(RESOLUTION_PATH)/RendererCore/Form/*.cpp) \
 $(wildcard $(THIRD_PARTY_PATH)/assimp/*.cpp) \

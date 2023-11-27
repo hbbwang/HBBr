@@ -3,7 +3,7 @@
 #include "HString.h"
 #include "VulkanManager.h"
 #include <map>
-#include "./Resource/HGuid.h"
+#include "./Asset/HGuid.h"
 enum class MPType : uint8_t
 {
 	Unknow = 0,

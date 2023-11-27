@@ -7,7 +7,7 @@
 #include "FileSystem.h"
 #include "Shader.h"
 #include "Thread.h"
-#include "Resource/World.h"
+#include "Asset/World.h"
 #include "Component/GameObject.h"
 #include "Component/CameraComponent.h"
 #if IS_EDITOR

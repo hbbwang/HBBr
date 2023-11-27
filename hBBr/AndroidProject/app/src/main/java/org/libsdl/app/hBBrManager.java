@@ -63,10 +63,10 @@ public class hBBrManager {
         _storageRootPath = externalStorageRoot.getAbsolutePath() + "/";
         _exAppStoragePath = file.getAbsolutePath()+ "/";
         _obbPath = a.getObbDir().getAbsolutePath();
-        //把Resources和Config资产都复制到 android/data/[package]/files/里
+        //把Asset和Config资产都复制到 android/data/[package]/files/里
         {
             copyFiles(a , "Config", _exAppStoragePath + "Config");
-            copyFiles(a , "Resource", _exAppStoragePath+ "Resource");
+            copyFiles(a , "Asset", _exAppStoragePath+ "Asset");
         }
     }
 

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <QWidget>
 #include "ui_ContentBrowser.h"
@@ -46,8 +46,7 @@ public:
 
 	MainWindow* _mainWindow = NULL;
 
-	//ä¯ÀÀÆ÷ÖÐ£¬¸ù¾ÝÂ·¾¶×Ô¶¯²éÕÒµ½µ±Ç°ÎÄ¼þÎ»ÖÃ
-	static void SearchResourceFile(HString filePath , ContentBrowser* cb = NULL);
+	static void SearchAssetFile(HString filePath , ContentBrowser* cb = NULL);
 
 	static QWidget* _currentFocusContentBrowser;
 
@@ -73,7 +72,7 @@ private slots:
 	void ListSearch();
 	void ListFilter(const QString& newText);
 	void Backspace();
-	void ResourceImport();
+	void AssetImport();
 	void OpenCurrentFolder_List();
 	void OpenCurrentFolder_Tree();
 };
