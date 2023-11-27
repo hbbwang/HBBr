@@ -223,26 +223,29 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				auto value = ((std::weak_ptr<ModelData>*)p.value);
 				AssetLine* line = new AssetLine(p.name, this, value->lock()->_assetInfo->virtualPath, value->lock()->_assetInfo->suffix);
 				compWidget->layout()->addWidget(line);
-				line->_bindFindButtonFunc = [](const char* p) { //���Ұ�ť�ص�����
+				line->_bindFindButtonFunc = [](const char* p) {
 
 				};
-				line->_bindStringFunc = [p, value](AssetLine* line, const char* s) { //�ļ���ק�ص�����
+				line->_bindStringFunc = [p, value](AssetLine* line, const char* s) {
 					auto guidStr = FileSystem::GetBaseName(s);
 					HGUID guid;
 					StringToGUID(guidStr.c_str(), &guid);
-					if (guid.isValid() && !value->expired())
+					if (guid.isValid())
 					{
-						auto newObject = ModelData::LoadAsset(guid);
-						if (!newObject.expired())
+						if (!value->expired())
 						{
-							*value = newObject; 
+							auto newObject = ModelData::LoadAsset(guid);
+							if (!newObject.expired())
+							{
+								*value = newObject;
+							}
+							line->_objectBind = ((std::weak_ptr<class AssetObject>*)value);
 						}
-						line->_objectBind = ((std::weak_ptr<class AssetObject>*)value);
-					}
-					else
-					{
-						*value = std::weak_ptr<ModelData>();
-					}
+						else
+						{
+							*value = std::weak_ptr<ModelData>();
+						}
+					}				
 				};
 				continue;
 			}
@@ -262,15 +265,18 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 						auto guidStr = FileSystem::GetBaseName(s);
 						HGUID guid;
 						StringToGUID(guidStr.c_str(), &guid);
-						if (guid.isValid() && !value->at(i).expired())
+						if (guid.isValid())
 						{
-							auto newObject = Material::LoadAsset(guid);
-							if (!newObject.expired())
+							if (!value->at(i).expired())
 							{
-								value->at(i) = newObject;
+								auto newObject = Material::LoadAsset(guid);
+								if (!newObject.expired())
+								{
+									value->at(i) = newObject;
+								}
+								line->_objectBind = ((std::weak_ptr<class AssetObject>*)value);
 							}
-							line->_objectBind = ((std::weak_ptr<class AssetObject>*)value);
-						}
+						}				
 					};
 				}
 				continue;
