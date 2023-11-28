@@ -15,13 +15,13 @@
 enum class AssetType
 {
 	Unknow = 0,
-	Model = 1,			//fbx
-	Material = 2,		//mat
-	Scene = 3,			//scene
-	Texture2D = 4,		//tex2D
-	TextureCube = 5,	//texCube
-	Prefab = 6,			//frefab
-
+	Model = 1,			//.fbx
+	Material = 2,		//.mat
+	World = 3,			//.world
+	Texture2D = 4,		//.tex2D
+	TextureCube = 5,	//.texCube
+	Prefab = 6,			//.frefab
+	Level = 7,				//.level
 	MaxNum = 32,
 };
 
@@ -31,10 +31,11 @@ inline static HString GetAssetTypeString(AssetType type)
 	{
 	case AssetType::Model:return "Model";
 	case AssetType::Material:return "Material";
-	case AssetType::Scene:return "Scene";
+	case AssetType::World:return "World";
 	case AssetType::Texture2D:return "Texture2D";
 	case AssetType::TextureCube:return "TextureCube";
 	case AssetType::Prefab:return "Prefab";
+	case AssetType::Level:return "Level";
 	case AssetType::Unknow:
 	case AssetType::MaxNum:	return "Unknow";
 	}

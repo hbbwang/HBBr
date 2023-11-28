@@ -39,7 +39,7 @@ void VulkanRenderer::Release()
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
 	_passManager.reset();
-	_worldManager.reset();
+	_world.reset();
 	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf);
 	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
 	_vulkanManager->DestroyRenderSemaphores(_presentSemaphore);
@@ -89,9 +89,6 @@ void VulkanRenderer::Init()
 
 	_renderThreadFuncsOnce.reserve(10);
 	_renderThreadFuncs.reserve(10);
-
-	//Init world
-	_worldManager.reset(new WorldManager());
 	 
 	//Init passes
 	_passManager.reset(new PassManager());
@@ -101,12 +98,53 @@ void VulkanRenderer::Init()
 
 }
 
+void VulkanRenderer::CreateWorld(HString worldName)
+{
+	auto assets = ContentManager::Get()->GetAssets(AssetType::World);
+	for (const auto i : assets)
+	{
+		if (i.second->name.IsSame(worldName, false))
+		{
+			CreateWorld(i.second->guid);
+			return;
+		}
+	}
+}
+
+void VulkanRenderer::CreateWorld(HGUID worldGuid)
+{
+	if (!_world.expired())
+	{
+		_world.lock()->UnLoad();
+	}
+	if (worldGuid.isValid())
+	{
+		auto newWorld = World::LoadAsset(worldGuid);
+		if (newWorld.expired())
+		{
+			MessageOut("Create World Failed.The guid of world asset is not valid.", false, false, "255,255,0");
+		}
+		else
+		{
+			newWorld.lock()->Load(this);
+			_world = newWorld;
+		}
+	}
+}
+
+void VulkanRenderer::CreateEmptyWorld()
+{
+	_emptyWorld.reset(new World);
+	_emptyWorld->Load(this);
+	_world = _emptyWorld;
+}
+
 void VulkanRenderer::Render()
 {
 	if (!_bInit)
 	{
+		CreateEmptyWorld();
 		_passManager->PassesInit(this);
-		_worldManager->WorldInit(this);
 		_bInit = true;
 	}
 	else if (!_bRendererRelease && _bInit)
@@ -140,7 +178,8 @@ void VulkanRenderer::Render()
 			func();
 		}
 
-		_worldManager->WorldUpdate();
+		if(!_world.expired())
+			_world.lock()->WorldUpdate();
 
 		SetupPassUniformBuffer();
 
@@ -168,11 +207,15 @@ void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
 void VulkanRenderer::SetupPassUniformBuffer()
 {
 	const CameraComponent* mainCamera = NULL;
+	if (!IsWorldValid())
+	{
+		return;
+	}
 	if (_bIsInGame)
-		mainCamera = _worldManager->_mainCamera;
+		mainCamera = GetWorld()->_mainCamera;
 #if IS_EDITOR
 	else
-		mainCamera = _worldManager->_editorCamera;
+		mainCamera = GetWorld()->_editorCamera;
 #endif
 	if (mainCamera != NULL)
 	{

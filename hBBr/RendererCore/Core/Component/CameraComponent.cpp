@@ -13,20 +13,20 @@ CameraComponent::CameraComponent(GameObject* parent)
 	_nearClipPlane = 0.01f;
 	_farClipPlane = 500.0f;
 	_fov = 90.0f;
-	_gameObject->GetScene()->_cameras.push_back(this);
-	if (_gameObject->GetScene()->_mainCamera == NULL)
+	_gameObject->GetWorld()->_cameras.push_back(this);
+	if (_gameObject->GetWorld()->_mainCamera == NULL)
 	{
-		_gameObject->GetScene()->_mainCamera = this;
+		_gameObject->GetWorld()->_mainCamera = this;
 	}
 }
 
 void CameraComponent::OverrideMainCamera()
 {
-	if (_gameObject->GetScene()->_mainCamera != NULL)
+	if (_gameObject->GetWorld()->_mainCamera != NULL)
 	{
-		_gameObject->GetScene()->_mainCamera->_bIsMainCamera = false;
+		_gameObject->GetWorld()->_mainCamera->_bIsMainCamera = false;
 	}
-	_gameObject->GetScene()->_mainCamera = this;
+	_gameObject->GetWorld()->_mainCamera = this;
 	_bIsMainCamera = true;
 }
 
@@ -35,7 +35,7 @@ void CameraComponent::Update()
 	const auto trans = _gameObject->GetTransform();
 	auto worldPos = trans->GetWorldLocation();
 	auto worldRot = trans->GetWorldRotation();
-	auto renderer = _gameObject->GetScene()->GetRenderer();
+	auto renderer = _gameObject->GetWorld()->GetRenderer();
 	//Editor camera behavior.
 	if (_bIsEditorCamera && !renderer->IsInGame())
 	{
@@ -96,7 +96,7 @@ void CameraComponent::Update()
 
 void CameraComponent::ExecuteDestroy()
 {
-	const auto scene = _gameObject->GetScene();
+	const auto scene = _gameObject->GetWorld();
 	auto it = std::remove(scene->_cameras.begin(), scene->_cameras.end(), this);
 	if (it != scene->_cameras.end())
 	{

@@ -11,25 +11,24 @@
 #include "Component/GameObject.h"
 #include "./ThirdParty/pugixml/pugixml.hpp"
 #include "Asset/HGuid.h"
-
-typedef void (*EditorSceneUpdate)(class WorldManager* scene, std::vector<std::shared_ptr<GameObject>> aliveObjects);
-typedef void (*EditorGameObjectAdd)(class WorldManager* scene, std::shared_ptr<GameObject> newObject);
-typedef void (*EditorGameObjectRemove)(class WorldManager* scene, std::shared_ptr<GameObject> oldObject);
-
-class WorldManager
+#include "Asset/Level.h"
+class World : public AssetObject
 {
 	friend class VulkanRenderer;
 	friend class GameObject;
 	friend class CameraComponent;
+	friend class Level;
 public:
 
-	~WorldManager();
+	HBBR_API static std::weak_ptr<World> LoadAsset(HGUID guid);
+
+	~World();
 
 #if IS_EDITOR
-	std::function<void(class WorldManager*, std::vector<std::shared_ptr<GameObject>>)> _editorSceneUpdateFunc = [](class WorldManager* s, std::vector<std::shared_ptr<GameObject>> o) {};
-	std::function<void(class WorldManager*, std::shared_ptr<GameObject>)> _editorGameObjectAddFunc = [](class WorldManager* scene, std::shared_ptr<GameObject> newObject) {};
-	std::function<void(class WorldManager*, std::shared_ptr<GameObject>)> _editorGameObjectRemoveFunc = [](class WorldManager* scene, std::shared_ptr<GameObject> oldObject) {};
-	std::function<void(class WorldManager*, std::shared_ptr<GameObject>)> _editorGameObjectUpdateFunc = [](class WorldManager* scene, std::shared_ptr<GameObject> oldObject) {};
+	std::function<void(class World*, std::vector<std::shared_ptr<GameObject>>)> _editorSceneUpdateFunc = [](class World* world, std::vector<std::shared_ptr<GameObject>> o) {};
+	std::function<void(class World*, std::shared_ptr<GameObject>)> _editorGameObjectAddFunc = [](class World* world, std::shared_ptr<GameObject> newObject) {};
+	std::function<void(class World*, std::shared_ptr<GameObject>)> _editorGameObjectRemoveFunc = [](class World* world, std::shared_ptr<GameObject> oldObject) {};
+	std::function<void(class World*, std::shared_ptr<GameObject>)> _editorGameObjectUpdateFunc = [](class World* world, std::shared_ptr<GameObject> oldObject) {};
 	class CameraComponent* _editorCamera = NULL;
 #endif
 
@@ -37,9 +36,24 @@ public:
 
 	HBBR_API HBBR_INLINE class CameraComponent* GetMainCamera()const { return _mainCamera; }
 
+	//添加关卡,
+	//1.关卡资产名称
+	//2.关卡资产的Asset虚拟路径
+	//3.关卡资产的Asset绝对路径
+	HBBR_API void AddLevel(HString levelNameOrContentPath);
+
+	HBBR_API void AddLevel(HGUID guid);
+
 private:
 
-	void WorldInit(class VulkanRenderer* renderer);
+	//加载场景
+	void Load(class VulkanRenderer* renderer);
+
+	//释放场景,但是asset依然存在
+	bool UnLoad();
+
+	//释放场景,包括.world asset.
+	bool ReleaseWorld();
 
 	void WorldUpdate();
 
@@ -59,7 +73,12 @@ private:
 	std::vector<std::shared_ptr<GameObject>> _gameObjectNeedDestroy;
 
 	//Test 
-	std::weak_ptr<GameObject> testObj;
+	//std::weak_ptr<GameObject> testObj;
+
+	std::vector<std::weak_ptr<Level>> _levels;
+
+	//Reference Count 可能存在多个VulkanRenderer共用一个World的情况，需要记录下来
+	int _refCount = 0;
 };
 
 

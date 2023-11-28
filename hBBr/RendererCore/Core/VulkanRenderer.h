@@ -7,6 +7,7 @@
 #include <functional>
 #include <map>
 #include "Pass/PassType.h"
+#include "Asset/HGuid.h"
 #include "HTime.h"
 
 class Texture;
@@ -80,8 +81,17 @@ public:
 		return _frameRate/1000.0f;
 	}
 
-	HBBR_API HBBR_INLINE class WorldManager* GetScene() {
-		return _worldManager.get();
+	HBBR_API HBBR_INLINE bool IsWorldValid()const{
+		return !_world.expired();
+	}
+
+	HBBR_API HBBR_INLINE class World* GetWorld() {
+		if (IsWorldValid()){
+			return _world.lock().get();
+		}
+		else{
+			return NULL;
+		}
 	}
 
 	HBBR_API HBBR_INLINE bool HasFocus() {
@@ -102,7 +112,13 @@ public:
 	{
 		return _bIsInGame;
 	}
-	
+
+	HBBR_API void CreateWorld(HString worldName);
+
+	HBBR_API void CreateWorld(HGUID worldGuid);
+
+	HBBR_API void CreateEmptyWorld();
+
 	//获取游戏时间(秒)
 	HBBR_INLINE const double GetGameTime()
 	{
@@ -171,8 +187,11 @@ private:
 	//Passes
 	std::unique_ptr<class PassManager> _passManager;
 
-	//Scene
-	std::unique_ptr<class WorldManager> _worldManager;
+	//World
+	std::weak_ptr<class World> _world;
+
+	//Empty world
+	std::shared_ptr<class World> _emptyWorld;
 
 	HTime _frameTime;
 

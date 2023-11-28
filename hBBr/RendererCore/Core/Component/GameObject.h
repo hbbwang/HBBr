@@ -8,20 +8,20 @@
 
 class GameObject
 {
-	friend class WorldManager;
+	friend class World;
 	friend class Component;
 	friend class Inspector;
 public:
 
-	GameObject(HString objectName = "NewGameObject", class WorldManager* scene = NULL, bool SceneEditorHide = false);
-	GameObject(class WorldManager* scene = NULL, bool SceneEditorHide = false);
+	GameObject(HString objectName = "NewGameObject", class World* scene = NULL, bool SceneEditorHide = false);
+	GameObject(class World* scene = NULL, bool SceneEditorHide = false);
 	~GameObject();
 
-	void ObjectInit(HString objectName = "NewGameObject", class WorldManager* scene = NULL, bool SceneEditorHide = false);
+	void ObjectInit(HString objectName = "NewGameObject", class World* scene = NULL, bool SceneEditorHide = false);
 
-	HBBR_API static GameObject* CreateGameObject(HString objectName = "NewGameObject", class WorldManager* scene = NULL);
+	HBBR_API static GameObject* CreateGameObject(HString objectName = "NewGameObject", class World* scene = NULL);
 
-	HBBR_API static GameObject* CreateModelGameObject(HString virtualPath, class WorldManager* scene = NULL);
+	HBBR_API static GameObject* CreateModelGameObject(HString virtualPath, class World* scene = NULL);
 
 	HBBR_API HBBR_INLINE void Destroy() {
 		SetActive(false);
@@ -56,7 +56,7 @@ public:
 		return _transform;
 	}
 
-	HBBR_API HBBR_INLINE class WorldManager* GetScene() {
+	HBBR_API HBBR_INLINE class World* GetWorld() {
 		return _scene;
 	}
 
@@ -114,7 +114,7 @@ private:
 	/* Auto run destroy execute.Do not call this function initiatively. */
 	bool ExecuteDestroy();
 
-	class WorldManager* _scene = NULL;
+	class World* _scene = NULL;
 
 	bool _bActive = true;
 

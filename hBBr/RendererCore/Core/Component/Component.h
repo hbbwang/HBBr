@@ -47,7 +47,7 @@ struct ComponentProperty
 class Component
 {
 	friend class GameObject;
-	friend class WorldManager;
+	friend class World;
 	friend class VulkanRenderer;
 public:
 	Component() {}

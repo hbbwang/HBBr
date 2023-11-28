@@ -198,12 +198,19 @@ public:
 		return _allGraphicsPrimitives;
 	}
 
-	inline static std::vector<MaterialPrimitive*> &GetMaterialPrimitives(uint32_t index) {
-		return _allGraphicsPrimitives[index];
+	inline static std::vector<MaterialPrimitive*> *GetMaterialPrimitives(uint32_t index) {
+		if (_allGraphicsPrimitives.size() > 0)
+			return &_allGraphicsPrimitives[index];
+		else
+			return NULL;
 	}
 
-	inline static std::vector<ModelPrimitive*> &GetModelPrimitives(MaterialPrimitive* index, class VulkanRenderer* renderer) {
-		return _allModelPrimitives[index][renderer];
+	inline static std::vector<ModelPrimitive*>* GetModelPrimitives(MaterialPrimitive* index, class VulkanRenderer* renderer) {
+		auto it = _allModelPrimitives.find(index);
+		if (it != _allModelPrimitives.end())
+			return &it->second[renderer];
+		else
+			return NULL;
 	}
 
 private:

@@ -8,12 +8,12 @@
 
 std::map<HString, std::function<class Component* (class GameObject*)>> GameObject::_componentSpawnFunctions;
 
-GameObject::GameObject(HString objectName, WorldManager* scene, bool SceneEditorHide)
+GameObject::GameObject(HString objectName, World* scene, bool SceneEditorHide)
 {
 	ObjectInit(objectName, scene, SceneEditorHide);
 }
 
-GameObject::GameObject(WorldManager* scene, bool SceneEditorHide)
+GameObject::GameObject(World* scene, bool SceneEditorHide)
 {
 	ObjectInit("NewGameObject", scene, SceneEditorHide);
 }
@@ -23,7 +23,7 @@ GameObject::~GameObject()
 
 }
 
-void GameObject::ObjectInit(HString objectName, WorldManager* scene, bool SceneEditorHide)
+void GameObject::ObjectInit(HString objectName, World* scene, bool SceneEditorHide)
 {
 	_guid = CreateGUID();
 #if IS_EDITOR
@@ -31,7 +31,7 @@ void GameObject::ObjectInit(HString objectName, WorldManager* scene, bool SceneE
 #endif
 	if (scene == NULL)
 	{
-		_scene = VulkanApp::GetMainForm()->renderer->GetScene();
+		_scene = VulkanApp::GetMainForm()->renderer->GetWorld();
 	}
 	else
 	{
@@ -47,12 +47,12 @@ void GameObject::ObjectInit(HString objectName, WorldManager* scene, bool SceneE
 	_scene->AddNewObject(sharedPtr);
 }
 
-GameObject* GameObject::CreateGameObject(HString objectName, WorldManager* scene)
+GameObject* GameObject::CreateGameObject(HString objectName, World* scene)
 {
 	return new GameObject(objectName, scene);
 }
 
-GameObject* GameObject::CreateModelGameObject(HString virtualPath, WorldManager* scene)
+GameObject* GameObject::CreateModelGameObject(HString virtualPath, World* scene)
 {
 	GameObject* cube = new GameObject(virtualPath.GetBaseName(), scene);
 	auto modelComp = cube->AddComponent<ModelComponent>();

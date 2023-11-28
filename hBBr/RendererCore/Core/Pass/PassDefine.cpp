@@ -108,8 +108,11 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 	pipelineTemps.clear();
 	//Reset buffer
 	{
-		auto& matPrim = PrimitiveProxy::GetMaterialPrimitives((uint32_t)p);
-
+		auto matPrim = PrimitiveProxy::GetMaterialPrimitives((uint32_t)p);
+		if (!matPrim)//Can not find any materials,return.
+		{
+			return;
+		}
 		bool bUpdateObjUb = false;
 		//Update pass uniform buffers
 		{
@@ -117,7 +120,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 			pass->BufferMapping(&passUniformBuffer, 0, sizeof(PassUniformBuffer));
 		}
 		uint32_t objectCount = 0;
-		for (auto m : matPrim)
+		for (auto m : *matPrim)
 		{
 			//Get Pipeline
  			auto pipelineObj = PipelineManager::GetGraphicsPipelineMap(m->graphicsIndex);
@@ -177,55 +180,58 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 			}
 
 			auto prims = PrimitiveProxy::GetModelPrimitives(m, _renderer);
-			for (size_t primIndex = 0; primIndex < prims.size(); primIndex++)
+			if (prims)
 			{
-				ModelPrimitive* prim = prims[primIndex];
-				bool bRefreshBuffer = prim->bNeedUpdate;
+				for (size_t primIndex = 0; primIndex < prims->size(); primIndex++)
 				{
-					//Vb,Ib
-					if (vbOffset != prim->vbPos || bRefreshBuffer) //偏移信息不相同时,重新映射
+					ModelPrimitive* prim = prims->at(primIndex);
+					bool bRefreshBuffer = prim->bNeedUpdate;
 					{
+						//Vb,Ib
+						if (vbOffset != prim->vbPos || bRefreshBuffer) //偏移信息不相同时,重新映射
+						{
+							if (prim->bActive)
+							{
+								vb->BufferMapping(prim->vertexData.data(), vbOffset, prim->vbSize);
+								prim->vbPos = vbOffset;
+							}
+							bRefreshBuffer = true;
+						}
+						if (ibOffset != prim->ibPos || bRefreshBuffer) //偏移信息不相同时,重新映射
+						{
+							if (prim->bActive)
+							{
+								ib->BufferMapping(prim->vertexIndices.data(), ibOffset, prim->ibSize);
+								prim->ibPos = ibOffset;
+							}
+							bRefreshBuffer = true;
+						}
 						if (prim->bActive)
 						{
-							vb->BufferMapping(prim->vertexData.data(), vbOffset, prim->vbSize);
-							prim->vbPos = vbOffset;
+							vbOffset += prim->vbSize;
+							ibOffset += prim->ibSize;
 						}
-						bRefreshBuffer = true;
-					}
-					if (ibOffset != prim->ibPos || bRefreshBuffer) //偏移信息不相同时,重新映射
-					{
+						//Object uniform
+						if (prim->transform &&
+							(prim->transform->NeedUpdateUb()
+								|| bRefreshBuffer //当顶点发生改变的时候,UniformBuffer也应该一起更新。
+								))
+						{
+							if (prim->bActive)
+							{
+								ObjectUniformBuffer objectUniformBuffer = {};
+								objectUniformBuffer.WorldMatrix = prim->transform->GetWorldMatrix();
+								obj->BufferMapping(&objectUniformBuffer, (uint64_t)objectUboOffset, sizeof(ObjectUniformBuffer));
+							}
+							bUpdateObjUb = true;
+						}
 						if (prim->bActive)
 						{
-							ib->BufferMapping(prim->vertexIndices.data(), ibOffset, prim->ibSize);
-							prim->ibPos = ibOffset;
+							objectCount++;
+							objectUboOffset += (uint32_t)sizeof(ObjectUniformBuffer);
 						}
-						bRefreshBuffer = true;
 					}
-					if (prim->bActive)
-					{
-						vbOffset += prim->vbSize;
-						ibOffset += prim->ibSize;
-					}
-					//Object uniform
-					if (prim->transform &&
-						(prim->transform->NeedUpdateUb()
-							|| bRefreshBuffer //当顶点发生改变的时候,UniformBuffer也应该一起更新。
-							))
-					{
-						if (prim->bActive)
-						{
-							ObjectUniformBuffer objectUniformBuffer = {};
-							objectUniformBuffer.WorldMatrix = prim->transform->GetWorldMatrix();
-							obj->BufferMapping(&objectUniformBuffer, (uint64_t)objectUboOffset, sizeof(ObjectUniformBuffer));
-						}
-						bUpdateObjUb = true;
-					}
-					if (prim->bActive)
-					{
-						objectCount++;
-						objectUboOffset += (uint32_t)sizeof(ObjectUniformBuffer);
-					}
-				}			
+				}
 			}
 		}
 		if (bUpdateObjUb)
@@ -245,7 +251,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 	uint32_t matIndex = 0;
 	auto curPipeline = pipelineTemps[matIndex];
 	vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 0, 1, &pass->GetDescriptorSet(), 1, dynamicOffset);
-	for (auto m : PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
+	for (auto m : *PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
 	{
 		manager->CmdCmdBindPipeline(cmdBuf, curPipeline->pipeline);
 		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat->GetDescriptorSet(), 1, &matBufferOffset[matIndex]);
@@ -254,23 +260,26 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &texSet, 0, NULL);
 		
 		auto prims = PrimitiveProxy::GetModelPrimitives(m, _renderer);
-		for (size_t m = 0; m < prims.size(); m++)
+		if (prims)
 		{
-			ModelPrimitive* prim = prims[m];
-			if (prim->bActive)
+			for (size_t m = 0; m < prims->size(); m++)
 			{
-				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 1, 1, &obj->GetDescriptorSet(), 1, &objectUboOffset);
-				objectUboOffset += sizeof(ObjectUniformBuffer);
+				ModelPrimitive* prim = prims->at(m);
+				if (prim->bActive)
+				{
+					vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 1, 1, &obj->GetDescriptorSet(), 1, &objectUboOffset);
+					objectUboOffset += sizeof(ObjectUniformBuffer);
 
-				VkBuffer verBuf[] = { vb->GetBuffer() };
-				vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, &vbOffset);
-				vkCmdBindIndexBuffer(cmdBuf, ib->GetBuffer(), ibOffset, VK_INDEX_TYPE_UINT32);
-				vkCmdDrawIndexed(cmdBuf, (uint32_t)prim->vertexIndices.size(), 1, 0, 0, 0);
+					VkBuffer verBuf[] = { vb->GetBuffer() };
+					vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, &vbOffset);
+					vkCmdBindIndexBuffer(cmdBuf, ib->GetBuffer(), ibOffset, VK_INDEX_TYPE_UINT32);
+					vkCmdDrawIndexed(cmdBuf, (uint32_t)prim->vertexIndices.size(), 1, 0, 0, 0);
 
-				vbOffset += prim->vbSize;
-				ibOffset += prim->ibSize;
-			}	
-		}
+					vbOffset += prim->vbSize;
+					ibOffset += prim->ibSize;
+				}
+			}
+		}	
 		matIndex++;
 	}
 }

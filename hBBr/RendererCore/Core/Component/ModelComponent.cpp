@@ -62,7 +62,7 @@ void ModelComponent::SetModel(std::weak_ptr<class ModelData> model)
 			_primitives[i]->transform = GetGameObject()->GetTransform();
 			if (_materials[i].expired())
 				_materials[i] = Material::LoadAsset(HGUID("61A147FF-32BD-48EC-B523-57BC75EB16BA"));
-			PrimitiveProxy::AddModelPrimitive(_materials[i].lock()->GetPrimitive(), _primitives[i], _gameObject->GetScene()->GetRenderer());
+			PrimitiveProxy::AddModelPrimitive(_materials[i].lock()->GetPrimitive(), _primitives[i], _gameObject->GetWorld()->GetRenderer());
 		}
 	}
 }
@@ -101,7 +101,7 @@ void ModelComponent::ClearPrimitves()
 	{
 		if (_primitives.size() > i && _primitives[i] != NULL && !_materials[i].expired())
 		{
-			PrimitiveProxy::RemoveModelPrimitive(_materials[i].lock()->GetPrimitive(), _primitives[i], _gameObject->GetScene()->GetRenderer());
+			PrimitiveProxy::RemoveModelPrimitive(_materials[i].lock()->GetPrimitive(), _primitives[i], _gameObject->GetWorld()->GetRenderer());
 			delete _primitives[i];
 			_primitives[i] = NULL;
 		}

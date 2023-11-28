@@ -16,7 +16,7 @@ std::unordered_map<TextureSampler, std::vector<VkSampler>>Texture::_samplers;
 std::unordered_map<wchar_t, FontTextureInfo> Texture::_fontTextureInfos;
 std::shared_ptr<Texture>Texture::_fontTexture;
 uint64_t Texture::_textureStreamingSize = 0;
-uint64_t Texture::_maxTextureStreamingSize = 1024 * 1024 * 4; //4 GB
+uint64_t Texture::_maxTextureStreamingSize = 4 * 1024 * 1024 * 1024; //4 GB
 
 SceneTexture::SceneTexture(VulkanRenderer* renderer)
 {
