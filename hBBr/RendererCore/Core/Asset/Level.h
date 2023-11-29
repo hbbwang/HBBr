@@ -20,12 +20,12 @@ public:
 	~Level();
 
 	//加载关卡
-	void Load(class World* world);
+	HBBR_API void Load(class World* world);
 
 	//释放关卡
-	bool UnLevel();
+	HBBR_API bool UnLevel();
 
-	void SaveLevel(HString saveContentPath);
+	HBBR_API void SaveLevel();
 
 private:
 
@@ -34,8 +34,6 @@ private:
 	bool bLoad = false;
 
 	class World* _world = NULL;
-
-	class VulkanRenderer* _renderer = NULL;
 };
 
 

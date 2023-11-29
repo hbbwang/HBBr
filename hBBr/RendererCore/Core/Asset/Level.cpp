@@ -15,14 +15,16 @@ void Level::Load(World* world)
 	if (world)
 	{
 		_world = world;
-		_renderer = world->_renderer;
-
 	}
 }
 
 bool Level::UnLevel()
 {
 	return false;
+}
+
+void Level::SaveLevel()
+{
 }
 
 void Level::LevelUpdate()

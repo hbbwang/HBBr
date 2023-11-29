@@ -288,6 +288,11 @@ void ContentManager::ReloadAssetInfo(AssetType type , pugi::xml_node & i)
 	}
 }
 
+std::weak_ptr<AssetInfoBase> ContentManager::ImportAssetInfo(AssetType type, HString name, HString suffix, HString assetPath)
+{
+	return ImportAssetInfo(type, "./" + name + "." + suffix, assetPath);
+}
+
 std::weak_ptr<AssetInfoBase> ContentManager::ImportAssetInfo(AssetType type, HString sourcePath,HString contentPath)
 {
 	FileSystem::CorrectionPath(sourcePath);
@@ -335,14 +340,20 @@ std::weak_ptr<AssetInfoBase> ContentManager::ImportAssetInfo(AssetType type, HSt
 		item.append_attribute(L"Name").set_value(name.c_wstr());
 		item.append_attribute(L"Suffix").set_value(suffix.c_wstr());
 		item.append_attribute(L"Path").set_value(path.c_wstr());
-		item.append_attribute(L"ByteSize").set_value(FileSystem::GetFileSize(sourcePath.c_str()));
+		if (FileSystem::FileExist(sourcePath.c_str()))
+		{
+			item.append_attribute(L"ByteSize").set_value(FileSystem::GetFileSize(sourcePath.c_str()));
+		}
 	}
 	else
 	{
 		HString guidStr = item.attribute(L"GUID").as_string();
 		StringToGUID(guidStr.c_str(), &guid);
 		item.attribute(L"Path").set_value(path.c_wstr());
-		item.attribute(L"ByteSize").set_value(FileSystem::GetFileSize(sourcePath.c_str()));
+		if (FileSystem::FileExist(sourcePath.c_str()))
+		{
+			item.attribute(L"ByteSize").set_value(FileSystem::GetFileSize(sourcePath.c_str()));
+		}
 	}
 
 	//重新导入

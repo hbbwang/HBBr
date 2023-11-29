@@ -139,7 +139,10 @@ public:
 	/* 更新单个资产的引用关系(GUID),不指定Type,会全局检索,可能会比较慢 */
 	HBBR_API void UpdateAssetReference(HGUID obj);
 
-	/* 导入资产信息, 注意:该操作不会检查是否存在相同名字和路径的资产 */
+	/* 导入资产信息 */
+	HBBR_API std::weak_ptr<AssetInfoBase> ImportAssetInfo(AssetType type, HString name, HString suffix, HString contentPath);
+
+	/* 导入资产信息 */
 	HBBR_API std::weak_ptr<AssetInfoBase> ImportAssetInfo(AssetType type , HString sourceFile, HString contentPath);
 
 	/* 删除资产 */

@@ -8,7 +8,10 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <qdir.h>
+#include <QFileDialog>
 #include <qfileinfo.h>
+#include "RendererCore/Core/VulkanRenderer.h"
+#include "RendererCore/Core/Asset/World.h"
 EditorMain* EditorMain::_self = NULL;
 
 EditorMain::EditorMain(QWidget *parent)
@@ -58,6 +61,24 @@ EditorMain::EditorMain(QWidget *parent)
     connect(ui.CompileAllShader, &QAction::triggered, this, [this](bool bChecked) {
         VulkanApp::RecompileAllShader();
     });
+    connect(ui.SaveWorld, &QAction::triggered, this, [this](bool bChecked) {
+
+        });
+    connect(ui.SaveWholeWorld, &QAction::triggered, this, [this](bool bChecked) {
+        if (VulkanApp::GetMainForm()->renderer->GetWorld()->_assetInfo)
+        {
+            VulkanApp::GetMainForm()->renderer->GetWorld()->SaveWholeWorld(FileSystem::GetFilePath(VulkanApp::GetMainForm()->renderer->GetWorld()->_assetInfo->absPath));
+        }
+        else
+        {
+            QString path = QFileDialog::getExistingDirectory(this, "Save Whole World", FileSystem::GetAssetAbsPath().c_str(),QFileDialog::Option::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+            if (path.size() > 3 && VulkanApp::GetMainForm()->renderer->GetWorld())
+            {
+                VulkanApp::GetMainForm()->renderer->GetWorld()->SaveWholeWorld(path.toStdString().c_str());
+            }
+        }
+    });
+
     EditorMain::_self = this;
 
     //Update timer

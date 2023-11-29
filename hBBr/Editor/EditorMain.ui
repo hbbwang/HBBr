@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>600</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="MainMenu">
@@ -34,8 +34,8 @@
      <addaction name="CreateNewScene"/>
     </widget>
     <addaction name="Menu_CreateNew"/>
-    <addaction name="Save"/>
-    <addaction name="SaveAs"/>
+    <addaction name="SaveWorld"/>
+    <addaction name="SaveWholeWorld"/>
     <addaction name="OpenProgramDir"/>
     <addaction name="CompileAllShader"/>
    </widget>
@@ -53,14 +53,14 @@
     <string>新建场景</string>
    </property>
   </action>
-  <action name="Save">
+  <action name="SaveWorld">
    <property name="text">
-    <string>保存</string>
+    <string>保存世界</string>
    </property>
   </action>
-  <action name="SaveAs">
+  <action name="SaveWholeWorld">
    <property name="text">
-    <string>另存为</string>
+    <string>保存世界和关卡</string>
    </property>
   </action>
   <action name="ResetWindowStyle">

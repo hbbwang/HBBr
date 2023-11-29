@@ -51,32 +51,6 @@ World::~World()
 	}
 }
 
-//void World::SaveWorld(HString path)
-//{
-//	if (FileSystem::IsDir(path.c_str()))
-//	{
-//		HString filePath = path + _worldName + ".xml";
-//		pugi::xml_document doc;
-//		XMLStream::CreateXMLFile("", doc);
-//		auto root = doc.append_child(L"root");
-//		//save scenes
-//		auto scene = root.append_child(L"scene");
-//		for (auto& i : _sceneDocs)
-//		{
-//			HString name = i.first;
-//			HString guidStr = i.second.str().c_str();
-//			auto item = scene.append_child(L"Item");
-//			item.append_attribute(L"Name").set_value(name.c_wstr());
-//			item.append_attribute(L"GUID").set_value(guidStr.c_wstr());
-//		}
-//		doc.save_file(filePath.c_wstr());
-//	}
-//	else
-//	{
-//		MessageOut("[SaveWorld] function parameter 'path' is not a valid directory.", false, false, "255,255,0");
-//	}
-//}
-
 void World::AddLevel(HString levelNameOrContentPath)
 {
 	HGUID guid;
@@ -141,8 +115,70 @@ void World::AddLevel(HGUID guid)
 
 void World::AddEmptyLevel(HString newLevelName)
 {
-	pugi::xml_document levelDoc;
-	XMLStream::CreateXMLFile(FileSystem::GetProgramPath() +  _assetInfo->relativePath + "./" + newLevelName, levelDoc);
+	auto newLevelInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Level, newLevelName, "level", _assetInfo->relativePath);
+	if (!newLevelInfo.expired())
+	{
+		pugi::xml_document levelDoc;
+		XMLStream::CreateXMLFile(FileSystem::GetProgramPath() + _assetInfo->relativePath + "./" + newLevelInfo.lock()->guid.str().c_str() + ".level", levelDoc);
+		ContentManager::Get()->ReloadAssetInfos(AssetType::Level);
+		auto info = std::static_pointer_cast<AssetInfo<Level>>(newLevelInfo.lock());
+		auto asset = info->GetData();
+		asset.lock()->Load(this);
+		_levels.push_back(asset);
+	}
+}
+
+void World::SaveWorld(HString assetPath)
+{
+	if (FileSystem::IsDir(assetPath.c_str()))
+	{
+		HGUID guid;
+		if (_assetInfo)
+		{
+			guid = _assetInfo->guid;
+		}
+		else
+		{
+			_assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Level, _worldName, "world", assetPath).lock().get();
+		}
+		pugi::xml_document doc;
+		HString filePath = assetPath + "/" + guid.str().c_str() + ".world";
+		if (!XMLStream::LoadXML(filePath.c_wstr(), doc))
+		{
+			XMLStream::CreateXMLFile(filePath, doc);
+		}
+		auto root = doc.append_child(L"root");
+		//save scenes
+		auto scene = root.append_child(L"Level");
+		for (auto& i : _levels)
+		{
+			HString name = i.lock()->_assetInfo->name;
+			HString guidStr = i.lock()->_assetInfo->guid.str().c_str();
+			HString relativeAssetPath = i.lock()->_assetInfo->relativePath;
+			auto item = scene.append_child(L"Item");
+			item.append_attribute(L"Name").set_value(name.c_wstr());
+			item.append_attribute(L"GUID").set_value(guidStr.c_wstr());
+			item.append_attribute(L"RelativePath").set_value(relativeAssetPath.c_wstr());
+		}
+		doc.save_file(filePath.c_wstr());
+		ContentManager::Get()->ReloadAssetInfos(AssetType::World);
+	}
+	else
+	{
+		MessageOut("[SaveWorld] function parameter 'path' is not a valid directory.", false, false, "255,255,0");
+	}
+}
+
+void World::SaveWholeWorld(HString assetPath)
+{
+	for (auto& i : _levels)
+	{
+		if (!i.expired())
+		{
+			i.lock()->SaveLevel();
+		}
+	}
+	SaveWorld(assetPath);
 }
 
 void World::Load(class VulkanRenderer* renderer)

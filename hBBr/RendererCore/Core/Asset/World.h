@@ -36,15 +36,23 @@ public:
 
 	HBBR_API HBBR_INLINE class CameraComponent* GetMainCamera()const { return _mainCamera; }
 
-	//添加关卡,
+	//添加现有关卡
 	//1.关卡资产名称
 	//2.关卡资产的Asset虚拟路径
 	//3.关卡资产的Asset绝对路径
 	HBBR_API void AddLevel(HString levelNameOrContentPath);
 
+	//添加现有关卡
 	HBBR_API void AddLevel(HGUID guid);
 
+	//新增空关卡
 	HBBR_API void AddEmptyLevel(HString newLevelName = "NewLevel");
+
+	//保存世界xml
+	HBBR_API void SaveWorld(HString assetPath);
+
+	//保存世界xml,包括Levels
+	HBBR_API void SaveWholeWorld(HString assetPath);
 
 private:
 
@@ -78,6 +86,8 @@ private:
 	//std::weak_ptr<GameObject> testObj;
 
 	std::vector<std::weak_ptr<Level>> _levels;
+
+	HString _worldName = "NewWorld";
 
 	//Reference Count 可能存在多个VulkanRenderer共用一个World的情况，需要记录下来
 	int _refCount = 0;
