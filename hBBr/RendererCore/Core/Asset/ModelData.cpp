@@ -33,7 +33,7 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 			return std::weak_ptr<ModelData>();
 		}
 	}
-	auto dataPtr = reinterpret_cast<AssetInfo<ModelData>*>(it->second);
+	auto dataPtr = std::static_pointer_cast<AssetInfo<ModelData>>(it->second);
 	if (dataPtr->IsAssetLoad())
 	{
 		return dataPtr->GetData();
@@ -76,7 +76,7 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 	}
 
 	auto modelData = std::make_shared<ModelData>();
-	modelData->_assetInfo = dataPtr;
+	modelData->_assetInfo = dataPtr.get();
 	glm::vec3 boundingBox_min = glm::vec3(0, 0, 0);
 	glm::vec3 boundingBox_max = glm::vec3(0, 0, 0);
 	for (unsigned int nm = 0; nm < scene->mNumMeshes; nm++)

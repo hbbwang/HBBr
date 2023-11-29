@@ -35,7 +35,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 			return std::weak_ptr<Material>();
 		}
 	}
-	auto dataPtr = reinterpret_cast<AssetInfo<Material>*>(it->second);
+	auto dataPtr = std::static_pointer_cast<AssetInfo<Material>>(it->second);
 	if (dataPtr->IsAssetLoad())
 	{
 		return dataPtr->GetData();
@@ -58,7 +58,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		auto materialPrim = root.child(L"MaterialPrimitive");
 		//MaterialPrimitive
 		mat->_primitive.reset(new MaterialPrimitive());
-		mat->_assetInfo = dataPtr;
+		mat->_assetInfo = dataPtr.get();
 		mat->_primitive->graphicsName = it->second->name;
 		XMLStream::LoadXMLAttributeString(materialPrim, L"vsShader", mat->_primitive->vsShader);
 		XMLStream::LoadXMLAttributeString(materialPrim, L"psShader", mat->_primitive->psShader);

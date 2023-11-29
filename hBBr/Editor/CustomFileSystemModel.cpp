@@ -33,9 +33,9 @@ QVariant CustomFileSystemModel::data(const QModelIndex & index, int role) const
 		if (info.exists() && info.isFile() && role == Qt::TextDate)
 		{
 			auto assetInfo = _contentBrowserListView->_fileInfos[index];
-			if (assetInfo)
+			if (!assetInfo.expired())
 			{
-				return  assetInfo->name.c_str();
+				return  assetInfo.lock()->name.c_str();
 			}
 		}	
 	}

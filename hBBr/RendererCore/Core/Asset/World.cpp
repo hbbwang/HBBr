@@ -20,7 +20,7 @@ std::weak_ptr<World> World::LoadAsset(HGUID guid)
 			return std::weak_ptr<World>();
 		}
 	}
-	auto dataPtr = reinterpret_cast<AssetInfo<World>*>(it->second);
+	auto dataPtr = std::static_pointer_cast<AssetInfo<World>>(it->second);
 	if (dataPtr->IsAssetLoad())
 	{
 		return dataPtr->GetData();
@@ -81,23 +81,23 @@ void World::AddLevel(HString levelNameOrContentPath)
 {
 	HGUID guid;
 	StringToGUID(levelNameOrContentPath.c_str(), &guid);
-	AssetInfo<Level>* newLevel = NULL;
+	std::shared_ptr<AssetInfo<Level>> newLevel = NULL;
 	if (guid.isValid())
 	{
 		auto asset  = ContentManager::Get()->GetAssetInfo(guid, AssetType::Level);
-		if (asset)
-			newLevel = (AssetInfo<Level>*)asset;
+		if (!asset.expired())
+			newLevel = std::static_pointer_cast<AssetInfo<Level>>(asset.lock());
 	}
 	else
 	{
 		auto asset = ContentManager::Get()->GetAssetInfo(levelNameOrContentPath);
-		if(asset)
-			newLevel = (AssetInfo<Level>*)asset;
+		if(!asset.expired())
+			newLevel = std::static_pointer_cast<AssetInfo<Level>>(asset.lock());
 		else
 		{
 			auto asset = ContentManager::Get()->GetAssetInfo(AssetType::Level, levelNameOrContentPath);
-			if (asset)
-				newLevel = (AssetInfo<Level>*)asset;
+			if (!asset.expired())
+				newLevel = std::static_pointer_cast<AssetInfo<Level>>(asset.lock());
 		}
 	}
 	if (!newLevel)
@@ -117,12 +117,12 @@ void World::AddLevel(HString levelNameOrContentPath)
 
 void World::AddLevel(HGUID guid)
 {
-	AssetInfo<Level>* newLevel = NULL;
+	std::shared_ptr<AssetInfo<Level>> newLevel = NULL;
 	if (guid.isValid())
 	{
 		auto asset = ContentManager::Get()->GetAssetInfo(guid, AssetType::Level);
-		if (asset)
-			newLevel = (AssetInfo<Level>*)asset;
+		if (!asset.expired())
+			newLevel = std::static_pointer_cast<AssetInfo<Level>>(asset.lock());
 	}
 	if (!newLevel)
 	{
@@ -137,6 +137,12 @@ void World::AddLevel(HGUID guid)
 	{
 		_levels.push_back(newLevel->GetData());
 	}
+}
+
+void World::AddEmptyLevel(HString newLevelName)
+{
+	pugi::xml_document levelDoc;
+	XMLStream::CreateXMLFile(FileSystem::GetProgramPath() +  _assetInfo->relativePath + "./" + newLevelName, levelDoc);
 }
 
 void World::Load(class VulkanRenderer* renderer)
@@ -191,7 +197,7 @@ bool World::ReleaseWorld()
 {
 	if (UnLoad())
 	{
-		((AssetInfo<World>*)this->_assetInfo)->ReleaseData();
+		_assetInfo->ReleaseData();
 		return true;
 	}
 	return false;

@@ -524,7 +524,7 @@ void ContentBrowser::AssetImport()
 		//
 		QString dirPath = _treeFileSystemModel->filePath(_treeWidget->currentIndex());
 		QString dstPath = _treeFileSystemModel->filePath(_treeWidget->currentIndex()) + QDir::separator() + fileInfo.baseName();
-		AssetInfoBase* assetInfo = NULL;
+		std::weak_ptr<AssetInfoBase> assetInfo;
 		if (_treeWidget->currentIndex().isValid())
 		{
 			if (fileInfo.suffix().compare("fbx", Qt::CaseInsensitive) == 0)
@@ -533,7 +533,7 @@ void ContentBrowser::AssetImport()
 				dstPath += ".fbx";
 				assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Model, i.toStdString().c_str(), dstPath.toStdString().c_str());
 				//复制fbx进content
-				HString guidStr = GUIDToString(assetInfo->guid);
+				HString guidStr = GUIDToString(assetInfo.lock()->guid);
 				dirPath += QDir::separator();
 				dirPath = dirPath + guidStr.c_str() + ".fbx";
 				FileSystem::FileCopy(i.toStdString().c_str(), dirPath.toStdString().c_str());
@@ -548,7 +548,7 @@ void ContentBrowser::AssetImport()
 				dstPath += ".dds";
 				assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Texture2D, i.toStdString().c_str(), dstPath.toStdString().c_str());
 				//转换图像格式为dds
-				HString guidStr = GUIDToString(assetInfo->guid);
+				HString guidStr = GUIDToString(assetInfo.lock()->guid);
 				dirPath += QDir::separator();
 				dirPath = dirPath + guidStr.c_str() + ".dds";
 				Texture::CompressionImage2D(i.toStdString().c_str(), dirPath.toStdString().c_str(), true, nvtt::Format_BC3, false, true);
@@ -559,7 +559,7 @@ void ContentBrowser::AssetImport()
 			{
 
 			}
-			if (assetInfo)
+			if (!assetInfo.expired())
 				_listWidget->_fileInfos.insert(_listFileSystemModel->index(dirPath), assetInfo);
 		}
 	}

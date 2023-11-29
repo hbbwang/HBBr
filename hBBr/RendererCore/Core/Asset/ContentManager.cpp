@@ -5,6 +5,8 @@
 #include "Asset/ModelData.h"
 #include "Asset/Material.h"
 #include "Asset/Texture.h"
+#include "Asset/Level.h"
+#include "Asset/World.h"
 std::unique_ptr<ContentManager> ContentManager::_ptr;
 
 ContentManager::ContentManager()
@@ -33,7 +35,7 @@ void ContentManager::ReloadAssetInfos(AssetType type)
 	if (subGroup)
 	{
 		//卸载已经加载的信息
-		ReleaseAssetsByType(type);
+		ReleaseAssetsByType(type, false);
 
 		//重新从引用配置文件里读取
 		for (auto i = subGroup.first_child(); i; i = i.next_sibling())
@@ -65,6 +67,8 @@ void ContentManager::UpdateAllAssetReference()
 	UpdateAssetReferenceByType(AssetType::Model);
 	UpdateAssetReferenceByType(AssetType::Material);
 	UpdateAssetReferenceByType(AssetType::Texture2D);
+	UpdateAssetReferenceByType(AssetType::Level);
+	UpdateAssetReferenceByType(AssetType::World);
 }
 
 //重载所有资产Info
@@ -73,29 +77,36 @@ void ContentManager::ReloadAllAssetInfos()
 	ReloadAssetInfos(AssetType::Model);
 	ReloadAssetInfos(AssetType::Material);
 	ReloadAssetInfos(AssetType::Texture2D);
+	ReloadAssetInfos(AssetType::Level);
+	ReloadAssetInfos(AssetType::World);
 	UpdateAllAssetReference();
 }
 
 void ContentManager::Release()
 {
-	ReleaseAssetsByType(AssetType::Model);
-	ReleaseAssetsByType(AssetType::Material);
-	ReleaseAssetsByType(AssetType::Texture2D);
+	ReleaseAssetsByType(AssetType::Model, true);
+	ReleaseAssetsByType(AssetType::Material, true);
+	ReleaseAssetsByType(AssetType::Texture2D, true);
+	ReleaseAssetsByType(AssetType::Level, true);
+	ReleaseAssetsByType(AssetType::World, true);
 }
 
-AssetInfoBase* CreateInfo(AssetType type)
+std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)
 {
+	std::shared_ptr<AssetInfoBase> result = NULL;
 	switch (type)//新增资产类型需要在这里添加实际对象,未来打包资产的时候会根据类型进行删留
 	{
-		case AssetType::Model:		return new AssetInfo<ModelData>(); 
-		case AssetType::Material:	return new AssetInfo<Material>();
-		case AssetType::Texture2D:	return new AssetInfo<Texture>();
+	case AssetType::Model:		result.reset(new AssetInfo<ModelData>());
+		case AssetType::Material:	result.reset(new AssetInfo<Material>());
+		case AssetType::Texture2D: result.reset(new AssetInfo<Texture>());
+		case AssetType::Level:	result.reset(new AssetInfo<Level>()); 
+		case AssetType::World:	 result.reset(new AssetInfo<World>());
 		default:break;
 	}
-	return NULL;
+	return result;
 }
 
-AssetInfoBase* ContentManager::GetAssetInfo(AssetType type, HString contentBrowserFilePath) const
+std::weak_ptr<AssetInfoBase> ContentManager::GetAssetInfo(AssetType type, HString contentBrowserFilePath) const
 {
 	HString filePath = FileSystem::GetFilePath(contentBrowserFilePath);
 	HString fileBaseName = FileSystem::GetBaseName(contentBrowserFilePath);
@@ -113,12 +124,20 @@ AssetInfoBase* ContentManager::GetAssetInfo(AssetType type, HString contentBrows
 	{
 		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "dds");
 	}
+	else if (type == AssetType::Level)
+	{
+		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "level");
+	}
+	else if (type == AssetType::World)
+	{
+		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "world");
+	}
 
 	if (type != AssetType::Unknow)
 	{
 		auto& map = _assets[(uint32_t)type];
 		HString path = FileSystem::GetRelativePath(filePath.c_str());
-		auto fit = std::find_if(map.begin(), map.end(), [&](const std::pair<HGUID, AssetInfoBase*>& item) {
+		auto fit = std::find_if(map.begin(), map.end(), [&](const std::pair<HGUID, std::shared_ptr<AssetInfoBase>>& item) {
 			return item.second->relativePath == path && fileBaseName == item.second->name;
 			});
 		if (fit != map.end())
@@ -127,10 +146,10 @@ AssetInfoBase* ContentManager::GetAssetInfo(AssetType type, HString contentBrows
 		}
 	}
 	MessageOut((HString(L"Error, the asset cannot be found. Please check whether the Asset directory is complete or the asset is missing.\n错误,无法找到资产,请检查Asset目录是否完整或资产缺失:\n") + contentBrowserFilePath).c_str(), false, false, "255,0,0");
-	return NULL;
+	return std::weak_ptr<AssetInfoBase>();
 }
 
-AssetInfoBase* ContentManager::GetAssetInfo(HString realAbsPath) const
+std::weak_ptr<AssetInfoBase> ContentManager::GetAssetInfo(HString realAbsPath) const
 {
 	HString guidStr = FileSystem::GetBaseName(realAbsPath);
 	HString suffix = FileSystem::GetFileExt(realAbsPath);
@@ -149,6 +168,14 @@ AssetInfoBase* ContentManager::GetAssetInfo(HString realAbsPath) const
 	{
 		type = AssetType::Material;
 	}
+	else if (suffix.IsSame("level"))
+	{
+		type = AssetType::Level;
+	}
+	else if (suffix.IsSame("world"))
+	{
+		type = AssetType::World;
+	}
 	return GetAssetInfo(guid, type);
 }
 #pragma endregion Asset Type Function(资产类型硬相关方法)
@@ -165,12 +192,23 @@ void ContentManager::UpdateAssetReference(HGUID obj)
 	}
 }
 
-void ContentManager::ReleaseAssetsByType(AssetType type)
+void ContentManager::ReleaseAssetsByType(AssetType type, bool bDestroy)
 {
-	for (auto i : _assets[(uint32_t)type])
-		if (i.second)
-			delete i.second;
-	_assets[(uint32_t)type].clear();
+	if (bDestroy)
+	{
+		for (auto i : _assets[(uint32_t)type])
+		{
+			i.second.reset();
+		}
+		_assets[(uint32_t)type].clear();
+	}
+	else
+	{
+		for (auto i : _assets[(uint32_t)type])
+		{
+			i.second->ReleaseData();
+		}
+	}
 }
 
 void ContentManager::ReleaseAsset(AssetType type, HGUID obj)
@@ -182,23 +220,41 @@ void ContentManager::ReleaseAsset(AssetType type, HGUID obj)
 	}
 }
 
-void ContentManager::UpdateAssetReference(AssetInfoBase* info)
+void ContentManager::UpdateAssetReference(std::weak_ptr<AssetInfoBase> info)
 {
-	info->refs.clear();
-	for (auto i : info->refTemps)
+	if (!info.expired())
 	{
-		info->refs.push_back(_assets[(uint32_t)i.type][i.guid]);
+		info.lock()->refs.clear();
+		for (auto i : info.lock()->refTemps)
+		{
+			info.lock()->refs.push_back(_assets[(uint32_t)i.type][i.guid]);
+		}
 	}
 }
 
 void ContentManager::ReloadAssetInfo(AssetType type , pugi::xml_node & i)
 {
-	//重新导入
-	AssetInfoBase* info = CreateInfo(type);
-	info->type = type;
+	HGUID guid;
 	HString guidStr;
 	XMLStream::LoadXMLAttributeString(i, L"GUID", guidStr);
-	StringToGUID(guidStr.c_str(), &info->guid);
+	StringToGUID(guidStr.c_str(), &guid);
+
+	//查看下是否已经加载过AssetInfo了,已经加载过就不需要创建了
+	auto checkExist = GetAssetInfo(guid, type);
+	bool bExist = !checkExist.expired();
+	std::shared_ptr<AssetInfoBase> info = NULL;
+	if (checkExist.expired())
+	{
+		info = CreateInfo(type);
+	}
+	else
+	{
+		info = checkExist.lock();
+	}
+
+	//重新导入
+	info->type = type;
+	info->guid = guid;
 	XMLStream::LoadXMLAttributeString(i, L"Name", info->name);
 	XMLStream::LoadXMLAttributeString(i, L"Path", info->relativePath);
 	FileSystem::CorrectionPath(info->relativePath);
@@ -225,13 +281,14 @@ void ContentManager::ReloadAssetInfo(AssetType type , pugi::xml_node & i)
 		newTemp.type = (AssetType)typeIndex;
 		info->refTemps.push_back(newTemp);
 	}
-	//尝试卸载旧资产
-	ReleaseAsset(type, info->guid);
-	//
-	_assets[(uint32_t)type].emplace(info->guid, info);
+
+	if (checkExist.expired())
+	{
+		_assets[(uint32_t)type].emplace(info->guid, info);
+	}
 }
 
-AssetInfoBase* ContentManager::ImportAssetInfo(AssetType type, HString sourcePath,HString contentPath)
+std::weak_ptr<AssetInfoBase> ContentManager::ImportAssetInfo(AssetType type, HString sourcePath,HString contentPath)
 {
 	FileSystem::CorrectionPath(sourcePath);
 	contentPath.Replace("\\", "/");
@@ -318,12 +375,15 @@ void ContentManager::RemoveAssetInfo(HGUID obj, AssetType type )
 				//移除引用关系
 				for (auto i : it->second->refs)
 				{
-					auto iit = std::remove_if(i->refs.begin(), i->refs.end(), [obj](AssetInfoBase*& info) {
-						return info->guid == obj;
-						});
-					if (iit != it->second->refs.end())
+					if (!i.expired())
 					{
-						i->refs.erase(iit);
+						auto iit = std::remove_if(i.lock()->refs.begin(), i.lock()->refs.end(), [obj](std::weak_ptr<AssetInfoBase>& info) {
+							return info.lock()->guid == obj;
+							});
+						if (iit != it->second->refs.end())
+						{
+							i.lock()->refs.erase(iit);
+						}
 					}
 				}
 				HString typeName = GetAssetTypeString(type);
@@ -351,13 +411,16 @@ void ContentManager::RemoveAssetInfo(HGUID obj, AssetType type )
 				//移除引用关系
 				for (auto i : it->second->refs)
 				{
-					auto iit = std::remove_if(i->refs.begin(), i->refs.end(), [obj](AssetInfoBase*& info) {
-						return info->guid == obj;
-						});
-					if (iit != it->second->refs.end())
+					if (!i.expired())
 					{
-						i->refs.erase(iit);
-					}
+						auto iit = std::remove_if(i.lock()->refs.begin(), i.lock()->refs.end(), [obj](std::weak_ptr<AssetInfoBase>& info) {
+							return info.lock()->guid == obj;
+							});
+						if (iit != it->second->refs.end())
+						{
+							i.lock()->refs.erase(iit);
+						}
+					}				
 				}
 				auto item = subGroup.find_child_by_attribute(L"GUID", guidStr.c_wstr());
 				subGroup.remove_child(item);
@@ -368,7 +431,7 @@ void ContentManager::RemoveAssetInfo(HGUID obj, AssetType type )
 	_contentRefConfig.save_file(_configPath.c_wstr());
 }
 
-AssetInfoBase* ContentManager::GetAssetInfo(HGUID guid, AssetType type)const 
+std::weak_ptr<AssetInfoBase> ContentManager::GetAssetInfo(HGUID guid, AssetType type)const
 {
 	if (type != AssetType::Unknow)
 	{
@@ -377,7 +440,7 @@ AssetInfoBase* ContentManager::GetAssetInfo(HGUID guid, AssetType type)const
 		{
 			return it->second;
 		}
-		return NULL;
+		return std::weak_ptr<AssetInfoBase>();
 	}
 	else
 	{
@@ -389,16 +452,16 @@ AssetInfoBase* ContentManager::GetAssetInfo(HGUID guid, AssetType type)const
 				return it->second;
 			}
 		}
-		return NULL;
+		return std::weak_ptr<AssetInfoBase>();
 	}
-	return NULL;
+	return std::weak_ptr<AssetInfoBase>();
 }
 
 HGUID ContentManager::GetAssetGUID(AssetType type, HString contentBrowserFilePath)const
 {
 	auto info = GetAssetInfo(type, contentBrowserFilePath);
-	if (info != NULL)
-		return info->guid;
+	if (!info.expired())
+		return info.lock()->guid;
 	else
 		return HGUID();
 }

@@ -25,6 +25,8 @@ public:
 	//释放关卡
 	bool UnLevel();
 
+	void SaveLevel(HString saveContentPath);
+
 private:
 
 	void LevelUpdate();

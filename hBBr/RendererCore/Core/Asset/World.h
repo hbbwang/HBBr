@@ -44,6 +44,8 @@ public:
 
 	HBBR_API void AddLevel(HGUID guid);
 
+	HBBR_API void AddEmptyLevel(HString newLevelName = "NewLevel");
+
 private:
 
 	//加载场景

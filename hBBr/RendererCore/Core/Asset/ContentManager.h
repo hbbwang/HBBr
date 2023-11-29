@@ -57,16 +57,20 @@ public:
 	AssetType type;
 	HString name;
 	HString suffix;
+	//相对路径
 	HString relativePath;
+	//Asset虚拟/相对路径，带虚拟文件名，没有后缀
 	HString virtualPath;
+	//真实绝对路径，带完整文件名字和后缀
 	HString absPath;
 	uint64_t byteSize;
-	std::vector<AssetInfoBase*> refs;
+	std::vector<std::weak_ptr<AssetInfoBase>> refs;
 	//用来暂时储存引用的guid和type,没有太多实际意义,通常是空的
 	std::vector<AssetInfoRefTemp> refTemps;
 	//
 	bool bAssetLoad = false;
 	virtual std::weak_ptr<class AssetObject> GetAssetData()const { return std::weak_ptr<class AssetObject>(); }
+	virtual void ReleaseData() {}
 	inline const bool IsAssetLoad()const
 	{
 		return bAssetLoad;
@@ -94,7 +98,7 @@ public:
 		}
 		return T::LoadAsset(this->guid);
 	}
-	inline void ReleaseData(){
+	inline void ReleaseData() override{
 		data.reset();
 		data = NULL;
 		bAssetLoad = false;
@@ -136,7 +140,7 @@ public:
 	HBBR_API void UpdateAssetReference(HGUID obj);
 
 	/* 导入资产信息, 注意:该操作不会检查是否存在相同名字和路径的资产 */
-	HBBR_API AssetInfoBase* ImportAssetInfo(AssetType type , HString sourceFile, HString contentPath);
+	HBBR_API std::weak_ptr<AssetInfoBase> ImportAssetInfo(AssetType type , HString sourceFile, HString contentPath);
 
 	/* 删除资产 */
 	HBBR_API void  DeleteAsset(HString filePath);
@@ -144,15 +148,15 @@ public:
 	/* 删除资产信息 */
 	HBBR_API void RemoveAssetInfo(HGUID obj, AssetType type = AssetType::Unknow);
 
-	HBBR_API inline const std::unordered_map<HGUID, AssetInfoBase*>& GetAssets(AssetType type)const { return _assets[(uint32_t)type]; }
+	HBBR_API inline const std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>& GetAssets(AssetType type)const { return _assets[(uint32_t)type]; }
 
-	HBBR_API AssetInfoBase* GetAssetInfo(HGUID guid, AssetType type = AssetType::Unknow)const;
+	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HGUID guid, AssetType type = AssetType::Unknow)const;
 
 	/* 根据实际路径实际文件获取 */
-	HBBR_API AssetInfoBase* GetAssetInfo(HString realAbsPath)const;
+	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HString realAbsPath)const;
 
 	/* 根据内容浏览器显示的文件名称(虚拟路径)查找 AssetInfo */
-	HBBR_API AssetInfoBase* GetAssetInfo(AssetType type, HString contentBrowserFilePath)const;
+	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(AssetType type, HString contentBrowserFilePath)const;
 
 	/* 根据内容浏览器显示的文件名称(虚拟路径)查找(非实际GUID的名称)GUID */
 	HBBR_API HGUID GetAssetGUID(AssetType type,HString contentBrowserFilePath)const;
@@ -161,11 +165,11 @@ public:
 	HBBR_INLINE std::weak_ptr<T> GetAsset(HGUID guid , AssetType type = AssetType::Unknow)
 	{
 		auto assetInfo = GetAssetInfo(guid , type);
-		if (!assetInfo)
+		if (assetInfo.expired())
 		{
 			return std::weak_ptr<T>();
 		}
-		auto asset = reinterpret_cast<AssetInfo<T>*>(assetInfo);
+		auto asset = std::static_pointer_cast<AssetInfo<T>>(assetInfo.lock());
 		return asset->GetData();
 	}
 
@@ -179,14 +183,14 @@ public:
 private:
 
 	/* 更新单个资产的引用关系(info) */
-	void UpdateAssetReference(AssetInfoBase* info);
+	void UpdateAssetReference(std::weak_ptr<AssetInfoBase> info);
 
 	/* 重载单个资产的信息(只是加载引用信息,非资产本身) */
 	void ReloadAssetInfo(AssetType type , pugi::xml_node& node);
 
 	void Release();
 
-	void ReleaseAssetsByType(AssetType type);
+	void ReleaseAssetsByType(AssetType type, bool bDestroy);
 
 	void ReleaseAsset(AssetType type, HGUID obj);
 
@@ -197,7 +201,7 @@ private:
 	//<HGUID,资产信息>//
 	pugi::xml_document _contentRefConfig;
 
-	std::vector<std::unordered_map<HGUID, AssetInfoBase*>>_assets;
+	std::vector<std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>>_assets;
 
 	HString _configPath;
 };

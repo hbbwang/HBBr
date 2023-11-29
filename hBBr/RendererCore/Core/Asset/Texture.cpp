@@ -16,7 +16,7 @@ std::unordered_map<TextureSampler, std::vector<VkSampler>>Texture::_samplers;
 std::unordered_map<wchar_t, FontTextureInfo> Texture::_fontTextureInfos;
 std::shared_ptr<Texture>Texture::_fontTexture;
 uint64_t Texture::_textureStreamingSize = 0;
-uint64_t Texture::_maxTextureStreamingSize = 4 * 1024 * 1024 * 1024; //4 GB
+uint64_t Texture::_maxTextureStreamingSize = (uint64_t)4 * (uint64_t)1024 * (uint64_t)1024 * (uint64_t)1024; //4 GB
 
 SceneTexture::SceneTexture(VulkanRenderer* renderer)
 {
@@ -162,7 +162,7 @@ std::weak_ptr<Texture> Texture::LoadAsset(HGUID guid, VkImageUsageFlags usageFla
 			return std::weak_ptr<Texture>();
 		}
 	}
-	auto dataPtr = reinterpret_cast<AssetInfo<Texture>*>(it->second);
+	auto dataPtr = std::static_pointer_cast<AssetInfo<Texture>>(it->second);
 	if (dataPtr->IsAssetLoad())
 	{
 		return dataPtr->GetData();
@@ -186,7 +186,7 @@ std::weak_ptr<Texture> Texture::LoadAsset(HGUID guid, VkImageUsageFlags usageFla
 	uint32_t h = out->data_header.height;
 	VkFormat format = out->texFormat;
 	std::shared_ptr<Texture> newTexture = std::make_shared<Texture>();
-	newTexture->_assetInfo = dataPtr;
+	newTexture->_assetInfo = dataPtr.get();
 	newTexture->_textureName = dataPtr->name;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = { w, h };

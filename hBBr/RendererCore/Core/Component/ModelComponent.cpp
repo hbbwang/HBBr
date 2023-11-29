@@ -20,7 +20,7 @@ void ModelComponent::SetModelByRealPath(HString path)
 	FileSystem::CorrectionPath(path);
 	HString guidStr = path.GetBaseName();
 	StringToGUID(guidStr.c_str(), &guid);
-	if (!_modelData.expired() && _modelData.lock()->_assetInfo->guid == guid)
+	if (!_modelData.expired()  && _modelData.lock()->_assetInfo->guid == guid)
 	{
 		return;
 	}
@@ -31,13 +31,13 @@ void ModelComponent::SetModelByVirtualPath(HString path)
 {
 	FileSystem::CorrectionPath(path);
 	auto info = ContentManager::Get()->GetAssetInfo(AssetType::Model, path);
-	if (info == NULL)
+	if (info.expired())
 		return;
-	if (!_modelData.expired() && _modelData.lock()->_assetInfo->guid == info->guid)
+	if (!_modelData.expired() && _modelData.lock()->_assetInfo->guid == info.lock()->guid)
 	{
 		return;
 	}
-	SetModel(info->guid);
+	SetModel(info.lock()->guid);
 }
 
 void ModelComponent::SetModel(HGUID guid)

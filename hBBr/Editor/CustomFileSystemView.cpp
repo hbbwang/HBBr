@@ -138,7 +138,7 @@ void CustomListView::setRootIndex(const QModelIndex& index)
 						HGUID guid;
 						StringToGUID(i.baseName().toStdString().c_str(), &guid);
 						auto assetInfo = ContentManager::Get()->GetAssetInfo(guid);
-						if (assetInfo)
+						if (!assetInfo.expired())
 						{
 							auto modelIndex = mod->index(i.absoluteFilePath());
 							_fileInfos.insert(modelIndex, assetInfo);
@@ -172,15 +172,15 @@ void CustomListView::mouseMoveEvent(QMouseEvent* event)
 					fileName = fileInfo.fileName();
 					byteSize = "ByteSize: " + fileInfo.size();
 				}
-				else if (!assetInfo)
+				else if (assetInfo.expired())
 				{
 					fileName = fileInfo.fileName();
 					byteSize = "ByteSize: ???";
 				}
 				else
 				{
-					fileName = assetInfo->name.c_str();
-					byteSize = "ByteSize: " + QString::number(assetInfo->byteSize);
+					fileName = assetInfo.lock()->name.c_str();
+					byteSize = "ByteSize: " + QString::number(assetInfo.lock()->byteSize);
 				}
 				fileName = "Name: " + fileName;
 				QString suffix = "Type: ";

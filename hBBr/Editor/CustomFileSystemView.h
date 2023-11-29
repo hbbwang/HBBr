@@ -27,7 +27,7 @@ public:
 	QSize _minIconSize = QSize(30, 30);
 	QSize _maxIconSize = QSize(250, 250);
 
-	QMap<QModelIndex,class AssetInfoBase*> _fileInfos;
+	QMap<QModelIndex,std::weak_ptr<AssetInfoBase>> _fileInfos;
 
 	virtual void setRootIndex(const QModelIndex& index)override;
 
