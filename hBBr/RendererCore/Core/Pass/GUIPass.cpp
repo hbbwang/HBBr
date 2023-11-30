@@ -61,7 +61,7 @@ void GUIPass::PassUpdate()
 	SetViewport(_currentFrameBufferSize);
 	BeginRenderPass({ 0,0,0,0 });
 	//Begin...
-	GUIDrawImage("TestImage", Texture::GetSystemTexture("TestTex"), 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1, 1, 1, 0.95)));
+	//GUIDrawImage("TestImage", Texture::GetSystemTexture("TestTex"), 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1, 1, 1, 0.95)));
 	ShowPerformance();
 
 	//GUIDrawText("fonttest",L"AbCd,自定义GUI文字测试~\n你好呀123嘿嘿。 ", 0, 20.0f, 200, 200, GUIDrawState(GUIAnchor_CenterLeft, false, glm::vec4(1)), 20.0f);

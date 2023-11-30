@@ -65,18 +65,7 @@ EditorMain::EditorMain(QWidget *parent)
 
         });
     connect(ui.SaveWholeWorld, &QAction::triggered, this, [this](bool bChecked) {
-        if (VulkanApp::GetMainForm()->renderer->GetWorld()->_assetInfo)
-        {
-            VulkanApp::GetMainForm()->renderer->GetWorld()->SaveWholeWorld(FileSystem::GetFilePath(VulkanApp::GetMainForm()->renderer->GetWorld()->_assetInfo->absPath));
-        }
-        else
-        {
-            QString path = QFileDialog::getExistingDirectory(this, "Save Whole World", FileSystem::GetAssetAbsPath().c_str(),QFileDialog::Option::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-            if (path.size() > 3 && VulkanApp::GetMainForm()->renderer->GetWorld())
-            {
-                VulkanApp::GetMainForm()->renderer->GetWorld()->SaveWholeWorld(path.toStdString().c_str());
-            }
-        }
+        VulkanApp::GetMainForm()->renderer->GetWorld()->SaveWholeWorld();
     });
 
     EditorMain::_self = this;

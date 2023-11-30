@@ -71,6 +71,15 @@ HString FileSystem::GetConfigAbsPath()
     return path;
 }
 
+HString FileSystem::GetWorldAbsPath()
+{
+    fs::path p = GetProgramPath().c_str();
+    HString path = (p / "Asset" / "World").c_str();
+    path += "/";
+    FileSystem::CorrectionPath(path);
+    return path;
+}
+
 HString FileSystem::GetShaderIncludeAbsPath()
 {
     fs::path p = GetProgramPath().c_str();
@@ -167,6 +176,18 @@ HString FileSystem::CorrectionPath(const char* path)
 void FileSystem::CorrectionPath(HString& path)
 {
     path = fs::path(path.c_str()).make_preferred().c_str();
+}
+
+void FileSystem::NormalizePath(HString& path)
+{
+    if (IsDir(path.c_str()))
+    {
+        path = (fs::path((path + "/").c_str())).lexically_normal().c_str();
+    }
+    else
+    {
+        path = fs::path(path.c_str()).lexically_normal().c_str();
+    }
 }
 
 HString FileSystem::GetFilePath(HString path)

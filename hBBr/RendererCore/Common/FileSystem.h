@@ -33,6 +33,7 @@ extern "C" {
 		HBBR_API static HString GetAssetAbsPath();
 		HBBR_API static HString GetContentAbsPath();
 		HBBR_API static HString GetConfigAbsPath();
+		HBBR_API static HString GetWorldAbsPath();
 		/* editor only */
 		HBBR_API static HString GetShaderIncludeAbsPath();
 		HBBR_API static HString GetRelativePath(const char* path);
@@ -46,6 +47,7 @@ extern "C" {
 		HBBR_API static uint64_t GetFileSize(const char* path);
 		HBBR_API static HString CorrectionPath(const char* path);
 		HBBR_API static void CorrectionPath(HString& path);
+		HBBR_API static void NormalizePath(HString& path);
 		HBBR_API static HString GetFilePath(HString path);
 		HBBR_API static HString GetFileName(HString path);
 		HBBR_API static HString GetBaseName(HString path);

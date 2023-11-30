@@ -98,45 +98,15 @@ void VulkanRenderer::Init()
 
 }
 
-void VulkanRenderer::CreateWorld(HString worldName)
+void VulkanRenderer::CreateWorld(HString worldNameOrAssetPath)
 {
-	auto assets = ContentManager::Get()->GetAssets(AssetType::World);
-	for (const auto i : assets)
-	{
-		if (i.second->name.IsSame(worldName, false))
-		{
-			CreateWorld(i.second->guid);
-			return;
-		}
-	}
-}
-
-void VulkanRenderer::CreateWorld(HGUID worldGuid)
-{
-	if (!_world.expired())
-	{
-		_world.lock()->UnLoad();
-	}
-	if (worldGuid.isValid())
-	{
-		auto newWorld = World::LoadAsset(worldGuid);
-		if (newWorld.expired())
-		{
-			MessageOut("Create World Failed.The guid of world asset is not valid.", false, false, "255,255,0");
-		}
-		else
-		{
-			newWorld.lock()->Load(this);
-			_world = newWorld;
-		}
-	}
+	
 }
 
 void VulkanRenderer::CreateEmptyWorld()
 {
-	_emptyWorld.reset(new World);
-	_emptyWorld->Load(this);
-	_world = _emptyWorld;
+	_world.reset(new World);
+	_world->Load(this);
 }
 
 void VulkanRenderer::Render()
@@ -178,8 +148,8 @@ void VulkanRenderer::Render()
 			func();
 		}
 
-		if(!_world.expired())
-			_world.lock()->WorldUpdate();
+		if (!_world)
+			_world->WorldUpdate();
 
 		SetupPassUniformBuffer();
 

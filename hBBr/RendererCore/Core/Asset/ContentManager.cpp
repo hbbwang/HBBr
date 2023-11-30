@@ -67,8 +67,6 @@ void ContentManager::UpdateAllAssetReference()
 	UpdateAssetReferenceByType(AssetType::Model);
 	UpdateAssetReferenceByType(AssetType::Material);
 	UpdateAssetReferenceByType(AssetType::Texture2D);
-	UpdateAssetReferenceByType(AssetType::Level);
-	UpdateAssetReferenceByType(AssetType::World);
 }
 
 //重载所有资产Info
@@ -77,8 +75,6 @@ void ContentManager::ReloadAllAssetInfos()
 	ReloadAssetInfos(AssetType::Model);
 	ReloadAssetInfos(AssetType::Material);
 	ReloadAssetInfos(AssetType::Texture2D);
-	ReloadAssetInfos(AssetType::Level);
-	ReloadAssetInfos(AssetType::World);
 	UpdateAllAssetReference();
 }
 
@@ -87,8 +83,6 @@ void ContentManager::Release()
 	ReleaseAssetsByType(AssetType::Model, true);
 	ReleaseAssetsByType(AssetType::Material, true);
 	ReleaseAssetsByType(AssetType::Texture2D, true);
-	ReleaseAssetsByType(AssetType::Level, true);
-	ReleaseAssetsByType(AssetType::World, true);
 }
 
 std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)
@@ -96,11 +90,9 @@ std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)
 	std::shared_ptr<AssetInfoBase> result = NULL;
 	switch (type)//新增资产类型需要在这里添加实际对象,未来打包资产的时候会根据类型进行删留
 	{
-	case AssetType::Model:		result.reset(new AssetInfo<ModelData>());
+		case AssetType::Model:		result.reset(new AssetInfo<ModelData>());
 		case AssetType::Material:	result.reset(new AssetInfo<Material>());
 		case AssetType::Texture2D: result.reset(new AssetInfo<Texture>());
-		case AssetType::Level:	result.reset(new AssetInfo<Level>()); 
-		case AssetType::World:	 result.reset(new AssetInfo<World>());
 		default:break;
 	}
 	return result;
@@ -123,14 +115,6 @@ std::weak_ptr<AssetInfoBase> ContentManager::GetAssetInfo(AssetType type, HStrin
 	else if (type == AssetType::Texture2D)
 	{
 		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "dds");
-	}
-	else if (type == AssetType::Level)
-	{
-		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "level");
-	}
-	else if (type == AssetType::World)
-	{
-		files = FileSystem::GetFilesBySuffix(filePath.c_str(), "world");
 	}
 
 	if (type != AssetType::Unknow)
@@ -167,14 +151,6 @@ std::weak_ptr<AssetInfoBase> ContentManager::GetAssetInfo(HString realAbsPath) c
 	else if (suffix.IsSame("mat"))
 	{
 		type = AssetType::Material;
-	}
-	else if (suffix.IsSame("level"))
-	{
-		type = AssetType::Level;
-	}
-	else if (suffix.IsSame("world"))
-	{
-		type = AssetType::World;
 	}
 	return GetAssetInfo(guid, type);
 }
@@ -296,12 +272,12 @@ std::weak_ptr<AssetInfoBase> ContentManager::ImportAssetInfo(AssetType type, HSt
 std::weak_ptr<AssetInfoBase> ContentManager::ImportAssetInfo(AssetType type, HString sourcePath,HString contentPath)
 {
 	FileSystem::CorrectionPath(sourcePath);
-	contentPath.Replace("\\", "/");
+	FileSystem::NormalizePath(contentPath);
 	HString typeName = GetAssetTypeString(type);
 	HString name = sourcePath.GetBaseName();
 	HString suffix = sourcePath.GetSuffix();
-	HString path = FileSystem::GetRelativePath(contentPath.c_str());
-	path.Replace("\\", "/");
+	HString relativePath = FileSystem::GetRelativePath(contentPath.c_str());
+	relativePath.Replace("\\", "/");
 	auto root = _contentRefConfig.child(L"root");
 	pugi::xml_node TypeNode = root.child(typeName.c_wstr());
 	pugi::xml_node item;
@@ -318,7 +294,7 @@ std::weak_ptr<AssetInfoBase> ContentManager::ImportAssetInfo(AssetType type, HSt
 		{
 			HString n_name = n.attribute(L"Name").as_string();
 			HString n_path = n.attribute(L"Path").as_string();
-			if (name.IsSame(n_name) && path.IsSame(n_path))
+			if (name.IsSame(n_name) && relativePath.IsSame(n_path))
 			{
 				item = n;
 				bExist = true;
@@ -339,7 +315,7 @@ std::weak_ptr<AssetInfoBase> ContentManager::ImportAssetInfo(AssetType type, HSt
 		item.append_attribute(L"GUID").set_value(guidStr.c_wstr());
 		item.append_attribute(L"Name").set_value(name.c_wstr());
 		item.append_attribute(L"Suffix").set_value(suffix.c_wstr());
-		item.append_attribute(L"Path").set_value(path.c_wstr());
+		item.append_attribute(L"Path").set_value(relativePath.c_wstr());
 		if (FileSystem::FileExist(sourcePath.c_str()))
 		{
 			item.append_attribute(L"ByteSize").set_value(FileSystem::GetFileSize(sourcePath.c_str()));
@@ -349,7 +325,7 @@ std::weak_ptr<AssetInfoBase> ContentManager::ImportAssetInfo(AssetType type, HSt
 	{
 		HString guidStr = item.attribute(L"GUID").as_string();
 		StringToGUID(guidStr.c_str(), &guid);
-		item.attribute(L"Path").set_value(path.c_wstr());
+		item.attribute(L"Path").set_value(relativePath.c_wstr());
 		if (FileSystem::FileExist(sourcePath.c_str()))
 		{
 			item.attribute(L"ByteSize").set_value(FileSystem::GetFileSize(sourcePath.c_str()));

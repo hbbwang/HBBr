@@ -8,7 +8,7 @@
 #include "./ThirdParty/pugixml/pugixml.hpp"
 #include "Asset/HGuid.h"
 
-class Level : public AssetObject
+class Level 
 {
 	friend class VulkanRenderer;
 	friend class GameObject;
@@ -17,6 +17,8 @@ class Level : public AssetObject
 public:
 
 	HBBR_API static std::weak_ptr<Level> LoadAsset(HGUID guid);
+	Level() {}
+	Level(HString name);
 	~Level();
 
 	//加载关卡
@@ -34,6 +36,8 @@ private:
 	bool bLoad = false;
 
 	class World* _world = NULL;
+
+	HString _levelName = "NewLevel";
 };
 
 

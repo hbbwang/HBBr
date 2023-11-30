@@ -7,37 +7,6 @@
 #include "XMLStream.h"
 #include "HInput.h"
 
-std::weak_ptr<World> World::LoadAsset(HGUID guid)
-{
-	const auto assets = ContentManager::Get()->GetAssets(AssetType::World);
-	HString guidStr = GUIDToString(guid);
-	//从内容管理器查找资产
-	auto it = assets.find(guid);
-	{
-		if (it == assets.end())
-		{
-			MessageOut(HString("Can not find [" + guidStr + "] world in content manager.").c_str(), false, false, "255,255,0");
-			return std::weak_ptr<World>();
-		}
-	}
-	auto dataPtr = std::static_pointer_cast<AssetInfo<World>>(it->second);
-	if (dataPtr->IsAssetLoad())
-	{
-		return dataPtr->GetData();
-	}
-	//获取实际路径
-	HString filePath = FileSystem::GetProgramPath() + it->second->relativePath + guidStr + ".mat";
-	FileSystem::CorrectionPath(filePath);
-	if (!FileSystem::FileExist(filePath.c_str()))
-	{
-		return std::weak_ptr<World>();
-	}
-
-
-
-	return std::weak_ptr<World>();
-}
-
 World::~World()
 {
 	//wait gameobject destroy
@@ -51,98 +20,20 @@ World::~World()
 	}
 }
 
-void World::AddLevel(HString levelNameOrContentPath)
+void World::AddNewLevel(HString name)
 {
-	HGUID guid;
-	StringToGUID(levelNameOrContentPath.c_str(), &guid);
-	std::shared_ptr<AssetInfo<Level>> newLevel = NULL;
-	if (guid.isValid())
-	{
-		auto asset  = ContentManager::Get()->GetAssetInfo(guid, AssetType::Level);
-		if (!asset.expired())
-			newLevel = std::static_pointer_cast<AssetInfo<Level>>(asset.lock());
-	}
-	else
-	{
-		auto asset = ContentManager::Get()->GetAssetInfo(levelNameOrContentPath);
-		if(!asset.expired())
-			newLevel = std::static_pointer_cast<AssetInfo<Level>>(asset.lock());
-		else
-		{
-			auto asset = ContentManager::Get()->GetAssetInfo(AssetType::Level, levelNameOrContentPath);
-			if (!asset.expired())
-				newLevel = std::static_pointer_cast<AssetInfo<Level>>(asset.lock());
-		}
-	}
-	if (!newLevel)
-	{
-		#if IS_EDITOR
-				MessageOut(HString("Add Level Failed.").c_str(), true, false, "255,0,0");
-		#else
-				MessageOut(HString("Add Level Failed.").c_str(), false, false, "255,0,0");
-		#endif
-		return;
-	}
-	else
-	{
-		_levels.push_back(newLevel->GetData());
-	}
+	std::shared_ptr<Level> newLevel = NULL;
+	newLevel.reset(new Level(name));
+	_levels.push_back(newLevel);
 }
 
-void World::AddLevel(HGUID guid)
+void World::SaveWorld()
 {
-	std::shared_ptr<AssetInfo<Level>> newLevel = NULL;
-	if (guid.isValid())
+	HString assetPath = FileSystem::GetWorldAbsPath() + _worldName ;
+	HString filePath = assetPath + "/" + _worldName + ".world";
+	if (!FileSystem::FileExist(assetPath.c_str()) && !FileSystem::FileExist(filePath.c_str()))
 	{
-		auto asset = ContentManager::Get()->GetAssetInfo(guid, AssetType::Level);
-		if (!asset.expired())
-			newLevel = std::static_pointer_cast<AssetInfo<Level>>(asset.lock());
-	}
-	if (!newLevel)
-	{
-		#if IS_EDITOR
-				MessageOut(HString("Add Level Failed.").c_str(), true, false, "255,0,0");
-		#else
-				MessageOut(HString("Add Level Failed.").c_str(), false, false, "255,0,0");
-		#endif
-		return;
-	}
-	else
-	{
-		_levels.push_back(newLevel->GetData());
-	}
-}
-
-void World::AddEmptyLevel(HString newLevelName)
-{
-	auto newLevelInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Level, newLevelName, "level", _assetInfo->relativePath);
-	if (!newLevelInfo.expired())
-	{
-		pugi::xml_document levelDoc;
-		XMLStream::CreateXMLFile(FileSystem::GetProgramPath() + _assetInfo->relativePath + "./" + newLevelInfo.lock()->guid.str().c_str() + ".level", levelDoc);
-		ContentManager::Get()->ReloadAssetInfos(AssetType::Level);
-		auto info = std::static_pointer_cast<AssetInfo<Level>>(newLevelInfo.lock());
-		auto asset = info->GetData();
-		asset.lock()->Load(this);
-		_levels.push_back(asset);
-	}
-}
-
-void World::SaveWorld(HString assetPath)
-{
-	if (FileSystem::IsDir(assetPath.c_str()))
-	{
-		HGUID guid;
-		if (_assetInfo)
-		{
-			guid = _assetInfo->guid;
-		}
-		else
-		{
-			_assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Level, _worldName, "world", assetPath).lock().get();
-		}
-		pugi::xml_document doc;
-		HString filePath = assetPath + "/" + guid.str().c_str() + ".world";
+		pugi::xml_document doc;	
 		if (!XMLStream::LoadXML(filePath.c_wstr(), doc))
 		{
 			XMLStream::CreateXMLFile(filePath, doc);
@@ -150,18 +41,14 @@ void World::SaveWorld(HString assetPath)
 		auto root = doc.append_child(L"root");
 		//save scenes
 		auto scene = root.append_child(L"Level");
+		scene.append_attribute(L"Num").set_value((int)_levels.size());
 		for (auto& i : _levels)
 		{
-			HString name = i.lock()->_assetInfo->name;
-			HString guidStr = i.lock()->_assetInfo->guid.str().c_str();
-			HString relativeAssetPath = i.lock()->_assetInfo->relativePath;
+			HString name = i->_levelName;
 			auto item = scene.append_child(L"Item");
 			item.append_attribute(L"Name").set_value(name.c_wstr());
-			item.append_attribute(L"GUID").set_value(guidStr.c_wstr());
-			item.append_attribute(L"RelativePath").set_value(relativeAssetPath.c_wstr());
 		}
 		doc.save_file(filePath.c_wstr());
-		ContentManager::Get()->ReloadAssetInfos(AssetType::World);
 	}
 	else
 	{
@@ -169,22 +56,18 @@ void World::SaveWorld(HString assetPath)
 	}
 }
 
-void World::SaveWholeWorld(HString assetPath)
+void World::SaveWholeWorld()
 {
 	for (auto& i : _levels)
 	{
-		if (!i.expired())
-		{
-			i.lock()->SaveLevel();
-		}
+		i->SaveLevel();
 	}
-	SaveWorld(assetPath);
+	SaveWorld();
 }
 
 void World::Load(class VulkanRenderer* renderer)
 {
 	_renderer = renderer;
-
 #if IS_EDITOR
 	//create editor camera
 	auto backCamera = new GameObject("EditorCamera", this, true);
@@ -216,24 +99,20 @@ void World::Load(class VulkanRenderer* renderer)
 //	modelComp->SetModelByVirtualPath(FileSystem::GetAssetAbsPath() + "Content/Core/Basic/Cube");
 //	cube->SetObjectName("TestFbx_Cube");
 
+	bLoad = true;
+
 }
 
 bool World::UnLoad()
 {
-	_refCount--;
-	//引用计数等于0了才能卸载
-	if (_refCount == 0)
-	{
-		return true;
-	}
-	return false;
+	bLoad = false;
+	return true;
 }
 
 bool World::ReleaseWorld()
 {
 	if (UnLoad())
 	{
-		_assetInfo->ReleaseData();
 		return true;
 	}
 	return false;
@@ -241,27 +120,17 @@ bool World::ReleaseWorld()
 
 void World::WorldUpdate()
 {
+	if (!bLoad)
+	{
+		return;
+	}
 	for (int i = 0; i < _levels.size(); i++)
 	{
-		if (_levels[i].expired())
+		if (_levels[i]->bLoad)
 		{
-			_levels.erase(_levels.begin() + i);
-			i--;
-			continue;
+			_levels[i]->LevelUpdate();
 		}
-		else
-		{
-			if (_levels[i].lock()->bLoad)
-			{
-				_levels[i].lock()->LevelUpdate();
-			}			
-		}	
 	}
-	////Test
-	//if (!testObj.expired() && testObj.lock()->GetTransform())
-	//{
-	//	testObj.lock()->GetTransform()->SetRotation(testObj.lock()->GetTransform()->GetRotation() + glm::vec3(0, _renderer->GetFrameRate() / 10.0f, 0));
-	//}
 
 	//Destroy Objects
 	//const auto destroyCount = _gameObjectNeedDestroy.size();

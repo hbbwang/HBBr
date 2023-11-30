@@ -6,6 +6,11 @@ std::weak_ptr<Level> Level::LoadAsset(HGUID guid)
 	return std::weak_ptr<Level>();
 }
 
+Level::Level(HString name)
+{
+	_levelName = name;
+}
+
 Level::~Level()
 {
 }

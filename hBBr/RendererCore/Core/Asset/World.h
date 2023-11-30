@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-//世界类,每个渲染器必须有一个场景管理类,用来储存当前场景的所有对象(GameObject)
+//世界类
 //世界文件后缀为.world
 //场景的结构由多个场景（.level）组成
 #include "Asset/AssetObject.h"
@@ -12,15 +12,13 @@
 #include "./ThirdParty/pugixml/pugixml.hpp"
 #include "Asset/HGuid.h"
 #include "Asset/Level.h"
-class World : public AssetObject
+class World
 {
 	friend class VulkanRenderer;
 	friend class GameObject;
 	friend class CameraComponent;
 	friend class Level;
 public:
-
-	HBBR_API static std::weak_ptr<World> LoadAsset(HGUID guid);
 
 	~World();
 
@@ -36,23 +34,13 @@ public:
 
 	HBBR_API HBBR_INLINE class CameraComponent* GetMainCamera()const { return _mainCamera; }
 
-	//添加现有关卡
-	//1.关卡资产名称
-	//2.关卡资产的Asset虚拟路径
-	//3.关卡资产的Asset绝对路径
-	HBBR_API void AddLevel(HString levelNameOrContentPath);
+	HBBR_API void AddNewLevel(HString name);
 
-	//添加现有关卡
-	HBBR_API void AddLevel(HGUID guid);
-
-	//新增空关卡
-	HBBR_API void AddEmptyLevel(HString newLevelName = "NewLevel");
-
-	//保存世界xml
-	HBBR_API void SaveWorld(HString assetPath);
+	//保存世界xml,路径都是固定在Asset/World里
+	HBBR_API void SaveWorld();
 
 	//保存世界xml,包括Levels
-	HBBR_API void SaveWholeWorld(HString assetPath);
+	HBBR_API void SaveWholeWorld();
 
 private:
 
@@ -82,15 +70,11 @@ private:
 	//需要进行销毁的Objects
 	std::vector<std::shared_ptr<GameObject>> _gameObjectNeedDestroy;
 
-	//Test 
-	//std::weak_ptr<GameObject> testObj;
-
-	std::vector<std::weak_ptr<Level>> _levels;
+	std::vector<std::shared_ptr<Level>> _levels;
 
 	HString _worldName = "NewWorld";
 
-	//Reference Count 可能存在多个VulkanRenderer共用一个World的情况，需要记录下来
-	int _refCount = 0;
+	bool bLoad = false;
 };
 
 
