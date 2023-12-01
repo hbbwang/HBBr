@@ -247,12 +247,18 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     mainLayout->setStretch(0, 1000);
 
     _renderer = renderer;
-    auto world = _renderer->GetWorld();
 
-    //Callback
-    world->_editorWorldUpdate.push_back([](World* world,std::vector<class Level*>) {
+    _guid_spawn_world_callback = CreateGUID();
 
-    });
+    auto spawn_world_callback = [this](VulkanRenderer* renderer,World* world) {
+        //Callback
+        auto editorWorldUpdateFunc = [](World* world, std::vector<class Level*>){
+        
+        };
+        world->_editorWorldUpdate.emplace(_guid_spawn_world_callback, editorWorldUpdateFunc);
+    };
+
+    World::AddSpawnNewWorldCallBack_Editor(_guid_spawn_world_callback, spawn_world_callback);
 
     //scene->_editorSceneUpdateFunc = [this, scene]
     //(World* scene, std::vector<std::shared_ptr<GameObject>> aliveObjects)
@@ -384,7 +390,7 @@ void SceneOutline::TreeSearch()
 
 void SceneOutline::closeEvent(QCloseEvent* event)
 {
-
+    World::RemoveSpawnNewWorldCallBack_Editor(_guid_spawn_world_callback);
 }
 
 void SceneOutline::focusInEvent(QFocusEvent* event)

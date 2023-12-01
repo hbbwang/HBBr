@@ -19,7 +19,7 @@ class World
 	friend class CameraComponent;
 	friend class Level;
 public:
-
+	World(class VulkanRenderer* renderer);
 	~World();
 
 #if IS_EDITOR
@@ -47,11 +47,24 @@ public:
 
 #if IS_EDITOR
 
-	std::vector<std::function<void(class World*, std::vector<Level*>)>> _editorWorldUpdate;
-
 	std::weak_ptr<Level> _currentSelectionLevel;
 
+	static std::map<HGUID, std::function<void(VulkanRenderer*, World*)>> _editorSpwanNewWorld;
+
+	std::map<HGUID, std::function<void(class World*, std::vector<Level*>)>> _editorWorldUpdate;
+
+
 	void SetCurrentSelectionLevel(std::weak_ptr<Level> level);
+
+	HBBR_API HBBR_INLINE static void AddSpawnNewWorldCallBack_Editor(HGUID guid, std::function<void(VulkanRenderer*, World*)> func)
+	{
+		_editorSpwanNewWorld.emplace(guid, func);
+	}
+
+	HBBR_API HBBR_INLINE static void RemoveSpawnNewWorldCallBack_Editor(HGUID guid)
+	{
+		_editorSpwanNewWorld.erase(guid);
+	}
 
 #endif
 
@@ -60,10 +73,7 @@ private:
 	//加载场景
 	void Load(class VulkanRenderer* renderer);
 
-	//释放场景,但是asset依然存在
-	bool UnLoad();
-
-	//释放场景,包括.world asset.
+	//释放场景
 	bool ReleaseWorld();
 
 	void WorldUpdate();

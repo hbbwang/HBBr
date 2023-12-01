@@ -7,6 +7,16 @@
 #include "XMLStream.h"
 #include "HInput.h"
 
+#if IS_EDITOR
+std::map<HGUID, std::function<void(VulkanRenderer*, World*)>> World::_editorSpwanNewWorld;
+
+#endif
+
+World::World(class VulkanRenderer* renderer)
+{
+	Load(renderer);
+}
+
 World::~World()
 {
 	//wait gameobject destroy
@@ -79,22 +89,17 @@ void World::Load(class VulkanRenderer* renderer)
 //	cube->SetObjectName("TestFbx_Cube");
 
 	bLoad = true;
-
-}
-
-bool World::UnLoad()
-{
-	bLoad = false;
-	return true;
+#if IS_EDITOR
+	for (auto i : World::_editorSpwanNewWorld)
+	{
+		i.second(_renderer, this);
+	}
+#endif
 }
 
 bool World::ReleaseWorld()
 {
-	if (UnLoad())
-	{
-		return true;
-	}
-	return false;
+	return true;
 }
 
 void World::WorldUpdate()
@@ -143,9 +148,9 @@ void World::WorldUpdate()
 	//Update Editor if the function is not null.
 #if IS_EDITOR
 	_editorSceneUpdateFunc(this, _gameObjects);
-	for (int i = 0; i < _editorWorldUpdate.size(); i++)
+	for (auto i : _editorWorldUpdate)
 	{
-		_editorWorldUpdate[i](this, _levelPtrs);
+		i.second(this, _levelPtrs);
 	}
 #endif
 }

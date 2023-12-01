@@ -10,6 +10,7 @@
 #include "Asset/World.h"
 #include "Component/GameObject.h"
 #include "Component/CameraComponent.h"
+
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -105,8 +106,7 @@ void VulkanRenderer::CreateWorld(HString worldNameOrAssetPath)
 
 void VulkanRenderer::CreateEmptyWorld()
 {
-	_world.reset(new World);
-	_world->Load(this);
+	_world.reset(new World(this));
 }
 
 void VulkanRenderer::Render()
