@@ -31,38 +31,17 @@ void World::SaveWorld()
 {
 	HString assetPath = FileSystem::GetWorldAbsPath() + _worldName ;
 	HString filePath = assetPath + "/" + _worldName + ".world";
-	if (!FileSystem::FileExist(assetPath.c_str()) && !FileSystem::FileExist(filePath.c_str()))
-	{
-		pugi::xml_document doc;	
-		if (!XMLStream::LoadXML(filePath.c_wstr(), doc))
-		{
-			XMLStream::CreateXMLFile(filePath, doc);
-		}
-		auto root = doc.append_child(L"root");
-		//save scenes
-		auto scene = root.append_child(L"Level");
-		scene.append_attribute(L"Num").set_value((int)_levels.size());
-		for (auto& i : _levels)
-		{
-			HString name = i->_levelName;
-			auto item = scene.append_child(L"Item");
-			item.append_attribute(L"Name").set_value(name.c_wstr());
-		}
-		doc.save_file(filePath.c_wstr());
-	}
-	else
-	{
-		MessageOut("[SaveWorld] function parameter 'path' is not a valid directory.", false, false, "255,255,0");
-	}
+	//创建World目录
+	FileSystem::CreateDir(filePath.c_str());
 }
 
 void World::SaveWholeWorld()
 {
+	SaveWorld();
 	for (auto& i : _levels)
 	{
 		i->SaveLevel();
 	}
-	SaveWorld();
 }
 
 void World::Load(class VulkanRenderer* renderer)
@@ -120,12 +99,15 @@ bool World::ReleaseWorld()
 
 void World::WorldUpdate()
 {
+	std::vector < Level* >_levelPtrs;
+	_levelPtrs.resize(_levels.size());
 	if (!bLoad)
 	{
 		return;
 	}
 	for (int i = 0; i < _levels.size(); i++)
 	{
+		_levelPtrs[i] = _levels[i].get();
 		if (_levels[i]->bLoad)
 		{
 			_levels[i]->LevelUpdate();
@@ -151,17 +133,21 @@ void World::WorldUpdate()
 		}
 		else
 		{
-			#if IS_EDITOR
+#if IS_EDITOR
 			if (!_gameObjects[i]->_sceneEditorHide)
 				_editorGameObjectUpdateFunc(this, _gameObjects[i]);
-			#endif
+#endif
 		}
 	}
 
 	//Update Editor if the function is not null.
-	#if IS_EDITOR
+#if IS_EDITOR
 	_editorSceneUpdateFunc(this, _gameObjects);
-	#endif
+	for (int i = 0; i < _editorWorldUpdate.size(); i++)
+	{
+		_editorWorldUpdate[i](this, _levelPtrs);
+	}
+#endif
 }
 
 void World::AddNewObject(std::shared_ptr<GameObject> newObject)
@@ -193,3 +179,12 @@ void World::RemoveObject(GameObject* object)
 		_gameObjects.erase(it);
 	}
 }
+
+#if IS_EDITOR
+
+void World::SetCurrentSelectionLevel(std::weak_ptr<Level> level)
+{
+	_currentSelectionLevel = level;
+}
+
+#endif

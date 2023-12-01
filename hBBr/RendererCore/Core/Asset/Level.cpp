@@ -1,5 +1,6 @@
 ﻿#include "Asset/Level.h"
 #include "Asset/World.h"
+#include "FileSystem.h"
 
 std::weak_ptr<Level> Level::LoadAsset(HGUID guid)
 {
@@ -30,6 +31,11 @@ bool Level::UnLevel()
 
 void Level::SaveLevel()
 {
+	if (!_world)
+		return;
+	HString assetPath = FileSystem::GetWorldAbsPath() + _world->_worldName;
+	HString filePath = assetPath + "/" + _world->_worldName + ".world";
+
 }
 
 void Level::LevelUpdate()

@@ -1,6 +1,7 @@
 #include "SceneOutline.h"
 #include "VulkanRenderer.h"
 #include "Asset/World.h"
+#include "Asset/Level.h"
 #include "Component/GameObject.h"
 #include <qheaderview.h>
 #include <qaction.h>
@@ -13,6 +14,7 @@
 #include "EditorCommonFunction.h"
 #include "CustomSearchLine.h"
 #include "Inspector.h"
+#include "CheckBox.h"
 SceneOutlineTree* SceneOutline::_treeWidget = NULL;
 
 GameObjectItem::GameObjectItem(GameObject* gameObject, QTreeWidget* view)
@@ -228,6 +230,10 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     mainLayout->setSpacing(0);
     this->setLayout(mainLayout);
 
+    _checkBox = new CheckBox("Level", this);
+    _checkBox->setMaximumHeight(30);
+    mainLayout->addWidget(_checkBox);
+
     _search = new CustomSearchLine(this);
     _search->setMaximumHeight(30);
     _search->ui.comboBox->setHidden(true);
@@ -241,7 +247,13 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     mainLayout->setStretch(0, 1000);
 
     _renderer = renderer;
-    auto scene = _renderer->GetWorld();
+    auto world = _renderer->GetWorld();
+
+    //Callback
+    world->_editorWorldUpdate.push_back([](World* world,std::vector<class Level*>) {
+
+    });
+
     //scene->_editorSceneUpdateFunc = [this, scene]
     //(World* scene, std::vector<std::shared_ptr<GameObject>> aliveObjects)
     //{

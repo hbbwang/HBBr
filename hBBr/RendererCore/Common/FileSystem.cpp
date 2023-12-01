@@ -130,6 +130,39 @@ bool FileSystem::IsDir(const char* path)
     return  fs::is_directory(path);
 }
 
+bool FileSystem::CreateDir(const char* path)
+{
+    std::error_code error;
+    auto result = fs::create_directory(path, error);;
+    if (error)
+    {
+        MessageOut(error.message().c_str(), false, false, "255,255,0");
+    }
+    else
+    {
+        if (!result)
+        {
+            MessageOut("[CreateDir]Dir exist.", false, false, "255,255,0");
+        }
+    }
+    return result;
+}
+
+bool FileSystem::CreateDirSymlink(const char* path, const char* linkTo)
+{
+    std::error_code error;
+    fs::create_directory_symlink(path, linkTo, error);
+    if (error)
+    {
+        MessageOut(error.message().c_str(), false, false, "255,255,0");
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
 bool FileSystem::IsNormalFile(const char* path)
 {
     return  fs::is_regular_file(path);

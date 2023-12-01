@@ -40,6 +40,8 @@ extern "C" {
 		HBBR_API static uint32_t GetPathFileNum(const char* path);
 		HBBR_API static bool FileExist(const char* path);
 		HBBR_API static bool IsDir(const char* path);
+		HBBR_API static bool CreateDir(const char* path);
+		HBBR_API static bool CreateDirSymlink(const char* createPath, const char* linkTo);
 		HBBR_API static bool IsNormalFile(const char* path);
 		HBBR_API static void FileCopy(const char* srcFile, const char* newPath);
 		HBBR_API static bool FileRemove(const char* path);

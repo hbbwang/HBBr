@@ -37,10 +37,23 @@ public:
 	HBBR_API void AddNewLevel(HString name);
 
 	//保存世界xml,路径都是固定在Asset/World里
+	//World 的结构大致如下:
+	//'Asset/World/$(_worldName).world/' 这个$(_worldName).world是一个文件夹。
+	//文件夹内储存的则是level后缀的xml文件
 	HBBR_API void SaveWorld();
 
 	//保存世界xml,包括Levels
 	HBBR_API void SaveWholeWorld();
+
+#if IS_EDITOR
+
+	std::vector<std::function<void(class World*, std::vector<Level*>)>> _editorWorldUpdate;
+
+	std::weak_ptr<Level> _currentSelectionLevel;
+
+	void SetCurrentSelectionLevel(std::weak_ptr<Level> level);
+
+#endif
 
 private:
 
