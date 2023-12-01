@@ -78,9 +78,10 @@ private:
 
 	std::vector<CameraComponent*> _cameras;
 
+	//游戏对象
 	std::vector<std::shared_ptr<GameObject>> _gameObjects;
 
-	//需要进行销毁的Objects
+	//需要进行销毁的游戏对象
 	std::vector<std::shared_ptr<GameObject>> _gameObjectNeedDestroy;
 
 	std::vector<std::shared_ptr<Level>> _levels;

@@ -21,11 +21,16 @@ public:
 	Level(HString name);
 	~Level();
 
+	HBBR_INLINE HBBR_API HString GetLevelName()const { return _levelName; }
+
 	//加载关卡
 	HBBR_API void Load(class World* world);
 
-	//释放关卡
-	HBBR_API bool UnLevel();
+	//释放关卡对象
+	HBBR_API bool UnLoad();
+
+	//释放关卡,包括对象和Xml Doc
+	HBBR_API bool ResetLevel();
 
 	HBBR_API void SaveLevel();
 
@@ -38,6 +43,8 @@ private:
 	class World* _world = NULL;
 
 	HString _levelName = "NewLevel";
+
+	pugi::xml_document _levelDoc;
 };
 
 

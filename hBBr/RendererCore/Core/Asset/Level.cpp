@@ -24,8 +24,18 @@ void Level::Load(World* world)
 	}
 }
 
-bool Level::UnLevel()
+bool Level::UnLoad()
 {
+	return false;
+}
+
+bool Level::ResetLevel()
+{
+	if (UnLoad())
+	{
+		_levelDoc = pugi::xml_document();
+		return true;
+	}
 	return false;
 }
 
