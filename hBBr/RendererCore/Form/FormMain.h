@@ -3,7 +3,6 @@
 #include "VulkanManager.h"
 #include "FileSystem.h"
 #include "HTime.h"
-typedef void (*FormDropFun)(int path_count, const char* paths[]);
 
 struct VulkanForm
 {
@@ -12,6 +11,8 @@ struct VulkanForm
 	class VulkanRenderer* renderer = NULL;
 	bool bMinimized = false;
 };
+
+typedef void (*FormDropFun)(VulkanForm* form,  HString file);
 
 class VulkanApp
 {
@@ -40,10 +41,15 @@ public:
 	HBBR_API static void SetFormVisiable(VulkanForm* form, bool bShow);
 	HBBR_API static void AppQuit();
 	HBBR_API static void RecompileAllShader();
+	HBBR_API static void AddDropCallback(FormDropFun func)
+	{
+		_dropFuns.push_back(func);
+	}
+	static std::vector<FormDropFun>& GetDropCallbacks() { return _dropFuns; }
+private:
+
 	//Callbacks
 	static std::vector<FormDropFun> _dropFuns;
-
-private:
 
 	static VulkanForm* _focusForm;
 

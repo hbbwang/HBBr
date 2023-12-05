@@ -61,31 +61,31 @@ void CloseCallBack(SDL_Window* window)
 	}
 }
 
-void FocusCallBack(VulkanForm* window, int focused)
+void FocusCallBack(VulkanForm* form, int focused)
 {
-	if (window)
+	if (form)
 	{
 		if (focused == 1)
-			VulkanApp::SetFocusForm(window);
+			VulkanApp::SetFocusForm(form);
 		else
 			VulkanApp::SetFocusForm(NULL);
 	}
 }
 
-void KeyBoardCallBack(VulkanForm* window, SDL_Keycode key, int scancode, int action, int mods)
+void KeyBoardCallBack(VulkanForm* form, SDL_Keycode key, int scancode, int action, int mods)
 {
-	if (window)
+	if (form)
 	{
-		HInput::KeyProcess(window, (KeyCode)key, (KeyMod)mods, (Action)action);
+		HInput::KeyProcess(form, (KeyCode)key, (KeyMod)mods, (Action)action);
 	}
 }
 
-void MouseButtonCallBack(VulkanForm* window, int button, int action)
+void MouseButtonCallBack(VulkanForm* form, int button, int action)
 {
-	if (window)
+	if (form)
 	{
-		SDL_SetWindowInputFocus(window->window);
-		SDL_SetWindowFocusable(window->window, SDL_TRUE);
+		SDL_SetWindowInputFocus(form->window);
+		SDL_SetWindowFocusable(form->window, SDL_TRUE);
 
 		//for (int i = 0; i < VulkanApp::GetForms().size(); ++i)
 		//{
@@ -95,7 +95,7 @@ void MouseButtonCallBack(VulkanForm* window, int button, int action)
 		//		break;
 		//	}
 		//}
-		HInput::MouseProcess(window, (MouseButton)button, (Action)action);
+		HInput::MouseProcess(form, (MouseButton)button, (Action)action);
 	}
 }
 
@@ -104,11 +104,11 @@ void ScrollCallBack(SDL_Window* window, double xoffset, double yoffset)
 
 }
 
-void DropCallBack(SDL_Window* window, int path_count, const char* paths[])
+void DropCallBack(VulkanForm* form, const char* file)
 {
-	for (auto& i : VulkanApp::_dropFuns)
+	for (auto& i : VulkanApp::GetDropCallbacks())
 	{
-		i(path_count, paths);
+		i(form, HString(file));
 	}
 }
 #if __ANDROID__
@@ -292,6 +292,16 @@ bool VulkanApp::UpdateForm()
 			}
 				break;
 			case SDL_EVENT_MOUSE_WHEEL:
+				break;
+			case SDL_EVENT_DROP_FILE:
+			{
+				char* file = event.drop.file;
+				if (file)
+				{
+					DropCallBack(winForm, file);
+					SDL_free(file);
+				}
+			}
 				break;
 			case SDL_EVENT_WINDOW_EXPOSED:
 			case SDL_EVENT_WINDOW_SHOWN:

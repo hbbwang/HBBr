@@ -64,7 +64,7 @@
 	#define DE_ASSERT(exp_, msgw_)  ;
 #endif
 
-void MessageOut(const char* msg, bool bExit = false, bool bMessageBox = false ,const char* textColor = ("255,255,255"));
+HBBR_API void MessageOut(const char* msg, bool bExit = false, bool bMessageBox = false ,const char* textColor = ("255,255,255"));
 
 
 #ifdef _WIN32

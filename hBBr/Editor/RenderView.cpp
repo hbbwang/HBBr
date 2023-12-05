@@ -3,10 +3,10 @@
 #include "QStyleOption.h"
 #include "qevent.h"
 #include <qwindow.h>
-
+#include <qmessagebox.h>
 #include "FormMain.h"
 #include "GLFWInclude.h"
-
+#include "ConsoleDebug.h"
 #ifdef _WIN32
 #pragma comment(lib , "RendererCore.lib")
 #endif
@@ -39,6 +39,12 @@ RenderView::RenderView(QWidget* parent)
 		//_mainRendererWidget = QWidget::createWindowContainer(mainRendererWindow, this);
 		//_mainRendererWidget->setFocusPolicy(Qt::ClickFocus);
 		//_mainRendererWidget->setObjectName("RenderView");
+		auto dropFunc = [](VulkanForm *from, HString file) {
+			//QMessageBox::information(0, from->name.c_str(), file.c_str(),0);
+			ConsoleDebug::printf_endl(" [%s]Drop File : %s", from->name.c_str(), file.c_str());
+		};
+		VulkanApp::AddDropCallback(dropFunc);
+
 	}
 }
 
