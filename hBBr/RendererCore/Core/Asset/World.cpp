@@ -19,21 +19,14 @@ World::World(class VulkanRenderer* renderer)
 
 World::~World()
 {
-	//wait gameobject destroy
-	while (_gameObjects.size() > 0 || _gameObjectNeedDestroy.size() > 0)
-	{
-		for (int i = 0; i < _gameObjects.size(); i++)
-		{
-			_gameObjects[i]->Destroy();
-		}
-		WorldUpdate();
-	}
+	ReleaseWorld();
 }
 
 void World::AddNewLevel(HString name)
 {
 	std::shared_ptr<Level> newLevel = NULL;
 	newLevel.reset(new Level(name));
+	newLevel->Load(this);
 	_levels.push_back(newLevel);
 }
 
@@ -54,24 +47,41 @@ void World::SaveWholeWorld()
 	}
 }
 
-GameObject* World::SpawnGameObject(HString name)
+GameObject* World::SpawnGameObject(HString name, class Level* level)
 {
-		GameObject* newObject = new GameObject(this);
-		newObject->SetObjectName(name);
-		return newObject;
+	if (this->_levels.size() <= 0)
+	{
+		MsgBox("World.cpp/SpawnGameObject","Spawn game object failed.This world is not having any levels.");
+		return NULL;
+	}
+	if (!level)
+	{
+		level = this->_levels[0].get();
+	}
+	GameObject* newObject = new GameObject(level);
+	newObject->SetObjectName(name);
+	return newObject;
 }
 
 void World::Load(class VulkanRenderer* renderer)
 {
 	_renderer = renderer;
+
 #if IS_EDITOR
+
+	//Create editor only level.
+	_editorLevel.reset(new Level("EditorLevel"));
+	_editorLevel->Load(this);
+	_editorLevel->_isEditorLevel = true;
+
 	//create editor camera
-	auto backCamera = new GameObject("EditorCamera", this, true);
+	auto backCamera = new GameObject("EditorCamera", _editorLevel.get(), true);
 	backCamera->GetTransform()->SetWorldLocation(glm::vec3(0, 2, -3.0));
 	auto cameraComp = backCamera->AddComponent<CameraComponent>();
 	cameraComp->OverrideMainCamera();
 	_editorCamera = cameraComp;
 	_editorCamera->_bIsEditorCamera = true;
+
 #else
 
 //	//Test game camera
@@ -106,6 +116,12 @@ void World::Load(class VulkanRenderer* renderer)
 
 bool World::ReleaseWorld()
 {
+	for (auto& i : _levels)
+	{
+		i.reset();
+	}
+	_editorLevel.reset();
+	_levels.clear();
 	return true;
 }
 
@@ -126,70 +142,14 @@ void World::WorldUpdate()
 		}
 	}
 
-	//Destroy Objects
-	//const auto destroyCount = _gameObjectNeedDestroy.size();
-	for (auto& i : _gameObjectNeedDestroy)
-	{
-		i.reset();
-	}
-	_gameObjectNeedDestroy.clear();
-
-	//Update Objecets
-	for (int i = 0; i < _gameObjects.size(); i++)
-	{
-		if (!_gameObjects[i]->Update())
-		{
-			i -= 1;
-			if (_gameObjects.size() <= 0)
-				break;
-		}
-		else
-		{
-#if IS_EDITOR
-			if (!_gameObjects[i]->_sceneEditorHide)
-				_editorGameObjectUpdateFunc(this, _gameObjects[i]);
-#endif
-		}
-	}
-
 	//Update Editor if the function is not null.
 #if IS_EDITOR
-	_editorSceneUpdateFunc(this, _gameObjects);
 	for (auto i : _editorWorldUpdate)
 	{
 		i.second(this, _levelPtrs);
 	}
 #endif
-}
 
-void World::AddNewObject(std::shared_ptr<GameObject> newObject)
-{
-	_gameObjects.push_back(newObject);
-	#if IS_EDITOR
-	if (!newObject->_sceneEditorHide)
-	{
-		if (!newObject->_sceneEditorHide)
-			_editorGameObjectAddFunc(this, newObject);
-	}
-	#endif
-}
-
-void World::RemoveObject(GameObject* object)
-{
-	auto it = std::find_if(_gameObjects.begin(),_gameObjects.end(), [object](std::shared_ptr<GameObject>& obj)
-		{
-			return obj.get() == object;
-		});
-	if (it != _gameObjects.end())
-	{
-		//延迟到下一帧再销毁
-		_gameObjectNeedDestroy.push_back(*it);
-		#if IS_EDITOR
-		if(!((*it)->_sceneEditorHide))
-			_editorGameObjectRemoveFunc(this, *it);
-		#endif
-		_gameObjects.erase(it);
-	}
 }
 
 #if IS_EDITOR

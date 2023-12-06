@@ -16,7 +16,6 @@ class Level
 	friend class World;
 public:
 
-	HBBR_API static std::weak_ptr<Level> LoadAsset(HGUID guid);
 	Level() {}
 	Level(HString name);
 	~Level();
@@ -34,6 +33,15 @@ public:
 
 	HBBR_API void SaveLevel();
 
+	HBBR_API class World* GetWorld()const { return _world; }
+
+#if IS_EDITOR
+	std::function<void(class Level*, std::shared_ptr<GameObject>)> _editorGameObjectAddFunc = [](class Level* world, std::shared_ptr<GameObject> newObject) {};
+	std::function<void(class Level*, std::shared_ptr<GameObject>)> _editorGameObjectRemoveFunc = [](class Level* world, std::shared_ptr<GameObject> oldObject) {};
+	std::function<void(class Level*, std::shared_ptr<GameObject>)> _editorGameObjectUpdateFunc = [](class Level* world, std::shared_ptr<GameObject> oldObject) {};
+	std::function<void(class Level*, std::vector<std::shared_ptr<GameObject>>)> _editorSceneUpdateFunc = [](class Level* world, std::vector<std::shared_ptr<GameObject>> o) {};
+#endif
+
 private:
 
 	void LevelUpdate();
@@ -45,6 +53,18 @@ private:
 	HString _levelName = "NewLevel";
 
 	pugi::xml_document _levelDoc;
+
+	void AddNewObject(std::shared_ptr<GameObject> newObject);
+
+	void RemoveObject(GameObject* object);
+
+	//游戏对象
+	std::vector<std::shared_ptr<GameObject>> _gameObjects;
+
+	//需要进行销毁的游戏对象
+	std::vector<std::shared_ptr<GameObject>> _gameObjectNeedDestroy;
+
+	bool _isEditorLevel = false;
 };
 
 

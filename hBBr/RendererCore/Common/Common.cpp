@@ -32,3 +32,9 @@ void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textC
 	}
 }
 
+void MsgBox(const char* title, const char* msg)
+{
+	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, title, msg, NULL);
+	ConsoleDebug::print_endl(msg);
+}
+

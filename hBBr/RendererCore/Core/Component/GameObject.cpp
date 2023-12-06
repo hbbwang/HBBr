@@ -2,20 +2,21 @@
 #include "FormMain.h"
 #include "VulkanRenderer.h"
 #include "Asset/World.h"
+#include "Asset/Level.h"
 #include "Component.h"
 #include "ConsoleDebug.h"
 #include "Component/ModelComponent.h"
 
 std::map<HString, std::function<class Component* (class GameObject*)>> GameObject::_componentSpawnFunctions;
 
-GameObject::GameObject(HString objectName, World* scene, bool SceneEditorHide)
+GameObject::GameObject(HString objectName, Level* level, bool SceneEditorHide)
 {
-	ObjectInit(objectName, scene, SceneEditorHide);
+	ObjectInit(objectName, level, SceneEditorHide);
 }
 
-GameObject::GameObject(World* scene, bool SceneEditorHide)
+GameObject::GameObject(Level* level, bool SceneEditorHide)
 {
-	ObjectInit("NewGameObject", scene, SceneEditorHide);
+	ObjectInit("NewGameObject", level, SceneEditorHide);
 }
 
 GameObject::~GameObject()
@@ -23,19 +24,24 @@ GameObject::~GameObject()
 
 }
 
-void GameObject::ObjectInit(HString objectName, World* scene, bool SceneEditorHide)
+void GameObject::ObjectInit(HString objectName, Level* level, bool SceneEditorHide)
 {
 	_guid = CreateGUID();
 #if IS_EDITOR
 	_sceneEditorHide = SceneEditorHide;
 #endif
-	if (scene == NULL)
+	if (level == NULL)
 	{
-		_scene = VulkanApp::GetMainForm()->renderer->GetWorld();
+		_world = VulkanApp::GetMainForm()->renderer->GetWorld();
+		_level = VulkanApp::GetMainForm()->renderer->GetWorld()->_levels[0].get();
 	}
 	else
 	{
-		_scene = scene;
+		_world = level->GetWorld();
+		_level = level;
+#if IS_EDITOR
+		_IsEditorObject = _level->_isEditorLevel;
+#endif
 	}
 	_name = objectName;
 	_bActive = true;
@@ -44,17 +50,17 @@ void GameObject::ObjectInit(HString objectName, World* scene, bool SceneEditorHi
 
 	auto sharedPtr = std::shared_ptr<GameObject>(this);
 	_selfWeak = sharedPtr;
-	_scene->AddNewObject(sharedPtr);
+	_level->AddNewObject(sharedPtr);
 }
 
-GameObject* GameObject::CreateGameObject(HString objectName, World* scene)
+GameObject* GameObject::CreateGameObject(HString objectName, Level* level)
 {
-	return new GameObject(objectName, scene);
+	return new GameObject(objectName, level);
 }
 
-GameObject* GameObject::CreateModelGameObject(HString virtualPath, World* scene)
+GameObject* GameObject::CreateModelGameObject(HString virtualPath, Level* level)
 {
-	GameObject* cube = new GameObject(virtualPath.GetBaseName(), scene);
+	GameObject* cube = new GameObject(virtualPath.GetBaseName(), level);
 	auto modelComp = cube->AddComponent<ModelComponent>();
 	cube->GetTransform()->SetLocation(glm::vec3(0, 0.5f, 0));
 	modelComp->SetModelByVirtualPath(virtualPath);
@@ -147,7 +153,7 @@ bool GameObject::Update()
 	{
 		if (ExecuteDestroy())
 		{
-			_scene->RemoveObject(this);
+			_level->RemoveObject(this);
 			return false;
 		}
 	}

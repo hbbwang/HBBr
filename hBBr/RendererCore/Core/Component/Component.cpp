@@ -1,12 +1,14 @@
 ﻿#include"Component.h"
 #include "GameObject.h"
 #include "Asset/World.h"
+#include "Asset/Level.h"
 #include "VulkanRenderer.h"
 Component::Component(GameObject* parent)
 {
 	_bActive = true;
 	_gameObject = parent;
-	_renderer = _gameObject->_scene->GetRenderer();
+	_world = _gameObject->_level->GetWorld();
+	_renderer = _world->GetRenderer();
 }
 
 Component::~Component()

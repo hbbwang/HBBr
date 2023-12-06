@@ -66,6 +66,8 @@
 
 HBBR_API void MessageOut(const char* msg, bool bExit = false, bool bMessageBox = false ,const char* textColor = ("255,255,255"));
 
+HBBR_API void MsgBox(const char* title, const char* msg);
+
 
 #ifdef _WIN32
 

@@ -53,9 +53,12 @@ RenderView::RenderView(QWidget* parent)
 				if (!assetInfo.expired())
 				{
 					GameObject* newObject = from->renderer->GetWorld()->SpawnGameObject(assetInfo.lock()->name);
-					auto modelComp = newObject->AddComponent<ModelComponent>();
-					modelComp->SetModelByVirtualPath(assetInfo.lock()->virtualPath);
-					newObject->SetObjectName(assetInfo.lock()->name);
+					if (newObject)
+					{
+						auto modelComp = newObject->AddComponent<ModelComponent>();
+						modelComp->SetModelByVirtualPath(assetInfo.lock()->virtualPath);
+						newObject->SetObjectName(assetInfo.lock()->name);
+					}
 				}
 			}
 		};

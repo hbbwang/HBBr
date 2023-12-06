@@ -86,6 +86,10 @@ public:
 	HBBR_API HBBR_INLINE HString GetComponentName() const {
 		return _typeName;
 	}
+
+	HBBR_API HBBR_INLINE class World* GetWorld() const {
+		return _world;
+	}
 	
 protected:
 
@@ -165,4 +169,6 @@ protected:
 	class GameObject* _gameObject = NULL;
 	
 	class VulkanRenderer* _renderer = NULL;
+
+	class World* _world = NULL;
 };

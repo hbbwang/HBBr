@@ -9,19 +9,20 @@
 class GameObject
 {
 	friend class World;
+	friend class Level;
 	friend class Component;
 	friend class Inspector;
 public:
 
-	GameObject(HString objectName = "NewGameObject", class World* scene = NULL, bool SceneEditorHide = false);
-	GameObject(class World* scene = NULL, bool SceneEditorHide = false);
+	GameObject(HString objectName = "NewGameObject", class Level* level = NULL, bool SceneEditorHide = false);
+	GameObject(class Level* level = NULL, bool SceneEditorHide = false);
 	~GameObject();
 
-	void ObjectInit(HString objectName = "NewGameObject", class World* scene = NULL, bool SceneEditorHide = false);
+	void ObjectInit(HString objectName = "NewGameObject", class Level* level = NULL, bool SceneEditorHide = false);
 
-	HBBR_API static GameObject* CreateGameObject(HString objectName = "NewGameObject", class World* scene = NULL);
+	HBBR_API static GameObject* CreateGameObject(HString objectName = "NewGameObject", class Level* level = NULL);
 
-	HBBR_API static GameObject* CreateModelGameObject(HString virtualPath, class World* scene = NULL);
+	HBBR_API static GameObject* CreateModelGameObject(HString virtualPath, class Level* level = NULL);
 
 	HBBR_API HBBR_INLINE void Destroy() {
 		SetActive(false);
@@ -56,8 +57,12 @@ public:
 		return _transform;
 	}
 
+	HBBR_API HBBR_INLINE class Level* GetLevel() {
+		return _level;
+	}
+
 	HBBR_API HBBR_INLINE class World* GetWorld() {
-		return _scene;
+		return _world;
 	}
 
 	HBBR_API HBBR_INLINE std::weak_ptr<GameObject> GetSelfWeekPtr() {
@@ -102,6 +107,7 @@ public:
 	void* _editorObject = NULL;
 	bool _bEditorNeedUpdate = false;
 	bool _sceneEditorHide = false;
+	bool _IsEditorObject = false;
 #endif
 
 private:
@@ -114,7 +120,9 @@ private:
 	/* Auto run destroy execute.Do not call this function initiatively. */
 	bool ExecuteDestroy();
 
-	class World* _scene = NULL;
+	class World* _world = NULL;
+
+	class Level* _level = NULL;
 
 	bool _bActive = true;
 

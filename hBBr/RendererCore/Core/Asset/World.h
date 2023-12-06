@@ -23,10 +23,6 @@ public:
 	~World();
 
 #if IS_EDITOR
-	std::function<void(class World*, std::vector<std::shared_ptr<GameObject>>)> _editorSceneUpdateFunc = [](class World* world, std::vector<std::shared_ptr<GameObject>> o) {};
-	std::function<void(class World*, std::shared_ptr<GameObject>)> _editorGameObjectAddFunc = [](class World* world, std::shared_ptr<GameObject> newObject) {};
-	std::function<void(class World*, std::shared_ptr<GameObject>)> _editorGameObjectRemoveFunc = [](class World* world, std::shared_ptr<GameObject> oldObject) {};
-	std::function<void(class World*, std::shared_ptr<GameObject>)> _editorGameObjectUpdateFunc = [](class World* world, std::shared_ptr<GameObject> oldObject) {};
 	class CameraComponent* _editorCamera = NULL;
 #endif
 
@@ -45,7 +41,7 @@ public:
 	//保存世界xml,包括Levels
 	HBBR_API void SaveWholeWorld();
 
-	HBBR_API GameObject* SpawnGameObject(HString name);
+	HBBR_API GameObject* SpawnGameObject(HString name, class Level* level = NULL);
 
 #if IS_EDITOR
 
@@ -55,6 +51,7 @@ public:
 
 	std::map<HGUID, std::function<void(class World*, std::vector<Level*>)>> _editorWorldUpdate;
 
+	std::shared_ptr<Level> _editorLevel;
 
 	void SetCurrentSelectionLevel(std::weak_ptr<Level> level);
 
@@ -80,21 +77,11 @@ private:
 
 	void WorldUpdate();
 
-	void AddNewObject(std::shared_ptr<GameObject> newObject);
-
-	void RemoveObject(GameObject* object);
-
 	class VulkanRenderer* _renderer = NULL;
 
 	class CameraComponent* _mainCamera = NULL;
 
 	std::vector<CameraComponent*> _cameras;
-
-	//游戏对象
-	std::vector<std::shared_ptr<GameObject>> _gameObjects;
-
-	//需要进行销毁的游戏对象
-	std::vector<std::shared_ptr<GameObject>> _gameObjectNeedDestroy;
 
 	std::vector<std::shared_ptr<Level>> _levels;
 
