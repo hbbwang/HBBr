@@ -7,6 +7,10 @@
 #include "FormMain.h"
 #include "GLFWInclude.h"
 #include "ConsoleDebug.h"
+#include "Component/GameObject.h"
+#include "Component/ModelComponent.h"
+#include "Asset/World.h"
+#include "VulkanRenderer.h"
 #ifdef _WIN32
 #pragma comment(lib , "RendererCore.lib")
 #endif
@@ -42,9 +46,21 @@ RenderView::RenderView(QWidget* parent)
 		auto dropFunc = [](VulkanForm *from, HString file) {
 			//QMessageBox::information(0, from->name.c_str(), file.c_str(),0);
 			ConsoleDebug::printf_endl(" [%s]Drop File : %s", from->name.c_str(), file.c_str());
+			auto mainForm = VulkanApp::GetMainForm();
+			if (from->renderer == mainForm->renderer && from->renderer->GetWorld())
+			{
+				auto assetInfo = ContentManager::Get()->GetAssetInfo(file);
+				if (!assetInfo.expired())
+				{
+					GameObject* newObject = from->renderer->GetWorld()->SpawnGameObject(assetInfo.lock()->name);
+					auto modelComp = newObject->AddComponent<ModelComponent>();
+					modelComp->SetModelByVirtualPath(assetInfo.lock()->virtualPath);
+					newObject->SetObjectName(assetInfo.lock()->name);
+				}
+			}
 		};
 		VulkanApp::AddDropCallback(dropFunc);
-
+		
 	}
 }
 

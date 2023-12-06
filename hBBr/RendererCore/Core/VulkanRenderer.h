@@ -82,7 +82,10 @@ public:
 	}
 
 	HBBR_API HBBR_INLINE bool IsWorldValid()const{
-		return !_world;
+		if (_world)
+			return true;
+		else
+			return false;
 	}
 
 	HBBR_API HBBR_INLINE class World* GetWorld() {

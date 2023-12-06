@@ -223,11 +223,46 @@ bool VulkanApp::UpdateForm()
 	bool bStopRender = false; 
 	while (SDL_PollEvent(&event))
 	{
-		SDL_Window* win = SDL_GetMouseFocus();
-		if (!win)
-			win = SDL_GetKeyboardFocus();
-		if (!win)
+		SDL_Window* win = NULL;
+
+#ifdef IS_EDITOR
+		ImGui_ImplSDL3_ProcessEvent(&event);
+#endif
+
+		//Get SDL_Window
+		switch (event.type)
+		{
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+		case SDL_EVENT_MOUSE_WHEEL:
+		case SDL_EVENT_MOUSE_MOTION:
+		{
+			win = SDL_GetWindowFromID(event.button.windowID);
+			if (!win)
+				win = SDL_GetMouseFocus();
+			break;
+		}
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_KEY_UP:
+		{
+			win = SDL_GetWindowFromID(event.key.windowID);
+			if (!win)
+				win = SDL_GetKeyboardFocus();
+			break;
+		}
+		case SDL_EVENT_DROP_FILE:
+			win = SDL_GetWindowFromID(event.drop.windowID);
+			break;
+		case SDL_EVENT_FINGER_DOWN:
+			win = SDL_GetWindowFromID(event.tfinger.windowID);
+			break;
+		default:
+			//Window event
 			win = SDL_GetWindowFromID(event.window.windowID);
+			break;
+		}
+
+		//Get window form
 		auto winFormIt = std::find_if(_forms.begin(), _forms.end(), [win](VulkanForm*& form) {
 			return form->window == win;
 			});
@@ -239,91 +274,107 @@ bool VulkanApp::UpdateForm()
 		if (winForm == NULL)
 		{
 			winForm = VulkanApp::GetFocusForm();
-			if(winForm)
+			if (winForm)
 				win = winForm->window;
 		}
 
-#ifdef IS_EDITOR
-		ImGui_ImplSDL3_ProcessEvent(&event);
-#endif
-		switch (event.type) 
+		switch (event.type)
 		{
-			//case 0x200://窗口事件,SDL3开始不再需要这个了
-				//WindowEvent(event);
-				//break;
-			case SDL_EVENT_WINDOW_CLOSE_REQUESTED: //窗口关闭事件
-				CloseCallBack(win);
-				SDL_DestroyWindow(win);
-				RemoveWindow(winForm);
-				if (winForm == GetFocusForm())
-				{
-					FocusCallBack(winForm, 0);
-				}
-				break;
-			case SDL_EVENT_WINDOW_TAKE_FOCUS:
-			case SDL_EVENT_WINDOW_FOCUS_GAINED:
-				FocusCallBack(winForm, 1);
-				break;
-			case SDL_EVENT_WINDOW_FOCUS_LOST:
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED: //窗口关闭事件
+		{
+			CloseCallBack(win);
+			SDL_DestroyWindow(win);
+			RemoveWindow(winForm);
+			if (winForm == GetFocusForm())
+			{
 				FocusCallBack(winForm, 0);
-				#ifdef __ANDROID__
-				bStopRender = true;
-				ResizeWindow(winForm, 1, 1);
-				#endif
-				break;
-			case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
-			case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
-			case SDL_EVENT_WINDOW_RESIZED:
-				ResizeCallBack(win, event.window.data1, event.window.data2);
-				break;
-			case SDL_EVENT_QUIT://窗口完全关闭,SDL即将退出
-				bQuit = true;
-				break;
-			case SDL_EVENT_MOUSE_BUTTON_DOWN:
-			case SDL_EVENT_MOUSE_BUTTON_UP:
-			{
-				MouseButtonCallBack(winForm, event.button.button, event.button.state);
 			}
-				break;
-			case SDL_EVENT_KEY_DOWN:
-			case SDL_EVENT_KEY_UP:
+			break;
+		}
+		case SDL_EVENT_WINDOW_TAKE_FOCUS:
+		case SDL_EVENT_WINDOW_FOCUS_GAINED:
+		{
+			FocusCallBack(winForm, 1);
+			break;
+		}
+		case SDL_EVENT_WINDOW_FOCUS_LOST:
+		{
+			FocusCallBack(winForm, 0);
+#ifdef __ANDROID__
+			bStopRender = true;
+			ResizeWindow(winForm, 1, 1);
+#endif
+			break;
+		}
+		case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
+		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+		case SDL_EVENT_WINDOW_RESIZED:
+		{
+			ResizeCallBack(win, event.window.data1, event.window.data2);
+			break;
+		}
+		case SDL_EVENT_QUIT://窗口完全关闭,SDL即将退出
+		{
+			bQuit = true;
+			break;
+		}
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+		{
+			MouseButtonCallBack(winForm, event.button.button, event.button.state);
+			break;
+		}
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_KEY_UP:
+		{
+			KeyBoardCallBack(winForm, event.key.keysym.sym, event.key.keysym.scancode, event.key.state, event.key.keysym.mod);
+			break;
+		}
+		case SDL_EVENT_MOUSE_WHEEL:
+			break;
+		case SDL_EVENT_DROP_FILE:
+		{
+			char* file = event.drop.file;
+			if (file)
 			{
-				KeyBoardCallBack(winForm, event.key.keysym.sym, event.key.keysym.scancode, event.key.state, event.key.keysym.mod);
-			}
-				break;
-			case SDL_EVENT_MOUSE_WHEEL:
-				break;
-			case SDL_EVENT_DROP_FILE:
-			{
-				char* file = event.drop.file;
-				if (file)
+				auto win = SDL_GetWindowFromID(event.drop.windowID);
+				auto winFormIt = std::find_if(_forms.begin(), _forms.end(), [win](VulkanForm*& form) {
+					return form->window == win;
+					});
+				if (*winFormIt)
 				{
 					DropCallBack(winForm, file);
-					SDL_free(file);
 				}
+				SDL_free(file);
 			}
-				break;
-			case SDL_EVENT_WINDOW_EXPOSED:
-			case SDL_EVENT_WINDOW_SHOWN:
-				if (winForm)
-				{
-					winForm->bMinimized = false;
-				}
-				break;
-			case SDL_EVENT_WINDOW_MINIMIZED:
-			case SDL_EVENT_WINDOW_HIDDEN:
-				if (winForm)
-				{
-					winForm->bMinimized = true;
-				}
-				bStopRender = true;
-				break;
-			case SDL_EVENT_FINGER_DOWN:
-				//SDL_ShowSimpleMessageBox(0, "", "(test)手指按下", NULL);
-				break;
+			break;
+		}
+		case SDL_EVENT_WINDOW_EXPOSED:
+		case SDL_EVENT_WINDOW_SHOWN:
+		{
+			if (winForm)
+			{
+				winForm->bMinimized = false;
+			}
+			break;
+		}
+		case SDL_EVENT_WINDOW_MINIMIZED:
+		case SDL_EVENT_WINDOW_HIDDEN:
+		{
+			if (winForm)
+			{
+				winForm->bMinimized = true;
+			}
+			bStopRender = true;
+			break;
+		}
+		case SDL_EVENT_FINGER_DOWN:
+		{
+			//SDL_ShowSimpleMessageBox(0, "", "(test)手指按下", NULL);
+			break;
+		}
 		}
 	}
-
 	if (_bFocusQuit || bQuit)
 	{
 		for (auto w : _forms)
@@ -345,11 +396,10 @@ bool VulkanApp::UpdateForm()
 #endif
 		Shader::LoadShaderCache(FileSystem::GetShaderCacheAbsPath().c_str());
 	}
-	else if(!bStopRender)
+	else if (!bStopRender)
 	{
 		UpdateRender();
 	}
-
 	return !bQuit;
 }
 

@@ -86,7 +86,7 @@ public:
 		return result;
 	}
 
-	class Component* AddComponent(HString className)
+	HBBR_API class Component* AddComponent(HString className)
 	{
 		auto it = _componentSpawnFunctions.find(className);
 		if (it != _componentSpawnFunctions.end())

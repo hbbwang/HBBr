@@ -148,7 +148,7 @@ void VulkanRenderer::Render()
 			func();
 		}
 
-		if (!_world)
+		if (_world)
 			_world->WorldUpdate();
 
 		SetupPassUniformBuffer();

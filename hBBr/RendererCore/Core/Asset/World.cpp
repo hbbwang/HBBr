@@ -54,6 +54,13 @@ void World::SaveWholeWorld()
 	}
 }
 
+GameObject* World::SpawnGameObject(HString name)
+{
+		GameObject* newObject = new GameObject(this);
+		newObject->SetObjectName(name);
+		return newObject;
+}
+
 void World::Load(class VulkanRenderer* renderer)
 {
 	_renderer = renderer;

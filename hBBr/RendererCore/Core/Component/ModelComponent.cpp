@@ -29,7 +29,7 @@ void ModelComponent::SetModelByRealPath(HString path)
 
 void ModelComponent::SetModelByVirtualPath(HString path)
 {
-	FileSystem::CorrectionPath(path);
+	path = FileSystem::FillUpAssetPath(path);
 	auto info = ContentManager::Get()->GetAssetInfo(AssetType::Model, path);
 	if (info.expired())
 		return;

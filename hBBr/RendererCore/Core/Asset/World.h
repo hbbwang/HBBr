@@ -45,6 +45,8 @@ public:
 	//保存世界xml,包括Levels
 	HBBR_API void SaveWholeWorld();
 
+	HBBR_API GameObject* SpawnGameObject(HString name);
+
 #if IS_EDITOR
 
 	std::weak_ptr<Level> _currentSelectionLevel;

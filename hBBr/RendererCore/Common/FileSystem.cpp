@@ -80,6 +80,15 @@ HString FileSystem::GetWorldAbsPath()
     return path;
 }
 
+HString FileSystem::FillUpAssetPath(HString assetPath)
+{
+    fs::path p = GetProgramPath().c_str();
+    fs::path a = assetPath.c_str();
+    p = p / a;
+    p = p.lexically_normal();
+    return p.c_str();
+}
+
 HString FileSystem::GetShaderIncludeAbsPath()
 {
     fs::path p = GetProgramPath().c_str();

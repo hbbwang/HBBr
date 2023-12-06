@@ -12,13 +12,14 @@ class ModelComponent :public Component
 
 public:
 
-	void SetModelByRealPath(HString path);
+	HBBR_API void SetModelByRealPath(HString path);
 
-	void SetModelByVirtualPath(HString path);
+	//path = virtual relative path (Asset/...)
+	HBBR_API void SetModelByVirtualPath(HString path);
 
-	void SetModel(HGUID guid);
+	HBBR_API void SetModel(HGUID guid);
 
-	void SetModel(std::weak_ptr<class ModelData> model);
+	HBBR_API void SetModel(std::weak_ptr<class ModelData> model);
 
 	virtual void GameObjectActiveChanged(bool objActive)override;
 
