@@ -20,10 +20,16 @@ public:
 	Level(HString name);
 	~Level();
 
+	//序列化
+	template<class Archive>
+	void serialize(Archive& ar) {
+		//ar(name_, age_);
+	}
+
 	HBBR_INLINE HBBR_API HString GetLevelName()const { return _levelName; }
 
 	//加载关卡
-	HBBR_API void Load(class World* world);
+	HBBR_API void Load(class World* world , HString levelPath);
 
 	//释放关卡对象
 	HBBR_API bool UnLoad();

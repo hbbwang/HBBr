@@ -31,7 +31,8 @@
      <property name="title">
       <string>新建</string>
      </property>
-     <addaction name="CreateNewScene"/>
+     <addaction name="CreateNewLevel"/>
+     <addaction name="CreateNewWorld"/>
     </widget>
     <addaction name="Menu_CreateNew"/>
     <addaction name="SaveWorld"/>
@@ -48,9 +49,9 @@
    <addaction name="MainMenu"/>
    <addaction name="menu_3"/>
   </widget>
-  <action name="CreateNewScene">
+  <action name="CreateNewWorld">
    <property name="text">
-    <string>新建场景</string>
+    <string>新建世界</string>
    </property>
   </action>
   <action name="SaveWorld">
@@ -60,7 +61,7 @@
   </action>
   <action name="SaveAsWorld">
    <property name="text">
-    <string>保存世界和关卡</string>
+    <string>世界另存为</string>
    </property>
   </action>
   <action name="ResetWindowStyle">
@@ -76,6 +77,11 @@
   <action name="CompileAllShader">
    <property name="text">
     <string>重新编译所有着色器</string>
+   </property>
+  </action>
+  <action name="CreateNewLevel">
+   <property name="text">
+    <string>新建关卡</string>
    </property>
   </action>
  </widget>

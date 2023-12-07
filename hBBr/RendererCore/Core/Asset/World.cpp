@@ -39,7 +39,7 @@ void World::AddNewLevel(HString name)
 {
 	std::shared_ptr<Level> newLevel = nullptr;
 	newLevel.reset(new Level(name));
-	newLevel->Load(this);
+	newLevel->Load(this, "");
 	_levels.push_back(newLevel);
 }
 
@@ -81,6 +81,12 @@ void World::Load(class VulkanRenderer* renderer, HString worldAssetPath)
 	_renderer = renderer;
 
 	HString assetPath = FileSystem::GetWorldAbsPath();
+
+	if (!FileSystem::FileExist(assetPath))
+	{
+		FileSystem::CreateDir(assetPath.c_str());
+	}
+
 	HString dirPath = assetPath + "/" + _worldName + ".world";
 	FileSystem::FixUpPath(dirPath);
 	_worldAssetPath = dirPath;
@@ -89,7 +95,7 @@ void World::Load(class VulkanRenderer* renderer, HString worldAssetPath)
 
 	//Create editor only level.
 	_editorLevel.reset(new Level("EditorLevel"));
-	_editorLevel->Load(this);
+	_editorLevel->Load(this, "");
 	_editorLevel->_isEditorLevel = true;
 
 	//create editor camera

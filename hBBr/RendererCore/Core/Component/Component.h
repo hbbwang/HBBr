@@ -48,6 +48,7 @@ class Component
 {
 	friend class GameObject;
 	friend class World;
+	friend class Level;
 	friend class VulkanRenderer;
 public:
 	Component() {}
@@ -114,6 +115,16 @@ protected:
 		std::sort(_compProperties.begin(), _compProperties.end(), valueCompare);
 	}
 	
+	static inline HString AnalysisPropertyValue(ComponentProperty& p)
+	{
+		if (p.type == typeid(bool).name())
+		{
+			auto Bool = (bool*)p.value;
+			return (*Bool == true) ? "1" : "0";
+		}
+		return "";
+	}
+
 	//<displayName , component>
 	std::vector<ComponentProperty> _compProperties;
 
