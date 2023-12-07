@@ -117,11 +117,34 @@ protected:
 	
 	static inline HString AnalysisPropertyValue(ComponentProperty& p)
 	{
+		//Base type
 		if (p.type == typeid(bool).name())
 		{
-			auto Bool = (bool*)p.value;
-			return (*Bool == true) ? "1" : "0";
+			auto value = (bool*)p.value;
+			return (*value == true) ? "1" : "0";
 		}
+		else if (p.type == typeid(int).name())
+		{
+			auto value = (int*)p.value;
+			return HString::FromInt(*value);
+		}
+		else if (p.type == typeid(uint64_t).name())
+		{
+			auto value = (uint64_t*)p.value;
+			return HString::FromSize_t(*value);
+		}
+		else if (p.type == typeid(uint32_t).name() || p.type == typeid(uint16_t).name() || p.type == typeid(uint8_t).name())
+		{
+			auto value = (uint32_t*)p.value;
+			return HString::FromUInt(*value);
+		}
+		else if (p.type == typeid(float).name())
+		{
+			auto value = (float*)p.value;
+			return HString::FromFloat(*value);
+		}
+		//Asset type
+
 		return "";
 	}
 
