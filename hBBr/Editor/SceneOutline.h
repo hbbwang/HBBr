@@ -11,7 +11,7 @@ class GameObjectItem :public QTreeWidgetItem
 {
 public:
     GameObjectItem(class GameObject* gameObject, QTreeWidget* view);
-    class GameObject* _gameObject = NULL;
+    class GameObject* _gameObject = nullptr;
     void Destroy();
 };
 
@@ -34,19 +34,19 @@ protected:
 
         QTreeWidget::commitData(editor);
     }
-    VulkanRenderer* _renderer = NULL;
+    VulkanRenderer* _renderer = nullptr;
     QTreeWidgetItem* _curItem;
     QTreeWidgetItem* _mouseTouchItem;
 
-    QMenu*      _menu = NULL;
-    QAction*    _createNewGameObject = NULL;
-    QAction*    _renameGameObject = NULL;
-    QAction*    _deleteGameObject = NULL;
+    QMenu*      _menu = nullptr;
+    QAction*    _createNewGameObject = nullptr;
+    QAction*    _renameGameObject = nullptr;
+    QAction*    _deleteGameObject = nullptr;
 
-    QMenu* _menu_createBasic = NULL;
-    QAction* _createCube = NULL;
-    QAction* _createSphere = NULL;
-    QAction* _createPlane = NULL;
+    QMenu* _menu_createBasic = nullptr;
+    QAction* _createCube = nullptr;
+    QAction* _createSphere = nullptr;
+    QAction* _createPlane = nullptr;
 
     virtual void contextMenuEvent(QContextMenuEvent*) override;
 
@@ -68,7 +68,7 @@ public:
 
     virtual void closeEvent(QCloseEvent* event);
     virtual void focusInEvent(QFocusEvent* event);
-    class  VulkanRenderer* _renderer = NULL;
+    class  VulkanRenderer* _renderer = nullptr;
     class CheckBox* _checkBox;
     static SceneOutlineTree* _treeWidget;
     class CustomSearchLine* _search;

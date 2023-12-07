@@ -48,7 +48,7 @@ private:
 
 	bool bLoad = false;
 
-	class World* _world = NULL;
+	class World* _world = nullptr;
 
 	HString _levelName = "NewLevel";
 

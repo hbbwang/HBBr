@@ -419,7 +419,7 @@ ImageData* DDSLoader::LoadDDSToImage()
 	arraySize = 1;
 	if (DDSBuffer.size() <= sizeof(FDDSFileHeader))
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	//获取文件头
@@ -443,7 +443,7 @@ ImageData* DDSLoader::LoadDDSToImage()
 	if (!IsValid())
 	{
 		ConsoleDebug::print_endl((HString("load dds file failed.")).c_str(), "255,20,0");
-		return NULL;
+		return nullptr;
 	}
 
 	//是不是CubeMap
@@ -472,7 +472,7 @@ ImageData* DDSLoader::LoadDDSToImage()
 	if(dxgiTextureFormat == DXGI_FORMAT_UNKNOWN)
 	{
 		ConsoleDebug::print_endl((HString("load dds file failed.Unknow texture format.")).c_str(), "255,20,0");
-		return NULL;
+		return nullptr;
 	}
 
 	ImageData* out = new ImageData;

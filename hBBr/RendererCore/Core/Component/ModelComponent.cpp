@@ -99,11 +99,11 @@ void ModelComponent::ClearPrimitves()
 		return;
 	for (int i = 0; i < (int)_materials.size(); i++)
 	{
-		if (_primitives.size() > i && _primitives[i] != NULL && !_materials[i].expired())
+		if (_primitives.size() > i && _primitives[i] != nullptr && !_materials[i].expired())
 		{
 			PrimitiveProxy::RemoveModelPrimitive(_materials[i].lock()->GetPrimitive(), _primitives[i], _gameObject->GetWorld()->GetRenderer());
 			delete _primitives[i];
-			_primitives[i] = NULL;
+			_primitives[i] = nullptr;
 		}
 	}
 	_primitives.clear();

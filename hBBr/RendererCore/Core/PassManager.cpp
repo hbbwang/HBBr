@@ -77,7 +77,7 @@ void PassManager::PassesReset()
 
 void PassManager::AddPass(std::shared_ptr<PassBase> newPass, const char* passName)
 {
-	if (newPass == NULL)
+	if (newPass == nullptr)
 	{
 		MessageOut("Add Pass Failed.The New Pass Is Null.", true, true);
 	}

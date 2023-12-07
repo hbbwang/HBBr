@@ -160,7 +160,7 @@ void CustomListView::mouseMoveEvent(QMouseEvent* event)
 		{
 			_toolTipIndex = index;
 			CustomFileSystemModel* dmodel = reinterpret_cast<CustomFileSystemModel*>(this->model());
-			if (dmodel)
+			if (dmodel && _fileInfos.size() > 0)
 			{
 				auto it = _fileInfos.find(index);
 				auto assetInfo = it.value();
@@ -387,7 +387,7 @@ void CustomTreeView::wheelEvent(QWheelEvent* event)
 
 void CustomTreeView::CustomContextMenu(const QPoint& point)
 {
-	if (_menu != NULL && currentIndex().isValid())
+	if (_menu != nullptr && currentIndex().isValid())
 	{
 		_menu->addAction(_import);
 		_menu->addAction(_openCurrentFolder);

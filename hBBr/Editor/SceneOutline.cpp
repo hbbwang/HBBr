@@ -15,7 +15,7 @@
 #include "CustomSearchLine.h"
 #include "Inspector.h"
 #include "CheckBox.h"
-SceneOutlineTree* SceneOutline::_treeWidget = NULL;
+SceneOutlineTree* SceneOutline::_treeWidget = nullptr;
 
 GameObjectItem::GameObjectItem(GameObject* gameObject, QTreeWidget* view)
     :QTreeWidgetItem(view)
@@ -27,11 +27,11 @@ GameObjectItem::GameObjectItem(GameObject* gameObject, QTreeWidget* view)
 
 void GameObjectItem::Destroy()
 {
-    if (_gameObject != NULL)
+    if (_gameObject != nullptr)
     {
-        _gameObject->_editorObject = NULL;
+        _gameObject->_editorObject = nullptr;
         _gameObject->Destroy();
-        _gameObject = NULL;
+        _gameObject = nullptr;
     }
     delete this;
 }
@@ -140,7 +140,7 @@ void SceneOutlineTree::ItemSelectionChanged()
     auto objects = GetSelectionObjects();
     if (objects.size() > 0)
     {
-        if (Inspector::_currentInspector != NULL)
+        if (Inspector::_currentInspector != nullptr)
             Inspector::_currentInspector->LoadInspector_GameObject(objects[0]->GetSelfWeekPtr());
     }
 }
@@ -162,12 +162,12 @@ void SceneOutlineTree::mouseMoveEvent(QMouseEvent* event)
 void SceneOutlineTree::dropEvent(QDropEvent* event)
 {
     QTreeWidget::dropEvent(event);
-    if (_curItem != NULL)
+    if (_curItem != nullptr)
     {
         GameObjectItem* dragItem = (GameObjectItem*)_curItem;
-        if (_mouseTouchItem == NULL)
+        if (_mouseTouchItem == nullptr)
         {
-            dragItem->_gameObject->SetParent(NULL);
+            dragItem->_gameObject->SetParent(nullptr);
         }
         else
         {
@@ -179,11 +179,11 @@ void SceneOutlineTree::dropEvent(QDropEvent* event)
                 }
                 else
                 {
-                    dragItem->_gameObject->SetParent(NULL);
+                    dragItem->_gameObject->SetParent(nullptr);
                 }
             }
         }
-        _curItem = NULL;
+        _curItem = nullptr;
     }
 }
 
@@ -276,7 +276,7 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     //        auto objects = SceneOutline::_treeWidget->GetSelectionObjects();
     //        if (objects.size() > 0)
     //        {
-    //            if (Inspector::_currentInspector != NULL)
+    //            if (Inspector::_currentInspector != nullptr)
     //                Inspector::_currentInspector->LoadInspector_GameObject(objects[0]->GetSelfWeekPtr(), true);
     //        }
     //        auto item = (GameObjectItem*)object->_editorObject;

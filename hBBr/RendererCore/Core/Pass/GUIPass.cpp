@@ -69,7 +69,7 @@ void GUIPass::PassUpdate()
 	//设置管线
 	//Create GUIShader Pipeline
 	auto pipelineObject = PipelineManager::GetGraphicsPipelineMap(_guiShaderIndex);
-	if (pipelineObject == NULL)
+	if (pipelineObject == nullptr)
 	{
 		_guiShaderIndex = CreatePipeline("GUIShader@0");
 	}
@@ -264,7 +264,7 @@ void GUIPass::SetupPanelAnchor(GUIDrawState state, float x, float y, float w, fl
 GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateCount, PipelineIndex index, float x, float y, float w, float h)
 {
 	auto dit = _drawList.find(tag);
-	GUIPrimitive* prim = NULL;
+	GUIPrimitive* prim = nullptr;
 	if (dit != _drawList.end())
 	{
 		prim = &dit->second;

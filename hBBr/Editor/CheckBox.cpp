@@ -44,7 +44,7 @@ void CheckBox::stateChanged(int state)
 	if (state == Qt::Checked)
 	{
 		_callback(true);
-		if (_boolBind != NULL)
+		if (_boolBind != nullptr)
 			*_boolBind = true;
 		if (_boolArrayBind)
 			_boolArrayBind->at(_boolArrayBindIndex) = true;
@@ -52,7 +52,7 @@ void CheckBox::stateChanged(int state)
 	else if (state == Qt::Unchecked)
 	{
 		_callback(false);
-		if (_boolBind != NULL)
+		if (_boolBind != nullptr)
 			*_boolBind = false;
 		if (_boolArrayBind)
 			_boolArrayBind->at(_boolArrayBindIndex) =  false;

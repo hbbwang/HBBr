@@ -21,21 +21,21 @@ public:
 	ContentBrowser(QWidget *parent = nullptr);
 	~ContentBrowser();
 
-	class QSplitter*		_splitterBox = NULL;
-	class CustomListView*	_listWidget = NULL;
-	class CustomTreeView*	_treeWidget = NULL;
+	class QSplitter*		_splitterBox = nullptr;
+	class CustomListView*	_listWidget = nullptr;
+	class CustomTreeView*	_treeWidget = nullptr;
 
-	QWidget* _tree_group = NULL;
-	QWidget* _list_group = NULL;
+	QWidget* _tree_group = nullptr;
+	QWidget* _list_group = nullptr;
 
-	CustomSearchLine* _treeSearchLine = NULL;
-	CustomSearchLine* _listSearchLine = NULL;
+	CustomSearchLine* _treeSearchLine = nullptr;
+	CustomSearchLine* _listSearchLine = nullptr;
 
 	CustomFileIconProvider		_treeFileIconProvider;
 	CustomFileIconProvider		_listFileIconProvider;
 
-	CustomFileSystemModel*		_treeFileSystemModel = NULL;
-	CustomFileSystemModel*		_listFileSystemModel = NULL;
+	CustomFileSystemModel*		_treeFileSystemModel = nullptr;
+	CustomFileSystemModel*		_listFileSystemModel = nullptr;
 
 	QStringList list_filterCache;
 
@@ -44,9 +44,9 @@ public:
 
 	QDir::Filters list_filters;
 
-	MainWindow* _mainWindow = NULL;
+	MainWindow* _mainWindow = nullptr;
 
-	static void SearchAssetFile(HString filePath , ContentBrowser* cb = NULL);
+	static void SearchAssetFile(HString filePath , ContentBrowser* cb = nullptr);
 
 	static QWidget* _currentFocusContentBrowser;
 

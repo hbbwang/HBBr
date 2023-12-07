@@ -84,7 +84,7 @@ private:
 	VkBufferUsageFlags				_bufferUsage;
 
 	/* The pointer point to buffer */
-	void* _bufferMapping = NULL;
+	void* _bufferMapping = nullptr;
 
 	bool _bufferIsMapping = false;
 };

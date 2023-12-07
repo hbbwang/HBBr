@@ -17,11 +17,11 @@ public:
 
 	QLabel* highLight;
 
-	HString* _stringBind = NULL;
+	HString* _stringBind = nullptr;
 
-	std::weak_ptr<class AssetObject> *_objectBind = NULL;
+	std::weak_ptr<class AssetObject> *_objectBind = nullptr;
 
-	std::vector<HString>* _stringArrayBind = NULL;
+	std::vector<HString>* _stringArrayBind = nullptr;
 
 	int	_stringArrayBindIndex = 0;
 

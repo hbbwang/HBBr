@@ -4,7 +4,7 @@
 
 QString GetWidgetStyleSheetFromFile(QString objectName, QString path = "Config/Theme/ThemeMain.qss");
 
-bool DeleteAllFile(QString path, QList<QString>*allAssets = NULL);
+bool DeleteAllFile(QString path, QList<QString>*allAssets = nullptr);
 
 struct SFileSearch
 {

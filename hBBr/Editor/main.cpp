@@ -3,9 +3,9 @@
 #include <QMouseEvent>
 #include <qdebug.h>
 
-#include <Windows.h> //为了支持SetFocus(NULL);
+#include <Windows.h> //为了支持SetFocus(nullptr);
 
-QWidget* currentFocusWidget = NULL;
+QWidget* currentFocusWidget = nullptr;
 class MyEventFilter : public QObject
 {
 protected:
@@ -37,7 +37,7 @@ protected:
                 if (bChangeFocus)
                 {
                     //取消所有焦点先
-                    SetFocus(NULL);
+                    SetFocus(nullptr);
                     //再重新赋予QT焦点
                     currentFocusWidget->setFocus();
                 }

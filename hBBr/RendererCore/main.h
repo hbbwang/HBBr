@@ -9,12 +9,12 @@
 #pragma comment(lib, "Dbghelp.lib")
 #define TRACE_MAX_STACK_FRAMES 1024
 #define TRACE_MAX_FUNCTION_NAME_LENGTH 1024
-int printStackTrace(std::string* outStr = NULL)
+int printStackTrace(std::string* outStr = nullptr)
 {
     void* stack[TRACE_MAX_STACK_FRAMES];
     HANDLE process = GetCurrentProcess();
-    SymInitialize(process, NULL, TRUE);
-    WORD numberOfFrames = CaptureStackBackTrace(0, TRACE_MAX_STACK_FRAMES, stack, NULL);
+    SymInitialize(process, nullptr, TRUE);
+    WORD numberOfFrames = CaptureStackBackTrace(0, TRACE_MAX_STACK_FRAMES, stack, nullptr);
     char buf[sizeof(SYMBOL_INFO) + (TRACE_MAX_FUNCTION_NAME_LENGTH - 1) * sizeof(TCHAR)];
     SYMBOL_INFO* symbol = (SYMBOL_INFO*)buf;
     symbol->MaxNameLen = TRACE_MAX_FUNCTION_NAME_LENGTH;
@@ -25,7 +25,7 @@ int printStackTrace(std::string* outStr = NULL)
     for (int i = 2; i < numberOfFrames; i++)
     {
         DWORD64 address = (DWORD64)(stack[i]);
-        SymFromAddr(process, address, NULL, symbol);
+        SymFromAddr(process, address, nullptr, symbol);
         if (SymGetLineFromAddr64(process, address, &displacement, &line))
         {
             char* formattedString = nullptr;
@@ -53,7 +53,7 @@ LONG ApplicationCrashHandler(EXCEPTION_POINTERS* pException) {
     sprintf_s(strDateTime, 256, ".%d.%.2d.%.2d.%.2d.%.2d.%.2d.%.3d.dmp", syst.wYear, syst.wMonth, syst.wDay, syst.wHour, syst.wMinute, syst.wSecond, syst.wMilliseconds);
     // 获取文件完整路径
     CHAR szFilename[MAX_PATH];
-    GetModuleFileNameA(NULL, szFilename, MAX_PATH);
+    GetModuleFileNameA(nullptr, szFilename, MAX_PATH);
     // 输出文件名称
     std::string outfilename;
     outfilename += szFilename;

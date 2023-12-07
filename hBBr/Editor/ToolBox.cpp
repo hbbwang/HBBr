@@ -111,7 +111,7 @@ ToolBox::ToolBox(QString title, bool isExpanded, QWidget* parent)
 
 ToolBox::~ToolBox()
 {
-    m_widget = NULL;
+    m_widget = nullptr;
 }
 
 void ToolBox::addWidget(const QString& title, QWidget* widget, bool isExpanded)

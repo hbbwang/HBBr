@@ -266,7 +266,7 @@ void ColorWindow::SetHSV()
 void ColorWindow::SetHexadecimal()
 {
     float alpha = RGB.alpha();
-    RGB = QColor(lineEditHex->text().toUInt(NULL, 16));
+    RGB = QColor(lineEditHex->text().toUInt(nullptr, 16));
     RGB.setAlpha(alpha);
     slider->setValue(RGB.hue());
     QPoint _pos = QPoint(((float)RGB.saturation() / (float)255) * label->width(), ((float)(255 - RGB.value()) / (float)255) * label->height());
@@ -382,7 +382,7 @@ void ColorWindow::mouseReleaseEvent(QMouseEvent* ev)
         bPickColor = false;
         PickColor();
         QWidget::mouseReleaseEvent(ev);
-        ClipCursor(NULL);
+        ClipCursor(nullptr);
         QPoint p;
         p = ev->pos() - QPoint(labelPos->width() / 2, labelPos->height() / 2);
         labelPos->move(p);

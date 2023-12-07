@@ -93,7 +93,7 @@ public:
 			return _world.get();
 		}
 		else{
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -116,7 +116,7 @@ public:
 		return _bIsInGame;
 	}
 
-	HBBR_API void CreateWorld(HString worldNameOrAssetPath);
+	HBBR_API void LoadWorld(HString worldNameOrAssetPath);
 
 	HBBR_API void CreateEmptyWorld();
 
@@ -180,7 +180,7 @@ private:
 
 	std::vector<VkCommandBuffer> _cmdBuf;
 
-	SDL_Window* _windowHandle = NULL;
+	SDL_Window* _windowHandle = nullptr;
 
 	//Pass Uniform
 	PassUniformBuffer _passUniformBuffer;

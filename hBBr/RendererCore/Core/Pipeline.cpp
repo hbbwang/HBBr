@@ -46,7 +46,7 @@ PipelineObject* PipelineManager::CreatePipelineObject(VkGraphicsPipelineCreateIn
 		_graphicsPipelines.emplace(std::make_pair(pipelineIndex, std::move(newPSO)));
 		return result;
 	}
-	return NULL;
+	return nullptr;
 }
 
 PipelineObject* PipelineManager::GetGraphicsPipelineMap(PipelineIndex index)
@@ -56,7 +56,7 @@ PipelineObject* PipelineManager::GetGraphicsPipelineMap(PipelineIndex index)
 	{
 		return it->second.get();
 	}
-	return NULL;
+	return nullptr;
 }
 
 void PipelineManager::ClearPipelineObjects()
@@ -206,7 +206,7 @@ void PipelineManager::BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCac
 	createInfo.dynamicStates.emplace_back(VK_DYNAMIC_STATE_VIEWPORT);
 	createInfo.dynamicStates.emplace_back(VK_DYNAMIC_STATE_SCISSOR);
 	createInfo.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-	createInfo.dynamicStateInfo.pNext = NULL;
+	createInfo.dynamicStateInfo.pNext = nullptr;
 	createInfo.dynamicStateInfo.pDynamicStates = createInfo.dynamicStates.data();
 	createInfo.dynamicStateInfo.dynamicStateCount = (uint32_t)createInfo.dynamicStates.size();
 	//-----------------------------------------------------------------------------------Multisampling 多重采样,不使用

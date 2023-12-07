@@ -12,7 +12,7 @@
 #include <qfileinfo.h>
 #include "RendererCore/Core/VulkanRenderer.h"
 #include "RendererCore/Core/Asset/World.h"
-EditorMain* EditorMain::_self = NULL;
+EditorMain* EditorMain::_self = nullptr;
 
 EditorMain::EditorMain(QWidget *parent)
     : QMainWindow(parent)
@@ -62,10 +62,10 @@ EditorMain::EditorMain(QWidget *parent)
         VulkanApp::RecompileAllShader();
     });
     connect(ui.SaveWorld, &QAction::triggered, this, [this](bool bChecked) {
-
-        });
-    connect(ui.SaveWholeWorld, &QAction::triggered, this, [this](bool bChecked) {
-        VulkanApp::GetMainForm()->renderer->GetWorld()->SaveWholeWorld();
+        VulkanApp::GetMainForm()->renderer->GetWorld()->SaveWorld();
+     });
+    connect(ui.SaveAsWorld, &QAction::triggered, this, [this](bool bChecked) {
+        VulkanApp::GetMainForm()->renderer->GetWorld()->SaveWorld();
     });
 
     EditorMain::_self = this;

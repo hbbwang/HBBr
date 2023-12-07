@@ -84,7 +84,7 @@ public:
 	~VulkanManager();
 
 	HBBR_API HBBR_INLINE static void InitManager(bool bDebug) {
-		if (_vulkanManager == NULL)
+		if (_vulkanManager == nullptr)
 		{
 			_vulkanManager.reset(new VulkanManager(bDebug));
 		}
@@ -137,7 +137,7 @@ public:
 		std::vector<VkCommandBuffer>* cmdBuf,
 		std::vector<VkSemaphore>* acquireImageSemaphore ,
 		std::vector<VkSemaphore>* queueSubmitSemaphore,
-		std::vector<VkFence>* fences = NULL,
+		std::vector<VkFence>* fences = nullptr,
 		bool bIsFullScreen = false,
 		bool bVSync = true
 	);

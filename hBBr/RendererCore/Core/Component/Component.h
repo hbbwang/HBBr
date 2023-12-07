@@ -35,7 +35,7 @@ struct ComponentProperty
 {
 	HString name;
 	//指向参数的指针
-	void* value = NULL;
+	void* value = nullptr;
 	//分类
 	HString category;
 	//排序
@@ -80,7 +80,7 @@ public:
 		{
 			return (it._Ptr);
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	HBBR_API HBBR_INLINE HString GetComponentName() const {
@@ -166,9 +166,9 @@ protected:
 
 	HString _typeName = "Component";
 
-	class GameObject* _gameObject = NULL;
+	class GameObject* _gameObject = nullptr;
 	
-	class VulkanRenderer* _renderer = NULL;
+	class VulkanRenderer* _renderer = nullptr;
 
-	class World* _world = NULL;
+	class World* _world = nullptr;
 };

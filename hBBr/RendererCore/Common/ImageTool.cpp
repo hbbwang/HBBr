@@ -14,18 +14,18 @@
 
 ImageData* ImageTool::ReadTgaImage(const char* filename)
 {
-	ImageData* out = NULL;
+	ImageData* out = nullptr;
 	//open TGA file
-	FILE* file = NULL;
+	FILE* file = nullptr;
 #ifdef _WIN32
 	fopen_s(&file, filename, "rb");//读取，二进制模式
 #else
 	file = fopen(filename, "rb");//读取，二进制模式
 #endif
-	if (file == NULL )
+	if (file == nullptr )
 	{
 		ConsoleDebug::print_endl("open TGA image file failed.", "255,255,0");
-		return NULL;
+		return nullptr;
 	}
 
 	//读取文件头
@@ -68,7 +68,7 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 			delete out;
 		if (tgaData)
 			delete[] out;
-		return NULL;
+		return nullptr;
 	}
 #ifdef _WIN32
 	try {
@@ -87,7 +87,7 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 						delete out;
 					if (tgaData)
 						delete[] out;
-					return NULL;
+					return nullptr;
 				}
 			}
 			break;
@@ -102,7 +102,7 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 					delete out;
 				if (tgaData)
 					delete[] out;
-				return NULL;
+				return nullptr;
 			}
 		}
 		break;
@@ -139,7 +139,7 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 					delete out;
 				if (tgaData)
 					delete[] out;
-				return NULL;
+				return nullptr;
 			}
 			break;
 		default:
@@ -148,7 +148,7 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 				delete out;
 			if (tgaData)
 				delete[] out;
-			return NULL;
+			return nullptr;
 		}
 #ifdef _WIN32
 	}
@@ -164,13 +164,13 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 		+ "\n\timageSize:" + HString::FromInt(out->imageSize)
 		, "205,225,255");
 
-	if (file != NULL)
+	if (file != nullptr)
 		fclose(file);
 
-	if (tgaData != NULL)
+	if (tgaData != nullptr)
 	{
 		delete[] tgaData;
-		tgaData = NULL;
+		tgaData = nullptr;
 	}
 	HString cbPath = filename;
 	out->filePath = cbPath;
@@ -183,7 +183,7 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 
 ImageData* ImageTool::ReadDDSImage(const char* filename)
 {
-	ImageData* out = NULL;
+	ImageData* out = nullptr;
 	DDSLoader loader(filename);
 	out = loader.LoadDDSToImage();
 	return out;
@@ -194,7 +194,7 @@ bool ImageTool::SaveTgaImage(const char* filename, ImageData* tgaData)
 #ifdef _WIN32
 	try {
 #endif
-		if (tgaData == NULL)
+		if (tgaData == nullptr)
 		{
 			ConsoleDebug::print_endl("TGA data was null", "255,255,0");
 			return false;
@@ -204,12 +204,12 @@ bool ImageTool::SaveTgaImage(const char* filename, ImageData* tgaData)
 			ConsoleDebug::print_endl(HString("Save TGA image failed.The TGA data is empty!!") + filename, "255,255,0");
 			return false;
 		}
-		FILE* file = NULL;
+		FILE* file = nullptr;
 #ifdef _WIN32
 		if (fopen_s(&file, filename, "wb") != 0)//二进制+写
 #else
 		file = fopen(filename, "wb");
-		if (file == NULL)
+		if (file == nullptr)
 #endif
 		{
 			ConsoleDebug::print_endl(HString("open tga file failed: ") + filename, "255,255,0");
@@ -257,17 +257,17 @@ bool ImageTool::SaveTgaImage(const char* filename, uint16_t w, uint16_t h, uint1
 #ifdef _WIN32
 	try {
 #endif
-		if (imageData == NULL)
+		if (imageData == nullptr)
 		{
 			ConsoleDebug::print_endl("TGA data was null", "255,255,0");
 			return false;
 		}
-		FILE* file = NULL;
+		FILE* file = nullptr;
 #ifdef _WIN32
 		if (fopen_s(&file, filename, "wb") != 0)//二进制+写
 #else
 		file = fopen(filename, "wb");
-		if (file ==NULL)
+		if (file ==nullptr)
 #endif
 		{
 			ConsoleDebug::print_endl(HString("open tga file failed: ") + filename, "255,255,0");
@@ -343,7 +343,7 @@ ImageData* ImageTool::ReadPngImage(const char* filename)
 		HString errorStr = HString("Load png failed : ") + lodepng_error_text(error);
 		printf("%s", (errorStr + "\n").c_str());
 		ConsoleDebug::print_endl(HString("Load png failed.") + lodepng_error_text(error), "255,55,0");
-		return NULL;
+		return nullptr;
 	}
 	lodepng::State state;
 	if (ignore_checksums) {
@@ -357,7 +357,7 @@ ImageData* ImageTool::ReadPngImage(const char* filename)
 		HString errorStr = HString("Load png failed : ") + lodepng_error_text(error);
 		printf("%s", (errorStr+"\n").c_str());
 		ConsoleDebug::print_endl(HString("Load png failed.") + lodepng_error_text(error), "255,55,0");
-		return NULL;
+		return nullptr;
 	}
 
 	const LodePNGColorMode& color = state.info_png.color;
@@ -388,7 +388,7 @@ ImageData* ImageTool::ReadPngImage(const char* filename)
 	default:
 		delete out;
 		ConsoleDebug::print_endl("It is not support this png format.", "255,55,0");
-		return NULL;
+		return nullptr;
 		break;
 	}
 
@@ -420,7 +420,7 @@ ImageData* ImageTool::ReadHDRImage(const char* filename)
 	if (!fileName.GetSuffix().IsSame("hdr", false))
 	{
 		ConsoleDebug::print_endl("open hdr image file failed.It is not a hdr file.", "255,255,0");
-		return NULL;
+		return nullptr;
 	}
 	std::ifstream file(filename, std::ios::ate | std::ios::binary);
 	if (!file.is_open())
@@ -438,7 +438,7 @@ ImageData* ImageTool::ReadHDRImage(const char* filename)
 	if (buffer.size() < 11)
 	{
 		ConsoleDebug::print_endl("open hdr image file failed.It is not a hdr file or file corruption.", "255,255,0");
-		return NULL;
+		return nullptr;
 	}
 
 	const char* FileDataPtr = buffer.data();
@@ -448,7 +448,7 @@ ImageData* ImageTool::ReadHDRImage(const char* filename)
 	if (std::strcmp(Line, "#?RADIANCE") != 0 )
 	{
 		ConsoleDebug::print_endl("open hdr image file failed.It is not a hdr file or file corruption.", "255,255,0");
-		return NULL;
+		return nullptr;
 	}
 
 	ImageData* out = new ImageData;
@@ -460,7 +460,7 @@ ImageData* ImageTool::ReadHDRImage(const char* filename)
 		char* HeightStr = std::strstr(Line, "-Y ");
 		char* WidthStr = std::strstr(Line, "+X ");
 
-		if (HeightStr != NULL && WidthStr != NULL)
+		if (HeightStr != nullptr && WidthStr != nullptr)
 		{
 			// insert a /0 after the height value
 			*(WidthStr - 1) = 0;

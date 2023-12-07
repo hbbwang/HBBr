@@ -117,7 +117,7 @@ private:
 
 	glm::mat4 worldMatrix;
 	
-	class GameObject* _gamebject = NULL;
+	class GameObject* _gamebject = nullptr;
 
 	HBBR_API void FSetWorldLocation(glm::vec3 newWorldLocation, bool bAffectChildren = true);
 	HBBR_API void FSetWorldRotation(glm::vec3 newAngle, bool bAffectChildren = true);

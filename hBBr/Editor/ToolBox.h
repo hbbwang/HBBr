@@ -38,5 +38,5 @@ public:
     Ui::ToolBoxClass ui;
 private:
     QVBoxLayout* m_pContentVBoxLayout;
-    QWidget* m_widget = NULL;
+    QWidget* m_widget = nullptr;
 };

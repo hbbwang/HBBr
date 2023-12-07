@@ -210,7 +210,7 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 
 bool ModelData::BuildModelPrimitives(ModelData* data, std::vector<ModelPrimitive*>& prims)
 {
-	if (data != NULL)
+	if (data != nullptr)
 	{
 		prims.resize(data->faces.size());
 		for (int i = 0; i < data->faces.size(); i++)

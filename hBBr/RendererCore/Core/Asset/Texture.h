@@ -65,7 +65,7 @@ public:
 		{
 			return it->second;
 		}
-		return NULL;
+		return nullptr;
 	}
 private:
 	std::map<SceneTextureDesc, std::shared_ptr<Texture>> _sceneTexture;
@@ -177,8 +177,8 @@ public:
 #pragma region NVTT
 	HBBR_API static void CompressionImage2D(const char* imagePath, const char* outputDDS, bool bGenerateMips, nvtt::Format format, bool bGenerateNormalMap, bool bAutoFormat = false);
 	//HBBR_API static void CompressionImageCube(const char* imagePath, const char* outputDDS, bool bGenerateMips);
-	HBBR_API static void DecompressionImage2D(const char* ddsPath, const char* outputPath, nvtt::Surface* outData = NULL, int32_t newWidth = -1, int32_t newHeight = -1, int32_t newDepth = -1);
-	HBBR_API static void DecompressionImageCube(const char* ddsPath, const char* outputPath, nvtt::Surface* outData = NULL, int32_t newWidth = -1, int32_t newHeight = -1, int32_t newDepth = -1);
+	HBBR_API static void DecompressionImage2D(const char* ddsPath, const char* outputPath, nvtt::Surface* outData = nullptr, int32_t newWidth = -1, int32_t newHeight = -1, int32_t newDepth = -1);
+	HBBR_API static void DecompressionImageCube(const char* ddsPath, const char* outputPath, nvtt::Surface* outData = nullptr, int32_t newWidth = -1, int32_t newHeight = -1, int32_t newDepth = -1);
 	HBBR_API static void OutputImage(const char* outputPath, int w, int h, nvtt::Format format , void* outData);
 	HBBR_API static void GetImageDataFromCompressionData(const char* ddsPath, nvtt::Surface* outData);
 #pragma endregion NVTT
@@ -203,7 +203,7 @@ private:
 	VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 	//Image data
-	ImageData* _imageData = NULL;
+	ImageData* _imageData = nullptr;
 
 	//Upload object
 	VkBuffer _uploadBuffer = VK_NULL_HANDLE;

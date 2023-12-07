@@ -76,7 +76,7 @@ struct GUIPrimitive
 	std::vector<GUIDrawState> States;
 	PipelineIndex pipelineIndex;
 	std::vector<wchar_t> fontCharacter;
-	Texture* BaseTexture = NULL;
+	Texture* BaseTexture = nullptr;
 	VkRect2D viewport;
 	std::shared_ptr<class DescriptorSet> ub_descriptorSet;
 	std::shared_ptr<class DescriptorSet> tex_descriptorSet;

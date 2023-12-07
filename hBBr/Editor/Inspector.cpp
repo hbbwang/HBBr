@@ -15,7 +15,7 @@
 #include "Material.h"
 #include "Texture.h"
 
-Inspector* Inspector::_currentInspector = NULL;
+Inspector* Inspector::_currentInspector = nullptr;
 
 Inspector::Inspector(QWidget *parent)
 	: QWidget(parent)
@@ -300,7 +300,7 @@ void Inspector::closeEvent(QCloseEvent* event)
 {
 	QWidget::closeEvent(event);
 	if (_currentInspector == this)
-		_currentInspector = NULL;
+		_currentInspector = nullptr;
 }
 
 void Inspector::resizeEvent(QResizeEvent* event)

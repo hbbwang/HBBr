@@ -124,7 +124,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 		{
 			//Get Pipeline
  			auto pipelineObj = PipelineManager::GetGraphicsPipelineMap(m->graphicsIndex);
-			if (pipelineObj == NULL)
+			if (pipelineObj == nullptr)
 			{
 				HString vsShaderFullName = m->graphicsIndex.GetVSShaderFullName();
 				HString psShaderFullName = m->graphicsIndex.GetPSShaderFullName();
@@ -257,7 +257,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat->GetDescriptorSet(), 1, &matBufferOffset[matIndex]);
 		
 		VkDescriptorSet texSet = m->GetDescriptorSet();
-		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &texSet, 0, NULL);
+		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &texSet, 0, nullptr);
 		
 		auto prims = PrimitiveProxy::GetModelPrimitives(m, _renderer);
 		if (prims)

@@ -21,16 +21,16 @@ public:
     class RenderView* _mainRenderView;
 
     //场景大纲
-    class SceneOutline* _sceneOutline = NULL;
-    class QDockWidget* _sceneOutline_dock = NULL;
+    class SceneOutline* _sceneOutline = nullptr;
+    class QDockWidget* _sceneOutline_dock = nullptr;
 
     //内容管理器
-    class ContentBrowser* _contentBrowser = NULL;
-    class QDockWidget* _contentBrowser_dock = NULL;
+    class ContentBrowser* _contentBrowser = nullptr;
+    class QDockWidget* _contentBrowser_dock = nullptr;
 
     //检查器/参数编辑器
-    class Inspector* _inspector = NULL;
-    class QDockWidget* _inspector_dock = NULL;
+    class Inspector* _inspector = nullptr;
+    class QDockWidget* _inspector_dock = nullptr;
 
     virtual void closeEvent(QCloseEvent* event);
 

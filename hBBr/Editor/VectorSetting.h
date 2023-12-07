@@ -17,7 +17,7 @@ public:
 
 	QList<FloatSetting*> floatSetting ;
 	std::function<void(QList<FloatSetting*>)> BindValue = [](QList<FloatSetting*>) {};
-	float* _vec4_f[4] = {NULL,NULL,NULL,NULL};
+	float* _vec4_f[4] = { nullptr,nullptr,nullptr,nullptr };
 	float _old_vec4_f[4] = { 0,0,0,0 };
 	void SetValue(float x  ,float y  , float z  ,float w = 0);
 	void SetValue(glm::vec4 v4 = glm::vec4(0));

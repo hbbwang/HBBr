@@ -11,14 +11,14 @@ void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textC
     if (bMessageBox && VulkanManager::GetManager()->_bDebugEnable)
     {
 #if defined(_WIN32)
-		//MessageBoxA(NULL, msg, "message", MB_ICONERROR);
+		//MessageBoxA(nullptr, msg, "message", MB_ICONERROR);
 		#if NDEBUG
 		MessageBoxA(0, msgStr.c_str(), "HBBr msg", 0);
 		#else
 		DE_ASSERT(0, msgStr.c_str());
 		#endif
 #else
-	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", msg, NULL);
+	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", msg, nullptr);
 	//fflush(stdout);
 #endif
     }
@@ -34,7 +34,7 @@ void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textC
 
 void MsgBox(const char* title, const char* msg)
 {
-	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, title, msg, NULL);
+	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, title, msg, nullptr);
 	ConsoleDebug::print_endl(msg);
 }
 

@@ -111,7 +111,7 @@ VulkanManager::VulkanManager(bool bDebug)
 	if (!InitVulkan())
 	{
 		// Vulkan 不可用
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Vulkan is not support on this device.", NULL);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Vulkan is not support on this device.", nullptr);
 		printf("Vulkan is not support on this device.");
 		std::cout<< "Vulkan is not support on this device." <<std::endl;
 		throw std::runtime_error("Vulkan is not support on this device.");
@@ -224,9 +224,9 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 		ConsoleDebug::print_endl("");
 		ConsoleDebug::print_endl("\t---------Enumerate Instance Extension Properties------");
 		uint32_t ecount = 0;
-		vkEnumerateInstanceExtensionProperties(NULL, &ecount, VK_NULL_HANDLE);
+		vkEnumerateInstanceExtensionProperties(nullptr, &ecount, VK_NULL_HANDLE);
 		std::vector<VkExtensionProperties> availableExts(ecount);
-		vkEnumerateInstanceExtensionProperties(NULL, &ecount, availableExts.data());
+		vkEnumerateInstanceExtensionProperties(nullptr, &ecount, availableExts.data());
 		for (uint32_t i = 0; i < ecount; i++)
 		{
 			ConsoleDebug::print_endl(HString("\t") + availableExts[i].extensionName, "150,150,150");
@@ -276,7 +276,7 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 	//SDL
 	{
 		unsigned int eCount = 0 ;
-		if(SDL_Vulkan_GetInstanceExtensions(&eCount, NULL) != SDL_TRUE)
+		if(SDL_Vulkan_GetInstanceExtensions(&eCount, nullptr) != SDL_TRUE)
 		{
 			MessageOut(SDL_GetError(), false, true, "255,0,0");
 		}
@@ -450,9 +450,9 @@ void VulkanManager::InitDevice()
 		ConsoleDebug::print_endl("");
 		ConsoleDebug::print_endl("\t---------Enumerate Device Extension Properties------");
 		uint32_t ecount = 0;
-		vkEnumerateDeviceExtensionProperties(_gpuDevice, NULL, &ecount, VK_NULL_HANDLE);
+		vkEnumerateDeviceExtensionProperties(_gpuDevice, nullptr, &ecount, VK_NULL_HANDLE);
 		std::vector<VkExtensionProperties> availableExts(ecount);
-		vkEnumerateDeviceExtensionProperties(_gpuDevice, NULL, &ecount, availableExts.data());
+		vkEnumerateDeviceExtensionProperties(_gpuDevice, nullptr, &ecount, availableExts.data());
 		ConsoleDebug::print_endl("\tDevice Extension Properties---------");
 		bool bHasRenderPass2Ext = false;
 		for (uint32_t i = 0; i < ecount; i++)
@@ -789,7 +789,7 @@ void VulkanManager::CheckSurfaceFormat(VkSurfaceKHR surface, VkSurfaceFormatKHR&
 		const VkFormat requestSurfaceImageFormat[] = { VK_FORMAT_R8G8B8A8_UNORM , VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8_UNORM };
 		const VkColorSpaceKHR requestSurfaceColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
 		uint32_t avail_count;
-		vkGetPhysicalDeviceSurfaceFormatsKHR(_gpuDevice, surface, &avail_count, NULL);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(_gpuDevice, surface, &avail_count, nullptr);
 		std::vector<VkSurfaceFormatKHR> avail_format;
 		avail_format.resize((int)avail_count);
 		vkGetPhysicalDeviceSurfaceFormatsKHR(_gpuDevice, surface, &avail_count, avail_format.data());
@@ -1136,7 +1136,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	_swapchainBufferCount = numSwapchainImages;
 
 	//init semaphores & fences
-	if (acquireImageSemaphore != NULL)
+	if (acquireImageSemaphore != nullptr)
 	{
 		ConsoleDebug::print_endl("hBBr:Swapchain: Present Semaphore.");
 		for (int i = 0; i < (int)acquireImageSemaphore->size(); i++)
@@ -1149,7 +1149,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 			CreateVkSemaphore(acquireImageSemaphore->at(i));
 		}
 	}
-	if (queueSubmitSemaphore != NULL)
+	if (queueSubmitSemaphore != nullptr)
 	{
 		ConsoleDebug::print_endl("hBBr:Swapchain: Queue Submit Semaphore.");
 		for (int i = 0; i < (int)queueSubmitSemaphore->size(); i++)
@@ -1162,7 +1162,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 			CreateVkSemaphore(queueSubmitSemaphore->at(i));
 		}
 	}
-	if (fences != NULL)
+	if (fences != nullptr)
 	{
 		ConsoleDebug::print_endl("hBBr:Swapchain: image acquired fences.");
 		for (int i = 0; i < (int)fences->size(); i++)
@@ -1176,7 +1176,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		}
 	}
 
-	if (cmdBuf != NULL)
+	if (cmdBuf != nullptr)
 	{
 		ConsoleDebug::print_endl("hBBr:Swapchain: Allocate Main CommandBuffers.");
 		FreeCommandBuffers(_commandPool, *cmdBuf);
@@ -1364,7 +1364,7 @@ VkDeviceSize VulkanManager::CreateImageMemory(VkImage inImage, VkDeviceMemory& i
 {
 	if (inImage == VK_NULL_HANDLE)
 	{
-		MessageOut("Create vulkan image view failed.VkImage is NULL.", false, false);
+		MessageOut("Create vulkan image view failed.VkImage is nullptr.", false, false);
 		return 0 ;
 	}
 	VkMemoryRequirements mem_requirement;
@@ -1375,11 +1375,11 @@ VkDeviceSize VulkanManager::CreateImageMemory(VkImage inImage, VkDeviceMemory& i
 	memory_allocate_info.memoryTypeIndex = FindMemoryTypeIndex(&mem_requirement, memoryPropertyFlag);
 	auto err = vkAllocateMemory(_device, &memory_allocate_info, VK_NULL_HANDLE, &imageViewMemory);
 	if (VK_SUCCESS != err) {
-		MessageOut("Create vulkan image view failed.VkImage is NULL.", false, false);
+		MessageOut("Create vulkan image view failed.VkImage is nullptr.", false, false);
 	}
 	err = vkBindImageMemory(_device, inImage, imageViewMemory, 0);
 	if (VK_SUCCESS != err) {
-		MessageOut("Create vulkan image view failed.VkImage is NULL.", false, false);
+		MessageOut("Create vulkan image view failed.VkImage is nullptr.", false, false);
 	}
 	if (VK_SUCCESS == err) {
 		return mem_requirement.size;
@@ -1400,7 +1400,7 @@ void VulkanManager::Transition(
 {
 	VkImageMemoryBarrier imageBarrier = {};
 	imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	imageBarrier.pNext = NULL;
+	imageBarrier.pNext = nullptr;
 	imageBarrier.oldLayout = oldLayout;
 	imageBarrier.newLayout = newLayout;
 	imageBarrier.image = image;
@@ -1474,7 +1474,7 @@ void VulkanManager::Transition(
 	default:
 		break;
 	}
-	vkCmdPipelineBarrier(cmdBuffer, srcFlags, dstFlags, 0, 0, NULL, 0, NULL, 1,
+	vkCmdPipelineBarrier(cmdBuffer, srcFlags, dstFlags, 0, 0, nullptr, 0, nullptr, 1,
 		&imageBarrier);
 }
 
@@ -1544,7 +1544,7 @@ void VulkanManager::CreateCommandPool(VkCommandPool& commandPool)
 {
 	VkCommandPoolCreateInfo cmdPoolInfo = {};
 	cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	cmdPoolInfo.pNext = NULL;
+	cmdPoolInfo.pNext = nullptr;
 	cmdPoolInfo.queueFamilyIndex = _graphicsQueueFamilyIndex;
 	cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
@@ -1571,7 +1571,7 @@ void VulkanManager::AllocateCommandBuffer(VkCommandPool commandPool, VkCommandBu
 {
 	VkCommandBufferAllocateInfo cmdBufAllocInfo = {};
 	cmdBufAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	cmdBufAllocInfo.pNext = NULL;
+	cmdBufAllocInfo.pNext = nullptr;
 	cmdBufAllocInfo.commandPool = commandPool;
 	cmdBufAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	cmdBufAllocInfo.commandBufferCount = 1;
@@ -1674,7 +1674,7 @@ bool VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore& semaphore, ui
 	VkResult infoResult = VK_SUCCESS;
 	VkPresentInfoKHR presentInfo = {};
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	presentInfo.pNext = NULL;
+	presentInfo.pNext = nullptr;
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = &swapchain;
 	presentInfo.pImageIndices = &swapchainImageIndex;
@@ -1740,7 +1740,7 @@ void VulkanManager::CreateDescripotrPool(VkDescriptorPool& pool)
 	};
 	VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
 	descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	descriptorPoolCreateInfo.pNext = NULL;
+	descriptorPoolCreateInfo.pNext = nullptr;
 	descriptorPoolCreateInfo.maxSets = 10000;
 	descriptorPoolCreateInfo.poolSizeCount = (uint32_t)std::size(pool_sizes);
 	descriptorPoolCreateInfo.pPoolSizes = pool_sizes;
@@ -2047,7 +2047,7 @@ void VulkanManager::WaitForFences(std::vector<VkFence> fences, bool bReset, uint
 //void VulkanManager::WaitSemaphores(std::vector<VkSemaphore> semaphores, uint64_t timeOut)
 //{
 //	//Semaphore 标识,借助vkGetSemaphoreCounterValue 用来查询信号状态用的，返回的value是否等于我们这里指定的值，是就代表获取到信号。
-//	//不具备实际数据作用,如果没有查询的意义,随便给一个不同的值就行了,但不能为NULL(0)
+//	//不具备实际数据作用,如果没有查询的意义,随便给一个不同的值就行了,但不能为nullptr(0)
 //	std::vector<uint64_t> values(semaphores.size());
 //	for (int i = 0 ; i < (int)values.size();i++)
 //	{
@@ -2088,7 +2088,7 @@ void VulkanManager::CreateRenderPass(std::vector<VkAttachmentDescription>attachm
 	renderPassCreateInfo.pAttachments = attachmentDescs.data();
 	renderPassCreateInfo.dependencyCount = (uint32_t)subpassDependencys.size();
 	renderPassCreateInfo.pDependencies = subpassDependencys.data();
-	renderPassCreateInfo.pNext = NULL;
+	renderPassCreateInfo.pNext = nullptr;
 	renderPassCreateInfo.subpassCount = (uint32_t)subpassDescs.size();
 	renderPassCreateInfo.pSubpasses = subpassDescs.data();
 	vkCreateRenderPass(_device, &renderPassCreateInfo, VK_NULL_HANDLE, &renderPass);
@@ -2178,7 +2178,7 @@ void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, u
 {
 #ifdef IS_EDITOR
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.IniFilename = NULL;
+	io.IniFilename = nullptr;
 
 	if (!ImGui_ImplSDL3_InitForVulkan(handle))
 		MessageOut("Error,ImGui_ImplSDL3_InitForVulkan return false!", false,true,"255,0,0");
@@ -2296,9 +2296,9 @@ void VulkanManager::SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, V
 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	info.pWaitDstStageMask = &waitStageMask;
 	info.waitSemaphoreCount = 0;
-	info.pWaitSemaphores = NULL;
+	info.pWaitSemaphores = nullptr;
 	info.signalSemaphoreCount = 0;
-	info.pSignalSemaphores = NULL;
+	info.pSignalSemaphores = nullptr;
 	info.commandBufferCount = static_cast<uint32_t>(cmdBufs.size());
 	info.pCommandBuffers = cmdBufs.data();
 	VkResult result;

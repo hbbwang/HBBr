@@ -18,9 +18,9 @@ public:
 	//添加需要一同进行渲染主循环的PropertyClass
 	QList<class PropertyClass*> _property_needUpdate;
 
-	QVBoxLayout* _layoutMain = NULL;
+	QVBoxLayout* _layoutMain = nullptr;
 
-	QTimer* _updateTimer = NULL;
+	QTimer* _updateTimer = nullptr;
 
 	static Inspector* _currentInspector;
 
@@ -47,8 +47,8 @@ protected:
 private:
 
 	Ui::InspectorClass ui;
-	QScrollArea* scrollArea = NULL;
-	QWidget* scrollWidget = NULL;
+	QScrollArea* scrollArea = nullptr;
+	QWidget* scrollWidget = nullptr;
 
 private slots:
 	void TimerUpdate();

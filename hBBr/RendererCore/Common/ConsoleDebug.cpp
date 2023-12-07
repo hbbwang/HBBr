@@ -32,7 +32,7 @@ std::thread ConsoleDebug::socketAcceptThread;
 HString LogFileName = "";
 std::function<void(HString,  float, float, float, HString)> ConsoleDebug::printFuncAdd = [](HString, float, float, float, HString) {};
 
-FILE* log_file = NULL;
+FILE* log_file = nullptr;
 std::mutex g_num_mutex;
 
 HString rgb2hex(int r, int g, int b, bool with_head)
@@ -88,7 +88,7 @@ void WriteToLogFile(FILE* &log_file , HString log)
     {
         fwrite(log.c_str(), strlen(log.c_str()), 1, log_file);
         fclose(log_file);
-        log_file = NULL;
+        log_file = nullptr;
     }
 }
 
@@ -153,18 +153,18 @@ void ConsoleDebug::CreateConsole(HString consolePath ,bool bNoClient)
     if (!bNoClient)
     {
         //system(consolePath.c_str());
-        //HINSTANCE hi = ShellExecute(hwnd, L"open", consolePath.c_wstr(), NULL, NULL, SW_SHOWNORMAL);
+        //HINSTANCE hi = ShellExecute(hwnd, L"open", consolePath.c_wstr(), nullptr, nullptr, SW_SHOWNORMAL);
         ZeroMemory(&si, sizeof(si));
         si.cb = sizeof(si);
         ZeroMemory(&pi, sizeof(pi));
-        CreateProcess(NULL,   // No module name (use command line)
+        CreateProcess(nullptr,   // No module name (use command line)
             (TCHAR*)consolePath.c_wstr(),        // Command line
-            NULL,           // Process handle not inheritable
-            NULL,           // Thread handle not inheritable
+            nullptr,           // Process handle not inheritable
+            nullptr,           // Thread handle not inheritable
             FALSE,          // Set handle inheritance to FALSE
             0,              // No creation flags
-            NULL,           // Use parent's environment block
-            NULL,           // Use parent's starting directory 
+            nullptr,           // Use parent's environment block
+            nullptr,           // Use parent's starting directory 
             &si,            // Pointer to STARTUPINFO structure
             &pi);           // Pointer to PROCESS_INFORMATION structure
     }
@@ -202,7 +202,7 @@ void ConsoleDebug::CleanupConsole()
     if (log_file)
     {
         fclose(log_file);
-        log_file = NULL;
+        log_file = nullptr;
     }
 }
 
@@ -225,10 +225,10 @@ char* UnicodeToUtf8(const wchar_t* unicode)
 {
 
         int len;
-        len = WideCharToMultiByte(CP_UTF8, 0, unicode, -1, NULL, 0, NULL, NULL);
+        len = WideCharToMultiByte(CP_UTF8, 0, unicode, -1, nullptr, 0, nullptr, nullptr);
         char* szUtf8 = (char*)malloc(len + 1);
         memset(szUtf8, 0, len + 1);
-        WideCharToMultiByte(CP_UTF8, 0, unicode, -1, szUtf8, len, NULL, NULL);
+        WideCharToMultiByte(CP_UTF8, 0, unicode, -1, szUtf8, len, nullptr, nullptr);
     return szUtf8;
 }
 #endif

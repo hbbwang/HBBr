@@ -335,14 +335,14 @@ struct KeyCallBack
 	KeyCode key;
 	Action  action;
 	KeyMod  mod;
-    VulkanForm* focusWindowHandle = NULL;
+    VulkanForm* focusWindowHandle = nullptr;
 };
 
 struct MouseCallBack
 {
 	MouseButton button;
 	Action  action;
-	VulkanForm* focusWindowHandle = NULL;
+	VulkanForm* focusWindowHandle = nullptr;
 };
 
 class HInput
@@ -358,64 +358,64 @@ class HInput
 public:
 	//Keyboard	注册当前帧反馈按键
 
-	static inline bool GetKey(KeyCode key, class VulkanRenderer* renderer = NULL) {
+	static inline bool GetKey(KeyCode key, class VulkanRenderer* renderer = nullptr) {
         if (!renderer)
         {
             renderer = VulkanApp::_mainForm->renderer;
         }
 		if (!renderer)
 			return false;
-		return FindRepeatKey(key, renderer) != NULL;
+		return FindRepeatKey(key, renderer) != nullptr;
 	}
 
-	static inline bool GetKeyDown(KeyCode key, class VulkanRenderer* renderer = NULL) {
+	static inline bool GetKeyDown(KeyCode key, class VulkanRenderer* renderer = nullptr) {
         if (!renderer)
         {
             renderer = VulkanApp::_mainForm->renderer;
         }
         if (!renderer)
             return false;
-		return FindDefaultKey(key, Action::PRESS, renderer) != NULL;
+		return FindDefaultKey(key, Action::PRESS, renderer) != nullptr;
 	}
 
-	static inline bool GetKeyUp(KeyCode key, class VulkanRenderer* renderer = NULL) {
+	static inline bool GetKeyUp(KeyCode key, class VulkanRenderer* renderer = nullptr) {
         if (!renderer)
         {
             renderer = VulkanApp::_mainForm->renderer;
         }
         if (!renderer)
             return false;
-		return FindDefaultKey(key, Action::RELEASE, renderer) != NULL;
+		return FindDefaultKey(key, Action::RELEASE, renderer) != nullptr;
 	}
 
-	static inline bool GetMouse(MouseButton button, class VulkanRenderer* renderer = NULL) {
+	static inline bool GetMouse(MouseButton button, class VulkanRenderer* renderer = nullptr) {
         if (!renderer)
         {
             renderer = VulkanApp::_mainForm->renderer;
         }
         if (!renderer)
             return false;
-		return FindRepeatMouse(button, renderer) != NULL;
+		return FindRepeatMouse(button, renderer) != nullptr;
 	}
 
-	static inline bool GetMouseDown(MouseButton button, class VulkanRenderer* renderer = NULL) {
+	static inline bool GetMouseDown(MouseButton button, class VulkanRenderer* renderer = nullptr) {
         if (!renderer)
         {
             renderer = VulkanApp::_mainForm->renderer;
         }
         if (!renderer)
             return false;
-		return FindDefaultMouse(button, Action::PRESS, renderer) != NULL;
+		return FindDefaultMouse(button, Action::PRESS, renderer) != nullptr;
 	}
 
-	static inline bool GetMouseUp(MouseButton button, class VulkanRenderer* renderer = NULL) {
+	static inline bool GetMouseUp(MouseButton button, class VulkanRenderer* renderer = nullptr) {
         if (!renderer)
         {
             renderer = VulkanApp::_mainForm->renderer;
         }
         if (!renderer)
             return false;
-		return FindDefaultMouse(button, Action::RELEASE, renderer) != NULL;
+		return FindDefaultMouse(button, Action::RELEASE, renderer) != nullptr;
 	}
 
     static inline void SetCursorPos(glm::vec2 pos)
@@ -471,7 +471,7 @@ private:
 		if (it != _keyRegisterDefault.end())
 			return &(*it);
 		else
-			return NULL;
+			return nullptr;
 	}
 
 	static inline KeyCallBack* FindRepeatKey(KeyCode key, class VulkanRenderer* renderer)
@@ -482,7 +482,7 @@ private:
 		if (it != _keyRegisterRepeat.end())
 			return &(*it);
 		else
-			return NULL;
+			return nullptr;
 	}
 
 	//
@@ -494,7 +494,7 @@ private:
 		if (it != _mouseRegisterDefault.end())
 			return &(*it);
 		else
-			return NULL;
+			return nullptr;
 	}
 
 	static inline MouseCallBack* FindRepeatMouse(MouseButton mouse, class VulkanRenderer* renderer)
@@ -507,7 +507,7 @@ private:
             return &(*it);
         }
 		else
-			return NULL;
+			return nullptr;
 	}
 
     //清空当前帧的输入缓存,其他时候不要主动调用该函数!

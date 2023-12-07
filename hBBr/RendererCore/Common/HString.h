@@ -48,10 +48,10 @@
 class  HString
 {
 private:
-	char* m_char = NULL;
-	wchar_t* m_wchar = NULL;
-	char* _str = NULL;
-	wchar_t* _wstr = NULL;
+	char* m_char = nullptr;
+	wchar_t* m_wchar = nullptr;
+	char* _str = nullptr;
+	wchar_t* _wstr = nullptr;
 	size_t length = 0;
 public:
 	/* 
@@ -61,10 +61,10 @@ public:
 	inline void clear()
 	{
 		ReleaseCache();
-		if (_str != NULL)
+		if (_str != nullptr)
 		{
 			delete[] _str;
-			_str = NULL;
+			_str = nullptr;
 		}
 		length = 0;
 	}
@@ -166,14 +166,14 @@ public:
 
 	HString& operator+=(const HString& obj)
 	{
-		if (obj._str == nullptr || obj._str == NULL)
+		if (obj._str == nullptr || obj._str == nullptr)
 			return *this;
 		char* temp = new char[length + 1];
 		strcpy_s(temp, length + 1, _str);//先把字符串复制到temp
-		if (_str != NULL)
+		if (_str != nullptr)
 		{
 			delete[] _str;//清空
-			_str = NULL;
+			_str = nullptr;
 		}
 		//申请新的大小
 		length = length + obj.length;
@@ -184,14 +184,14 @@ public:
 		strcat_s(_str, length + 1, obj._str);
 		//释放temp
 		delete[] temp;
-		temp = NULL;
+		temp = nullptr;
 		length = strlen(_str);
 		return *this;
 	}
 
 	friend HString operator+(const HString& obj, const HString& obj1)
 	{
-		if (obj1._str == nullptr || obj1._str == NULL)
+		if (obj1._str == nullptr || obj1._str == nullptr)
 			return obj._str;
 		size_t len = obj.length + obj1.length;
 		char* temp = new char[len + 1];//新建字符数组
@@ -200,7 +200,7 @@ public:
 		HString result(temp);//赋值到新的变量
 		//释放temp
 		delete[] temp;
-		temp = NULL;
+		temp = nullptr;
 		return result;
 	}
 
@@ -322,12 +322,12 @@ public:
 			index += 1;
 		}
 		temp[length] = '\0';//最后一个字符填充空字符
-		if (_str != NULL)
+		if (_str != nullptr)
 			delete[] _str;//释放字符串
 		_str = new char[length + 1];
 		strcpy_s(_str, strlen(temp) + 1, temp);
 		delete[] temp;
-		temp = NULL;
+		temp = nullptr;
 		length = strlen(_str);
 #endif
 	}
@@ -354,7 +354,7 @@ public:
 		this->assign(result);
 #else
 		size_t len = strlen(removeStr);//获取字符串的长度
-		char* temp = NULL;
+		char* temp = nullptr;
 		temp = new char[len + 1];//加上最后代表结束的\0字符
 		temp[len] = '\0';
 		//resetRemove:
@@ -381,7 +381,7 @@ public:
 					index++;
 				}
 				temp_str[length] = '\0';//最后一个字符填充空字符
-				if (_str != NULL)
+				if (_str != nullptr)
 					delete[] _str;//释放字符串
 				_str = new char[length + 1];
 				strcpy_s(_str, strlen(temp_str) + 1, temp_str);
@@ -395,7 +395,7 @@ public:
 			}
 		}
 		delete[] temp;
-		temp = NULL;
+		temp = nullptr;
 #endif
 	}
 
@@ -459,7 +459,7 @@ public:
 		this->assign(result);
 		//释放temp
 		delete[] temp;
-		temp = NULL;
+		temp = nullptr;
 	}
 
 	//判断字符是否相同，第二个参数作用 是否区分大小
@@ -495,7 +495,7 @@ public:
 
 	inline std::vector<HString> Split(const char* pattern)
 	{
-		if(strstr(this->_str , pattern) == NULL)
+		if(strstr(this->_str , pattern) == nullptr)
 		{
 			return{ this->_str };
 		}
@@ -508,12 +508,12 @@ public:
 		char* strc = new char[charLen + 1];
 		strcpy_s(strc, charLen + 1, this->_str);
 		strc[charLen] = '\0';
-		char* temp = NULL;
+		char* temp = nullptr;
 		char* tmpStr = strtok_s(strc, pattern, &temp);
-		while (tmpStr != NULL)
+		while (tmpStr != nullptr)
 		{
 			resultVec.push_back(tmpStr);
-			tmpStr = strtok_s(NULL, pattern, &temp);
+			tmpStr = strtok_s(nullptr, pattern, &temp);
 		}
 
 		delete[] strc;
@@ -860,7 +860,7 @@ public:
 	wchar_t* ps2ws(const char* s)
 	{
 		ReleaseCache();
-		size_t len = MultiByteToWideChar(CP_ACP, 0, s, (int)strlen(s), NULL, 0);
+		size_t len = MultiByteToWideChar(CP_ACP, 0, s, (int)strlen(s), nullptr, 0);
 		m_wchar = new wchar_t[len + 1];
 		MultiByteToWideChar(CP_ACP, 0, s, (int)strlen(s), m_wchar, (int)len);
 		m_wchar[len] = '\0';
@@ -871,9 +871,9 @@ public:
 	char* pws2s(const wchar_t* ws)
 	{
 		ReleaseCache();
-		size_t len = WideCharToMultiByte(CP_ACP, 0, ws, (int)wcslen(ws), NULL, 0, NULL, NULL);
+		size_t len = WideCharToMultiByte(CP_ACP, 0, ws, (int)wcslen(ws), nullptr, 0, nullptr, nullptr);
 		m_char = new char[len + 1];
-		WideCharToMultiByte(CP_ACP, 0, ws, (int)wcslen(ws), m_char, (int)len, NULL, NULL);
+		WideCharToMultiByte(CP_ACP, 0, ws, (int)wcslen(ws), m_char, (int)len, nullptr, nullptr);
 		m_char[len] = '\0';
 		return m_char;
 	}
@@ -922,15 +922,15 @@ private:
 	//Cache
 	void ReleaseCache()
 	{
-		if (m_char != NULL)
+		if (m_char != nullptr)
 		{
 			delete[] m_char;
-			m_char = NULL;
+			m_char = nullptr;
 		}
-		if (m_wchar != NULL)
+		if (m_wchar != nullptr)
 		{
 			delete[] m_wchar;
-			m_wchar = NULL;
+			m_wchar = nullptr;
 		}
 	}
 };

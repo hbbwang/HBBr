@@ -59,10 +59,10 @@ Texture::~Texture()
 	}
 	VulkanManager::GetManager()->DestroyImageView(_imageView);
 	VulkanManager::GetManager()->DestroyImage(_image);
-	if (_imageData!=NULL)
+	if (_imageData!=nullptr)
 	{
 		delete _imageData;
-		_imageData = NULL;
+		_imageData = nullptr;
 	}
 }
 
@@ -304,7 +304,7 @@ void Texture::GlobalInitialize()
 		fontTexturePath = FileSystem::GetRelativePath(fontTexturePath.c_str());
 		fontTexturePath = FileSystem::GetProgramPath() + fontTexturePath;
 		FileSystem::CorrectionPath(fontTexturePath);
-		ImageData* imageData = NULL;
+		ImageData* imageData = nullptr;
 		if (fontTexturePath.GetSuffix().IsSame("png", false))
 		{
 			imageData = ImageTool::ReadPngImage(fontTexturePath.c_str());
@@ -343,7 +343,7 @@ void Texture::GlobalInitialize()
 		//auto num = root.attribute(L"num").as_ullong();
 		float tw = (float)root.attribute(L"width").as_ullong();
 		float th = (float)root.attribute(L"height").as_ullong();
-		for (auto i = root.first_child(); i != NULL; i = i.next_sibling())
+		for (auto i = root.first_child(); i ; i = i.next_sibling())
 		{
 			FontTextureInfo info;
 			info.posX = (float)i.attribute(L"x").as_uint();
@@ -434,7 +434,7 @@ bool Texture::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 				_uploadBuffer,
 				_uploadBufferMemory);
-			void* data = NULL;
+			void* data = nullptr;
 			vkMapMemory(manager->GetDevice(), _uploadBufferMemory, 0, imageSize, 0, &data);
 			memcpy(data, _imageData->imageData.data(), (size_t)imageSize);
 			vkUnmapMemory(manager->GetDevice(), _uploadBufferMemory);
@@ -833,7 +833,7 @@ void Texture::DecompressionImage2D(const char* ddsPath, const char* outputPath, 
 	nvtt::Surface surface = images.GetSurface(0, 0);
 	if (needResize)
 		surface.resize(width, height, depth, ResizeFilter::ResizeFilter_Box);
-	if (outData != NULL)
+	if (outData != nullptr)
 	{
 		*outData = surface;
 	}
@@ -847,7 +847,7 @@ void Texture::DecompressionImageCube(const char* ddsPath, const char* outputPath
 	CubeSurface cube;
 	cube.load(ddsPath, 0);
 	bool needResize = false;
-	if (outData != NULL)
+	if (outData != nullptr)
 		*outData = cube.unfold(CubeLayout_VerticalCross);
 	else
 		return;
@@ -894,7 +894,7 @@ void Texture::GetImageDataFromCompressionData(const char* ddsPath, nvtt::Surface
 	using namespace nvtt;
 	SurfaceSet images;
 	images.loadDDS(ddsPath);
-	if (outData != NULL)
+	if (outData != nullptr)
 	{
 		*outData = images.GetSurface(0, 0);
 	}

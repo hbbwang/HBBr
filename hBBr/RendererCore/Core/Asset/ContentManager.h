@@ -76,7 +76,7 @@ public:
 template<class T>
 class AssetInfo : public AssetInfoBase
 {
-	std::shared_ptr<T> data = NULL;
+	std::shared_ptr<T> data = nullptr;
 public:
 	AssetInfo():AssetInfoBase(){}
 	virtual ~AssetInfo() { ReleaseData(); }
@@ -96,7 +96,7 @@ public:
 	}
 	inline void ReleaseData() override{
 		data.reset();
-		data = NULL;
+		data = nullptr;
 		bAssetLoad = false;
 	}
 	inline void SetData(std::shared_ptr<T> newData){

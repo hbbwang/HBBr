@@ -14,15 +14,15 @@ class GameObject
 	friend class Inspector;
 public:
 
-	GameObject(HString objectName = "NewGameObject", class Level* level = NULL, bool SceneEditorHide = false);
-	GameObject(class Level* level = NULL, bool SceneEditorHide = false);
+	GameObject(HString objectName = "NewGameObject", class Level* level = nullptr, bool SceneEditorHide = false);
+	GameObject(class Level* level = nullptr, bool SceneEditorHide = false);
 	~GameObject();
 
-	void ObjectInit(HString objectName = "NewGameObject", class Level* level = NULL, bool SceneEditorHide = false);
+	void ObjectInit(HString objectName = "NewGameObject", class Level* level = nullptr, bool SceneEditorHide = false);
 
-	HBBR_API static GameObject* CreateGameObject(HString objectName = "NewGameObject", class Level* level = NULL);
+	HBBR_API static GameObject* CreateGameObject(HString objectName = "NewGameObject", class Level* level = nullptr);
 
-	HBBR_API static GameObject* CreateModelGameObject(HString virtualPath, class Level* level = NULL);
+	HBBR_API static GameObject* CreateModelGameObject(HString virtualPath, class Level* level = nullptr);
 
 	HBBR_API HBBR_INLINE void Destroy() {
 		SetActive(false);
@@ -76,7 +76,7 @@ public:
 	HBBR_API void SetParent(GameObject* newParent);
 
 	HBBR_API static bool IsValid(std::weak_ptr<GameObject> obj){
-		return !obj.expired() && !obj.lock()->_bWantDestroy && obj.lock()->_transform != NULL;
+		return !obj.expired() && !obj.lock()->_bWantDestroy && obj.lock()->_transform != nullptr;
 	}
 
 	HBBR_INLINE static std::map<HString, std::function<class Component* (class GameObject*)>> GetCompSpawnMap()	{
@@ -100,11 +100,11 @@ public:
 			_comps.push_back(newComp);
 			return newComp;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 #if IS_EDITOR
-	void* _editorObject = NULL;
+	void* _editorObject = nullptr;
 	bool _bEditorNeedUpdate = false;
 	bool _sceneEditorHide = false;
 	bool _IsEditorObject = false;
@@ -120,9 +120,9 @@ private:
 	/* Auto run destroy execute.Do not call this function initiatively. */
 	bool ExecuteDestroy();
 
-	class World* _world = NULL;
+	class World* _world = nullptr;
 
-	class Level* _level = NULL;
+	class Level* _level = nullptr;
 
 	bool _bActive = true;
 
@@ -134,7 +134,7 @@ private:
 
 	HString _name = "None";
 
-	GameObject* _parent = NULL;
+	GameObject* _parent = nullptr;
 
 	std::vector<GameObject*> _children;
 

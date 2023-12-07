@@ -15,6 +15,6 @@ public:
 	virtual void Update() {
 	}
 
-	void* TempObject = NULL;
+	void* TempObject = nullptr;
 
 };

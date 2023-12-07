@@ -70,7 +70,7 @@ void ArraySetting::valueChange(int num)
 
 void ArraySetting::AddNewVaule()
 {
-	VectorSetting* newValue=NULL;
+	VectorSetting* newValue=nullptr;
 	switch (typeID)
 	{
 	case 0 :

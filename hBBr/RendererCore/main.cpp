@@ -28,8 +28,8 @@
 //#endif
 
 std::vector<VulkanForm*> VulkanApp::_forms;
-VulkanForm* VulkanApp::_mainForm = NULL;
-VulkanForm* VulkanApp::_focusForm = NULL;
+VulkanForm* VulkanApp::_mainForm = nullptr;
+VulkanForm* VulkanApp::_focusForm = nullptr;
 std::vector<FormDropFun> VulkanApp::_dropFuns;
 bool VulkanApp::_bFocusQuit = false;
 bool VulkanApp::_bRecompilerShaders = false;
@@ -56,7 +56,7 @@ void CloseCallBack(SDL_Window* window)
 		if ((*it)->renderer)
 		{
 			(*it)->renderer->Release();
-			(*it)->renderer = NULL;
+			(*it)->renderer = nullptr;
 		}
 	}
 }
@@ -68,7 +68,7 @@ void FocusCallBack(VulkanForm* form, int focused)
 		if (focused == 1)
 			VulkanApp::SetFocusForm(form);
 		else
-			VulkanApp::SetFocusForm(NULL);
+			VulkanApp::SetFocusForm(nullptr);
 	}
 }
 
@@ -128,7 +128,7 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 		MessageOut("Init sdl3 failed.", true, true, "255,0,0");
 	}
 
-	if (SDL_Vulkan_LoadLibrary(NULL) == -1)
+	if (SDL_Vulkan_LoadLibrary(nullptr) == -1)
 	{
 		MessageOut(SDL_GetError(), true, true, "255,0,0");
 	}
@@ -184,7 +184,7 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	{
 		return win;
 	}
-	return NULL;
+	return nullptr;
 }
 
 void VulkanApp::DeInitVulkanManager()
@@ -196,14 +196,14 @@ void VulkanApp::DeInitVulkanManager()
 			if (_forms[i]->renderer)
 			{
 				_forms[i]->renderer->Release();
-				_forms[i]->renderer = NULL;
+				_forms[i]->renderer = nullptr;
 			}
 			if (_forms[i]->window)
 			{
 				SDL_DestroyWindow(_forms[i]->window);
 			}
 			delete _forms[i];
-			_forms[i] = NULL;
+			_forms[i] = nullptr;
 		}
 		_forms.clear();
 	}
@@ -223,7 +223,7 @@ bool VulkanApp::UpdateForm()
 	bool bStopRender = false; 
 	while (SDL_PollEvent(&event))
 	{
-		SDL_Window* win = NULL;
+		SDL_Window* win = nullptr;
 
 #ifdef IS_EDITOR
 		ImGui_ImplSDL3_ProcessEvent(&event);
@@ -266,12 +266,12 @@ bool VulkanApp::UpdateForm()
 		auto winFormIt = std::find_if(_forms.begin(), _forms.end(), [win](VulkanForm*& form) {
 			return form->window == win;
 			});
-		VulkanForm* winForm = NULL;
+		VulkanForm* winForm = nullptr;
 		if (winFormIt != _forms.end())
 		{
 			winForm = *winFormIt;
 		}
-		if (winForm == NULL)
+		if (winForm == nullptr)
 		{
 			winForm = VulkanApp::GetFocusForm();
 			if (winForm)
@@ -370,7 +370,7 @@ bool VulkanApp::UpdateForm()
 		}
 		case SDL_EVENT_FINGER_DOWN:
 		{
-			//SDL_ShowSimpleMessageBox(0, "", "(test)手指按下", NULL);
+			//SDL_ShowSimpleMessageBox(0, "", "(test)手指按下", nullptr);
 			break;
 		}
 		}
@@ -408,7 +408,7 @@ void VulkanApp::UpdateRender()
 	for (auto w : _forms)
 	{
 		Texture::GlobalUpdate();
-		if(w->renderer != NULL && !w->bMinimized)
+		if(w->renderer != nullptr && !w->bMinimized)
 			w->renderer->Render();
 	}
 	HInput::ClearInput();
@@ -417,8 +417,8 @@ void VulkanApp::UpdateRender()
 
 VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* title, bool bCreateRenderer, void* parent)
 {
-	SDL_Window* window = NULL;
-	if (parent != NULL)
+	SDL_Window* window = nullptr;
+	if (parent != nullptr)
 	{
 		window = SDL_CreateWindowFrom(parent);
 	}
@@ -453,7 +453,7 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 
 void VulkanApp::CreateRenderer(VulkanForm* form)
 {
-	if (form != NULL)
+	if (form != nullptr)
 	{
 		form->renderer = new VulkanRenderer(form->window, form->name.c_str());
 		//Try Refresh focus
@@ -464,7 +464,7 @@ void VulkanApp::CreateRenderer(VulkanForm* form)
 
 bool VulkanApp::IsWindowFocus(SDL_Window* windowHandle)
 {
-	if (GetFocusForm() != NULL)
+	if (GetFocusForm() != nullptr)
 	{
 		return  GetFocusForm()->window == windowHandle;
 	}
@@ -473,7 +473,7 @@ bool VulkanApp::IsWindowFocus(SDL_Window* windowHandle)
 
 void VulkanApp::RemoveWindow(VulkanForm* form)
 {
-	if (form != NULL && form != nullptr)
+	if (form != nullptr && form != nullptr)
 	{
 		auto window = form->window;
 		auto it = std::remove_if(_forms.begin(), _forms.end(), [window](VulkanForm* &glfw) {
@@ -513,7 +513,7 @@ void* VulkanApp::GetWindowHandle(VulkanForm* form)
 		return (void*)wmInfo.info.win.window;
 		#endif
 	}
-	return NULL;
+	return nullptr;
 }
 
 void VulkanApp::SetFocusForm(VulkanForm* form)
@@ -550,7 +550,7 @@ void VulkanApp::RecompileAllShader()
 
 int main(int argc, char* argv[])
 {
-    //SDL_ShowSimpleMessageBox(0,"","",NULL);
+    //SDL_ShowSimpleMessageBox(0,"","",nullptr);
     //ConsoleDebug::CreateConsole("");
 	//Enable custom loop
 	VulkanApp::InitVulkanManager(true, true);

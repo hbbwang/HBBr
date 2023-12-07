@@ -145,10 +145,10 @@ void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<ui
 	subpassDesc.pInputAttachments = _input_ref.data();
 	subpassDesc.colorAttachmentCount = (uint32_t)_color_ref.size();
 	subpassDesc.pColorAttachments = _color_ref.data();
-	subpassDesc.pResolveAttachments = NULL;
-	subpassDesc.pDepthStencilAttachment = depthStencilIndex >= 0 ? &_depthStencil_ref : NULL;
+	subpassDesc.pResolveAttachments = nullptr;
+	subpassDesc.pDepthStencilAttachment = depthStencilIndex >= 0 ? &_depthStencil_ref : nullptr;
 	subpassDesc.preserveAttachmentCount = 0;
-	subpassDesc.pPreserveAttachments = NULL;
+	subpassDesc.pPreserveAttachments = nullptr;
 	//
 	_subpassDescs.push_back(subpassDesc);
 

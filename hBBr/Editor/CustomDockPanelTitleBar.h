@@ -11,7 +11,7 @@ public:
 	CustomDockPanelTitleBar(QWidget *parent);
 	~CustomDockPanelTitleBar();
 
-	QWidget* _parent = NULL;
+	QWidget* _parent = nullptr;
 
 protected:
 	virtual void paintEvent(QPaintEvent* event);

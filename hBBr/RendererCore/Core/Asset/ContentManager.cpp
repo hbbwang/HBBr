@@ -87,7 +87,7 @@ void ContentManager::Release()
 
 std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)
 {
-	std::shared_ptr<AssetInfoBase> result = NULL;
+	std::shared_ptr<AssetInfoBase> result = nullptr;
 	switch (type)//新增资产类型需要在这里添加实际对象,未来打包资产的时候会根据类型进行删留
 	{
 		case AssetType::Model:		result.reset(new AssetInfo<ModelData>());
@@ -218,7 +218,7 @@ void ContentManager::ReloadAssetInfo(AssetType type , pugi::xml_node & i)
 	//查看下是否已经加载过AssetInfo了,已经加载过就不需要创建了
 	auto checkExist = GetAssetInfo(guid, type);
 	bool bExist = !checkExist.expired();
-	std::shared_ptr<AssetInfoBase> info = NULL;
+	std::shared_ptr<AssetInfoBase> info = nullptr;
 	if (checkExist.expired())
 	{
 		info = CreateInfo(type);
@@ -290,7 +290,7 @@ std::weak_ptr<AssetInfoBase> ContentManager::ImportAssetInfo(AssetType type, HSt
 	else
 	{
 		//find exist
-		for (auto n = TypeNode.first_child(); n != NULL; n = n.next_sibling())
+		for (auto n = TypeNode.first_child(); n ; n = n.next_sibling())
 		{
 			HString n_name = n.attribute(L"Name").as_string();
 			HString n_path = n.attribute(L"Path").as_string();

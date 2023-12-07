@@ -80,7 +80,7 @@ QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
 		}
 		else
 		{
-			QMessageBox::information(NULL, "Error", "Load [" + objectName + "] style sheet file failed");
+			QMessageBox::information(nullptr, "Error", "Load [" + objectName + "] style sheet file failed");
 		}
 	}
 	//QMessageBox::information(this, "Check", result);
@@ -265,7 +265,7 @@ QImage GetImageFromTGA(QString path)
     }
 
     auto tgaImage = ImageTool::ReadTgaImage(info.filePath().toStdString().c_str());
-    if (tgaImage == NULL)
+    if (tgaImage == nullptr)
     {
         return result;
     }
@@ -302,7 +302,7 @@ bool GetPreviewImage(QString resourceFilePath, QPixmap& pixmap)
  //       if (//info.suffix().compare("dds", Qt::CaseInsensitive) == 0||
  //           info.suffix().compare("tex", Qt::CaseInsensitive) == 0)
  //       {
- //           FileStreamClass::DecompressionImage2D(resourceFilePath.toStdString().c_str(), previewImagePath.toStdString().c_str(), NULL, 64, 64);
+ //           FileStreamClass::DecompressionImage2D(resourceFilePath.toStdString().c_str(), previewImagePath.toStdString().c_str(), nullptr, 64, 64);
  //       }
  //       //else if (info.suffix().compare("mat", Qt::CaseInsensitive))
  //       //{

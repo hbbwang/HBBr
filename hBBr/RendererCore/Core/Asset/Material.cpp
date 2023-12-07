@@ -100,7 +100,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 			int alignmentFloat4 = 0; // float4 对齐
 			uint32_t arrayIndex = 0;
 			int paramIndex = 0;
-			for (auto i = parameters.first_child(); i != NULL; i = i.next_sibling())
+			for (auto i = parameters.first_child(); i ; i = i.next_sibling())
 			{
 				int type;
 				XMLStream::LoadXMLAttributeInt(i, L"type", type);
@@ -191,7 +191,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 				}
 			}
 			//赋值
-			for (auto i = textures.first_child(); i != NULL; i = i.next_sibling())
+			for (auto i = textures.first_child(); i ; i = i.next_sibling())
 			{
 				int type;
 				XMLStream::LoadXMLAttributeInt(i, L"type", type);
@@ -260,7 +260,7 @@ Material* Material::CreateMaterial(HString newMatFilePath)
 {
 	if (!FileSystem::IsDir(newMatFilePath.c_str()))
 	{
-		return NULL;
+		return nullptr;
 	}
 	//复制引擎自带材质实例
 	HGUID guid("61A147FF-32BD-48EC-B523-57BC75EB16BA");
@@ -269,5 +269,5 @@ Material* Material::CreateMaterial(HString newMatFilePath)
 	HString newName = (newMatFilePath + "/NewMaterial.mat");
 	FileSystem::FileRename(srcMat.c_str(), newName.c_str());
 	auto assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Material, newName.c_str(), newMatFilePath);
-	return NULL;
+	return nullptr;
 }

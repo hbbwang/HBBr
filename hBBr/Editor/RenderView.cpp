@@ -32,7 +32,7 @@ RenderView::RenderView(QWidget* parent)
 
 	setObjectName("RenderView");
 
-	if (_mainRendererWidget == NULL)
+	if (_mainRendererWidget == nullptr)
 	{
 		//Enable custom loop
 		_mainRenderer = VulkanApp::InitVulkanManager(false, true, (void*)this->winId());
@@ -85,7 +85,7 @@ void RenderView::showEvent(QShowEvent* event)
 void RenderView::resizeEvent(QResizeEvent* event)
 {
 	QWidget::resizeEvent(event);
-	if (_mainRendererWidget != NULL)
+	if (_mainRendererWidget != nullptr)
 	{
 		_mainRendererWidget->setGeometry(0, 0, width(), height());
 	}
@@ -127,7 +127,7 @@ void RenderView::focusInEvent(QFocusEvent* event)
 {
 	//if (GetFocus() != hwnd || VulkanApp::GetFocusForm() != _mainRenderer)
 	{
-		//SetFocus(NULL);
+		//SetFocus(nullptr);
 		VulkanApp::SetFocusForm(_mainRenderer);
 		SetFocus(hwnd);
 	}

@@ -30,7 +30,7 @@ void GameObject::ObjectInit(HString objectName, Level* level, bool SceneEditorHi
 #if IS_EDITOR
 	_sceneEditorHide = SceneEditorHide;
 #endif
-	if (level == NULL)
+	if (level == nullptr)
 	{
 		_world = VulkanApp::GetMainForm()->renderer->GetWorld();
 		_level = VulkanApp::GetMainForm()->renderer->GetWorld()->_levels[0].get();
@@ -91,9 +91,9 @@ void GameObject::SetObjectName(HString newName)
 
 void GameObject::SetParent(GameObject* newParent)
 {
-	if (newParent != NULL)
+	if (newParent != nullptr)
 	{
-		if (_parent != NULL)
+		if (_parent != nullptr)
 		{
 			//为了安全考虑，最好进行一次Parent的查找，不过感觉应该不需要...
 			//auto it = std::find(_gameObjects.begin(), _gameObjects.end(), i->_parent);
@@ -119,7 +119,7 @@ void GameObject::SetParent(GameObject* newParent)
 	else
 	{
 		//如果已经有父类了先清除
-		if (_parent != NULL)
+		if (_parent != nullptr)
 		{
 			auto cit = std::find(_parent->_children.begin(), _parent->_children.end(), this);
 			if (cit != _parent->_children.end())
@@ -133,7 +133,7 @@ void GameObject::SetParent(GameObject* newParent)
 			ConsoleDebug::print_endl("GameObject " + _name + " detach");
 			#endif
 		}
-		_parent = NULL;
+		_parent = nullptr;
 	}
 
 }
@@ -167,7 +167,7 @@ bool GameObject::Update()
 			}
 			else
 			{
-				if(_transform != NULL)
+				if(_transform != nullptr)
 					_transform->Update();
 				const auto compCount = _comps.size();
 				for (int i = 0; i < compCount; i++)
@@ -197,10 +197,10 @@ bool GameObject::ExecuteDestroy()
 		_comps[i]->Destroy();
 	}
 
-	if (_transform != NULL)
+	if (_transform != nullptr)
 	{
 		delete _transform;
-		_transform = NULL;
+		_transform = nullptr;
 	}
 
 	if (_comps.size() > 0)

@@ -14,9 +14,9 @@ public:
 	CustomFileSystemModel(QObject *parent);
 	~CustomFileSystemModel();
 
-	CustomTreeView* _contentBrowserTreeView=NULL;
+	CustomTreeView* _contentBrowserTreeView= nullptr;
 
-	CustomListView* _contentBrowserListView = NULL;
+	CustomListView* _contentBrowserListView = nullptr;
 
 	QVariant data(const QModelIndex& index, int role) const;
 

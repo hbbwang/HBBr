@@ -45,7 +45,7 @@ struct ModelPrimitive
 
 	glm::vec3					boundingBox_max = glm::vec3(0, 0, 0);
 
-	Transform*					transform = NULL;
+	Transform*					transform = nullptr;
 
 	HString						matSocketName="";
 
@@ -80,7 +80,7 @@ class MaterialPrimitive
 public:
 
 	//Get material instance texture descriptor set.
-	//If material instance number of textures is 0,it will return NULL.
+	//If material instance number of textures is 0,it will return nullptr.
 	HBBR_INLINE VkDescriptorSet GetDescriptorSet() {
 		auto manager = VulkanManager::GetManager();
 		if (textures.size() > 0)
@@ -202,7 +202,7 @@ public:
 		if (_allGraphicsPrimitives.size() > 0)
 			return &_allGraphicsPrimitives[index];
 		else
-			return NULL;
+			return nullptr;
 	}
 
 	inline static std::vector<ModelPrimitive*>* GetModelPrimitives(MaterialPrimitive* index, class VulkanRenderer* renderer) {
@@ -210,7 +210,7 @@ public:
 		if (it != _allModelPrimitives.end())
 			return &it->second[renderer];
 		else
-			return NULL;
+			return nullptr;
 	}
 
 private:

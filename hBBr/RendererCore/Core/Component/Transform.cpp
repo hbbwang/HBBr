@@ -113,7 +113,7 @@ void Transform::FSetWorldLocation(glm::vec3 newWorldLocation, bool bAffectChildr
 	worldMatrix[3] = w;
 
 	//Get local location
-	if (_gamebject->GetParent() == NULL)
+	if (_gamebject->GetParent() == nullptr)
 	{
 		location = worldLocation;
 	}
@@ -158,7 +158,7 @@ void Transform::FSetWorldRotation(glm::vec3 newAngle, bool bAffectChildren)
 	worldMatrix[2] = glm::vec4(forward.x, forward.y, forward.z, 0.0);
 
 	//Update local eulerAngle
-	if (_gamebject->GetParent() == NULL)
+	if (_gamebject->GetParent() == nullptr)
 	{
 		eulerAngle = worldEulerAngle;
 	}
@@ -252,7 +252,7 @@ void Transform::FSetLocalRotation(glm::vec3 newAngle)
 	forward = glm::normalize(forward);
 
 	//Update local eulerAngle
-	if (_gamebject->GetParent() == NULL)
+	if (_gamebject->GetParent() == nullptr)
 	{
 		worldEulerAngle = newAngle;
 		eulerAngle = worldEulerAngle;

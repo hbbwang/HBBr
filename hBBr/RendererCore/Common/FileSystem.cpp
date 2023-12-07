@@ -14,7 +14,7 @@ HString FileSystem::GetProgramPath()
     //const char* org = "hBBr";
     //const char* app = "Game";
     //char* prefPath = SDL_GetPrefPath(org, app);
-    //SDL_ShowSimpleMessageBox(0, "", prefPath, NULL);
+    //SDL_ShowSimpleMessageBox(0, "", prefPath, nullptr);
     //SDL_free(prefPath);
 
     if (_appPath.Length() <= 2)
@@ -134,9 +134,19 @@ bool FileSystem::FileExist(const char* path)
     return fs::exists(path);
 }
 
+bool FileSystem::FileExist(HString& path)
+{
+    return fs::exists(path.c_str());
+}
+
 bool FileSystem::IsDir(const char* path)
 {
     return  fs::is_directory(path);
+}
+
+bool FileSystem::IsDir(HString& path)
+{
+    return  fs::is_directory(path.c_str());
 }
 
 bool FileSystem::CreateDir(const char* path)
@@ -230,6 +240,30 @@ void FileSystem::NormalizePath(HString& path)
     {
         path = fs::path(path.c_str()).lexically_normal().c_str();
     }
+}
+
+void FileSystem::FixUpPath(HString& path)
+{
+    NormalizePath(path);
+    CorrectionPath(path);
+}
+
+bool FileSystem::ContainsPath(HString A, HString B)
+{
+    NormalizePath(A);
+    CorrectionPath(A);
+
+    NormalizePath(B);
+    CorrectionPath(B);
+
+    fs::path a = A.c_str();
+    fs::path b = B.c_str();
+
+    // 使用std::mismatch算法比较两个路径的元素
+    auto [a_it, b_it] = std::mismatch(a.begin(), a.end(), b.begin(), b.end());
+    
+    // 如果路径A的所有元素都与路径B的元素匹配，则路径A是路径B的一部分
+    return a_it == a.end();
 }
 
 HString FileSystem::GetFilePath(HString path)

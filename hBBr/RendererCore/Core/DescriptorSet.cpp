@@ -97,9 +97,9 @@ DescriptorSet::~DescriptorSet()
 
 void DescriptorSet::BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize, int bufferIndex)
 {
-	if (_buffers[bufferIndex] == NULL)
+	if (_buffers[bufferIndex] == nullptr)
 	{
-		MessageOut("Buffer Mapping Failed._buffers[bufferIndex] is NULL", false, true, "255,255,0");
+		MessageOut("Buffer Mapping Failed._buffers[bufferIndex] is nullptr", false, true, "255,255,0");
 		return;
 	}
 	_buffers[bufferIndex]->BufferMapping(mappingData, offset, bufferSize);
@@ -109,9 +109,9 @@ void DescriptorSet::BufferMapping(void* mappingData, uint64_t offset, uint64_t b
 
 bool DescriptorSet::ResizeDescriptorBuffer(VkDeviceSize newSize, int bufferIndex)
 {
-	if (_buffers[bufferIndex] == NULL)
+	if (_buffers[bufferIndex] == nullptr)
 	{
-		MessageOut("Buffer Mapping Failed._buffers[bufferIndex] is NULL", false, true, "255,255,0");
+		MessageOut("Buffer Mapping Failed._buffers[bufferIndex] is nullptr", false, true, "255,255,0");
 		return false;
 	}
 	auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(newSize);

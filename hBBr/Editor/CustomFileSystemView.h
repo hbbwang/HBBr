@@ -17,12 +17,12 @@ public:
 	~CustomListView();
 
 	
-	QAction* _import = NULL;
-	QAction* _createNewFolder = NULL;
-	QAction* _rename = NULL;
-	QAction* _delete = NULL;
-	QAction* _createMaterialInstance = NULL;
-	QAction* _openCurrentFolder = NULL;
+	QAction* _import = nullptr;
+	QAction* _createNewFolder = nullptr;
+	QAction* _rename = nullptr;
+	QAction* _delete = nullptr;
+	QAction* _createMaterialInstance = nullptr;
+	QAction* _openCurrentFolder = nullptr;
 	QSize _iconSize = QSize(85,85);
 	QSize _minIconSize = QSize(30, 30);
 	QSize _maxIconSize = QSize(250, 250);
@@ -64,12 +64,12 @@ public:
 	explicit CustomTreeView(QWidget* parent);
 	~CustomTreeView();
 
-	QMenu*		_menu = NULL;
-	QAction*	_import  = NULL;
-	QAction*	_createNewFolder = NULL;
-	QAction*	_rename = NULL;
-	QAction*	_delete = NULL;
-	QAction*	_openCurrentFolder = NULL;
+	QMenu*		_menu = nullptr;
+	QAction*	_import  = nullptr;
+	QAction*	_createNewFolder = nullptr;
+	QAction*	_rename = nullptr;
+	QAction*	_delete = nullptr;
+	QAction*	_openCurrentFolder = nullptr;
 
 	QSize _iconSize = QSize(40, 40);
 	QSize _minIconSize = QSize(30, 30);

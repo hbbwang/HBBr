@@ -33,7 +33,7 @@ HString RendererLauguage::GetText(HString key)
 		{
 			MessageOut("Fatal error! Load lauguage file error.", true, true);
 		}
-		for (pugi::xml_node node = doc.child(L"root").first_child(); node != NULL; node = node.next_sibling())
+		for (pugi::xml_node node = doc.child(L"root").first_child(); node ; node = node.next_sibling())
 		{
 			HString nodeName = node.name();
 			HString text = node.attribute(L"text").as_string();

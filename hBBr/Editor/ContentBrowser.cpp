@@ -25,7 +25,7 @@
 #include "Asset/Material.h"
 #include "Asset/ContentManager.h"
 
-QWidget* ContentBrowser::_currentFocusContentBrowser = NULL;
+QWidget* ContentBrowser::_currentFocusContentBrowser = nullptr;
 QList<QWidget*> ContentBrowser::_allContentBrowser;
 
 ContentBrowser::ContentBrowser(QWidget *parent)
@@ -217,7 +217,7 @@ void ContentBrowser::closeEvent(QCloseEvent* event)
 	if (_currentFocusContentBrowser == this)
 	{
 		_allContentBrowser.removeOne(_currentFocusContentBrowser);
-		_currentFocusContentBrowser = NULL;
+		_currentFocusContentBrowser = nullptr;
 	}
 }
 

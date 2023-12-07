@@ -14,7 +14,12 @@ std::map<HGUID, std::function<void(VulkanRenderer*, World*)>> World::_editorSpwa
 
 World::World(class VulkanRenderer* renderer)
 {
-	Load(renderer);
+	Load(renderer, "");
+}
+
+World::World(VulkanRenderer* renderer, HString worldAssetPath)
+{
+	Load(renderer, worldAssetPath);
 }
 
 World::~World()
@@ -22,25 +27,33 @@ World::~World()
 	ReleaseWorld();
 }
 
+void World::AddLevel(HString levelAssetPath)
+{
+	if (FileSystem::ContainsPath(_worldAssetPath, levelAssetPath))
+	{
+
+	}
+}
+
 void World::AddNewLevel(HString name)
 {
-	std::shared_ptr<Level> newLevel = NULL;
+	std::shared_ptr<Level> newLevel = nullptr;
 	newLevel.reset(new Level(name));
 	newLevel->Load(this);
 	_levels.push_back(newLevel);
 }
 
-void World::SaveWorld()
+void World::SaveWorld(HString newWorldName)
 {
-	HString assetPath = FileSystem::GetWorldAbsPath() + _worldName ;
-	HString filePath = assetPath + "/" + _worldName + ".world";
+	if (newWorldName.Length() > 1)
+	{
+		HString assetPath = FileSystem::GetWorldAbsPath();
+		newWorldName = assetPath + "/" + newWorldName + ".world";
+		FileSystem::FixUpPath(newWorldName);
+		_worldAssetPath = newWorldName;
+	}
 	//创建World目录
-	FileSystem::CreateDir(filePath.c_str());
-}
-
-void World::SaveWholeWorld()
-{
-	SaveWorld();
+	FileSystem::CreateDir(_worldAssetPath.c_str());
 	for (auto& i : _levels)
 	{
 		i->SaveLevel();
@@ -52,7 +65,7 @@ GameObject* World::SpawnGameObject(HString name, class Level* level)
 	if (this->_levels.size() <= 0)
 	{
 		MsgBox("World.cpp/SpawnGameObject","Spawn game object failed.This world is not having any levels.");
-		return NULL;
+		return nullptr;
 	}
 	if (!level)
 	{
@@ -63,9 +76,14 @@ GameObject* World::SpawnGameObject(HString name, class Level* level)
 	return newObject;
 }
 
-void World::Load(class VulkanRenderer* renderer)
+void World::Load(class VulkanRenderer* renderer, HString worldAssetPath)
 {
 	_renderer = renderer;
+
+	HString assetPath = FileSystem::GetWorldAbsPath();
+	HString dirPath = assetPath + "/" + _worldName + ".world";
+	FileSystem::FixUpPath(dirPath);
+	_worldAssetPath = dirPath;
 
 #if IS_EDITOR
 
@@ -91,19 +109,22 @@ void World::Load(class VulkanRenderer* renderer)
 //	cameraComp->OverrideMainCamera();
 
 #endif
-//
-//	//Test model
-//	auto test = new GameObject(this);
-//	auto modelComp0 = test->AddComponent<ModelComponent>();
-//	modelComp0->SetModelByVirtualPath(FileSystem::GetAssetAbsPath() + "Content/Core/Basic/TestFbx_1_Combine");
-//	test->SetObjectName("TestFbx_1_Combine");
-//
-//	GameObject* cube = new GameObject(this);
-//	testObj = cube->GetSelfWeekPtr();
-//	auto modelComp = cube->AddComponent<ModelComponent>();
-//	cube->GetTransform()->SetLocation(glm::vec3(0, 0.5f, 0));
-//	modelComp->SetModelByVirtualPath(FileSystem::GetAssetAbsPath() + "Content/Core/Basic/Cube");
-//	cube->SetObjectName("TestFbx_Cube");
+
+	//Load world file
+	if (FileSystem::IsDir(worldAssetPath.c_str()))
+	{
+		//Find all levels
+		auto levelFiles = FileSystem::GetFilesBySuffix(worldAssetPath.c_str(), "level");
+		for (auto f : levelFiles)
+		{
+			AddLevel(f.relativePath);
+		}
+	}
+	else
+	{
+		//This is a new world ,create a empty level .
+		AddNewLevel("Empty Level");
+	}
 
 	bLoad = true;
 #if IS_EDITOR
@@ -144,6 +165,7 @@ void World::WorldUpdate()
 
 	//Update Editor if the function is not null.
 #if IS_EDITOR
+	if(_editorLevel) _editorLevel->LevelUpdate();
 	for (auto i : _editorWorldUpdate)
 	{
 		i.second(this, _levelPtrs);

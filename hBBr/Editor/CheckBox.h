@@ -15,8 +15,8 @@ public:
 	CheckBox(HString name, QWidget* parent = Q_NULLPTR, bool bEnbale = false);
 	~CheckBox();
 
-	bool* _boolBind = NULL;
-	std::vector<bool>* _boolArrayBind = NULL;
+	bool* _boolBind = nullptr;
+	std::vector<bool>* _boolArrayBind = nullptr;
 	int _boolArrayBindIndex = 0;
 	std::function<void(bool)> _callback = [](bool bEnable) {};
 	void SetAlignmentLeft();

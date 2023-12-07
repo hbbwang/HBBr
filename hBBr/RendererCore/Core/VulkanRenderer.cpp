@@ -99,7 +99,7 @@ void VulkanRenderer::Init()
 
 }
 
-void VulkanRenderer::CreateWorld(HString worldNameOrAssetPath)
+void VulkanRenderer::LoadWorld(HString worldNameOrAssetPath)
 {
 	
 }
@@ -113,7 +113,11 @@ void VulkanRenderer::Render()
 {
 	if (!_bInit)
 	{
-		CreateEmptyWorld();
+		LoadWorld("");
+		if (!_world)
+		{
+			CreateEmptyWorld();
+		}
 		_passManager->PassesInit(this);
 		_bInit = true;
 	}
@@ -176,7 +180,7 @@ void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
 
 void VulkanRenderer::SetupPassUniformBuffer()
 {
-	const CameraComponent* mainCamera = NULL;
+	const CameraComponent* mainCamera = nullptr;
 	if (!IsWorldValid())
 	{
 		return;
@@ -187,7 +191,7 @@ void VulkanRenderer::SetupPassUniformBuffer()
 	else
 		mainCamera = GetWorld()->_editorCamera;
 #endif
-	if (mainCamera != NULL)
+	if (mainCamera != nullptr)
 	{
 		_passUniformBuffer.View = mainCamera->GetViewMatrix();
 		_passUniformBuffer.View_Inv = mainCamera->GetInvViewMatrix();

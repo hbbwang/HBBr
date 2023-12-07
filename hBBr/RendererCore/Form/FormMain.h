@@ -7,8 +7,8 @@
 struct VulkanForm
 {
 	HString name;
-	SDL_Window* window = NULL;
-	class VulkanRenderer* renderer = NULL;
+	SDL_Window* window = nullptr;
+	class VulkanRenderer* renderer = nullptr;
 	bool bMinimized = false;
 };
 
@@ -23,11 +23,11 @@ public:
 		@bEnableDebug :是否开启Debug layer
 		@return:如果bCustomRenderLoop为false,则返回这个vulkan渲染窗口
 	*/
-	HBBR_API static VulkanForm* InitVulkanManager(bool bCustomRenderLoop,bool bEnableDebug = false,void* parent = NULL);
+	HBBR_API static VulkanForm* InitVulkanManager(bool bCustomRenderLoop,bool bEnableDebug = false,void* parent = nullptr);
 	HBBR_API static void DeInitVulkanManager();
 	HBBR_API static bool UpdateForm();
 	HBBR_API static void UpdateRender();
-	HBBR_API static VulkanForm* CreateNewWindow(uint32_t w = 512, uint32_t h = 512, const char* title = "Renderer",bool bCreateRenderer = false ,void* parent = NULL);
+	HBBR_API static VulkanForm* CreateNewWindow(uint32_t w = 512, uint32_t h = 512, const char* title = "Renderer",bool bCreateRenderer = false ,void* parent = nullptr);
 	HBBR_API static void CreateRenderer(VulkanForm* form);
 	HBBR_API static bool IsWindowFocus(SDL_Window* windowHandle);
 	HBBR_API static std::vector<VulkanForm*>& GetForms() { return _forms; }

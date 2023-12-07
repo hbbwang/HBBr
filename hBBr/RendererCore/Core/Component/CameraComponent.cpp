@@ -14,7 +14,7 @@ CameraComponent::CameraComponent(GameObject* parent)
 	_farClipPlane = 500.0f;
 	_fov = 90.0f;
 	_gameObject->GetWorld()->_cameras.push_back(this);
-	if (_gameObject->GetWorld()->_mainCamera == NULL)
+	if (_gameObject->GetWorld()->_mainCamera == nullptr)
 	{
 		_gameObject->GetWorld()->_mainCamera = this;
 	}
@@ -22,7 +22,7 @@ CameraComponent::CameraComponent(GameObject* parent)
 
 void CameraComponent::OverrideMainCamera()
 {
-	if (_gameObject->GetWorld()->_mainCamera != NULL)
+	if (_gameObject->GetWorld()->_mainCamera != nullptr)
 	{
 		_gameObject->GetWorld()->_mainCamera->_bIsMainCamera = false;
 	}
@@ -110,7 +110,7 @@ void CameraComponent::ExecuteDestroy()
 		}
 		else
 		{
-			scene->_mainCamera = NULL;
+			scene->_mainCamera = nullptr;
 		}
 	}
 	Component::ExecuteDestroy();
