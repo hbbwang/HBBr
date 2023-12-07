@@ -101,6 +101,7 @@ void Level::SaveLevel()
 					{
 						auto pro = compItem.append_child(L"Item");
 						pro.append_attribute(L"Name").set_value(p.name.c_wstr());
+						pro.append_attribute(L"Type").set_value(p.type.c_wstr());
 						pro.append_attribute(L"Value").set_value(Component::AnalysisPropertyValue(p).c_wstr());
 					}
 				}

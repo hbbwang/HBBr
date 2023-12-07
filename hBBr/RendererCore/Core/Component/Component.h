@@ -40,8 +40,11 @@ struct ComponentProperty
 	HString category;
 	//排序
 	int sort = 32;
-	//
-	std::string type = typeid(void).name();
+	//Type String
+	HString type = "void";
+	//runtime type id
+	std::string type_runtime = "";
+	bool bArray = false;
 };
 
 class Component
@@ -96,17 +99,56 @@ protected:
 
 	HBBR_INLINE virtual void OnConstruction() {
 		//Component Property Reflection Add.
-		AddProperty("bActive", &_bActive, "", 0);
+		AddProperty<bool>("bActive", &_bActive, "Default", 0);
 	}
 
 	template<class T>
-	void AddProperty(HString name, T *valuePtr, HString category, int sort = 32)
+	HString GetPropertyTypeString()
+	{
+		if (typeid(T) == typeid(int))
+			return "int";
+		else if (typeid(T) == typeid(float))
+			return "float";
+		else if (typeid(T) == typeid(bool))
+			return "bool";
+		else if (typeid(T) == typeid(uint32_t))
+			return "uint32_t";
+		else if (typeid(T) == typeid(uint16_t))
+			return "uint16_t";
+		else if (typeid(T) == typeid(uint8_t))
+			return "uint8_t";
+		else if (typeid(T) == typeid(uint64_t))
+			return "uint64_t";
+		else if (typeid(T) == typeid(HString))
+			return "HString";
+
+		else
+			return "void";
+
+	}
+
+	template<class T>
+	void AddProperty(HString name, void* valuePtr, HString category = "Default", int sort = 32)
+	{
+		AddProperty<T>(name, valuePtr, false, category, sort);
+	}
+
+	template<class T>
+	void AddArrayProperty(HString name, void* valuePtr, HString category = "Default", int sort = 32)
+	{
+		AddProperty<T>(name, valuePtr, true, category, sort);
+	}
+
+	template<class T>
+	void AddProperty(HString name, void *valuePtr, bool bArray=false , HString category = "Default", int sort = 32)
 	{	
 		ComponentProperty pro;
 		pro.name = name;
 		pro.value = valuePtr;
-		pro.type = typeid(T).name();
+		pro.type = GetPropertyTypeString<T>();
+		pro.type_runtime = typeid(T).name();
 		pro.category = category;
+		pro.bArray = bArray;
 		pro.sort = sort;
 		_compProperties.push_back(pro);
 		auto valueCompare = [](const ComponentProperty& p1, const ComponentProperty& p2)->bool {
@@ -115,38 +157,7 @@ protected:
 		std::sort(_compProperties.begin(), _compProperties.end(), valueCompare);
 	}
 	
-	static inline HString AnalysisPropertyValue(ComponentProperty& p)
-	{
-		//Base type
-		if (p.type == typeid(bool).name())
-		{
-			auto value = (bool*)p.value;
-			return (*value == true) ? "1" : "0";
-		}
-		else if (p.type == typeid(int).name())
-		{
-			auto value = (int*)p.value;
-			return HString::FromInt(*value);
-		}
-		else if (p.type == typeid(uint64_t).name())
-		{
-			auto value = (uint64_t*)p.value;
-			return HString::FromSize_t(*value);
-		}
-		else if (p.type == typeid(uint32_t).name() || p.type == typeid(uint16_t).name() || p.type == typeid(uint8_t).name())
-		{
-			auto value = (uint32_t*)p.value;
-			return HString::FromUInt(*value);
-		}
-		else if (p.type == typeid(float).name())
-		{
-			auto value = (float*)p.value;
-			return HString::FromFloat(*value);
-		}
-		//Asset type
-
-		return "";
-	}
+	static HString AnalysisPropertyValue(ComponentProperty& p);
 
 	//<displayName , component>
 	std::vector<ComponentProperty> _compProperties;
