@@ -28,25 +28,23 @@ public:
 
 	HBBR_INLINE HBBR_API HString GetLevelName()const { return _levelName; }
 
-	//加载关卡
-	HBBR_API void Load(class World* world , HString levelPath);
+	//load level by asset path or name(from world path)
+	HBBR_API void Load(class World* world , HString levelAssetPathOrName);
 
-	//释放关卡对象
+	//Release level
 	HBBR_API bool UnLoad();
 
-	//释放关卡,包括对象和Xml Doc
+	//Release level and xml file
 	HBBR_API bool ResetLevel();
 
 	HBBR_API void SaveLevel();
 
-	HBBR_API class World* GetWorld()const { return _world; }
+	//Get all game objects from this level.
+	HBBR_API std::vector<std::shared_ptr<GameObject>>& GetAllGameObjects() {
+		return _gameObjects;
+	}
 
-#if IS_EDITOR
-	std::function<void(class Level*, std::shared_ptr<GameObject>)> _editorGameObjectAddFunc = [](class Level* world, std::shared_ptr<GameObject> newObject) {};
-	std::function<void(class Level*, std::shared_ptr<GameObject>)> _editorGameObjectRemoveFunc = [](class Level* world, std::shared_ptr<GameObject> oldObject) {};
-	std::function<void(class Level*, std::shared_ptr<GameObject>)> _editorGameObjectUpdateFunc = [](class Level* world, std::shared_ptr<GameObject> oldObject) {};
-	std::function<void(class Level*, std::vector<std::shared_ptr<GameObject>>)> _editorSceneUpdateFunc = [](class Level* world, std::vector<std::shared_ptr<GameObject>> o) {};
-#endif
+	HBBR_API class World* GetWorld()const { return _world; }
 
 private:
 
@@ -59,9 +57,11 @@ private:
 	HString _levelName = "NewLevel";
 
 	pugi::xml_document _levelDoc;
-
+	
+	//请勿要主动使用该函数
 	void AddNewObject(std::shared_ptr<GameObject> newObject);
 
+	//请勿要主动使用该函数
 	void RemoveObject(GameObject* object);
 
 	//游戏对象

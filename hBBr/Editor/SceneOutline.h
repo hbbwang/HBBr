@@ -72,7 +72,6 @@ public:
     class CheckBox* _checkBox;
     static SceneOutlineTree* _treeWidget;
     class CustomSearchLine* _search;
-    HGUID _guid_spawn_world_callback;
 private slots:
     void TreeSearch();
 

@@ -34,6 +34,7 @@ void Level::Load(World* world, HString levelPath)
 			HString levelPath = worldPath + "/" + _levelName + ".level";
 			XMLStream::CreateXMLFile(levelPath, _levelDoc);
 		}
+		bLoad = true;
 	}
 }
 
@@ -135,29 +136,15 @@ void Level::LevelUpdate()
 		}
 		else
 		{
-#if IS_EDITOR
-			if (!_gameObjects[i]->_sceneEditorHide)
-				_editorGameObjectUpdateFunc(this, _gameObjects[i]);
-#endif
+			_world->UpdateObject(_gameObjects[i]);
 		}
 	}
-
-#if IS_EDITOR
-	_editorSceneUpdateFunc(this, _gameObjects);
-#endif
-
 }
 
 void Level::AddNewObject(std::shared_ptr<GameObject> newObject)
 {
 	_gameObjects.push_back(newObject);
-#if IS_EDITOR
-	if (!newObject->_sceneEditorHide)
-	{
-		if (!newObject->_sceneEditorHide)
-			_editorGameObjectAddFunc(this, newObject);
-	}
-#endif
+	_world->AddNewObject(newObject);
 }
 
 void Level::RemoveObject(GameObject* object)
@@ -170,10 +157,7 @@ void Level::RemoveObject(GameObject* object)
 	{
 		//延迟到下一帧再销毁
 		_gameObjectNeedDestroy.push_back(*it);
-#if IS_EDITOR
-		if (!((*it)->_sceneEditorHide))
-			_editorGameObjectRemoveFunc(this, *it);
-#endif
+		_world->RemoveObject(*it);
 		_gameObjects.erase(it);
 	}
 }

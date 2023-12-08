@@ -66,7 +66,12 @@ GameObject* World::SpawnGameObject(HString name, class Level* level)
 	{
 		level = this->_levels[0].get();
 	}
-	GameObject* newObject = new GameObject(level);
+	if (!level->bLoad)
+	{
+		MsgBox("World.cpp/SpawnGameObject", "Spawn game object failed.The level is not loading.");
+		return nullptr;
+	}
+	GameObject* newObject = GameObject::CreateGameObject(name, level);
 	newObject->SetObjectName(name);
 	return newObject;
 }
@@ -94,7 +99,8 @@ void World::Load(class VulkanRenderer* renderer, HString worldAssetPath)
 	_editorLevel->_isEditorLevel = true;
 
 	//create editor camera
-	auto backCamera = new GameObject("EditorCamera", _editorLevel.get(), true);
+	auto backCamera = GameObject::CreateGameObject("EditorCamera", _editorLevel.get());
+	backCamera->_sceneEditorHide = true;
 	backCamera->GetTransform()->SetWorldLocation(glm::vec3(0, 2, -3.0));
 	auto cameraComp = backCamera->AddComponent<CameraComponent>();
 	cameraComp->OverrideMainCamera();
@@ -142,15 +148,15 @@ bool World::ReleaseWorld()
 
 void World::WorldUpdate()
 {
-	std::vector < Level* >_levelPtrs;
-	_levelPtrs.resize(_levels.size());
+	std::vector < std::weak_ptr<Level> >_levelPtrs;
+	_levelPtrs.resize(_levels.size() + 1);
 	if (!bLoad)
 	{
 		return;
 	}
 	for (int i = 0; i < _levels.size(); i++)
 	{
-		_levelPtrs[i] = _levels[i].get();
+		_levelPtrs[i] = _levels[i];
 		if (_levels[i]->bLoad)
 		{
 			_levels[i]->LevelUpdate();
@@ -159,13 +165,40 @@ void World::WorldUpdate()
 
 	//Update Editor if the function is not null.
 #if IS_EDITOR
-	if(_editorLevel) _editorLevel->LevelUpdate();
-	for (auto i : _editorWorldUpdate)
+	if (_editorLevel)
 	{
-		i.second(this, _levelPtrs);
+		_editorLevel->LevelUpdate();
+		_levelPtrs[_levelPtrs.size() - 1] = _editorLevel;
 	}
+	_editorWorldUpdate(_levelPtrs);
 #endif
 
+}
+
+void World::UpdateObject(std::shared_ptr<GameObject> newObject)
+{
+#if IS_EDITOR
+	if (!newObject->_sceneEditorHide)
+		_editorGameObjectUpdateFunc(newObject);
+#endif
+}
+
+void World::AddNewObject(std::shared_ptr<GameObject> newObject)
+{
+#if IS_EDITOR
+	if (!newObject->_sceneEditorHide)
+	{
+		_editorGameObjectAddFunc(newObject);
+	}
+#endif
+}
+
+void World::RemoveObject(std::shared_ptr<GameObject> object)
+{
+#if IS_EDITOR
+	if (!(object->_sceneEditorHide))
+		_editorGameObjectRemoveFunc(object);
+#endif
 }
 
 #if IS_EDITOR

@@ -10,12 +10,12 @@ class GameObject
 {
 	friend class World;
 	friend class Level;
+	friend class VulkanRenderer;
 	friend class Component;
 	friend class Inspector;
-public:
-
 	GameObject(HString objectName = "NewGameObject", class Level* level = nullptr, bool SceneEditorHide = false);
 	GameObject(class Level* level = nullptr, bool SceneEditorHide = false);
+public:
 	~GameObject();
 
 	void ObjectInit(HString objectName = "NewGameObject", class Level* level = nullptr, bool SceneEditorHide = false);

@@ -46,7 +46,10 @@ public:
 
 	std::weak_ptr<Level> _currentSelectionLevel;
 
-	std::map<void*, std::function<void(class World*, std::vector<Level*>)>> _editorWorldUpdate;
+	std::function<void(std::shared_ptr<GameObject>)> _editorGameObjectAddFunc = [](std::shared_ptr<GameObject> newObject) {};
+	std::function<void(std::shared_ptr<GameObject>)> _editorGameObjectRemoveFunc = [](std::shared_ptr<GameObject> oldObject) {};
+	std::function<void(std::shared_ptr<GameObject>)> _editorGameObjectUpdateFunc = [](std::shared_ptr<GameObject> oldObject) {};
+	std::function<void(std::vector<std::weak_ptr<Level>>&)> _editorWorldUpdate = [](std::vector<std::weak_ptr<Level>> levels) {};
 
 	std::shared_ptr<Level> _editorLevel;
 
@@ -63,6 +66,15 @@ private:
 	bool ReleaseWorld();
 
 	void WorldUpdate();
+
+	//请勿要主动使用该函数
+	void UpdateObject(std::shared_ptr<GameObject> newObject);
+
+	//请勿要主动使用该函数
+	void AddNewObject(std::shared_ptr<GameObject> newObject);
+
+	//请勿要主动使用该函数
+	void RemoveObject(std::shared_ptr<GameObject> object);
 
 	class VulkanRenderer* _renderer = nullptr;
 

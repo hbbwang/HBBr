@@ -22,6 +22,7 @@ GameObjectItem::GameObjectItem(GameObject* gameObject, QTreeWidget* view)
 {
     _gameObject = gameObject;
     _gameObject->_editorObject = this;
+    this->setText(0, _gameObject->GetObjectName().c_str());
     setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
 }
 
@@ -249,76 +250,75 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     _renderer = renderer;
 
     //Spawn new world callBack:
-    _renderer->AddSpawnNewWorldCallBack([this](std::weak_ptr<World> world)
+    auto spawnNewWorldCallBack = [this](std::weak_ptr<World> world)
+    {
+        //World Update Callback
+        if (!world.expired())
         {
-            //World Update Callback
-            if (!world.expired())
+            auto worldPtr = world.lock();
+            worldPtr->_editorWorldUpdate= 
+                [](std::vector<std::weak_ptr<Level>>&levels)
+                {
+                };
+
+            //Editor GameObject更新委托
+            worldPtr->_editorGameObjectUpdateFunc = [this]
+            (std::shared_ptr<GameObject> object)
             {
-                auto worldPtr = world.lock();
-                worldPtr->_editorWorldUpdate.emplace(_guid_spawn_world_callback,
-                    [](World* world, std::vector<class Level*>)
+                if (object->_bEditorNeedUpdate)
+                {
+                    object->_bEditorNeedUpdate = false;
+                    auto objects = SceneOutline::_treeWidget->GetSelectionObjects();
+                    if (objects.size() > 0)
                     {
+                        if (Inspector::_currentInspector != nullptr)
+                            Inspector::_currentInspector->LoadInspector_GameObject(objects[0]->GetSelfWeekPtr(), true);
+                    }
+                    auto item = (GameObjectItem*)object->_editorObject;
+                    //rename?
+                    item->setText(0, object->GetObjectName().c_str());
+                }
+            };
 
-                    });
-            }
-        });
+            //Editor GameObject Spawn委托
+            worldPtr->_editorGameObjectAddFunc = [this]
+            (std::shared_ptr<GameObject> object) 
+            {
+                _treeWidget->addTopLevelItem(new GameObjectItem(object.get(), _treeWidget));
+            };
 
-    //scene->_editorSceneUpdateFunc = [this, scene]
-    //(World* scene, std::vector<std::shared_ptr<GameObject>> aliveObjects)
-    //{
+            //Editor GameObject Destroy委托
+            worldPtr->_editorGameObjectRemoveFunc = [this]
+            (std::shared_ptr<GameObject> object)
+            {
+                auto item = (GameObjectItem*)object->_editorObject;
+                //QT5 QTreeWidgetItem 删除了父节点,子节点内存也会更着一起销毁,
+                //会导致object->_editorObject(内存已被删除)获取出现异常,
+                //所以销毁节点之前先把子节点取出，防止冲突。
+                if (item->childCount() > 0)
+                {
+                    if (item->parent())
+                    {
+                        item->parent()->addChildren(item->takeChildren());
+                    }
+                    else
+                    {
+                        _treeWidget->addTopLevelItems(item->takeChildren());
+                    }
+                }
+                item->Destroy();
+            };
+        }
+    };   
+    _renderer->_spwanNewWorld.push_back(spawnNewWorldCallBack);
 
-    //};
-
-    ////Editor GameObject更新委托
-    //scene->_editorGameObjectUpdateFunc = [this, scene]
-    //(World* scene, std::shared_ptr<GameObject> object)
-    //{
-    //    if (object->_bEditorNeedUpdate)
-    //    {
-    //        object->_bEditorNeedUpdate = false;
-    //        auto objects = SceneOutline::_treeWidget->GetSelectionObjects();
-    //        if (objects.size() > 0)
-    //        {
-    //            if (Inspector::_currentInspector != nullptr)
-    //                Inspector::_currentInspector->LoadInspector_GameObject(objects[0]->GetSelfWeekPtr(), true);
-    //        }
-    //        auto item = (GameObjectItem*)object->_editorObject;
-    //        //rename?
-    //        item->setText(0, object->GetObjectName().c_str());
-    //    }
-    //};
-
-    ////Editor GameObject Spawn委托
-    //scene->_editorGameObjectAddFunc = [this, scene]
-    //(World* scene, std::shared_ptr<GameObject> object) 
-    //{
-    //    _treeWidget->addTopLevelItem(new GameObjectItem(object.get(), _treeWidget));
-    //};
-
-    ////Editor GameObject Destroy委托
-    //scene->_editorGameObjectRemoveFunc = [this, scene]
-    //(World* scene, std::shared_ptr<GameObject> object)
-    //{
-    //    auto item = (GameObjectItem*)object->_editorObject;
-    //    //QT5 QTreeWidgetItem 删除了父节点,子节点内存也会更着一起销毁,
-    //    //会导致object->_editorObject(内存已被删除)获取出现异常,
-    //    //所以销毁节点之前先把子节点取出，防止冲突。
-    //    if (item->childCount() > 0)
-    //    {
-    //        if (item->parent())
-    //        {
-    //            item->parent()->addChildren(item->takeChildren());
-    //        }
-    //        else
-    //        {
-    //            _treeWidget->addTopLevelItems(item->takeChildren());
-    //        }
-    //    }
-    //    item->Destroy();
-    //};
 }
 
 SceneOutline::~SceneOutline()
+{
+}
+
+void SceneOutline::closeEvent(QCloseEvent* event)
 {
 
 }
@@ -389,11 +389,6 @@ void SceneOutline::TreeSearch()
         bool bHide = searchTraverse(_treeWidget->topLevelItem(i) , searchList , input);
         _treeWidget->topLevelItem(i)->setHidden(bHide);       
     }
-}
-
-void SceneOutline::closeEvent(QCloseEvent* event)
-{
-
 }
 
 void SceneOutline::focusInEvent(QFocusEvent* event)
