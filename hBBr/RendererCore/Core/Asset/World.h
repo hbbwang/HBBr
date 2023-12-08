@@ -46,23 +46,11 @@ public:
 
 	std::weak_ptr<Level> _currentSelectionLevel;
 
-	static std::map<HGUID, std::function<void(VulkanRenderer*, World*)>> _editorSpwanNewWorld;
-
-	std::map<HGUID, std::function<void(class World*, std::vector<Level*>)>> _editorWorldUpdate;
+	std::map<void*, std::function<void(class World*, std::vector<Level*>)>> _editorWorldUpdate;
 
 	std::shared_ptr<Level> _editorLevel;
 
 	void SetCurrentSelectionLevel(std::weak_ptr<Level> level);
-
-	HBBR_API HBBR_INLINE static void AddSpawnNewWorldCallBack_Editor(HGUID guid, std::function<void(VulkanRenderer*, World*)> func)
-	{
-		_editorSpwanNewWorld.emplace(guid, func);
-	}
-
-	HBBR_API HBBR_INLINE static void RemoveSpawnNewWorldCallBack_Editor(HGUID guid)
-	{
-		_editorSpwanNewWorld.erase(guid);
-	}
 
 #endif
 

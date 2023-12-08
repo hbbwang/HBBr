@@ -37,6 +37,7 @@ VulkanRenderer::~VulkanRenderer()
 void VulkanRenderer::Release()
 {
 	_bRendererRelease = true;
+	_spwanNewWorld.clear();
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
 	_passManager.reset();
@@ -101,12 +102,21 @@ void VulkanRenderer::Init()
 
 void VulkanRenderer::LoadWorld(HString worldNameOrAssetPath)
 {
-	
+
+	//
+	for (auto i : _spwanNewWorld)
+	{
+		i(_world);
+	}
 }
 
 void VulkanRenderer::CreateEmptyWorld()
 {
 	_world.reset(new World(this));
+	for (auto i : _spwanNewWorld)
+	{
+		i(_world);
+	}
 }
 
 void VulkanRenderer::Render()

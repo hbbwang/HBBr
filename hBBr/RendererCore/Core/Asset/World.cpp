@@ -7,11 +7,6 @@
 #include "XMLStream.h"
 #include "HInput.h"
 
-#if IS_EDITOR
-std::map<HGUID, std::function<void(VulkanRenderer*, World*)>> World::_editorSpwanNewWorld;
-
-#endif
-
 World::World(class VulkanRenderer* renderer)
 {
 	Load(renderer, "");
@@ -131,14 +126,7 @@ void World::Load(class VulkanRenderer* renderer, HString worldAssetPath)
 		//This is a new world ,create a empty level .
 		AddNewLevel("Empty Level");
 	}
-
 	bLoad = true;
-#if IS_EDITOR
-	for (auto i : World::_editorSpwanNewWorld)
-	{
-		i.second(_renderer, this);
-	}
-#endif
 }
 
 bool World::ReleaseWorld()

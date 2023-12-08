@@ -140,6 +140,12 @@ public:
 
 	VkSurfaceCapabilitiesKHR _surfaceCapabilities{};
 
+	//spwan new world Callback
+	HBBR_API HBBR_INLINE  void AddSpawnNewWorldCallBack( std::function<void(std::weak_ptr<World>)> func)
+	{
+		_spwanNewWorld.push_back(func);
+	}
+
 private:
 
 	void SetupPassUniformBuffer();
@@ -202,4 +208,6 @@ private:
 	std::vector<std::function<void()>> _renderThreadFuncs;
 
 	bool _bIsInGame;
+
+	std::vector<std::function<void(std::weak_ptr<World>)>> _spwanNewWorld;
 };
