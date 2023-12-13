@@ -109,6 +109,9 @@
     <ClCompile Include="AssetLine.cpp">
       <Filter>Widgets\Extension</Filter>
     </ClCompile>
+    <ClCompile Include="LineEditDialog.cpp">
+      <Filter>Widgets\Extension</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="EditorMain.h">
@@ -168,6 +171,9 @@
     <QtMoc Include="AssetLine.h">
       <Filter>Widgets\Extension</Filter>
     </QtMoc>
+    <QtMoc Include="LineEditDialog.h">
+      <Filter>Widgets\Extension</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditorCommonFunction.h">
@@ -215,6 +221,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="AssetLine.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="LineEditDialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

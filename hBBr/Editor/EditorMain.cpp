@@ -10,6 +10,7 @@
 #include <qdir.h>
 #include <QFileDialog>
 #include <qfileinfo.h>
+#include "LineEditDialog.h"
 #include "RendererCore/Core/VulkanRenderer.h"
 #include "RendererCore/Core/Asset/World.h"
 EditorMain* EditorMain::_self = nullptr;
@@ -71,7 +72,13 @@ EditorMain::EditorMain(QWidget *parent)
         VulkanApp::GetMainForm()->renderer->GetWorld()->SaveWorld();
      });
     connect(ui.SaveAsWorld, &QAction::triggered, this, [this](bool bChecked) {
-        VulkanApp::GetMainForm()->renderer->GetWorld()->SaveWorld();
+        LineEditDialog* dialog = new LineEditDialog("New World Name",this);
+        dialog->EnterCallBack = [dialog]() {
+            if (dialog->ui.lineEdit->text().size() > 1)
+            {
+                VulkanApp::GetMainForm()->renderer->GetWorld()->SaveWorld(dialog->ui.lineEdit->text().toStdString().c_str());
+            }
+        };       
     });
 
     EditorMain::_self = this;

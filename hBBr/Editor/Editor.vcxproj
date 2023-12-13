@@ -179,6 +179,7 @@
     <ClCompile Include="EditorCommonFunction.cpp" />
     <ClCompile Include="FloatSetting.cpp" />
     <ClCompile Include="Inspector.cpp" />
+    <ClCompile Include="LineEditDialog.cpp" />
     <ClCompile Include="PropertyClass.cpp" />
     <ClCompile Include="RenderView.cpp" />
     <ClCompile Include="SceneOutline.cpp" />
@@ -199,6 +200,7 @@
     <ClCompile Include="EditorMain.cpp" />
     <ClCompile Include="main.cpp" />
     <QtUic Include="Inspector.ui" />
+    <QtUic Include="LineEditDialog.ui" />
     <QtUic Include="ToolBox.ui" />
     <QtUic Include="ToolPage.ui" />
     <QtUic Include="VectorSetting.ui" />
@@ -210,6 +212,7 @@
     <QtMoc Include="SceneOutline.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="LineEditDialog.h" />
     <QtMoc Include="PropertyClass.h" />
     <QtMoc Include="FloatSetting.h" />
     <QtMoc Include="VectorSetting.h" />
