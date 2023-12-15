@@ -28,8 +28,7 @@ public:
 
 	HBBR_INLINE HBBR_API HString GetLevelName()const { return _levelName; }
 
-	//load level by asset path or name(from world path)
-	HBBR_API void Load(class World* world , HString levelAssetPathOrName);
+	HBBR_API void Rename(HString newName);
 
 	//Release level
 	HBBR_API bool UnLoad();
@@ -47,6 +46,7 @@ public:
 	HBBR_API class World* GetWorld()const { return _world; }
 
 private:
+	HBBR_API void Load(class World* world, HString levelAssetPathOrName);
 
 	void LevelUpdate();
 
@@ -55,6 +55,8 @@ private:
 	class World* _world = nullptr;
 
 	HString _levelName = "NewLevel";
+
+	HString _levelPath = "";
 
 	pugi::xml_document _levelDoc;
 	

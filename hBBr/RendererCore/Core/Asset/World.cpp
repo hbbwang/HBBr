@@ -48,7 +48,9 @@ void World::AddLevel(HString levelNameOrAssetPath)
 			}
 		}
 	}
+#if IS_EDITOR
 	_editorLevelChanged();
+#endif
 }
 
 void World::AddNewLevel(HString name)
@@ -57,7 +59,9 @@ void World::AddNewLevel(HString name)
 	newLevel.reset(new Level(name));
 	newLevel->Load(this, "");
 	_levels.push_back(newLevel);
+#if IS_EDITOR
 	_editorLevelChanged();
+#endif
 }
 
 void World::SaveWorld(HString newWorldName)

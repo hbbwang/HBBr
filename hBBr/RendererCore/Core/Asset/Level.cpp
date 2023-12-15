@@ -23,19 +23,48 @@ Level::~Level()
 	}
 }
 
+void Level::Rename(HString newName)
+{
+	_levelName = newName;
+	if (FileSystem::FileExist(_levelPath))
+	{
+		FileSystem::FileRemove(_levelPath.c_str());
+		SaveLevel();
+	}
+#if IS_EDITOR
+	_world->_editorLevelChanged();
+#endif
+}
+
 void Level::Load(World* world, HString levelPath)
 {
 	if (world)
 	{
 		_world = world;
-		XMLStream::LoadXML(levelPath.c_wstr(), _levelDoc);
-		if (!_levelDoc || _levelDoc.empty())
+		if (!bLoad)
 		{
-			HString worldPath = _world->_worldAssetPath;
-			HString levelPath = worldPath + "/" + _levelName + ".level";
-			XMLStream::CreateXMLFile(levelPath, _levelDoc);
+			XMLStream::LoadXML(levelPath.c_wstr(), _levelDoc);
+			if (_levelDoc && !_levelDoc.empty())
+			{
+				//先生成
+				auto root = _levelDoc.child(L"root");
+				for (pugi::xml_node item = root.first_child(); item; item = item.next_sibling())
+				{
+					HString type = item.attribute(L"Type").as_string();					
+					if (type == "GameObject")
+					{
+						HString name = item.attribute(L"Name").as_string();
+						HString guidStr = item.attribute(L"GUID").as_string();
+						HGUID  guid; StringToGUID(guidStr.c_str(), &guid);
+						auto object = _world->SpawnGameObject(name, this);
+
+					}
+				}
+				//再考虑父子关系
+				
+			}
+			bLoad = true;
 		}
-		bLoad = true;
 	}
 }
 
