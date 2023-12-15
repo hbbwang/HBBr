@@ -30,6 +30,8 @@ public:
 
 	HBBR_API void Rename(HString newName);
 
+	HBBR_API GameObject* FindGameObjectByGUID(HGUID guid);
+
 	//Release level
 	HBBR_API bool UnLoad();
 

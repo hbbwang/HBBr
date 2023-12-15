@@ -36,6 +36,17 @@ void Level::Rename(HString newName)
 #endif
 }
 
+GameObject* Level::FindGameObjectByGUID(HGUID guid)
+{
+	auto it = std::find_if(_gameObjects.begin(), _gameObjects.end(), [guid](std::shared_ptr<GameObject>& item) {
+		return item->GetGUID() == guid;
+	});
+	if (it != _gameObjects.end())
+	{
+		return it->get();
+	}
+}
+
 void Level::Load(World* world, HString levelPath)
 {
 	if (world)
@@ -48,20 +59,68 @@ void Level::Load(World* world, HString levelPath)
 			{
 				//先生成
 				auto root = _levelDoc.child(L"root");
+				HString type;
 				for (pugi::xml_node item = root.first_child(); item; item = item.next_sibling())
 				{
 					HString type = item.attribute(L"Type").as_string();					
 					if (type == "GameObject")
 					{
 						HString name = item.attribute(L"Name").as_string();
-						HString guidStr = item.attribute(L"GUID").as_string();
-						HGUID  guid; StringToGUID(guidStr.c_str(), &guid);
 						auto object = _world->SpawnGameObject(name, this);
-
 					}
 				}
 				//再考虑父子关系
-				
+				uint32_t objectIndex = 0;
+				for (pugi::xml_node item = root.first_child(); item; item = item.next_sibling())
+				{
+					if (type == "GameObject")
+					{
+						HString guidStr = item.attribute(L"GUID").as_string();
+						HGUID  guid; StringToGUID(guidStr.c_str(), &guid);
+						auto object = _gameObjects[objectIndex];
+						//Parent
+						HString parentGuidStr = item.attribute(L"Parent").as_string();
+						HGUID parentGuid; StringToGUID(parentGuidStr.c_str(), &parentGuid);
+						if (parentGuid.isValid())
+						{
+							auto parent = FindGameObjectByGUID(parentGuid);
+							object->SetParent(parent);
+						}
+						//Transform
+						{
+							auto tranNode = item.child(L"Transform");
+							glm::vec3 pos = glm::vec3(0), rot = glm::vec3(0), scale = glm::vec3(0);
+							pos.x = tranNode.attribute(L"PosX").as_double();
+							pos.y = tranNode.attribute(L"PosY").as_double();
+							pos.z = tranNode.attribute(L"PosZ").as_double();
+							object->_transform->SetLocation(pos);
+							pos.x = tranNode.attribute(L"RotX").as_double();
+							pos.y = tranNode.attribute(L"RotY").as_double();
+							pos.z = tranNode.attribute(L"RotZ").as_double();
+							object->_transform->SetRotation(rot);
+							pos.x = tranNode.attribute(L"ScaX").as_double();
+							pos.y = tranNode.attribute(L"ScaY").as_double();
+							pos.z = tranNode.attribute(L"ScaZ").as_double();
+							object->_transform->SetScale3D(scale);
+						}
+						//Component
+						{
+							auto Component = item.child(L"Component");
+							for (pugi::xml_node compItem = Component.first_child(); compItem; compItem = compItem.next_sibling())
+							{
+								HString className = compItem.attribute(L"Class").as_string();
+								auto component = object->AddComponent(className);
+								auto pro = compItem.child(L"Item");
+
+								HString proName = pro.attribute(L"Name").as_string();
+								HString proType = pro.attribute(L"Type").as_string();
+								HString proValue = pro.attribute(L"Value").as_string();
+								?
+							}
+						}
+					}
+					objectIndex++;
+				}
 			}
 			bLoad = true;
 		}
