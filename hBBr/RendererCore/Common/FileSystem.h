@@ -52,6 +52,7 @@ extern "C" {
 		HBBR_API static bool FileRemove(const char* path);
 		HBBR_API static void FileRename(const char* src , const char* dst);
 		HBBR_API static uint64_t GetFileSize(const char* path);
+		HBBR_API static HString Append(HString a,HString b);
 		//本地化路径上的斜杠
 		HBBR_API static HString CorrectionPath(const char* path);
 		//本地化路径上的斜杠

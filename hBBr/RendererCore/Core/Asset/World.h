@@ -30,7 +30,12 @@ public:
 
 	HBBR_API HBBR_INLINE class CameraComponent* GetMainCamera()const { return _mainCamera; }
 
-	HBBR_API void AddLevel(HString levelAssetPath);
+	HBBR_API HBBR_INLINE std::vector<std::shared_ptr<Level>> GetLevels()const { return _levels; }
+
+	//参数可以支持两种形式：
+	// 1.Level名称,会在World目录下查找是否存在该Level
+	// 2.根据Asset相对路径(Asset/World/aaa.world/bbb.level)
+	HBBR_API void AddLevel(HString levelNameOrAssetPath);
 
 	HBBR_API void AddNewLevel(HString name);
 
@@ -50,6 +55,7 @@ public:
 	std::function<void(std::shared_ptr<GameObject>)> _editorGameObjectRemoveFunc = [](std::shared_ptr<GameObject> oldObject) {};
 	std::function<void(std::shared_ptr<GameObject>)> _editorGameObjectUpdateFunc = [](std::shared_ptr<GameObject> oldObject) {};
 	std::function<void(std::vector<std::weak_ptr<Level>>&)> _editorWorldUpdate = [](std::vector<std::weak_ptr<Level>> levels) {};
+	std::function<void()> _editorLevelChanged = []() {};
 
 	std::shared_ptr<Level> _editorLevel;
 

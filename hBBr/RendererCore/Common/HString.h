@@ -574,6 +574,7 @@ public:
 		return out;
 	}
 
+	//返回一个没有空格或者Tab的字符串
 	inline HString ClearSpace()
 	{
 		if (length > 0)

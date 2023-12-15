@@ -69,7 +69,7 @@ public:
     virtual void closeEvent(QCloseEvent* event);
     virtual void focusInEvent(QFocusEvent* event);
     class  VulkanRenderer* _renderer = nullptr;
-    class CheckBox* _checkBox;
+    class ComboBox* _currentLevel;
     static SceneOutlineTree* _treeWidget;
     class CustomSearchLine* _search;
 private slots:

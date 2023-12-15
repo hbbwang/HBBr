@@ -15,6 +15,7 @@
 #include "CustomSearchLine.h"
 #include "Inspector.h"
 #include "CheckBox.h"
+#include "ComboBox.h"
 SceneOutlineTree* SceneOutline::_treeWidget = nullptr;
 
 GameObjectItem::GameObjectItem(GameObject* gameObject, QTreeWidget* view)
@@ -231,9 +232,13 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     mainLayout->setSpacing(0);
     this->setLayout(mainLayout);
 
-    _checkBox = new CheckBox("Level", this);
-    _checkBox->setMaximumHeight(30);
-    mainLayout->addWidget(_checkBox);
+    _currentLevel = new ComboBox("Level", this);
+    _currentLevel->setMaximumHeight(30);
+    _currentLevel->ui.horizontalLayout->setStretch(0, 1);
+    _currentLevel->ui.horizontalLayout->setStretch(1, 0);
+    _currentLevel->ui.horizontalLayout->setStretch(2, 50);
+    _currentLevel->ui.Name->setObjectName("SceneOutlineLevel");
+    mainLayout->addWidget(_currentLevel);
 
     _search = new CustomSearchLine(this);
     _search->setMaximumHeight(30);
@@ -244,22 +249,31 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     _treeWidget = new SceneOutlineTree(renderer, this);
     mainLayout->addWidget(_treeWidget);
 
-    mainLayout->setStretch(0, 0);
-    mainLayout->setStretch(0, 1000);
-
     _renderer = renderer;
 
     //Spawn new world callBack:
     auto spawnNewWorldCallBack = [this](std::weak_ptr<World> world)
     {
-        //World Update Callback
         if (!world.expired())
         {
             auto worldPtr = world.lock();
+
+            //World Update Callback
             worldPtr->_editorWorldUpdate= 
                 [](std::vector<std::weak_ptr<Level>>&levels)
                 {
                 };
+
+            //Level changed callback
+            worldPtr->_editorLevelChanged =
+                [this, worldPtr]()
+            {
+                _currentLevel->ClearItems();
+                for (auto& i : worldPtr->GetLevels())
+                {
+                    _currentLevel->AddItem(i->GetLevelName().c_str());
+                }
+            };
 
             //Editor GameObject¸üÐÂÎ¯ÍÐ
             worldPtr->_editorGameObjectUpdateFunc = [this]
@@ -308,6 +322,12 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                 }
                 item->Destroy();
             };
+            
+            _currentLevel->ClearItems();
+            for (auto &i : worldPtr->GetLevels())
+            {
+                _currentLevel->AddItem(i->GetLevelName().c_str());
+            }
         }
     };   
     _renderer->_spwanNewWorld.push_back(spawnNewWorldCallBack);

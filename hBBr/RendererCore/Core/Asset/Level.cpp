@@ -7,6 +7,7 @@
 Level::Level(HString name)
 {
 	_levelName = name;
+	_levelName = _levelName.ClearSpace();
 }
 
 Level::~Level()

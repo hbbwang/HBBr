@@ -22,12 +22,33 @@ World::~World()
 	ReleaseWorld();
 }
 
-void World::AddLevel(HString levelAssetPath)
+void World::AddLevel(HString levelNameOrAssetPath)
 {
-	if (FileSystem::ContainsPath(_worldAssetPath, levelAssetPath))
+	HString path = levelNameOrAssetPath; 
+	//Asset完整路径
+	if (FileSystem::FileExist(path))
 	{
 
 	}
+	else
+	{
+		//Asset相对路径
+		path = FileSystem::FillUpAssetPath(levelNameOrAssetPath);
+		if (FileSystem::FileExist(path))
+		{
+
+		}
+		//Name
+		else
+		{
+			path = FileSystem::Append(_worldAssetPath, levelNameOrAssetPath) + ".level";
+			if (FileSystem::FileExist(path))
+			{
+
+			}
+		}
+	}
+	_editorLevelChanged();
 }
 
 void World::AddNewLevel(HString name)
@@ -36,10 +57,12 @@ void World::AddNewLevel(HString name)
 	newLevel.reset(new Level(name));
 	newLevel->Load(this, "");
 	_levels.push_back(newLevel);
+	_editorLevelChanged();
 }
 
 void World::SaveWorld(HString newWorldName)
 {
+	newWorldName.ClearSpace();
 	if (newWorldName.Length() > 1)
 	{
 		HString assetPath = FileSystem::GetWorldAbsPath();
@@ -117,7 +140,7 @@ void World::Load(class VulkanRenderer* renderer, HString worldAssetPath)
 
 #endif
 
-	//Load world file
+	//Load world content
 	if (FileSystem::IsDir(worldAssetPath.c_str()))
 	{
 		//Find all levels

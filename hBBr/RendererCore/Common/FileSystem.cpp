@@ -219,6 +219,15 @@ uint64_t FileSystem::GetFileSize(const char* path)
     return fs::file_size(path);
 }
 
+HString FileSystem::Append(HString a, HString b)
+{
+    fs::path pp = a.c_str();
+    fs::path aa = b.c_str();
+    pp = pp / aa;
+    pp = pp.lexically_normal();
+    return pp.c_str();
+}
+
 HString FileSystem::CorrectionPath(const char* path)
 {
     //std::filesystem::path::preferred_separator

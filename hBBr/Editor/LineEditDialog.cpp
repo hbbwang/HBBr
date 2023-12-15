@@ -21,10 +21,8 @@ LineEditDialog::LineEditDialog(QString name , QWidget *parent)
 	connect(ui.CancelButton, &QPushButton::clicked, this, &LineEditDialog::Cancel);
 
 	CancelCallBack = [this]() {
-		this->setParent(nullptr);
-		this->close();
 	};
-
+	this->show();
 }
 
 LineEditDialog::~LineEditDialog()
@@ -33,9 +31,13 @@ LineEditDialog::~LineEditDialog()
 void LineEditDialog::Enter()
 {
 	EnterCallBack();
+	this->setParent(nullptr);
+	this->close();
 }
 
 void LineEditDialog::Cancel()
 {
 	CancelCallBack();
+	this->setParent(nullptr);
+	this->close();
 }
