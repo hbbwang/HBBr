@@ -19,7 +19,7 @@ public:
 
 	HString* _stringBind = nullptr;
 
-	std::weak_ptr<class AssetObject> *_objectBind = nullptr;
+	class AssetObject* _objectBind = nullptr;
 
 	std::vector<HString>* _stringArrayBind = nullptr;
 

@@ -115,7 +115,8 @@ void Level::Load(World* world, HString levelPath)
 								HString proName = pro.attribute(L"Name").as_string();
 								HString proType = pro.attribute(L"Type").as_string();
 								HString proValue = pro.attribute(L"Value").as_string();
-								?
+								
+
 							}
 						}
 					}
@@ -192,7 +193,7 @@ void Level::SaveLevel()
 						auto pro = compItem.append_child(L"Item");
 						pro.append_attribute(L"Name").set_value(p.name.c_wstr());
 						pro.append_attribute(L"Type").set_value(p.type.c_wstr());
-						pro.append_attribute(L"Value").set_value(Component::AnalysisPropertyValue(p).c_wstr());
+						pro.append_attribute(L"Value").set_value(valueStr.c_wstr());
 					}
 				}
 			}

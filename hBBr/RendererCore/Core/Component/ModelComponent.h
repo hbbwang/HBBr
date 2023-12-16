@@ -38,7 +38,7 @@ private:
 
 	std::weak_ptr<class ModelData> _modelData;
 
-	std::weak_ptr<class ModelData> _lastModelData;
+	std::weak_ptr<class ModelData> _oldModelData;
 
 	std::vector<ModelPrimitive*> _primitives;
 

@@ -222,45 +222,86 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				continue;
 			}
 			//std::weak_ptr<ModelData> value
-			else if (p.type_runtime == typeid(ModelData).name())
+			else if (p.bAsset)
 			{
 				if (p.bArray)
 				{
+					auto value = ((std::vector<HGUID>*)p.value);
+					ToolBox* box = new ToolBox("Material", true, this);
+					compWidget->layout()->addWidget(box);
+					for (int i = 0; i < value->size(); i++)
+					{
+						auto info = ContentManager::Get()->GetAssetInfo(value->at(i));
+						if (!info.expired())
+						{
+							AssetLine* line = new AssetLine(p.name, this, info.lock()->virtualPath, info.lock()->suffix);
+							compWidget->layout()->addWidget(line);
+							line->_bindFindButtonFunc = [](const char* p) {
+
+							};
+							line->_bindStringFunc = [p, value, i](AssetLine* line, const char* s) {
+								auto guidStr = FileSystem::GetBaseName(s);
+								HGUID newGuid;
+								StringToGUID(guidStr.c_str(), &newGuid);
+								if (newGuid.isValid())
+								{
+									value->at(i) = newGuid;
+									if (p.type_runtime == typeid(ModelData).name())
+									{
+										auto newObject = ModelData::LoadAsset(newGuid);
+										auto shared = newObject.lock();
+										line->_objectBind = shared.get();
+									}
+									else	if (p.type_runtime == typeid(Material).name())
+									{
+										auto newObject = Material::LoadAsset(newGuid);
+										auto shared = newObject.lock();
+										line->_objectBind = shared.get();
+									}
+								}
+							};
+						}
+					}
 				}
 				else
 				{
-					auto value = ((std::weak_ptr<ModelData>*)p.value);
-					AssetLine* line = new AssetLine(p.name, this, value->lock()->_assetInfo->virtualPath, value->lock()->_assetInfo->suffix);
-					compWidget->layout()->addWidget(line);
-					line->_bindFindButtonFunc = [](const char* p) {
+					auto value = ((HGUID*)p.value);
+					HGUID guid = *value;
+					auto info = ContentManager::Get()->GetAssetInfo(guid);
+					if (!info.expired())
+					{
+						AssetLine* line = new AssetLine(p.name, this, info.lock()->virtualPath, info.lock()->suffix);
+						compWidget->layout()->addWidget(line);
+						line->_bindFindButtonFunc = [](const char* p) {
 
-					};
-					line->_bindStringFunc = [p, value](AssetLine* line, const char* s) {
-						auto guidStr = FileSystem::GetBaseName(s);
-						HGUID guid;
-						StringToGUID(guidStr.c_str(), &guid);
-						if (guid.isValid())
-						{
-							if (!value->expired())
+						};
+						line->_bindStringFunc = [p,value](AssetLine* line, const char* s) {
+							auto guidStr = FileSystem::GetBaseName(s);
+							HGUID newGuid;
+							StringToGUID(guidStr.c_str(), &newGuid);
+							if (newGuid.isValid())
 							{
-								auto newObject = ModelData::LoadAsset(guid);
-								if (!newObject.expired())
+								*value = newGuid;
+								if (p.type_runtime == typeid(ModelData).name())
 								{
-									*value = newObject;
+									auto newObject = ModelData::LoadAsset(newGuid);
+									auto shared = newObject.lock();
+									line->_objectBind = shared.get();
 								}
-								line->_objectBind = ((std::weak_ptr<class AssetObject>*)value);
+								else	if (p.type_runtime == typeid(Material).name())
+								{
+									auto newObject = Material::LoadAsset(newGuid);
+									auto shared = newObject.lock();
+									line->_objectBind = shared.get();
+								}
 							}
-							else
-							{
-								*value = std::weak_ptr<ModelData>();
-							}
-						}
-					};
+						};
+					}
 				}
 				continue;
 			}
 			//std::vector<std::weak_ptr<Material>> value array
-			else if (p.type_runtime == typeid(Material).name())
+			/*else if (p.type_runtime == typeid(Material).name())
 			{
 				if (p.bArray)
 				{
@@ -293,7 +334,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 					}
 				}			
 				continue;
-			}
+			}*/
 
 		}
 	}

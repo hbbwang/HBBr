@@ -10,8 +10,8 @@ COMPONENT_IMPLEMENT(ModelComponent)
 void ModelComponent::OnConstruction()
 {
 	Component::OnConstruction();
-	AddProperty<ModelData>("Model",  &_modelData , "");
-	AddProperty<Material>("Material", &_materials , "");
+	AddProperty(ModelData, "Model", &_modelGUID, false, "Default", 0);
+	AddProperty(Material, "Material", &_materialGUIDs, false, "Default", 0);
 }
 
 void ModelComponent::SetModelByRealPath(HString path)
@@ -54,7 +54,8 @@ void ModelComponent::SetModel(std::weak_ptr<class ModelData> model)
 	ClearPrimitves();
 	if (!model.expired())
 	{
-		_lastModelData = model;
+		_modelGUID = model.lock()->_assetInfo->guid;
+		_oldModelGUID = model.lock()->_assetInfo->guid;
 		ModelData::BuildModelPrimitives(model.lock().get(), _primitives);
 		_materials.resize(_primitives.size());
 		for (int i = 0; i < (int)_primitives.size(); i++)
@@ -81,9 +82,9 @@ void ModelComponent::GameObjectActiveChanged(bool objActive)
 
 void ModelComponent::Update()
 {
-	if (_modelData.lock().get() != _lastModelData.lock().get())
+	if (_modelGUID != _oldModelGUID)
 	{
-		SetModel(_modelData);
+		SetModel(_modelGUID);
 	}
 }
 

@@ -7,6 +7,7 @@
 #include <typeinfo>
 #include <any>
 #include "HInput.h"
+#include "AssetObject.h"
 
 #define COMPONENT_DEFINE(ComponentClassName)\
 public:\
@@ -31,6 +32,27 @@ ComponentClassName::ComponentClassName(class GameObject* parent) :Component(pare
 \
 ComponentClassName  _component_construct_##ComponentClassName;
 
+#define AddProperty(_class,_name,_value,_bArray,_category,_sort)\
+{\
+	ComponentProperty pro;\
+	if (std::is_base_of<AssetObject, _class>::value)\
+	{\
+		pro.bAsset = true;\
+	}\
+	pro.name = _name;\
+	pro.value = _value;\
+	pro.type = #_class;\
+	pro.type_runtime = typeid(_class).name();\
+	pro.category = _category;\
+	pro.bArray = _bArray;\
+	pro.sort = _sort;\
+	_compProperties.push_back(pro);\
+	auto valueCompare = [](const ComponentProperty& p1, const ComponentProperty& p2)->bool {\
+		return p1.sort < p2.sort;\
+	};\
+	std::sort(_compProperties.begin(), _compProperties.end(), valueCompare);\
+}
+
 struct ComponentProperty
 {
 	HString name;
@@ -45,6 +67,7 @@ struct ComponentProperty
 	//runtime type id
 	std::string type_runtime = "";
 	bool bArray = false;
+	bool bAsset = false;
 };
 
 class Component
@@ -99,64 +122,9 @@ protected:
 
 	HBBR_INLINE virtual void OnConstruction() {
 		//Component Property Reflection Add.
-		AddProperty<bool>("bActive", &_bActive, "Default", 0);
+		AddProperty(bool, "bActive", &_bActive, false, "Default", 0);
 	}
 
-	template<class T>
-	HString GetPropertyTypeString()
-	{
-		if (typeid(T) == typeid(int))
-			return "int";
-		else if (typeid(T) == typeid(float))
-			return "float";
-		else if (typeid(T) == typeid(bool))
-			return "bool";
-		else if (typeid(T) == typeid(uint32_t))
-			return "uint32_t";
-		else if (typeid(T) == typeid(uint16_t))
-			return "uint16_t";
-		else if (typeid(T) == typeid(uint8_t))
-			return "uint8_t";
-		else if (typeid(T) == typeid(uint64_t))
-			return "uint64_t";
-		else if (typeid(T) == typeid(HString))
-			return "HString";
-
-		else
-			return "void";
-
-	}
-
-	template<class T>
-	void AddProperty(HString name, void* valuePtr, HString category = "Default", int sort = 32)
-	{
-		AddProperty<T>(name, valuePtr, false, category, sort);
-	}
-
-	template<class T>
-	void AddArrayProperty(HString name, void* valuePtr, HString category = "Default", int sort = 32)
-	{
-		AddProperty<T>(name, valuePtr, true, category, sort);
-	}
-
-	template<class T>
-	void AddProperty(HString name, void *valuePtr, bool bArray=false , HString category = "Default", int sort = 32)
-	{	
-		ComponentProperty pro;
-		pro.name = name;
-		pro.value = valuePtr;
-		pro.type = GetPropertyTypeString<T>();
-		pro.type_runtime = typeid(T).name();
-		pro.category = category;
-		pro.bArray = bArray;
-		pro.sort = sort;
-		_compProperties.push_back(pro);
-		auto valueCompare = [](const ComponentProperty& p1, const ComponentProperty& p2)->bool {
-			return p1.sort < p2.sort;
-		};
-		std::sort(_compProperties.begin(), _compProperties.end(), valueCompare);
-	}
-	
 	static HString AnalysisPropertyValue(ComponentProperty& p);
 
 	//<displayName , component>
