@@ -340,6 +340,44 @@ std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char
     return result;
 }
 
+std::vector<FileEntry> FileSystem::GetAllFilesExceptFolders(const char* path)
+{
+    if (!fs::is_directory(path))
+    {
+        MessageOut("Get Files By Suffix Failed.Path is not exists.", false, false);
+        return {};
+    }
+    std::vector<FileEntry> result;
+    for (const auto& entry : fs::directory_iterator(path))
+    {
+        if (entry.is_regular_file()) //如果是文件
+        {
+            HString ext = entry.path().extension().c_str();
+            ext.Remove(".");
+            {
+                FileEntry en = {};
+                en.absPath = entry.path().c_str();
+                en.relativePath = GetRelativePath(en.absPath.c_str());
+                en.fileName = entry.path().filename().c_str();
+                en.suffix = entry.path().extension().c_str();
+                en.baseName = entry.path().stem().c_str();
+                en.type = FileEntryType::File;
+                result.push_back(en);
+            }
+        }
+        else if (entry.is_directory()) //文件夹
+        {
+            HString newDirPath = entry.path().c_str();
+            auto children = GetAllFilesExceptFolders(newDirPath.c_str());
+            if (children.size() > 0)
+            {
+                result.insert(result.end(), children.begin(), children.end());
+            }
+        }
+    }
+    return result;
+}
+
 std::vector<char> FileSystem::ReadBinaryFile(const char* filePath)
 {
     std::ifstream file(filePath, std::ios::ate | std::ios::binary);

@@ -37,6 +37,21 @@ public:
 	/* 读取xml节点的Float属性 */
 	static bool LoadXMLAttributeFloat(pugi::xml_node& node, const wchar_t* attributeName, float& attri);
 
+	template<class T>
+	static bool SetXMLAttribute(pugi::xml_node& node, const wchar_t* attributeName, T value)
+	{
+		if (node)
+		{
+			pugi::xml_attribute attr = node.attribute(attributeName);
+			if (!attr)
+			{
+				attr = node.append_attribute(attributeName);
+			}
+			attr.set_value(value);
+		}
+	}
+
+
 	static void CreateXMLFile(HString path , pugi::xml_document& doc);
 
 };

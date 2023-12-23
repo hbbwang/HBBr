@@ -9,7 +9,6 @@
 #include "Asset/HGuid.h"
 #include "HString.h"
 #include "Asset/HGuid.h"
-//渲染器的资产名字在导入的过程中自动转换为GUID,而它的信息将会储存在Asset/Content/ContentReference.xml中。
 
 //资产类型
 enum class AssetType
@@ -18,10 +17,27 @@ enum class AssetType
 	Model = 1,			//.fbx
 	Material = 2,		//.mat
 	Texture2D = 3,		//.tex2D
-	TextureCube = 4,	//.texCube
-	Prefab = 5,			//.frefab
+
 	MaxNum = 32,
 };
+
+
+inline static AssetType GetAssetTypeBySuffix(HString suffix)
+{
+	if (suffix.IsSame("fbx", false))
+	{
+		return AssetType::Model;
+	}
+	else if (suffix.IsSame("mat", false))
+	{
+		return AssetType::Material;
+	}
+	else if(suffix.IsSame("dds", false))
+	{
+		return AssetType::Texture2D;
+	}
+	return AssetType::Unknow;
+}
 
 inline static HString GetAssetTypeString(AssetType type)
 {
@@ -30,8 +46,6 @@ inline static HString GetAssetTypeString(AssetType type)
 	case AssetType::Model:return "Model";
 	case AssetType::Material:return "Material";
 	case AssetType::Texture2D:return "Texture2D";
-	case AssetType::TextureCube:return "TextureCube";
-	case AssetType::Prefab:return "Prefab";
 	case AssetType::Unknow:
 	case AssetType::MaxNum:	return "Unknow";
 	}
@@ -53,12 +67,12 @@ public:
 	AssetType type;
 	HString name;
 	HString suffix;
-	//相对路径
-	HString relativePath;
-	//Asset虚拟/相对路径，带虚拟文件名，没有后缀
-	HString virtualPath;
+	//相对路径(Asset/....)
+	HString assetPath;
 	//真实绝对路径，带完整文件名字和后缀
 	HString absPath;
+	//Info文件的绝对路径
+	HString metaFileAbsPath;
 	uint64_t byteSize;
 	std::vector<std::weak_ptr<AssetInfoBase>> refs;
 	//用来暂时储存引用的guid和type,没有太多实际意义,通常是空的
@@ -120,9 +134,6 @@ public:
 	/* 重载所有资产信息(只是加载引用信息,非资产本身) */
 	HBBR_API void ReloadAllAssetInfos();
 
-	/* 重载相关类型资产的信息(只是加载引用信息,非资产本身) */
-	HBBR_API void ReloadAssetInfos(AssetType type);
-
 	/* 更新所有资产引用关系 */
 	HBBR_API void UpdateAllAssetReference();
 
@@ -135,11 +146,10 @@ public:
 	/* 更新单个资产的引用关系(GUID),不指定Type,会全局检索,可能会比较慢 */
 	HBBR_API void UpdateAssetReference(HGUID obj);
 
-	/* 导入资产信息 */
-	HBBR_API std::weak_ptr<AssetInfoBase> ImportAssetInfo(AssetType type, HString name, HString suffix, HString contentPath);
+	/* 创建资产信息 */
+	HBBR_API std::weak_ptr<AssetInfoBase> CreateAssetInfo(HString AssetPath);
 
-	/* 导入资产信息 */
-	HBBR_API std::weak_ptr<AssetInfoBase> ImportAssetInfo(AssetType type , HString sourceFile, HString contentPath);
+	HBBR_API void SaveAssetInfo(AssetInfoBase* info);
 
 	/* 删除资产 */
 	HBBR_API void  DeleteAsset(HString filePath);
@@ -151,14 +161,11 @@ public:
 
 	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HGUID guid, AssetType type = AssetType::Unknow)const;
 
-	/* 根据实际路径实际文件获取 */
-	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HString realAbsPath)const;
-
-	/* 根据内容浏览器显示的文件名称(虚拟路径)查找 AssetInfo */
-	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(AssetType type, HString contentBrowserFilePath)const;
+	/* 根据路径实际文件获取 */
+	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HString assetPath)const;
 
 	/* 根据内容浏览器显示的文件名称(虚拟路径)查找(非实际GUID的名称)GUID */
-	HBBR_API HGUID GetAssetGUID(AssetType type,HString contentBrowserFilePath)const;
+	HBBR_API HGUID GetAssetGUID(HString assetPath)const;
 
 	template<class T>
 	HBBR_INLINE std::weak_ptr<T> GetAsset(HGUID guid , AssetType type = AssetType::Unknow)
@@ -184,8 +191,8 @@ private:
 	/* 更新单个资产的引用关系(info) */
 	void UpdateAssetReference(std::weak_ptr<AssetInfoBase> info);
 
-	/* 重载单个资产的信息(只是加载引用信息,非资产本身) */
-	void ReloadAssetInfo(AssetType type , pugi::xml_node& node);
+	/* 重载单个资产的信息(只是加载引用信息,非资产本身),meta绝对路径 */
+	std::weak_ptr<AssetInfoBase> ReloadAssetInfoByMetaFile(HString AbsPath);
 
 	void Release();
 
@@ -197,10 +204,6 @@ private:
 
 	static std::unique_ptr<ContentManager> _ptr;
 
-	//<HGUID,资产信息>//
-	pugi::xml_document _contentRefConfig;
-
 	std::vector<std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>>_assets;
 
-	HString _configPath;
 };

@@ -66,8 +66,10 @@ extern "C" {
 		HBBR_API static HString GetFileName(HString path);
 		HBBR_API static HString GetBaseName(HString path);
 		HBBR_API static HString GetFileExt(HString path);
-		static std::vector<FileEntry> GetFilesBySuffix(const char* path, const char* suffix);
-		static std::vector<char>ReadBinaryFile(const char* filePath);
+		HBBR_API static std::vector<FileEntry> GetFilesBySuffix(const char* path, const char* suffix);
+		//Get all files except folders
+		HBBR_API static std::vector<FileEntry> GetAllFilesExceptFolders(const char* path);
+		HBBR_API static std::vector<char>ReadBinaryFile(const char* filePath);
 		static HString _appPath;
 	};
 
