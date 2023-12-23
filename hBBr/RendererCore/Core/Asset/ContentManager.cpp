@@ -224,45 +224,71 @@ std::weak_ptr<AssetInfoBase> ContentManager::ReloadAssetInfoByMetaFile(HString A
 std::weak_ptr<AssetInfoBase> ContentManager::CreateAssetInfo(HString AssetPath)
 {
 	auto contentPath = FileSystem::FillUpAssetPath(AssetPath);
-
 	auto metaFile = contentPath + ".meta";
 
-	FileSystem::NormalizePath(contentPath);
-	HString name = contentPath.GetBaseName();
-	HString suffix = contentPath.GetSuffix();
-	AssetType type = GetAssetTypeBySuffix(suffix);
-	HString relativePath = FileSystem::GetRelativePath(contentPath.c_str());
-	relativePath.Replace("\\", "/");
+	{
+		AssetSaveType save;
+		save.metaAssetPath = metaFile;
+		save.guid = CreateGUID();
+		save.type = GetAssetTypeBySuffix(AssetPath.GetSuffix());
+		save.byteSize = FileSystem::GetFileSize(AssetPath.c_str());
+		SaveAssetInfo(save);
+	}
 
 	//重新导入并获取
-	return ReloadAssetInfoByMetaFile(metaFile);
+	auto info = ReloadAssetInfoByMetaFile(metaFile);;
+
+	return info;
 }
 
 void ContentManager::SaveAssetInfo(AssetInfoBase* info)
 {
 	if (info)
 	{
-		pugi::xml_document doc;
-		HString metaFilePath = info->metaFileAbsPath;
-		if (!FileSystem::FileExist(metaFilePath))
-		{
-			XMLStream::CreateXMLFile(metaFilePath, doc);
-		}
-		else
-		{
-			XMLStream::LoadXML(metaFilePath.c_wstr(), doc);
-		}
-
-		auto rootNode = doc.child(L"root");
-		//Type
-		XMLStream::SetXMLAttribute(rootNode, L"Type", (int)info->type);
-		//GUID
-		XMLStream::SetXMLAttribute(rootNode, L"Type", ((HString)info->guid.str().c_str()).c_wstr());
-		//ByteSize
-		XMLStream::SetXMLAttribute(rootNode, L"ByteSize", info->byteSize);
-
-		doc.save_file(metaFilePath.c_wstr());
+		AssetSaveType save;
+		save.metaAssetPath = info->metaFileAbsPath;
+		save.guid = info->guid;
+		save.type = info->type;
+		save.byteSize = info->byteSize;
+		save.refs = info->refs;
+		SaveAssetInfo(save);
 	}
+}
+
+void ContentManager::SaveAssetInfo(AssetSaveType save)
+{
+	pugi::xml_document doc;
+	if (!FileSystem::FileExist(save.metaAssetPath))
+	{
+		XMLStream::CreateXMLFile(save.metaAssetPath, doc);
+	}
+	else
+	{
+		XMLStream::LoadXML(save.metaAssetPath.c_wstr(), doc);
+	}
+
+	auto rootNode = doc.child(L"root");
+	//Type
+	XMLStream::SetXMLAttribute(rootNode, L"Type", (int)save.type);
+	//GUID
+	XMLStream::SetXMLAttribute(rootNode, L"GUID", ((HString)save.guid.str().c_str()).c_wstr());
+	//ByteSize
+	XMLStream::SetXMLAttribute(rootNode, L"ByteSize", save.byteSize);
+	
+	//Reference
+	auto refNode = XMLStream::CreateXMLNode(rootNode, L"Ref");
+	for (auto& i : save.refs)
+	{
+		if (!i.expired())
+		{
+			//Ref Type
+			XMLStream::SetXMLAttribute(rootNode, L"Type", (int)i.lock()->type);
+			//Ref GUID
+			XMLStream::SetXMLAttribute(rootNode, L"GUID", ((HString)i.lock()->guid.str().c_str()).c_wstr());
+		}
+	}
+
+	doc.save_file(save.metaAssetPath.c_wstr());
 }
 
 void ContentManager::DeleteAsset(HString filePath)
@@ -320,6 +346,7 @@ void ContentManager::RemoveAssetInfo(HGUID obj, AssetType type )
 					if (iit != it->second->refs.end())
 					{
 						i.lock()->refs.erase(iit);
+						SaveAssetInfo(i.lock().get());
 					}
 				}
 			}

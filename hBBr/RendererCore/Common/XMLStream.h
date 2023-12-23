@@ -38,7 +38,7 @@ public:
 	static bool LoadXMLAttributeFloat(pugi::xml_node& node, const wchar_t* attributeName, float& attri);
 
 	template<class T>
-	static bool SetXMLAttribute(pugi::xml_node& node, const wchar_t* attributeName, T value)
+	static void SetXMLAttribute(pugi::xml_node& node, const wchar_t* attributeName, T value)
 	{
 		if (node)
 		{
@@ -51,6 +51,18 @@ public:
 		}
 	}
 
+	static pugi::xml_node CreateXMLNode(pugi::xml_node& node, const wchar_t* name)
+	{
+		if (node)
+		{
+			if (!node.child(name))
+			{
+				auto new_node = node.append_child(name);
+				return new_node;
+			}
+		}
+		return pugi::xml_node();
+	}
 
 	static void CreateXMLFile(HString path , pugi::xml_document& doc);
 

@@ -119,6 +119,15 @@ public:
 	}
 };
 
+struct AssetSaveType
+{
+	HString metaAssetPath;
+	HGUID guid;
+	AssetType type;
+	size_t byteSize;
+	std::vector<std::weak_ptr<AssetInfoBase>> refs;
+};
+
 class ContentManager
 {
 	friend class VulkanApp;
@@ -150,6 +159,8 @@ public:
 	HBBR_API std::weak_ptr<AssetInfoBase> CreateAssetInfo(HString AssetPath);
 
 	HBBR_API void SaveAssetInfo(AssetInfoBase* info);
+
+	HBBR_API void SaveAssetInfo(AssetSaveType save);
 
 	/* 删除资产 */
 	HBBR_API void  DeleteAsset(HString filePath);
