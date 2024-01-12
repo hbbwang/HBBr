@@ -56,7 +56,7 @@ RenderView::RenderView(QWidget* parent)
 					if (newObject)
 					{
 						auto modelComp = newObject->AddComponent<ModelComponent>();
-						modelComp->SetModelByVirtualPath(assetInfo.lock()->virtualPath);
+						modelComp->SetModelByAssetPath(assetInfo.lock()->assetFilePath);
 						newObject->SetObjectName(assetInfo.lock()->name);
 					}
 				}

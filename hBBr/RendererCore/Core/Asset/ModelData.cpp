@@ -39,8 +39,7 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 		return dataPtr->GetData();
 	}
 	//获取实际路径
-	HString filePath = FileSystem::GetProgramPath() + it->second->relativePath + guidStr + ".fbx";
-	FileSystem::CorrectionPath(filePath);
+	HString filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
 		return std::weak_ptr<ModelData>();
@@ -199,8 +198,6 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 		modelData->faces.push_back(newData);
 	}
 	//----------------------
-	modelData->filePath = filePath;
-	modelData->virtualFilePath = dataPtr->virtualPath;
 	//_modelCache.emplace(std::make_pair(fbxPath, std::move(modelData)));
 
 	dataPtr->SetData(std::move(modelData));
@@ -220,7 +217,7 @@ bool ModelData::BuildModelPrimitives(ModelData* data, std::vector<ModelPrimitive
 			prims[i]->boundingBox_min = data->boundingBox_min;
 			prims[i]->boundingBox_max = data->boundingBox_max;
 			prims[i]->vertexInput = data->faces[i].vertexData;
-			prims[i]->modelPrimitiveName = data->filePath;
+			prims[i]->modelPrimitiveName = data->_assetInfo->name;
 		}
 		return true;
 	}

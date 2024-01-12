@@ -45,6 +45,7 @@ GameObject* Level::FindGameObjectByGUID(HGUID guid)
 	{
 		return it->get();
 	}
+	return nullptr;
 }
 
 void Level::Load(World* world, HString levelPath)

@@ -18,7 +18,6 @@ void Shader::LoadShaderCache(const char* cachePath)
 		ShaderCache cache = {};
 		cache.shaderLoadIndex = cacheIndex;
 		//
-		//auto shaderData = FileSystem::ReadBinaryFile(i.absPath.c_str());
 		std::ifstream file(i.absPath.c_str(), std::ios::ate | std::ios::binary);
 		size_t fileSize = static_cast<size_t>(file.tellg());
 		if (fileSize <= 1)

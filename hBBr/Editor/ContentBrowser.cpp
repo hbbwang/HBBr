@@ -531,7 +531,7 @@ void ContentBrowser::AssetImport()
 			{
 				//导入Asset info
 				dstPath += ".fbx";
-				assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Model, i.toStdString().c_str(), dstPath.toStdString().c_str());
+				assetInfo = ContentManager::Get()->CreateAssetInfo(dstPath.toStdString().c_str());
 				//复制fbx进content
 				HString guidStr = GUIDToString(assetInfo.lock()->guid);
 				dirPath += QDir::separator();
@@ -546,7 +546,7 @@ void ContentBrowser::AssetImport()
 			{
 		        //导入dds压缩纹理
 				dstPath += ".dds";
-				assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Texture2D, i.toStdString().c_str(), dstPath.toStdString().c_str());
+				assetInfo = ContentManager::Get()->CreateAssetInfo(dstPath.toStdString().c_str());
 				//转换图像格式为dds
 				HString guidStr = GUIDToString(assetInfo.lock()->guid);
 				dirPath += QDir::separator();

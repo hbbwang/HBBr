@@ -86,8 +86,11 @@ std::weak_ptr<AssetInfoBase> ContentManager::GetAssetInfo(HString assetPath) con
 	{
 		std::weak_ptr<AssetInfoBase>();
 	}
-
-	auto metaFilePath = assetPath + ".meta";
+	auto metaFilePath = assetPath;
+	if (!metaFilePath.GetSuffix().IsSame("meta"))
+	{
+		metaFilePath += ".meta";
+	}
 	pugi::xml_document doc; 
 	if (XMLStream::LoadXML(metaFilePath.c_wstr(), doc))
 	{
@@ -190,9 +193,13 @@ std::weak_ptr<AssetInfoBase> ContentManager::ReloadAssetInfoByMetaFile(HString A
 	info->type = type;
 	info->guid = guid;
 	info->name = AbsPath.GetBaseName().GetBaseName();//xxx.fbx.meta
-	info->absPath = AbsPath;
+	info->absFilePath = AbsPath;
+	FileSystem::FixUpPath(info->absFilePath);
+	info->absPath = info->absFilePath.GetFilePath();
 	FileSystem::FixUpPath(info->absPath);
-	info->assetPath = FileSystem::GetRelativePath(AbsPath.c_str());
+	info->assetFilePath = FileSystem::GetRelativePath(AbsPath.c_str());
+	FileSystem::FixUpPath(info->assetFilePath);
+	info->assetPath = info->assetFilePath.GetFilePath();
 	FileSystem::FixUpPath(info->assetPath);
 	info->suffix = AbsPath.GetSuffix();
 	info->metaFileAbsPath = AbsPath + ".meta";

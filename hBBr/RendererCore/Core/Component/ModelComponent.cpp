@@ -14,29 +14,12 @@ void ModelComponent::OnConstruction()
 	AddProperty(Material, "Material", &_materialGUIDs, false, "Default", 0);
 }
 
-void ModelComponent::SetModelByRealPath(HString path)
-{
-	HGUID guid;
-	FileSystem::CorrectionPath(path);
-	HString guidStr = path.GetBaseName();
-	StringToGUID(guidStr.c_str(), &guid);
-	if (!_modelData.expired()  && _modelData.lock()->_assetInfo->guid == guid)
-	{
-		return;
-	}
-	SetModel(guid);
-}
-
-void ModelComponent::SetModelByVirtualPath(HString path)
+void ModelComponent::SetModelByAssetPath(HString path)
 {
 	path = FileSystem::FillUpAssetPath(path);
-	auto info = ContentManager::Get()->GetAssetInfo(AssetType::Model, path);
+	auto info = ContentManager::Get()->GetAssetInfo(path);
 	if (info.expired())
 		return;
-	if (!_modelData.expired() && _modelData.lock()->_assetInfo->guid == info.lock()->guid)
-	{
-		return;
-	}
 	SetModel(info.lock()->guid);
 }
 
@@ -45,8 +28,7 @@ void ModelComponent::SetModel(HGUID guid)
 	if (!guid.isValid())
 		return;
 	//create
-	_modelData = ModelData::LoadAsset(guid);
-	SetModel(_modelData);
+	SetModel(ModelData::LoadAsset(guid));
 }
 
 void ModelComponent::SetModel(std::weak_ptr<class ModelData> model)
@@ -57,6 +39,7 @@ void ModelComponent::SetModel(std::weak_ptr<class ModelData> model)
 		_modelGUID = model.lock()->_assetInfo->guid;
 		_oldModelGUID = model.lock()->_assetInfo->guid;
 		ModelData::BuildModelPrimitives(model.lock().get(), _primitives);
+		_materialGUIDs.resize(_primitives.size());
 		_materials.resize(_primitives.size());
 		for (int i = 0; i < (int)_primitives.size(); i++)
 		{
@@ -70,9 +53,9 @@ void ModelComponent::SetModel(std::weak_ptr<class ModelData> model)
 
 void ModelComponent::GameObjectActiveChanged(bool objActive)
 {
-	if (!_modelData.expired() && _bActive && objActive)
+	if ( _bActive && objActive )
 	{
-		SetModel(_modelData.lock()->_assetInfo->guid);
+		SetModel(_modelGUID);
 	}
 	else
 	{

@@ -148,6 +148,4 @@ public:
 	glm::vec4					uv_0_1_abs_max = glm::vec4(0, 0, 0, 0);
 	glm::vec4					uv_2_3_abs_max = glm::vec4(0, 0, 0, 0);
 	//
-	HString						filePath;
-	HString						virtualFilePath;
 };

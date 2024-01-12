@@ -63,7 +63,7 @@ GameObject* GameObject::CreateModelGameObject(HString virtualPath, Level* level)
 	GameObject* cube = new GameObject(virtualPath.GetBaseName(), level);
 	auto modelComp = cube->AddComponent<ModelComponent>();
 	cube->GetTransform()->SetLocation(glm::vec3(0, 0.5f, 0));
-	modelComp->SetModelByVirtualPath(virtualPath);
+	modelComp->SetModelByAssetPath(virtualPath);
 	return cube;
 }
 

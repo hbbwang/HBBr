@@ -67,9 +67,13 @@ public:
 	AssetType type;
 	HString name;
 	HString suffix;
-	//相对路径(Asset/....)
+	//资产所在的相对 [文件] 路径(Asset/....),带完整文件名字和后缀
+	HString assetFilePath;
+	//资产所在的相对 [目录] 路径(Asset/....)
 	HString assetPath;
-	//真实绝对路径，带完整文件名字和后缀
+	//资产所在的真实绝对 [文件] 路径，带完整文件名字和后缀
+	HString absFilePath;
+	//资产所在的真实绝对 [目录] 路径
 	HString absPath;
 	//Info文件的绝对路径
 	HString metaFileAbsPath;
@@ -156,7 +160,7 @@ public:
 	HBBR_API void UpdateAssetReference(HGUID obj);
 
 	/* 创建资产信息 */
-	HBBR_API std::weak_ptr<AssetInfoBase> CreateAssetInfo(HString AssetPath);
+	HBBR_API std::weak_ptr<AssetInfoBase> CreateAssetInfo(HString AssetPath); 
 
 	HBBR_API void SaveAssetInfo(AssetInfoBase* info);
 

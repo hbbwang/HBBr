@@ -41,8 +41,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		return dataPtr->GetData();
 	}
 	//获取实际路径
-	HString filePath = FileSystem::GetProgramPath() + it->second->relativePath + guidStr + ".mat";
-	FileSystem::CorrectionPath(filePath);
+	HString filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
 		return std::weak_ptr<Material>();
@@ -256,18 +255,20 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 	return std::weak_ptr<Material>();
 }
 
-Material* Material::CreateMaterial(HString newMatFilePath)
+std::weak_ptr<Material> Material::CreateMaterial(HString newMatFilePath)
 {
 	if (!FileSystem::IsDir(newMatFilePath.c_str()))
 	{
-		return nullptr;
+		return std::weak_ptr<Material>();
 	}
 	//复制引擎自带材质实例
-	HGUID guid("61A147FF-32BD-48EC-B523-57BC75EB16BA");
-	HString srcMat = (FileSystem::GetContentAbsPath() + "Core/Material/61A147FF-32BD-48EC-B523-57BC75EB16BA.mat");
+	HString srcMat = (FileSystem::GetContentAbsPath() + "Core/Material/DefaultPBR.mat");
 	FileSystem::FileCopy(srcMat.c_str() ,newMatFilePath.c_str());
+
 	HString newName = (newMatFilePath + "/NewMaterial.mat");
-	FileSystem::FileRename(srcMat.c_str(), newName.c_str());
-	auto assetInfo = ContentManager::Get()->ImportAssetInfo(AssetType::Material, newName.c_str(), newMatFilePath);
-	return nullptr;
+
+	FileSystem::FileRename(srcMat.c_str(), FileSystem::GetRelativePath(newName.c_str()).c_str());
+	auto assetInfo = ContentManager::Get()->CreateAssetInfo(newName);
+
+	return std::reinterpret_pointer_cast<Material>(assetInfo.lock()->GetAssetData().lock());
 }

@@ -168,8 +168,7 @@ std::weak_ptr<Texture> Texture::LoadAsset(HGUID guid, VkImageUsageFlags usageFla
 		return dataPtr->GetData();
 	}
 	//获取实际路径
-	HString filePath = FileSystem::GetProgramPath() + it->second->relativePath + guidStr + ".dds";
-	FileSystem::CorrectionPath(filePath);
+	HString filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
 		return std::weak_ptr<Texture>();
@@ -282,11 +281,11 @@ void Texture::GlobalInitialize()
 	}	
 
 	//Create BaseTexture
-	auto uvGridTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_UVGrid"));
-	auto blackTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Black"));
-	auto normalTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_Normal"));
-	auto whiteTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/T_System_White"));
-	auto testTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID(AssetType::Texture2D, FileSystem::GetContentAbsPath() + "Core/Texture/TestTex"));
+	auto uvGridTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID("Asset/Content/Core/Texture/T_System_UVGrid.dds"));
+	auto blackTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID("Asset/Content/Core/Texture/T_System_Black.dds"));
+	auto normalTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID( "Asset/Content/Core/Texture/T_System_Normal.dds"));
+	auto whiteTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID("Asset/Content/Core/Texture/T_System_White.dds"));
+	auto testTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID("Asset/Content/Core/Texture/TestTex.dds"));
 	if(!uvGridTex.expired())
 		Texture::AddSystemTexture("UVGrid", uvGridTex.lock().get());
 	if (!whiteTex.expired())

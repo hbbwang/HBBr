@@ -234,7 +234,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 						auto info = ContentManager::Get()->GetAssetInfo(value->at(i));
 						if (!info.expired())
 						{
-							AssetLine* line = new AssetLine(p.name, this, info.lock()->virtualPath, info.lock()->suffix);
+							AssetLine* line = new AssetLine(p.name, this, info.lock()->assetFilePath, info.lock()->suffix);
 							compWidget->layout()->addWidget(line);
 							line->_bindFindButtonFunc = [](const char* p) {
 
@@ -270,7 +270,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 					auto info = ContentManager::Get()->GetAssetInfo(guid);
 					if (!info.expired())
 					{
-						AssetLine* line = new AssetLine(p.name, this, info.lock()->virtualPath, info.lock()->suffix);
+						AssetLine* line = new AssetLine(p.name, this, info.lock()->assetFilePath, info.lock()->suffix);
 						compWidget->layout()->addWidget(line);
 						line->_bindFindButtonFunc = [](const char* p) {
 
