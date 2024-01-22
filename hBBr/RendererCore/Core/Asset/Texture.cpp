@@ -179,7 +179,10 @@ std::weak_ptr<Texture> Texture::LoadAsset(HGUID guid, VkImageUsageFlags usageFla
 	//Load dds
 	DDSLoader loader(filePath.c_str());
 	ImageData* out = loader.LoadDDSToImage();
-
+	if (out == nullptr)
+	{
+		return std::weak_ptr<Texture>();
+	}
 	//Create Texture Object.
 	uint32_t w = out->data_header.width;
 	uint32_t h = out->data_header.height;
@@ -278,14 +281,14 @@ void Texture::GlobalInitialize()
 				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, (float)i, 16);
 			_samplers[(TextureSampler)t].push_back(std::move(sampler));
 		}
-	}	
+	}
 
 	//Create BaseTexture
-	auto uvGridTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID("Asset/Content/Core/Texture/T_System_UVGrid.dds"));
-	auto blackTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID("Asset/Content/Core/Texture/T_System_Black.dds"));
-	auto normalTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID( "Asset/Content/Core/Texture/T_System_Normal.dds"));
-	auto whiteTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID("Asset/Content/Core/Texture/T_System_White.dds"));
-	auto testTex = Texture::LoadAsset(ContentManager::Get()->GetAssetGUID("Asset/Content/Core/Texture/TestTex.dds"));
+	auto uvGridTex = ContentManager::Get()->LoadAsset<Texture>("Asset/Content/Core/Texture/T_System_UVGrid.dds");
+	auto blackTex = ContentManager::Get()->LoadAsset<Texture>("Asset/Content/Core/Texture/T_System_Black.dds");
+	auto normalTex = ContentManager::Get()->LoadAsset<Texture>("Asset/Content/Core/Texture/T_System_Normal.dds");
+	auto whiteTex = ContentManager::Get()->LoadAsset<Texture>("Asset/Content/Core/Texture/T_System_White.dds");
+	auto testTex = ContentManager::Get()->LoadAsset<Texture>("Asset/Content/Core/Texture/TestTex.dds");
 	if(!uvGridTex.expired())
 		Texture::AddSystemTexture("UVGrid", uvGridTex.lock().get());
 	if (!whiteTex.expired())

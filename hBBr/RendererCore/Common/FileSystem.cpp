@@ -139,6 +139,19 @@ bool FileSystem::FileExist(HString& path)
     return fs::exists(path.c_str());
 }
 
+HString FileSystem::AssetFileExist(HString path)
+{
+    if (!FileExist(path))
+    {
+        path = FileSystem::FillUpAssetPath(path);
+    }
+    if (!FileExist(path))
+    {
+        return "";
+    }
+    return path;
+}
+
 bool FileSystem::IsDir(const char* path)
 {
     return  fs::is_directory(path);

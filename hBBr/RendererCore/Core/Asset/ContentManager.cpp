@@ -193,16 +193,16 @@ std::weak_ptr<AssetInfoBase> ContentManager::ReloadAssetInfoByMetaFile(HString A
 	info->type = type;
 	info->guid = guid;
 	info->name = AbsPath.GetBaseName().GetBaseName();//xxx.fbx.meta
-	info->absFilePath = AbsPath;
+	info->absFilePath = AbsPath.GetFilePath() + AbsPath.GetFileName().GetBaseName();
 	FileSystem::FixUpPath(info->absFilePath);
 	info->absPath = info->absFilePath.GetFilePath();
 	FileSystem::FixUpPath(info->absPath);
-	info->assetFilePath = FileSystem::GetRelativePath(AbsPath.c_str());
+	info->assetFilePath = FileSystem::GetRelativePath(info->absFilePath.c_str());
 	FileSystem::FixUpPath(info->assetFilePath);
 	info->assetPath = info->assetFilePath.GetFilePath();
 	FileSystem::FixUpPath(info->assetPath);
-	info->suffix = AbsPath.GetSuffix();
-	info->metaFileAbsPath = AbsPath + ".meta";
+	info->suffix = info->absFilePath.GetSuffix();
+	info->metaFileAbsPath = AbsPath;
 
 	XMLStream::LoadXMLAttributeUint64(rootNode, L"ByteSize", info->byteSize);
 

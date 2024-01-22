@@ -179,7 +179,7 @@ public:
 	/* 根据路径实际文件获取 */
 	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HString assetPath)const;
 
-	/* 根据内容浏览器显示的文件名称(虚拟路径)查找(非实际GUID的名称)GUID */
+	/* 根据内容浏览器显示的文件名称查找GUID */
 	HBBR_API HGUID GetAssetGUID(HString assetPath)const;
 
 	template<class T>
@@ -199,6 +199,16 @@ public:
 	HBBR_INLINE std::weak_ptr<class AssetObject> LoadAsset(HGUID guid)
 	{
 		return T::LoadAsset(guid);
+	}
+
+	template<class T>
+	HBBR_INLINE std::weak_ptr<T> LoadAsset(HString assetPath)
+	{
+		if (!assetPath.IsEmpty())
+		{
+			return T::LoadAsset(GetAssetGUID(assetPath));
+		}
+		return  std::weak_ptr<T>();
 	}
 
 private:

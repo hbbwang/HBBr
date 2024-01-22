@@ -74,6 +74,11 @@ public:
 		this->assign("");
 	}
 
+	inline bool IsEmpty()
+	{
+		return this->length <= 0;
+	}
+
 	//字符串初始化
 	HString()
 	{
