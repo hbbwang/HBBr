@@ -53,22 +53,22 @@ void CameraComponent::Update()
 			worldRot.x -= mouseAxis.y * _editorMouseSpeed;
 			trans->SetWorldRotation(worldRot);
 			//
-			if (GetKeyDown(Key_W))
-			{
-				ConsoleDebug::printf_endl_warning("GetKeyDown : Key_W");
-			}
-			if (GetKeyUp(Key_W))
-			{
-				ConsoleDebug::printf_endl_warning("GetKeyUp : Key_W");
-			}
-			if (GetMouseDown(Button_Left))
-			{
-				ConsoleDebug::printf_endl_warning("GetMouseDown : Button_Left");
-			}
-			if (GetMouseUp(Button_Left))
-			{
-				ConsoleDebug::printf_endl_warning("GetMouseUp : Button_Left");
-			}
+			//if (GetKeyDown(Key_W))
+			//{
+			//	ConsoleDebug::printf_endl_warning("GetKeyDown : Key_W");
+			//}
+			//if (GetKeyUp(Key_W))
+			//{
+			//	ConsoleDebug::printf_endl_warning("GetKeyUp : Key_W");
+			//}
+			//if (GetMouseDown(Button_Left))
+			//{
+			//	ConsoleDebug::printf_endl_warning("GetMouseDown : Button_Left");
+			//}
+			//if (GetMouseUp(Button_Left))
+			//{
+			//	ConsoleDebug::printf_endl_warning("GetMouseUp : Button_Left");
+			//}
 			if (GetKey(Key_W))
 			{
 				worldPos += trans->GetForwardVector() * _editorMoveSpeed * frameRate;
