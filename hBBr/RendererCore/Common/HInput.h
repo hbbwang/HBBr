@@ -336,6 +336,7 @@ struct KeyCallBack
 	Action  action;
 	KeyMod  mod;
     VulkanForm* focusWindowHandle = nullptr;
+    bool bKeyDown = false;
 };
 
 struct MouseCallBack
@@ -343,6 +344,7 @@ struct MouseCallBack
 	MouseButton button;
 	Action  action;
 	VulkanForm* focusWindowHandle = nullptr;
+    bool bMouseDown = false;
 };
 
 class HInput
@@ -375,7 +377,7 @@ public:
         }
         if (!renderer)
             return false;
-		return FindDefaultKey(key, Action::PRESS, renderer) != nullptr;
+		return FindDefaultKeyDown(key, Action::PRESS, renderer) != nullptr;
 	}
 
 	static inline bool GetKeyUp(KeyCode key, class VulkanRenderer* renderer = nullptr) {
@@ -405,7 +407,7 @@ public:
         }
         if (!renderer)
             return false;
-		return FindDefaultMouse(button, Action::PRESS, renderer) != nullptr;
+		return FindDefaultMouseDown(button, Action::PRESS, renderer) != nullptr;
 	}
 
 	static inline bool GetMouseUp(MouseButton button, class VulkanRenderer* renderer = nullptr) {
@@ -474,6 +476,17 @@ private:
 			return nullptr;
 	}
 
+    static inline KeyCallBack* FindDefaultKeyDown(KeyCode key, Action action, class VulkanRenderer* renderer)
+    {
+        auto it = std::find_if(_keyRegisterRepeat.begin(), _keyRegisterRepeat.end(), [key, action, renderer](KeyCallBack& callback) {
+            return callback.key == key && callback.action == action && callback.focusWindowHandle && callback.focusWindowHandle->renderer == renderer && callback.bKeyDown ==true;
+            });
+        if (it != _keyRegisterRepeat.end())
+            return &(*it); 
+        else
+            return nullptr;
+    }
+
 	static inline KeyCallBack* FindRepeatKey(KeyCode key, class VulkanRenderer* renderer)
 	{
 		auto it = std::find_if(_keyRegisterRepeat.begin(), _keyRegisterRepeat.end(), [renderer,key](KeyCallBack& callback) {
@@ -497,6 +510,17 @@ private:
 			return nullptr;
 	}
 
+    static inline MouseCallBack* FindDefaultMouseDown(MouseButton mouse, Action action, class VulkanRenderer* renderer)
+    {
+        auto it = std::find_if(_mouseRegisterRepeat.begin(), _mouseRegisterRepeat.end(), [mouse, action, renderer](MouseCallBack& callback) {
+            return callback.button == mouse && callback.action == action && callback.focusWindowHandle && callback.focusWindowHandle->renderer == renderer && callback.bMouseDown == true;
+            });
+        if (it != _mouseRegisterRepeat.end())
+            return &(*it);
+        else
+            return nullptr;
+    }
+
 	static inline MouseCallBack* FindRepeatMouse(MouseButton mouse, class VulkanRenderer* renderer)
 	{
 		auto it = std::find_if(_mouseRegisterRepeat.begin(), _mouseRegisterRepeat.end(), [mouse, renderer](MouseCallBack& callback) {
@@ -517,6 +541,14 @@ private:
         //_keyRegisterRepeat.clear();
         _mouseRegisterDefault.clear();
         //_mouseRegisterRepeat.clear();
+        for (auto& i : _keyRegisterRepeat)
+        {
+            i.bKeyDown = false;
+        }
+        for (auto& i : _mouseRegisterRepeat)
+        {
+            i.bMouseDown = false;
+        }
     }
 
 };

@@ -14,22 +14,34 @@ void HInput::KeyProcess(VulkanForm* focusWindowHandle , KeyCode key, KeyMod mod,
 	callBack.action = action;
 	callBack.mod = mod;
 	callBack.focusWindowHandle = focusWindowHandle;
+	if (action == Action::RELEASE)
 	{
-		_keyRegisterDefault.push_back(callBack);
-		if (action == Action::RELEASE)
+		callBack.bKeyDown = false;
+
+		if (std::find_if(_keyRegisterDefault.begin(), _keyRegisterDefault.end(), [&](KeyCallBack item) {
+			return callBack.key == item.key && callBack.action == item.action && callBack.mod == item.mod;
+			}) == _keyRegisterDefault.end())
 		{
-			for (int i = 0; i < _keyRegisterRepeat.size(); i++)
+			_keyRegisterDefault.push_back(callBack);
+		}
+
+		for (int i = 0; i < _keyRegisterRepeat.size(); i++)
+		{
+			if (_keyRegisterRepeat[i].key == key)
 			{
-				if (_keyRegisterRepeat[i].key == key)
-				{
-					_keyRegisterRepeat.erase(_keyRegisterRepeat.begin() + i);
-					i -= 1;
-					if (_keyRegisterRepeat.size() <= 0)
-						break;
-				}
+				_keyRegisterRepeat.erase(_keyRegisterRepeat.begin() + i);
+				i -= 1;
+				if (_keyRegisterRepeat.size() <= 0)
+					break;
 			}
 		}
-		else if (action == Action::PRESS)
+	}
+	else if (action == Action::PRESS)
+	{
+		callBack.bKeyDown = true;
+		if (std::find_if(_keyRegisterRepeat.begin(), _keyRegisterRepeat.end(), [&](KeyCallBack item) {
+			return callBack.key == item.key && callBack.action == item.action && callBack.mod == item.mod;
+			}) == _keyRegisterRepeat.end())
 		{
 			_keyRegisterRepeat.push_back(callBack);
 		}
@@ -43,9 +55,17 @@ void HInput::MouseProcess(VulkanForm* focusWindowHandle, MouseButton mouse, Acti
 	callBack.action = action;
 	callBack.focusWindowHandle = focusWindowHandle;
 	{
-		_mouseRegisterDefault.push_back(callBack);
 		if (action == Action::RELEASE)
 		{
+			callBack.bMouseDown = false;
+
+			if (std::find_if(_mouseRegisterDefault.begin(), _mouseRegisterDefault.end(), [&](MouseCallBack item) {
+				return callBack.button == item.button && callBack.action == item.action;
+				}) == _mouseRegisterDefault.end())
+			{
+				_mouseRegisterDefault.push_back(callBack);
+			}
+
 			for (int i = 0; i < _mouseRegisterRepeat.size(); i++)
 			{
 				if (_mouseRegisterRepeat[i].button == mouse)
@@ -59,7 +79,13 @@ void HInput::MouseProcess(VulkanForm* focusWindowHandle, MouseButton mouse, Acti
 		}
 		else if (action == Action::PRESS)
 		{
-			_mouseRegisterRepeat.push_back(callBack);
+			callBack.bMouseDown = true;
+			if (std::find_if(_mouseRegisterRepeat.begin(), _mouseRegisterRepeat.end(), [&](MouseCallBack item) {
+				return callBack.button == item.button && callBack.action == item.action;
+				}) == _mouseRegisterRepeat.end())
+			{
+				_mouseRegisterRepeat.push_back(callBack);
+			}
 		}
 	}
 }
