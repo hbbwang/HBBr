@@ -22,7 +22,7 @@ std::unique_ptr<VulkanManager> VulkanManager::_vulkanManager;
 
 PFN_vkCreateDebugReportCallbackEXT  fvkCreateDebugReportCallbackEXT = VK_NULL_HANDLE;
 PFN_vkDestroyDebugReportCallbackEXT  fvkDestroyDebugReportCallbackEXT = VK_NULL_HANDLE;
-
+bool VulkanManager::_bDebugEnable= false;
 bool VulkanManager::debugMarkerActive = false;
 bool VulkanManager::extensionPresent = false;
 PFN_vkDebugMarkerSetObjectTagEXT VulkanManager::vkDebugMarkerSetObjectTag = VK_NULL_HANDLE;

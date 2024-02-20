@@ -8,7 +8,7 @@ void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textC
 {
 	HString msgStr = msg;
 	//msgStr = "[hBBr]:" + msgStr;
-    if (bMessageBox && VulkanManager::GetManager()->_bDebugEnable)
+    if (bMessageBox && VulkanManager::_bDebugEnable)
     {
 #if defined(_WIN32)
 		//MessageBoxA(nullptr, msg, "message", MB_ICONERROR);

@@ -229,6 +229,9 @@
     <ClInclude Include="Core\Asset\World.h">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Asset\Archive.h">
+      <Filter>Renderer\Core\Asset</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -380,6 +383,9 @@
     </ClCompile>
     <ClCompile Include="Core\Asset\World.cpp">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Asset\Archive.cpp">
+      <Filter>Renderer\Core\Asset</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

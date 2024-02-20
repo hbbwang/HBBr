@@ -134,7 +134,7 @@ bool FileSystem::FileExist(const char* path)
     return fs::exists(path);
 }
 
-bool FileSystem::FileExist(HString& path)
+bool FileSystem::FileExist(HString path)
 {
     return fs::exists(path.c_str());
 }

@@ -102,8 +102,7 @@ void VulkanRenderer::Init()
 
 void VulkanRenderer::LoadWorld(HString worldNameOrAssetPath)
 {
-
-	//
+	//_world.reset(new World(this, worldNameOrAssetPath));
 	for (auto i : _spwanNewWorld)
 	{
 		i(_world);
@@ -121,7 +120,7 @@ void VulkanRenderer::CreateEmptyWorld()
 
 void VulkanRenderer::Render()
 {
-	if (!_bInit)
+	if (!_bInit) //Render loop Init.
 	{
 		LoadWorld("");
 		if (!_world)

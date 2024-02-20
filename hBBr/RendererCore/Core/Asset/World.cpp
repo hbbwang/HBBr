@@ -67,13 +67,21 @@ void World::AddNewLevel(HString name)
 void World::SaveWorld(HString newWorldName)
 {
 	newWorldName.ClearSpace();
+	HString worldSettingPath;
 	if (newWorldName.Length() > 1)
 	{
 		HString assetPath = FileSystem::GetWorldAbsPath();
+		worldSettingPath = assetPath;
 		newWorldName = assetPath + "/" + newWorldName + ".world";
+		worldSettingPath ="World/" + newWorldName + ".world/WorldSetting.xml";
+		FileSystem::FixUpPath(worldSettingPath);
 		FileSystem::FixUpPath(newWorldName);
 		_worldAssetPath = newWorldName;
 	}
+	//
+	WorldSetting.InitArchive(worldSettingPath);
+	WorldSetting.SaveArchive();
+	//
 	//创建World目录
 	FileSystem::CreateDir(_worldAssetPath.c_str());
 	for (auto& i : _levels)

@@ -37,6 +37,20 @@ public:
 	/* 读取xml节点的Float属性 */
 	static bool LoadXMLAttributeFloat(pugi::xml_node& node, const wchar_t* attributeName, float& attri);
 
+	static pugi::xml_node GetXMLNode(pugi::xml_node& node, const wchar_t* name)
+	{
+		if (node)
+		{
+			pugi::xml_node result = node.child(name);
+			if (!result)
+			{
+				result = node.append_child(name);
+			}
+			return result;
+		}
+		return pugi::xml_node();
+	}
+
 	template<class T>
 	static void SetXMLAttribute(pugi::xml_node& node, const wchar_t* attributeName, T value)
 	{

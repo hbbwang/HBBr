@@ -381,7 +381,7 @@ public:
 	//忽略vkGetSwapchainImagesKHR里获取到的Images数量，坚持使用我们设定的数量
 	bool _bIsIgnoreVulkanSwapChainExtraImages = false;
 
-	bool _bDebugEnable;
+	static bool _bDebugEnable;
 
 private:
 

@@ -275,6 +275,7 @@
     <ClInclude Include="Common\RendererType.h" />
     <ClInclude Include="Common\TypeConversion.h" />
     <ClInclude Include="Common\XMLStream.h" />
+    <ClInclude Include="Core\Asset\Archive.h" />
     <ClInclude Include="Core\Asset\ContentManager.h" />
     <ClInclude Include="Core\Asset\HGuid.h" />
     <ClInclude Include="Core\Asset\Level.h" />
@@ -330,6 +331,7 @@
     <ClCompile Include="Common\ImageTool.cpp" />
     <ClCompile Include="Common\TypeConversion.cpp" />
     <ClCompile Include="Common\XMLStream.cpp" />
+    <ClCompile Include="Core\Asset\Archive.cpp" />
     <ClCompile Include="Core\Asset\ContentManager.cpp" />
     <ClCompile Include="Core\Asset\HGuid.cpp" />
     <ClCompile Include="Core\Asset\Level.cpp" />

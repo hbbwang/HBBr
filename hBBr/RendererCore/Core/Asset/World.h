@@ -11,6 +11,7 @@
 #include "Component/GameObject.h"
 #include "Asset/HGuid.h"
 #include "Asset/Level.h"
+#include "Archive.h"
 class World
 {
 	friend class VulkanRenderer;
@@ -95,6 +96,8 @@ private:
 	HString _worldAssetPath = "";
 
 	bool bLoad = false;
+
+	Archive WorldSetting;
 };
 
 
