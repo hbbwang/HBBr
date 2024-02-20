@@ -4,4 +4,5 @@
     <Font absPath="C:/Windows/Fonts/msyh.ttc"/>
     <FontTexture path="Asset/Font/font.png"/>
     <FontConfig path="Asset/Font/Font.xml"/>
+    <DefaultLevel path="Asset/World/NewWorld.world" />
 </root>
