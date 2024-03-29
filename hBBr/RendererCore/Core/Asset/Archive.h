@@ -6,7 +6,6 @@
 
 struct ArchiveLayout
 {
-	HString Group;
 	HString PropertyName;
 	HString PropertyValue;
 };
@@ -14,10 +13,13 @@ struct ArchiveLayout
 class Archive
 {
 public:
+	//被释放的时候,自动执行SaveArchive。
 	virtual ~Archive();
+	//也可以手动执行
 	virtual void SaveArchive();
+
 	virtual void InitArchive(HString assetSavePath);
-	void Add(HString name, HString value, HString group = "Default");
+	void Add(HString name, HString value);
 private:
 	pugi::xml_document ArchiveTargetFile;
 	std::vector<ArchiveLayout>Properties;

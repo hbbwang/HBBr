@@ -1,5 +1,6 @@
 ﻿#include "Archive.h"
 #include "FileSystem.h"
+
 //被释放的时候,自动进行存档。
 Archive::~Archive()
 {
@@ -12,10 +13,14 @@ void Archive::SaveArchive()
 	if (bInit)
 	{
 		auto root = ArchiveTargetFile.child(TEXT("root"));
+		if (!root)
+		{
+			root = ArchiveTargetFile.append_child(TEXT("root"));
+		}
 		for (int i = 0; i < Properties.size(); i++)
 		{
-			auto groupNode = XMLStream::GetXMLNode(root, Properties[i].Group.c_wstr());
-			groupNode.append_child(TEXT("Item")).append_attribute(Properties[i].PropertyName.c_wstr()).set_value(Properties[i].PropertyValue.c_wstr());
+			auto groupNode = XMLStream::GetXMLNode(root, Properties[i].PropertyName.c_wstr());
+			groupNode.set_value(Properties[i].PropertyValue.c_wstr());
 		}
 		ArchiveTargetFile.save_file(ArchiveTargetAbsFilePath.c_wstr());
 	}
@@ -23,6 +28,10 @@ void Archive::SaveArchive()
 
 void Archive::InitArchive(HString assetSavePath)
 {
+	if (bInit)
+	{
+		return;
+	}
 	ArchiveTargetAbsFilePath = FileSystem::FillUpAssetPath(assetSavePath);
 	bInit = false;
 	if (assetSavePath.IsEmpty())
@@ -41,10 +50,9 @@ void Archive::InitArchive(HString assetSavePath)
 	}
 }
 
-void Archive::Add(HString name, HString value, HString group)
+void Archive::Add(HString name, HString value)
 {
 	ArchiveLayout newLayout;
-	newLayout.Group = group;
 	newLayout.PropertyName = name;
 	newLayout.PropertyValue = value;
 	Properties.push_back(newLayout);

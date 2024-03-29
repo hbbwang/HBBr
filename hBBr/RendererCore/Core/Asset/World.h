@@ -12,6 +12,7 @@
 #include "Asset/HGuid.h"
 #include "Asset/Level.h"
 #include "Archive.h"
+
 class World
 {
 	friend class VulkanRenderer;

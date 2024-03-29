@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<root>
+	<WorldName>TestWorld</WorldName>
+	<Levels>
+		<Main Visibility="1"/>
+	</Levels>
+</root>

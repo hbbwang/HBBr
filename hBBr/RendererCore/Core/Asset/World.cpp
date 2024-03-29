@@ -113,21 +113,42 @@ GameObject* World::SpawnGameObject(HString name, class Level* level)
 
 void World::Load(class VulkanRenderer* renderer, HString worldAssetPath)
 {
+	//auto result = FileSystem::GetAllFolders(FileSystem::GetWorldAbsPath().c_str());
+	//for (auto& i : result)
+	//{
+	//	
+	//}
+
 	_renderer = renderer;
 
-	HString assetPath = FileSystem::GetWorldAbsPath();
-
-	if (!FileSystem::FileExist(assetPath))
+	if (worldAssetPath.GetSuffix() == "world" && FileSystem::IsDir(worldAssetPath))
 	{
-		FileSystem::CreateDir(assetPath.c_str());
+		_worldAssetPath = worldAssetPath;
+		FileSystem::FixUpPath(_worldAssetPath);
+
+		//Find all levels
+		auto levelFiles = FileSystem::GetFilesBySuffix(_worldAssetPath.c_str(), "level");
+		for (auto f : levelFiles)
+		{
+			AddLevel(f.relativePath);
+		}
+	}
+	else
+	{
+		HString assetPath = FileSystem::GetWorldAbsPath();
+		if (!FileSystem::FileExist(assetPath))
+		{
+			FileSystem::CreateDir(assetPath.c_str());
+		}
+		HString dirPath = assetPath + "/" + _worldName + ".world";
+		FileSystem::FixUpPath(dirPath);
+		_worldAssetPath = dirPath;
+
+		//This is a new world ,create a empty level .
+		AddNewLevel("Empty Level");
 	}
 
-	HString dirPath = assetPath + "/" + _worldName + ".world";
-	FileSystem::FixUpPath(dirPath);
-	_worldAssetPath = dirPath;
-
 #if IS_EDITOR
-
 	//Create editor only level.
 	_editorLevel.reset(new Level("EditorLevel"));
 	_editorLevel->Load(this, "");
@@ -141,7 +162,6 @@ void World::Load(class VulkanRenderer* renderer, HString worldAssetPath)
 	cameraComp->OverrideMainCamera();
 	_editorCamera = cameraComp;
 	_editorCamera->_bIsEditorCamera = true;
-
 #else
 
 //	//Test game camera
@@ -152,21 +172,6 @@ void World::Load(class VulkanRenderer* renderer, HString worldAssetPath)
 
 #endif
 
-	//Load world content
-	if (FileSystem::IsDir(worldAssetPath.c_str()))
-	{
-		//Find all levels
-		auto levelFiles = FileSystem::GetFilesBySuffix(worldAssetPath.c_str(), "level");
-		for (auto f : levelFiles)
-		{
-			AddLevel(f.relativePath);
-		}
-	}
-	else
-	{
-		//This is a new world ,create a empty level .
-		AddNewLevel("Empty Level");
-	}
 	bLoad = true;
 }
 
@@ -244,3 +249,4 @@ void World::SetCurrentSelectionLevel(std::weak_ptr<Level> level)
 }
 
 #endif
+

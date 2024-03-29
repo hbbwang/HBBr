@@ -16,6 +16,7 @@ RendererConfig* RendererConfig::Get()
 		{
 			MessageOut("Fatal error! Load renderer config failed !!", true, true);
 		}
+		_rendererConfig->_configFileRootNode = _rendererConfig->_configFile.child(TEXT("root"));
 	}
 	return _rendererConfig.get();
 }

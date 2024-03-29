@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<root>
+	<Item Type="GameObject" GUID="19308759-111c-446e-b0ea-951f079e5ee6" Name="Cube" Parent="00000000-0000-0000-0000-000000000000">
+		<Transform PosX="0" PosY="0" PosZ="0" RotX="0" RotY="0" RotZ="0" ScaX="1" ScaY="1" ScaZ="1" />
+		<Component>
+			<Item Class="ModelComponent">
+				<Item Name="bActive" Type="bool" Value="1" />
+			</Item>
+		</Component>
+	</Item>
+</root>

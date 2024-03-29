@@ -102,7 +102,7 @@ void VulkanRenderer::Init()
 
 void VulkanRenderer::LoadWorld(HString worldNameOrAssetPath)
 {
-	//_world.reset(new World(this, worldNameOrAssetPath));
+	_world.reset(new World(this, worldNameOrAssetPath));
 	for (auto i : _spwanNewWorld)
 	{
 		i(_world);
@@ -122,7 +122,11 @@ void VulkanRenderer::Render()
 {
 	if (!_bInit) //Render loop Init.
 	{
-		LoadWorld("");
+		HString defaultWorldPath;
+		auto defaultLevelNode = XMLStream::GetXMLNode(RendererConfig::Get()->_configFileRootNode, TEXT("DefaultLevel"));
+		XMLStream::LoadXMLAttributeString(defaultLevelNode,L"path", defaultWorldPath);
+		LoadWorld(defaultWorldPath);
+
 		if (!_world)
 		{
 			CreateEmptyWorld();

@@ -34,11 +34,11 @@ extern "C" {
 		HBBR_API static HString GetContentAbsPath();
 		HBBR_API static HString GetConfigAbsPath();
 		HBBR_API static HString GetWorldAbsPath();
-		//Fill up asset path (Asset/...)
+		//Fill up asset path (Asset/...) to (C:/aa/bb/Asset/...)
 		HBBR_API static HString FillUpAssetPath(HString assetPath);
 		/* editor only */
 		HBBR_API static HString GetShaderIncludeAbsPath();
-		//
+		//Remove exe path.
 		HBBR_API static HString GetRelativePath(const char* path);
 		HBBR_API static uint32_t GetPathFileNum(const char* path);
 		HBBR_API static bool FileExist(const char* path);
@@ -70,6 +70,7 @@ extern "C" {
 		HBBR_API static std::vector<FileEntry> GetFilesBySuffix(const char* path, const char* suffix);
 		//Get all files except folders
 		HBBR_API static std::vector<FileEntry> GetAllFilesExceptFolders(const char* path);
+		HBBR_API static std::vector<FileEntry> GetAllFolders(const char* path,bool currentDir = true);
 		HBBR_API static std::vector<char>ReadBinaryFile(const char* filePath);
 		static HString _appPath;
 	};

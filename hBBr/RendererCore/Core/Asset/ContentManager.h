@@ -11,14 +11,14 @@
 #include "Asset/HGuid.h"
 
 //资产类型
-enum class AssetType
+enum class AssetType : uint32_t
 {
 	Unknow = 0,
 	Model = 1,			//.fbx
 	Material = 2,		//.mat
 	Texture2D = 3,		//.tex2D
 
-	MaxNum = 32,
+	MaxNum = 4,
 };
 
 
@@ -65,19 +65,23 @@ public:
 	virtual ~AssetInfoBase() {}
 	HGUID guid;
 	AssetType type;
-	HString name;
+	//虚拟名称,非实际文件名
+	HString displayName;
 	HString suffix;
-	//资产所在的相对 [文件] 路径(Asset/....),带完整文件名字和后缀
+	//资产所在的真实绝对 [文件] 路径(D:/xxx/xxx/.../abc.fbx)，带完整文件名字和后缀
+	HString absFilePath;
+	//资产所在的真实绝对 [目录] 路径(D:/xxx/xxx/...)
+	HString absPath;
+	//资产所在的相对 [文件] 路径(Asset/..../abc.fbx),带完整文件名字和后缀
 	HString assetFilePath;
 	//资产所在的相对 [目录] 路径(Asset/....)
 	HString assetPath;
-	//资产所在的真实绝对 [文件] 路径，带完整文件名字和后缀
-	HString absFilePath;
-	//资产所在的真实绝对 [目录] 路径
-	HString absPath;
-	//Info文件的绝对路径
-	HString metaFileAbsPath;
-	uint64_t byteSize;
+	//资产的虚拟路径(Content/xxx/...),非实际路径
+	HString virtualPath;
+	//资产的虚拟文件路径(Content/xxx/...abc.fbx),非实际路径,带名字和后缀
+	HString virtualFilePath;
+	//资产所在的仓库名字,不带.repository后缀
+	HString repository;
 	std::vector<std::weak_ptr<AssetInfoBase>> refs;
 	//用来暂时储存引用的guid和type,没有太多实际意义,通常是空的
 	std::vector<AssetInfoRefTemp> refTemps;
@@ -132,6 +136,12 @@ struct AssetSaveType
 	std::vector<std::weak_ptr<AssetInfoBase>> refs;
 };
 
+struct Repository
+{
+	HString Name;
+	std::
+};
+
 class ContentManager
 {
 	friend class VulkanApp;
@@ -159,28 +169,17 @@ public:
 	/* 更新单个资产的引用关系(GUID),不指定Type,会全局检索,可能会比较慢 */
 	HBBR_API void UpdateAssetReference(HGUID obj);
 
-	/* 创建资产信息 */
-	HBBR_API std::weak_ptr<AssetInfoBase> CreateAssetInfo(HString AssetPath); 
-
-	HBBR_API void SaveAssetInfo(AssetInfoBase* info);
-
-	HBBR_API void SaveAssetInfo(AssetSaveType save);
-
-	/* 删除资产 */
-	HBBR_API void  DeleteAsset(HString filePath);
-
-	/* 删除资产信息 */
-	HBBR_API void RemoveAssetInfo(HGUID obj, AssetType type = AssetType::Unknow);
-
 	HBBR_API inline const std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>& GetAssets(AssetType type)const { return _assets[(uint32_t)type]; }
 
 	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HGUID guid, AssetType type = AssetType::Unknow)const;
 
-	/* 根据路径实际文件获取 */
-	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HString assetPath)const;
+	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HGUID guid,HString repositoryName)const;
 
-	/* 根据内容浏览器显示的文件名称查找GUID */
-	HBBR_API HGUID GetAssetGUID(HString assetPath)const;
+	/* 根据内容浏览器显示的文件名(文件的虚拟路径)称查找GUID,不推荐使用 */
+	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HString virtualFilePath , AssetType type = AssetType::Unknow)const;
+
+	/* 重载仓库 */
+	HBBR_API void ReloadRepository(HString repositoryName);
 
 	template<class T>
 	HBBR_INLINE std::weak_ptr<T> GetAsset(HGUID guid , AssetType type = AssetType::Unknow)
@@ -216,19 +215,15 @@ private:
 	/* 更新单个资产的引用关系(info) */
 	void UpdateAssetReference(std::weak_ptr<AssetInfoBase> info);
 
-	/* 重载单个资产的信息(只是加载引用信息,非资产本身),meta绝对路径 */
-	std::weak_ptr<AssetInfoBase> ReloadAssetInfoByMetaFile(HString AbsPath);
-
 	void Release();
-
-	void ReleaseAssetsByType(AssetType type, bool bDestroy);
-
-	void ReleaseAsset(AssetType type, HGUID obj);
 
 	ContentManager();
 
 	static std::unique_ptr<ContentManager> _ptr;
 
+	//根据类型储存对象
 	std::vector<std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>>_assets;
+	//根据仓库储存对象
+	std::unordered_map<HString, std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>> _assets_repos;
 
 };
