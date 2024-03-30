@@ -173,8 +173,6 @@
     <ClCompile Include="ContentBrowser.cpp" />
     <ClCompile Include="CustomDockPanelTitleBar.cpp" />
     <ClCompile Include="CustomFileIconProvider.cpp" />
-    <ClCompile Include="CustomFileSystemModel.cpp" />
-    <ClCompile Include="CustomFileSystemView.cpp" />
     <ClCompile Include="CustomSearchLine.cpp" />
     <ClCompile Include="EditorCommonFunction.cpp" />
     <ClCompile Include="FloatSetting.cpp" />
@@ -227,8 +225,6 @@
     <QtMoc Include="CustomDockPanelTitleBar.h" />
     <QtMoc Include="AssetLine.h" />
     <ClInclude Include="CustomFileIconProvider.h" />
-    <QtMoc Include="CustomFileSystemModel.h" />
-    <QtMoc Include="CustomFileSystemView.h" />
     <QtMoc Include="CustomSearchLine.h" />
     <ClInclude Include="EditorCommonFunction.h" />
   </ItemGroup>

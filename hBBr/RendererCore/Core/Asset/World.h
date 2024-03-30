@@ -21,7 +21,7 @@ class World
 	friend class Level;
 public:
 	World(class VulkanRenderer* renderer);
-	World(class VulkanRenderer* renderer, HString worldAssetPath);
+	World(class VulkanRenderer* renderer, HString worldName);
 	~World();
 
 #if IS_EDITOR
@@ -67,8 +67,11 @@ public:
 
 private:
 
-	//加载场景
-	void Load(class VulkanRenderer* renderer, HString worldAssetPath);
+	//加载场景,此状态不可以加载普通Object,会和编辑器起冲突报错! 除非_sceneEditorHide=true
+	void PreLoad(class VulkanRenderer* renderer, HString worldAssetPath);
+
+	//加载场景资产
+	void Load();
 
 	//释放场景
 	bool ReleaseWorld();

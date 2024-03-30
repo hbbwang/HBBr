@@ -52,12 +52,12 @@ RenderView::RenderView(QWidget* parent)
 				auto assetInfo = ContentManager::Get()->GetAssetInfo(file);
 				if (!assetInfo.expired())
 				{
-					GameObject* newObject = from->renderer->GetWorld()->SpawnGameObject(assetInfo.lock()->name);
+					GameObject* newObject = from->renderer->GetWorld()->SpawnGameObject(assetInfo.lock()->displayName);
 					if (newObject)
 					{
 						auto modelComp = newObject->AddComponent<ModelComponent>();
 						modelComp->SetModelByAssetPath(assetInfo.lock()->assetFilePath);
-						newObject->SetObjectName(assetInfo.lock()->name);
+						newObject->SetObjectName(assetInfo.lock()->displayName);
 					}
 				}
 			}

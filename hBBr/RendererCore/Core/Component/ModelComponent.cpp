@@ -45,7 +45,7 @@ void ModelComponent::SetModel(std::weak_ptr<class Model> model)
 		{
 			_primitives[i]->transform = GetGameObject()->GetTransform();
 			if (_materials[i].expired())
-				_materials[i] = Material::LoadAsset(HGUID("61A147FF-32BD-48EC-B523-57BC75EB16BA"));
+				_materials[i] = Material::LoadAsset(HGUID("b51e2e9a-0985-75e8-6138-fa95efcbab57"));
 			PrimitiveProxy::AddModelPrimitive(_materials[i].lock()->GetPrimitive(), _primitives[i], _gameObject->GetWorld()->GetRenderer());
 		}
 	}

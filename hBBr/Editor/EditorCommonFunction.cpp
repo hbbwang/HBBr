@@ -90,67 +90,67 @@ QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
 /*--------------------渲染器相关----------------------*/
 #include "Asset/ContentManager.h"
 #include "Asset/HGuid.h"
-
-bool DeleteAllFile(QString path, QList<QString>*allAssetGuid)
-{
-    QFileInfo checkInfo(path);
-    if (checkInfo.isFile())
-    {
-        ContentManager::Get()->DeleteAsset(path.toStdString().c_str());
-        if(allAssetGuid)
-            allAssetGuid->append(checkInfo.baseName());
-        QFile::remove(path);
-        return true;
-    }
-    QDir dir(path);
-    QFileInfoList fileList;
-    QFileInfo curFile;
-    if (!dir.exists()) { return false; }//文件不存，则返回false
-    fileList = dir.entryInfoList(QDir::Dirs | QDir::Files
-        | QDir::Readable | QDir::Writable
-        | QDir::Hidden | QDir::NoDotAndDotDot
-        , QDir::Name);
-    while (fileList.size() > 0)
-    {
-        int infoNum = fileList.size();
-        for (int i = infoNum - 1; i >= 0; i--)
-        {
-            curFile = fileList[i];
-            if (curFile.isFile())//如果是文件，删除文件
-            {
-                ContentManager::Get()->DeleteAsset(curFile.filePath().toStdString().c_str());
-                QFile fileTemp(curFile.filePath());
-                if (allAssetGuid)
-                    allAssetGuid->append(curFile.baseName());
-                fileTemp.remove();
-                fileList.removeAt(i);
-            }
-            if (curFile.isDir())//如果是文件夹
-            {
-                QDir dirTemp(curFile.filePath());
-                QFileInfoList fileList1 = dirTemp.entryInfoList(QDir::Dirs | QDir::Files
-                    | QDir::Readable | QDir::Writable
-                    | QDir::Hidden | QDir::NoDotAndDotDot
-                    , QDir::Name);
-                if (fileList1.size() == 0)//下层没有文件或文件夹
-                {
-                    dirTemp.rmdir(".");
-                    fileList.removeAt(i);
-                }
-                else//下层有文件夹或文件
-                {
-                    for (int j = 0; j < fileList1.size(); j++)
-                    {
-                        if (!(fileList.contains(fileList1[j])))
-                            fileList.append(fileList1[j]);
-                    }
-                }
-            }
-        }
-    }
-    dir.removeRecursively();
-    return true;
-}
+//
+//bool DeleteAllFile(QString path, QList<QString>*allAssetGuid)
+//{
+//    QFileInfo checkInfo(path);
+//    if (checkInfo.isFile())
+//    {
+//        ContentManager::Get()->DeleteAsset(path.toStdString().c_str());
+//        if(allAssetGuid)
+//            allAssetGuid->append(checkInfo.baseName());
+//        QFile::remove(path);
+//        return true;
+//    }
+//    QDir dir(path);
+//    QFileInfoList fileList;
+//    QFileInfo curFile;
+//    if (!dir.exists()) { return false; }//文件不存，则返回false
+//    fileList = dir.entryInfoList(QDir::Dirs | QDir::Files
+//        | QDir::Readable | QDir::Writable
+//        | QDir::Hidden | QDir::NoDotAndDotDot
+//        , QDir::Name);
+//    while (fileList.size() > 0)
+//    {
+//        int infoNum = fileList.size();
+//        for (int i = infoNum - 1; i >= 0; i--)
+//        {
+//            curFile = fileList[i];
+//            if (curFile.isFile())//如果是文件，删除文件
+//            {
+//                ContentManager::Get()->DeleteAsset(curFile.filePath().toStdString().c_str());
+//                QFile fileTemp(curFile.filePath());
+//                if (allAssetGuid)
+//                    allAssetGuid->append(curFile.baseName());
+//                fileTemp.remove();
+//                fileList.removeAt(i);
+//            }
+//            if (curFile.isDir())//如果是文件夹
+//            {
+//                QDir dirTemp(curFile.filePath());
+//                QFileInfoList fileList1 = dirTemp.entryInfoList(QDir::Dirs | QDir::Files
+//                    | QDir::Readable | QDir::Writable
+//                    | QDir::Hidden | QDir::NoDotAndDotDot
+//                    , QDir::Name);
+//                if (fileList1.size() == 0)//下层没有文件或文件夹
+//                {
+//                    dirTemp.rmdir(".");
+//                    fileList.removeAt(i);
+//                }
+//                else//下层有文件夹或文件
+//                {
+//                    for (int j = 0; j < fileList1.size(); j++)
+//                    {
+//                        if (!(fileList.contains(fileList1[j])))
+//                            fileList.append(fileList1[j]);
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    dir.removeRecursively();
+//    return true;
+//}
 
 bool SearchDir(QString path, QString searchText, QList<SFileSearch>& ResultOutput)
 {

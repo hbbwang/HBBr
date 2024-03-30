@@ -49,7 +49,8 @@ void ContentManager::UpdateAllAssetReference()
 void ContentManager::ReloadAllAssetInfos()
 {
 	//获取所有仓库目录
-	auto allRepositories = FileSystem::GetFilesBySuffix(FileSystem::GetContentAbsPath().c_str(), "repository");
+	//auto allRepositories = FileSystem::GetFilesBySuffix(FileSystem::GetContentAbsPath().c_str(), "repository");
+	auto allRepositories = FileSystem::GetAllFolders(FileSystem::GetContentAbsPath().c_str());
 	//读取仓库信息
 	for (auto& i : allRepositories)
 	{
@@ -110,7 +111,7 @@ void ContentManager::ReloadRepository(HString repositoryName)
 		info->guid = guid;
 		info->displayName = i.attribute(L"Name").as_string();
 		info->suffix = i.attribute(L"Format").as_string();
-		info->absFilePath = FileSystem::Append(FileSystem::Append(fullPath , i.attribute(L"RPath").as_string()), guidStr) + info->suffix;
+		info->absFilePath = FileSystem::Append(FileSystem::Append(fullPath , i.attribute(L"RPath").as_string()), guidStr) + "." +info->suffix;
 		FileSystem::FixUpPath(info->absFilePath);
 		info->absPath = FileSystem::Append(fullPath, i.attribute(L"RPath").as_string());
 		FileSystem::FixUpPath(info->absPath);
@@ -121,13 +122,12 @@ void ContentManager::ReloadRepository(HString repositoryName)
 		info->virtualPath = i.attribute(L"VPath").as_string();
 		FileSystem::FixUpPath(info->virtualPath);
 		info->virtualFilePath = i.attribute(L"VPath").as_string();
-		info->virtualFilePath += info->displayName + info->suffix;
+		info->virtualFilePath += info->displayName + "." + info->suffix;
 		FileSystem::FixUpPath(info->virtualFilePath);
 		info->repository = repositoryName;
 		//读取引用关系
-		auto refNode = i.child(L"Ref");
 		info->refTemps.clear();
-		for (auto j = refNode.first_child(); j; j = j.next_sibling())
+		for (auto j = i.first_child(); j; j = j.next_sibling())//<Ref>
 		{
 			HGUID subGuid;
 			HString guidText = j.text().as_string();

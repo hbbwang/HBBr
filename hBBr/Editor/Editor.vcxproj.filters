@@ -64,12 +64,6 @@
     <ClCompile Include="CustomFileIconProvider.cpp">
       <Filter>Widgets\Custom</Filter>
     </ClCompile>
-    <ClCompile Include="CustomFileSystemModel.cpp">
-      <Filter>Widgets\Custom</Filter>
-    </ClCompile>
-    <ClCompile Include="CustomFileSystemView.cpp">
-      <Filter>Widgets\Custom</Filter>
-    </ClCompile>
     <ClCompile Include="CustomSearchLine.cpp">
       <Filter>Widgets\Custom</Filter>
     </ClCompile>
@@ -125,12 +119,6 @@
     </QtMoc>
     <QtMoc Include="ContentBrowser.h">
       <Filter>Widgets</Filter>
-    </QtMoc>
-    <QtMoc Include="CustomFileSystemModel.h">
-      <Filter>Widgets\Custom</Filter>
-    </QtMoc>
-    <QtMoc Include="CustomFileSystemView.h">
-      <Filter>Widgets\Custom</Filter>
     </QtMoc>
     <QtMoc Include="CustomSearchLine.h">
       <Filter>Widgets\Custom</Filter>

@@ -113,6 +113,21 @@ HString FileSystem::GetRelativePath(const char* filePath)
     return filePath;
 }
 
+HString FileSystem::GetRelativePath(HString filePath)
+{
+    HString programPath = GetProgramPath().c_str();
+    FileSystem::CorrectionPath(programPath);
+    HString path = fs::path(filePath.c_str()).c_str();
+    FileSystem::CorrectionPath(path);
+    if (path.Contains(programPath))
+    {
+        path.Remove(0, programPath.Length());
+        path = "." + HString::GetSeparate() + path;
+        return path;
+    }
+    return filePath;
+}
+
 uint32_t FileSystem::GetPathFileNum(const char* path)
 {
     if (!fs::exists(path))

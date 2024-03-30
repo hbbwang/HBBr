@@ -125,7 +125,7 @@ void AssetLine::lineChanged(QString newStr)
 	_bindStringFunc(this, newStr.toStdString().c_str());
 	if (_objectBind )
 	{
-		ui.LineEdit->setText((_objectBind->_assetInfo->assetFilePath + _objectBind->_assetInfo->name).c_str());
+		ui.LineEdit->setText((_objectBind->_assetInfo->assetFilePath + _objectBind->_assetInfo->displayName).c_str());
 	}
 	if (_stringArrayBind)
 		_stringArrayBind->at(_stringArrayBindIndex) = newStr.toStdString().c_str();

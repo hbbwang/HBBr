@@ -40,6 +40,7 @@ extern "C" {
 		HBBR_API static HString GetShaderIncludeAbsPath();
 		//Remove exe path.
 		HBBR_API static HString GetRelativePath(const char* path);
+		HBBR_API static HString GetRelativePath(HString path);
 		HBBR_API static uint32_t GetPathFileNum(const char* path);
 		HBBR_API static bool FileExist(const char* path);
 		HBBR_API static bool FileExist(HString path);

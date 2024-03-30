@@ -9,12 +9,12 @@
 
 World::World(class VulkanRenderer* renderer)
 {
-	Load(renderer, "");
+	PreLoad(renderer, "");
 }
 
 World::World(VulkanRenderer* renderer, HString worldAssetPath)
 {
-	Load(renderer, worldAssetPath);
+	PreLoad(renderer, worldAssetPath);
 }
 
 World::~World()
@@ -111,19 +111,14 @@ GameObject* World::SpawnGameObject(HString name, class Level* level)
 	return newObject;
 }
 
-void World::Load(class VulkanRenderer* renderer, HString worldAssetPath)
+void World::PreLoad(class VulkanRenderer* renderer, HString worldName)
 {
-	//auto result = FileSystem::GetAllFolders(FileSystem::GetWorldAbsPath().c_str());
-	//for (auto& i : result)
-	//{
-	//	
-	//}
-
 	_renderer = renderer;
 
-	if (worldAssetPath.GetSuffix() == "world" && FileSystem::IsDir(worldAssetPath))
+	if (worldName.GetSuffix() == "world" && FileSystem::IsDir(worldName))
 	{
-		_worldAssetPath = worldAssetPath;
+		HString fullPath = FileSystem::Append(FileSystem::GetWorldAbsPath() , worldName);
+		_worldAssetPath = FileSystem::GetRelativePath(fullPath);
 		FileSystem::FixUpPath(_worldAssetPath);
 
 		//Find all levels
@@ -162,6 +157,7 @@ void World::Load(class VulkanRenderer* renderer, HString worldAssetPath)
 	cameraComp->OverrideMainCamera();
 	_editorCamera = cameraComp;
 	_editorCamera->_bIsEditorCamera = true;
+
 #else
 
 //	//Test game camera
@@ -173,6 +169,16 @@ void World::Load(class VulkanRenderer* renderer, HString worldAssetPath)
 #endif
 
 	bLoad = true;
+}
+
+void World::Load()
+{
+#if IS_EDITOR
+	//-----model--test
+	auto testModel = GameObject::CreateGameObject("Test", _editorLevel.get());
+	auto modelComp = testModel->AddComponent<ModelComponent>();
+	modelComp->SetModel(HGUID("c51a01e8-9349-660a-d2df-353a310db461"));
+#endif
 }
 
 bool World::ReleaseWorld()
