@@ -47,7 +47,7 @@ enum class SceneTextureDesc {
 
 class VulkanRenderer;
 class PassBase;
-class Texture;
+class Texture2D;
 
 class SceneTexture
 {
@@ -58,7 +58,7 @@ public:
 		_sceneTexture.clear();
 	}
 	void UpdateTextures();
-	inline std::shared_ptr<Texture> GetTexture(SceneTextureDesc desc)
+	inline std::shared_ptr<Texture2D> GetTexture(SceneTextureDesc desc)
 	{
 		auto it = _sceneTexture.find(desc);
 		if (it != _sceneTexture.end())
@@ -68,17 +68,17 @@ public:
 		return nullptr;
 	}
 private:
-	std::map<SceneTextureDesc, std::shared_ptr<Texture>> _sceneTexture;
+	std::map<SceneTextureDesc, std::shared_ptr<Texture2D>> _sceneTexture;
 	class VulkanRenderer* _renderer;
 };
 
-class Texture : public AssetObject
+class Texture2D : public AssetObject
 {
 	friend class VulkanManager;
 	friend class ContentManager;
 public:
-	Texture() {}
-	~Texture();
+	Texture2D() {}
+	~Texture2D();
 	HBBR_INLINE VkImage GetTexture()const {
 		return _image;
 	}
@@ -105,11 +105,11 @@ public:
 		return _imageSize;
 	}
 
-	HBBR_INLINE static std::vector<Texture*>& GetUploadTextures(){
+	HBBR_INLINE static std::vector<Texture2D*>& GetUploadTextures(){
 		return _upload_textures;
 	}
 
-	HBBR_INLINE static Texture* GetFontTexture() {
+	HBBR_INLINE static Texture2D* GetFontTexture() {
 		return _fontTexture.get();
 	}
 
@@ -152,9 +152,9 @@ public:
 		return _bUploadToGPU;
 	}
 
-	HBBR_API static std::shared_ptr<Texture> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, HString textureName = "Texture", uint32_t miplevel = 1, uint32_t layerCount = 1);
+	HBBR_API static std::shared_ptr<Texture2D> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, HString textureName = "Texture2D", uint32_t miplevel = 1, uint32_t layerCount = 1);
 
-	HBBR_API static std::weak_ptr<Texture> LoadAsset(HGUID guid , VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+	HBBR_API static std::weak_ptr<Texture2D> LoadAsset(HGUID guid , VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
 	static void GlobalInitialize();
 
@@ -162,10 +162,10 @@ public:
 
 	static void GlobalRelease();
 
-	HBBR_API static void AddSystemTexture(HString tag, Texture* tex);
+	HBBR_API static void AddSystemTexture(HString tag, Texture2D* tex);
 
 	//获取渲染系统纹理,如果查找失败则返回第一张
-	HBBR_API static Texture* GetSystemTexture(HString tag);
+	HBBR_API static Texture2D* GetSystemTexture(HString tag);
 
 	//通过ttf生成dds纹理
 	static void CreateFontTexture(HString ttfFontPath, HString outTexturePath,bool bOverwrite = true,uint32_t fontSize = 48 , uint32_t maxTextureSize = 256);
@@ -208,18 +208,18 @@ private:
 	//Upload object
 	VkBuffer _uploadBuffer = VK_NULL_HANDLE;
 	VkDeviceMemory _uploadBufferMemory = VK_NULL_HANDLE;
-	static std::vector<Texture*> _upload_textures;
+	static std::vector<Texture2D*> _upload_textures;
 
 	//Global variable
-	static std::unordered_map<HString, Texture*> _system_textures;
+	static std::unordered_map<HString, Texture2D*> _system_textures;
 	//<mipLod,sampler>
 	static std::unordered_map<TextureSampler, std::vector<VkSampler>> _samplers;
 	
 	// vector<RGBA channel<wchar_t , FontTextureInfo>>
 	static std::unordered_map<wchar_t, FontTextureInfo> _fontTextureInfos;
-	static std::shared_ptr<Texture> _fontTexture;
+	static std::shared_ptr<Texture2D> _fontTexture;
 
-	//Texture streaming
+	//Texture2D streaming
 	static uint64_t _textureStreamingSize;
 	static uint64_t _maxTextureStreamingSize;
 };

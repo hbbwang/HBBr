@@ -551,7 +551,7 @@ void ContentBrowser::AssetImport()
 				HString guidStr = GUIDToString(assetInfo.lock()->guid);
 				dirPath += QDir::separator();
 				dirPath = dirPath + guidStr.c_str() + ".dds";
-				Texture::CompressionImage2D(i.toStdString().c_str(), dirPath.toStdString().c_str(), true, nvtt::Format_BC3, false, true);
+				Texture2D::CompressionImage2D(i.toStdString().c_str(), dirPath.toStdString().c_str(), true, nvtt::Format_BC3, false, true);
 			}
 			else if (fileInfo.suffix().compare("hdr", Qt::CaseInsensitive) == 0 ||
 				fileInfo.suffix().compare("exr", Qt::CaseInsensitive) == 0

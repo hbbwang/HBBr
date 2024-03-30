@@ -136,12 +136,6 @@ struct AssetSaveType
 	std::vector<std::weak_ptr<AssetInfoBase>> refs;
 };
 
-struct Repository
-{
-	HString Name;
-	std::
-};
-
 class ContentManager
 {
 	friend class VulkanApp;
@@ -195,19 +189,9 @@ public:
 
 	//通过已知类型和guid加载资产
 	template<class T>
-	HBBR_INLINE std::weak_ptr<class AssetObject> LoadAsset(HGUID guid)
+	HBBR_INLINE std::weak_ptr<T> LoadAsset(HGUID guid)
 	{
 		return T::LoadAsset(guid);
-	}
-
-	template<class T>
-	HBBR_INLINE std::weak_ptr<T> LoadAsset(HString assetPath)
-	{
-		if (!assetPath.IsEmpty())
-		{
-			return T::LoadAsset(GetAssetGUID(assetPath));
-		}
-		return  std::weak_ptr<T>();
 	}
 
 private:
@@ -225,5 +209,4 @@ private:
 	std::vector<std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>>_assets;
 	//根据仓库储存对象
 	std::unordered_map<HString, std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>> _assets_repos;
-
 };

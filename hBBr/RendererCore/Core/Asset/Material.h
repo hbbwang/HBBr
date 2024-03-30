@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Common.h"
-#include "Texture.h"
+#include "Texture2D.h"
 #include "Pass/PassType.h"
 #include "Primitive.h"
 #include "Asset/HGuid.h"
@@ -24,7 +24,7 @@ public:
 
 	HBBR_API HBBR_INLINE MaterialPrimitive* GetPrimitive()const { return _primitive.get(); }
 
-	HBBR_INLINE std::vector<class Texture*> GetTextures() {
+	HBBR_INLINE std::vector<class Texture2D*> GetTextures() {
 		return _primitive->GetTextures();
 	}
 

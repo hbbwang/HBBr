@@ -1,4 +1,4 @@
-﻿#include "ModelData.h"
+﻿#include "Model.h"
 
 #include "ConsoleDebug.h"
 #include "FileSystem.h"
@@ -20,7 +20,7 @@
 
 #include "ContentManager.h"
 
-std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
+std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 {
 	const auto modelAssets = ContentManager::Get()->GetAssets(AssetType::Model);
 	HString guidStr = GUIDToString(guid);
@@ -30,10 +30,10 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 		if (it == modelAssets.end())
 		{
 			MessageOut(HString("Can not find [" + guidStr + "] model in content manager.").c_str(), false, false, "255,255,0");
-			return std::weak_ptr<ModelData>();
+			return std::weak_ptr<Model>();
 		}
 	}
-	auto dataPtr = std::static_pointer_cast<AssetInfo<ModelData>>(it->second);
+	auto dataPtr = std::static_pointer_cast<AssetInfo<Model>>(it->second);
 	if (dataPtr->IsAssetLoad())
 	{
 		return dataPtr->GetData();
@@ -42,7 +42,7 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 	HString filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
-		return std::weak_ptr<ModelData>();
+		return std::weak_ptr<Model>();
 	}
 	//导入fbx文件
 #if _DEBUG
@@ -61,21 +61,21 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 	if (!scene)
 	{
 		MessageOut(importer.GetErrorString(), false, true, "255,255,0");
-		return std::weak_ptr<ModelData>();
+		return std::weak_ptr<Model>();
 	}
 	if (!scene->HasMaterials())
 	{
 		MessageOut("Error,cannot find materials in this fbx file.Import failed.", false, true, "255,255,0");
-		return std::weak_ptr<ModelData>();
+		return std::weak_ptr<Model>();
 	}
 	if (!scene->HasMeshes())
 	{
 		MessageOut("Error,cannot find meshes in this fbx file.Import failed.", false, true, "255,255,0");
-		return std::weak_ptr<ModelData>();
+		return std::weak_ptr<Model>();
 	}
 
-	auto modelData = std::make_shared<ModelData>();
-	modelData->_assetInfo = dataPtr.get();
+	auto model = std::make_shared<Model>();
+	model->_assetInfo = dataPtr.get();
 	glm::vec3 boundingBox_min = glm::vec3(0, 0, 0);
 	glm::vec3 boundingBox_max = glm::vec3(0, 0, 0);
 	for (unsigned int nm = 0; nm < scene->mNumMeshes; nm++)
@@ -87,7 +87,7 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 		//
 		FaceData newData = {};
 		newData.vertexNum = mesh->mNumVertices;
-		modelData->faceNum += 1;
+		model->faceNum += 1;
 		//
 		VertexFactory::VertexInput vertex{};
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -108,8 +108,8 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 				boundingBox_max.x = boundingBox_max.x <= vec3.x ? vec3.x : boundingBox_max.x;
 				boundingBox_max.y = boundingBox_max.y <= vec3.y ? vec3.y : boundingBox_max.y;
 				boundingBox_max.z = boundingBox_max.z <= vec3.z ? vec3.z : boundingBox_max.z;
-				modelData->boundingBox_min = boundingBox_min;
-				modelData->boundingBox_max = boundingBox_max;
+				model->boundingBox_min = boundingBox_min;
+				model->boundingBox_max = boundingBox_max;
 			}
 			//
 			if (mesh->HasNormals()) {
@@ -139,15 +139,15 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 			{
 				vec4.x = mesh->mTextureCoords[0][i].x;
 				vec4.y = mesh->mTextureCoords[0][i].y;
-				modelData->uv_0_1_abs_max.x = glm::fmax(modelData->uv_0_1_abs_max.x, glm::abs(vec4.x));
-				modelData->uv_0_1_abs_max.y = glm::fmax(modelData->uv_0_1_abs_max.y, glm::abs(vec4.y));
+				model->uv_0_1_abs_max.x = glm::fmax(model->uv_0_1_abs_max.x, glm::abs(vec4.x));
+				model->uv_0_1_abs_max.y = glm::fmax(model->uv_0_1_abs_max.y, glm::abs(vec4.y));
 			}
 			if (mesh->HasTextureCoords(1))
 			{
 				vec4.z = mesh->mTextureCoords[1][i].x;
 				vec4.w = mesh->mTextureCoords[1][i].y;
-				modelData->uv_0_1_abs_max.z = glm::fmax(modelData->uv_0_1_abs_max.z, glm::abs(vec4.z));
-				modelData->uv_0_1_abs_max.w = glm::fmax(modelData->uv_0_1_abs_max.w, glm::abs(vec4.w));
+				model->uv_0_1_abs_max.z = glm::fmax(model->uv_0_1_abs_max.z, glm::abs(vec4.z));
+				model->uv_0_1_abs_max.w = glm::fmax(model->uv_0_1_abs_max.w, glm::abs(vec4.w));
 			}
 			vertex.uv01.push_back(vec4);
 			//UV 23
@@ -156,15 +156,15 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 			{
 				vec4.x = mesh->mTextureCoords[2][i].x;
 				vec4.y = mesh->mTextureCoords[2][i].y;
-				modelData->uv_2_3_abs_max.x = glm::fmax(modelData->uv_2_3_abs_max.x, glm::abs(vec4.x));
-				modelData->uv_2_3_abs_max.y = glm::fmax(modelData->uv_2_3_abs_max.y, glm::abs(vec4.y));
+				model->uv_2_3_abs_max.x = glm::fmax(model->uv_2_3_abs_max.x, glm::abs(vec4.x));
+				model->uv_2_3_abs_max.y = glm::fmax(model->uv_2_3_abs_max.y, glm::abs(vec4.y));
 			}
 			if (mesh->HasTextureCoords(3))
 			{
 				vec4.z = mesh->mTextureCoords[3][i].x;
 				vec4.w = mesh->mTextureCoords[3][i].y;
-				modelData->uv_2_3_abs_max.z = glm::fmax(modelData->uv_2_3_abs_max.z, glm::abs(vec4.z));
-				modelData->uv_2_3_abs_max.w = glm::fmax(modelData->uv_2_3_abs_max.w, glm::abs(vec4.w));
+				model->uv_2_3_abs_max.z = glm::fmax(model->uv_2_3_abs_max.z, glm::abs(vec4.z));
+				model->uv_2_3_abs_max.w = glm::fmax(model->uv_2_3_abs_max.w, glm::abs(vec4.w));
 			}
 			vertex.uv23.push_back(vec4);
 		}
@@ -175,8 +175,8 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 			if (mesh->mFaces[i].mNumIndices != 3)
 			{
 				MessageOut("Face indices number was not equal 3.", false, true, "255,255,0");
-				modelData.reset();
-				return std::weak_ptr<ModelData>();
+				model.reset();
+				return std::weak_ptr<Model>();
 			}
 			//
 			newData.vertexData.vertexIndices.push_back(mesh->mFaces[i].mIndices[0]);
@@ -195,17 +195,17 @@ std::weak_ptr<ModelData> ModelData::LoadAsset(HGUID guid)
 
 		}
 
-		modelData->faces.push_back(newData);
+		model->faces.push_back(newData);
 	}
 	//----------------------
-	//_modelCache.emplace(std::make_pair(fbxPath, std::move(modelData)));
+	//_modelCache.emplace(std::make_pair(fbxPath, std::move(Model)));
 
-	dataPtr->SetData(std::move(modelData));
+	dataPtr->SetData(std::move(model));
 
 	return dataPtr->GetData();
 }
 
-bool ModelData::BuildModelPrimitives(ModelData* data, std::vector<ModelPrimitive*>& prims)
+bool Model::BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prims)
 {
 	if (data != nullptr)
 	{
@@ -217,7 +217,7 @@ bool ModelData::BuildModelPrimitives(ModelData* data, std::vector<ModelPrimitive
 			prims[i]->boundingBox_min = data->boundingBox_min;
 			prims[i]->boundingBox_max = data->boundingBox_max;
 			prims[i]->vertexInput = data->faces[i].vertexData;
-			prims[i]->modelPrimitiveName = data->_assetInfo->name;
+			prims[i]->modelPrimitiveName = data->_assetInfo->displayName;
 		}
 		return true;
 	}

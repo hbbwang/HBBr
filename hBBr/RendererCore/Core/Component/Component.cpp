@@ -3,8 +3,8 @@
 #include "Asset/World.h"
 #include "Asset/Level.h"
 #include "VulkanRenderer.h"
-#include "ModelData.h"
-#include "Texture.h"
+#include "Model.h"
+#include "Texture2D.h"
 #include "Material.h"
 Component::Component(GameObject* parent)
 {
@@ -107,14 +107,14 @@ HString Component::AnalysisPropertyValue(ComponentProperty& p)
 		return HString(*value);
 	}
 	//Asset type
-	else if (p.type == typeid(ModelData).name())
+	else if (p.type == typeid(Model).name())
 	{
-		auto value = (std::weak_ptr<ModelData>*)p.value;
+		auto value = (std::weak_ptr<Model>*)p.value;
 		return value->lock()->_assetInfo->guid.str().c_str();
 	}
-	else if (p.type == typeid(Texture).name())
+	else if (p.type == typeid(Texture2D).name())
 	{
-		auto value = (std::weak_ptr<Texture>*)p.value;
+		auto value = (std::weak_ptr<Texture2D>*)p.value;
 		return value->lock()->_assetInfo->guid.str().c_str();
 	}
 	else if (p.type == typeid(Material).name())

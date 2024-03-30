@@ -76,7 +76,7 @@ struct GUIPrimitive
 	std::vector<GUIDrawState> States;
 	PipelineIndex pipelineIndex;
 	std::vector<wchar_t> fontCharacter;
-	Texture* BaseTexture = nullptr;
+	Texture2D* BaseTexture = nullptr;
 	VkRect2D viewport;
 	std::shared_ptr<class DescriptorSet> ub_descriptorSet;
 	std::shared_ptr<class DescriptorSet> tex_descriptorSet;
@@ -91,7 +91,7 @@ public:
 	virtual void PassUpdate()override;
 	virtual void PassReset()override;
 
-	void GUIDrawImage(HString tag, Texture* texture, float x, float y, float w, float h,GUIDrawState state);
+	void GUIDrawImage(HString tag, Texture2D* texture, float x, float y, float w, float h,GUIDrawState state);
 	void GUIDrawText(HString tag, const wchar_t* text, float x, float y, float w, float h, GUIDrawState state , float fontSize = 20);
 
 private:

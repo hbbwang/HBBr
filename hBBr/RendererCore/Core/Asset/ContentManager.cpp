@@ -2,9 +2,9 @@
 #include "XMLStream.h"
 #include "FileSystem.h"
 #include "Asset/AssetObject.h"
-#include "Asset/ModelData.h"
+#include "Asset/Model.h"
 #include "Asset/Material.h"
-#include "Asset/Texture.h"
+#include "Asset/Texture2D.h"
 #include "Asset/Level.h"
 #include "Asset/World.h"
 std::unique_ptr<ContentManager> ContentManager::_ptr;
@@ -36,7 +36,6 @@ void ContentManager::UpdateAssetReferenceByType(AssetType type)
 	}
 }
 
-#pragma region Asset Type Function
 //更新所有资产的引用
 void ContentManager::UpdateAllAssetReference()
 {
@@ -68,15 +67,16 @@ void ContentManager::Release()
 std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)
 {
 	std::shared_ptr<AssetInfoBase> result = nullptr;
-	switch (type)//新增资产类型需要在这里添加实际对象,未来打包资产的时候会根据类型进行删留
+	switch (type)//-------新增资产类型需要在这里添加实际对象,未来打包资产的时候会根据类型进行删留
 	{
-		case AssetType::Model:		result.reset(new AssetInfo<ModelData>());
-		case AssetType::Material:	result.reset(new AssetInfo<Material>());
-		case AssetType::Texture2D: result.reset(new AssetInfo<Texture>());
+		case AssetType::Model:		result.reset(new AssetInfo<Model>());
+		case AssetType::Material:		result.reset(new AssetInfo<Material>());
+		case AssetType::Texture2D:	result.reset(new AssetInfo<Texture2D>());
 		default:break;
 	}
 	return result;
 }
+//------------
 
 void ContentManager::ReloadRepository(HString repositoryName)
 {
@@ -143,7 +143,9 @@ void ContentManager::ReloadRepository(HString repositoryName)
 
 		if (checkExist.expired())
 		{
+			//1
 			_assets[(uint32_t)type].emplace(info->guid, info);
+			//2
 			auto it = _assets_repos.find(repositoryName);
 			if (it == _assets_repos.end())
 			{
@@ -162,8 +164,6 @@ void ContentManager::ReloadRepository(HString repositoryName)
 		}
 	}
 }
-
-#pragma endregion Asset Type Function(资产类型硬相关方法)
 
 void ContentManager::UpdateAssetReference(HGUID obj)
 {

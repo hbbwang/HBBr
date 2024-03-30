@@ -58,7 +58,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		//MaterialPrimitive
 		mat->_primitive.reset(new MaterialPrimitive());
 		mat->_assetInfo = dataPtr.get();
-		mat->_primitive->graphicsName = it->second->name;
+		mat->_primitive->graphicsName = it->second->displayName;
 		XMLStream::LoadXMLAttributeString(materialPrim, L"vsShader", mat->_primitive->vsShader);
 		XMLStream::LoadXMLAttributeString(materialPrim, L"psShader", mat->_primitive->psShader);
 		uint32_t vs_varient = 0;
@@ -164,29 +164,29 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 			for (int i = 0; i < psCache.header.shaderTextureCount; i++)
 			{
 				mat->_primitive->_textureInfos.push_back(*psCache.ti[i]);
-				mat->_primitive->SetTexture(i, Texture::GetSystemTexture(psCache.texs[i].defaultTexture));
+				mat->_primitive->SetTexture(i, Texture2D::GetSystemTexture(psCache.texs[i].defaultTexture));
 				//Set Sampler
 				if (psCache.texs[i].msFilter == MSFilter::Nearest)
 				{
 					if (psCache.texs[i].msAddress == MSAddress::Clamp)
-						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp));
+						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp));
 					else if (psCache.texs[i].msAddress == MSAddress::Wrap)
-						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Nearest_Wrap));
+						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Wrap));
 					else if (psCache.texs[i].msAddress == MSAddress::Mirror)
-						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Nearest_Mirror));
+						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Mirror));
 					else if (psCache.texs[i].msAddress == MSAddress::Border)
-						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Nearest_Border));
+						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Border));
 				}
 				else if (psCache.texs[i].msFilter == MSFilter::Linear)
 				{
 					if (psCache.texs[i].msAddress == MSAddress::Clamp)
-						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Linear_Clamp));
+						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Linear_Clamp));
 					else if (psCache.texs[i].msAddress == MSAddress::Wrap)
-						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Linear_Wrap));
+						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Linear_Wrap));
 					else if (psCache.texs[i].msAddress == MSAddress::Mirror)
-						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Linear_Mirror));
+						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Linear_Mirror));
 					else if (psCache.texs[i].msAddress == MSAddress::Border)
-						mat->_primitive->SetTextureSampler(i, Texture::GetSampler(TextureSampler::TextureSampler_Linear_Border));
+						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Linear_Border));
 				}
 			}
 			//赋值
@@ -223,14 +223,14 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 					if (!guid.isValid())
 					{
 						MessageOut(HString(("Material load texture failed : ") + value).c_str(), false, false, "255,0,0");
-						Texture::GetSystemTexture(it->defaultTexture);
-						mat->_primitive->SetTexture(it->index, Texture::GetSystemTexture(it->defaultTexture));
+						Texture2D::GetSystemTexture(it->defaultTexture);
+						mat->_primitive->SetTexture(it->index, Texture2D::GetSystemTexture(it->defaultTexture));
 					}
 					else
 					{
 						if (info.type == MTType::Texture2D)
 						{
-							auto asset = ContentManager::Get()->GetAsset<Texture>(guid, AssetType::Texture2D);
+							auto asset = ContentManager::Get()->GetAsset<Texture2D>(guid, AssetType::Texture2D);
 							mat->_primitive->SetTexture(it->index, asset.lock().get());
 						}					
 					}
@@ -261,14 +261,14 @@ std::weak_ptr<Material> Material::CreateMaterial(HString newMatFilePath)
 	{
 		return std::weak_ptr<Material>();
 	}
-	//复制引擎自带材质实例
-	HString srcMat = (FileSystem::GetContentAbsPath() + "Core/Material/DefaultPBR.mat");
-	FileSystem::FileCopy(srcMat.c_str() ,newMatFilePath.c_str());
+	////复制引擎自带材质实例
+	//HString srcMat = (FileSystem::GetContentAbsPath() + "Core/Material/DefaultPBR.mat");
+	//FileSystem::FileCopy(srcMat.c_str() ,newMatFilePath.c_str());
 
-	HString newName = (newMatFilePath + "/NewMaterial.mat");
+	//HString newName = (newMatFilePath + "/NewMaterial.mat");
 
-	FileSystem::FileRename(srcMat.c_str(), FileSystem::GetRelativePath(newName.c_str()).c_str());
-	auto assetInfo = ContentManager::Get()->CreateAssetInfo(newName);
+	//FileSystem::FileRename(srcMat.c_str(), FileSystem::GetRelativePath(newName.c_str()).c_str());
+	//auto assetInfo = ContentManager::Get()->CreateAssetInfo(newName);
 
-	return std::reinterpret_pointer_cast<Material>(assetInfo.lock()->GetAssetData().lock());
+	//return std::reinterpret_pointer_cast<Material>(assetInfo.lock()->GetAssetData().lock());
 }

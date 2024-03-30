@@ -1,7 +1,7 @@
 ﻿#pragma once
 //PassManager类，管理所有渲染或者计算Pass
 #include "Common.h"
-#include "Texture.h"
+#include "Texture2D.h"
 #include <vector>
 #include <map>
 class VulkanRenderer;

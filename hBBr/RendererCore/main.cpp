@@ -4,7 +4,7 @@
 #include "./Core/Shader.h"
 #include "./Core/Pipeline.h"
 #include "./Common/HInput.h"
-#include "./Asset/Texture.h"
+#include "./Asset/Texture2D.h"
 #include "./Common/XMLStream.h"
 #include "./Core/RendererConfig.h"
 #if IS_EDITOR
@@ -152,9 +152,9 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	outFontTexturePath = FileSystem::GetRelativePath(outFontTexturePath.c_str());
 	outFontTexturePath = FileSystem::GetProgramPath() + outFontTexturePath;
 	FileSystem::CorrectionPath(outFontTexturePath);
-	//Texture::CreateFontTexture(ttfFontPath, outFontTexturePath, true, 16U, 4096U);
+	//Texture2D::CreateFontTexture(ttfFontPath, outFontTexturePath, true, 16U, 4096U);
 
-	Texture::GlobalInitialize();
+	Texture2D::GlobalInitialize();
 
 	//Create Main Window
 	auto win = CreateNewWindow(128, 128, "MainRenderer", false, parent);
@@ -210,7 +210,7 @@ void VulkanApp::DeInitVulkanManager()
 	Shader::DestroyAllShaderCache();
 	PipelineManager::ClearPipelineObjects();
 	ContentManager::Get()->Release();
-	Texture::GlobalRelease();
+	Texture2D::GlobalRelease();
 	VulkanManager::ReleaseManager();
 	SDL_Quit();
 }
@@ -407,7 +407,7 @@ void VulkanApp::UpdateRender()
 {
 	for (auto w : _forms)
 	{
-		Texture::GlobalUpdate();
+		Texture2D::GlobalUpdate();
 		if(w->renderer != nullptr && !w->bMinimized)
 			w->renderer->Render();
 	}

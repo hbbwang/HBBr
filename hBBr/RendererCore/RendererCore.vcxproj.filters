@@ -217,13 +217,13 @@
     <ClInclude Include="Core\Asset\Material.h">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Asset\ModelData.h">
+    <ClInclude Include="Core\Asset\Model.h">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClInclude>
     <ClInclude Include="Core\Asset\AssetObject.h">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Asset\Texture.h">
+    <ClInclude Include="Core\Asset\Texture2D.h">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClInclude>
     <ClInclude Include="Core\Asset\World.h">
@@ -372,13 +372,13 @@
     <ClCompile Include="Core\Asset\Material.cpp">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Asset\ModelData.cpp">
+    <ClCompile Include="Core\Asset\Model.cpp">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClCompile>
     <ClCompile Include="Core\Asset\AssetObject.cpp">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Asset\Texture.cpp">
+    <ClCompile Include="Core\Asset\Texture2D.cpp">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClCompile>
     <ClCompile Include="Core\Asset\World.cpp">

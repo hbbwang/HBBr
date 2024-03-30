@@ -130,13 +130,13 @@ struct Vec4ColorFileData
 	}
 };
 
-class ModelData :public AssetObject
+class Model :public AssetObject
 {
 public:
 
-	HBBR_API static std::weak_ptr<ModelData> LoadAsset(HGUID guid);
+	HBBR_API static std::weak_ptr<Model> LoadAsset(HGUID guid);
 
-	HBBR_API static bool BuildModelPrimitives(ModelData* data, std::vector<ModelPrimitive*>& prims);
+	HBBR_API static bool BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prims);
 
 	//根据材质区分面
 	std::vector<FaceData>		faces;

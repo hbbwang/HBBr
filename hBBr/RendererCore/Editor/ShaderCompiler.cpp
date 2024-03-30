@@ -554,7 +554,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 				}
 			}
 			}
-			//Texture
+			//Texture2D
 			else if (setting[0] == 'T' && setting[1] == 'e' && setting[2] == 'x' && setting[3] == 't'
 				&& setting[4] == 'u' && setting[5] == 'r' && setting[6] == 'e')
 			{
@@ -637,13 +637,13 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 				if (cBufferMaterialRegisterLineIndex != -1)
 				{
 					line[textureRegisterLineIndex[i]] += HString(":register(t") + HString::FromInt(i) + ",space3);";
-					//给Texture补充一个SamplerState
+					//给Texture2D补充一个SamplerState
 					line[textureRegisterLineIndex[i]] += "   SamplerState " + texName + "Sampler:register(s" + HString::FromInt(i) + ",space3);";
 				}
 				else
 				{
 					line[textureRegisterLineIndex[i]] += HString(":register(t") + HString::FromInt(i) + ",space2);";
-					//给Texture补充一个SamplerState
+					//给Texture2D补充一个SamplerState
 					line[textureRegisterLineIndex[i]] += "   SamplerState " + texName + "Sampler:register(s" + HString::FromInt(i) + ",space2);";
 				}
 			}

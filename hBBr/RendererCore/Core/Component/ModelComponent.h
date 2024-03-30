@@ -19,7 +19,7 @@ public:
 
 	HBBR_API void SetModel(HGUID guid);
 
-	HBBR_API void SetModel(std::weak_ptr<class ModelData> model);
+	HBBR_API void SetModel(std::weak_ptr<class Model> model);
 
 	virtual void GameObjectActiveChanged(bool objActive)override;
 

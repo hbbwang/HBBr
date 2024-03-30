@@ -88,13 +88,13 @@ void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive
 	}
 }
 
-void MaterialPrimitive::SetTexture(int index, Texture* newTexture)
+void MaterialPrimitive::SetTexture(int index, Texture2D* newTexture)
 {
 	textures[index] = newTexture;
 	_needUpdateDescriptorSet_tex = true;
 }
 
-void MaterialPrimitive::SetTexture(HString textureName, Texture* newTexture)
+void MaterialPrimitive::SetTexture(HString textureName, Texture2D* newTexture)
 {
 	auto it = std::find_if(_textureInfos.begin(), _textureInfos.end(), [textureName](MaterialTextureInfo& info) {
 		return info.name.IsSame(textureName, false);

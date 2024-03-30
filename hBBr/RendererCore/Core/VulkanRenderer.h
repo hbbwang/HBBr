@@ -10,7 +10,7 @@
 #include "Asset/HGuid.h"
 #include "HTime.h"
 
-class Texture;
+class Texture2D;
 class Scene;
 
 class VulkanRenderer

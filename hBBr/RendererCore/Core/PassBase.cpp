@@ -1,7 +1,7 @@
 ﻿#include "PassBase.h"
 #include "VulkanRenderer.h"
 #include "VulkanManager.h"
-#include "Texture.h"
+#include "Texture2D.h"
 #include "PassManager.h"
 #include "VertexFactory.h"
 #include "DescriptorSet.h"
@@ -16,7 +16,7 @@ PassBase::~PassBase()
 
 }
 
-std::shared_ptr<Texture> PassBase::GetSceneTexture(uint32_t descIndex)
+std::shared_ptr<Texture2D> PassBase::GetSceneTexture(uint32_t descIndex)
 {
 	return _renderer->GetPassManager()->GetSceneTexture()->GetTexture(SceneTextureDesc(descIndex));
 }

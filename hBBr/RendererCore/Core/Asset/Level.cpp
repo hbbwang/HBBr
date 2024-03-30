@@ -91,17 +91,17 @@ void Level::Load(World* world, HString levelPath)
 						{
 							auto tranNode = item.child(L"Transform");
 							glm::vec3 pos = glm::vec3(0), rot = glm::vec3(0), scale = glm::vec3(0);
-							pos.x = tranNode.attribute(L"PosX").as_double();
-							pos.y = tranNode.attribute(L"PosY").as_double();
-							pos.z = tranNode.attribute(L"PosZ").as_double();
+							pos.x = (float)tranNode.attribute(L"PosX").as_double();
+							pos.y = (float)tranNode.attribute(L"PosY").as_double();
+							pos.z = (float)tranNode.attribute(L"PosZ").as_double();
 							object->_transform->SetLocation(pos);
-							pos.x = tranNode.attribute(L"RotX").as_double();
-							pos.y = tranNode.attribute(L"RotY").as_double();
-							pos.z = tranNode.attribute(L"RotZ").as_double();
+							pos.x = (float)tranNode.attribute(L"RotX").as_double();
+							pos.y = (float)tranNode.attribute(L"RotY").as_double();
+							pos.z = (float)tranNode.attribute(L"RotZ").as_double();
 							object->_transform->SetRotation(rot);
-							pos.x = tranNode.attribute(L"ScaX").as_double();
-							pos.y = tranNode.attribute(L"ScaY").as_double();
-							pos.z = tranNode.attribute(L"ScaZ").as_double();
+							pos.x = (float)tranNode.attribute(L"ScaX").as_double();
+							pos.y = (float)tranNode.attribute(L"ScaY").as_double();
+							pos.z = (float)tranNode.attribute(L"ScaZ").as_double();
 							object->_transform->SetScale3D(scale);
 						}
 						//Component

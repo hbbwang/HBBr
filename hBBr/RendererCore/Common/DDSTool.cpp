@@ -1,6 +1,6 @@
 ﻿#include "DDSTool.h"
 #include "ImageTool.h"
-#include "Texture.h"
+#include "Texture2D.h"
 #include "ConsoleDebug.h"
 #define ISBITMASK(r, g, b, a) (ddpf.dwRBitMask == r && ddpf.dwGBitMask == g && ddpf.dwBBitMask == b && ddpf.dwABitMask == a)
 

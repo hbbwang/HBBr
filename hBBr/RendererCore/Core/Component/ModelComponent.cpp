@@ -1,5 +1,5 @@
 ﻿#include "ModelComponent.h"
-#include "Asset/ModelData.h"
+#include "Asset/Model.h"
 #include "Primitive.h"
 #include "GameObject.h"
 #include "FileSystem.h"
@@ -10,7 +10,7 @@ COMPONENT_IMPLEMENT(ModelComponent)
 void ModelComponent::OnConstruction()
 {
 	Component::OnConstruction();
-	AddProperty(ModelData, "Model", &_modelGUID, false, "Default", 0);
+	AddProperty(Model, "Model", &_modelGUID, false, "Default", 0);
 	AddProperty(Material, "Material", &_materialGUIDs, false, "Default", 0);
 }
 
@@ -28,17 +28,17 @@ void ModelComponent::SetModel(HGUID guid)
 	if (!guid.isValid())
 		return;
 	//create
-	SetModel(ModelData::LoadAsset(guid));
+	SetModel(Model::LoadAsset(guid));
 }
 
-void ModelComponent::SetModel(std::weak_ptr<class ModelData> model)
+void ModelComponent::SetModel(std::weak_ptr<class Model> model)
 {
 	ClearPrimitves();
 	if (!model.expired())
 	{
 		_modelGUID = model.lock()->_assetInfo->guid;
 		_oldModelGUID = model.lock()->_assetInfo->guid;
-		ModelData::BuildModelPrimitives(model.lock().get(), _primitives);
+		Model::BuildModelPrimitives(model.lock().get(), _primitives);
 		_materialGUIDs.resize(_primitives.size());
 		_materials.resize(_primitives.size());
 		for (int i = 0; i < (int)_primitives.size(); i++)

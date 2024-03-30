@@ -142,14 +142,14 @@ public:
 		bool bVSync = true
 	);
 
-	/* 创建Swapchain From Texture Class */
-	VkExtent2D CreateSwapchainFromTextures(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures , std::vector<VkImageView>& swapchainImageViews);
+	/* 创建Swapchain From Texture2D Class */
+	VkExtent2D CreateSwapchainFromTextures(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture2D>>& textures , std::vector<VkImageView>& swapchainImageViews);
 
 	/* 释放Swapchain */
 	void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImageView>& swapchainImageViews);
 
-	/* 释放Swapchain From Texture Class */
-	void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<std::shared_ptr<class Texture>>& textures);
+	/* 释放Swapchain From Texture2D Class */
+	void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<std::shared_ptr<class Texture2D>>& textures);
 
 	/* 创建Vulkan image ,但是不带 mipmaps */
 	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image ,uint32_t miplevel = 1, uint32_t layerCount = 1);
@@ -317,7 +317,7 @@ public:
 
 	void UpdateBufferDescriptorSetAll(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
 
-	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture*> textures, std::vector<VkSampler> samplers);
+	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture2D*> textures, std::vector<VkSampler> samplers);
 
 	VkDeviceSize GetMinUboAlignmentSize(VkDeviceSize realSize);
 

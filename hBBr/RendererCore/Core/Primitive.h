@@ -4,7 +4,7 @@
 #include "VertexFactory.h"
 #include "Pass/PassType.h"
 #include "Component/Transform.h"
-#include "Texture.h"
+#include "Texture2D.h"
 #include "Pipeline.h"
 #include "Shader.h"
 
@@ -109,7 +109,7 @@ public:
 		return result;
 	}
 
-	HBBR_INLINE std::vector<class Texture*> GetTextures() {
+	HBBR_INLINE std::vector<class Texture2D*> GetTextures() {
 		return textures;
 	}
 
@@ -121,9 +121,9 @@ public:
 
 	void SetTextureSampler(HString textureName, VkSampler sampler);
 
-	void SetTexture(int index, class Texture* newTexture);
+	void SetTexture(int index, class Texture2D* newTexture);
 
-	void SetTexture(HString textureName, class Texture* newTexture);
+	void SetTexture(HString textureName, class Texture2D* newTexture);
 
 	~MaterialPrimitive()
 	{
@@ -166,7 +166,7 @@ public:
 private:
 
 	//纹理贴图
-	std::vector<class Texture*> textures;
+	std::vector<class Texture2D*> textures;
 
 	//采样器选择
 	std::vector<VkSampler> _samplers;

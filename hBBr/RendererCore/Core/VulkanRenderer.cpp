@@ -1,5 +1,5 @@
 ﻿#include "VulkanRenderer.h"
-#include "Texture.h"
+#include "Texture2D.h"
 #include "RendererConfig.h"
 #include "ConsoleDebug.h"
 #include "PassManager.h"

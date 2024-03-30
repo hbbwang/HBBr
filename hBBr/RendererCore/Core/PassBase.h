@@ -9,7 +9,7 @@
 #include "DescriptorSet.h"
 #include "VertexFactory.h"
 #include "Primitive.h"
-class Texture;
+class Texture2D;
 class VulkanRenderer;
 
 class PassBase
@@ -25,7 +25,7 @@ protected:
 	virtual void PassUpdate() {}
 	virtual void Reset() {}
 	virtual void PassReset() {}
-	std::shared_ptr<Texture> GetSceneTexture(uint32_t descIndex);
+	std::shared_ptr<Texture2D> GetSceneTexture(uint32_t descIndex);
 	VulkanRenderer* _renderer = nullptr;
 	HString _passName = "PassBase";
 	glm::vec4 _markColor = glm::vec4(1,1,1,0.5);

@@ -5,7 +5,7 @@
 #include "Buffer.h"
 #include "Primitive.h"
 #include "Pass/PassType.h"
-#include "Texture.h"
+#include "Texture2D.h"
 
 /*
 	Opaque pass
@@ -27,7 +27,7 @@ void BasePass::PassInit()
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetFormat() , VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 	AddSubpass({}, { 0 }, 1);
 	CreateRenderPass();
-	//Texture DescriptorSet
+	//Texture2D DescriptorSet
 	auto manager = VulkanManager::GetManager();
 	_opaque_descriptorSet_pass.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1, sizeof(PassUniformBuffer)));
 	_opaque_descriptorSet_obj.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1));
@@ -300,7 +300,7 @@ void PreCommandPass::PassUpdate()
 {
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	//Image data CPU to GPU
-	auto& uploadTexs = Texture::GetUploadTextures();
+	auto& uploadTexs = Texture2D::GetUploadTextures();
 	for (auto it = uploadTexs.begin(); it != uploadTexs.end(); it++)
 	{
 		if ((*it)->CopyBufferToTexture(cmdBuf))

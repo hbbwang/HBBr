@@ -4,7 +4,8 @@
 class AssetObject
 {
 public:
-	virtual ~AssetObject() = default;
-	AssetInfoBase* _assetInfo = nullptr;
 
+	virtual ~AssetObject() = default;
+
+	AssetInfoBase* _assetInfo = nullptr;
 };

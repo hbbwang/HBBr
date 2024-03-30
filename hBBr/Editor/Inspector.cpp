@@ -11,9 +11,9 @@
 #include "AssetObject.h"
 #include "FileSystem.h"
 
-#include "ModelData.h"
+#include "Model.h"
 #include "Material.h"
-#include "Texture.h"
+#include "Texture2D.h"
 
 Inspector* Inspector::_currentInspector = nullptr;
 
@@ -221,7 +221,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				}
 				continue;
 			}
-			//std::weak_ptr<ModelData> value
+			//std::weak_ptr<Model> value
 			else if (p.bAsset)
 			{
 				if (p.bArray)
@@ -246,9 +246,9 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 								if (newGuid.isValid())
 								{
 									value->at(i) = newGuid;
-									if (p.type_runtime == typeid(ModelData).name())
+									if (p.type_runtime == typeid(Model).name())
 									{
-										auto newObject = ModelData::LoadAsset(newGuid);
+										auto newObject = Model::LoadAsset(newGuid);
 										auto shared = newObject.lock();
 										line->_objectBind = shared.get();
 									}
@@ -282,9 +282,9 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 							if (newGuid.isValid())
 							{
 								*value = newGuid;
-								if (p.type_runtime == typeid(ModelData).name())
+								if (p.type_runtime == typeid(Model).name())
 								{
-									auto newObject = ModelData::LoadAsset(newGuid);
+									auto newObject = Model::LoadAsset(newGuid);
 									auto shared = newObject.lock();
 									line->_objectBind = shared.get();
 								}

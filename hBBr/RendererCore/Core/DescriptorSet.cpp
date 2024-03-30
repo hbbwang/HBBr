@@ -1,7 +1,7 @@
 ﻿#include "DescriptorSet.h"
 #include "VulkanManager.h"
 #include "VulkanRenderer.h"
-#include "Texture.h"
+#include "Texture2D.h"
 #include <vector>
 DescriptorSet::DescriptorSet(class VulkanRenderer* renderer , VkDescriptorType type, uint32_t bindingCount, VkDeviceSize bufferSizeInit, VkShaderStageFlags shaderStageFlags)
 {
@@ -159,7 +159,7 @@ void DescriptorSet::UpdateDescriptorSetAll(uint32_t sameBufferSize)
 	VulkanManager::GetManager()->UpdateBufferDescriptorSetAll(this, 0, 0, alignmentSize);
 }
 
-void DescriptorSet::UpdateTextureDescriptorSet(std::vector<class Texture*> textures, std::vector<VkSampler> samplers)
+void DescriptorSet::UpdateTextureDescriptorSet(std::vector<class Texture2D*> textures, std::vector<VkSampler> samplers)
 {
 	if (_needUpdates[_renderer->GetCurrentFrameIndex()] == 1)
 	{

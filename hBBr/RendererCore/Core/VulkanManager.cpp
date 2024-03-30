@@ -5,7 +5,7 @@
 #include "HString.h"
 #include "ConsoleDebug.h"
 #include "RendererConfig.h"
-#include "Texture.h"
+#include "Texture2D.h"
 #include "FileSystem.h"
 #include "Shader.h"
 #include "DescriptorSet.h"
@@ -1190,7 +1190,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	return info.imageExtent;
 }
 
-VkExtent2D VulkanManager::CreateSwapchainFromTextures(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture>>& textures, std::vector<VkImageView>& swapchainImageViews)
+VkExtent2D VulkanManager::CreateSwapchainFromTextures(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture2D>>& textures, std::vector<VkImageView>& swapchainImageViews)
 {
 	//ConsoleDebug::print_endl("Create Swapchain KHR.");
 	VkPresentModeKHR present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
@@ -1254,7 +1254,7 @@ VkExtent2D VulkanManager::CreateSwapchainFromTextures(VkExtent2D surfaceSize, Vk
 	swapchainImageViews.clear();
 	for (int i = 0; i < (int)_swapchainBufferCount; i++)
 	{
-		textures[i].reset(new Texture());
+		textures[i].reset(new Texture2D());
 		textures[i]->_image = images[i];
 		textures[i]->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		textures[i]->_imageAspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -1294,7 +1294,7 @@ void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkIm
 	}
 }
 
-void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<std::shared_ptr<class Texture>>& textures)
+void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<std::shared_ptr<class Texture2D>>& textures)
 {
 	for (int i = 0; i < (int)textures.size(); i++)
 	{
@@ -2483,7 +2483,7 @@ void VulkanManager::UpdateBufferDescriptorSetAll(DescriptorSet* descriptorSet, u
 	}
 }
 
-void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture*> textures, std::vector<VkSampler> samplers)
+void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture2D*> textures, std::vector<VkSampler> samplers)
 {
 	const uint32_t count = (uint32_t)textures.size();
 	std::vector<VkWriteDescriptorSet> descriptorWrite(count);

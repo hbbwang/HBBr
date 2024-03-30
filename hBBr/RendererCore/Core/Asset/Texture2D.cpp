@@ -1,5 +1,5 @@
 ﻿#include <ostream>
-#include "Texture.h"
+#include "Texture2D.h"
 #include "VulkanRenderer.h"
 #include "VulkanManager.h"
 #include "ContentManager.h"
@@ -10,19 +10,19 @@
 #include "XMLStream.h"
 #include "RendererConfig.h"
 
-std::vector<Texture*> Texture::_upload_textures;
-std::unordered_map<HString, Texture*> Texture::_system_textures;
-std::unordered_map<TextureSampler, std::vector<VkSampler>>Texture::_samplers;
-std::unordered_map<wchar_t, FontTextureInfo> Texture::_fontTextureInfos;
-std::shared_ptr<Texture>Texture::_fontTexture;
-uint64_t Texture::_textureStreamingSize = 0;
-uint64_t Texture::_maxTextureStreamingSize = (uint64_t)4 * (uint64_t)1024 * (uint64_t)1024 * (uint64_t)1024; //4 GB
+std::vector<Texture2D*> Texture2D::_upload_textures;
+std::unordered_map<HString, Texture2D*> Texture2D::_system_textures;
+std::unordered_map<TextureSampler, std::vector<VkSampler>>Texture2D::_samplers;
+std::unordered_map<wchar_t, FontTextureInfo> Texture2D::_fontTextureInfos;
+std::shared_ptr<Texture2D>Texture2D::_fontTexture;
+uint64_t Texture2D::_textureStreamingSize = 0;
+uint64_t Texture2D::_maxTextureStreamingSize = (uint64_t)4 * (uint64_t)1024 * (uint64_t)1024 * (uint64_t)1024; //4 GB
 
 SceneTexture::SceneTexture(VulkanRenderer* renderer)
 {
 	_renderer = renderer;
-	auto sceneColor = Texture::CreateTexture2D(1, 1, VK_FORMAT_R16G16B16A16_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneColor");
-	auto sceneDepth = Texture::CreateTexture2D(1, 1, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneDepth");
+	auto sceneColor = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_R16G16B16A16_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneColor");
+	auto sceneDepth = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneDepth");
 	//Transition
 	VkCommandBuffer cmdbuf;
 	VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), cmdbuf);
@@ -50,7 +50,7 @@ void SceneTexture::UpdateTextures()
 	}
 }
 
-Texture::~Texture()
+Texture2D::~Texture2D()
 {
 	if (_imageViewMemory != VK_NULL_HANDLE)
 	{
@@ -66,13 +66,13 @@ Texture::~Texture()
 	}
 }
 
-void Texture::Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin, uint32_t mipLevelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+void Texture2D::Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin, uint32_t mipLevelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
 	VulkanManager::GetManager()->Transition(cmdBuffer, _image, _imageAspectFlags, oldLayout, newLayout, mipLevelBegin, mipLevelCount, baseArrayLayer, layerCount);
 	_imageLayout = newLayout;
 }
 
-void Texture::TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin, uint32_t mipLevelCount)
+void Texture2D::TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin, uint32_t mipLevelCount)
 {
 	VkCommandBuffer cmdbuf;
 	VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), cmdbuf);
@@ -86,7 +86,7 @@ void Texture::TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayo
 	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), { cmdbuf });
 }
 
-void Texture::Resize(uint32_t width, uint32_t height)
+void Texture2D::Resize(uint32_t width, uint32_t height)
 {
 	if (_image == VK_NULL_HANDLE)
 		return;
@@ -125,12 +125,12 @@ void Texture::Resize(uint32_t width, uint32_t height)
 	_imageSize = { width,height };
 }
 
-std::shared_ptr<Texture> Texture::CreateTexture2D(
+std::shared_ptr<Texture2D> Texture2D::CreateTexture2D(
 	uint32_t width, uint32_t height, VkFormat format, 
 	VkImageUsageFlags usageFlags, HString textureName,
 	uint32_t miplevel, uint32_t layerCount)
 {
-	std::shared_ptr<Texture> newTexture = std::make_shared<Texture>();
+	std::shared_ptr<Texture2D> newTexture = std::make_shared<Texture2D>();
 	newTexture->_textureName = textureName;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = {width,height};
@@ -149,7 +149,7 @@ std::shared_ptr<Texture> Texture::CreateTexture2D(
 	return newTexture;
 }
 
-std::weak_ptr<Texture> Texture::LoadAsset(HGUID guid, VkImageUsageFlags usageFlags)
+std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usageFlags)
 {
 	const auto texAssets = ContentManager::Get()->GetAssets(AssetType::Texture2D);
 	HString guidStr = GUIDToString(guid);
@@ -159,10 +159,10 @@ std::weak_ptr<Texture> Texture::LoadAsset(HGUID guid, VkImageUsageFlags usageFla
 		if (it == texAssets.end())
 		{
 			MessageOut(HString("Can not find [" + guidStr + "] texture in content manager.").c_str(), false, false, "255,255,0");
-			return std::weak_ptr<Texture>();
+			return std::weak_ptr<Texture2D>();
 		}
 	}
-	auto dataPtr = std::static_pointer_cast<AssetInfo<Texture>>(it->second);
+	auto dataPtr = std::static_pointer_cast<AssetInfo<Texture2D>>(it->second);
 	if (dataPtr->IsAssetLoad())
 	{
 		return dataPtr->GetData();
@@ -171,7 +171,7 @@ std::weak_ptr<Texture> Texture::LoadAsset(HGUID guid, VkImageUsageFlags usageFla
 	HString filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
-		return std::weak_ptr<Texture>();
+		return std::weak_ptr<Texture2D>();
 	}
 #if _DEBUG
 	ConsoleDebug::print_endl("Import dds texture :" + filePath, "255,255,255");
@@ -181,15 +181,15 @@ std::weak_ptr<Texture> Texture::LoadAsset(HGUID guid, VkImageUsageFlags usageFla
 	ImageData* out = loader.LoadDDSToImage();
 	if (out == nullptr)
 	{
-		return std::weak_ptr<Texture>();
+		return std::weak_ptr<Texture2D>();
 	}
-	//Create Texture Object.
+	//Create Texture2D Object.
 	uint32_t w = out->data_header.width;
 	uint32_t h = out->data_header.height;
 	VkFormat format = out->texFormat;
-	std::shared_ptr<Texture> newTexture = std::make_shared<Texture>();
+	std::shared_ptr<Texture2D> newTexture = std::make_shared<Texture2D>();
 	newTexture->_assetInfo = dataPtr.get();
-	newTexture->_textureName = dataPtr->name;
+	newTexture->_textureName = dataPtr->displayName;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = { w, h };
 	newTexture->_imageData = out;
@@ -217,7 +217,7 @@ std::weak_ptr<Texture> Texture::LoadAsset(HGUID guid, VkImageUsageFlags usageFla
 	return dataPtr->GetData();
 }
 
-void Texture::GlobalInitialize()
+void Texture2D::GlobalInitialize()
 {
 	const auto& manager = VulkanManager::GetManager();
 
@@ -284,21 +284,21 @@ void Texture::GlobalInitialize()
 	}
 
 	//Create BaseTexture
-	auto uvGridTex = ContentManager::Get()->LoadAsset<Texture>("Asset/Content/Core/Texture/T_System_UVGrid.dds");
-	auto blackTex = ContentManager::Get()->LoadAsset<Texture>("Asset/Content/Core/Texture/T_System_Black.dds");
-	auto normalTex = ContentManager::Get()->LoadAsset<Texture>("Asset/Content/Core/Texture/T_System_Normal.dds");
-	auto whiteTex = ContentManager::Get()->LoadAsset<Texture>("Asset/Content/Core/Texture/T_System_White.dds");
-	auto testTex = ContentManager::Get()->LoadAsset<Texture>("Asset/Content/Core/Texture/TestTex.dds");
+	auto uvGridTex = ContentManager::Get()->LoadAsset<Texture2D>(HGUID("69056105-8b40-a3b2-65d4-95ebf2fe28fb"));
+	auto blackTex = ContentManager::Get()->LoadAsset<Texture2D>(HGUID("9eb473e5-6ef2-d6a8-9a31-8f4b26eb9f12"));
+	auto normalTex = ContentManager::Get()->LoadAsset<Texture2D>(HGUID("fa3e3e63-872f-99e3-a126-6ce5b8fedfae"));
+	auto whiteTex = ContentManager::Get()->LoadAsset<Texture2D>(HGUID("38c42242-404c-b372-fac8-d0441f2100f8"));
+	auto testTex = ContentManager::Get()->LoadAsset<Texture2D>(HGUID("eb8ac147-e469-f5a3-c48a-5daec8880f1f"));
 	if(!uvGridTex.expired())
-		Texture::AddSystemTexture("UVGrid", uvGridTex.lock().get());
+		Texture2D::AddSystemTexture("UVGrid", uvGridTex.lock().get());
 	if (!whiteTex.expired())
-		Texture::AddSystemTexture("White", whiteTex.lock().get());
+		Texture2D::AddSystemTexture("White", whiteTex.lock().get());
 	if (!blackTex.expired())
-		Texture::AddSystemTexture("Black", blackTex.lock().get());
+		Texture2D::AddSystemTexture("Black", blackTex.lock().get());
 	if (!normalTex.expired())
-		Texture::AddSystemTexture("Normal", normalTex.lock().get());
+		Texture2D::AddSystemTexture("Normal", normalTex.lock().get());
 	if (!testTex.expired())
-		Texture::AddSystemTexture("TestTex", testTex.lock().get());
+		Texture2D::AddSystemTexture("TestTex", testTex.lock().get());
 
 	//导入文字纹理
 	{
@@ -321,15 +321,15 @@ void Texture::GlobalInitialize()
 		}
 		else
 		{
-			MessageOut("Load Font Texture Failed!!!", false, true, "255,0,0");
+			MessageOut("Load Font Texture2D Failed!!!", false, true, "255,0,0");
 		}
 		if (!imageData)
 		{
-			MessageOut("Load Font Texture Failed!!Font image data is null.", false, true, "255,0,0");
+			MessageOut("Load Font Texture2D Failed!!Font image data is null.", false, true, "255,0,0");
 		}
 		_fontTexture = CreateTexture2D(imageData->data_header.width, imageData->data_header.height, imageData->texFormat, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, "FontTexture");
 		_fontTexture->_imageData = imageData;
-		//上传到GPU,并储存一份指针到System Texture
+		//上传到GPU,并储存一份指针到System Texture2D
 		AddSystemTexture("Font", _fontTexture.get());
 	}
 
@@ -359,11 +359,11 @@ void Texture::GlobalInitialize()
 	}
 }
 
-void Texture::GlobalUpdate()
+void Texture2D::GlobalUpdate()
 {
 }
 
-void Texture::GlobalRelease()
+void Texture2D::GlobalRelease()
 {
 	const auto& manager = VulkanManager::GetManager();
 	for (auto i : _samplers)
@@ -378,14 +378,14 @@ void Texture::GlobalRelease()
 	_fontTexture.reset();
 }
 
-void Texture::AddSystemTexture(HString tag, Texture* tex)
+void Texture2D::AddSystemTexture(HString tag, Texture2D* tex)
 {
 	//系统纹理是渲染器底层预设纹理，需要直接准备就绪
 	tex->CopyBufferToTextureImmediate();
 	_system_textures.emplace(tag, tex);
 }
 
-Texture* Texture::GetSystemTexture(HString tag)
+Texture2D* Texture2D::GetSystemTexture(HString tag)
 {
 	//_system_textures[tag];
 	auto it = _system_textures.find(tag);
@@ -396,7 +396,7 @@ Texture* Texture::GetSystemTexture(HString tag)
 	return _system_textures.begin()->second;
 }
 
-bool Texture::CopyBufferToTexture(VkCommandBuffer cmdbuf)
+bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 {
 	const auto& manager = VulkanManager::GetManager();
 	if (_imageData)
@@ -496,7 +496,7 @@ bool Texture::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 	return false;
 }
 
-void Texture::CopyBufferToTextureImmediate()
+void Texture2D::CopyBufferToTextureImmediate()
 {
 	const auto& manager = VulkanManager::GetManager();
 	VkCommandBuffer buf;
@@ -658,7 +658,7 @@ inline void createCubeMapFace(const Mat& in, Mat& face,
 
 #pragma region NVTT
 
-void Texture::CompressionImage2D(const char* imagePath, const char* outputDDS, bool bGenerateMips, nvtt::Format format, bool bGenerateNormalMap, bool bAutoFormat)
+void Texture2D::CompressionImage2D(const char* imagePath, const char* outputDDS, bool bGenerateMips, nvtt::Format format, bool bGenerateNormalMap, bool bAutoFormat)
 {
 	using namespace nvtt;
 
@@ -721,7 +721,7 @@ void Texture::CompressionImage2D(const char* imagePath, const char* outputDDS, b
 }
 
 /*
-void Texture::CompressionImageCube(const char* imagePath, const char* outputDDS, bool bGenerateMips)
+void Texture2D::CompressionImageCube(const char* imagePath, const char* outputDDS, bool bGenerateMips)
 {
 	using namespace nvtt;
 	//创建上下文
@@ -808,7 +808,7 @@ void Texture::CompressionImageCube(const char* imagePath, const char* outputDDS,
 }
 */
 
-void Texture::DecompressionImage2D(const char* ddsPath, const char* outputPath, nvtt::Surface* outData, int32_t newWidth, int32_t newHeight, int32_t newDepth)
+void Texture2D::DecompressionImage2D(const char* ddsPath, const char* outputPath, nvtt::Surface* outData, int32_t newWidth, int32_t newHeight, int32_t newDepth)
 {
 	using namespace nvtt;
 	SurfaceSet images;
@@ -843,7 +843,7 @@ void Texture::DecompressionImage2D(const char* ddsPath, const char* outputPath, 
 	surface.save(outputPath);
 }
 
-void Texture::DecompressionImageCube(const char* ddsPath, const char* outputPath, nvtt::Surface* outData, int32_t newWidth, int32_t newHeight, int32_t newDepth)
+void Texture2D::DecompressionImageCube(const char* ddsPath, const char* outputPath, nvtt::Surface* outData, int32_t newWidth, int32_t newHeight, int32_t newDepth)
 {
 	using namespace nvtt;
 	CubeSurface cube;
@@ -877,7 +877,7 @@ void Texture::DecompressionImageCube(const char* ddsPath, const char* outputPath
 	outData->save(outputPath);
 }
 
-void Texture::OutputImage(const char* outputPath, int w, int h, nvtt::Format format, void* outData)
+void Texture2D::OutputImage(const char* outputPath, int w, int h, nvtt::Format format, void* outData)
 {
 	using namespace nvtt;
 	Surface image;
@@ -891,7 +891,7 @@ void Texture::OutputImage(const char* outputPath, int w, int h, nvtt::Format for
 	}
 }
 
-void Texture::GetImageDataFromCompressionData(const char* ddsPath, nvtt::Surface* outData)
+void Texture2D::GetImageDataFromCompressionData(const char* ddsPath, nvtt::Surface* outData)
 {
 	using namespace nvtt;
 	SurfaceSet images;
@@ -1000,7 +1000,7 @@ void GetFontCharacter(
 	}
 }
 
-void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath, bool bOverwrite, uint32_t fontSize, uint32_t maxTextureSize)
+void Texture2D::CreateFontTexture(HString ttfFontPath, HString outTexturePath, bool bOverwrite, uint32_t fontSize, uint32_t maxTextureSize)
 {
 	if (!bOverwrite)
 	{
@@ -1238,7 +1238,7 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath, boo
 #else
 
 #include "msdfgen.h"
-void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath, bool bOverwrite, uint32_t fontSize, uint32_t maxTextureSize)
+void Texture2D::CreateFontTexture(HString ttfFontPath, HString outTexturePath, bool bOverwrite, uint32_t fontSize, uint32_t maxTextureSize)
 {
 	msdfgen::Bitmap<float, 3>msdf(maxTextureSize, maxTextureSize);
 	msdfgen::Shape shape;
@@ -1248,7 +1248,7 @@ void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath, boo
 #endif
 
 #else
-void Texture::CreateFontTexture(HString ttfFontPath, HString outTexturePath, bool bOverwrite, uint32_t fontSize, uint32_t maxTextureSize)
+void Texture2D::CreateFontTexture(HString ttfFontPath, HString outTexturePath, bool bOverwrite, uint32_t fontSize, uint32_t maxTextureSize)
 {
 
 }

@@ -61,7 +61,7 @@ void GUIPass::PassUpdate()
 	SetViewport(_currentFrameBufferSize);
 	BeginRenderPass({ 0,0,0,0 });
 	//Begin...
-	//GUIDrawImage("TestImage", Texture::GetSystemTexture("TestTex"), 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1, 1, 1, 0.95)));
+	//GUIDrawImage("TestImage", Texture2D::GetSystemTexture("TestTex"), 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1, 1, 1, 0.95)));
 	ShowPerformance();
 
 	//GUIDrawText("fonttest",L"AbCd,自定义GUI文字测试~\n你好呀123嘿嘿。 ", 0, 20.0f, 200, 200, GUIDrawState(GUIAnchor_CenterLeft, false, glm::vec4(1)), 20.0f);
@@ -80,7 +80,7 @@ void GUIPass::PassUpdate()
 		//vertex buffer
 		vertices.insert(vertices.end(), i.second.Data.begin(), i.second.Data.end());
 		//textures
-		i.second.tex_descriptorSet->UpdateTextureDescriptorSet({ i.second.BaseTexture }, { Texture::GetSampler(TextureSampler::TextureSampler_Linear_Wrap) });
+		i.second.tex_descriptorSet->UpdateTextureDescriptorSet({ i.second.BaseTexture }, { Texture2D::GetSampler(TextureSampler::TextureSampler_Linear_Wrap) });
 		uint32_t ubSize = (uint32_t)manager->GetMinUboAlignmentSize(sizeof(GUIUniformBuffer));
 		uint32_t ubOffset = 0;
 		i.second.ub_descriptorSet->ResizeDescriptorBuffer(ubSize * (i.second.States.size()));
@@ -139,9 +139,9 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 	state.uniformBuffer.Color = glm::vec4(1,1,1,2);
 	state.uniformBuffer.Flags = IsFont;
 	GUIPrimitive* prim = GetPrimitve(tag, state, (int)textLength, _guiShaderIndex, x, y, w, h);
-	if (prim->BaseTexture != Texture::GetFontTexture())
+	if (prim->BaseTexture != Texture2D::GetFontTexture())
 	{
-		prim->BaseTexture = Texture::GetFontTexture();
+		prim->BaseTexture = Texture2D::GetFontTexture();
 		prim->tex_descriptorSet->NeedUpdate();
 	}
 	//计算每个文字面片位置
@@ -160,10 +160,10 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 		//文字不存在fixed模式,文字的大小不应该被变形
 		prim->States[i].bFixed = false;
 		//获取文字信息
-		auto info = Texture::GetFontInfo(prim->fontCharacter[i]);
+		auto info = Texture2D::GetFontInfo(prim->fontCharacter[i]);
 		prim->States[i].uniformBuffer.UVSetting = glm::vec4(info->posX, info->posY, info->sizeX, info->sizeY);
-		prim->States[i].uniformBuffer.TextureSizeX = (float)Texture::GetFontTexture()->GetImageSize().width;
-		prim->States[i].uniformBuffer.TextureSizeY = (float)Texture::GetFontTexture()->GetImageSize().width;
+		prim->States[i].uniformBuffer.TextureSizeX = (float)Texture2D::GetFontTexture()->GetImageSize().width;
+		prim->States[i].uniformBuffer.TextureSizeY = (float)Texture2D::GetFontTexture()->GetImageSize().width;
 		//文字像素大小
 		if (textChar == L' ')
 		{
@@ -180,7 +180,7 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 	}
 }
 
-void GUIPass::GUIDrawImage(HString tag, Texture* texture, float x, float y, float w, float h, GUIDrawState state)
+void GUIPass::GUIDrawImage(HString tag, Texture2D* texture, float x, float y, float w, float h, GUIDrawState state)
 {
 	GUIPrimitive* prim = GetPrimitve(tag, state, 1, _guiShaderIndex, x, y, w, h);
 	SetupPanelAnchor(state, x, y, w, h, prim->Data.data());
