@@ -12,6 +12,7 @@ public:
 
 	virtual void PassInit()override;
 	virtual void PassUpdate()override;
+	virtual void PassReset()override;
 private:
 
 	void SetupBasePassAndDraw(Pass p, class DescriptorSet* pass , class DescriptorSet* obj , class DescriptorSet* mat, class Buffer* vb , class Buffer* ib);

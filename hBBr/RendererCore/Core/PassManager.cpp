@@ -69,6 +69,9 @@ void PassManager::PassesRelease()
 
 void PassManager::PassesReset()
 {
+	if (_sceneTextures == nullptr)
+		return;
+	_sceneTextures->UpdateTextures();
 	for (auto& p : _passes)
 	{
 		p->Reset();

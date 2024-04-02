@@ -996,16 +996,16 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	switch (PreTransform)
 	{
 	case VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR:
-		ConsoleDebug::print_endl("Current preTransform is : VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR");
+		//ConsoleDebug::print_endl("Current preTransform is : VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR");
 		break;
 	case VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR:
-		ConsoleDebug::print_endl("Current preTransform is : VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR");
+		//ConsoleDebug::print_endl("Current preTransform is : VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR");
 		break;
 	case VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR:
-		ConsoleDebug::print_endl("Current preTransform is : VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR");
+		//ConsoleDebug::print_endl("Current preTransform is : VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR");
 		break;
 	case VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR:
-		ConsoleDebug::print_endl("Current preTransform is : VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR");
+		//ConsoleDebug::print_endl("Current preTransform is : VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR");
 		break;
 	default:break;
 	}
@@ -1089,7 +1089,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		//全屏可能失败了,取消全屏
 		if (result == VK_ERROR_INITIALIZATION_FAILED)
 		{
-			ConsoleDebug::printf_endl_warning("vkCreateSwapchainKHR return VK_ERROR_INITIALIZATION_FAILED . Create swapchain failed with Initialization error; removing FullScreen extension...");
+			//ConsoleDebug::printf_endl_warning("vkCreateSwapchainKHR return VK_ERROR_INITIALIZATION_FAILED . Create swapchain failed with Initialization error; removing FullScreen extension...");
 			info.pNext = FullScreenInfo.pNext;
 			result = vkCreateSwapchainKHR(_device, &info, VK_NULL_HANDLE, &newSwapchain);
 		}
@@ -1114,13 +1114,13 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &numSwapchainImages, swapchainImages.data());
 
 	//创建ImageView
-	ConsoleDebug::print_endl("hBBr:Swapchain: Create Swapchain Image View.");
+	//ConsoleDebug::print_endl("hBBr:Swapchain: Create Swapchain Image View.");
 	for (int i = 0; i < (int)numSwapchainImages; i++)
 	{
 		CreateImageView(swapchainImages[i], surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, swapchainImageViews[i]);
 	}
-	ConsoleDebug::print_endl("hBBr:Swapchain: Transition Swapchain Image layout to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR.");
-	//Swapchain转换到呈现模式
+	//ConsoleDebug::print_endl("hBBr:Swapchain: Transition Swapchain Image layout to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR.");
+	//Swapchain转换到呈现布局
 	VkCommandBuffer buf;
 	AllocateCommandBuffer(_commandPool, buf);
 	BeginCommandBuffer(buf, 0);
@@ -1136,9 +1136,9 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	_swapchainBufferCount = numSwapchainImages;
 
 	//init semaphores & fences
-	if (acquireImageSemaphore != nullptr)
+	if (acquireImageSemaphore != nullptr && acquireImageSemaphore->size() != _swapchainBufferCount)
 	{
-		ConsoleDebug::print_endl("hBBr:Swapchain: Present Semaphore.");
+		//ConsoleDebug::print_endl("hBBr:Swapchain: Present Semaphore.");
 		for (int i = 0; i < (int)acquireImageSemaphore->size(); i++)
 		{
 			DestroySemaphore(acquireImageSemaphore->at(i));		
@@ -1149,9 +1149,9 @@ VkExtent2D VulkanManager::CreateSwapchain(
 			CreateVkSemaphore(acquireImageSemaphore->at(i));
 		}
 	}
-	if (queueSubmitSemaphore != nullptr)
+	if (queueSubmitSemaphore != nullptr && queueSubmitSemaphore->size() != _swapchainBufferCount)
 	{
-		ConsoleDebug::print_endl("hBBr:Swapchain: Queue Submit Semaphore.");
+		//ConsoleDebug::print_endl("hBBr:Swapchain: Queue Submit Semaphore.");
 		for (int i = 0; i < (int)queueSubmitSemaphore->size(); i++)
 		{
 			DestroySemaphore(queueSubmitSemaphore->at(i));
@@ -1162,9 +1162,9 @@ VkExtent2D VulkanManager::CreateSwapchain(
 			CreateVkSemaphore(queueSubmitSemaphore->at(i));
 		}
 	}
-	if (fences != nullptr)
+	if (fences != nullptr && fences->size() != _swapchainBufferCount)
 	{
-		ConsoleDebug::print_endl("hBBr:Swapchain: image acquired fences.");
+		//ConsoleDebug::print_endl("hBBr:Swapchain: image acquired fences.");
 		for (int i = 0; i < (int)fences->size(); i++)
 		{
 			DestroyFence(fences->at(i));
@@ -1176,9 +1176,9 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		}
 	}
 
-	if (cmdBuf != nullptr)
+	if (cmdBuf != nullptr && cmdBuf->size() != _swapchainBufferCount)
 	{
-		ConsoleDebug::print_endl("hBBr:Swapchain: Allocate Main CommandBuffers.");
+		//ConsoleDebug::print_endl("hBBr:Swapchain: Allocate Main CommandBuffers.");
 		FreeCommandBuffers(_commandPool, *cmdBuf);
 		cmdBuf->resize(_swapchainBufferCount);
 		for (int i = 0; i < (int)_swapchainBufferCount; i++)

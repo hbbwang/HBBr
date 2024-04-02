@@ -48,7 +48,7 @@ public:
 	virtual void PassUpdate()override;
 	virtual void PassReset()override {}
 	void Reset() override {
-		_currentFrameBufferSize = { 999999 , 999999 };
+		_currentFrameBufferSize = { 1 , 1 };//Force update
 		PassReset();
 	}
 	virtual void ResetFrameBuffer(VkExtent2D size,std::vector<VkImageView> imageViews);

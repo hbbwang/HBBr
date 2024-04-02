@@ -34,8 +34,12 @@ RenderView::RenderView(QWidget* parent)
 
 	if (_mainRendererWidget == nullptr)
 	{
-		//Enable custom loop
-		_mainRenderer = VulkanApp::InitVulkanManager(false, true, (void*)this->winId());
+		////Enable custom loop
+		//{
+		//	_mainRenderer = VulkanApp::InitVulkanManager(false, true, (void*)this->winId());
+		//}
+
+		_mainRenderer = VulkanApp::InitVulkanManager(false, true);
 
 		hwnd = (HWND)VulkanApp::GetWindowHandle(_mainRenderer);
 

@@ -146,7 +146,7 @@ private:
 
 	void SetupPassUniformBuffer();
 
-	bool Resizing(bool bForce = false);
+	bool ResizeBuffer();
 
 	HString _rendererName;
 
@@ -177,8 +177,6 @@ private:
 	bool _bRendererRelease;
 
 	bool _bInit;
-
-	bool _bResize;
 
 	std::vector<VkCommandBuffer> _cmdBuf;
 

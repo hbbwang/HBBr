@@ -42,6 +42,10 @@ SceneTexture::SceneTexture(VulkanRenderer* renderer)
 
 void SceneTexture::UpdateTextures()
 {
+	if (_sceneTexture.size() <= 0)
+	{
+		return;
+	}
 	auto sceneDepth = _sceneTexture[SceneTextureDesc::SceneDepth];
 	if (sceneDepth->GetImageSize().width != _renderer->GetSurfaceSize().width ||
 		sceneDepth->GetImageSize().height != _renderer->GetSurfaceSize().height)

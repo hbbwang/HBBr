@@ -140,21 +140,11 @@ void VulkanRenderer::Render()
 	{
 		_frameRate = _frameTime.FrameRate_ms();
 
-		if (!Resizing())
-			return;
-
 		VulkanManager* _vulkanManager = VulkanManager::GetManager();
 
 		uint32_t _swapchainIndex = 0;
 
-		//Which swapchain index need to present?
-		//_vulkanManager->ResetFence(_imageAcquiredFences[_currentFrameIndex]);
-		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], VK_NULL_HANDLE , &_swapchainIndex))
-		{
-			_bResize = (true);
-			return;
-		}
-		//_vulkanManager->WaitForFences({ _imageAcquiredFences[_currentFrameIndex] } ,false);
+		_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], VK_NULL_HANDLE, &_swapchainIndex);
 
 		auto funcOnce = std::move(_renderThreadFuncsOnce);
 		for (auto& func : funcOnce)
@@ -177,9 +167,10 @@ void VulkanRenderer::Render()
 		//Present swapchain.
 		if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], _swapchainIndex))
 		{
-			_bResize = (true);
+			ResizeBuffer();
 			return;
 		}
+
 		//Get next frame index.
 		uint32_t maxNumSwapchainImages = _vulkanManager->GetSwapchainBufferCount();
 		_currentFrameIndex = (_currentFrameIndex + 1) % maxNumSwapchainImages;
@@ -188,9 +179,9 @@ void VulkanRenderer::Render()
 
 void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
 {
-	_bResize = true;
 	_windowSize.width = w;
 	_windowSize.height = h;
+	ResizeBuffer();
 }
 
 void VulkanRenderer::SetupPassUniformBuffer()
@@ -246,12 +237,11 @@ void VulkanRenderer::SetupPassUniformBuffer()
 	}
 }
 
-bool VulkanRenderer::Resizing(bool bForce)
+bool VulkanRenderer::ResizeBuffer()
 {
 	if (!_bRendererRelease)
 	{
 		VulkanManager* _vulkanManager = VulkanManager::GetManager();
-		if (_bResize || bForce || _swapchain == VK_NULL_HANDLE )
 		{
 			vkDeviceWaitIdle(_vulkanManager->GetDevice());
 			_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
@@ -261,6 +251,7 @@ bool VulkanRenderer::Resizing(bool bForce)
 #endif
 			//部分情况下重置窗口会出现Surface被销毁的问题，最好Surface也重新创建一个
 			_vulkanManager->ReCreateSurface_SDL(_windowHandle, _surface);
+
 			_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
 			_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore, &_queueSubmitSemaphore);
 			if (_swapchain == VK_NULL_HANDLE)
@@ -268,8 +259,9 @@ bool VulkanRenderer::Resizing(bool bForce)
 				return false;
 			}
 			_passManager->PassesReset();
-			_bResize = false;
+			Render();//缩放完赶紧绘制一次减少黑屏概率
+			return true;
 		}
 	}
-	return true;
+	return false;
 }

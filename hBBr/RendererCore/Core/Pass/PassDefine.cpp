@@ -6,7 +6,7 @@
 #include "Primitive.h"
 #include "Pass/PassType.h"
 #include "Texture2D.h"
-
+#include "ConsoleDebug.h"
 /*
 	Opaque pass
 */
@@ -90,8 +90,13 @@ void BasePass::PassUpdate()
 	//Translucent pass
 	//...
 
-	
 	EndRenderPass();
+}
+
+void BasePass::PassReset()
+{
+	//ConsoleDebug::printf_endl_warning("%d, %d", _renderer->GetSurfaceSize().width , _renderer->GetSurfaceSize().height);
+	ResetFrameBuffer(_renderer->GetSurfaceSize(), { GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetTextureView() });
 }
 
 void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* obj, DescriptorSet* mat, Buffer* vb, Buffer* ib)
