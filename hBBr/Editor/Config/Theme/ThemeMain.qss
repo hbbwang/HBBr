@@ -305,6 +305,59 @@ QDockWidget::close-button:hover
     color:rgb(133, 133, 133);
     background-color: rgb(151, 115, 115);
 }
+QTreeView 
+{
+    background-color: rgba(40,40,40,0.5);
+    color: antiquewhite;
+    outline: 0;
+}
+QTreeView::item 
+{
+    height: 20px;
+    border: none;
+    color: antiquewhite;
+}
+QTreeView::item:hover 
+{
+    font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
+    color :rgb(234, 209, 209);
+    background-color: rgba(79, 64, 64, 0.8);
+    border: 1px solid rgb(180, 180, 180);
+    outline: 0;
+}
+QTreeView::item:selected
+{
+    font-family:  Microsoft Yahei Light, Arial, Helvetica, sans-serif;
+    color :rgb(210, 210, 210);
+    background-color: rgba(90, 85, 80, 0.8);
+    border: 1px solid rgb(120, 120, 120);
+    outline: 0;
+}
+QTreeView::branch:selected 
+{
+}
+QTreeView::branch:closed:has-children
+{
+    image: url(./Config/Theme/Icons/TreeWidget_Close.png);
+}
+QTreeView::branch:open:has-children
+{
+    image: url(./Config/Theme/Icons/TreeWidget_Open.png);
+}
+QTreeView::indicator
+{
+    width: 18px;
+    height: 18px;
+}
+QTreeWidget::indicator:unchecked
+{
+	image:url(:/icon/iconmain/New_ui/icon_addcontacts_normal.png);
+}
+
+QTreeWidget::indicator:checked
+{
+	image:url(:/icon/iconmain/New_ui/icon_addcontacts_press.png); 
+}
 QTreeWidget
 {
     background-color: rgba(40,40,40,0.5);
@@ -471,18 +524,6 @@ QSplitter::handle
     border-radius:2px;
     font:35 16pt;
 }
-/* Content Browser */
-#ContentBrowser
-{
-    background-color: BackgroundColor;
-    font-family: Microsoft Yahei Light,Arial, Helvetica, sans-serif;
-}
-/* Content Browser PathLabel */
-#PathLabel
-{
-    /* border: 1px solid rgb(140, 90, 100); */
-    background-color: rgba(0,0,0,0);
-}
 /* SearchLine */
 #SearchLine
 {
@@ -504,4 +545,24 @@ QSplitter::handle
 #Inspector
 {
     background-color: BackgroundColor;
+}
+#CustomTreeView
+{
+
+}
+/* ContentBrowser */
+#ContentBrowser
+{
+    background-color: BackgroundColor;
+    font-family: Microsoft Yahei Light,Arial, Helvetica, sans-serif;
+}
+#CustomTreeView_VirtualFolderTreeView
+{
+    
+}
+/* Content Browser PathLabel */
+#PathLabel
+{
+    /* border: 1px solid rgb(140, 90, 100); */
+    background-color: rgba(0,0,0,0);
 };
