@@ -4,6 +4,8 @@
 #include "ui_ContentBrowser.h"
 #include "CustomFileIconProvider.h"
 #include <QDir>
+#include <qstandarditemmodel.h>
+#include <QTreeView>
 #include "HString.h"
 class QSplitter;
 class QListView;
@@ -77,8 +79,32 @@ class MainWindow;
 //	void OpenCurrentFolder_Tree();
 //};
 
+class CustomTreeView : public QTreeView
+{
+	Q_OBJECT
+public:
+	explicit CustomTreeView(QWidget* parent = nullptr);
+	
+	void SetRootItemName(QString newText);
+
+	void AddItem(QStandardItem* newItem, QStandardItem* parent = nullptr);
+
+	void RemoveAllItems();
+
+	QStandardItemModel* _model = nullptr;
+
+	QStandardItem* _rootItem = nullptr;
+};
 
 //重做...
+
+class VirtualFolderTreeView : public CustomTreeView
+{
+	Q_OBJECT
+public:
+	explicit VirtualFolderTreeView(QWidget* parent = nullptr);
+};
+
 class ContentBrowser : public QWidget
 {
 	Q_OBJECT
@@ -86,6 +112,9 @@ class ContentBrowser : public QWidget
 public:
 	ContentBrowser(QWidget* parent = nullptr);
 	~ContentBrowser();
+
+	static void RefreshContentBrowsers();
+	void Refresh();
 
 protected:
 	virtual void focusInEvent(QFocusEvent* event);
@@ -95,9 +124,13 @@ protected:
 	virtual void mousePressEvent(QMouseEvent* event);
 	virtual void closeEvent(QCloseEvent* event) override;
 
+	static QList<ContentBrowser*> _contentBrowser;
+
 	class QSplitter*					_splitterBox = nullptr;
 	class QWidget*					_listWidget = nullptr;
 	class QWidget*					_treeWidget = nullptr;
+
+	VirtualFolderTreeView* _treeView = nullptr;
 
 private:
 	Ui::ContentBrowserClass ui;

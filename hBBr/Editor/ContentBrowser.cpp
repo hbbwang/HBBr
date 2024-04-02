@@ -573,12 +573,63 @@
 //	QDesktopServices::openUrl(QUrl(_treeFileSystemModel->filePath(_treeWidget->currentIndex())));
 //}
 
+CustomTreeView::CustomTreeView(QWidget* parent)
+	:QTreeView(parent)
+{
+	_model = new QStandardItemModel(this);
+
+	_rootItem = new QStandardItem("root");
+
+	_model->appendRow(_rootItem);
+
+	setHeaderHidden(true);
+
+	//setRootIsDecorated(false);
+
+	setObjectName("CustomTreeView");
+
+	setModel(_model);
+}
+
+void CustomTreeView::SetRootItemName(QString newText)
+{
+	_rootItem->setText(newText);
+}
+
+void CustomTreeView::AddItem(QStandardItem* newItem, QStandardItem* parent)
+{
+	if (parent)
+	{
+		parent->appendRow(newItem);
+	}
+	else
+	{
+		_rootItem->appendRow(newItem);
+	}
+}
+
+void CustomTreeView::RemoveAllItems()
+{
+	_model->removeRows(_rootItem->row(), _rootItem->rowCount());
+}
 
 //重做...
+VirtualFolderTreeView::VirtualFolderTreeView(QWidget* parent)
+	:CustomTreeView(parent)
+{
+	setObjectName("CustomTreeView_VirtualFolderTreeView");
+}
+
+QList<ContentBrowser*>ContentBrowser::_contentBrowser;
+
 ContentBrowser::ContentBrowser(QWidget* parent )
 	:QWidget(parent)
 {
 	ui.setupUi(this);
+	ui.horizontalLayout_2->setSpacing(1);
+	ui.horizontalLayout_2->setContentsMargins(1, 1, 1, 1);
+	ui.ContentBrowserVBoxLayout->setSpacing(1);
+	ui.ContentBrowserVBoxLayout->setContentsMargins(1, 1, 1, 1);
 
 	this->setObjectName("ContentBrowser");
 	
@@ -589,7 +640,15 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	_listWidget = new QWidget(_splitterBox);
 	_splitterBox->addWidget(_treeWidget);
 	_splitterBox->addWidget(_listWidget);
-
+	QVBoxLayout* treeLayout = new QVBoxLayout(_treeWidget);
+	QVBoxLayout* listLayout = new QVBoxLayout(_listWidget);
+	treeLayout->setSpacing(1);
+	treeLayout->setContentsMargins(1, 1, 1, 1);
+	listLayout->setSpacing(1);
+	listLayout->setContentsMargins(1, 1, 1, 1);
+	//
+	_treeView = new VirtualFolderTreeView(this);
+	treeLayout->addWidget(_treeView);
 	//
 	_splitterBox->setStretchFactor(1, 4);
 	ui.ContentBrowserVBoxLayout->addWidget(_splitterBox);
@@ -598,19 +657,43 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	
 	//Path label
 	ui.PathLabel->setObjectName("PathLabel");
+
+	_contentBrowser.append(this);
+	RefreshContentBrowsers();
+
 }
 
 ContentBrowser::~ContentBrowser()
 {
+	_contentBrowser.removeOne(this);
+}
 
+void ContentBrowser::RefreshContentBrowsers()
+{
+	for (auto& i : _contentBrowser)
+	{
+		i->Refresh();
+	}
+}
+
+void ContentBrowser::Refresh()
+{
+	_treeView->RemoveAllItems();
+	auto folders = FileSystem::GetAllFolders(FileSystem::GetContentAbsPath().c_str());
+	for (auto& i : folders)
+	{
+		_treeView->AddItem(new QStandardItem(i.baseName.c_str()));
+	}
 }
 
 void ContentBrowser::focusInEvent(QFocusEvent* event)
 {
+
 }
 
 void ContentBrowser::showEvent(QShowEvent* event)
 {
+
 }
 
 void ContentBrowser::paintEvent(QPaintEvent* event)
