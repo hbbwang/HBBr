@@ -83,7 +83,9 @@ EditorMain::EditorMain(QWidget *parent)
 
     EditorMain::_self = this;
 
-    //Update timer
+    //Update timer //编辑器缩放窗口的时候，渲染器会不停闪黑，
+    //这是因为窗口缩放和渲染更新(Update)不同步导致，窗口已经缩放但是画面未及时重新绘制导致一瞬间发黑
+    //哪天能找到QT5消息循环的函数重写应该就能解决这个问题了。
     _renderTimer = new QTimer(this);
     _renderTimer->setInterval(1);
     connect(_renderTimer, SIGNAL(timeout()), this, SLOT(UpdateRender()));
