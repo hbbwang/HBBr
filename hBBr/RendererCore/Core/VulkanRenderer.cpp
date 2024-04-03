@@ -138,13 +138,23 @@ void VulkanRenderer::Render()
 	}
 	else if (!_bRendererRelease && _bInit)
 	{
+		if (bResizeBuffer)
+		{
+			ResizeBuffer();
+		}
+
 		_frameRate = _frameTime.FrameRate_ms();
 
 		VulkanManager* _vulkanManager = VulkanManager::GetManager();
 
 		uint32_t _swapchainIndex = 0;
 
-		_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], VK_NULL_HANDLE, &_swapchainIndex);
+		GetNextSwapchainIndex:
+		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], VK_NULL_HANDLE, &_swapchainIndex))
+		{
+			ResizeBuffer();
+			goto GetNextSwapchainIndex;
+		}
 
 		auto funcOnce = std::move(_renderThreadFuncsOnce);
 		for (auto& func : funcOnce)
@@ -165,10 +175,11 @@ void VulkanRenderer::Render()
 		_passManager->PassesUpdate();
 
 		//Present swapchain.
+		Present:
 		if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], _swapchainIndex))
 		{
 			ResizeBuffer();
-			return;
+			goto Present;
 		}
 
 		//Get next frame index.
@@ -181,7 +192,7 @@ void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
 {
 	_windowSize.width = w;
 	_windowSize.height = h;
-	ResizeBuffer();
+	bResizeBuffer = true;
 }
 
 void VulkanRenderer::SetupPassUniformBuffer()
@@ -251,15 +262,15 @@ bool VulkanRenderer::ResizeBuffer()
 #endif
 			//部分情况下重置窗口会出现Surface被销毁的问题，最好Surface也重新创建一个
 			_vulkanManager->ReCreateSurface_SDL(_windowHandle, _surface);
-
 			_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
-			_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore, &_queueSubmitSemaphore);
+			_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore, &_queueSubmitSemaphore
+			,nullptr,false,true);
 			if (_swapchain == VK_NULL_HANDLE)
 			{
 				return false;
 			}
 			_passManager->PassesReset();
-			Render();//缩放完赶紧绘制一次减少黑屏概率
+			bResizeBuffer = false;
 			return true;
 		}
 	}

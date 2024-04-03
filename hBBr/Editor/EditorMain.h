@@ -42,6 +42,8 @@ public:
 
     virtual void focusOutEvent(QFocusEvent* event);
 
+    //virtual void timerEvent(QTimerEvent* event)override;
+
 private:
 
     Ui::EditorMainClass ui;

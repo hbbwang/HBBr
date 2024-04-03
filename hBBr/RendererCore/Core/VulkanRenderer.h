@@ -142,6 +142,8 @@ public:
 
 	std::vector<std::function<void(std::weak_ptr<World>)>> _spwanNewWorld;
 
+	bool bResizeBuffer;
+
 private:
 
 	void SetupPassUniformBuffer();

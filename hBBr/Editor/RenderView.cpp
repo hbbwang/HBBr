@@ -34,12 +34,8 @@ RenderView::RenderView(QWidget* parent)
 
 	if (_mainRendererWidget == nullptr)
 	{
-		////Enable custom loop
-		//{
-		//	_mainRenderer = VulkanApp::InitVulkanManager(false, true, (void*)this->winId());
-		//}
-
-		_mainRenderer = VulkanApp::InitVulkanManager(false, true);
+		//Enable custom loop
+		_mainRenderer = VulkanApp::InitVulkanManager(false, true, (void*)this->winId());
 
 		hwnd = (HWND)VulkanApp::GetWindowHandle(_mainRenderer);
 
@@ -89,6 +85,7 @@ void RenderView::showEvent(QShowEvent* event)
 void RenderView::resizeEvent(QResizeEvent* event)
 {
 	QWidget::resizeEvent(event);
+	VulkanApp::ResizeWindow(_mainRenderer, width(), height());
 	if (_mainRendererWidget != nullptr)
 	{
 		_mainRendererWidget->setGeometry(0, 0, width(), height());

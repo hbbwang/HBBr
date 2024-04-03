@@ -6,7 +6,7 @@
 #include "FileSystem.h"
 #include "XMLStream.h"
 #include "HInput.h"
-
+#include "ConsoleDebug.h"
 World::World(class VulkanRenderer* renderer)
 {
 	PreLoad(renderer, "");
@@ -173,12 +173,16 @@ void World::PreLoad(class VulkanRenderer* renderer, HString worldName)
 
 void World::Load()
 {
-#if IS_EDITOR
+	//-----model--camera
+	auto backCamera = GameObject::CreateGameObject("EditorCamera", _levels[0].get());
+	backCamera->GetTransform()->SetWorldLocation(glm::vec3(0, 2, -3.0));
+	auto cameraComp = backCamera->AddComponent<CameraComponent>();
+	cameraComp->OverrideMainCamera();
 	//-----model--test
-	auto testModel = GameObject::CreateGameObject("Test", _editorLevel.get());
+	auto testModel = GameObject::CreateGameObject("Test", _levels[0].get());
 	auto modelComp = testModel->AddComponent<ModelComponent>();
 	modelComp->SetModel(HGUID("c51a01e8-9349-660a-d2df-353a310db461"));
-#endif
+	ConsoleDebug::printf_endl("Test Model Spawn......");
 }
 
 bool World::ReleaseWorld()
@@ -187,7 +191,9 @@ bool World::ReleaseWorld()
 	{
 		i.reset();
 	}
+#if IS_EDITOR
 	_editorLevel.reset();
+#endif
 	_levels.clear();
 	return true;
 }

@@ -841,7 +841,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	//ConsoleDebug::print_endl("Create Swapchain KHR.");
 	VkPresentModeKHR present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
 
-	//我们用锁帧的方式实现垂直同步吧
+	//Vulkan的垂直同步
 #if 0
 	//if (_winInfo.vsync)
 	{
@@ -980,7 +980,19 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		}
 		ConsoleDebug::printf_endl("Current presene mode is : " + CurrentPresentMode + " :%d ", (int)VK_PRESENT_MODE_MAILBOX_KHR);
 	}
+#else
+
+	//VK_PRESENT_MODE_IMMEDIATE_KHR：
+			// 立即模式。在图像准备好后立即显示，可能会导致撕裂现象。这种模式下，GPU渲染的速度不受显示器刷新率的限制。
+	//VK_PRESENT_MODE_MAILBOX_KHR：
+			// 邮箱模式。类似于立即模式，但当新图像准备好时，它会替换交换链中的旧图像，而不是立即显示。这可以减少撕裂现象，但仍然允许GPU渲染的速度超过显示器的刷新率。
+	//VK_PRESENT_MODE_FIFO_KHR：
+			// 先进先出（FIFO）模式。在显示器完成刷新后，才从交换链中获取新图像并显示。这种模式下，GPU渲染的速度受到显示器刷新率的限制，但可以防止撕裂现象。这是Vulkan API规范中要求必须支持的呈现模式。
+	//VK_PRESENT_MODE_FIFO_RELAXED_KHR：
+			// 宽松的FIFO模式。当图像准备好并且显示器处于垂直同步间隔之外时，立即显示图像。这种模式下，当GPU渲染速度低于显示器刷新率时，可以避免撕裂现象；当GPU渲染速度高于显示器刷新率时，可能会出现撕裂现象。
+	present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
 #endif
+
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_gpuDevice, surface, &surfaceCapabilities);
 	VkSurfaceTransformFlagBitsKHR PreTransform;
 
@@ -1684,9 +1696,7 @@ bool VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore& semaphore, ui
 	auto result = vkQueuePresentKHR(_graphicsQueue, &presentInfo);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 	{
-		#if _DEBUG
-		//MessageOut("VK_ERROR_OUT_OF_DATE_KHR or VK_SUBOPTIMAL_KHR.Swapchain need to reset.", false, false);//太烦人了,不显示了,反正不影响
-		#endif
+		MessageOut("VK_ERROR_OUT_OF_DATE_KHR or VK_SUBOPTIMAL_KHR.Swapchain need to reset.", false, false);
 		return false;
 	}
 	else if (result != VK_SUCCESS || infoResult != VK_SUCCESS)

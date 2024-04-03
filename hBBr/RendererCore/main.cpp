@@ -127,14 +127,14 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	{
 		MessageOut("Init sdl3 failed.", true, true, "255,0,0");
 	}
-
+	
 	if (SDL_Vulkan_LoadLibrary(nullptr) == -1)
 	{
 		MessageOut(SDL_GetError(), true, true, "255,0,0");
 	}
 
 	//Set sdl hints
-    SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "0");
+	SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "0");
 	SDL_SetHint(SDL_HINT_VIDEO_FOREIGN_WINDOW_VULKAN, "1");//SDL_WINDOW_VULKAN
 
 #if __ANDROID__
@@ -311,7 +311,6 @@ bool VulkanApp::UpdateForm()
 		case SDL_EVENT_WINDOW_RESIZED:
 		{
 			ResizeCallBack(win, event.window.data1, event.window.data2);
-			bStopRender = true;
 			break;
 		}
 		case SDL_EVENT_QUIT://窗口完全关闭,SDL即将退出
