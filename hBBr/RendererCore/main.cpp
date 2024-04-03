@@ -306,8 +306,8 @@ bool VulkanApp::UpdateForm()
 #endif
 			break;
 		}
-		//case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
-		//case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+		case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
+		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
 		case SDL_EVENT_WINDOW_RESIZED:
 		{
 			ResizeCallBack(win, event.window.data1, event.window.data2);

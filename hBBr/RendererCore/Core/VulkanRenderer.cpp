@@ -271,6 +271,7 @@ bool VulkanRenderer::ResizeBuffer()
 			}
 			_passManager->PassesReset();
 			bResizeBuffer = false;
+			Render();
 			return true;
 		}
 	}

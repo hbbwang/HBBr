@@ -131,5 +131,6 @@ void EditorMain::closeEvent(QCloseEvent* event)
 
 void EditorMain::resizeEvent(QResizeEvent* event)
 {
+
 }
 
