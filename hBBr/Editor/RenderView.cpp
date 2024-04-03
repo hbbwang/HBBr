@@ -36,13 +36,16 @@ RenderView::RenderView(QWidget* parent)
 	{
 		//Enable custom loop
 		_mainRenderer = VulkanApp::InitVulkanManager(false, true, (void*)this->winId());
-
+		//_mainRenderer = VulkanApp::InitVulkanManager(false, true, nullptr);
 		hwnd = (HWND)VulkanApp::GetWindowHandle(_mainRenderer);
+		{
+			//auto mainRendererWindow = QWindow::fromWinId((WId)hwnd);
+			//_mainRendererWidget = QWidget::createWindowContainer(mainRendererWindow, this);
+			//_mainRendererWidget->setFocusPolicy(Qt::ClickFocus);
+			//_mainRendererWidget->setObjectName("RenderView");
+		}
 
-		//auto mainRendererWindow = QWindow::fromWinId((WId)hwnd);
-		//_mainRendererWidget = QWidget::createWindowContainer(mainRendererWindow, this);
-		//_mainRendererWidget->setFocusPolicy(Qt::ClickFocus);
-		//_mainRendererWidget->setObjectName("RenderView");
+
 		auto dropFunc = [](VulkanForm *from, HString file) {
 			//QMessageBox::information(0, from->name.c_str(), file.c_str(),0);
 			ConsoleDebug::printf_endl(" [%s]Drop File : %s", from->name.c_str(), file.c_str());
@@ -85,7 +88,6 @@ void RenderView::showEvent(QShowEvent* event)
 void RenderView::resizeEvent(QResizeEvent* event)
 {
 	QWidget::resizeEvent(event);
-	VulkanApp::ResizeWindow(_mainRenderer, width(), height());
 	if (_mainRendererWidget != nullptr)
 	{
 		_mainRendererWidget->setGeometry(0, 0, width(), height());
