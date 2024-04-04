@@ -611,6 +611,10 @@ public:
 		HString out = *this;
 		//找到最后一个 '.'
 		const auto lenStr = strlen(_str);
+		if (lenStr <= 0)
+		{
+			return out;
+		}
 		for (size_t i = lenStr - 1; i > 0; i--)
 		{
 			if (out[i] == '.')

@@ -149,11 +149,10 @@ void VulkanRenderer::Render()
 
 		uint32_t _swapchainIndex = 0;
 
-		GetNextSwapchainIndex:
 		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], VK_NULL_HANDLE, &_swapchainIndex))
 		{
 			ResizeBuffer();
-			goto GetNextSwapchainIndex;
+			return;
 		}
 
 		auto funcOnce = std::move(_renderThreadFuncsOnce);
@@ -175,11 +174,10 @@ void VulkanRenderer::Render()
 		_passManager->PassesUpdate();
 
 		//Present swapchain.
-		Present:
 		if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], _swapchainIndex))
 		{
 			ResizeBuffer();
-			goto Present;
+			return;
 		}
 
 		//Get next frame index.
@@ -193,6 +191,7 @@ void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
 	_windowSize.width = w;
 	_windowSize.height = h;
 	bResizeBuffer = true;
+	ResizeBuffer();
 }
 
 void VulkanRenderer::SetupPassUniformBuffer()
@@ -271,7 +270,14 @@ bool VulkanRenderer::ResizeBuffer()
 			}
 			_passManager->PassesReset();
 			bResizeBuffer = false;
-			Render();
+
+			//重置buffer会导致画面丢失，我们要在这一瞬间重新把buffer绘制回去，缓解黑屏。
+			_currentFrameIndex = 0;
+			for (int i = 0; i < _vulkanManager->GetSwapchainBufferCount(); i++)
+			{
+				Render();
+			}
+
 			return true;
 		}
 	}

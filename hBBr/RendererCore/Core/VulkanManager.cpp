@@ -1669,7 +1669,7 @@ bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 	{
 		#if _DEBUG
-		MessageOut(RendererLauguage::GetText("A000009").c_str(), false, false);//太烦人了,不影响
+		//MessageOut(RendererLauguage::GetText("A000009").c_str(), false, false);//太烦人了,不影响
 		#endif	
 		return false;
 	}
@@ -1696,7 +1696,7 @@ bool VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore& semaphore, ui
 	auto result = vkQueuePresentKHR(_graphicsQueue, &presentInfo);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 	{
-		MessageOut("VK_ERROR_OUT_OF_DATE_KHR or VK_SUBOPTIMAL_KHR.Swapchain need to reset.", false, false);
+		//MessageOut("VK_ERROR_OUT_OF_DATE_KHR or VK_SUBOPTIMAL_KHR.Swapchain need to reset.", false, false);//太烦人了,不影响
 		return false;
 	}
 	else if (result != VK_SUCCESS || infoResult != VK_SUCCESS)

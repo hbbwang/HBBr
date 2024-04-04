@@ -218,6 +218,10 @@ void VulkanApp::DeInitVulkanManager()
 //DISABLE_CODE_OPTIMIZE
 bool VulkanApp::UpdateForm()
 {
+	if (_mainForm == nullptr || _mainForm->renderer == nullptr)
+	{
+		return false;
+	}
 	bool bQuit = false;
 	SDL_Event event;
 	bool bStopRender = false; 
@@ -306,14 +310,18 @@ bool VulkanApp::UpdateForm()
 #endif
 			break;
 		}
-		case SDL_EVENT_WINDOW_ICCPROF_CHANGED:
-		case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
-		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+		//case SDL_EVENT_WINDOW_ICCPROF_CHANGED:
+		//case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
+		//case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+
+#if 1 //Editor下咱们窗口缩放不走SDL的逻辑
 		case SDL_EVENT_WINDOW_RESIZED:
 		{
 			ResizeCallBack(win, event.window.data1, event.window.data2);
 			break;
 		}
+#endif
+
 		case SDL_EVENT_QUIT://窗口完全关闭,SDL即将退出
 		{
 			bQuit = true;
