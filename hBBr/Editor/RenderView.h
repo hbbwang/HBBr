@@ -1,7 +1,7 @@
 #pragma once
 #include <QWidget>
 #include <qtimer.h>
-
+#include "FormMain.h"
 
 class RenderView  : public QWidget
 {
@@ -18,6 +18,8 @@ public:
 	QWidget* _mainRendererWidget = nullptr;
 
 	class VulkanForm* _mainRenderer = nullptr;
+
+	static SDL_Keycode mapQtKeyToSdlKey(int qtKey);
 
 protected:
 	//不使用Qt默认的绘制引擎

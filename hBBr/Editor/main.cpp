@@ -2,7 +2,9 @@
 #include <QtWidgets/QApplication>
 #include <QMouseEvent>
 #include <qdebug.h>
-
+#include "FormMain.h"
+#include "RenderView.h"
+#include "HInput.h"
 #include <Windows.h> //为了支持SetFocus(nullptr);
 
 QWidget* currentFocusWidget = nullptr;
@@ -13,7 +15,8 @@ protected:
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         bool bChangeFocus = false;
-        if (event->type() == QEvent::MouseButtonPress) {
+        if (event->type() == QEvent::MouseButtonPress) 
+        {
             QWidget* newCurrentFocusWidget = QApplication::widgetAt(mouseEvent->globalPos());
             if (currentFocusWidget && currentFocusWidget != newCurrentFocusWidget && currentFocusWidget != QApplication::focusWidget())
             {
@@ -43,6 +46,7 @@ protected:
                 }
             }         
         }
+
         //if (event->type() == QEvent::MouseMove)
         //    qDebug() << QApplication::widgetAt(mouseEvent->globalPos())->objectName().toStdString().c_str();
         return false; // 事件未被处理，继续传递

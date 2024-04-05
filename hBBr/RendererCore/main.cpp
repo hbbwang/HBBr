@@ -314,7 +314,7 @@ bool VulkanApp::UpdateForm()
 		//case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
 		//case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
 
-#if 1 //Editor下咱们窗口缩放不走SDL的逻辑
+#if !IS_EDITOR //Editor下咱们窗口缩放不走SDL的逻辑
 		case SDL_EVENT_WINDOW_RESIZED:
 		{
 			ResizeCallBack(win, event.window.data1, event.window.data2);
