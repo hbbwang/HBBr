@@ -7,6 +7,7 @@
 #include <qstandarditemmodel.h>
 #include <QTreeView>
 #include "HString.h"
+#include "Asset/ContentManager.h"
 class QSplitter;
 class QListView;
 class QTreeView;
@@ -79,6 +80,16 @@ class MainWindow;
 //	void OpenCurrentFolder_Tree();
 //};
 
+class CustomViewItem :public QStandardItem
+{
+public:
+	CustomViewItem()
+	{}
+	explicit CustomViewItem(const QString& text) :QStandardItem(text)
+	{}
+	QString path;
+};
+
 class CustomTreeView : public QTreeView
 {
 	Q_OBJECT
@@ -87,13 +98,17 @@ public:
 	
 	void SetRootItemName(QString newText);
 
-	void AddItem(QStandardItem* newItem, QStandardItem* parent = nullptr);
+	void AddItem(CustomViewItem* newItem, CustomViewItem* parent = nullptr);
+
+	QList<CustomViewItem*> FindItems(QString name);
 
 	void RemoveAllItems();
 
 	QStandardItemModel* _model = nullptr;
 
-	QStandardItem* _rootItem = nullptr;
+	CustomViewItem* _rootItem = nullptr;
+
+	QList<CustomViewItem*> _allItems;
 };
 
 //重做...
@@ -103,6 +118,8 @@ class VirtualFolderTreeView : public CustomTreeView
 	Q_OBJECT
 public:
 	explicit VirtualFolderTreeView(QWidget* parent = nullptr);
+	//虚拟路径统一用“/”分割，不存在使用"\\"
+	CustomViewItem* FindFolder(QString virtualPath);
 };
 
 class ContentBrowser : public QWidget
@@ -115,7 +132,7 @@ public:
 
 	static void RefreshContentBrowsers();
 	void Refresh();
-
+	void SpawnFolder(VirtualFolder& folder);
 protected:
 	virtual void focusInEvent(QFocusEvent* event);
 	virtual void showEvent(QShowEvent* event);
@@ -123,7 +140,6 @@ protected:
 	virtual void mouseMoveEvent(QMouseEvent* event) override;
 	virtual void mousePressEvent(QMouseEvent* event);
 	virtual void closeEvent(QCloseEvent* event) override;
-
 	static QList<ContentBrowser*> _contentBrowser;
 
 	class QSplitter*					_splitterBox = nullptr;

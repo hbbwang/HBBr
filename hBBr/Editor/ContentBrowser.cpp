@@ -21,8 +21,9 @@
 #include "RendererCore/Core/VulkanRenderer.h"
 #include "RendererCore/Form/FormMain.h"
 #include "Asset/Material.h"
-#include "Asset/ContentManager.h"
-//
+#include "qdir.h"
+
+
 //QWidget* ContentBrowser::_currentFocusContentBrowser = nullptr;
 //QList<QWidget*> ContentBrowser::_allContentBrowser;
 //
@@ -578,7 +579,7 @@ CustomTreeView::CustomTreeView(QWidget* parent)
 {
 	_model = new QStandardItemModel(this);
 
-	_rootItem = new QStandardItem("root");
+	_rootItem = new CustomViewItem("root");
 
 	_model->appendRow(_rootItem);
 
@@ -596,16 +597,32 @@ void CustomTreeView::SetRootItemName(QString newText)
 	_rootItem->setText(newText);
 }
 
-void CustomTreeView::AddItem(QStandardItem* newItem, QStandardItem* parent)
+void CustomTreeView::AddItem(CustomViewItem* newItem, CustomViewItem* parent)
 {
 	if (parent)
 	{
+		newItem->path = parent->path + "/" + parent->text();
 		parent->appendRow(newItem);
 	}
 	else
 	{
+		newItem->path = parent->path + "/" + _rootItem->text();
 		_rootItem->appendRow(newItem);
 	}
+	_allItems.append(newItem);
+}
+
+QList<CustomViewItem*> CustomTreeView::FindItems(QString name)
+{
+	QList<CustomViewItem*> result;
+	for (auto& i : _allItems)
+	{
+		if (i->path.compare(name, Qt::CaseInsensitive) == 0 )
+		{
+			result.append(i);
+		}
+	}
+	return result;
 }
 
 void CustomTreeView::RemoveAllItems()
@@ -618,6 +635,25 @@ VirtualFolderTreeView::VirtualFolderTreeView(QWidget* parent)
 	:CustomTreeView(parent)
 {
 	setObjectName("CustomTreeView_VirtualFolderTreeView");
+	_rootItem->setText("Asset");
+}
+
+CustomViewItem* VirtualFolderTreeView::FindFolder(QString virtualPath)
+{
+	auto folderName = FileSystem::GetFileName(virtualPath.toStdString().c_str());
+	//FindItem
+	for (auto& i : _allItems)
+	{
+		QString shortPath = i->path.replace("/", "");
+		shortPath = shortPath.replace("\\", "");
+		virtualPath = virtualPath.replace("/", "");
+		virtualPath = virtualPath.replace("\\", "");
+		if (shortPath.compare(virtualPath, Qt::CaseInsensitive) == 0)
+		{
+			return i;
+		}
+	}
+	return nullptr;
 }
 
 QList<ContentBrowser*>ContentBrowser::_contentBrowser;
@@ -676,13 +712,32 @@ void ContentBrowser::RefreshContentBrowsers()
 	}
 }
 
+void ContentBrowser::SpawnFolder(VirtualFolder& folder)
+{
+	auto pathTag = folder.Path.Split(HString::GetSeparate().c_str());
+	CustomViewItem* parent = _treeView->_rootItem;
+	for (int i = 0; i < pathTag.size();i++)
+	{
+		QString vfp = parent->path + "/" + parent->text();
+		CustomViewItem* newItem = _treeView->FindFolder(vfp);
+		if (newItem == nullptr)
+		{
+			newItem = new CustomViewItem(pathTag[i].c_str());
+			_treeView->AddItem(newItem, parent);
+		}
+		parent = newItem;
+	}
+}
+
 void ContentBrowser::Refresh()
 {
 	_treeView->RemoveAllItems();
-	auto folders = FileSystem::GetAllFolders(FileSystem::GetContentAbsPath().c_str());
+	//auto folders = FileSystem::GetAllFolders(FileSystem::GetContentAbsPath().c_str());
+	auto folders = ContentManager::Get()->GetVirtualFolders();
+
 	for (auto& i : folders)
 	{
-		_treeView->AddItem(new QStandardItem(i.baseName.c_str()));
+		SpawnFolder(i.second);
 	}
 }
 
@@ -716,3 +771,4 @@ void ContentBrowser::mousePressEvent(QMouseEvent* event)
 void ContentBrowser::closeEvent(QCloseEvent* event)
 {
 }
+

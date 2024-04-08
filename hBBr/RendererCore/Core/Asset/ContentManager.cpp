@@ -63,6 +63,7 @@ void ContentManager::Release()
 {
 	_assets.clear();
 	_assets_repos.clear();
+	_assets_vf.clear();
 }
 
 std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)
@@ -155,7 +156,23 @@ void ContentManager::ReloadRepository(HString repositoryName)
 			}
 			else
 			{
-				_assets_repos[repositoryName].emplace(info->guid, info);
+				it->second.emplace(info->guid, info);
+			}
+			//3
+			HString vpvf = info->virtualPath;
+			FileSystem::ClearPathSeparation(vpvf);
+			auto vfit = _assets_vf.find(vpvf);
+			if (vfit == _assets_vf.end())
+			{
+				VirtualFolder newVF;
+				newVF.assets.emplace(info->guid, info);
+				newVF.FolderName = FileSystem::GetFileName(info->virtualPath);
+				newVF.Path = info->virtualPath;
+				_assets_vf.emplace(vpvf, newVF);
+			}
+			else
+			{
+				vfit->second.assets.emplace(info->guid, info);
 			}
 		}
 		else
@@ -175,6 +192,17 @@ void ContentManager::UpdateAssetReference(HGUID obj)
 			UpdateAssetReference(it->second);
 		}
 	}
+}
+
+inline const std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> ContentManager::GetAssetsByVirtualFolder(HString virtualFolder) const
+{
+	FileSystem::ClearPathSeparation(virtualFolder);
+	auto it = _assets_vf.find(virtualFolder);
+	if (it != _assets_vf.end())
+	{
+		return it->second.assets;
+	}
+	return std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>();
 }
 
 void ContentManager::UpdateAssetReference(std::weak_ptr<AssetInfoBase> info)

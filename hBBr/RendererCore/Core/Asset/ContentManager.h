@@ -76,9 +76,9 @@ public:
 	HString assetFilePath;
 	//资产所在的相对 [目录] 路径(Asset/....)
 	HString assetPath;
-	//资产的虚拟路径(Content/xxx/...),非实际路径
+	//资产的虚拟路径(Content/xxx/...),非实际路径,虚拟路径统一用“/”分割,不存在使用"\\"
 	HString virtualPath;
-	//资产的虚拟文件路径(Content/xxx/...abc.fbx),非实际路径,带名字和后缀
+	//资产的虚拟文件路径(Content/xxx/...abc.fbx),非实际路径,带名字和后缀,虚拟路径统一用“/”分割,不存在使用"\\"
 	HString virtualFilePath;
 	//资产所在的仓库名字,不带.repository后缀
 	HString repository;
@@ -136,6 +136,13 @@ struct AssetSaveType
 	std::vector<std::weak_ptr<AssetInfoBase>> refs;
 };
 
+struct VirtualFolder
+{
+	HString FolderName;
+	HString Path;
+	std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> assets;
+};
+
 class ContentManager
 {
 	friend class VulkanApp;
@@ -164,6 +171,10 @@ public:
 	HBBR_API void UpdateAssetReference(HGUID obj);
 
 	HBBR_API inline const std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>& GetAssets(AssetType type)const { return _assets[(uint32_t)type]; }
+
+	HBBR_API inline const  std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> GetAssetsByVirtualFolder(HString virtualFolder)const;
+
+	HBBR_API inline const std::unordered_map<HString, VirtualFolder>& GetVirtualFolders()const { return _assets_vf; }
 
 	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HGUID guid, AssetType type = AssetType::Unknow)const;
 
@@ -209,4 +220,6 @@ private:
 	std::vector<std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>>_assets;
 	//根据仓库储存对象
 	std::unordered_map<HString, std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>> _assets_repos;
+	//根据虚拟路径储存对象<完整虚拟路径,虚拟路径对象>
+	std::unordered_map<HString, VirtualFolder> _assets_vf;
 };

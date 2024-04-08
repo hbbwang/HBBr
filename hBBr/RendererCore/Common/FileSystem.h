@@ -73,6 +73,8 @@ extern "C" {
 		HBBR_API static std::vector<FileEntry> GetAllFilesExceptFolders(const char* path);
 		HBBR_API static std::vector<FileEntry> GetAllFolders(const char* path,bool currentDir = true);
 		HBBR_API static std::vector<char>ReadBinaryFile(const char* filePath);
+		//清除路径分隔符("/"和"\\")
+		HBBR_API static void ClearPathSeparation(HString& path);
 		static HString _appPath;
 	};
 

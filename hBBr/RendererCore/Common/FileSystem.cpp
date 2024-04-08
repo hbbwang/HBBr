@@ -460,3 +460,13 @@ std::vector<char> FileSystem::ReadBinaryFile(const char* filePath)
     file.close();
     return buffer;
 }
+
+void FileSystem::ClearPathSeparation(HString& path)
+{
+    std::string str = path.c_str();
+    auto newEnd = std::remove_if(str.begin(), str.end(), [](char c) {
+        return c == '/' || c == '\\';
+    });
+    str.erase(newEnd, str.end());
+    path = str.c_str();
+}
