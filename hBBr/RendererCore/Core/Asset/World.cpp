@@ -173,11 +173,13 @@ void World::PreLoad(class VulkanRenderer* renderer, HString worldName)
 
 void World::Load()
 {
+#if IS_GAME
 	//-----model--camera
-	auto backCamera = GameObject::CreateGameObject("EditorCamera", _levels[0].get());
+	auto backCamera = GameObject::CreateGameObject("TestGameCamera", _levels[0].get());
 	backCamera->GetTransform()->SetWorldLocation(glm::vec3(0, 2, -3.0));
 	auto cameraComp = backCamera->AddComponent<CameraComponent>();
 	cameraComp->OverrideMainCamera();
+#endif
 	//-----model--test
 	auto testModel = GameObject::CreateGameObject("Test", _levels[0].get());
 	auto modelComp = testModel->AddComponent<ModelComponent>();

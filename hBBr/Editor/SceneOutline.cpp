@@ -54,6 +54,8 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
     setObjectName("SceneOutline");
     viewport()->setObjectName("SceneOutline");
 
+    setIndentation(15);
+
     _renderer = renderer;
     _menu = new QMenu(this);
     _createNewGameObject    = new QAction(QString::fromLocal8Bit("´´½¨GameObject"), _menu);

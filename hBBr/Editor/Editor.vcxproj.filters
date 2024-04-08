@@ -106,6 +106,9 @@
     <ClCompile Include="LineEditDialog.cpp">
       <Filter>Widgets\Extension</Filter>
     </ClCompile>
+    <ClCompile Include="CustomView.cpp">
+      <Filter>Widgets\Custom</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="EditorMain.h">
@@ -168,6 +171,9 @@
       <Filter>Widgets\Common</Filter>
     </ClInclude>
     <ClInclude Include="CustomFileIconProvider.h">
+      <Filter>Widgets\Custom</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomView.h">
       <Filter>Widgets\Custom</Filter>
     </ClInclude>
   </ItemGroup>

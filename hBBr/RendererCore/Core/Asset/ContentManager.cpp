@@ -121,10 +121,10 @@ void ContentManager::ReloadRepository(HString repositoryName)
 		info->assetPath = FileSystem::GetRelativePath(info->absPath.c_str());
 		FileSystem::FixUpPath(info->assetPath);
 		info->virtualPath = i.attribute(L"VPath").as_string();
-		FileSystem::FixUpPath(info->virtualPath);
+		//FileSystem::FixUpPath(info->virtualPath);
 		info->virtualFilePath = i.attribute(L"VPath").as_string();
 		info->virtualFilePath += info->displayName + "." + info->suffix;
-		FileSystem::FixUpPath(info->virtualFilePath);
+		//FileSystem::FixUpPath(info->virtualFilePath);
 		info->repository = repositoryName;
 		//读取引用关系
 		info->refTemps.clear();

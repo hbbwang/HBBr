@@ -560,6 +560,18 @@ QSplitter::handle
 {
     
 }
+#CustomTreeView_VirtualFolderTreeView::item 
+{
+    height: 50px;
+}
+#CustomTreeView_VirtualFolderTreeView::branch:closed:has-children
+{
+    image: url(./Config/Theme/Icons/ContentBrowser_FolderClose.png);
+}
+#CustomTreeView_VirtualFolderTreeView::branch:open:has-children
+{
+    image: url(./Config/Theme/Icons/ContentBrowser_FolderOpen.png);
+}
 /* Content Browser PathLabel */
 #PathLabel
 {
