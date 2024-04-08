@@ -558,11 +558,25 @@ QSplitter::handle
 }
 #CustomTreeView_VirtualFolderTreeView
 {
-    
+    color: rgb(140, 140, 140) ;
+    font-weight:400;
+    font-size: 17px;
+    icon-size: 32px;
 }
 #CustomTreeView_VirtualFolderTreeView::item 
 {
-    height: 50px;
+    color: rgb(195, 195, 195) ;
+    height: 25px;
+}
+#CustomTreeView_VirtualFolderTreeView::item:selected
+{
+    color: rgb(255, 175, 175) ;
+    height: 25px;
+}
+#CustomTreeView_VirtualFolderTreeView::branch
+{
+    width: 28px;
+    height: 28px;
 }
 #CustomTreeView_VirtualFolderTreeView::branch:closed:has-children
 {
