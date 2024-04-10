@@ -227,7 +227,7 @@
     <QtMoc Include="AssetLine.h" />
     <ClInclude Include="CustomFileIconProvider.h" />
     <QtMoc Include="CustomSearchLine.h" />
-    <ClInclude Include="CustomView.h" />
+    <QtMoc Include="CustomView.h" />
     <ClInclude Include="EditorCommonFunction.h" />
   </ItemGroup>
   <ItemGroup>

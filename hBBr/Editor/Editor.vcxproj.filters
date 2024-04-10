@@ -165,15 +165,15 @@
     <QtMoc Include="LineEditDialog.h">
       <Filter>Widgets\Extension</Filter>
     </QtMoc>
+    <QtMoc Include="CustomView.h">
+      <Filter>Widgets\Custom</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditorCommonFunction.h">
       <Filter>Widgets\Common</Filter>
     </ClInclude>
     <ClInclude Include="CustomFileIconProvider.h">
-      <Filter>Widgets\Custom</Filter>
-    </ClInclude>
-    <ClInclude Include="CustomView.h">
       <Filter>Widgets\Custom</Filter>
     </ClInclude>
   </ItemGroup>

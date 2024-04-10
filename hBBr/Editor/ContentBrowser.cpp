@@ -23,14 +23,39 @@
 #include "Asset/Material.h"
 #include "qdir.h"
 
+//--------------------------------------VirtualFolderTreeView-------------------
+#pragma region VirtualFolderTreeView
 VirtualFolderTreeView::VirtualFolderTreeView(QWidget* parent)
 	:CustomTreeView(parent)
 {
 	setObjectName("CustomTreeView_VirtualFolderTreeView");
 	_rootItem->setText("Asset");
-	_rootItem->path = "";
+	_rootItem->_path = "";
+	_rootItem->_text = "";
 	setIndentation(20);
 	setEditTriggers(EditTrigger::DoubleClicked);
+}
+
+void VirtualFolderTreeView::AddItem(CustomViewItem* newItem, CustomViewItem* parent)
+{
+	if (!newItem)
+	{
+		return;
+	}
+	newItem->_text = newItem->text();
+	if (parent && parent != _rootItem)
+	{
+		newItem->_path = parent->_path + "/" + parent->_text;
+		newItem->_fullPath = newItem->_path + "/" + newItem->_text;
+		parent->appendRow(newItem);
+	}
+	else
+	{
+		//newItem->_path = parent->_path + "/" + _rootItem->_text;
+		newItem->_fullPath = newItem->_text;
+		_rootItem->appendRow(newItem);
+	}
+	_allItems.append(newItem);
 }
 
 CustomViewItem* VirtualFolderTreeView::FindFolder(QString virtualPath)
@@ -39,7 +64,7 @@ CustomViewItem* VirtualFolderTreeView::FindFolder(QString virtualPath)
 	//FindItem
 	for (auto& i : _allItems)
 	{
-		QString shortPath = i->path + i->text();
+		QString shortPath = i->_path + i->_text;
 		shortPath = shortPath.replace("/", "");
 		shortPath = shortPath.replace("\\", "");
 		QString vp = virtualPath;
@@ -52,7 +77,52 @@ CustomViewItem* VirtualFolderTreeView::FindFolder(QString virtualPath)
 	}
 	return nullptr;
 }
+#pragma endregion
 
+
+//--------------------------------------Virtual File List View-------------------
+#pragma region VirtualFileListView
+VirtualFileListView::VirtualFileListView(QWidget* parent)
+	:CustomListView(parent)
+{
+	setObjectName("CustomListView_VirtualFileListView");
+}
+
+CustomListItem* VirtualFileListView::AddFile(struct AssetInfoBase* assetInfo)
+{
+	if (assetInfo)
+	{
+		auto iconPath = assetInfo->absFilePath + ".png";
+		if (!FileSystem::FileExist(iconPath))
+		{
+			iconPath = assetInfo->absFilePath + ".jpg";
+		}
+		if (!FileSystem::FileExist(iconPath))
+		{
+			iconPath = FileSystem::GetConfigAbsPath();
+			if (assetInfo->type == AssetType::Model)
+			{
+				iconPath += "Theme/Icons/ICON_FILE_MODEL.png";
+			}
+			else if (assetInfo->type == AssetType::Material)
+			{
+				iconPath += "Theme/Icons/ICON_FILE_MAT.png";
+			}
+			else
+			{
+				iconPath += "Theme/Icons/ICON_FILE.png";
+			}
+		}
+		return AddItem(assetInfo->displayName.c_str(), iconPath.c_str());
+	}
+	return nullptr;
+}
+
+#pragma endregion
+
+
+//--------------------------------------Content Browser Widget-------------------
+#pragma region ContentBrowserWidget
 QList<ContentBrowser*>ContentBrowser::_contentBrowser;
 
 ContentBrowser::ContentBrowser(QWidget* parent )
@@ -82,6 +152,8 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	//
 	_treeView = new VirtualFolderTreeView(this);
 	treeLayout->addWidget(_treeView);
+	_listView = new VirtualFileListView(this);
+	listLayout->addWidget(_listView);
 	//
 	_splitterBox->setStretchFactor(1, 4);
 	ui.ContentBrowserVBoxLayout->addWidget(_splitterBox);
@@ -92,8 +164,13 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	ui.PathLabel->setObjectName("PathLabel");
 
 	_contentBrowser.append(this);
-	RefreshContentBrowsers();
 
+	//Connect
+	connect(_treeView,SIGNAL(clicked(const QModelIndex&)),this,SLOT(TreeViewSelection(const QModelIndex&)));
+
+
+	//Refresh
+	RefreshContentBrowsers();
 }
 
 ContentBrowser::~ContentBrowser()
@@ -109,32 +186,45 @@ void ContentBrowser::RefreshContentBrowsers()
 	}
 }
 
-void ContentBrowser::SpawnFolder(VirtualFolder& folder)
+void ContentBrowser::Refresh()
 {
-	auto pathTag = folder.Path.Split("/");
-	CustomViewItem* parent = _treeView->_rootItem;
-	for (int i = 0; i < pathTag.size();i++)
+	RefreshFolderOnTreeView();
+	//默认选择root(Asset)根节点。不需要显示任何文件夹
+}
+
+void ContentBrowser::RefreshFolderOnTreeView()
+{
+	_treeView->RemoveAllItems();
+	auto folders = ContentManager::Get()->GetVirtualFolders();
+	for (auto& i : folders)
 	{
-		QString vfp = parent->path + "/" + parent->text() + "/" + pathTag[i].c_str() + "/";
-		CustomViewItem* newItem = _treeView->FindFolder(vfp);
-		if (newItem == nullptr)
+		auto pathTag = i.second.Path.Split("/");
+		CustomViewItem* parent = _treeView->_rootItem;
+		for (int i = 0; i < pathTag.size(); i++)
 		{
-			newItem = new CustomViewItem(pathTag[i].c_str());
-			_treeView->AddItem(newItem, parent);
+			QString vfp = parent->_path + "/" + parent->_text + "/" + pathTag[i].c_str() + "/";
+			CustomViewItem* newItem = _treeView->FindFolder(vfp);
+			if (newItem == nullptr)
+			{
+				newItem = new CustomViewItem(pathTag[i].c_str());
+				_treeView->AddItem(newItem, parent);
+			}
+			parent = newItem;
 		}
-		parent = newItem;
 	}
 }
 
-void ContentBrowser::Refresh()
+void ContentBrowser::RefreshFileOnListView()
 {
-	_treeView->RemoveAllItems();
-	//auto folders = FileSystem::GetAllFolders(FileSystem::GetContentAbsPath().c_str());
-	auto folders = ContentManager::Get()->GetVirtualFolders();
-
-	for (auto& i : folders)
+	_listView->RemoveAllItems();
+	auto item = _treeView->GetSelectionItems();
+	for (auto& i : item)
 	{
-		SpawnFolder(i.second);
+		auto assets = ContentManager::Get()->GetAssetsByVirtualFolder(i->_fullPath.toStdString().c_str());
+		for (auto& a : assets)
+		{
+			auto item = _listView->AddFile(a.second.get());
+		}
 	}
 }
 
@@ -168,4 +258,12 @@ void ContentBrowser::mousePressEvent(QMouseEvent* event)
 void ContentBrowser::closeEvent(QCloseEvent* event)
 {
 }
+
+void ContentBrowser::TreeViewSelection(const QModelIndex& index)
+{
+	//QMessageBox::information(0,0,0,0);
+	RefreshFileOnListView();
+}
+
+#pragma endregion
 

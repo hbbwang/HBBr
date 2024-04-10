@@ -87,6 +87,88 @@ QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
 	return result;
 }
 
+QString GetSingleStyleFromFile(QString Name, QString path)
+{
+    QString result;
+    bool bFound = false;
+    path = QString(FileSystem::GetProgramPath().c_str()) + path;
+    if (!path.isEmpty())
+    {
+        QDir dir(path);
+        dir.toNativeSeparators(path);
+        path = dir.path();
+
+        QFile styleFile(path);
+
+        if (styleFile.open(QFile::ReadOnly | QIODevice::Text))
+        {
+            QTextStream in(&styleFile);
+            QString strLine;
+            bool bFoundVariable = false;
+            struct qssVarible
+            {
+                QString name;
+                QString value;
+            };
+            QList<qssVarible> vars;
+            while (!in.atEnd())
+            {
+                strLine = in.readLine();//逐行读取
+                int length = Name.length();
+                QString objN = "*" + Name;
+                if (bFound == true && !result.isEmpty() && strLine.contains("};", Qt::CaseSensitive))//是否到底结束位置
+                {
+                    result += strLine.left(strLine.length() - 1);
+                    break;
+                }
+                if (bFound == false && strcmp(strLine.left(length + 1).toStdString().c_str(), objN.toStdString().c_str()) == 0)
+                {
+                    bFound = true;
+                    continue;
+                }
+                //替换变量定义
+                if (strLine.contains("VariableDefine", Qt::CaseSensitive))
+                {
+                    bFoundVariable = true;
+                    strLine = "/*" + strLine;
+                }
+                if (bFoundVariable)
+                {
+                    auto noSpace = strLine.remove(" ");
+                    noSpace = noSpace.remove("\t");
+                    auto l = noSpace.split(':');
+                    if (l.size() > 1)
+                    {
+                        vars.append({ l[0] , l[1].remove(';') });
+                    }
+                }
+                if (bFoundVariable && strLine.contains("}", Qt::CaseSensitive))
+                {
+                    bFoundVariable = false;
+                    strLine = strLine + "*/";
+                }
+                if (bFound)
+                {
+                    result += strLine;
+                }
+            }
+            styleFile.close();
+            for (auto i : vars)
+            {
+                result.replace(i.name, i.value);
+            }
+        }
+        else
+        {
+            QMessageBox::information(nullptr, "Error", "Load [" + Name + "] style sheet file failed");
+        }
+    }
+    //QMessageBox::information(this, "Check", result);
+    result = result.replace("{","");
+    result = result.replace("}", "");
+    return result;
+}
+
 /*--------------------渲染器相关----------------------*/
 #include "Asset/ContentManager.h"
 #include "Asset/HGuid.h"

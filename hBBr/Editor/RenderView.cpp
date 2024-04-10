@@ -113,12 +113,12 @@ void RenderView::closeEvent(QCloseEvent* event)
 
 void RenderView::paintEvent(QPaintEvent* event)
 {
-	QStylePainter painter(this);
-	QStyleOption opt;
-	opt.initFrom(this);
-	opt.rect = rect();
-	painter.drawPrimitive(QStyle::PE_Widget, opt);
-	QWidget::paintEvent(event);
+	//QStylePainter painter(this);
+	//QStyleOption opt;
+	//opt.initFrom(this);
+	//opt.rect = rect();
+	//painter.drawPrimitive(QStyle::PE_Widget, opt);
+	//QWidget::paintEvent(event);
 }
 
 void RenderView::keyPressEvent(QKeyEvent* event)
