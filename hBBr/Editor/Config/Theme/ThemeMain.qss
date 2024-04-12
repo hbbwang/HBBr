@@ -414,6 +414,18 @@ QTreeWidget::branch:closed:!has-children
     /* border-image: url(./Config/Theme/Icons/TreeWidget_Close.png) ; */
     border-color: rgba(255,255,255,0.25);
 }
+QListWidget
+{
+ 
+}
+QListWidget::item:hover
+{
+
+}
+QListWidget::item:selected
+{
+
+}
 QSplitter
 {
     background-color:rgb(140, 90, 100);
@@ -550,13 +562,6 @@ QSplitter::handle
 {
 
 }
-#CustomListView
-{
-    background-color: transparent;
-    font-size: 16px;
-    color:rgb(218, 218, 218);
-    text-align:center;
-}
 /* ContentBrowser */
 #ContentBrowser
 {
@@ -592,6 +597,28 @@ QSplitter::handle
 #CustomTreeView_VirtualFolderTreeView::branch:open:has-children
 {
     image: url(./Config/Theme/Icons/ContentBrowser_FolderOpen.png);
+}
+
+#CustomListView_VirtualFileListView 
+{
+    background-color:transparent;
+    font-size: 18px;
+}
+#CustomListView_VirtualFileListView::item
+{
+    color:rgb(184, 184, 184);
+    text-align:left;
+    border:2px dashed rgb(107, 103, 103);
+    border-radius:6px;
+    margin: 2;
+    /* padding: 10px; */
+}
+#CustomListView_VirtualFileListView::item:selected
+{
+    background: #3a2a2d;
+    color:rgb(255, 227, 237);
+    border:2px solid rgb(154, 103, 110);
+    font-weight: 400;
 }
 /* Content Browser PathLabel */
 #PathLabel

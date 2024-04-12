@@ -11,6 +11,7 @@
 #include <QMessageBox>
 #include <QAction>
 #include <QStyledItemDelegate>
+#include <QApplication>
 #include <QTextDocument>
 #include <QAbstractTextDocumentLayout>
 #include "CustomSearchLine.h"
@@ -39,7 +40,12 @@ CustomViewItem::CustomViewItem(const QIcon& icon, const QString& text) : QStanda
 
 CustomListItem::CustomListItem(const QString& text, QListWidget* view, int type):QListWidgetItem(text, view, type)
 {
-
+	setFlags(Qt::ItemIsSelectable 
+		| Qt::ItemIsEditable
+		| Qt::ItemIsDragEnabled
+		| Qt::ItemNeverHasChildren
+		| Qt::ItemIsEnabled
+	);
 }
 
 CustomListItem::CustomListItem(const QIcon& icon, const QString& text, QListWidget* view, int type) : QListWidgetItem(icon, text, view, type)
@@ -159,12 +165,6 @@ public:
 		QStyleOptionViewItem opt = option;
 		initStyleOption(&opt, index);
 
-		QIcon icon = index.data(Qt::DecorationRole).value<QIcon>();
-		QString text = index.data(Qt::DisplayRole).toString();
-
-		QRect rect = opt.rect;
-		QFont font = opt.font;
-
 		////高亮
 		//bool bSelect = false;
 		//for (auto& i : ((QListView*)parent())->selectionModel()->selectedIndexes())
@@ -197,41 +197,55 @@ public:
 		//		_gridSize.height());
 		//}
 
-		QSize sub = _gridSize - _iconSize;
+		// 计算自定义高亮框的大小和位置
+		QRect highlightRect = opt.rect;
+		highlightRect.setSize(QSize(64, 64)); // 设置统一的高亮框大小
+		highlightRect.moveCenter(opt.rect.center()); // 将高亮框居中
 
-		// 绘制图标
-		painter->drawPixmap(
-			rect.x() + (sub.width()/2),
-			rect.y() + (sub.height() / 2),
-			_iconSize.width(), 
-			_iconSize.height(), 
-			icon.pixmap(_iconSize));
+		//// 使用自定义高亮框绘制选中状态
+		//if (opt.state & QStyle::State_Selected) {
+		//	painter->fillRect(highlightRect, opt.palette.highlight());
+		//}
+
+		//// 绘制图标和文本
+		//QIcon icon = index.data(Qt::DecorationRole).value<QIcon>();
+		//QString text = index.data(Qt::DisplayRole).toString();
+		//QRect iconRect = highlightRect;
+		//QRect textRect = opt.rect;
+		//textRect.setTop(iconRect.bottom());
+
+		//QTextDocument textDoc;
+		//textDoc.setHtml(text);
+		//textDoc.setTextWidth(_gridSize.width());
+
+		//painter->drawPixmap(iconRect, icon.pixmap(iconRect.size()));
+		//painter->drawText(textRect, Qt::AlignCenter, text);
+
+		//style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, opt.widget);
+
+		// 使用自定义高亮框绘制选中状态
+		if (opt.state & QStyle::State_Selected) {
+			painter->fillRect(highlightRect, opt.palette.highlight());
+		}
+
+		// 绘制图标和文本
+		QIcon icon = index.data(Qt::DecorationRole).value<QIcon>();
+		QString text = index.data(Qt::DisplayRole).toString();
+		QRect iconRect = highlightRect;
+		QRect textRect = opt.rect;
+		textRect.setTop(iconRect.bottom());
 
 		QTextDocument textDoc;
-		textDoc.setHtml(QString("<div style='%1'>%2</div>").arg(_qssStyle).arg(text));
+		textDoc.setHtml(text);
 		textDoc.setTextWidth(_gridSize.width());
-		textDoc.setDefaultFont(font);
 
-		QRect textRect = QRect(
-			opt.rect.x() + (_gridSize.width() / 2) - (textDoc.size().width()/2),
-			rect.y() + (sub.height() / 2) + _iconSize.height(),
-			_gridSize.width(),
-			textDoc.size().height()
-		);
+		// 使用QStyle绘制图标和文本
+		QStyle* style = opt.widget ? opt.widget->style() : QApplication::style();
+		style->drawItemPixmap(painter, iconRect, Qt::AlignCenter, icon.pixmap(iconRect.size()));
+		style->drawItemText(painter, textRect, Qt::AlignCenter, opt.palette, opt.state & QStyle::State_Enabled, text);
 
-		painter->save();
-		painter->translate(textRect.topLeft());
-		textDoc.documentLayout()->draw(painter, QAbstractTextDocumentLayout::PaintContext());
-		painter->restore();
-
-		//// 使用QStyle绘制项的背景和焦点矩形，以便支持QSS
-		//opt.rect = option.rect;
-		//opt.text = QString(); // 清除原始文本，以免重复绘制
-		//QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &opt, painter);
-
-		//// 使用QStyle绘制文本，以便支持QSS
-		//QApplication::style()->drawItemText(painter, textRect, Qt::AlignLeft, opt.palette, opt.state & QStyle::State_Enabled, text);
-	
+		
+		//QStyledItemDelegate::paint(painter, opt, index);
 	}
 };
 
@@ -244,15 +258,19 @@ CustomListView::CustomListView(QWidget* parent) :QListWidget(parent)
 
 	setLayoutMode(LayoutMode::Batched);//延迟
 
-	setIconSize(QSize(100,100));//格子内的图标大小
+	setSelectionMode(QAbstractItemView::ExtendedSelection);//多选
 
-	setGridSize(iconSize()*1.5f);//每个格子的大小
+	setIconSize(QSize(125,125));//格子内的图标大小
+
+	setGridSize(QSize(iconSize().width()*1.15, iconSize().height()*1.3));//每个格子的大小
 
 	setWrapping(true);//Item换行
 
+	setWordWrap(true);
+
 	setUniformItemSizes(true);
 
-	setSpacing(2);//间隔
+	//setSpacing(2);//间隔
 
 	setItemAlignment(Qt::AlignLeft);
 
@@ -262,7 +280,7 @@ CustomListView::CustomListView(QWidget* parent) :QListWidget(parent)
 
 	setResizeMode(QListView::ResizeMode::Adjust);//自动缩放
 
-	setTextElideMode(Qt::TextElideMode::ElideNone);//文本的省略模式
+	//setTextElideMode(Qt::TextElideMode::ElideNone);//文本的省略模式
 
 	setDragDropMode(QAbstractItemView::DragDropMode::DragDrop);
 
@@ -299,8 +317,6 @@ CustomListItem* CustomListView::AddItem(QString name, QString iconPath)
 
 void CustomListView::RemoveAllItems()
 {
-	//model()->removeRows(0, model()->rowCount());
-	//model()->removeColumns(0, model()->columnCount());
 	for (auto& i : _allItems)
 	{
 		takeItem(row(i));
@@ -312,12 +328,12 @@ void CustomListView::RemoveAllItems()
 void CustomListView::resizeEvent(QResizeEvent* e)
 {
 	QListWidget::resizeEvent(e);
-	//((CustomListViewItemDelegate*)itemDelegate())->UpdateStyle();
 }
 
 
 void CustomListView::indexesMoved(const QModelIndexList& indexes)
 {
+	sortItems();
 }
 
 #pragma endregion
