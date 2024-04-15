@@ -250,6 +250,7 @@ public:
 };
 
 #pragma region CustomListView
+
 CustomListView::CustomListView(QWidget* parent) :QListWidget(parent)
 {
 	setObjectName("CustomListView");
@@ -293,14 +294,38 @@ CustomListView::CustomListView(QWidget* parent) :QListWidget(parent)
 	//CustomListViewItemDelegate* itemDelegate = new CustomListViewItemDelegate(this,iconSize(),gridSize());
 	//setItemDelegate(itemDelegate);
 
-	
+	{
+		_toolTipWidget = new ToolTipWidget(this);
+		_toolTipWidget->setObjectName("CustomListView_ToolTip");
+		_toolTipWidget->setAttribute(Qt::WidgetAttribute::WA_AlwaysStackOnTop);
+		_toolTipWidget->setWindowFlags(Qt::Window);
+		_toolTipWidget->setWindowFlags(Qt::Tool);
+		_toolTipWidget->setWindowFlag(Qt::FramelessWindowHint);
+		_toolTipWidget->setAttribute(Qt::WidgetAttribute::WA_DeleteOnClose);
+		_toolTipWidget->setFocusPolicy(Qt::FocusPolicy::NoFocus);
+		_toolTipWidget->show();
+		_toolTipWidget->resize(0,0);
+		_toolTipWidget->setHidden(true);
+		QVBoxLayout* layout = new QVBoxLayout(_toolTipWidget);
+		layout->setContentsMargins(8, 8, 10, 8);
+		_toolTipWidget->setLayout(layout);
+		_toolTipWidget->adjustSize();
+		_toolTipLabel = new QLabel(_toolTipWidget);
+		_toolTipLabel->setObjectName("CustomListView_ToolTip_Text");
+		//_toolTipLabel->setWordWrap(true);
+		layout->addWidget(_toolTipLabel);
+	}
 
 	//设置自动排序
 	connect(this, SIGNAL(indexesMoved(const QModelIndexList&)), this, SLOT(indexesMoved(const QModelIndexList&)));
 	
 }
 
-CustomListItem* CustomListView::AddItem(QString name, QString iconPath, QString toolTip)
+CustomListView::~CustomListView()
+{
+}
+
+CustomListItem* CustomListView::AddItem(QString name, QString iconPath, ToolTip toolTip)
 {
 	CustomListItem* item = nullptr;
 	if (!iconPath.isEmpty())
@@ -311,6 +336,7 @@ CustomListItem* CustomListView::AddItem(QString name, QString iconPath, QString 
 	{
 		item = new CustomListItem(name,this);
 	}
+	item->_toolTip = toolTip;
 	item->_iconPath = iconPath;
 	addItem(item);
 	_allItems.append(item);
@@ -332,6 +358,35 @@ void CustomListView::resizeEvent(QResizeEvent* e)
 	QListWidget::resizeEvent(e);
 }
 
+void CustomListView::mouseMoveEvent(QMouseEvent* event)
+{
+	QPoint pos = mapFromGlobal(event->globalPos());
+	CustomListItem* item = (CustomListItem*)this->itemAt(pos);
+	if (item && item->_toolTip._tooltip.length()>1)
+	{
+		if (_currentMouseTrackItem != item)
+		{
+			_currentMouseTrackItem = item;
+		}
+		_toolTipWidget->resize(0, 0);
+		_toolTipWidget->setHidden(false);
+		_toolTipLabel->setText(item->_toolTip._tooltip);
+		_toolTipWidget->move(event->globalPos().x() + 10, event->globalPos().y() +10);
+	}
+	else
+	{
+		_toolTipWidget->setHidden(true);
+		_currentMouseTrackItem = nullptr;
+	}
+	QListWidget::mouseMoveEvent(event);
+}
+
+void CustomListView::leaveEvent(QEvent* event)
+{
+	_toolTipWidget->setHidden(true);
+	_currentMouseTrackItem = nullptr;
+	QListWidget::leaveEvent(event);
+}
 
 void CustomListView::indexesMoved(const QModelIndexList& indexes)
 {

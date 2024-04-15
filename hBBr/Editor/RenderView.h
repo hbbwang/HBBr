@@ -41,7 +41,7 @@ protected:
 
 	virtual void closeEvent(QCloseEvent* event)override;
 
-	virtual void paintEvent(QPaintEvent* event);
+	virtual void paintEvent(QPaintEvent* event)override;
 
 	virtual void keyPressEvent(QKeyEvent* event)override;
 

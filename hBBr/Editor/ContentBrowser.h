@@ -29,6 +29,9 @@ public:
 	CustomListItem* AddFile(std::weak_ptr<struct AssetInfoBase> assetInfo);
 
 	VirtualFolder _currentTreeViewSelection;
+
+protected:
+
 };
 #pragma endregion
 

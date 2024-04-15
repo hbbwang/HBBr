@@ -91,8 +91,6 @@ public:
 #endif
 	//
 	AssetInfoBase() {
-		toolTips.reserve(20); 
-		toolTips.push_back(HString::printf("资产类型:%s", GetAssetTypeString(type)));
 	}
 	virtual ~AssetInfoBase() {}
 

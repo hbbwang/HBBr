@@ -126,6 +126,11 @@ void ContentManager::ReloadRepository(HString repositoryName)
 		info->virtualFilePath += info->displayName + "." + info->suffix;
 		//FileSystem::FixUpPath(info->virtualFilePath);
 		info->repository = repositoryName;
+
+		info->toolTips.reserve(20);
+		info->toolTips.push_back(HString::printf("资产名:%s", info->displayName.c_str()));
+		info->toolTips.push_back(HString::printf("资产类型:%s", GetAssetTypeString(type).c_str()));
+
 		//读取引用关系
 		info->refTemps.clear();
 		for (auto j = i.first_child(); j; j = j.next_sibling())//<Ref>

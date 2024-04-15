@@ -3,10 +3,36 @@
 #include <QListView>
 #include <qlistwidget.h>
 #include <QDir>
+#include <QLabel>
 #include <qtooltip.h>
+#include <QStylePainter>
+#include <QStyleOption>
 #include <qstandarditemmodel.h>
 #include "HString.h"
 #include "Asset/ContentManager.h"
+
+struct ToolTip
+{
+	QString _tooltip;
+};
+
+class ToolTipWidget : public QWidget
+{
+	Q_OBJECT
+public:
+	ToolTipWidget(QWidget*parent = nullptr) :QWidget(parent)
+	{}
+protected:
+	virtual void paintEvent(QPaintEvent* event)override
+	{
+		QStylePainter painter(this);
+		QStyleOption opt;
+		opt.initFrom(this);
+		opt.rect = rect();
+		painter.drawPrimitive(QStyle::PE_Widget, opt);
+		QWidget::paintEvent(event);
+	}
+};
 
 class CustomViewItem :public QStandardItem
 {
@@ -28,6 +54,7 @@ public:
 	QString _path;//without name
 	QString _fullPath;//with name
 	QString _iconPath;
+	ToolTip _toolTip;
 	std::weak_ptr<AssetInfoBase> _assetInfo;
 };
 
@@ -58,8 +85,9 @@ class CustomListView : public QListWidget
 public:
 
 	explicit CustomListView(QWidget* parent = nullptr);
+	~CustomListView();
 
-	virtual CustomListItem* AddItem(QString name, QString iconPath = "", QString toolTip = "");
+	virtual CustomListItem* AddItem(QString name, QString iconPath = "", ToolTip toolTip = ToolTip());
 
 	void RemoveAllItems();
 
@@ -67,6 +95,13 @@ public:
 
 protected:
 	void resizeEvent(QResizeEvent* e) override;
+	void mouseMoveEvent(QMouseEvent* event) override;
+	void leaveEvent(QEvent* event) override;
+
+	CustomListItem* _currentMouseTrackItem;
+
+	ToolTipWidget* _toolTipWidget;
+	QLabel* _toolTipLabel;
 
 private slots:
 	void indexesMoved(const QModelIndexList& indexes);

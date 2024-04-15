@@ -86,6 +86,7 @@ VirtualFileListView::VirtualFileListView(QWidget* parent)
 	:CustomListView(parent)
 {
 	setObjectName("CustomListView_VirtualFileListView");
+	setMouseTracking(true);
 }
 
 CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase> assetInfo)
@@ -93,14 +94,14 @@ CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase>
 	if (!assetInfo.expired())
 	{
 		//收集资产的ToolTip
-		HString toolTips;
+		ToolTip newToolTip;
 		for (auto& i : assetInfo.lock()->toolTips)
 		{
-			if (toolTips.Length() > 1)
+			if (newToolTip._tooltip.length() > 1)
 			{
-				toolTips += "\n";
+				newToolTip._tooltip += "\n";
 			}
-			toolTips += i;
+			newToolTip._tooltip += i.c_str();
 		}
 		auto iconPath = assetInfo.lock()->absFilePath + ".png";
 		if (!FileSystem::FileExist(iconPath))
@@ -123,13 +124,12 @@ CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase>
 				iconPath += "Theme/Icons/ICON_FILE.png";
 			}
 		}
-		auto newItem = AddItem(assetInfo.lock()->displayName.c_str(), iconPath.c_str(), toolTips.c_str());
+		auto newItem = AddItem(assetInfo.lock()->displayName.c_str(), iconPath.c_str(), newToolTip);
 		newItem->_assetInfo = assetInfo;
 		return newItem;
 	}
 	return nullptr;
 }
-
 #pragma endregion
 
 
