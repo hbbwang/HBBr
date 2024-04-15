@@ -293,12 +293,14 @@ CustomListView::CustomListView(QWidget* parent) :QListWidget(parent)
 	//CustomListViewItemDelegate* itemDelegate = new CustomListViewItemDelegate(this,iconSize(),gridSize());
 	//setItemDelegate(itemDelegate);
 
+	
+
 	//设置自动排序
 	connect(this, SIGNAL(indexesMoved(const QModelIndexList&)), this, SLOT(indexesMoved(const QModelIndexList&)));
 	
 }
 
-CustomListItem* CustomListView::AddItem(QString name, QString iconPath)
+CustomListItem* CustomListView::AddItem(QString name, QString iconPath, QString toolTip)
 {
 	CustomListItem* item = nullptr;
 	if (!iconPath.isEmpty())

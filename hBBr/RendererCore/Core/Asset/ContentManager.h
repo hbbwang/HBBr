@@ -61,8 +61,6 @@ struct AssetInfoRefTemp
 class AssetInfoBase
 {
 public:
-	AssetInfoBase() {}
-	virtual ~AssetInfoBase() {}
 	HGUID guid;
 	AssetType type;
 	//虚拟名称,非实际文件名
@@ -85,8 +83,19 @@ public:
 	std::vector<std::weak_ptr<AssetInfoBase>> refs;
 	//用来暂时储存引用的guid和type,没有太多实际意义,通常是空的
 	std::vector<AssetInfoRefTemp> refTemps;
-	//
 	bool bAssetLoad = false;
+#if IS_EDITOR
+	//编辑器ListWidget生成Item图标的时候使用
+	//每个HString为单独一行
+	std::vector<HString> toolTips;
+#endif
+	//
+	AssetInfoBase() {
+		toolTips.reserve(20); 
+		toolTips.push_back(HString::printf("资产类型:%s", GetAssetTypeString(type)));
+	}
+	virtual ~AssetInfoBase() {}
+
 	virtual std::weak_ptr<class AssetObject> GetAssetData()const { return std::weak_ptr<class AssetObject>(); }
 	virtual void ReleaseData() {}
 	inline const bool IsAssetLoad()const

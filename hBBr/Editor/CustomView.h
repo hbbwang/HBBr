@@ -3,6 +3,7 @@
 #include <QListView>
 #include <qlistwidget.h>
 #include <QDir>
+#include <qtooltip.h>
 #include <qstandarditemmodel.h>
 #include "HString.h"
 #include "Asset/ContentManager.h"
@@ -27,6 +28,7 @@ public:
 	QString _path;//without name
 	QString _fullPath;//with name
 	QString _iconPath;
+	std::weak_ptr<AssetInfoBase> _assetInfo;
 };
 
 class CustomTreeView : public QTreeView
@@ -57,7 +59,7 @@ public:
 
 	explicit CustomListView(QWidget* parent = nullptr);
 
-	virtual CustomListItem* AddItem(QString name, QString iconPath = "");
+	virtual CustomListItem* AddItem(QString name, QString iconPath = "", QString toolTip = "");
 
 	void RemoveAllItems();
 

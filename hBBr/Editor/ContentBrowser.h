@@ -26,7 +26,7 @@ class VirtualFileListView :public CustomListView
 public:
 	explicit VirtualFileListView(QWidget* parent = nullptr);
 
-	CustomListItem* AddFile(struct AssetInfoBase* assetInfo);
+	CustomListItem* AddFile(std::weak_ptr<struct AssetInfoBase> assetInfo);
 
 	VirtualFolder _currentTreeViewSelection;
 };

@@ -45,6 +45,9 @@
 #include <clocale>
 #include <cwchar>
 
+//图方便,直接用SDL的函数吧，而且直接跨平台
+#include <SDL3/SDL.h>
+
 class  HString
 {
 private:
@@ -413,6 +416,18 @@ public:
 		_str[length] = '\0';
 	}
 
+	HBBR_INLINE void assign(const wchar_t* str)
+	{
+		if (str == nullptr)
+			return;
+		clear();
+		const char* result = pws2s(str);
+		this->length = strlen(result);
+		this->_str = new char[this->length + 1];
+		strcpy_s(this->_str, this->length + 1, result);
+		_str[length] = '\0';
+	}
+
 	HBBR_INLINE void assign(HString str)
 	{
 		clear();
@@ -420,6 +435,14 @@ public:
 		_str = new char[length + 1];//预留最后一个'/0'空字符的位置
 		strcpy_s(_str, length + 1, str._str);
 		_str[length] = '\0';
+	}
+
+	template<typename ...Arg>
+	HBBR_INLINE static HString printf(HString in, Arg...args)
+	{
+		char* formattedString = nullptr;
+		SDL_asprintf(&formattedString, in.c_str(), args...);
+		return HString(formattedString);
 	}
 
 	/* char* length!!! not wchar_t*  */

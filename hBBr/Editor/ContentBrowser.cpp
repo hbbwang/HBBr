@@ -88,23 +88,33 @@ VirtualFileListView::VirtualFileListView(QWidget* parent)
 	setObjectName("CustomListView_VirtualFileListView");
 }
 
-CustomListItem* VirtualFileListView::AddFile(struct AssetInfoBase* assetInfo)
+CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase> assetInfo)
 {
-	if (assetInfo)
+	if (!assetInfo.expired())
 	{
-		auto iconPath = assetInfo->absFilePath + ".png";
+		//收集资产的ToolTip
+		HString toolTips;
+		for (auto& i : assetInfo.lock()->toolTips)
+		{
+			if (toolTips.Length() > 1)
+			{
+				toolTips += "\n";
+			}
+			toolTips += i;
+		}
+		auto iconPath = assetInfo.lock()->absFilePath + ".png";
 		if (!FileSystem::FileExist(iconPath))
 		{
-			iconPath = assetInfo->absFilePath + ".jpg";
+			iconPath = assetInfo.lock()->absFilePath + ".jpg";
 		}
 		if (!FileSystem::FileExist(iconPath))
 		{
 			iconPath = FileSystem::GetConfigAbsPath();
-			if (assetInfo->type == AssetType::Model)
+			if (assetInfo.lock()->type == AssetType::Model)
 			{
 				iconPath += "Theme/Icons/ICON_FILE_MODEL.png";
 			}
-			else if (assetInfo->type == AssetType::Material)
+			else if (assetInfo.lock()->type == AssetType::Material)
 			{
 				iconPath += "Theme/Icons/ICON_FILE_MAT.png";
 			}
@@ -113,7 +123,9 @@ CustomListItem* VirtualFileListView::AddFile(struct AssetInfoBase* assetInfo)
 				iconPath += "Theme/Icons/ICON_FILE.png";
 			}
 		}
-		return AddItem(assetInfo->displayName.c_str(), iconPath.c_str());
+		auto newItem = AddItem(assetInfo.lock()->displayName.c_str(), iconPath.c_str(), toolTips.c_str());
+		newItem->_assetInfo = assetInfo;
+		return newItem;
 	}
 	return nullptr;
 }
@@ -223,7 +235,7 @@ void ContentBrowser::RefreshFileOnListView()
 		auto assets = ContentManager::Get()->GetAssetsByVirtualFolder(i->_fullPath.toStdString().c_str());
 		for (auto& a : assets)
 		{
-			auto item = _listView->AddFile(a.second.get());
+			auto item = _listView->AddFile(a.second);
 		}
 	}
 }
