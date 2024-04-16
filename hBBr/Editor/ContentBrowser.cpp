@@ -231,7 +231,36 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 		}
 	});
 	connect(ui.ImportButton, &QPushButton::clicked, this, [this]() {
+		// 创建一个支持多选的文件选择对话框
+		QStringList fileNames = QFileDialog::getOpenFileNames(nullptr,
+			"Import Resources",  // 对话框标题
+			"",         // 对话框初始目录
+			"All File (*);;\
+				Model (*.fbx);;\
+				Image (*.png *.jpg *.bmp *.tga *.hdr);;\
+			");  
+		for (auto& i : fileNames)
+		{
+			//QMessageBox::information(0,0,i,0);
+			QFileInfo info(i);
+			if (info.suffix().compare("fbx", Qt::CaseInsensitive) == 0)
+			{
 
+			}
+			else if (info.suffix().compare("fbx", Qt::CaseInsensitive) == 0)
+			{
+
+			}
+			else if (info.suffix().compare("png", Qt::CaseInsensitive) == 0 
+				|| info.suffix().compare("tga", Qt::CaseInsensitive) == 0
+				|| info.suffix().compare("jpg", Qt::CaseInsensitive) == 0
+				|| info.suffix().compare("bmp", Qt::CaseInsensitive) == 0
+				|| info.suffix().compare("hdr", Qt::CaseInsensitive) == 0)
+			{
+
+			}
+
+		}
 	}); 
 	connect(ui.FrontspaceButton, &QPushButton::clicked, this, [this]() {
 		if (_treeView->_newSelectionItems.size() > 0 && _treeView->_currentSelectionItem > 0)

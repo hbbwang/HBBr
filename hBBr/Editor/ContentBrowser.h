@@ -48,6 +48,22 @@ protected:
 };
 #pragma endregion
 
+//--------------------------------------Repository Selection Widget-------------------
+#pragma region RepositorySelectionWidget
+class RepositorySelection : public QWidget
+{
+	Q_OBJECT
+	friend class VirtualFileListView;
+	friend class VirtualFolderTreeView;
+	friend class ContentBrowser;
+public:
+
+protected:
+	virtual void paintEvent(QPaintEvent* event);
+};
+
+#pragma endregion
+
 //--------------------------------------Content Browser Widget-------------------
 #pragma region ContentBrowserWidget
 class ContentBrowser : public QWidget
@@ -55,6 +71,7 @@ class ContentBrowser : public QWidget
 	Q_OBJECT
 	friend class VirtualFileListView;
 	friend class VirtualFolderTreeView;
+	friend class RepositorySelection;
 public:
 	ContentBrowser(QWidget* parent = nullptr);
 	~ContentBrowser();
@@ -76,8 +93,10 @@ protected:
 	class QWidget*					_listWidget = nullptr;
 	class QWidget*					_treeWidget = nullptr;
 
-	VirtualFolderTreeView* _treeView = nullptr;
-	VirtualFileListView* _listView = nullptr;
+	VirtualFolderTreeView*		_treeView = nullptr;
+	VirtualFileListView*			_listView = nullptr;
+
+	RepositorySelection*		_repositorySelection = nullptr;
 private:
 	Ui::ContentBrowserClass ui;
 
