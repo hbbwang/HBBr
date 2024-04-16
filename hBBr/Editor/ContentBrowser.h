@@ -8,13 +8,24 @@
 class VirtualFolderTreeView : public CustomTreeView
 {
 	Q_OBJECT
+	friend class ContentBrowser;
+	friend class VirtualFileListView;
 public:
-	explicit VirtualFolderTreeView(QWidget* parent = nullptr);
+	explicit VirtualFolderTreeView(class  ContentBrowser* contentBrowser , QWidget* parent = nullptr);
 
 	void AddItem(CustomViewItem* newItem, CustomViewItem* parent = nullptr)override;
 
 	//虚拟路径统一用“/”分割，不存在使用"\\"
 	CustomViewItem* FindFolder(QString virtualPath);
+
+	class  ContentBrowser* _contentBrowser;
+
+protected:
+	virtual void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)override;
+	void currentChanged(const QModelIndex& current, const QModelIndex& previous) override;
+	QList<CustomViewItem*> _newSelectionItems;
+	int _currentSelectionItem;
+	bool _bSaveSelectionItem;
 };
 #pragma endregion
 
@@ -23,6 +34,8 @@ public:
 class VirtualFileListView :public CustomListView
 {
 	Q_OBJECT
+	friend class ContentBrowser;
+	friend class VirtualFolderTreeView;
 public:
 	explicit VirtualFileListView(QWidget* parent = nullptr);
 
@@ -40,7 +53,8 @@ protected:
 class ContentBrowser : public QWidget
 {
 	Q_OBJECT
-
+	friend class VirtualFileListView;
+	friend class VirtualFolderTreeView;
 public:
 	ContentBrowser(QWidget* parent = nullptr);
 	~ContentBrowser();
@@ -66,8 +80,6 @@ protected:
 	VirtualFileListView* _listView = nullptr;
 private:
 	Ui::ContentBrowserClass ui;
-	
-private slots:
-	void TreeViewSelection(const QModelIndex& index);
+
 };
 #pragma endregion

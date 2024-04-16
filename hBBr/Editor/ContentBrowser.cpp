@@ -10,6 +10,7 @@
 #include <qdebug.h>
 #include <QMessageBox>
 #include <QAction>
+#include <QPushButton>
 #include "CustomSearchLine.h"
 #include "EditorCommonFunction.h"
 #include "HString.h"
@@ -25,7 +26,7 @@
 
 //--------------------------------------VirtualFolderTreeView-------------------
 #pragma region VirtualFolderTreeView
-VirtualFolderTreeView::VirtualFolderTreeView(QWidget* parent)
+VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrowser, QWidget* parent)
 	:CustomTreeView(parent)
 {
 	setObjectName("CustomTreeView_VirtualFolderTreeView");
@@ -34,6 +35,10 @@ VirtualFolderTreeView::VirtualFolderTreeView(QWidget* parent)
 	_rootItem->_text = "";
 	setIndentation(20);
 	setEditTriggers(EditTrigger::DoubleClicked);
+	_contentBrowser = contentBrowser;
+	_newSelectionItems.reserve(50);
+	_currentSelectionItem = 0;
+	_bSaveSelectionItem = true;
 }
 
 void VirtualFolderTreeView::AddItem(CustomViewItem* newItem, CustomViewItem* parent)
@@ -77,6 +82,44 @@ CustomViewItem* VirtualFolderTreeView::FindFolder(QString virtualPath)
 	}
 	return nullptr;
 }
+
+void VirtualFolderTreeView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+{
+	_contentBrowser->RefreshFileOnListView();
+	CustomTreeView::selectionChanged(selected, deselected);
+}
+
+void VirtualFolderTreeView::currentChanged(const QModelIndex& current, const QModelIndex& previous)
+{
+	CustomTreeView::currentChanged(current, previous);
+	if(current != previous)
+	{
+		QStandardItemModel* Itemmodel = (QStandardItemModel*)model();
+		CustomViewItem* item = (CustomViewItem*)(Itemmodel->itemFromIndex(current));
+		CustomViewItem* lastItem = (CustomViewItem*)(Itemmodel->itemFromIndex(previous));
+		if (item == lastItem)
+		{
+			return;
+		}
+		auto text = item->_fullPath;
+		if (text[0] != '/')
+		{
+			text = "/" + text;
+		}
+		text = "Asset" + text.replace("/", " - ");
+		_contentBrowser->ui.PathLabel->setText(text);
+
+		if (_bSaveSelectionItem)
+		{
+			_newSelectionItems.insert(0, item);
+			if (_newSelectionItems.size() > 50)
+			{
+				_newSelectionItems.removeLast();
+			}
+		}
+	}
+}
+
 #pragma endregion
 
 
@@ -174,11 +217,66 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	
 	//Path label
 	ui.PathLabel->setObjectName("PathLabel");
+	ui.PathLabel->setText("Asset -");
 
 	_contentBrowser.append(this);
 
 	//Connect
-	connect(_treeView,SIGNAL(clicked(const QModelIndex&)),this,SLOT(TreeViewSelection(const QModelIndex&)));
+	connect(_treeView, &QTreeView::clicked, this, [this]() {
+		_treeView->_bSaveSelectionItem = true;
+		if (_treeView->_currentSelectionItem != 0 && _treeView->_newSelectionItems.size() > 0)
+		{
+			_treeView->_newSelectionItems.erase(_treeView->_newSelectionItems.begin(), _treeView->_newSelectionItems.end() - (_treeView->_newSelectionItems.size() - _treeView->_currentSelectionItem));
+			_treeView->_currentSelectionItem = 0;
+		}
+	});
+	connect(ui.ImportButton, &QPushButton::clicked, this, [this]() {
+
+	}); 
+	connect(ui.FrontspaceButton, &QPushButton::clicked, this, [this]() {
+		if (_treeView->_newSelectionItems.size() > 0 && _treeView->_currentSelectionItem > 0)
+		{
+			_treeView->_currentSelectionItem--;
+			if (_treeView->_newSelectionItems.size() > _treeView->_currentSelectionItem)
+			{
+				auto item = _treeView->_newSelectionItems[_treeView->_currentSelectionItem];
+				{
+					_treeView->_bSaveSelectionItem = false;
+					_treeView->selectionModel()->clearSelection();
+					_treeView->selectionModel()->setCurrentIndex(item->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
+				}
+			}
+		}
+	});
+	connect(ui.BackspaceButton, &QPushButton::clicked, this, [this]() {
+		if (_treeView->_newSelectionItems.size() > 0)
+		{
+			_treeView->_currentSelectionItem++;
+			if (_treeView->_newSelectionItems.size() > _treeView->_currentSelectionItem)
+			{
+				auto item = _treeView->_newSelectionItems[_treeView->_currentSelectionItem];
+				{
+					_treeView->_bSaveSelectionItem = false;
+					_treeView->selectionModel()->clearSelection();
+					_treeView->selectionModel()->setCurrentIndex(item->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
+				}
+			}
+		}
+	});
+
+	connect(ui.BackToParentButton, &QPushButton::clicked, this, [this]() {
+		if (_treeView->currentIndex().isValid())
+		{
+			_treeView->_bSaveSelectionItem = true;
+			QStandardItemModel* model = (QStandardItemModel*)_treeView->model();
+			CustomViewItem* item = (CustomViewItem*)model->itemFromIndex(_treeView->currentIndex());
+			if (item->parent()->index().isValid())
+			{
+				_treeView->selectionModel()->clearSelection();
+				_treeView->selectionModel()->setCurrentIndex(item->parent()->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
+			}
+		}
+	});
 
 
 	//Refresh
@@ -271,11 +369,6 @@ void ContentBrowser::closeEvent(QCloseEvent* event)
 {
 }
 
-void ContentBrowser::TreeViewSelection(const QModelIndex& index)
-{
-	//QMessageBox::information(0,0,0,0);
-	RefreshFileOnListView();
-}
 
 #pragma endregion
 

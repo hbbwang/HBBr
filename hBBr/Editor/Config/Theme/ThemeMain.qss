@@ -572,7 +572,7 @@ QSplitter::handle
 }
 #CustomListView_Text
 {
-
+    font-family: 微软雅黑, Arial, Helvetica, sans-serif;
 }
 /* ContentBrowser */
 #ContentBrowser

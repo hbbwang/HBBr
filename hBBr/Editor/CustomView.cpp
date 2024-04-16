@@ -74,6 +74,8 @@ CustomTreeView::CustomTreeView(QWidget* parent)
 
 	setObjectName("CustomTreeView");
 
+	setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
+
 }
 
 void CustomTreeView::SetRootItemName(QString newText)

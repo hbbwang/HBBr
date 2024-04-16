@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>603</width>
+    <width>401</width>
     <height>197</height>
    </rect>
   </property>
@@ -30,7 +30,22 @@
     <number>1</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,1,0,100">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="2,0,1,1,2,100">
+     <property name="spacing">
+      <number>2</number>
+     </property>
+     <property name="leftMargin">
+      <number>1</number>
+     </property>
+     <property name="topMargin">
+      <number>1</number>
+     </property>
+     <property name="rightMargin">
+      <number>1</number>
+     </property>
+     <property name="bottomMargin">
+      <number>1</number>
+     </property>
      <item>
       <widget class="QPushButton" name="ImportButton">
        <property name="text">
@@ -39,9 +54,41 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="BackToParentButton">
+       <property name="maximumSize">
+        <size>
+         <width>30</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>↑</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="BackspaceButton">
+       <property name="maximumSize">
+        <size>
+         <width>30</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>←</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="FrontspaceButton">
+       <property name="maximumSize">
+        <size>
+         <width>30</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>→</string>
        </property>
       </widget>
      </item>
