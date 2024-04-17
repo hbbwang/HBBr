@@ -66,6 +66,32 @@ void ContentManager::Release()
 	_assets_vf.clear();
 }
 
+bool ContentManager::AssetImport(std::vector<AssetImportInfo> importFiles)
+{
+	bool bSucceed = false;
+	for (auto& i : importFiles)
+	{
+		HString suffix = FileSystem::GetFileExt(i.absAssetFilePath);
+		HString fileName = FileSystem::GetBaseName(i.absAssetFilePath);
+		//Model
+		if (suffix.IsSame("fbx", false))
+		{
+
+		}
+		//Texture
+		else if (suffix.IsSame("png", false)
+			|| suffix.IsSame("tga", false)
+			|| suffix.IsSame("jpg", false)
+			|| suffix.IsSame("bmp", false)
+			|| suffix.IsSame("hdr", false)
+			)
+		{
+
+		}
+	}
+	return bSucceed;
+}
+
 std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)
 {
 	std::shared_ptr<AssetInfoBase> result = nullptr;

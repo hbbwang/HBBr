@@ -332,42 +332,31 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 		_repositorySelection->_selectionCallBack = [this](QString repository)
 		{
 			//资产导入操作在这
-			if (_importFileNames.size() > 0)
+			if (_importFileNames.size() > 0 && _treeView->currentIndex().isValid())
 			{
-				bool bFinish = true;
+				std::vector<AssetImportInfo> infos;
+				infos.reserve(_importFileNames.size());
 				for (auto& i : _importFileNames)
 				{
+
 					//QMessageBox::information(0,0,i,0);
 					QFileInfo info(i);
 					if (info.isDir()) continue;
-					else if (info.suffix().compare("fbx", Qt::CaseInsensitive) == 0)
+					else 
 					{
-
-					}
-					else if (info.suffix().compare("fbx", Qt::CaseInsensitive) == 0)
-					{
-
-					}
-					else if (info.suffix().compare("png", Qt::CaseInsensitive) == 0
-						|| info.suffix().compare("tga", Qt::CaseInsensitive) == 0
-						|| info.suffix().compare("jpg", Qt::CaseInsensitive) == 0
-						|| info.suffix().compare("bmp", Qt::CaseInsensitive) == 0
-						|| info.suffix().compare("hdr", Qt::CaseInsensitive) == 0)
-					{
-
-					}
-					else
-					{
-						QMessageBox::information(0, 0,"Importing failed.This file is not support:\n" + i, 0);
-						bFinish = false;
-					}
-					if (bFinish)
-					{
-						RefreshContentBrowsers();
+						AssetImportInfo newInfo;
+						newInfo.absAssetFilePath = i.toStdString().c_str();
+						newInfo.repositoryName = repository.toStdString().c_str();
+						newInfo.virtualPath =((CustomViewItem*)((QStandardItemModel*) _treeView->model())->itemFromIndex(_treeView->currentIndex()))->_fullPath.toStdString().c_str();
+						infos.push_back(newInfo);
 					}
 				}
+				bool bSucceed = ContentManager::Get()->AssetImport(infos);
 				_importFileNames.clear();
-
+				if (bSucceed)
+				{
+					RefreshContentBrowsers();
+				}
 			}
 		};
 	}

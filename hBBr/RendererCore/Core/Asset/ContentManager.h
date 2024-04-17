@@ -150,6 +150,13 @@ struct VirtualFolder
 	std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> assets;
 };
 
+struct AssetImportInfo
+{
+	HString repositoryName;
+	HString absAssetFilePath;
+	HString virtualPath;
+};
+
 class ContentManager
 {
 	friend class VulkanApp;
@@ -164,6 +171,14 @@ public:
 	
 	/* 重载所有资产信息(只是加载引用信息,非资产本身) */
 	HBBR_API void ReloadAllAssetInfos();
+
+	/*
+	资产导入
+	repositoryName:仓库名
+	absAssetFilePath:导入的资产的绝对路径
+	virtualPath:导入之后显示在哪个虚拟路径
+	*/
+	HBBR_API bool AssetImport(std::vector<AssetImportInfo> importFiles);
 
 	/* 更新所有资产引用关系 */
 	HBBR_API void UpdateAllAssetReference();

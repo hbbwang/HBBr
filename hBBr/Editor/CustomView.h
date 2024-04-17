@@ -39,7 +39,6 @@ class CustomViewItem :public QStandardItem
 public:
 	explicit CustomViewItem(const QString& text);
 	CustomViewItem(const QIcon& icon, const QString& text);
-	std::weak_ptr<AssetInfoBase*> _assetInfo;
 	QString _text;//treeview backup
 	QString _path;//without name
 	QString _fullPath;//with name
