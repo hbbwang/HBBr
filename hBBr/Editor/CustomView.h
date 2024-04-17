@@ -63,8 +63,6 @@ class CustomTreeView : public QTreeView
 	Q_OBJECT
 public:
 	explicit CustomTreeView(QWidget* parent = nullptr);
-	
-	void SetRootItemName(QString newText);
 
 	virtual void AddItem(CustomViewItem* newItem, CustomViewItem* parent = nullptr);
 
@@ -73,8 +71,6 @@ public:
 	QList<CustomViewItem*> FindItems(QString name);
 
 	void RemoveAllItems();
-
-	CustomViewItem* _rootItem = nullptr;
 
 	QList<CustomViewItem*> _allItems;
 };

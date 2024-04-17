@@ -36,6 +36,8 @@ void CameraComponent::Update()
 	auto worldPos = trans->GetWorldLocation();
 	auto worldRot = trans->GetWorldRotation();
 	auto renderer = _gameObject->GetWorld()->GetRenderer();
+
+#if IS_EDITOR
 	//Editor camera behavior.
 	if (_bIsEditorCamera && !renderer->IsInGame())
 	{
@@ -53,14 +55,14 @@ void CameraComponent::Update()
 			worldRot.x -= mouseAxis.y * _editorMouseSpeed;
 			trans->SetWorldRotation(worldRot);
 			//
-			if (GetKeyDown(Key_D) && GetKeyDown(Key_A))
-			{
-				ConsoleDebug::printf_endl_warning("GetKeyDown");
-			}
-			if (GetKeyDown(Key_W))
-			{
-				ConsoleDebug::printf_endl_warning("GetKeyDown : Key_W");
-			}
+			//if (GetKeyDown(Key_D) && GetKeyDown(Key_A))
+			//{
+			//	ConsoleDebug::printf_endl_warning("GetKeyDown");
+			//}
+			//if (GetKeyDown(Key_W))
+			//{
+			//	ConsoleDebug::printf_endl_warning("GetKeyDown : Key_W");
+			//}
 			//if (GetMouseDown(Button_Left))
 			//{
 			//	ConsoleDebug::printf_endl_warning("GetMouseDown : Button_Left");
@@ -102,6 +104,7 @@ void CameraComponent::Update()
 			lockMousePos = currentMousePos;
 		}
 	}
+#endif
 	_cameraPos = worldPos;
 	_cameraTarget = _cameraPos + trans->GetForwardVector();
 	_cameraUp = trans->GetUpVector();

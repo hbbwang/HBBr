@@ -24,15 +24,13 @@
 #include "Asset/Material.h"
 #include "qdir.h"
 #include "ComboBox.h"
+#include "EditorMain.h"
 //--------------------------------------VirtualFolderTreeView-------------------
 #pragma region VirtualFolderTreeView
 VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrowser, QWidget* parent)
 	:CustomTreeView(parent)
 {
 	setObjectName("CustomTreeView_VirtualFolderTreeView");
-	_rootItem->setText("Asset");
-	_rootItem->_path = "";
-	_rootItem->_text = "";
 	setIndentation(20);
 	setEditTriggers(EditTrigger::DoubleClicked);
 	_contentBrowser = contentBrowser;
@@ -48,7 +46,7 @@ void VirtualFolderTreeView::AddItem(CustomViewItem* newItem, CustomViewItem* par
 		return;
 	}
 	newItem->_text = newItem->text();
-	if (parent && parent != _rootItem)
+	if (parent)
 	{
 		newItem->_path = parent->_path + "/" + parent->_text;
 		newItem->_fullPath = newItem->_path + "/" + newItem->_text;
@@ -58,7 +56,7 @@ void VirtualFolderTreeView::AddItem(CustomViewItem* newItem, CustomViewItem* par
 	{
 		//newItem->_path = parent->_path + "/" + _rootItem->_text;
 		newItem->_fullPath = newItem->_text;
-		_rootItem->appendRow(newItem);
+		((QStandardItemModel*)model())->appendRow(newItem);
 	}
 	_allItems.append(newItem);
 }
@@ -179,35 +177,51 @@ CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase>
 #pragma region RepositorySelectionWidget
 RepositorySelection::RepositorySelection(QWidget* parent) :QWidget(parent)
 {
-	setObjectName("ContentBrowser_RepositorySelection");
 	setAttribute(Qt::WidgetAttribute::WA_AlwaysStackOnTop);
 	setWindowFlags(Qt::Window);
 	setWindowFlags(Qt::Tool);
 	setWindowFlag(Qt::FramelessWindowHint);
 	setAttribute(Qt::WidgetAttribute::WA_DeleteOnClose);
+	setFocusPolicy(Qt::FocusPolicy::StrongFocus);
 	QVBoxLayout* layout = new QVBoxLayout(this);
-	layout->setContentsMargins(8, 8, 10, 8);
+	layout->setContentsMargins(8,8, 10, 8);
 	setLayout(layout);
-	adjustSize();
+
 	combo = new ComboBox("RepositorySelection : ", this);
 	layout->addWidget(combo);
+	
+	//
+	adjustSize();
 	show();
 	resize(0, 0);
 	setHidden(true);
 	_selectionCallBack = [](HString text, int index) {};
 	combo->_bindCurrentTextChanged = [this](const int index, const char* text) 
 	{
-		setHidden(true);
-		_selectionCallBack(text, index);
+		if (!bShow)
+		{
+			setHidden(true);
+			_selectionCallBack(text, index);
+		}
 	};
+	combo->ui.horizontalLayout->setContentsMargins(1, 1, 1, 1);
+	combo->setMaximumHeight(50);
+	combo->ui.ComboBox_0->setMaximumHeight(40);
+	combo->ui.Name->setMaximumHeight(45);
 }
 
 void RepositorySelection::Show()
 {
 	show();
-	resize(0, 0);
+	resize(300, 0);
+	QPoint pos = QPoint(EditorMain::_self->x() + EditorMain::_self->width() / 2, EditorMain::_self->y() + EditorMain::_self->height()/2);
+	pos -= QPoint(width()/2 , height()/2 );
+	//pos = EditorMain::_self->mapToGlobal(pos);
+
+	setGeometry(pos.x(), pos.y(), 400 , 0);
 	setHidden(false);
 	//
+	bShow = true;
 	combo->ClearItems();
 	auto repositories = ContentManager::Get()->GetRepositories();
 	for (auto& i : repositories)
@@ -215,6 +229,14 @@ void RepositorySelection::Show()
 		HString name = i.first;
 		combo->AddItem(name.c_str());
 	}
+	combo->SetCurrentSelection(" ? ");
+	setFocus();
+	bShow = false;
+}
+
+void RepositorySelection::Hide()
+{
+	setHidden(true);
 }
 
 void RepositorySelection::paintEvent(QPaintEvent* event)
@@ -232,10 +254,15 @@ void RepositorySelection::resizeEvent(QResizeEvent* event)
 	QWidget::resizeEvent(event);
 }
 
+void RepositorySelection::focusOutEvent(QFocusEvent* event)
+{
+	Hide();
+}
+
 
 
 #pragma endregion
-
+RepositorySelection* ContentBrowser::_repositorySelection = nullptr;
 //--------------------------------------Content Browser Widget-------------------
 #pragma region ContentBrowserWidget
 QList<ContentBrowser*>ContentBrowser::_contentBrowser;
@@ -282,6 +309,7 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	//Repository Selection Widget
 	{
 		_repositorySelection = new RepositorySelection(this);
+		_repositorySelection->setObjectName("ContentBrowser_RepositorySelection");
 		_repositorySelection->_selectionCallBack = [this](HString text, int index)
 		{
 			//资产导入操作在这
@@ -292,7 +320,8 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 				{
 					//QMessageBox::information(0,0,i,0);
 					QFileInfo info(i);
-					if (info.suffix().compare("fbx", Qt::CaseInsensitive) == 0)
+					if (info.isDir()) continue;
+					else if (info.suffix().compare("fbx", Qt::CaseInsensitive) == 0)
 					{
 
 					}
@@ -307,6 +336,10 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 						|| info.suffix().compare("hdr", Qt::CaseInsensitive) == 0)
 					{
 
+					}
+					else
+					{
+						QMessageBox::information(0, 0,"Importing failed.This file is not support:\n" + i, 0);
 					}
 				}
 				_importFileNames.clear();
@@ -336,6 +369,7 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 			");  
 		if (fileNames.size() > 0)
 		{
+			_repositorySelection->setFocus();
 			_repositorySelection->Show();
 			_importFileNames = fileNames;
 		}	
@@ -413,13 +447,19 @@ void ContentBrowser::RefreshFolderOnTreeView()
 {
 	_treeView->RemoveAllItems();
 	auto folders = ContentManager::Get()->GetVirtualFolders();
+	CustomViewItem* firstChoose = nullptr;
 	for (auto& i : folders)
 	{
+		CustomViewItem* parent = nullptr;
 		auto pathTag = i.second.Path.Split("/");
-		CustomViewItem* parent = _treeView->_rootItem;
 		for (int i = 0; i < pathTag.size(); i++)
 		{
-			QString vfp = parent->_path + "/" + parent->_text + "/" + pathTag[i].c_str() + "/";
+			QString vfp;
+			if (parent)
+			{
+				vfp = parent->_path + "/" + parent->_text + "/";
+			}
+			vfp +=( pathTag[i]+ "/" ).c_str();
 			CustomViewItem* newItem = _treeView->FindFolder(vfp);
 			if (newItem == nullptr)
 			{
@@ -427,7 +467,16 @@ void ContentBrowser::RefreshFolderOnTreeView()
 				_treeView->AddItem(newItem, parent);
 			}
 			parent = newItem;
+			if (firstChoose == nullptr)
+			{
+				firstChoose = parent;
+			}
 		}
+	}
+	{
+		_treeView->_bSaveSelectionItem = false;
+		_treeView->selectionModel()->clearSelection();
+		_treeView->selectionModel()->setCurrentIndex(firstChoose->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
 	}
 }
 

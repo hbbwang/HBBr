@@ -62,10 +62,6 @@ CustomTreeView::CustomTreeView(QWidget* parent)
 {
 	QStandardItemModel* model = new QStandardItemModel(this);
 
-	_rootItem = new CustomViewItem("root");
-
-	model->appendRow(_rootItem);
-
 	setModel(model);
 
 	setHeaderHidden(true);
@@ -76,11 +72,6 @@ CustomTreeView::CustomTreeView(QWidget* parent)
 
 	setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
 
-}
-
-void CustomTreeView::SetRootItemName(QString newText)
-{
-	_rootItem->setText(newText);
 }
 
 void CustomTreeView::AddItem(CustomViewItem* newItem, CustomViewItem* parent)
@@ -98,9 +89,9 @@ void CustomTreeView::AddItem(CustomViewItem* newItem, CustomViewItem* parent)
 	}
 	else
 	{
-		newItem->_path = parent->_path + "/" + _rootItem->text();
+		newItem->_path = "";
 		newItem->_fullPath = newItem->_path + "/" + newItem->_text;
-		_rootItem->appendRow(newItem);
+		((QStandardItemModel*)model())->appendRow(newItem);
 	}
 	_allItems.append(newItem);
 }
@@ -136,7 +127,7 @@ QList<CustomViewItem*> CustomTreeView::FindItems(QString name)
 void CustomTreeView::RemoveAllItems()
 {
 	_allItems.clear();
-	model()->removeRows(_rootItem->row(), _rootItem->rowCount());
+	model()->removeRows(0 , model()->rowCount());
 }
 #pragma endregion
 

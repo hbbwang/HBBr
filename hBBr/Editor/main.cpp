@@ -5,6 +5,7 @@
 #include "FormMain.h"
 #include "RenderView.h"
 #include "HInput.h"
+#include "ContentBrowser.h"
 #include <Windows.h> //为了支持SetFocus(nullptr);
 
 QWidget* currentFocusWidget = nullptr;
@@ -28,13 +29,9 @@ protected:
                     bChangeFocus = true;
                 else if (currentFocusWidget->parent() || currentFocusWidget->parent()->parent())
                 {
-                    if(
-                        !currentFocusWidget->parent()->objectName().contains("combo", Qt::CaseInsensitive)
-                        )
+                    if(!currentFocusWidget->parent()->objectName().contains("combo", Qt::CaseInsensitive))
                         bChangeFocus = true;
-                    if (
-                        !currentFocusWidget->parent()->parent()->objectName().contains("combo", Qt::CaseInsensitive)
-                        )
+                    if (!currentFocusWidget->parent()->parent()->objectName().contains("combo", Qt::CaseInsensitive))
                         bChangeFocus = true;
                 }
                 if (bChangeFocus)
@@ -44,7 +41,11 @@ protected:
                     //再重新赋予QT焦点
                     currentFocusWidget->setFocus();
                 }
-            }         
+            }
+            else if (!ContentBrowser::_repositorySelection->rect().contains(mouseEvent->pos()))
+            {
+                ContentBrowser::_repositorySelection->Hide();
+            }
         }
 
         //if (event->type() == QEvent::MouseMove)
