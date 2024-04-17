@@ -346,12 +346,11 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 					{
 						AssetImportInfo newInfo;
 						newInfo.absAssetFilePath = i.toStdString().c_str();
-						newInfo.repositoryName = repository.toStdString().c_str();
 						newInfo.virtualPath =((CustomViewItem*)((QStandardItemModel*) _treeView->model())->itemFromIndex(_treeView->currentIndex()))->_fullPath.toStdString().c_str();
 						infos.push_back(newInfo);
 					}
 				}
-				bool bSucceed = ContentManager::Get()->AssetImport(infos);
+				bool bSucceed = ContentManager::Get()->AssetImport(repository.toStdString().c_str() , infos);
 				_importFileNames.clear();
 				if (bSucceed)
 				{

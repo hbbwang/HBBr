@@ -66,30 +66,72 @@ void ContentManager::Release()
 	_assets_vf.clear();
 }
 
-bool ContentManager::AssetImport(std::vector<AssetImportInfo> importFiles)
+bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImportInfo> importFiles)
 {
-	bool bSucceed = false;
-	for (auto& i : importFiles)
+	HString contentPath = FileSystem::GetContentAbsPath();
+	HString repositoryPath = FileSystem::Append(contentPath, repositoryName);
+	HString repositoryXMLPath = FileSystem::Append(repositoryPath,".repository");
+	pugi::xml_document doc;
+	if (XMLStream::LoadXML(repositoryXMLPath.c_wstr(), doc))
 	{
-		HString suffix = FileSystem::GetFileExt(i.absAssetFilePath);
-		HString fileName = FileSystem::GetBaseName(i.absAssetFilePath);
-		//Model
-		if (suffix.IsSame("fbx", false))
+		for (auto& i : importFiles)
 		{
+			HString suffix = FileSystem::GetFileExt(i.absAssetFilePath);
+			HString baseName = FileSystem::GetBaseName(i.absAssetFilePath);
+			HString fileName = FileSystem::GetFileName(i.absAssetFilePath);
+			HGUID guid;
+			HString guidStr;
+			AssetType type = AssetType::Unknow;
+			HString assetTypeName = "Unknow";
+			//Model
+			if (suffix.IsSame("fbx", false))
+			{
+				type = AssetType::Model;
+				HString savePath = FileSystem::Append(repositoryPath, "Model");
+				//复制fbx到项目目录
+				FileSystem::FileCopy(i.absAssetFilePath.c_str(), savePath.c_str());
+				guidStr = CreateGUIDAndString(guid);
+				FileSystem::FileRename((FileSystem::Append(savePath, fileName)) .c_str(), FileSystem::Append(savePath, guidStr + ".fbx").c_str());
+			}
+			//Texture
+			else if (suffix.IsSame("png", false)
+				|| suffix.IsSame("tga", false)
+				|| suffix.IsSame("jpg", false)
+				|| suffix.IsSame("bmp", false)
+				)
+			{
+				type = AssetType::Texture2D;
+				HString savePath = FileSystem::Append(repositoryPath, "Texture");
 
-		}
-		//Texture
-		else if (suffix.IsSame("png", false)
-			|| suffix.IsSame("tga", false)
-			|| suffix.IsSame("jpg", false)
-			|| suffix.IsSame("bmp", false)
-			|| suffix.IsSame("hdr", false)
-			)
-		{
-
+			}
+			//导入AssetInfo
+			if(type != AssetType::Unknow)
+			{
+				assetTypeName = GetAssetTypeString(type);
+				auto root = doc.child(TEXT("root"));
+				auto newItem = root.append_child(TEXT("Item"));	
+				XMLStream::SetXMLAttribute(newItem,TEXT("GUID"), guidStr.c_wstr());
+				XMLStream::SetXMLAttribute(newItem, TEXT("Type"), (int)type);
+				XMLStream::SetXMLAttribute(newItem, TEXT("Name"), baseName.c_wstr());
+				XMLStream::SetXMLAttribute(newItem, TEXT("VPath"), i.virtualPath.c_wstr());
+				XMLStream::SetXMLAttribute(newItem, TEXT("Format"), suffix.c_wstr());
+				XMLStream::SetXMLAttribute(newItem, TEXT("RPath"), (assetTypeName + "/").c_wstr());
+				if (!doc.save_file(repositoryXMLPath.c_wstr()))
+				{
+					MessageOut("Save repository xml failed.", false, true, "255,255,0");
+				}
+				ReloadRepository(repositoryName);
+				UpdateAllAssetReference();
+			}
+			else
+			{
+				MessageOut("Asset Import Failed.Unknow asset type.",false,true,"255,255,0");
+				return false;
+			}
 		}
 	}
-	return bSucceed;
+
+	return true;
 }
 
 std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)
@@ -109,7 +151,6 @@ std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)
 void ContentManager::ReloadRepository(HString repositoryName)
 {
 	HString fullPath = FileSystem::Append(FileSystem::GetContentAbsPath(), repositoryName);
-	fullPath = fullPath + ".repository";
 	HString repositoryConfigPath = FileSystem::Append(fullPath, ".repository");
 	pugi::xml_document doc;
 	XMLStream::LoadXML(repositoryConfigPath.c_wstr(), doc);

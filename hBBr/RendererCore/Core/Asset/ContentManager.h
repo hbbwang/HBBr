@@ -152,7 +152,6 @@ struct VirtualFolder
 
 struct AssetImportInfo
 {
-	HString repositoryName;
 	HString absAssetFilePath;
 	HString virtualPath;
 };
@@ -178,7 +177,7 @@ public:
 	absAssetFilePath:导入的资产的绝对路径
 	virtualPath:导入之后显示在哪个虚拟路径
 	*/
-	HBBR_API bool AssetImport(std::vector<AssetImportInfo> importFiles);
+	HBBR_API bool AssetImport(HString repositoryName,std::vector<AssetImportInfo> importFiles);
 
 	/* 更新所有资产引用关系 */
 	HBBR_API void UpdateAllAssetReference();
