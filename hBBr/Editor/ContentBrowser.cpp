@@ -23,7 +23,7 @@
 #include "RendererCore/Form/FormMain.h"
 #include "Asset/Material.h"
 #include "qdir.h"
-
+#include "ComboBox.h"
 //--------------------------------------VirtualFolderTreeView-------------------
 #pragma region VirtualFolderTreeView
 VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrowser, QWidget* parent)
@@ -175,6 +175,66 @@ CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase>
 }
 #pragma endregion
 
+//--------------------------------------Repository Selection Widget-------------------
+#pragma region RepositorySelectionWidget
+RepositorySelection::RepositorySelection(QWidget* parent) :QWidget(parent)
+{
+	setObjectName("ContentBrowser_RepositorySelection");
+	setAttribute(Qt::WidgetAttribute::WA_AlwaysStackOnTop);
+	setWindowFlags(Qt::Window);
+	setWindowFlags(Qt::Tool);
+	setWindowFlag(Qt::FramelessWindowHint);
+	setAttribute(Qt::WidgetAttribute::WA_DeleteOnClose);
+	QVBoxLayout* layout = new QVBoxLayout(this);
+	layout->setContentsMargins(8, 8, 10, 8);
+	setLayout(layout);
+	adjustSize();
+	combo = new ComboBox("RepositorySelection : ", this);
+	layout->addWidget(combo);
+	show();
+	resize(0, 0);
+	setHidden(true);
+	_selectionCallBack = [](HString text, int index) {};
+	combo->_bindCurrentTextChanged = [this](const int index, const char* text) 
+	{
+		setHidden(true);
+		_selectionCallBack(text, index);
+	};
+}
+
+void RepositorySelection::Show()
+{
+	show();
+	resize(0, 0);
+	setHidden(false);
+	//
+	combo->ClearItems();
+	auto repositories = ContentManager::Get()->GetRepositories();
+	for (auto& i : repositories)
+	{
+		HString name = i.first;
+		combo->AddItem(name.c_str());
+	}
+}
+
+void RepositorySelection::paintEvent(QPaintEvent* event)
+{
+	Q_UNUSED(event);
+	QStyleOption styleOpt;
+	styleOpt.init(this);
+	QPainter painter(this);
+	style()->drawPrimitive(QStyle::PE_Widget, &styleOpt, &painter, this);
+	QWidget::paintEvent(event);
+}
+
+void RepositorySelection::resizeEvent(QResizeEvent* event)
+{
+	QWidget::resizeEvent(event);
+}
+
+
+
+#pragma endregion
 
 //--------------------------------------Content Browser Widget-------------------
 #pragma region ContentBrowserWidget
@@ -192,7 +252,7 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	this->setObjectName("ContentBrowser");
 	
 	_splitterBox = new QSplitter(Qt::Horizontal, this);
-	_splitterBox->setObjectName("ContentBrowserSplitter");
+	_splitterBox->setObjectName("ContentBrowser_Splitter");
 	//
 	_treeWidget = new QWidget(_splitterBox);
 	_listWidget = new QWidget(_splitterBox);
@@ -219,8 +279,43 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	ui.PathLabel->setObjectName("PathLabel");
 	ui.PathLabel->setText("Asset -");
 
-	_contentBrowser.append(this);
+	//Repository Selection Widget
+	{
+		_repositorySelection = new RepositorySelection(this);
+		_repositorySelection->_selectionCallBack = [this](HString text, int index)
+		{
+			//资产导入操作在这
+			if (_importFileNames.size() > 0)
+			{
+				_currentRepositorySelection = text.c_str();
+				for (auto& i : _importFileNames)
+				{
+					//QMessageBox::information(0,0,i,0);
+					QFileInfo info(i);
+					if (info.suffix().compare("fbx", Qt::CaseInsensitive) == 0)
+					{
 
+					}
+					else if (info.suffix().compare("fbx", Qt::CaseInsensitive) == 0)
+					{
+
+					}
+					else if (info.suffix().compare("png", Qt::CaseInsensitive) == 0
+						|| info.suffix().compare("tga", Qt::CaseInsensitive) == 0
+						|| info.suffix().compare("jpg", Qt::CaseInsensitive) == 0
+						|| info.suffix().compare("bmp", Qt::CaseInsensitive) == 0
+						|| info.suffix().compare("hdr", Qt::CaseInsensitive) == 0)
+					{
+
+					}
+				}
+				_importFileNames.clear();
+
+			}
+		};
+	}
+
+	_contentBrowser.append(this);
 	//Connect
 	connect(_treeView, &QTreeView::clicked, this, [this]() {
 		_treeView->_bSaveSelectionItem = true;
@@ -239,28 +334,11 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 				Model (*.fbx);;\
 				Image (*.png *.jpg *.bmp *.tga *.hdr);;\
 			");  
-		for (auto& i : fileNames)
+		if (fileNames.size() > 0)
 		{
-			//QMessageBox::information(0,0,i,0);
-			QFileInfo info(i);
-			if (info.suffix().compare("fbx", Qt::CaseInsensitive) == 0)
-			{
-
-			}
-			else if (info.suffix().compare("fbx", Qt::CaseInsensitive) == 0)
-			{
-
-			}
-			else if (info.suffix().compare("png", Qt::CaseInsensitive) == 0 
-				|| info.suffix().compare("tga", Qt::CaseInsensitive) == 0
-				|| info.suffix().compare("jpg", Qt::CaseInsensitive) == 0
-				|| info.suffix().compare("bmp", Qt::CaseInsensitive) == 0
-				|| info.suffix().compare("hdr", Qt::CaseInsensitive) == 0)
-			{
-
-			}
-
-		}
+			_repositorySelection->Show();
+			_importFileNames = fileNames;
+		}	
 	}); 
 	connect(ui.FrontspaceButton, &QPushButton::clicked, this, [this]() {
 		if (_treeView->_newSelectionItems.size() > 0 && _treeView->_currentSelectionItem > 0)

@@ -58,9 +58,6 @@
     <ClCompile Include="EditorCommonFunction.cpp">
       <Filter>Widgets\Common</Filter>
     </ClCompile>
-    <ClCompile Include="ContentBrowser.cpp">
-      <Filter>Widgets</Filter>
-    </ClCompile>
     <ClCompile Include="CustomFileIconProvider.cpp">
       <Filter>Widgets\Custom</Filter>
     </ClCompile>
@@ -108,6 +105,9 @@
     </ClCompile>
     <ClCompile Include="CustomView.cpp">
       <Filter>Widgets\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="ContentBrowser.cpp">
+      <Filter>Widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

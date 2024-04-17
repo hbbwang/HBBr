@@ -57,9 +57,13 @@ class RepositorySelection : public QWidget
 	friend class VirtualFolderTreeView;
 	friend class ContentBrowser;
 public:
-
+	RepositorySelection(QWidget* parent);
+	void Show();
+	std::function<void(HString text,int index)> _selectionCallBack;
 protected:
-	virtual void paintEvent(QPaintEvent* event);
+	virtual void paintEvent(QPaintEvent* event)override;
+	virtual void resizeEvent(QResizeEvent* event)override;
+	class ComboBox* combo = nullptr;
 };
 
 #pragma endregion
@@ -96,7 +100,9 @@ protected:
 	VirtualFolderTreeView*		_treeView = nullptr;
 	VirtualFileListView*			_listView = nullptr;
 
-	RepositorySelection*		_repositorySelection = nullptr;
+	class RepositorySelection*		_repositorySelection = nullptr;
+	QString _currentRepositorySelection;
+	QStringList _importFileNames;
 private:
 	Ui::ContentBrowserClass ui;
 
