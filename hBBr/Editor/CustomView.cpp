@@ -124,6 +124,10 @@ QList<CustomViewItem*> CustomTreeView::FindItems(QString name)
 	return result;
 }
 
+void CustomTreeView::SelectionItem(QString text)
+{
+}
+
 void CustomTreeView::RemoveAllItems()
 {
 	_allItems.clear();

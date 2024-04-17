@@ -70,6 +70,8 @@ public:
 
 	QList<CustomViewItem*> FindItems(QString name);
 
+	virtual void SelectionItem(QString text);
+
 	void RemoveAllItems();
 
 	QList<CustomViewItem*> _allItems;

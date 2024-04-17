@@ -42,10 +42,6 @@ protected:
                     currentFocusWidget->setFocus();
                 }
             }
-            else if (!ContentBrowser::_repositorySelection->rect().contains(mouseEvent->pos()))
-            {
-                ContentBrowser::_repositorySelection->Hide();
-            }
         }
 
         //if (event->type() == QEvent::MouseMove)

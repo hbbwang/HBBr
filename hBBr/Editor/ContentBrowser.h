@@ -18,6 +18,8 @@ public:
 	//虚拟路径统一用“/”分割，不存在使用"\\"
 	CustomViewItem* FindFolder(QString virtualPath);
 
+	virtual void SelectionItem(QString vPath)override;
+
 	class  ContentBrowser* _contentBrowser;
 
 protected:
@@ -60,13 +62,12 @@ public:
 	RepositorySelection(QWidget* parent);
 	void Show();
 	void Hide();
-	std::function<void(HString text,int index)> _selectionCallBack;
+	std::function<void(QString repository)> _selectionCallBack;
+	QString _currentRepositorySelection;
 protected:
 	virtual void paintEvent(QPaintEvent* event)override;
 	virtual void resizeEvent(QResizeEvent* event)override;
-	virtual void focusOutEvent(QFocusEvent* event)override;
 	class ComboBox* combo = nullptr;
-	bool bShow;
 };
 
 #pragma endregion
@@ -108,7 +109,6 @@ protected:
 	VirtualFolderTreeView*		_treeView = nullptr;
 	VirtualFileListView*			_listView = nullptr;
 
-	QString _currentRepositorySelection;
 	QStringList _importFileNames;
 
 private:
