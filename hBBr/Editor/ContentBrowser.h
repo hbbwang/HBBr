@@ -15,6 +15,10 @@ public:
 
 	void AddItem(CustomViewItem* newItem, CustomViewItem* parent = nullptr)override;
 
+	//删除文件(是真的删除!包括真实路径下的文件,注意别乱用了)
+	//和RemoveItem不一样，RemoveItem只是暂时移除编辑器里的虚拟目录，不会对项目造成实质性影响。
+	virtual void RemoveFolder(QString virtualPath);
+
 	//虚拟路径统一用“/”分割，不存在使用"\\"
 	CustomViewItem* FindFolder(QString virtualPath);
 

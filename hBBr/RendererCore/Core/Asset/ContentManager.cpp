@@ -134,6 +134,90 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 	return true;
 }
 
+HBBR_API void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool messageBox)
+{
+	bool bSure = true;
+	if (messageBox)
+	{
+		MessageOut("You are deleting assets, are you sure?");
+		HString assetsPath;
+		for (auto& i : assetInfos)
+		{
+			assetsPath += i->virtualFilePath + "\n";
+		}
+		SDL_MessageBoxButtonData buttons[] = {
+			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 0, "Sure" },
+			{ SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 1, "Cancel" },
+		};
+		SDL_MessageBoxData messageboxdata = {
+			SDL_MESSAGEBOX_INFORMATION,    // 消息框类型
+			NULL,                           // 父窗口
+			"AssetDelete",                   // 消息框标题
+			(HString("You are deleting assets, are you sure?\nCheck the asset reference relationship before deleting please.\n") + assetsPath).c_str(),         // 消息框内容
+			SDL_arraysize(buttons),         // 按钮数量
+			buttons,                        // 按钮数据
+			NULL                            // 颜色方案（使用默认颜色）
+		};
+		int buttonid;
+		if (SDL_ShowMessageBox(&messageboxdata, &buttonid) >= 0) {
+			if (buttonid == 0) {
+				bSure = true;
+			}
+			else {
+				bSure = false;
+			}
+		}
+	}
+	if (bSure)
+	{
+		for (auto& i : assetInfos)
+		{
+			//资产删除不会帮忙处理资产引用关系(包括场景的)，如果删错了
+			//编辑器会直接告知用户引用错误信息，让用户自行处理(不会崩溃)
+			//所以删除前最好使用 [引用关系查看器] 检查好 
+
+			//删除实际资产
+			FileSystem::FileRemove(i->absFilePath.c_str());
+			//移除.repository内储存的Item信息
+			HString contentPath = FileSystem::GetContentAbsPath();
+			HString repositoryPath = FileSystem::Append(contentPath, i->repository);
+			HString repositoryXMLPath = FileSystem::Append(repositoryPath, ".repository");
+			pugi::xml_document doc;
+			if (XMLStream::LoadXML(repositoryXMLPath.c_wstr(), doc))
+			{
+				auto root = doc.child(TEXT("root"));
+				HGUID guid;
+				for (auto n = root.first_child(); n; n = n.next_sibling())
+				{
+					HString guidStr = n.attribute(TEXT("GUID")).as_string();
+					StringToGUID(guidStr.c_str(), &guid);
+					if (guid == i->guid)
+					{
+						root.remove_child(n);
+						break;
+					}
+				}
+				if (!doc.save_file(repositoryXMLPath.c_wstr()))
+				{
+					MessageOut("Save repository xml failed.", false, true, "255,255,0");
+					continue;
+				}
+
+				//移除内存中的AssetInfo
+				_assets[(int)i->type].erase(guid);
+				_assets_repos[i->repository].erase(guid);
+				HString vpvf = i->virtualPath;
+				FileSystem::ClearPathSeparation(vpvf);
+				_assets_vf.erase(vpvf);
+
+				//重新刷新仓库和引用
+				ReloadRepository(i->repository);
+				UpdateAllAssetReference();
+			}
+		}
+	}
+}
+
 std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)
 {
 	std::shared_ptr<AssetInfoBase> result = nullptr;
@@ -199,6 +283,7 @@ void ContentManager::ReloadRepository(HString repositoryName)
 		info->toolTips.push_back(HString::printf("资产类型:%s", GetAssetTypeString(type).c_str()));
 
 		//读取引用关系
+		info->depTemps.clear();
 		info->refTemps.clear();
 		for (auto j = i.first_child(); j; j = j.next_sibling())//<Ref>
 		{
@@ -211,7 +296,14 @@ void ContentManager::ReloadRepository(HString repositoryName)
 			newTemp.guid = guid;
 			newTemp.type = (AssetType)typeIndex;
 			//先加载完所有资产信息,再处理引用关系!
-			info->refTemps.push_back(newTemp);
+			if (HString("Dep").IsSame(j.name()))
+			{
+				info->depTemps.push_back(newTemp);
+			}
+			else
+			{
+				info->refTemps.push_back(newTemp);
+			}
 		}
 
 		if (checkExist.expired())
@@ -282,9 +374,22 @@ void ContentManager::UpdateAssetReference(std::weak_ptr<AssetInfoBase> info)
 	if (!info.expired())
 	{
 		info.lock()->refs.clear();
+		info.lock()->deps.clear();
 		for (auto i : info.lock()->refTemps)
 		{
-			info.lock()->refs.push_back(_assets[(uint32_t)i.type][i.guid]);
+			auto it = _assets[(uint32_t)i.type].find(i.guid);
+			if (it != _assets[(uint32_t)i.type].end())
+			{
+				info.lock()->refs.push_back(it->second);
+			}
+		}
+		for (auto i : info.lock()->depTemps)
+		{
+			auto it = _assets[(uint32_t)i.type].find(i.guid);
+			if (it != _assets[(uint32_t)i.type].end())
+			{
+				info.lock()->deps.push_back(it->second);
+			}
 		}
 	}
 }

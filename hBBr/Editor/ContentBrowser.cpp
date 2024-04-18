@@ -95,6 +95,17 @@ void VirtualFolderTreeView::selectionChanged(const QItemSelection& selected, con
 	CustomTreeView::selectionChanged(selected, deselected);
 }
 
+void VirtualFolderTreeView::RemoveFolder(QString virtualPath)
+{
+	auto item = FindFolder(virtualPath);
+	_allItems.removeOne(item);
+	model()->removeRow(item->row());
+	//尝试删除历史记录
+	_newSelectionItems.removeOne(item);
+	//删除实际路径文件和assetInfo
+	
+}
+
 void VirtualFolderTreeView::currentChanged(const QModelIndex& current, const QModelIndex& previous)
 {
 	CustomTreeView::currentChanged(current, previous);

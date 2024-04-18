@@ -133,6 +133,17 @@ void CustomTreeView::RemoveAllItems()
 	_allItems.clear();
 	model()->removeRows(0 , model()->rowCount());
 }
+
+void CustomTreeView::RemoveItems(QString name)
+{
+	auto items =FindItems(name);
+	for (auto& i : items)
+	{
+		_allItems.removeOne(i);
+		model()->removeRow(i->row());
+	}
+}
+
 #pragma endregion
 
 

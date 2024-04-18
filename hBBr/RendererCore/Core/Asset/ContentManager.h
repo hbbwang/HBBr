@@ -80,9 +80,17 @@ public:
 	HString virtualFilePath;
 	//资产所在的仓库名字,不带.repository后缀
 	HString repository;
+
+	//引用
 	std::vector<std::weak_ptr<AssetInfoBase>> refs;
+	//依赖
+	std::vector<std::weak_ptr<AssetInfoBase>> deps;
+
 	//用来暂时储存引用的guid和type,没有太多实际意义,通常是空的
 	std::vector<AssetInfoRefTemp> refTemps;
+	std::vector<AssetInfoRefTemp> depTemps;
+
+
 	bool bAssetLoad = false;
 #if IS_EDITOR
 	//编辑器ListWidget生成Item图标的时候使用
@@ -171,6 +179,8 @@ public:
 	/* 重载所有资产信息(只是加载引用信息,非资产本身) */
 	HBBR_API void ReloadAllAssetInfos();
 
+#if IS_EDITOR
+
 	/*
 	资产导入
 	repositoryName:仓库名
@@ -178,6 +188,15 @@ public:
 	virtualPath:导入之后显示在哪个虚拟路径
 	*/
 	HBBR_API bool AssetImport(HString repositoryName,std::vector<AssetImportInfo> importFiles);
+
+	/*
+	资产删除
+	assetInfos:需要删除的资产信息
+	messageBox:是否弹出提示
+	*/
+	HBBR_API void AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool messageBox = true);
+
+#endif
 
 	/* 更新所有资产引用关系 */
 	HBBR_API void UpdateAllAssetReference();

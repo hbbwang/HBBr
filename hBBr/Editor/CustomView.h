@@ -71,7 +71,10 @@ public:
 
 	virtual void SelectionItem(QString text);
 
-	void RemoveAllItems();
+	virtual void RemoveAllItems();
+
+	//移除符合名字的items
+	virtual void RemoveItems(QString name);
 
 	QList<CustomViewItem*> _allItems;
 };
