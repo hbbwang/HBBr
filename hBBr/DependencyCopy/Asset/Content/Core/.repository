@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <root>
 	<Item GUID="7e5e05bb-aa1a-f8c0-b08d-b5dde955807b" Type="1" Name="Cube" VPath="Content/Core/Model" Format="fbx" RPath="Model/">
-		<Ref Type="2">b51e2e9a-0985-75e8-6138-fa95efcbab57</Ref>
+		<Dep Type="2">b51e2e9a-0985-75e8-6138-fa95efcbab57</Dep>
 	</Item>
 	<Item GUID="8b5fc385-2f6e-611e-415e-d5fa39875e50" Type="1" Name="Plane" VPath="Content/Core/Model" Format="fbx" RPath="Model/">
-		<Ref Type="2">b51e2e9a-0985-75e8-6138-fa95efcbab57</Ref>
+		<Dep Type="2">b51e2e9a-0985-75e8-6138-fa95efcbab57</Dep>
 	</Item>
 	<Item GUID="6146e15a-0632-b197-b6f9-b12fc8a16b05" Type="1" Name="Sphere" VPath="Content/Core/Model" Format="fbx" RPath="Model/">
-		<Ref Type="2">b51e2e9a-0985-75e8-6138-fa95efcbab57</Ref>
+		<Dep Type="2">b51e2e9a-0985-75e8-6138-fa95efcbab57</Dep>
 	</Item>
 	<Item GUID="c51a01e8-9349-660a-d2df-353a310db461" Type="1" Name="TestFbx_1_Combine" VPath="Content/Core/Model" Format="fbx" RPath="Model/">
-		<Ref Type="2">b51e2e9a-0985-75e8-6138-fa95efcbab57</Ref>
+		<Dep Type="2">b51e2e9a-0985-75e8-6138-fa95efcbab57</Dep>
 	</Item>
 	<Item GUID="b51e2e9a-0985-75e8-6138-fa95efcbab57" Type="2" Name="DefaultPBR" VPath="Content/Core/Material" Format="mat" RPath="Material/">
 		<Ref Type="1">7e5e05bb-aa1a-f8c0-b08d-b5dde955807b</Ref>

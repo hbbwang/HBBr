@@ -196,6 +196,17 @@ public:
 	*/
 	HBBR_API void AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool messageBox = true);
 
+	/* 
+	资产虚拟目录更改(不会更改仓库)
+	assetInfos:需要更改虚拟路径的资产信息
+	*/
+	HBBR_API void SetNewVirtualPath(std::vector<AssetInfoBase*> assetInfos , HString newVirtualPath);
+
+	/*
+	保存AssetInfo到.repository
+	*/
+	HBBR_API void SaveAssetInfo(AssetInfoBase*  assetInfo);
+
 #endif
 
 	/* 更新所有资产引用关系 */

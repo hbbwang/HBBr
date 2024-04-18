@@ -38,6 +38,30 @@ VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrows
 	_newSelectionItems.reserve(50);
 	_currentSelectionItem = 0;
 	_bSaveSelectionItem = true;
+	//Context Menu
+	{
+		setContextMenuPolicy(Qt::ContextMenuPolicy::DefaultContextMenu);
+		_contextMenu = new QMenu(this);
+		QAction* createFolder = new QAction("Create Folder", _contextMenu);
+		QAction* deleteFile = new QAction("Delete Folder", _contextMenu);
+		QAction* rename = new QAction("Rename", _contextMenu);
+		_contextMenu->addAction(createFolder);
+		_contextMenu->addAction(rename);
+		_contextMenu->addSeparator();
+		_contextMenu->addAction(deleteFile);
+		ActionConnect(createFolder, [this]() 
+			{
+
+			});
+		ActionConnect(deleteFile, [this]()
+			{
+
+			});
+		ActionConnect(rename, [this]()
+			{
+
+			});
+	}
 }
 
 void VirtualFolderTreeView::AddItem(CustomViewItem* newItem, CustomViewItem* parent)
@@ -103,7 +127,15 @@ void VirtualFolderTreeView::RemoveFolder(QString virtualPath)
 	//尝试删除历史记录
 	_newSelectionItems.removeOne(item);
 	//删除实际路径文件和assetInfo
-	
+	std::vector<AssetInfoBase*> assetInfos;
+	for (auto& i : _contentBrowser->_listView->_currentVirtualFolderItems)
+	{
+		if (!i->_assetInfo.expired())
+		{
+			assetInfos.push_back(i->_assetInfo.lock().get());
+		}
+	}
+	ContentManager::Get()->AssetDelete(assetInfos);
 }
 
 void VirtualFolderTreeView::currentChanged(const QModelIndex& current, const QModelIndex& previous)
@@ -137,16 +169,70 @@ void VirtualFolderTreeView::currentChanged(const QModelIndex& current, const QMo
 	}
 }
 
+void VirtualFolderTreeView::contextMenuEvent(QContextMenuEvent* event)
+{
+	CustomTreeView::contextMenuEvent(event);
+	_contextMenu->exec(event->globalPos());
+}
+
 #pragma endregion
 
 
 //--------------------------------------Virtual File List View-------------------
 #pragma region VirtualFileListView
-VirtualFileListView::VirtualFileListView(QWidget* parent)
+VirtualFileListView::VirtualFileListView(class  ContentBrowser* contentBrowser, QWidget* parent)
 	:CustomListView(parent)
 {
+	_contentBrowser = contentBrowser;
 	setObjectName("CustomListView_VirtualFileListView");
 	setMouseTracking(true);
+
+	//Context Menu
+	{
+		setContextMenuPolicy(Qt::ContextMenuPolicy::DefaultContextMenu);
+		_contextMenu = new QMenu(this);
+		{
+			QMenu* createFile = new QMenu("Create", _contextMenu);
+			_contextMenu->addMenu(createFile);
+			QAction* createMaterial = new QAction("Create Material", createFile);
+			createFile->addAction(createMaterial);
+			ActionConnect(createMaterial, [this]()
+				{
+
+				});
+		}
+		QAction* deleteFile = new QAction("Delete", _contextMenu);
+		QAction* rename = new QAction("Rename", _contextMenu);
+		_contextMenu->addAction(rename);
+		_contextMenu->addSeparator();
+		_contextMenu->addAction(deleteFile);
+		ActionConnect(deleteFile, [this]()
+			{
+				auto items = GetSelectionItems();
+				std::vector<AssetInfoBase*> infos;
+				infos.reserve(items.size());
+				for (auto& i : items)
+				{
+					if (!i->_assetInfo.expired())
+					{
+						infos.push_back(i->_assetInfo.lock().get());
+					}
+				}
+				ContentManager::Get()->AssetDelete(infos);
+				//刷新内容浏览器
+				ContentBrowser::RefreshContentBrowsers();
+			});
+		ActionConnect(rename, [this]()
+			{
+
+			});
+	}
+}
+
+void VirtualFileListView::contextMenuEvent(QContextMenuEvent* event)
+{
+	CustomListView::contextMenuEvent(event);
+	_contextMenu->exec(event->globalPos());
 }
 
 CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase> assetInfo)
@@ -322,9 +408,9 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	listLayout->setSpacing(1);
 	listLayout->setContentsMargins(1, 1, 1, 1);
 	//
-	_treeView = new VirtualFolderTreeView(this);
+	_treeView = new VirtualFolderTreeView(this, this);
 	treeLayout->addWidget(_treeView);
-	_listView = new VirtualFileListView(this);
+	_listView = new VirtualFileListView(this, this);
 	listLayout->addWidget(_listView);
 	//
 	_splitterBox->setStretchFactor(1, 4);
@@ -381,6 +467,7 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 			_treeView->_currentSelectionItem = 0;
 		}
 	});
+	//资产导入按钮
 	connect(ui.ImportButton, &QPushButton::clicked, this, [this]() {
 		// 创建一个支持多选的文件选择对话框
 		QStringList fileNames = QFileDialog::getOpenFileNames(nullptr,
@@ -523,24 +610,26 @@ void ContentBrowser::RefreshFileOnListView()
 {
 	_listView->RemoveAllItems();
 	auto item = _treeView->GetSelectionItems();
+	_listView->_currentVirtualFolderItems.clear();
 	for (auto& i : item)
 	{
 		auto assets = ContentManager::Get()->GetAssetsByVirtualFolder(i->_fullPath.toStdString().c_str());
 		for (auto& a : assets)
 		{
 			auto item = _listView->AddFile(a.second);
+			_listView->_currentVirtualFolderItems.append(item);
 		}
 	}
 }
 
 void ContentBrowser::focusInEvent(QFocusEvent* event)
 {
-
+	QWidget::focusInEvent(event);
 }
 
 void ContentBrowser::showEvent(QShowEvent* event)
 {
-
+	QWidget::showEvent(event);
 }
 
 void ContentBrowser::paintEvent(QPaintEvent* event)
@@ -554,14 +643,17 @@ void ContentBrowser::paintEvent(QPaintEvent* event)
 
 void ContentBrowser::mouseMoveEvent(QMouseEvent* event)
 {
+	QWidget::mouseMoveEvent(event);
 }
 
 void ContentBrowser::mousePressEvent(QMouseEvent* event)
 {
+	QWidget::mousePressEvent(event);
 }
 
 void ContentBrowser::closeEvent(QCloseEvent* event)
 {
+	QWidget::closeEvent(event);
 }
 
 

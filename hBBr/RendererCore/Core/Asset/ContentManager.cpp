@@ -66,6 +66,8 @@ void ContentManager::Release()
 	_assets_vf.clear();
 }
 
+#if IS_EDITOR
+
 bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImportInfo> importFiles)
 {
 	HString contentPath = FileSystem::GetContentAbsPath();
@@ -83,7 +85,7 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 			HString guidStr;
 			AssetType type = AssetType::Unknow;
 			HString assetTypeName = "Unknow";
-			//Model
+			//----------------------------------------Model
 			if (suffix.IsSame("fbx", false))
 			{
 				type = AssetType::Model;
@@ -93,7 +95,7 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				guidStr = CreateGUIDAndString(guid);
 				FileSystem::FileRename((FileSystem::Append(savePath, fileName)) .c_str(), FileSystem::Append(savePath, guidStr + ".fbx").c_str());
 			}
-			//Texture
+			//----------------------------------------Texture
 			else if (suffix.IsSame("png", false)
 				|| suffix.IsSame("tga", false)
 				|| suffix.IsSame("jpg", false)
@@ -109,7 +111,8 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 			{
 				assetTypeName = GetAssetTypeString(type);
 				auto root = doc.child(TEXT("root"));
-				auto newItem = root.append_child(TEXT("Item"));	
+				//auto newItem = root.append_child(TEXT("Item"));	
+				auto newItem = XMLStream::CreateXMLNode(root, TEXT("item"));
 				XMLStream::SetXMLAttribute(newItem,TEXT("GUID"), guidStr.c_wstr());
 				XMLStream::SetXMLAttribute(newItem, TEXT("Type"), (int)type);
 				XMLStream::SetXMLAttribute(newItem, TEXT("Name"), baseName.c_wstr());
@@ -120,8 +123,6 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				{
 					MessageOut("Save repository xml failed.", false, true, "255,255,0");
 				}
-				ReloadRepository(repositoryName);
-				UpdateAllAssetReference();
 			}
 			else
 			{
@@ -129,6 +130,8 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				return false;
 			}
 		}
+		ReloadRepository(repositoryName);
+		UpdateAllAssetReference();
 	}
 
 	return true;
@@ -140,21 +143,22 @@ HBBR_API void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos
 	if (messageBox)
 	{
 		MessageOut("You are deleting assets, are you sure?");
-		HString assetsPath;
+		HString msg;
 		for (auto& i : assetInfos)
 		{
-			assetsPath += i->virtualFilePath + "\n";
+			msg += i->virtualFilePath + "\n";
 		}
+		msg = HString("You are deleting assets, are you sure?\nPlease check the asset reference relationship before deleting.\n\n") + msg;
 		SDL_MessageBoxButtonData buttons[] = {
-			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 0, "Sure" },
 			{ SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 1, "Cancel" },
+			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 0, "Contunue" },
 		};
 		SDL_MessageBoxData messageboxdata = {
 			SDL_MESSAGEBOX_INFORMATION,    // 消息框类型
 			NULL,                           // 父窗口
-			"AssetDelete",                   // 消息框标题
-			(HString("You are deleting assets, are you sure?\nCheck the asset reference relationship before deleting please.\n") + assetsPath).c_str(),         // 消息框内容
-			SDL_arraysize(buttons),         // 按钮数量
+			"AssetDelete",               // 消息框标题
+			msg.c_str(),					// 消息框内容
+			SDL_arraysize(buttons), // 按钮数量
 			buttons,                        // 按钮数据
 			NULL                            // 颜色方案（使用默认颜色）
 		};
@@ -175,12 +179,12 @@ HBBR_API void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos
 			//资产删除不会帮忙处理资产引用关系(包括场景的)，如果删错了
 			//编辑器会直接告知用户引用错误信息，让用户自行处理(不会崩溃)
 			//所以删除前最好使用 [引用关系查看器] 检查好 
-
+			HString repository = i->repository;
 			//删除实际资产
 			FileSystem::FileRemove(i->absFilePath.c_str());
 			//移除.repository内储存的Item信息
 			HString contentPath = FileSystem::GetContentAbsPath();
-			HString repositoryPath = FileSystem::Append(contentPath, i->repository);
+			HString repositoryPath = FileSystem::Append(contentPath, repository);
 			HString repositoryXMLPath = FileSystem::Append(repositoryPath, ".repository");
 			pugi::xml_document doc;
 			if (XMLStream::LoadXML(repositoryXMLPath.c_wstr(), doc))
@@ -205,18 +209,94 @@ HBBR_API void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos
 
 				//移除内存中的AssetInfo
 				_assets[(int)i->type].erase(guid);
-				_assets_repos[i->repository].erase(guid);
+				_assets_repos[repository].erase(guid);
 				HString vpvf = i->virtualPath;
 				FileSystem::ClearPathSeparation(vpvf);
 				_assets_vf.erase(vpvf);
 
 				//重新刷新仓库和引用
-				ReloadRepository(i->repository);
+				ReloadRepository(repository);
 				UpdateAllAssetReference();
 			}
 		}
 	}
 }
+
+void ContentManager::SetNewVirtualPath(std::vector<AssetInfoBase*> assetInfos, HString newVirtualPath)
+{
+	std::vector<HString> repositories;
+	for (auto& i : assetInfos)
+	{
+		HString assetRepository = i->repository;
+		//修改info的虚拟路径
+		i->virtualPath = newVirtualPath;
+		i->virtualFilePath = FileSystem::Append(newVirtualPath, i->displayName + "." + i->suffix);
+		i->virtualFilePath.Replace("\\", "/");
+		i->virtualFilePath.Replace("\\\\", "/");
+		auto it = std::find_if(repositories.begin(), repositories.end(), [assetRepository](HString & r) {
+			return r.IsSame(assetRepository);
+			});
+		if (it == repositories.end())
+		{
+			repositories.push_back(assetRepository);
+		}
+		//保存进.repository
+		SaveAssetInfo(i);
+	}
+
+	for (auto& i : repositories)
+	{
+		//重新加载
+		ReloadRepository(i);
+	}
+
+	//刷新引用
+	UpdateAllAssetReference();
+}
+
+void ContentManager::SaveAssetInfo(AssetInfoBase* assetInfo)
+{
+	if (assetInfo)
+	{
+		HString repositoryXMLPath = FileSystem::GetRepositoryXMLAbsPath(assetInfo->repository);
+		pugi::xml_document doc;
+		pugi::xml_node target = pugi::xml_node();
+		if (XMLStream::LoadXML(repositoryXMLPath.c_wstr(), doc))
+		{
+			auto root = doc.child(TEXT("root"));
+			HGUID guid;
+			HString guidStr;
+			for (auto n = root.first_child(); n; n = n.next_sibling())
+			{	
+				guidStr = n.attribute(TEXT("GUID")).as_string();
+				StringToGUID(guidStr.c_str(), &guid);
+				if (guid == assetInfo->guid)
+				{
+					target = n;
+					break;
+				}
+			}
+			if (!target)
+			{
+				target = XMLStream::CreateXMLNode(root, TEXT("item"));
+			}
+			//设置属性,保存XML
+			HString assetTypeName = GetAssetTypeString(assetInfo->type);
+			XMLStream::SetXMLAttribute(target, TEXT("GUID"), guidStr.c_wstr());
+			XMLStream::SetXMLAttribute(target, TEXT("Type"), (int)assetInfo->type);
+			XMLStream::SetXMLAttribute(target, TEXT("Name"), assetInfo->displayName.c_wstr());
+			XMLStream::SetXMLAttribute(target, TEXT("VPath"), assetInfo->virtualPath.c_wstr());
+			XMLStream::SetXMLAttribute(target, TEXT("Format"), assetInfo->suffix.c_wstr());
+			XMLStream::SetXMLAttribute(target, TEXT("RPath"), (assetTypeName + "/").c_wstr());
+			if (!doc.save_file(repositoryXMLPath.c_wstr()))
+			{
+				MessageOut("Save repository xml failed.", false, true, "255,255,0");
+			}
+		}
+	}
+}
+
+#endif
 
 std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)
 {
@@ -273,8 +353,9 @@ void ContentManager::ReloadRepository(HString repositoryName)
 		FileSystem::FixUpPath(info->assetPath);
 		info->virtualPath = i.attribute(L"VPath").as_string();
 		//FileSystem::FixUpPath(info->virtualPath);
-		info->virtualFilePath = i.attribute(L"VPath").as_string();
-		info->virtualFilePath += info->displayName + "." + info->suffix;
+		info->virtualFilePath = FileSystem::Append(info->virtualPath , info->displayName + "." + info->suffix);
+		info->virtualFilePath.Replace("\\","/");
+		info->virtualFilePath.Replace("\\\\", "/");
 		//FileSystem::FixUpPath(info->virtualFilePath);
 		info->repository = repositoryName;
 

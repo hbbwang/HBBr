@@ -28,10 +28,19 @@ public:
 
 protected:
 	virtual void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)override;
+
 	void currentChanged(const QModelIndex& current, const QModelIndex& previous) override;
+
+	virtual void contextMenuEvent(QContextMenuEvent* event)override;
+
+	class QMenu* _contextMenu = nullptr;
+
 	QList<CustomViewItem*> _newSelectionItems;
+
 	int _currentSelectionItem;
+
 	bool _bSaveSelectionItem;
+
 };
 #pragma endregion
 
@@ -43,14 +52,22 @@ class VirtualFileListView :public CustomListView
 	friend class ContentBrowser;
 	friend class VirtualFolderTreeView;
 public:
-	explicit VirtualFileListView(QWidget* parent = nullptr);
+	explicit VirtualFileListView(class  ContentBrowser* contentBrowser, QWidget* parent = nullptr);
 
 	CustomListItem* AddFile(std::weak_ptr<struct AssetInfoBase> assetInfo);
 
 	VirtualFolder _currentTreeViewSelection;
 
+	class  ContentBrowser* _contentBrowser;
+
 protected:
 
+	class QMenu* _contextMenu = nullptr;
+
+	virtual void contextMenuEvent(QContextMenuEvent* event)override;
+
+	//当前选中的虚拟路径的所有文件对象
+	QList<CustomListItem*> _currentVirtualFolderItems;
 };
 #pragma endregion
 
@@ -106,9 +123,11 @@ protected:
 	virtual void closeEvent(QCloseEvent* event) override;
 	static QList<ContentBrowser*> _contentBrowser;
 
-	class QSplitter*					_splitterBox = nullptr;
-	class QWidget*					_listWidget = nullptr;
-	class QWidget*					_treeWidget = nullptr;
+	class QSplitter*		_splitterBox = nullptr;
+	class QWidget*		_listWidget = nullptr;
+	class QWidget*		_treeWidget = nullptr;
+
+
 
 	VirtualFolderTreeView*		_treeView = nullptr;
 	VirtualFileListView*			_listView = nullptr;

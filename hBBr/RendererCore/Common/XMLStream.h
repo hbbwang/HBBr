@@ -69,11 +69,12 @@ public:
 	{
 		if (node)
 		{
-			if (!node.child(name))
+			auto newChild = node.child(name);
+			if (!newChild)
 			{
-				auto new_node = node.append_child(name);
-				return new_node;
+				newChild = node.append_child(name);
 			}
+			return newChild;
 		}
 		return pugi::xml_node();
 	}

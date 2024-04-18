@@ -6,6 +6,8 @@ QString GetWidgetStyleSheetFromFile(QString objectName, QString path = "Config/T
 
 QString GetSingleStyleFromFile(QString Name, QString path = "Config/Theme/ThemeMain.qss");
 
+#define ActionConnect(action,func) connect(action, &QAction::triggered, this, func);
+
 struct SFileSearch
 {
 	QString path;

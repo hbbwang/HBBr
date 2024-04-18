@@ -34,6 +34,10 @@ extern "C" {
 		HBBR_API static HString GetContentAbsPath();
 		HBBR_API static HString GetConfigAbsPath();
 		HBBR_API static HString GetWorldAbsPath();
+		//获取仓库.repository 文件的绝对路径
+		HBBR_API static HString GetRepositoryXMLAbsPath(HString repositoryName);
+		//获取仓库绝对路径
+		HBBR_API static HString GetRepositoryAbsPath(HString repositoryName);
 		//Fill up asset path (Asset/...) to (C:/aa/bb/Asset/...)
 		HBBR_API static HString FillUpAssetPath(HString assetPath);
 		/* editor only */

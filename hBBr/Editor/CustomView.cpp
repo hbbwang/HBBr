@@ -351,6 +351,23 @@ CustomListItem* CustomListView::AddItem(QString name, QString iconPath, ToolTip 
 	return item;
 }
 
+const QList<CustomListItem*> CustomListView::GetSelectionItems() const
+{
+	{
+		QList<CustomListItem*> result;
+		auto indces = selectedIndexes();
+		for (auto& i : indces)
+		{
+			auto item = itemFromIndex(i);
+			if (item)
+			{
+				result.append((CustomListItem*)item);
+			}
+		}
+		return result;
+	}
+}
+
 void CustomListView::RemoveAllItems()
 {
 	for (auto& i : _allItems)

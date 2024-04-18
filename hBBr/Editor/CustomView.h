@@ -89,6 +89,8 @@ public:
 
 	virtual CustomListItem* AddItem(QString name, QString iconPath = "", ToolTip toolTip = ToolTip());
 
+	virtual const QList<CustomListItem*> GetSelectionItems()const;
+
 	void RemoveAllItems();
 
 	QList<CustomListItem*> _allItems;

@@ -80,6 +80,19 @@ HString FileSystem::GetWorldAbsPath()
     return path;
 }
 
+HString FileSystem::GetRepositoryXMLAbsPath(HString repositoryName)
+{
+    HString contentPath = FileSystem::GetContentAbsPath();
+    HString repositoryPath = FileSystem::Append(contentPath, repositoryName);
+    return FileSystem::Append(repositoryPath, ".repository");
+}
+
+HString FileSystem::GetRepositoryAbsPath(HString repositoryName)
+{
+    HString contentPath = FileSystem::GetContentAbsPath();
+    return FileSystem::Append(contentPath, repositoryName);
+}
+
 HString FileSystem::FillUpAssetPath(HString assetPath)
 {
     fs::path p = GetProgramPath().c_str();
