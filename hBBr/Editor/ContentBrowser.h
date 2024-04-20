@@ -27,6 +27,7 @@ public:
 	class  ContentBrowser* _contentBrowser;
 
 protected:
+
 	virtual void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)override;
 
 	void currentChanged(const QModelIndex& current, const QModelIndex& previous) override;
@@ -35,7 +36,8 @@ protected:
 
 	class QMenu* _contextMenu = nullptr;
 
-	QList<CustomViewItem*> _newSelectionItems;
+	//点击的文件夹的虚拟路径的历史记录
+	QList<QString> _newSelectionItems;
 
 	int _currentSelectionItem;
 

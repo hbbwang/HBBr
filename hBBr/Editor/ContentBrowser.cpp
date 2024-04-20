@@ -49,14 +49,50 @@ VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrows
 		_contextMenu->addAction(rename);
 		_contextMenu->addSeparator();
 		_contextMenu->addAction(deleteFile);
+		//创建一个新的虚拟文件夹
 		ActionConnect(createFolder, [this]() 
 			{
+				auto itemModel = ((QStandardItemModel*)model());
+				if (currentIndex().isValid())
+				{
+					CustomViewItem* currentItem = (CustomViewItem*)itemModel->itemFromIndex(currentIndex());
+					QString newName = "NewFolder";
+					int index = -1;
+					while (true)
+					{
+						bool bFound = false;
+						int rowCount = currentItem->rowCount();
+						for (int row = 0; row < rowCount; ++row)
+						{
+							QStandardItem* childItem = currentItem->child(row);
+							if (childItem->text().compare(newName) == 0)
+							{
+								bFound = true;
+								index++;
+								newName = "NewFolder_" + QString::number(index) ;
+								break;
+							}
+						}
+						if (!bFound)
+						{
+							break;
+						}
+					}
+					CustomViewItem* newItem = new CustomViewItem(newName);
+					AddItem(newItem , currentItem);
+					//
+					_bSaveSelectionItem = true;
+					selectionModel()->clearSelection();
+					selectionModel()->setCurrentIndex(newItem->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
+				}
 
 			});
+		//删除当前虚拟文件夹内的所有文件
 		ActionConnect(deleteFile, [this]()
 			{
 
 			});
+		//给虚拟文件夹重命名
 		ActionConnect(rename, [this]()
 			{
 
@@ -140,7 +176,7 @@ void VirtualFolderTreeView::RemoveFolder(QString virtualPath)
 	_allItems.removeOne(item);
 	model()->removeRow(item->row());
 	//尝试删除历史记录
-	_newSelectionItems.removeOne(item);
+	_newSelectionItems.removeOne(item->_fullPath);
 	//删除实际路径文件和assetInfo
 	std::vector<AssetInfoBase*> assetInfos;
 	HString msg;
@@ -186,9 +222,9 @@ void VirtualFolderTreeView::currentChanged(const QModelIndex& current, const QMo
 		text = "Asset" + text.replace("/", " - ");
 		_contentBrowser->ui.PathLabel->setText(text);
 
-		if (_bSaveSelectionItem)
+		if (_bSaveSelectionItem || _newSelectionItems.size() <=0 )//第一个目录记一下
 		{
-			_newSelectionItems.insert(0, item);
+			_newSelectionItems.insert(0, item->_fullPath);
 			if (_newSelectionItems.size() > 50)
 			{
 				_newSelectionItems.removeLast();
@@ -571,13 +607,15 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 			_importFileNames = fileNames;
 		}	
 	}); 
+	//回到下一个文件夹 →
 	connect(ui.FrontspaceButton, &QPushButton::clicked, this, [this]() {
 		if (_treeView->_newSelectionItems.size() > 0 && _treeView->_currentSelectionItem > 0)
 		{
 			_treeView->_currentSelectionItem--;
 			if (_treeView->_newSelectionItems.size() > _treeView->_currentSelectionItem)
 			{
-				auto item = _treeView->_newSelectionItems[_treeView->_currentSelectionItem];
+				auto itemFullPath = _treeView->_newSelectionItems[_treeView->_currentSelectionItem];
+				auto item = _treeView->FindFolder(itemFullPath);
 				{
 					_treeView->_bSaveSelectionItem = false;
 					_treeView->selectionModel()->clearSelection();
@@ -586,13 +624,15 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 			}
 		}
 	});
+	//回到上一个文件夹 ←
 	connect(ui.BackspaceButton, &QPushButton::clicked, this, [this]() {
-		if (_treeView->_newSelectionItems.size() > 0)
+		if (_treeView->_newSelectionItems.size() > 0 && _treeView->_newSelectionItems.size() > _treeView->_currentSelectionItem + 1)
 		{
 			_treeView->_currentSelectionItem++;
 			if (_treeView->_newSelectionItems.size() > _treeView->_currentSelectionItem)
 			{
-				auto item = _treeView->_newSelectionItems[_treeView->_currentSelectionItem];
+				auto itemFullPath = _treeView->_newSelectionItems[_treeView->_currentSelectionItem];
+				auto item = _treeView->FindFolder(itemFullPath);
 				{
 					_treeView->_bSaveSelectionItem = false;
 					_treeView->selectionModel()->clearSelection();
@@ -601,7 +641,7 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 			}
 		}
 	});
-
+	//回到当前的父文件夹 ↑
 	connect(ui.BackToParentButton, &QPushButton::clicked, this, [this]() {
 		if (_treeView->currentIndex().isValid())
 		{
