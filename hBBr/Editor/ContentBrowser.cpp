@@ -290,11 +290,12 @@ void VirtualFolderTreeView::onDataChanged(const QModelIndex& topLeft, const QMod
 			//更新
 			ContentBrowser::RefreshContentBrowsers();
 			//
-			//_bSaveSelectionItem = true;
-			//selectionModel()->clearSelection();
-			//selectionModel()->setCurrentIndex(currentItem->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
 
 			ConsoleDebug::print_endl("Virtual folder rename : [" + oldName + "] to [" + currentItem->_text.toStdString().c_str() + "]");
+
+			_bSaveSelectionItem = true;
+			selectionModel()->clearSelection();
+			selectionModel()->setCurrentIndex(currentItem->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
 
 		}	
 	}
