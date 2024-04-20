@@ -50,7 +50,12 @@ CustomListItem::CustomListItem(const QString& text, QListWidget* view, int type)
 
 CustomListItem::CustomListItem(const QIcon& icon, const QString& text, QListWidget* view, int type) : QListWidgetItem(icon, text, view, type)
 {
-
+	setFlags(Qt::ItemIsSelectable
+		| Qt::ItemIsEditable
+		| Qt::ItemIsDragEnabled
+		| Qt::ItemNeverHasChildren
+		| Qt::ItemIsEnabled
+	);
 }
 
 #pragma endregion
@@ -116,7 +121,7 @@ QList<CustomViewItem*> CustomTreeView::FindItems(QString name)
 	QList<CustomViewItem*> result;
 	for (auto& i : _allItems)
 	{
-		if (i->_path.compare(name, Qt::CaseInsensitive) == 0 )
+		if (i->text().compare(name, Qt::CaseInsensitive) == 0 )
 		{
 			result.append(i);
 		}
@@ -349,6 +354,19 @@ CustomListItem* CustomListView::AddItem(QString name, QString iconPath, ToolTip 
 	addItem(item);
 	_allItems.append(item);
 	return item;
+}
+
+QList<CustomListItem*> CustomListView::FindItems(QString name)
+{
+	QList<CustomListItem*> result;
+	for (auto& i : _allItems)
+	{
+		if (i->_path.compare(name, Qt::CaseInsensitive) == 0)
+		{
+			result.append(i);
+		}
+	}
+	return result;
 }
 
 const QList<CustomListItem*> CustomListView::GetSelectionItems() const

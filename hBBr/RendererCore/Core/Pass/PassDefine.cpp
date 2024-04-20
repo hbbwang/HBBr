@@ -75,7 +75,7 @@ void BasePass::PassUpdate()
 	//Update FrameBuffer
 	ResetFrameBuffer(_renderer->GetSurfaceSize(), { GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetTextureView() });
 	SetViewport(_currentFrameBufferSize);
-	BeginRenderPass({ 0,0,0.1,1 });
+	BeginRenderPass({ 0,0,0,0 });
 	//Opaque Pass
 	SetupBasePassAndDraw(
 		Pass::OpaquePass,

@@ -13,6 +13,9 @@ public:
 	/* 读取xml文档 */
 	static bool LoadXML(const wchar_t* path, pugi::xml_document& doc);
 
+	/* 保存xml文档UTF-8格式 */
+	static bool SaveXML(HString path, pugi::xml_document& doc);
+
 	/* 读取xml节点,必须使用完整的路径形式,例如:root/aa/bb */
 	static bool LoadXMLNode(pugi::xml_document& doc, const wchar_t* nodeName, pugi::xml_node& node);
 
@@ -79,6 +82,6 @@ public:
 		return pugi::xml_node();
 	}
 
-	static void CreateXMLFile(HString path , pugi::xml_document& doc);
+	static bool CreateXMLFile(HString path , pugi::xml_document& doc);
 
 };

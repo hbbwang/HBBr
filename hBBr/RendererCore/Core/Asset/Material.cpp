@@ -255,20 +255,50 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 	return std::weak_ptr<Material>();
 }
 
-std::weak_ptr<Material> Material::CreateMaterial(HString newMatFilePath)
+std::weak_ptr<AssetInfoBase> Material::CreateMaterial(HString repository, HString virtualPath)
 {
-	if (!FileSystem::IsDir(newMatFilePath.c_str()))
+	HString repositoryPath = FileSystem::GetRepositoryAbsPath(repository);
+	//生成材质xml文件
+	HString savePath = FileSystem::Append(repositoryPath, "Material");
+	HString saveFilePath = FileSystem::Append(savePath, "NewMaterial");
+	int index = -1;
+	while (true)
 	{
-		return std::weak_ptr<Material>();
+		if (FileSystem::FileExist(saveFilePath))
+		{
+			index++;
+			saveFilePath = FileSystem::Append(savePath, HString("NewMaterial_") + HString::FromInt(index));
+		}
+		else
+		{
+			break;
+		}
 	}
-	////复制引擎自带材质实例
-	//HString srcMat = (FileSystem::GetContentAbsPath() + "Core/Material/DefaultPBR.mat");
-	//FileSystem::FileCopy(srcMat.c_str() ,newMatFilePath.c_str());
+	pugi::xml_document doc;
+	saveFilePath += ".mat";
 
-	//HString newName = (newMatFilePath + "/NewMaterial.mat");
+	auto root = doc.append_child(TEXT("root"));
+	auto mp = XMLStream::CreateXMLNode(root,TEXT("MaterialPrimitive"));
+	XMLStream::SetXMLAttribute(mp,TEXT("vsShader"),TEXT("PBR"));
+	XMLStream::SetXMLAttribute(mp, TEXT("psShader"), TEXT("PBR"));
+	XMLStream::SetXMLAttribute(mp, TEXT("vsVarient"), 1);
+	XMLStream::SetXMLAttribute(mp, TEXT("psVarient"), 1);
+	XMLStream::SetXMLAttribute(mp, TEXT("pass"), 0);
 
-	//FileSystem::FileRename(srcMat.c_str(), FileSystem::GetRelativePath(newName.c_str()).c_str());
-	//auto assetInfo = ContentManager::Get()->CreateAssetInfo(newName);
-
-	//return std::reinterpret_pointer_cast<Material>(assetInfo.lock()->GetAssetData().lock());
+	if (XMLStream::SaveXML(saveFilePath.c_wstr(), doc))
+	{
+		std::vector<std::weak_ptr<AssetInfoBase> > results;
+		//导入AssetInfo
+		AssetImportInfo newInfo;
+		newInfo.absAssetFilePath = saveFilePath;
+		newInfo.virtualPath = virtualPath;
+		ContentManager::Get()->AssetImport(repository, { newInfo }, &results);
+		MessageOut("Create a new material successful.", false, false, "0,255,0");
+		return results[0];
+	}
+	else
+	{
+		MessageOut("Create material failed.", false, false, "255,0,0");
+	}
+	return std::weak_ptr<AssetInfoBase>();
 }

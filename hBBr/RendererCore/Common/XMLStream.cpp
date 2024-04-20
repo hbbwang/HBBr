@@ -69,6 +69,11 @@ bool XMLStream::LoadXML(const wchar_t* path, pugi::xml_document& doc)
 	return true;
 }
 
+bool XMLStream::SaveXML(HString path, pugi::xml_document& doc)
+{
+	return CreateXMLFile(path,doc);
+}
+
 bool XMLStream::LoadXMLNode(pugi::xml_document& doc, const wchar_t* nodeName, pugi::xml_node& node)
 {
 	HString nodeStr = nodeName;
@@ -186,13 +191,15 @@ bool XMLStream::LoadXMLAttributeFloat(pugi::xml_node& node, const wchar_t* attri
 	return false;
 }
 
-void XMLStream::CreateXMLFile(HString path, pugi::xml_document& doc)
+bool XMLStream::CreateXMLFile(HString path, pugi::xml_document& doc)
 {
 	pugi::xml_node decl = doc.prepend_child(pugi::node_declaration);
 	decl.append_attribute(L"version") = L"1.0";
 	decl.append_attribute(L"encoding") = L"UTF-8";
-	if (FileSystem::IsDir(path.GetFilePath().c_str()))
+	auto dirPath = FileSystem::GetFilePath(path);
+	if (FileSystem::IsDir(dirPath))
 	{
-		doc.save_file(path.c_wstr());
+		return doc.save_file(path.c_wstr());
 	}
+	return false;
 }

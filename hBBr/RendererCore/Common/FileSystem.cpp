@@ -180,11 +180,6 @@ HString FileSystem::AssetFileExist(HString path)
     return path;
 }
 
-bool FileSystem::IsDir(const char* path)
-{
-    return  fs::is_directory(path);
-}
-
 bool FileSystem::IsDir(HString& path)
 {
     return  fs::is_directory(path.c_str());
@@ -282,7 +277,7 @@ void FileSystem::CorrectionPath(HString& path)
 
 void FileSystem::NormalizePath(HString& path)
 {
-    if (IsDir(path.c_str()))
+    if (IsDir(path))
     {
         path = (fs::path((path + "/").c_str())).lexically_normal().c_str();
     }
@@ -318,9 +313,10 @@ bool FileSystem::ContainsPath(HString A, HString B)
 
 HString FileSystem::GetFilePath(HString path)
 {
-    std::string result = fs::path(path.c_str()).parent_path().string();
+    fs::path fs_path = fs::path(path.c_str());
+    std::string result = fs_path.parent_path().string();
     result += fs::path::preferred_separator;
-    return result.c_str();
+    return HString(result.c_str());
 }
 
 HString FileSystem::GetFileName(HString path)

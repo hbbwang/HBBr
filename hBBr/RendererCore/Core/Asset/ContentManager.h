@@ -10,6 +10,12 @@
 #include "HString.h"
 #include "Asset/HGuid.h"
 
+#define StdVectorRemoveIf(stdVector,func)  \
+std::remove_if(stdVector.begin(), stdVector.end(), func); 
+
+#define StdVectorFindIf(stdVector,func)  \
+std::find_if(stdVector.begin(), stdVector.end(), func); 
+
 //资产类型
 enum class AssetType : uint32_t
 {
@@ -187,7 +193,7 @@ public:
 	absAssetFilePath:导入的资产的绝对路径
 	virtualPath:导入之后显示在哪个虚拟路径
 	*/
-	HBBR_API bool AssetImport(HString repositoryName,std::vector<AssetImportInfo> importFiles);
+	HBBR_API bool AssetImport(HString repositoryName,std::vector<AssetImportInfo> importFiles , std::vector<std::weak_ptr<AssetInfoBase>>* out = nullptr);
 
 	/*
 	资产删除
@@ -206,6 +212,32 @@ public:
 	保存AssetInfo到.repository
 	*/
 	HBBR_API void SaveAssetInfo(AssetInfoBase*  assetInfo);
+
+	/*
+		设置资产的虚拟名字(DIsplayName,非GUID)
+		bSave:是否直接保存到仓库xml里,默认false
+	*/
+	HBBR_API void SetVirtualName(AssetInfoBase* assetInfo,HString newName,bool bSave = false);
+
+	/*
+		标记已经改动过的资产,告诉用户这些资产可能需要手动保存
+	*/
+	HBBR_API static void MarkAssetDirty(std::weak_ptr<AssetInfoBase> asset);
+	static std::vector<std::weak_ptr<AssetInfoBase>> _dirtyAssets;
+	HBBR_API static std::vector<std::weak_ptr<AssetInfoBase>> GetDirtyAssets() {
+		//for safe:
+		std::vector<std::weak_ptr<AssetInfoBase>> result;
+		result.reserve(_dirtyAssets.size());
+		for (auto& i : _dirtyAssets)
+		{
+			if (!i.expired())
+			{
+				result.push_back(i);
+			}
+		}
+		return result;
+	}
+
 
 #endif
 

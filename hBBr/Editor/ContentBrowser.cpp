@@ -108,9 +108,24 @@ CustomViewItem* VirtualFolderTreeView::FindFolder(QString virtualPath)
 
 void VirtualFolderTreeView::SelectionItem(QString vPath)
 {
-	auto item = FindFolder(vPath);
-	selectionModel()->clearSelection();
-	selectionModel()->setCurrentIndex(item->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
+	CustomViewItem* item = nullptr;
+	while (item==nullptr)
+	{
+		item = FindFolder(vPath);
+		if (item)
+		{
+			break;
+		}
+		else
+		{
+			vPath = FileSystem::GetFilePath(vPath.toStdString().c_str()).c_str();
+		}
+	}
+	if (item)
+	{
+		selectionModel()->clearSelection();
+		selectionModel()->setCurrentIndex(item->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
+	}
 }
 
 void VirtualFolderTreeView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
@@ -128,14 +143,27 @@ void VirtualFolderTreeView::RemoveFolder(QString virtualPath)
 	_newSelectionItems.removeOne(item);
 	//删除实际路径文件和assetInfo
 	std::vector<AssetInfoBase*> assetInfos;
+	HString msg;
 	for (auto& i : _contentBrowser->_listView->_currentVirtualFolderItems)
 	{
 		if (!i->_assetInfo.expired())
 		{
 			assetInfos.push_back(i->_assetInfo.lock().get());
+			msg += i->_assetInfo.lock()->virtualFilePath + "\n";
 		}
 	}
-	ContentManager::Get()->AssetDelete(assetInfos);
+
+	msg = HString("You are deleting assets, are you sure?\nPlease check the asset reference relationship before deleting.\n\n") + msg;
+	ConsoleDebug::print_endl(msg,"255,255,0");
+	QMessageBox::StandardButton reply = QMessageBox::question(this,"Delete assets", msg.c_str(), QMessageBox::Yes | QMessageBox::Cancel);
+
+	if (reply == QMessageBox::Yes)
+	{
+		ContentManager::Get()->AssetDelete(assetInfos, false);
+	}
+	else
+	{
+	}
 }
 
 void VirtualFolderTreeView::currentChanged(const QModelIndex& current, const QModelIndex& previous)
@@ -186,7 +214,7 @@ VirtualFileListView::VirtualFileListView(class  ContentBrowser* contentBrowser, 
 	_contentBrowser = contentBrowser;
 	setObjectName("CustomListView_VirtualFileListView");
 	setMouseTracking(true);
-
+	setEditTriggers(QAbstractItemView::NoEditTriggers);
 	//Context Menu
 	{
 		setContextMenuPolicy(Qt::ContextMenuPolicy::DefaultContextMenu);
@@ -198,7 +226,19 @@ VirtualFileListView::VirtualFileListView(class  ContentBrowser* contentBrowser, 
 			createFile->addAction(createMaterial);
 			ActionConnect(createMaterial, [this]()
 				{
-
+					auto repositorySelection = new RepositorySelection(this);
+					repositorySelection->setObjectName("ContentBrowser_RepositorySelection");
+					repositorySelection->_selectionCallBack = [this](QString repository)
+					{
+						if (_contentBrowser->_treeView->currentIndex().isValid())
+						{
+							CustomViewItem* treeItem = ((CustomViewItem*)((QStandardItemModel*)_contentBrowser->_treeView->model())->itemFromIndex(_contentBrowser->_treeView->currentIndex()));
+							HString virtualPath = treeItem->_fullPath.toStdString().c_str();
+							Material::CreateMaterial(repository.toStdString().c_str(), virtualPath);
+							ContentBrowser::RefreshContentBrowsers();
+						}
+					};
+					repositorySelection->Show();
 				});
 		}
 		QAction* deleteFile = new QAction("Delete", _contextMenu);
@@ -208,24 +248,49 @@ VirtualFileListView::VirtualFileListView(class  ContentBrowser* contentBrowser, 
 		_contextMenu->addAction(deleteFile);
 		ActionConnect(deleteFile, [this]()
 			{
+				HString msg;
 				auto items = GetSelectionItems();
-				std::vector<AssetInfoBase*> infos;
-				infos.reserve(items.size());
-				for (auto& i : items)
+				if (items.size() > 0)
 				{
-					if (!i->_assetInfo.expired())
+					std::vector<AssetInfoBase*> infos;
+					infos.reserve(items.size());
+					for (auto& i : items)
 					{
-						infos.push_back(i->_assetInfo.lock().get());
+						if (!i->_assetInfo.expired())
+						{
+							infos.push_back(i->_assetInfo.lock().get());
+							msg += i->_assetInfo.lock()->virtualFilePath + "\n";
+						}
 					}
+
+					msg = HString("You are deleting assets, are you sure?\nPlease check the asset reference relationship before deleting.\n\n") + msg;
+					ConsoleDebug::print_endl(msg, "255,255,0");
+					QMessageBox::StandardButton reply = QMessageBox::question(this, "Delete assets", msg.c_str(), QMessageBox::Yes | QMessageBox::Cancel);
+
+					if (reply == QMessageBox::Yes)
+					{
+						ContentManager::Get()->AssetDelete(infos, false);
+					}
+					else
+					{
+					}
+
+					//刷新内容浏览器
+					ContentBrowser::RefreshContentBrowsers();
 				}
-				ContentManager::Get()->AssetDelete(infos);
-				//刷新内容浏览器
-				ContentBrowser::RefreshContentBrowsers();
 			});
 		ActionConnect(rename, [this]()
 			{
-
+				//资产改名
+				auto items = GetSelectionItems();
+				if (items.size() > 0)
+				{
+					_ediingItem = items[0];
+					editItem(items[0]);
+				}
 			});
+
+		connect(this,&QListWidget::itemChanged,this,&VirtualFileListView::ItemTextChange);
 	}
 }
 
@@ -233,6 +298,22 @@ void VirtualFileListView::contextMenuEvent(QContextMenuEvent* event)
 {
 	CustomListView::contextMenuEvent(event);
 	_contextMenu->exec(event->globalPos());
+}
+
+
+void VirtualFileListView::ItemTextChange(QListWidgetItem* widgetItem)
+{
+	//资产改名
+	auto item = (CustomListItem*)widgetItem;
+	if (!item->_assetInfo.expired() && _ediingItem == item)
+	{
+		if (!item->_assetInfo.lock()->displayName.IsSame(item->text().toStdString().c_str()))
+		{
+			ContentManager::Get()->SetVirtualName(item->_assetInfo.lock().get(), item->text().toStdString().c_str());
+			ContentManager::Get()->MarkAssetDirty(item->_assetInfo);
+		}
+		_ediingItem = nullptr;
+	}
 }
 
 CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase> assetInfo)
@@ -276,11 +357,12 @@ CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase>
 	}
 	return nullptr;
 }
+
 #pragma endregion
 
 //--------------------------------------Repository Selection Widget-------------------
 #pragma region RepositorySelectionWidget
-RepositorySelection::RepositorySelection(QWidget* parent) :QWidget(parent)
+RepositorySelection::RepositorySelection(QWidget* parent) :QDialog(parent)
 {
 	setAttribute(Qt::WidgetAttribute::WA_AlwaysStackOnTop);
 	setWindowFlags(Qt::Window);
@@ -320,7 +402,6 @@ RepositorySelection::RepositorySelection(QWidget* parent) :QWidget(parent)
 	}
 	//
 	adjustSize();
-	show();
 	resize(0, 0);
 	setHidden(true);
 	combo->_bindCurrentTextChanged = [this](const int index, const char* text) 
@@ -335,13 +416,25 @@ RepositorySelection::RepositorySelection(QWidget* parent) :QWidget(parent)
 
 void RepositorySelection::Show()
 {
-	show();
+	exec();
+}
+
+void RepositorySelection::Hide()
+{
+	resize(0,0);
+	move(0,0);
+	setHidden(true);
+}
+
+void RepositorySelection::showEvent(QShowEvent*e)
+{
+	QDialog::showEvent(e);
 	resize(300, 0);
-	QPoint pos = QPoint(EditorMain::_self->x() + EditorMain::_self->width() / 2, EditorMain::_self->y() + EditorMain::_self->height()/2);
-	pos -= QPoint(width()/2 , height()/2 );
+	QPoint pos = QPoint(EditorMain::_self->x() + EditorMain::_self->width() / 2, EditorMain::_self->y() + EditorMain::_self->height() / 2);
+	pos -= QPoint(width() / 2, height() / 2);
 	//pos = EditorMain::_self->mapToGlobal(pos);
 
-	setGeometry(pos.x(), pos.y(), 400 , 0);
+	setGeometry(pos.x(), pos.y(), 400, 0);
 	setHidden(false);
 	//
 	combo->ClearItems();
@@ -353,13 +446,6 @@ void RepositorySelection::Show()
 	}
 	combo->SetCurrentSelection(_currentRepositorySelection);
 	setFocus();
-}
-
-void RepositorySelection::Hide()
-{
-	resize(0,0);
-	move(0,0);
-	setHidden(true);
 }
 
 void RepositorySelection::paintEvent(QPaintEvent* event)
@@ -522,7 +608,7 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 			_treeView->_bSaveSelectionItem = true;
 			QStandardItemModel* model = (QStandardItemModel*)_treeView->model();
 			CustomViewItem* item = (CustomViewItem*)model->itemFromIndex(_treeView->currentIndex());
-			if (item->parent()->index().isValid())
+			if (item && item->parent() && item->parent()->index().isValid())
 			{
 				_treeView->selectionModel()->clearSelection();
 				_treeView->selectionModel()->setCurrentIndex(item->parent()->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);

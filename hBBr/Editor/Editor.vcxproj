@@ -175,6 +175,7 @@
     <ClCompile Include="CustomFileIconProvider.cpp" />
     <ClCompile Include="CustomSearchLine.cpp" />
     <ClCompile Include="CustomView.cpp" />
+    <ClCompile Include="DirtyAssetsManager.cpp" />
     <ClCompile Include="EditorCommonFunction.cpp" />
     <ClCompile Include="FloatSetting.cpp" />
     <ClCompile Include="Inspector.cpp" />
@@ -194,6 +195,7 @@
     <QtUic Include="ContentBrowser.ui" />
     <QtUic Include="CustomDockPanelTitleBar.ui" />
     <QtUic Include="CustomSearchLine.ui" />
+    <QtUic Include="DirtyAssetsManager.ui" />
     <QtUic Include="EditorMain.ui" />
     <QtMoc Include="EditorMain.h" />
     <ClCompile Include="EditorMain.cpp" />
@@ -228,6 +230,7 @@
     <ClInclude Include="CustomFileIconProvider.h" />
     <QtMoc Include="CustomSearchLine.h" />
     <QtMoc Include="CustomView.h" />
+    <QtMoc Include="DirtyAssetsManager.h" />
     <ClInclude Include="EditorCommonFunction.h" />
   </ItemGroup>
   <ItemGroup>

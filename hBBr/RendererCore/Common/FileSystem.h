@@ -49,7 +49,6 @@ extern "C" {
 		HBBR_API static bool FileExist(const char* path);
 		HBBR_API static bool FileExist(HString path);
 		HBBR_API static HString AssetFileExist(HString path);
-		HBBR_API static bool IsDir(const char* path);
 		HBBR_API static bool IsDir(HString& path);
 		HBBR_API static bool CreateDir(const char* path);
 		HBBR_API static bool CreateDirSymlink(const char* createPath, const char* linkTo);

@@ -109,6 +109,9 @@
     <ClCompile Include="ContentBrowser.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="DirtyAssetsManager.cpp">
+      <Filter>Widgets\Custom</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="EditorMain.h">
@@ -168,6 +171,9 @@
     <QtMoc Include="CustomView.h">
       <Filter>Widgets\Custom</Filter>
     </QtMoc>
+    <QtMoc Include="DirtyAssetsManager.h">
+      <Filter>Widgets\Custom</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditorCommonFunction.h">
@@ -218,6 +224,12 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="LineEditDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="DirtyAssetsManager.ui">
+      <Filter>Widgets\Custom</Filter>
+    </QtUic>
+    <QtUic Include="DirtyAssetsManager.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

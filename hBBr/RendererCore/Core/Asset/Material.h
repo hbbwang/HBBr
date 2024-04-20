@@ -20,7 +20,7 @@ public:
 
 	HBBR_API static std::weak_ptr<Material> LoadAsset(HGUID guid);
 
-	HBBR_API static  std::weak_ptr<Material> CreateMaterial(HString newMatFilePath);
+	HBBR_API static  std::weak_ptr<AssetInfoBase> CreateMaterial(HString repository,HString virtualPath);
 
 	HBBR_API HBBR_INLINE MaterialPrimitive* GetPrimitive()const { return _primitive.get(); }
 

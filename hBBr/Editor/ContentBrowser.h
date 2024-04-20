@@ -2,7 +2,7 @@
 #include "CustomView.h"
 #include "ui_ContentBrowser.h"
 #include "Asset/ContentManager.h"
-
+#include <qdialog.h>
 //--------------------------------------Virtual Folder Tree View-------------------
 #pragma region VirtualFolderTreeView
 class VirtualFolderTreeView : public CustomTreeView
@@ -66,14 +66,23 @@ protected:
 
 	virtual void contextMenuEvent(QContextMenuEvent* event)override;
 
+	//滚动到指定Item位置
+	//void scrollToItem(const QListWidgetItem* item, QAbstractItemView::ScrollHint hint = EnsureVisible);
+
 	//当前选中的虚拟路径的所有文件对象
 	QList<CustomListItem*> _currentVirtualFolderItems;
+
+private:
+	CustomListItem* _ediingItem = nullptr;
+private slots:
+	void ItemTextChange(QListWidgetItem* item);
+
 };
 #pragma endregion
 
 //--------------------------------------Repository Selection Widget-------------------
 #pragma region RepositorySelectionWidget
-class RepositorySelection : public QWidget
+class RepositorySelection : public QDialog
 {
 	Q_OBJECT
 	friend class VirtualFileListView;
@@ -86,6 +95,7 @@ public:
 	std::function<void(QString repository)> _selectionCallBack;
 	QString _currentRepositorySelection;
 protected:
+	virtual void showEvent(QShowEvent*) override;
 	virtual void paintEvent(QPaintEvent* event)override;
 	virtual void resizeEvent(QResizeEvent* event)override;
 	class ComboBox* combo = nullptr;

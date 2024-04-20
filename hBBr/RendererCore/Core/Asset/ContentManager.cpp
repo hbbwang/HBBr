@@ -8,7 +8,7 @@
 #include "Asset/Level.h"
 #include "Asset/World.h"
 std::unique_ptr<ContentManager> ContentManager::_ptr;
-
+std::vector<std::weak_ptr<AssetInfoBase>> ContentManager::_dirtyAssets;
 ContentManager::ContentManager()
 {
 	_assets.resize((uint32_t)AssetType::MaxNum);
@@ -68,12 +68,23 @@ void ContentManager::Release()
 
 #if IS_EDITOR
 
-bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImportInfo> importFiles)
+bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImportInfo> importFiles, std::vector<std::weak_ptr<AssetInfoBase>>* out)
 {
 	HString contentPath = FileSystem::GetContentAbsPath();
 	HString repositoryPath = FileSystem::Append(contentPath, repositoryName);
 	HString repositoryXMLPath = FileSystem::Append(repositoryPath,".repository");
 	pugi::xml_document doc;
+	struct resultFind
+	{
+		HGUID guid;
+		HString VirtualPath;
+	};
+	std::vector<resultFind> guids;
+	if (out != nullptr)
+	{
+		guids.reserve(importFiles.size());
+		out->reserve(importFiles.size());
+	}
 	if (XMLStream::LoadXML(repositoryXMLPath.c_wstr(), doc))
 	{
 		for (auto& i : importFiles)
@@ -93,7 +104,7 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				//复制fbx到项目目录
 				FileSystem::FileCopy(i.absAssetFilePath.c_str(), savePath.c_str());
 				guidStr = CreateGUIDAndString(guid);
-				FileSystem::FileRename((FileSystem::Append(savePath, fileName)) .c_str(), FileSystem::Append(savePath, guidStr + ".fbx").c_str());
+				FileSystem::FileRename((FileSystem::Append(savePath, fileName)) .c_str(), FileSystem::Append(savePath, guidStr + "." + suffix).c_str());
 			}
 			//----------------------------------------Texture
 			else if (suffix.IsSame("png", false)
@@ -106,6 +117,16 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				HString savePath = FileSystem::Append(repositoryPath, "Texture");
 
 			}
+			//----------------------------------------Material
+			else if (suffix.IsSame("mat", false))
+			{
+				type = AssetType::Material;
+				HString savePath = FileSystem::Append(repositoryPath, "Material");
+				//复制fbx到项目目录
+				FileSystem::FileCopy(i.absAssetFilePath.c_str(), savePath.c_str());
+				guidStr = CreateGUIDAndString(guid);
+				FileSystem::FileRename((FileSystem::Append(savePath, fileName)).c_str(), FileSystem::Append(savePath, guidStr + "." + suffix).c_str());
+			}
 			//导入AssetInfo
 			if(type != AssetType::Unknow)
 			{
@@ -116,13 +137,17 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				XMLStream::SetXMLAttribute(newItem,TEXT("GUID"), guidStr.c_wstr());
 				XMLStream::SetXMLAttribute(newItem, TEXT("Type"), (int)type);
 				XMLStream::SetXMLAttribute(newItem, TEXT("Name"), baseName.c_wstr());
-				XMLStream::SetXMLAttribute(newItem, TEXT("VPath"), i.virtualPath.c_wstr());
 				XMLStream::SetXMLAttribute(newItem, TEXT("Format"), suffix.c_wstr());
+				XMLStream::SetXMLAttribute(newItem, TEXT("VPath"), i.virtualPath.c_wstr());
 				XMLStream::SetXMLAttribute(newItem, TEXT("RPath"), (assetTypeName + "/").c_wstr());
 				if (!doc.save_file(repositoryXMLPath.c_wstr()))
 				{
 					MessageOut("Save repository xml failed.", false, true, "255,255,0");
 				}
+				resultFind newFind;
+				newFind.guid = guid;
+				newFind.VirtualPath = i.virtualPath;
+				guids.push_back(newFind);
 			}
 			else
 			{
@@ -132,8 +157,19 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 		}
 		ReloadRepository(repositoryName);
 		UpdateAllAssetReference();
+		if (out != nullptr)
+		{
+			for (auto& i : guids)
+			{
+				auto assets = GetAssetsByVirtualFolder(i.VirtualPath);
+				auto resultAsset = assets.find(i.guid);
+				if (resultAsset != assets.end())
+				{
+					out->push_back(resultAsset->second);
+				}
+			}
+		}
 	}
-
 	return true;
 }
 
@@ -212,7 +248,7 @@ HBBR_API void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos
 				_assets_repos[repository].erase(guid);
 				HString vpvf = i->virtualPath;
 				FileSystem::ClearPathSeparation(vpvf);
-				_assets_vf.erase(vpvf);
+				_assets_vf[vpvf].assets.erase(guid);
 
 				//重新刷新仓库和引用
 				ReloadRepository(repository);
@@ -292,8 +328,40 @@ void ContentManager::SaveAssetInfo(AssetInfoBase* assetInfo)
 			{
 				MessageOut("Save repository xml failed.", false, true, "255,255,0");
 			}
+
+			//保存了的资产自动退出Dirty Mark
+			{
+				auto vit = std::remove_if(_dirtyAssets.begin(), _dirtyAssets.end(), [assetInfo](std::weak_ptr<AssetInfoBase>& a) {
+					return a.lock()->guid == assetInfo->guid;
+					});
+				if (vit != _dirtyAssets.end())
+				{
+					_dirtyAssets.erase(vit);
+				}
+			}
+
 		}
 	}
+}
+
+void ContentManager::SetVirtualName(AssetInfoBase* assetInfo, HString newName, bool bSave)
+{
+	if (assetInfo)
+	{
+		//更新asset info
+		assetInfo->displayName = newName;
+		assetInfo->virtualFilePath = FileSystem::Append(assetInfo->virtualPath, assetInfo->displayName + "." + assetInfo->suffix);
+		assetInfo->virtualFilePath.Replace("\\", "/");
+		if (bSave)
+		{
+			SaveAssetInfo(assetInfo);
+		}
+	}
+}
+
+void ContentManager::MarkAssetDirty(std::weak_ptr<AssetInfoBase> asset)
+{
+	_dirtyAssets.push_back(asset);
 }
 
 #endif
@@ -351,11 +419,12 @@ void ContentManager::ReloadRepository(HString repositoryName)
 		FileSystem::FixUpPath(info->assetFilePath);
 		info->assetPath = FileSystem::GetRelativePath(info->absPath.c_str());
 		FileSystem::FixUpPath(info->assetPath);
+		//虚拟路径Virtual Path
 		info->virtualPath = i.attribute(L"VPath").as_string();
 		//FileSystem::FixUpPath(info->virtualPath);
 		info->virtualFilePath = FileSystem::Append(info->virtualPath , info->displayName + "." + info->suffix);
 		info->virtualFilePath.Replace("\\","/");
-		info->virtualFilePath.Replace("\\\\", "/");
+
 		//FileSystem::FixUpPath(info->virtualFilePath);
 		info->repository = repositoryName;
 
