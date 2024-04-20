@@ -31,11 +31,19 @@
 #pragma region  ViewItem
 CustomViewItem::CustomViewItem(const QString& text) :QStandardItem(text)
 {
-	setEditable(false);
+	setFlags(Qt::ItemIsSelectable
+		| Qt::ItemIsEditable
+		| Qt::ItemIsDragEnabled
+		| Qt::ItemIsEnabled
+	);
 }
 CustomViewItem::CustomViewItem(const QIcon& icon, const QString& text) : QStandardItem(icon, text)
 {
-	setEditable(false);
+	setFlags(Qt::ItemIsSelectable
+		| Qt::ItemIsEditable
+		| Qt::ItemIsDragEnabled
+		| Qt::ItemIsEnabled
+	);
 }
 
 CustomListItem::CustomListItem(const QString& text, QListWidget* view, int type):QListWidgetItem(text, view, type)

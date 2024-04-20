@@ -264,11 +264,11 @@ void ContentManager::SetNewVirtualPath(std::vector<AssetInfoBase*> assetInfos, H
 	for (auto& i : assetInfos)
 	{
 		HString assetRepository = i->repository;
+		HString oldVirtualPath = i->virtualPath;
 		//修改info的虚拟路径
 		i->virtualPath = newVirtualPath;
 		i->virtualFilePath = FileSystem::Append(newVirtualPath, i->displayName + "." + i->suffix);
 		i->virtualFilePath.Replace("\\", "/");
-		i->virtualFilePath.Replace("\\\\", "/");
 		auto it = std::find_if(repositories.begin(), repositories.end(), [assetRepository](HString & r) {
 			return r.IsSame(assetRepository);
 			});
@@ -278,16 +278,44 @@ void ContentManager::SetNewVirtualPath(std::vector<AssetInfoBase*> assetInfos, H
 		}
 		//保存进.repository
 		SaveAssetInfo(i);
+		{
+			//添加
+			HString vpf = i->virtualPath;
+			HString vpf_old = oldVirtualPath;
+			FileSystem::ClearPathSeparation(vpf);
+			FileSystem::ClearPathSeparation(vpf_old);
+			auto vfit = _assets_vf.find(vpf);
+			if (vfit == _assets_vf.end())
+			{
+				VirtualFolder newVF;
+				newVF.assets.emplace(i->guid, _assets_vf[vpf_old].assets[i->guid]);
+				newVF.FolderName = FileSystem::GetFileName(i->virtualPath);
+				newVF.Path = i->virtualPath;
+				_assets_vf.emplace(vpf, newVF);
+			}
+			else
+			{
+				vfit->second.assets.emplace(i->guid, _assets_vf[vpf_old].assets[i->guid]);
+			}
+			//移除内存，该函数修改了虚拟路径，所以只需要处理虚拟路径的_assets_vf就行了
+			_assets_vf[vpf_old].assets.erase(i->guid);
+
+			//如果更改的过程发现老的虚拟目录空了,就直接删了吧
+			if (_assets_vf[vpf_old].assets.size() <= 0)
+			{
+				_assets_vf.erase(vpf_old);
+			}
+		}
 	}
 
-	for (auto& i : repositories)
-	{
-		//重新加载
-		ReloadRepository(i);
-	}
+	//for (auto& i : repositories)
+	//{
+	//	//重新加载
+	//	ReloadRepository(i);
+	//}
 
-	//刷新引用
-	UpdateAllAssetReference();
+	//刷新引用(只是改个虚拟路径不需要刷新引用)
+	//UpdateAllAssetReference();
 }
 
 void ContentManager::SaveAssetInfo(AssetInfoBase* assetInfo)
@@ -456,10 +484,18 @@ void ContentManager::ReloadRepository(HString repositoryName)
 			}
 		}
 
-		if (checkExist.expired())
+		//Get memory
 		{
 			//1
-			_assets[(uint32_t)type].emplace(info->guid, info);
+			auto ait = _assets[(uint32_t)type].find(info->guid);
+			if (ait == _assets[(uint32_t)type].end())
+			{
+				_assets[(uint32_t)type].emplace(info->guid, info);
+			}
+			else
+			{
+				_assets[(uint32_t)type][info->guid] = info;
+			}
 			//2
 			auto it = _assets_repos.find(repositoryName);
 			if (it == _assets_repos.end())
@@ -489,10 +525,7 @@ void ContentManager::ReloadRepository(HString repositoryName)
 				vfit->second.assets.emplace(info->guid, info);
 			}
 		}
-		else
-		{
-			_assets[(uint32_t)type][info->guid] = info;
-		}
+
 	}
 }
 

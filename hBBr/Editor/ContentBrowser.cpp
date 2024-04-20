@@ -33,7 +33,8 @@ VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrows
 {
 	setObjectName("CustomTreeView_VirtualFolderTreeView");
 	setIndentation(20);
-	setEditTriggers(EditTrigger::DoubleClicked);
+	//setEditTriggers(EditTrigger::DoubleClicked);
+	setEditTriggers(QAbstractItemView::NoEditTriggers);
 	_contentBrowser = contentBrowser;
 	_newSelectionItems.reserve(50);
 	_currentSelectionItem = 0;
@@ -52,40 +53,11 @@ VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrows
 		//创建一个新的虚拟文件夹
 		ActionConnect(createFolder, [this]() 
 			{
-				auto itemModel = ((QStandardItemModel*)model());
 				if (currentIndex().isValid())
 				{
-					CustomViewItem* currentItem = (CustomViewItem*)itemModel->itemFromIndex(currentIndex());
-					QString newName = "NewFolder";
-					int index = -1;
-					while (true)
-					{
-						bool bFound = false;
-						int rowCount = currentItem->rowCount();
-						for (int row = 0; row < rowCount; ++row)
-						{
-							QStandardItem* childItem = currentItem->child(row);
-							if (childItem->text().compare(newName) == 0)
-							{
-								bFound = true;
-								index++;
-								newName = "NewFolder_" + QString::number(index) ;
-								break;
-							}
-						}
-						if (!bFound)
-						{
-							break;
-						}
-					}
-					CustomViewItem* newItem = new CustomViewItem(newName);
-					AddItem(newItem , currentItem);
-					//
-					_bSaveSelectionItem = true;
-					selectionModel()->clearSelection();
-					selectionModel()->setCurrentIndex(newItem->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
+					auto itemModel = ((QStandardItemModel*)model());
+					CreateNewVirtualFolder((CustomViewItem*)itemModel->itemFromIndex(currentIndex()));
 				}
-
 			});
 		//删除当前虚拟文件夹内的所有文件
 		ActionConnect(deleteFile, [this]()
@@ -95,9 +67,16 @@ VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrows
 		//给虚拟文件夹重命名
 		ActionConnect(rename, [this]()
 			{
-
+				//资产改名
+				auto items = GetSelectionItems();
+				if (items.size() > 0)
+				{
+					_ediingItem = items[0];
+					edit(_ediingItem->index());
+				}
 			});
 	}
+	connect(model(), &QAbstractItemModel::dataChanged, this, &VirtualFolderTreeView::onDataChanged);
 }
 
 void VirtualFolderTreeView::AddItem(CustomViewItem* newItem, CustomViewItem* parent)
@@ -237,6 +216,88 @@ void VirtualFolderTreeView::contextMenuEvent(QContextMenuEvent* event)
 {
 	CustomTreeView::contextMenuEvent(event);
 	_contextMenu->exec(event->globalPos());
+}
+
+CustomViewItem* VirtualFolderTreeView::CreateNewVirtualFolder(CustomViewItem* parent, QString folderName)
+{
+	if (!parent)
+	{
+		return nullptr;
+	}
+	auto itemModel = ((QStandardItemModel*)model());
+	if (parent->index().isValid())
+	{
+		CustomViewItem* currentItem = (CustomViewItem*)itemModel->itemFromIndex(parent->index());
+		QString newName = folderName;
+		int index = -1;
+		while (true)
+		{
+			bool bFound = false;
+			int rowCount = currentItem->rowCount();
+			for (int row = 0; row < rowCount; ++row)
+			{
+				QStandardItem* childItem = currentItem->child(row);
+				if (childItem->text().compare(newName) == 0)
+				{
+					bFound = true;
+					index++;
+					newName = folderName + "_" + QString::number(index);
+					break;
+				}
+			}
+			if (!bFound)
+			{
+				break;
+			}
+		}
+		CustomViewItem* newItem = new CustomViewItem(newName);
+		AddItem(newItem, currentItem);
+		//
+		_bSaveSelectionItem = true;
+		selectionModel()->clearSelection();
+		selectionModel()->setCurrentIndex(newItem->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
+		return newItem;
+	}
+	return nullptr;
+}
+
+void VirtualFolderTreeView::onDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+	auto itemModel = ((QStandardItemModel*)model());
+	if (topLeft.isValid())
+	{
+		CustomViewItem* currentItem = (CustomViewItem*)itemModel->itemFromIndex(topLeft);
+		//if (currentItem->parent())
+		{
+			//创建新名字目录
+			//此函数是Item已经改完名字之后触发的，所有不需要创建新的目录.
+			//auto newFolder = CreateNewVirtualFolder((CustomViewItem*)currentItem->parent(), currentItem->text());
+			auto assets = ContentManager::Get()->GetAssetsByVirtualFolder(currentItem->_fullPath.toStdString().c_str());
+			HString oldName = currentItem->_text.toStdString().c_str();
+			currentItem->_text = currentItem->text();
+			currentItem->_fullPath = currentItem->_path + "/" + currentItem->_text;
+			// 
+			//把资产都移动到新目录
+			std::vector<AssetInfoBase*> infos;
+			infos.reserve(assets.size());
+			for (auto& i : assets)
+			{
+				infos.push_back(i.second.get());
+			}
+			ContentManager::Get()->SetNewVirtualPath(infos, currentItem->_fullPath.toStdString().c_str());
+			//删除旧目录
+			//RemoveFolder(currentItem->_fullPath);
+			//更新
+			ContentBrowser::RefreshContentBrowsers();
+			//
+			//_bSaveSelectionItem = true;
+			//selectionModel()->clearSelection();
+			//selectionModel()->setCurrentIndex(currentItem->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
+
+			ConsoleDebug::print_endl("Virtual folder rename : [" + oldName + "] to [" + currentItem->_text.toStdString().c_str() + "]");
+
+		}	
+	}
 }
 
 #pragma endregion

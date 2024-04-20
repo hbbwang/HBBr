@@ -25,7 +25,8 @@ public:
 	virtual void SelectionItem(QString vPath)override;
 
 	class  ContentBrowser* _contentBrowser;
-
+private:
+	CustomViewItem* _ediingItem = nullptr;
 protected:
 
 	virtual void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)override;
@@ -33,6 +34,8 @@ protected:
 	void currentChanged(const QModelIndex& current, const QModelIndex& previous) override;
 
 	virtual void contextMenuEvent(QContextMenuEvent* event)override;
+
+	CustomViewItem* CreateNewVirtualFolder(CustomViewItem* parent , QString folderName = "NewFolder");
 
 	class QMenu* _contextMenu = nullptr;
 
@@ -43,6 +46,8 @@ protected:
 
 	bool _bSaveSelectionItem;
 
+private slots:
+	void onDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 };
 #pragma endregion
 

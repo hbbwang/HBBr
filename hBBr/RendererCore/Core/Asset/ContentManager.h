@@ -259,7 +259,7 @@ public:
 
 	HBBR_API inline const  std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> GetAssetsByVirtualFolder(HString virtualFolder)const;
 
-	HBBR_API inline const std::unordered_map<HString, VirtualFolder>& GetVirtualFolders()const { return _assets_vf; }
+	HBBR_API inline const std::map<HString, VirtualFolder>& GetVirtualFolders()const { return _assets_vf; }
 
 	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HGUID guid, AssetType type = AssetType::Unknow)const;
 
@@ -306,5 +306,5 @@ private:
 	//根据仓库储存对象
 	std::unordered_map<HString, std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>> _assets_repos;
 	//根据虚拟路径储存对象<完整虚拟路径,虚拟路径对象>
-	std::unordered_map<HString, VirtualFolder> _assets_vf;
+	std::map<HString, VirtualFolder> _assets_vf;
 };
