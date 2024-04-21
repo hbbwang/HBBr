@@ -11,6 +11,7 @@ class GameObjectItem :public QTreeWidgetItem
 {
 public:
     GameObjectItem(class GameObject* gameObject, QTreeWidget* view);
+    ~GameObjectItem();
     class GameObject* _gameObject = nullptr;
     void Destroy();
 };

@@ -27,6 +27,11 @@ GameObjectItem::GameObjectItem(GameObject* gameObject, QTreeWidget* view)
     setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
 }
 
+GameObjectItem::~GameObjectItem()
+{
+
+}
+
 void GameObjectItem::Destroy()
 {
     if (_gameObject != nullptr)
@@ -258,27 +263,26 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     {
         if (!world.expired())
         {
-            auto worldPtr = world.lock();
-
             //World Update Callback
-            worldPtr->_editorWorldUpdate= 
+            world.lock()->_editorWorldUpdate=
                 [](std::vector<std::weak_ptr<Level>>&levels)
                 {
                 };
 
             //Level changed callback
-            worldPtr->_editorLevelChanged =
-                [this, worldPtr]()
+            world.lock()->_editorLevelChanged =
+                [this, world]()
             {
                 _currentLevel->ClearItems();
-                for (auto& i : worldPtr->GetLevels())
+                if (!world.expired())
+                for (auto& i : world.lock()->GetLevels())
                 {
                     _currentLevel->AddItem(i->GetLevelName().c_str());
                 }
             };
 
             //Editor GameObject更新委托
-            worldPtr->_editorGameObjectUpdateFunc = [this]
+            world.lock()->_editorGameObjectUpdateFunc = [this]
             (std::shared_ptr<GameObject> object)
             {
                 if (object->_bEditorNeedUpdate)
@@ -290,21 +294,24 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                         if (Inspector::_currentInspector != nullptr)
                             Inspector::_currentInspector->LoadInspector_GameObject(objects[0]->GetSelfWeekPtr(), true);
                     }
-                    auto item = (GameObjectItem*)object->_editorObject;
-                    //rename?
-                    item->setText(0, object->GetObjectName().c_str());
+                    if (object->_editorObject)
+                    {
+                        auto item = (GameObjectItem*)object->_editorObject;
+                        //rename?
+                        item->setText(0, object->GetObjectName().c_str());
+                    }
                 }
             };
 
             //Editor GameObject Spawn委托
-            worldPtr->_editorGameObjectAddFunc = [this]
+            world.lock()->_editorGameObjectAddFunc = [this]
             (std::shared_ptr<GameObject> object) 
             {
                 _treeWidget->addTopLevelItem(new GameObjectItem(object.get(), _treeWidget));
             };
 
             //Editor GameObject Destroy委托
-            worldPtr->_editorGameObjectRemoveFunc = [this]
+            world.lock()->_editorGameObjectRemoveFunc = [this]
             (std::shared_ptr<GameObject> object)
             {
                 auto item = (GameObjectItem*)object->_editorObject;
@@ -326,7 +333,7 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
             };
             
             _currentLevel->ClearItems();
-            for (auto &i : worldPtr->GetLevels())
+            for (auto &i : world.lock()->GetLevels())
             {
                 _currentLevel->AddItem(i->GetLevelName().c_str());
             }

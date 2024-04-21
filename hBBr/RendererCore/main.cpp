@@ -22,10 +22,10 @@
 
 #include "main.h"
 
-//#if _DEBUG
-//#include "include/vld.h"
-//#pragma comment(lib ,"vld.lib")
-//#endif
+#if _DEBUG
+#include "include/vld.h"
+#pragma comment(lib ,"vld.lib")
+#endif
 
 std::vector<VulkanForm*> VulkanApp::_forms;
 VulkanForm* VulkanApp::_mainForm = nullptr;

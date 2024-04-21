@@ -108,7 +108,10 @@ bool RenderView::event(QEvent* event)
 
 void RenderView::closeEvent(QCloseEvent* event)
 {
-	VulkanApp::DeInitVulkanManager();
+    if (hwnd)
+    {
+        VulkanApp::DeInitVulkanManager();
+    }
 }
 
 void RenderView::paintEvent(QPaintEvent* event)
