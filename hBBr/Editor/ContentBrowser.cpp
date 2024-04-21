@@ -278,25 +278,31 @@ void VirtualFolderTreeView::onDataChanged(const QModelIndex& topLeft, const QMod
 			currentItem->_fullPath = currentItem->_path + "/" + currentItem->_text;
 			// 
 			//把资产都移动到新目录
-			std::vector<AssetInfoBase*> infos;
-			infos.reserve(assets.size());
-			for (auto& i : assets)
+			if (assets.size() > 0)
 			{
-				infos.push_back(i.second.get());
+				std::vector<AssetInfoBase*> infos;
+				infos.reserve(assets.size());
+				for (auto& i : assets)
+				{
+					infos.push_back(i.second.get());
+				}
+				ContentManager::Get()->SetNewVirtualPath(infos, currentItem->_fullPath.toStdString().c_str());
 			}
-			ContentManager::Get()->SetNewVirtualPath(infos, currentItem->_fullPath.toStdString().c_str());
+			else
+			{
+				ContentManager::Get()->CreateNewVirtualFolder(currentItem->_fullPath.toStdString().c_str());
+			}
 			//删除旧目录
 			//RemoveFolder(currentItem->_fullPath);
-			//更新
-			ContentBrowser::RefreshContentBrowsers();
-			//
-
+			// 
 			ConsoleDebug::print_endl("Virtual folder rename : [" + oldName + "] to [" + currentItem->_text.toStdString().c_str() + "]");
 
 			_bSaveSelectionItem = true;
 			selectionModel()->clearSelection();
 			selectionModel()->setCurrentIndex(currentItem->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
 
+			//更新
+			ContentBrowser::RefreshContentBrowsers();		
 		}	
 	}
 }

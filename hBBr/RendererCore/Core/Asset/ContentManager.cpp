@@ -392,6 +392,20 @@ void ContentManager::MarkAssetDirty(std::weak_ptr<AssetInfoBase> asset)
 	_dirtyAssets.push_back(asset);
 }
 
+void ContentManager::CreateNewVirtualFolder(HString folderFullPath)
+{
+	HString vpvf = folderFullPath;
+	FileSystem::ClearPathSeparation(vpvf);
+	auto vfit = _assets_vf.find(vpvf);
+	if (vfit == _assets_vf.end())
+	{
+		VirtualFolder newVF;
+		newVF.FolderName = FileSystem::GetFileName(folderFullPath);
+		newVF.Path = folderFullPath;
+		_assets_vf.emplace(vpvf, newVF);
+	}
+}
+
 #endif
 
 std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)

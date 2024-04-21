@@ -238,6 +238,11 @@ public:
 		return result;
 	}
 
+	/*
+		创建一个新的虚拟文件夹
+	*/
+	HBBR_API void CreateNewVirtualFolder(HString folderFullPath);
+
 
 #endif
 
