@@ -151,6 +151,7 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 			else if (suffix.IsSame("mat", false))
 			{
 				//材质球只能在编辑器创建,无法导入
+				type = AssetType::Material;
 			}
 			//导入AssetInfo
 			if(type != AssetType::Unknow)
@@ -196,7 +197,7 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 			}
 			else
 			{
-				MessageOut("Asset Import Failed.Unknow asset type.",false,true,"255,255,0");
+				MessageOut("Asset Import Failed.Unknow asset type.",false, false,"255,255,0");
 				return false;
 			}
 		}
@@ -255,6 +256,7 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 	}
 	if (bSure)
 	{
+		std::vector<std::shared_ptr<AssetInfoBase>> assetInfosPtr;
 		std::vector<HString>repositories;
 		repositories.reserve(assetInfos.size());
 		for (auto& i : assetInfos)
@@ -297,24 +299,37 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 					continue;
 				}
 
-				//移除内存中的AssetInfo
-				_assets[(int)i->type].erase(guid);
-				_assets_repos[repository].erase(guid);
+
+				//收集临时共享指针,防止因为earse导致指针释放
+				auto assetIt = _assets[(int)i->type].find(guid);
+				if (assetIt != _assets[(int)i->type].end())
+				{
+					assetInfosPtr.push_back(assetIt->second);
+				}
+
+			}
+		}
+
+		//移除内存中的AssetInfo
+		{
+			for (auto& i : assetInfosPtr)
+			{
+				_assets[(int)i->type].erase(i->guid);
+				_assets_repos[i->repository].erase(i->guid);
 				HString vpvf = i->virtualPath;
 				FileSystem::ClearPathSeparation(vpvf);
-				_assets_vf[vpvf].assets.erase(guid);
-
+				_assets_vf[vpvf].assets.erase(i->guid);
 				if (isRemoveTheEmptyVirtualFolder)
-				{				
+				{
 					//如果更改的过程发现虚拟目录空了,就直接删了吧
 					if (_assets_vf[vpvf].assets.size() <= 0)
 					{
 						_assets_vf.erase(vpvf);
 					}
 				}
-
-			}
+			}		
 		}
+
 		//重新刷新仓库和引用
 		for (auto& r : repositories)
 		{

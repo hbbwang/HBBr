@@ -40,7 +40,6 @@ void GetAllFolderChildItems(CustomViewItem* parentItem , QList<CustomViewItem*> 
 			CustomViewItem* childItem = (CustomViewItem*)parentItem->child(row);
 			if (childItem)
 			{
-				out.append(parentItem);
 				ConsoleDebug::printf_endl("Get Virtual Folder : %s", childItem->text().toStdString().c_str());
 				// 递归获取子项的子项
 				GetAllFolderChildItems(childItem,out);
@@ -92,7 +91,7 @@ VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrows
 		ActionConnect(deleteFile, [this]()
 			{
 				//收集当前选中的虚拟目录 + 它们的所以子目录
-				QList<CustomViewItem*> allFoldersForDelete;
+				QList<CustomViewItem*> allFoldersForDelete; 
 				{
 					auto items = GetSelectionItems();
 					for (auto& i : items)
@@ -775,8 +774,8 @@ void ContentBrowser::RefreshFolderOnTreeView()
 			_treeView->_bSaveSelectionItem = false;
 			_treeView->selectionModel()->clearSelection();
 			_treeView->selectionModel()->setCurrentIndex(firstChoose->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
-
 		}
+		_treeView->expand(_treeView->currentIndex());
 	}
 }
 
