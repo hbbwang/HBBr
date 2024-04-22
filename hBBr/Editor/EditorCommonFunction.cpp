@@ -3,6 +3,7 @@
 #include "qmessageBox.h"
 #include "QTextStream.h"
 #include <QFileInfo>
+#include <regex>
 #include <QDirIterator>
 #include "ImageTool.h"
 #include "ConsoleDebug.h"
@@ -55,11 +56,14 @@ QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
                 if (bFoundVariable)
                 {
                     auto noSpace = strLine.remove(" ");
+                    noSpace = strLine.remove("\r");
                     noSpace = noSpace.remove("\t");
                     auto l = noSpace.split(':');
                     if (l.size() > 1)
                     {
-                        vars.append({ l[0] , l[1].remove(';') });
+                        QString name = l[0];
+                        QString value = l[1].remove(';');
+                        vars.append({ name , value });
                     }
                 }
                 if (bFoundVariable && strLine.contains("}", Qt::CaseSensitive))
@@ -75,7 +79,7 @@ QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
             styleFile.close();
             for (auto i : vars)
             {
-                result.replace(i.name, i.value);
+                result.replace(i.name, i.value); 
             }
 		}
 		else

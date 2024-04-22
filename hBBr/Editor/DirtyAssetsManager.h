@@ -6,7 +6,6 @@
 class DirtyAssetsManager : public QDialog
 {
 	Q_OBJECT
-
 public:
 	DirtyAssetsManager(QWidget *parent = nullptr);
 	~DirtyAssetsManager();

@@ -3,6 +3,8 @@
 #include "EditorCommonFunction.h"
 #include <QPixmap>
 #include <qabstractitemview.h>
+#include <QPainter>
+#include <QStyleOption>
 CustomSearchLine::CustomSearchLine(QWidget *parent)
 	: QWidget(parent)
 {
@@ -24,4 +26,13 @@ CustomSearchLine::CustomSearchLine(QWidget *parent)
 CustomSearchLine::~CustomSearchLine()
 {
 
+}
+
+void CustomSearchLine::paintEvent(QPaintEvent* event)
+{
+	Q_UNUSED(event);
+	QStyleOption styleOpt;
+	styleOpt.init(this);
+	QPainter painter(this);
+	style()->drawPrimitive(QStyle::PE_Widget, &styleOpt, &painter, this);
 }

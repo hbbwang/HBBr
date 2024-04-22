@@ -10,6 +10,8 @@
 #include <QMimeData>
 #include <QApplication>
 #include <QDrag>
+#include <QStyleOption>
+#include <QPainter>
 #include <qmenu.h>
 #include "EditorCommonFunction.h"
 #include "CustomSearchLine.h"
@@ -235,8 +237,8 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     setFocusPolicy(Qt::FocusPolicy::ClickFocus);
     setObjectName("SceneOutline");
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(0,0,0,0);
-    mainLayout->setSpacing(0);
+    mainLayout->setContentsMargins(1,1,1,1);
+    mainLayout->setSpacing(1);
     this->setLayout(mainLayout);
 
     _currentLevel = new ComboBox("Level", this);
@@ -423,5 +425,14 @@ void SceneOutline::TreeSearch()
 void SceneOutline::focusInEvent(QFocusEvent* event)
 {
 
+}
+
+void SceneOutline::paintEvent(QPaintEvent* event)
+{
+    Q_UNUSED(event);
+    QStyleOption styleOpt;
+    styleOpt.init(this);
+    QPainter painter(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &styleOpt, &painter, this);
 }
 

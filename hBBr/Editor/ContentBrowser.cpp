@@ -605,10 +605,16 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	:QWidget(parent)
 {
 	ui.setupUi(this);
-	ui.horizontalLayout_2->setSpacing(1);
+	ui.horizontalLayout_2->setSpacing(2);
 	ui.horizontalLayout_2->setContentsMargins(1, 1, 1, 1);
 	ui.ContentBrowserVBoxLayout->setSpacing(1);
 	ui.ContentBrowserVBoxLayout->setContentsMargins(1, 1, 1, 1);
+
+	ui.ImportButton->setObjectName("ContentBrowser_Button");
+	ui.FrontspaceButton->setObjectName("ContentBrowser_Button");
+	ui.BackToParentButton->setObjectName("ContentBrowser_Button");
+	ui.BackspaceButton->setObjectName("ContentBrowser_Button");
+	ui.SaveButton->setObjectName("ContentBrowser_Button");
 
 	this->setObjectName("ContentBrowser");
 	
@@ -637,7 +643,7 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	ui.ContentBrowserVBoxLayout->setStretch(1, 1000);
 	
 	//Path label
-	ui.PathLabel->setObjectName("PathLabel");
+	ui.PathLabel->setObjectName("ContentBrowser_PathLabel");
 	ui.PathLabel->setText("Asset -");
 
 	_contentBrowser.append(this);

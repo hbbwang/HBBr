@@ -69,6 +69,7 @@ public:
 
     virtual void closeEvent(QCloseEvent* event);
     virtual void focusInEvent(QFocusEvent* event);
+    virtual void paintEvent(QPaintEvent* event);
     class  VulkanRenderer* _renderer = nullptr;
     class ComboBox* _currentLevel;
     static SceneOutlineTree* _treeWidget;

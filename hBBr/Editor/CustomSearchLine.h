@@ -12,5 +12,6 @@ public:
 	~CustomSearchLine();
 
 	Ui::CustomSearchLineClass ui;
-
+protected:
+	virtual void paintEvent(QPaintEvent* event);
 };

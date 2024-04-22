@@ -30,7 +30,7 @@ EditorMain::EditorMain(QWidget *parent)
         QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     _sceneOutline_dock->setWidget(_sceneOutline);
     _sceneOutline_dock->setWindowTitle("Scene Outline");
-    _sceneOutline_dock->setObjectName("SceneOutline");
+    _sceneOutline->setObjectName("SceneOutline");
     addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, _sceneOutline_dock);
 
     _contentBrowser = new ContentBrowser(this);
@@ -39,7 +39,7 @@ EditorMain::EditorMain(QWidget *parent)
         QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     _contentBrowser_dock->setWidget(_contentBrowser);
     _contentBrowser_dock->setWindowTitle("Content Browser");
-    _contentBrowser_dock->setObjectName("ContentBrowser");
+    _contentBrowser->setObjectName("ContentBrowser");
     addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, _contentBrowser_dock);
 
     _inspector = new Inspector(this);
@@ -48,7 +48,7 @@ EditorMain::EditorMain(QWidget *parent)
         QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     _inspector_dock->setWidget(_inspector);
     _inspector_dock->setWindowTitle("Inspector");
-    _inspector_dock->setObjectName("Inspector");
+    _inspector->setObjectName("Inspector");
     addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, _inspector_dock);
 
     setObjectName("EditorMain");
