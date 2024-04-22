@@ -53,6 +53,7 @@ extern "C" {
 		HBBR_API static bool CreateDir(const char* path);
 		HBBR_API static bool CreateDirSymlink(const char* createPath, const char* linkTo);
 		HBBR_API static bool IsNormalFile(const char* path);
+		//文件复制,遇到相同目标名字的对象,则覆盖
 		HBBR_API static void FileCopy(const char* srcFile, const char* newPath);
 		HBBR_API static bool FileRemove(const char* path);
 		HBBR_API static void FileRename(const char* src , const char* dst);

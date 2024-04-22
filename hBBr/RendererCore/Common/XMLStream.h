@@ -68,16 +68,23 @@ public:
 		}
 	}
 
-	static pugi::xml_node CreateXMLNode(pugi::xml_node& node, const wchar_t* name)
+	static pugi::xml_node CreateXMLNode(pugi::xml_node& node, const wchar_t* name , bool bOverride = true)
 	{
 		if (node)
 		{
-			auto newChild = node.child(name);
-			if (!newChild)
+			if (bOverride)
 			{
-				newChild = node.append_child(name);
+				auto newChild = node.child(name);
+				if (!newChild)
+				{
+					newChild = node.append_child(name);
+				}
+				return newChild;
 			}
-			return newChild;
+			else
+			{
+				return node.append_child(name);
+			}
 		}
 		return pugi::xml_node();
 	}

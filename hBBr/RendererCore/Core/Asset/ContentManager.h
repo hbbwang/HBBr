@@ -200,7 +200,7 @@ public:
 	assetInfos:需要删除的资产信息
 	messageBox:是否弹出提示
 	*/
-	HBBR_API void AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool messageBox = true);
+	HBBR_API void AssetDelete(std::vector<AssetInfoBase*> assetInfos , bool isRemoveTheEmptyVirtualFolder = false, bool messageBox = true);
 
 	/* 
 	资产虚拟目录更改(不会更改仓库)
@@ -236,6 +236,9 @@ public:
 			}
 		}
 		return result;
+	}
+	HBBR_API static void ClearDirtyAssets() {
+		_dirtyAssets.clear();
 	}
 
 	/*

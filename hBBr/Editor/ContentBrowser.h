@@ -17,7 +17,7 @@ public:
 
 	//删除文件(是真的删除!包括真实路径下的文件,注意别乱用了)
 	//和RemoveItem不一样，RemoveItem只是暂时移除编辑器里的虚拟目录，不会对项目造成实质性影响。
-	virtual void RemoveFolder(QString virtualPath);
+	virtual void DeleteFolders(QList<CustomViewItem*> allFoldersForDelete);
 
 	//虚拟路径统一用“/”分割，不存在使用"\\"
 	CustomViewItem* FindFolder(QString virtualPath);
@@ -97,7 +97,6 @@ class RepositorySelection : public QDialog
 	friend class ContentBrowser;
 public:
 	RepositorySelection(QWidget* parent);
-	void Show();
 	void Hide();
 	std::function<void(QString repository)> _selectionCallBack;
 	QString _currentRepositorySelection;
@@ -127,8 +126,8 @@ public:
 	void Refresh();
 	void RefreshFolderOnTreeView();
 	void RefreshFileOnListView();
-
-	static class RepositorySelection* _repositorySelection;
+	void ShowRepositorySelection();
+	void ImportAssets();
 
 protected:
 

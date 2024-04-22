@@ -87,13 +87,44 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 	}
 	if (XMLStream::LoadXML(repositoryXMLPath.c_wstr(), doc))
 	{
+		auto root = doc.child(TEXT("root"));
 		for (auto& i : importFiles)
 		{
 			HString suffix = FileSystem::GetFileExt(i.absAssetFilePath);
 			HString baseName = FileSystem::GetBaseName(i.absAssetFilePath);
 			HString fileName = FileSystem::GetFileName(i.absAssetFilePath);
+
+			//查看下当前虚拟目录下有没有相同名字和类型的文件，有就进行覆盖，没有才新增
+			bool bFound = false; 
 			HGUID guid;
 			HString guidStr;
+			{
+				HString newVirtualFullPath = FileSystem::Append(i.virtualPath, fileName);
+				HString cVP = i.virtualPath;
+				FileSystem::ClearPathSeparation(cVP);
+				FileSystem::ClearPathSeparation(newVirtualFullPath); 
+				auto fit = _assets_vf.find(cVP);
+				if (fit != _assets_vf.end())
+				{
+					for (auto& fit_i : fit->second.assets)
+					{
+						HString checkFilePath = fit_i.second->virtualFilePath;
+						FileSystem::ClearPathSeparation(checkFilePath);
+						if (checkFilePath.IsSame(newVirtualFullPath))
+						{
+							bFound = true;
+							guid = fit_i.second->guid;
+							guidStr = fit_i.second->guid.str().c_str();
+						}
+					}
+				}
+			}
+			if (!bFound)
+			{
+				guidStr = CreateGUIDAndString(guid);
+			}
+			//
+
 			AssetType type = AssetType::Unknow;
 			HString assetTypeName = "Unknow";
 			//----------------------------------------Model
@@ -101,10 +132,9 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 			{
 				type = AssetType::Model;
 				HString savePath = FileSystem::Append(repositoryPath, "Model");
+				savePath = FileSystem::Append(savePath, guidStr + "." + suffix);
 				//复制fbx到项目目录
 				FileSystem::FileCopy(i.absAssetFilePath.c_str(), savePath.c_str());
-				guidStr = CreateGUIDAndString(guid);
-				FileSystem::FileRename((FileSystem::Append(savePath, fileName)) .c_str(), FileSystem::Append(savePath, guidStr + "." + suffix).c_str());
 			}
 			//----------------------------------------Texture
 			else if (suffix.IsSame("png", false)
@@ -120,20 +150,35 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 			//----------------------------------------Material
 			else if (suffix.IsSame("mat", false))
 			{
-				type = AssetType::Material;
-				HString savePath = FileSystem::Append(repositoryPath, "Material");
-				//复制fbx到项目目录
-				FileSystem::FileCopy(i.absAssetFilePath.c_str(), savePath.c_str());
-				guidStr = CreateGUIDAndString(guid);
-				FileSystem::FileRename((FileSystem::Append(savePath, fileName)).c_str(), FileSystem::Append(savePath, guidStr + "." + suffix).c_str());
+				//材质球只能在编辑器创建,无法导入
 			}
 			//导入AssetInfo
 			if(type != AssetType::Unknow)
 			{
 				assetTypeName = GetAssetTypeString(type);
-				auto root = doc.child(TEXT("root"));
 				//auto newItem = root.append_child(TEXT("Item"));	
-				auto newItem = XMLStream::CreateXMLNode(root, TEXT("item"));
+				auto newItem = pugi::xml_node();
+				if (bFound)
+				{
+					bool bFindGUID = false;
+					for (auto n = root.first_child(); n; n = n.next_sibling())
+					{
+						if (guidStr.IsSame(n.attribute(TEXT("GUID")).as_string()))
+						{
+							bFindGUID = true;
+							newItem = XMLStream::CreateXMLNode(root, TEXT("Item"), true);
+						}
+					}
+					if (!bFindGUID)
+					{
+						//仓库文件中没找到该GUID的Item，重新添加一份上去。
+						newItem = XMLStream::CreateXMLNode(root, TEXT("Item"), false);
+					}
+				}
+				else
+				{
+					newItem = XMLStream::CreateXMLNode(root, TEXT("Item"), false);
+				}
 				XMLStream::SetXMLAttribute(newItem,TEXT("GUID"), guidStr.c_wstr());
 				XMLStream::SetXMLAttribute(newItem, TEXT("Type"), (int)type);
 				XMLStream::SetXMLAttribute(newItem, TEXT("Name"), baseName.c_wstr());
@@ -173,7 +218,7 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 	return true;
 }
 
-HBBR_API void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool messageBox)
+void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool isRemoveTheEmptyVirtualFolder, bool messageBox)
 {
 	bool bSure = true;
 	if (messageBox)
@@ -210,12 +255,21 @@ HBBR_API void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos
 	}
 	if (bSure)
 	{
+		std::vector<HString>repositories;
+		repositories.reserve(assetInfos.size());
 		for (auto& i : assetInfos)
 		{
 			//资产删除不会帮忙处理资产引用关系(包括场景的)，如果删错了
 			//编辑器会直接告知用户引用错误信息，让用户自行处理(不会崩溃)
 			//所以删除前最好使用 [引用关系查看器] 检查好 
 			HString repository = i->repository;
+			auto ssit = std::find_if(repositories.begin(), repositories.end(), [repository](HString & s) {
+				return s == repository;
+			});
+			if (ssit == repositories.end())
+			{
+				repositories.push_back(repository);
+			}
 			//删除实际资产
 			FileSystem::FileRemove(i->absFilePath.c_str());
 			//移除.repository内储存的Item信息
@@ -250,11 +304,23 @@ HBBR_API void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos
 				FileSystem::ClearPathSeparation(vpvf);
 				_assets_vf[vpvf].assets.erase(guid);
 
-				//重新刷新仓库和引用
-				ReloadRepository(repository);
-				UpdateAllAssetReference();
+				if (isRemoveTheEmptyVirtualFolder)
+				{				
+					//如果更改的过程发现虚拟目录空了,就直接删了吧
+					if (_assets_vf[vpvf].assets.size() <= 0)
+					{
+						_assets_vf.erase(vpvf);
+					}
+				}
+
 			}
 		}
+		//重新刷新仓库和引用
+		for (auto& r : repositories)
+		{
+			ReloadRepository(r);
+		}
+		UpdateAllAssetReference();
 	}
 }
 

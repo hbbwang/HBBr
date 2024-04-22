@@ -28,6 +28,27 @@
 #include "ConsoleDebug.h"
 //--------------------------------------VirtualFolderTreeView-------------------
 #pragma region VirtualFolderTreeView
+void GetAllFolderChildItems(CustomViewItem* parentItem , QList<CustomViewItem*> & out)
+{
+	if (parentItem)
+	{
+		out.append(parentItem);
+		ConsoleDebug::printf_endl("Get Virtual Folder : %s", parentItem->text().toStdString().c_str());
+		int rowCount = parentItem->rowCount();
+		for (int row = 0; row < rowCount; ++row)
+		{
+			CustomViewItem* childItem = (CustomViewItem*)parentItem->child(row);
+			if (childItem)
+			{
+				out.append(parentItem);
+				ConsoleDebug::printf_endl("Get Virtual Folder : %s", childItem->text().toStdString().c_str());
+				// 递归获取子项的子项
+				GetAllFolderChildItems(childItem,out);
+			}
+		}
+	}
+}
+
 VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrowser, QWidget* parent)
 	:CustomTreeView(parent)
 {
@@ -43,13 +64,20 @@ VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrows
 	{
 		setContextMenuPolicy(Qt::ContextMenuPolicy::DefaultContextMenu);
 		_contextMenu = new QMenu(this);
+		QAction* importAssets = new QAction("Import Assets", _contextMenu);
 		QAction* createFolder = new QAction("Create Folder", _contextMenu);
 		QAction* deleteFile = new QAction("Delete Folder", _contextMenu);
 		QAction* rename = new QAction("Rename", _contextMenu);
+		_contextMenu->addAction(importAssets);
 		_contextMenu->addAction(createFolder);
 		_contextMenu->addAction(rename);
 		_contextMenu->addSeparator();
 		_contextMenu->addAction(deleteFile);
+		//资产导入
+		ActionConnect(importAssets, [this]()
+			{
+				_contentBrowser->ImportAssets();
+			});
 		//创建一个新的虚拟文件夹
 		ActionConnect(createFolder, [this]() 
 			{
@@ -59,9 +87,20 @@ VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrows
 					CreateNewVirtualFolder((CustomViewItem*)itemModel->itemFromIndex(currentIndex()));
 				}
 			});
+		
 		//删除当前虚拟文件夹内的所有文件
 		ActionConnect(deleteFile, [this]()
 			{
+				//收集当前选中的虚拟目录 + 它们的所以子目录
+				QList<CustomViewItem*> allFoldersForDelete;
+				{
+					auto items = GetSelectionItems();
+					for (auto& i : items)
+					{
+						GetAllFolderChildItems(i, allFoldersForDelete);
+					}
+				}
+				DeleteFolders(allFoldersForDelete);
 
 			});
 		//给虚拟文件夹重命名
@@ -149,36 +188,41 @@ void VirtualFolderTreeView::selectionChanged(const QItemSelection& selected, con
 	CustomTreeView::selectionChanged(selected, deselected);
 }
 
-void VirtualFolderTreeView::RemoveFolder(QString virtualPath)
+void VirtualFolderTreeView::DeleteFolders(QList<CustomViewItem*> allFoldersForDelete)
 {
-	auto item = FindFolder(virtualPath);
-	_allItems.removeOne(item);
-	model()->removeRow(item->row());
-	//尝试删除历史记录
-	_newSelectionItems.removeOne(item->_fullPath);
-	//删除实际路径文件和assetInfo
-	std::vector<AssetInfoBase*> assetInfos;
+	//获取这些虚拟目录资产,删除
 	HString msg;
-	for (auto& i : _contentBrowser->_listView->_currentVirtualFolderItems)
+	int count = 0;
+	std::vector<AssetInfoBase*>assetsForDelete;
+	for (auto& i : allFoldersForDelete)
 	{
-		if (!i->_assetInfo.expired())
+		auto assets = ContentManager::Get()->GetAssetsByVirtualFolder(i->_fullPath.toStdString().c_str());
+		for (auto& a : assets)
 		{
-			assetInfos.push_back(i->_assetInfo.lock().get());
-			msg += i->_assetInfo.lock()->virtualFilePath + "\n";
+			if (assetsForDelete.capacity() <= assetsForDelete.size())
+			{
+				assetsForDelete.reserve(assetsForDelete.capacity() + 100);
+			}
+			assetsForDelete.push_back(a.second.get());
+		}
+		if (count < 20)
+		{
+			HString newLine = i->_fullPath.toStdString().c_str();
+			msg += newLine + "\n";
+			count++;
 		}
 	}
-
-	msg = HString("You are deleting assets, are you sure?\nPlease check the asset reference relationship before deleting.\n\n") + msg;
-	ConsoleDebug::print_endl(msg,"255,255,0");
-	QMessageBox::StandardButton reply = QMessageBox::question(this,"Delete assets", msg.c_str(), QMessageBox::Yes | QMessageBox::Cancel);
+	msg = HString("You are deleting vitrual folder, are you sure?\nNormally, this is not recommended.This will also delete all the files in it (including the subdirectories,this can result in irreversible data loss.\n\n") + msg;
+	ConsoleDebug::print_endl(msg, "255,255,0");
+	QMessageBox::StandardButton reply = QMessageBox::question(this, "Delete virualt folder", msg.c_str(), QMessageBox::Yes | QMessageBox::Cancel);
 
 	if (reply == QMessageBox::Yes)
 	{
-		ContentManager::Get()->AssetDelete(assetInfos, false);
+		ContentManager::Get()->AssetDelete(assetsForDelete, true, false);
+		//刷新内容浏览器
+		ContentBrowser::RefreshContentBrowsers();
 	}
-	else
-	{
-	}
+
 }
 
 void VirtualFolderTreeView::currentChanged(const QModelIndex& current, const QModelIndex& previous)
@@ -267,11 +311,8 @@ void VirtualFolderTreeView::onDataChanged(const QModelIndex& topLeft, const QMod
 	if (topLeft.isValid())
 	{
 		CustomViewItem* currentItem = (CustomViewItem*)itemModel->itemFromIndex(topLeft);
-		//if (currentItem->parent())
 		{
-			//创建新名字目录
 			//此函数是Item已经改完名字之后触发的，所有不需要创建新的目录.
-			//auto newFolder = CreateNewVirtualFolder((CustomViewItem*)currentItem->parent(), currentItem->text());
 			auto assets = ContentManager::Get()->GetAssetsByVirtualFolder(currentItem->_fullPath.toStdString().c_str());
 			HString oldName = currentItem->_text.toStdString().c_str();
 			currentItem->_text = currentItem->text();
@@ -292,8 +333,6 @@ void VirtualFolderTreeView::onDataChanged(const QModelIndex& topLeft, const QMod
 			{
 				ContentManager::Get()->CreateNewVirtualFolder(currentItem->_fullPath.toStdString().c_str());
 			}
-			//删除旧目录
-			//RemoveFolder(currentItem->_fullPath);
 			// 
 			ConsoleDebug::print_endl("Virtual folder rename : [" + oldName + "] to [" + currentItem->_text.toStdString().c_str() + "]");
 
@@ -323,6 +362,8 @@ VirtualFileListView::VirtualFileListView(class  ContentBrowser* contentBrowser, 
 	{
 		setContextMenuPolicy(Qt::ContextMenuPolicy::DefaultContextMenu);
 		_contextMenu = new QMenu(this);
+		QAction* importAssets = new QAction("Import Assets",_contextMenu);
+		_contextMenu->addAction(importAssets);
 		{
 			QMenu* createFile = new QMenu("Create", _contextMenu);
 			_contextMenu->addMenu(createFile);
@@ -342,7 +383,7 @@ VirtualFileListView::VirtualFileListView(class  ContentBrowser* contentBrowser, 
 							ContentBrowser::RefreshContentBrowsers();
 						}
 					};
-					repositorySelection->Show();
+					repositorySelection->exec();
 				});
 		}
 		QAction* deleteFile = new QAction("Delete", _contextMenu);
@@ -350,6 +391,10 @@ VirtualFileListView::VirtualFileListView(class  ContentBrowser* contentBrowser, 
 		_contextMenu->addAction(rename);
 		_contextMenu->addSeparator();
 		_contextMenu->addAction(deleteFile);
+		ActionConnect(importAssets, [this]() 
+			{
+				_contentBrowser->ImportAssets();
+			});
 		ActionConnect(deleteFile, [this]()
 			{
 				HString msg;
@@ -373,7 +418,7 @@ VirtualFileListView::VirtualFileListView(class  ContentBrowser* contentBrowser, 
 
 					if (reply == QMessageBox::Yes)
 					{
-						ContentManager::Get()->AssetDelete(infos, false);
+						ContentManager::Get()->AssetDelete(infos, false, false);
 					}
 					else
 					{
@@ -472,7 +517,7 @@ RepositorySelection::RepositorySelection(QWidget* parent) :QDialog(parent)
 	setWindowFlags(Qt::Window);
 	setWindowFlags(Qt::Tool);
 	setWindowFlag(Qt::FramelessWindowHint);
-	setAttribute(Qt::WidgetAttribute::WA_DeleteOnClose);
+	//setAttribute(Qt::WidgetAttribute::WA_DeleteOnClose);
 	setFocusPolicy(Qt::FocusPolicy::StrongFocus);
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setContentsMargins(8,8, 10, 8);
@@ -498,16 +543,13 @@ RepositorySelection::RepositorySelection(QWidget* parent) :QDialog(parent)
 			}
 			ConsoleDebug::printf_endl("Import assets to repository:%s", _currentRepositorySelection.toStdString().c_str());
 			_selectionCallBack(_currentRepositorySelection);
-			Hide();
+			close();
 		});
 		connect(bCancel, &QPushButton::clicked, this, [this]() {
-			Hide();
+			close();
 		});
 	}
-	//
-	adjustSize();
-	resize(0, 0);
-	setHidden(true);
+
 	combo->_bindCurrentTextChanged = [this](const int index, const char* text) 
 	{
 		_currentRepositorySelection = text;
@@ -516,18 +558,6 @@ RepositorySelection::RepositorySelection(QWidget* parent) :QDialog(parent)
 	//combo->setMaximumHeight(50);
 	combo->ui.ComboBox_0->setMaximumHeight(40);
 	combo->ui.Name->setMaximumHeight(45);
-}
-
-void RepositorySelection::Show()
-{
-	exec();
-}
-
-void RepositorySelection::Hide()
-{
-	resize(0,0);
-	move(0,0);
-	setHidden(true);
 }
 
 void RepositorySelection::showEvent(QShowEvent*e)
@@ -568,7 +598,6 @@ void RepositorySelection::resizeEvent(QResizeEvent* event)
 }
 
 #pragma endregion
-RepositorySelection* ContentBrowser::_repositorySelection = nullptr;
 //--------------------------------------Content Browser Widget-------------------
 #pragma region ContentBrowserWidget
 QList<ContentBrowser*>ContentBrowser::_contentBrowser;
@@ -612,41 +641,6 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	ui.PathLabel->setObjectName("PathLabel");
 	ui.PathLabel->setText("Asset -");
 
-	//Repository Selection Widget
-	{
-		_repositorySelection = new RepositorySelection(this);
-		_repositorySelection->setObjectName("ContentBrowser_RepositorySelection");
-		_repositorySelection->_selectionCallBack = [this](QString repository)
-		{
-			//资产导入操作在这
-			if (_importFileNames.size() > 0 && _treeView->currentIndex().isValid())
-			{
-				std::vector<AssetImportInfo> infos;
-				infos.reserve(_importFileNames.size());
-				for (auto& i : _importFileNames)
-				{
-
-					//QMessageBox::information(0,0,i,0);
-					QFileInfo info(i);
-					if (info.isDir()) continue;
-					else 
-					{
-						AssetImportInfo newInfo;
-						newInfo.absAssetFilePath = i.toStdString().c_str();
-						newInfo.virtualPath =((CustomViewItem*)((QStandardItemModel*) _treeView->model())->itemFromIndex(_treeView->currentIndex()))->_fullPath.toStdString().c_str();
-						infos.push_back(newInfo);
-					}
-				}
-				bool bSucceed = ContentManager::Get()->AssetImport(repository.toStdString().c_str() , infos);
-				_importFileNames.clear();
-				if (bSucceed)
-				{
-					RefreshContentBrowsers();
-				}
-			}
-		};
-	}
-
 	_contentBrowser.append(this);
 	//Connect
 	connect(_treeView, &QTreeView::clicked, this, [this]() {
@@ -659,21 +653,7 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	});
 	//资产导入按钮
 	connect(ui.ImportButton, &QPushButton::clicked, this, [this]() {
-		// 创建一个支持多选的文件选择对话框
-		QStringList fileNames = QFileDialog::getOpenFileNames(nullptr,
-			"Import Resources",  // 对话框标题
-			"",         // 对话框初始目录
-			"All File (*);;\
-				Model (*.fbx);;\
-				Image (*.png *.jpg *.bmp *.tga *.hdr);;\
-			");  
-		ConsoleDebug::print_endl("Begin import assets...");
-		if (fileNames.size() > 0)
-		{
-			_repositorySelection->setFocus();
-			_repositorySelection->Show();
-			_importFileNames = fileNames;
-		}	
+		ImportAssets();
 	}); 
 	//回到下一个文件夹 →
 	connect(ui.FrontspaceButton, &QPushButton::clicked, this, [this]() {
@@ -813,6 +793,61 @@ void ContentBrowser::RefreshFileOnListView()
 			auto item = _listView->AddFile(a.second);
 			_listView->_currentVirtualFolderItems.append(item);
 		}
+	}
+}
+
+void ContentBrowser::ShowRepositorySelection()
+{
+	auto new_rs = new RepositorySelection(this);
+	new_rs->setObjectName("ContentBrowser_RepositorySelection");
+	_Sleep(10);
+	new_rs->_selectionCallBack = [this](QString repository)
+	{
+		//资产导入操作在这
+		if (_importFileNames.size() > 0 && _treeView->currentIndex().isValid())
+		{
+			std::vector<AssetImportInfo> infos;
+			infos.reserve(_importFileNames.size());
+			for (auto& i : _importFileNames)
+			{
+
+				//QMessageBox::information(0,0,i,0);
+				QFileInfo info(i);
+				if (info.isDir()) continue;
+				else
+				{
+					AssetImportInfo newInfo;
+					newInfo.absAssetFilePath = i.toStdString().c_str();
+					newInfo.virtualPath = ((CustomViewItem*)((QStandardItemModel*)_treeView->model())->itemFromIndex(_treeView->currentIndex()))->_fullPath.toStdString().c_str();
+					infos.push_back(newInfo);
+				}
+			}
+			bool bSucceed = ContentManager::Get()->AssetImport(repository.toStdString().c_str(), infos);
+			_importFileNames.clear();
+			if (bSucceed)
+			{
+				RefreshContentBrowsers();
+			}
+		}
+	};
+	new_rs->exec();
+}
+
+void ContentBrowser::ImportAssets()
+{
+	// 创建一个支持多选的文件选择对话框
+	QStringList fileNames = QFileDialog::getOpenFileNames(nullptr,
+		"Import Resources",  // 对话框标题
+		"",         // 对话框初始目录
+		"All File (*);;\
+				Model (*.fbx);;\
+				Image (*.png *.jpg *.bmp *.tga *.hdr);;\
+			");
+	ConsoleDebug::print_endl("Begin import assets...");
+	if (fileNames.size() > 0)
+	{
+		_importFileNames = fileNames;
+		ShowRepositorySelection();
 	}
 }
 
