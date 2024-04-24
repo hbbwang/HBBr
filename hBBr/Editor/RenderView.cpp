@@ -181,6 +181,7 @@ void RenderView::dropEvent(QDropEvent* e)
                         CustomListItem* Item =(CustomListItem*)source->item(row);
                         if (Item && !Item->_assetInfo.expired())
                         {
+                            const auto info = Item->_assetInfo.lock().get();
                             auto world = _mainRenderer->renderer->GetWorld();
                             HString name = Item->_assetInfo.lock()->displayName;
                             //int index = -1;
@@ -199,12 +200,15 @@ void RenderView::dropEvent(QDropEvent* e)
                             //        break;
                             //    }
                             //}
-                            auto gameObject = _mainRenderer->renderer->GetWorld()->SpawnGameObject(name);
-                            if (gameObject)
+                            if (info->type == AssetType::Model)
                             {
-                            	auto modelComp = gameObject->AddComponent<ModelComponent>();
-                            	modelComp->SetModelByAssetPath(Item->_assetInfo.lock()->virtualFilePath);
-                            }
+                                auto gameObject = _mainRenderer->renderer->GetWorld()->SpawnGameObject(name);
+                                if (gameObject)
+                                {
+                                    auto modelComp = gameObject->AddComponent<ModelComponent>();
+                                    modelComp->SetModelByAssetPath(Item->_assetInfo.lock()->virtualFilePath);
+                                }
+                            }                           
                         }
 					}
 				}

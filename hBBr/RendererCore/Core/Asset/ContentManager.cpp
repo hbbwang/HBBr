@@ -530,9 +530,15 @@ std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)
 	std::shared_ptr<AssetInfoBase> result = nullptr;
 	switch (type)//-------新增资产类型需要在这里添加实际对象,未来打包资产的时候会根据类型进行删留
 	{
-		case AssetType::Model:		result.reset(new AssetInfo<Model>());
-		case AssetType::Material:		result.reset(new AssetInfo<Material>());
-		case AssetType::Texture2D:	result.reset(new AssetInfo<Texture2D>());
+		case AssetType::Model:		
+			result.reset(new AssetInfo<Model>()); 
+			break;
+		case AssetType::Material:		
+			result.reset(new AssetInfo<Material>()); 
+			break;
+		case AssetType::Texture2D:
+			result.reset(new AssetInfo<Texture2D>()); 
+			break;
 		default:break;
 	}
 	return result;

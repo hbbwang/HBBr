@@ -19,7 +19,11 @@ void ModelComponent::SetModelByAssetPath(HString virtualPath)
 	auto info = ContentManager::Get()->GetAssetInfo(virtualPath);
 	if (info.expired())
 		return;
-	SetModel(info.lock()->guid);
+	auto model = info.lock()->GetAssetObject<Model>();
+	if (!model.expired())
+	{
+		SetModel(model);
+	}
 }
 
 void ModelComponent::SetModel(HGUID guid)

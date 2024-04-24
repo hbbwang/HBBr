@@ -110,12 +110,26 @@ public:
 	virtual ~AssetInfoBase() {}
 
 	virtual std::weak_ptr<class AssetObject> GetAssetData()const { return std::weak_ptr<class AssetObject>(); }
+	
+private:
+	virtual std::shared_ptr<class AssetObject> GetSharedData()const {
+		return std::shared_ptr<class AssetObject>();}
+
+public:
+	template<class T>
+	std::weak_ptr<T>GetAssetObject()const {
+		return std::static_pointer_cast<T>(GetSharedData());
+	}
+
 	virtual void ReleaseData() {}
 	inline const bool IsAssetLoad()const
 	{
 		return bAssetLoad;
 	}
+
 };
+
+#define GetAssetByInfo(type,assetInfo)  (std::weak_ptr<type>)std::static_pointer_cast<type>(assetInfo->GetAssetData().lock())
 
 template<class T>
 class AssetInfo : public AssetInfoBase
@@ -146,6 +160,14 @@ public:
 	inline void SetData(std::shared_ptr<T> newData){
 		data = std::move(newData);
 		bAssetLoad = true;
+	}
+private:
+	virtual std::shared_ptr<class AssetObject> GetSharedData()const override {
+		if (GetData().expired())
+		{
+			T::LoadAsset(this->guid);
+		}
+		return data;
 	}
 };
 
