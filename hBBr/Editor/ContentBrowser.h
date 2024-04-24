@@ -25,15 +25,17 @@ public:
 	virtual void SelectionItem(QString vPath)override;
 
 	class  ContentBrowser* _contentBrowser;
+
 private:
 	CustomViewItem* _ediingItem = nullptr;
 protected:
 
 	virtual void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)override;
-
-	void currentChanged(const QModelIndex& current, const QModelIndex& previous) override;
-
+	virtual void currentChanged(const QModelIndex& current, const QModelIndex& previous) override;
 	virtual void contextMenuEvent(QContextMenuEvent* event)override;
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
+
 
 	CustomViewItem* CreateNewVirtualFolder(CustomViewItem* parent , QString folderName = "NewFolder");
 
@@ -61,6 +63,8 @@ class VirtualFileListView :public CustomListView
 public:
 	explicit VirtualFileListView(class  ContentBrowser* contentBrowser, QWidget* parent = nullptr);
 
+	ToolTip UpdateToolTips(std::weak_ptr<struct AssetInfoBase> &assetInfo);
+
 	CustomListItem* AddFile(std::weak_ptr<struct AssetInfoBase> assetInfo);
 
 	VirtualFolder _currentTreeViewSelection;
@@ -72,6 +76,10 @@ protected:
 	class QMenu* _contextMenu = nullptr;
 
 	virtual void contextMenuEvent(QContextMenuEvent* event)override;
+
+	virtual void mouseMoveEvent(QMouseEvent* event) override;
+
+	virtual void paintEvent(QPaintEvent* event)override;
 
 	//滚动到指定Item位置
 	//void scrollToItem(const QListWidgetItem* item, QAbstractItemView::ScrollHint hint = EnsureVisible);
@@ -152,7 +160,7 @@ protected:
 
 private:
 
-	Ui::ContentBrowserClass ui;
+	Ui::ContentBrowser ui;
 
 };
 #pragma endregion

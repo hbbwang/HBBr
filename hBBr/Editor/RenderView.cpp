@@ -28,6 +28,8 @@ RenderView::RenderView(QWidget* parent)
 
 	setObjectName("RenderView");
 
+    setAcceptDrops(true);
+
 	if (_mainRendererWidget == nullptr)
 	{
 		//Enable custom loop

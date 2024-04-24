@@ -34,6 +34,7 @@ CustomViewItem::CustomViewItem(const QString& text) :QStandardItem(text)
 	setFlags(Qt::ItemIsSelectable
 		| Qt::ItemIsEditable
 		| Qt::ItemIsDragEnabled
+		| Qt::ItemIsDropEnabled
 		| Qt::ItemIsEnabled
 	);
 }
@@ -42,6 +43,7 @@ CustomViewItem::CustomViewItem(const QIcon& icon, const QString& text) : QStanda
 	setFlags(Qt::ItemIsSelectable
 		| Qt::ItemIsEditable
 		| Qt::ItemIsDragEnabled
+		| Qt::ItemIsDropEnabled
 		| Qt::ItemIsEnabled
 	);
 }
@@ -51,6 +53,7 @@ CustomListItem::CustomListItem(const QString& text, QListWidget* view, int type)
 	setFlags(Qt::ItemIsSelectable 
 		| Qt::ItemIsEditable
 		| Qt::ItemIsDragEnabled
+		| Qt::ItemIsDropEnabled
 		| Qt::ItemNeverHasChildren
 		| Qt::ItemIsEnabled
 	);
@@ -61,6 +64,7 @@ CustomListItem::CustomListItem(const QIcon& icon, const QString& text, QListWidg
 	setFlags(Qt::ItemIsSelectable
 		| Qt::ItemIsEditable
 		| Qt::ItemIsDragEnabled
+		| Qt::ItemIsDropEnabled
 		| Qt::ItemNeverHasChildren
 		| Qt::ItemIsEnabled
 	);
@@ -84,6 +88,14 @@ CustomTreeView::CustomTreeView(QWidget* parent)
 	setObjectName("CustomTreeView");
 
 	setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
+
+	setDragDropMode(QAbstractItemView::DragDropMode::DragDrop);
+
+	setDragEnabled(true); 
+
+	setAcceptDrops(true); 
+
+	setDefaultDropAction(Qt::MoveAction);
 
 }
 
@@ -165,108 +177,36 @@ void CustomTreeView::RemoveItems(QString name)
 class CustomListViewItemDelegate : public QStyledItemDelegate
 {
 public:
-	QSize _iconSize;
-	QSize _gridSize;
-	QString _qssStyle;
+	CustomListView* _view;
 
-	void UpdateStyle()
+	CustomListViewItemDelegate(QObject* parent) : QStyledItemDelegate(parent)
 	{
-		_qssStyle = GetSingleStyleFromFile("CustomListView");
-	}
-
-	CustomListViewItemDelegate(QObject* parent, QSize IconSize,  QSize GridSize ) : QStyledItemDelegate(parent)
-	{
-		_iconSize = IconSize;
-		_gridSize = GridSize;
-		UpdateStyle();
 	}
 
 	void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
 	{
 		QStyleOptionViewItem opt = option;
 		initStyleOption(&opt, index);
+		QStyledItemDelegate::paint(painter, opt, index);
 
-		////高亮
-		//bool bSelect = false;
-		//for (auto& i : ((QListView*)parent())->selectionModel()->selectedIndexes())
-		//{
-		//	if (i.row() == index.row())
-		//	{
-		//		bSelect = true;
-		//	}
-		//}
-		//if (bSelect)
-		//{
-		//	// 设置画刷颜色（矩形填充颜色）
-		//	//QBrush brush(QColor(180,150,160));
-		//	//painter->setBrush(brush);
-		//	QPen pen(QColor(180, 150, 160));
-		//	pen.setWidth(3);
-		//	painter->setPen(pen);
-		//	painter->drawRect(
-		//		rect.x(),
-		//		rect.y(),
-		//		_gridSize.width(),
-		//		_gridSize.height());
-		//}
-		//else
-		//{
-		//	painter->eraseRect(
-		//		rect.x(),
-		//		rect.y(),
-		//		_gridSize.width(),
-		//		_gridSize.height());
-		//}
-
-		// 计算自定义高亮框的大小和位置
-		QRect highlightRect = opt.rect;
-		highlightRect.setSize(QSize(64, 64)); // 设置统一的高亮框大小
-		highlightRect.moveCenter(opt.rect.center()); // 将高亮框居中
-
-		//// 使用自定义高亮框绘制选中状态
-		//if (opt.state & QStyle::State_Selected) {
-		//	painter->fillRect(highlightRect, opt.palette.highlight());
-		//}
-
-		//// 绘制图标和文本
-		//QIcon icon = index.data(Qt::DecorationRole).value<QIcon>();
-		//QString text = index.data(Qt::DisplayRole).toString();
-		//QRect iconRect = highlightRect;
-		//QRect textRect = opt.rect;
-		//textRect.setTop(iconRect.bottom());
-
-		//QTextDocument textDoc;
-		//textDoc.setHtml(text);
-		//textDoc.setTextWidth(_gridSize.width());
-
-		//painter->drawPixmap(iconRect, icon.pixmap(iconRect.size()));
-		//painter->drawText(textRect, Qt::AlignCenter, text);
-
-		//style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, opt.widget);
-
-		// 使用自定义高亮框绘制选中状态
-		if (opt.state & QStyle::State_Selected) {
-			painter->fillRect(highlightRect, opt.palette.highlight());
+		auto baseRect = opt.rect;
+		CustomListItem* item = (CustomListItem*)(_view->item(index.row()));
+		//
+		if (_view->viewMode() == QListWidget::IconMode &&  item && !item->_assetInfo.expired() && item->_assetInfo.lock()->bDirty)
+		{
+			// 绘制Dirty图标
+			auto dirtyIconRect = baseRect;
+			dirtyIconRect.setWidth(dirtyIconRect.width()/5);
+			dirtyIconRect.setHeight(dirtyIconRect.height() / 5.5);
+			dirtyIconRect.setX(dirtyIconRect.x() + 6);
+			dirtyIconRect.setY(dirtyIconRect.y() + 6);
+			HString pp = FileSystem::GetProgramPath() + "Config/Theme/Icons/ContentBrowser_AssetDirty.png";
+			//auto icon = QIcon(pp.c_str());
+			//QPixmap pixMap = icon.pixmap(dirtyIconRect.width() / 3, dirtyIconRect.width() / 3);
+			QPixmap pixMap = QPixmap(pp.c_str());
+			painter->drawPixmap(dirtyIconRect, pixMap);
 		}
-
-		// 绘制图标和文本
-		QIcon icon = index.data(Qt::DecorationRole).value<QIcon>();
-		QString text = index.data(Qt::DisplayRole).toString();
-		QRect iconRect = highlightRect;
-		QRect textRect = opt.rect;
-		textRect.setTop(iconRect.bottom());
-
-		QTextDocument textDoc;
-		textDoc.setHtml(text);
-		textDoc.setTextWidth(_gridSize.width());
-
-		// 使用QStyle绘制图标和文本
-		QStyle* style = opt.widget ? opt.widget->style() : QApplication::style();
-		style->drawItemPixmap(painter, iconRect, Qt::AlignCenter, icon.pixmap(iconRect.size()));
-		style->drawItemText(painter, textRect, Qt::AlignCenter, opt.palette, opt.state & QStyle::State_Enabled, text);
-
-		
-		//QStyledItemDelegate::paint(painter, opt, index);
+		//
 	}
 };
 
@@ -306,14 +246,15 @@ CustomListView::CustomListView(QWidget* parent) :QListWidget(parent)
 
 	setDragDropMode(QAbstractItemView::DragDropMode::DragDrop);
 
-	setDragEnabled(true);
+	setDragEnabled(true); 
 
-	setAcceptDrops(true);
+	setAcceptDrops(true); 
 
 	setDefaultDropAction(Qt::MoveAction);
 
-	//CustomListViewItemDelegate* itemDelegate = new CustomListViewItemDelegate(this,iconSize(),gridSize());
-	//setItemDelegate(itemDelegate);
+	CustomListViewItemDelegate* itemDelegate = new CustomListViewItemDelegate(this);
+	itemDelegate->_view = this;
+	setItemDelegate(itemDelegate);
 
 	{
 		_toolTipWidget = new ToolTipWidget(this);

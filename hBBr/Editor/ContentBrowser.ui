@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>ContentBrowser</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <layout class="QVBoxLayout" name="ContentBrowserVBoxLayout" stretch="0">
    <property name="spacing">
     <number>2</number>
@@ -55,6 +58,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="SaveButton">
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
        <property name="text">
         <string> Save Assets </string>
        </property>

@@ -101,7 +101,8 @@ public:
 #if IS_EDITOR
 	//编辑器ListWidget生成Item图标的时候使用
 	//每个HString为单独一行
-	std::vector<HString> toolTips;
+	std::unordered_map<HString, HString> toolTips;
+	bool bDirty = false;
 #endif
 	//
 	AssetInfoBase() {
@@ -206,7 +207,7 @@ public:
 	资产虚拟目录更改(不会更改仓库)
 	assetInfos:需要更改虚拟路径的资产信息
 	*/
-	HBBR_API void SetNewVirtualPath(std::vector<AssetInfoBase*> assetInfos , HString newVirtualPath);
+	HBBR_API void SetNewVirtualPath(std::vector<AssetInfoBase*> assetInfos , HString newVirtualPath , bool bDeleteEmptyFolder = true);
 
 	/*
 	保存AssetInfo到.repository
@@ -237,15 +238,16 @@ public:
 		}
 		return result;
 	}
-	HBBR_API static void ClearDirtyAssets() {
-		_dirtyAssets.clear();
-	}
+	HBBR_API static void ClearDirtyAssets();
 
 	/*
 		创建一个新的虚拟文件夹
 	*/
 	HBBR_API void CreateNewVirtualFolder(HString folderFullPath);
 
+	/*  */
+	HBBR_API void UpdateToolTips(AssetInfoBase* asset);
+	HBBR_API void SetToolTip(AssetInfoBase* asset,HString name,HString value);
 
 #endif
 

@@ -339,7 +339,7 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 	}
 }
 
-void ContentManager::SetNewVirtualPath(std::vector<AssetInfoBase*> assetInfos, HString newVirtualPath)
+void ContentManager::SetNewVirtualPath(std::vector<AssetInfoBase*> assetInfos, HString newVirtualPath, bool bDeleteEmptyFolder)
 {
 	std::vector<HString> repositories;
 	for (auto& i : assetInfos)
@@ -381,10 +381,13 @@ void ContentManager::SetNewVirtualPath(std::vector<AssetInfoBase*> assetInfos, H
 			//移除内存，该函数修改了虚拟路径，所以只需要处理虚拟路径的_assets_vf就行了
 			_assets_vf[vpf_old].assets.erase(i->guid);
 
-			//如果更改的过程发现老的虚拟目录空了,就直接删了吧
-			if (_assets_vf[vpf_old].assets.size() <= 0)
+			if (bDeleteEmptyFolder)
 			{
-				_assets_vf.erase(vpf_old);
+				//如果更改的过程发现老的虚拟目录空了,就直接删了吧
+				if (_assets_vf[vpf_old].assets.size() <= 0)
+				{
+					_assets_vf.erase(vpf_old);
+				}
 			}
 		}
 	}
@@ -461,6 +464,7 @@ void ContentManager::SetVirtualName(AssetInfoBase* assetInfo, HString newName, b
 		assetInfo->displayName = newName;
 		assetInfo->virtualFilePath = FileSystem::Append(assetInfo->virtualPath, assetInfo->displayName + "." + assetInfo->suffix);
 		assetInfo->virtualFilePath.Replace("\\", "/");
+		UpdateToolTips(assetInfo);
 		if (bSave)
 		{
 			SaveAssetInfo(assetInfo);
@@ -470,7 +474,20 @@ void ContentManager::SetVirtualName(AssetInfoBase* assetInfo, HString newName, b
 
 void ContentManager::MarkAssetDirty(std::weak_ptr<AssetInfoBase> asset)
 {
+	asset.lock()->bDirty = true;
 	_dirtyAssets.push_back(asset);
+}
+
+void  ContentManager::ClearDirtyAssets()
+{
+	for (auto& i : _dirtyAssets)
+	{
+		if (!i.expired())
+		{
+			i.lock()->bDirty = false;
+		}
+	}
+	_dirtyAssets.clear();
 }
 
 void ContentManager::CreateNewVirtualFolder(HString folderFullPath)
@@ -484,6 +501,25 @@ void ContentManager::CreateNewVirtualFolder(HString folderFullPath)
 		newVF.FolderName = FileSystem::GetFileName(folderFullPath);
 		newVF.Path = folderFullPath;
 		_assets_vf.emplace(vpvf, newVF);
+	}
+}
+
+void ContentManager::UpdateToolTips(AssetInfoBase* asset)
+{
+	SetToolTip(asset,"资产名", asset->displayName);
+	SetToolTip(asset, "资产类型", GetAssetTypeString(asset->type));
+}
+
+void ContentManager::SetToolTip(AssetInfoBase* asset, HString name, HString value)
+{
+	auto it = asset->toolTips.find(name);
+	if (it != asset->toolTips.end())
+	{
+		it->second = ":" + value;
+	}
+	else
+	{
+		asset->toolTips.emplace(name, ":" + value);
 	}
 }
 
@@ -552,8 +588,7 @@ void ContentManager::ReloadRepository(HString repositoryName)
 		info->repository = repositoryName;
 
 		info->toolTips.reserve(20);
-		info->toolTips.push_back(HString::printf("资产名:%s", info->displayName.c_str()));
-		info->toolTips.push_back(HString::printf("资产类型:%s", GetAssetTypeString(type).c_str()));
+		UpdateToolTips(info.get());
 
 		//读取引用关系
 		info->depTemps.clear();

@@ -11,6 +11,9 @@
 #include <QMessageBox>
 #include <QAction>
 #include <QPushButton>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <qmimedata.h>
 #include "CustomSearchLine.h"
 #include "EditorCommonFunction.h"
 #include "HString.h"
@@ -59,6 +62,8 @@ VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrows
 	_newSelectionItems.reserve(50);
 	_currentSelectionItem = 0;
 	_bSaveSelectionItem = true;
+	setDragEnabled(true);
+	setAcceptDrops(true);
 	//Context Menu
 	{
 		setContextMenuPolicy(Qt::ContextMenuPolicy::DefaultContextMenu);
@@ -86,7 +91,6 @@ VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrows
 					CreateNewVirtualFolder((CustomViewItem*)itemModel->itemFromIndex(currentIndex()));
 				}
 			});
-		
 		//删除当前虚拟文件夹内的所有文件
 		ActionConnect(deleteFile, [this]()
 			{
@@ -261,6 +265,76 @@ void VirtualFolderTreeView::contextMenuEvent(QContextMenuEvent* event)
 	_contextMenu->exec(event->globalPos());
 }
 
+void VirtualFolderTreeView::dragEnterEvent(QDragEnterEvent* e)
+{
+	qDebug() << e->mimeData()->text();
+	if (e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))//如果是来自Item的数据
+	{
+		e->acceptProposedAction();
+	}
+}
+
+void VirtualFolderTreeView::dropEvent(QDropEvent* e)
+{
+	//Get Items
+	{
+		QByteArray encoded = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
+		CustomViewItem* target = nullptr;
+		auto targetIndex = indexAt(e->pos());
+		QStandardItemModel* model = (QStandardItemModel*)(this->model());
+		if (targetIndex.isValid())
+		{
+			target = (CustomViewItem*)model->itemFromIndex(indexAt(e->pos()));
+		}
+		if (target && !encoded.isEmpty())
+		{
+			std::vector<AssetInfoBase*> assets;
+			QDataStream stream(&encoded, QIODevice::ReadOnly);
+			while (!stream.atEnd())
+			{
+				if (assets.capacity() < assets.size())
+				{
+					assets.reserve(assets.capacity() + 25);
+				}
+				int row, col;
+				QMap<int, QVariant> roleDataMap;
+				stream >> row >> col >> roleDataMap;
+				if (roleDataMap.contains(Qt::DisplayRole))
+				{
+					//收集拖拽的AssetInfos
+					if (e->source()->objectName().compare(this->objectName()) == 0)//Tree View
+					{
+						//QMessageBox::information(0, 0, QString::number(row), 0);
+						auto from = (CustomViewItem*)model->item(row);
+						auto folderAssets = ContentManager::Get()->GetAssetsByVirtualFolder(from->_fullPath.toStdString().c_str());
+						assets.reserve(assets.capacity() + folderAssets.size());
+						for (auto& i : folderAssets)
+						{
+							assets.push_back(i.second.get());				
+						}
+					}
+					else if (e->source()->objectName().compare(_contentBrowser->_listView->objectName()) == 0)//List View
+					{
+						//QMessageBox::information(0, 0, QString::number(row), 0);
+						auto from = ((CustomListItem*)_contentBrowser->_listView->item(row));
+						if (from && !from->_assetInfo.expired())
+						{
+							assets.push_back(from->_assetInfo.lock().get());
+						}
+
+					}
+				}
+			}
+			//
+			if (assets.size() > 0)
+			{
+				ContentManager::Get()->SetNewVirtualPath(assets, target->_fullPath.toStdString().c_str(), false);
+			}
+			ContentBrowser::RefreshContentBrowsers();
+		}
+	}
+}
+
 CustomViewItem* VirtualFolderTreeView::CreateNewVirtualFolder(CustomViewItem* parent, QString folderName)
 {
 	if (!parent)
@@ -307,7 +381,7 @@ CustomViewItem* VirtualFolderTreeView::CreateNewVirtualFolder(CustomViewItem* pa
 void VirtualFolderTreeView::onDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
 	auto itemModel = ((QStandardItemModel*)model());
-	if (topLeft.isValid())
+	if (topLeft.isValid() && itemModel->itemFromIndex(topLeft))
 	{
 		CustomViewItem* currentItem = (CustomViewItem*)itemModel->itemFromIndex(topLeft);
 		{
@@ -440,6 +514,7 @@ VirtualFileListView::VirtualFileListView(class  ContentBrowser* contentBrowser, 
 
 		connect(this,&QListWidget::itemChanged,this,&VirtualFileListView::ItemTextChange);
 	}
+
 }
 
 void VirtualFileListView::contextMenuEvent(QContextMenuEvent* event)
@@ -448,6 +523,54 @@ void VirtualFileListView::contextMenuEvent(QContextMenuEvent* event)
 	_contextMenu->exec(event->globalPos());
 }
 
+void VirtualFileListView::mouseMoveEvent(QMouseEvent* event)
+{
+	QPoint pos = mapFromGlobal(event->globalPos());
+	CustomListItem* item = (CustomListItem*)this->itemAt(pos);
+	if (item && item->_toolTip._tooltip.length() > 1)
+	{
+		if (_currentMouseTrackItem != item)
+		{
+			_currentMouseTrackItem = item;
+		}
+		_toolTipWidget->resize(0, 0);
+		_toolTipWidget->setHidden(false);
+
+		_toolTipLabel->setText(item->_toolTip._tooltip);
+		_toolTipWidget->move(event->globalPos().x() + 10, event->globalPos().y() + 10);
+	}
+	else
+	{
+		_toolTipWidget->setHidden(true);
+		_currentMouseTrackItem = nullptr;
+	}
+	QListWidget::mouseMoveEvent(event);
+}
+
+void VirtualFileListView::paintEvent(QPaintEvent* event)
+{
+	CustomListView::paintEvent(event);
+}
+
+ToolTip VirtualFileListView::UpdateToolTips(std::weak_ptr<struct AssetInfoBase>& assetInfo)
+{
+	//收集资产的ToolTip
+	ToolTip result;
+	if (!assetInfo.expired())
+	{
+		for (auto& i : assetInfo.lock()->toolTips)
+		{
+			if (i.first.Length() > 1)
+			{
+				HString name = i.first;
+				HString value = i.second;
+				result._tooltip += (name + value).c_str();
+				result._tooltip += "\n";
+			}
+		}
+	}
+	return result;
+}
 
 void VirtualFileListView::ItemTextChange(QListWidgetItem* widgetItem)
 {
@@ -458,6 +581,7 @@ void VirtualFileListView::ItemTextChange(QListWidgetItem* widgetItem)
 		if (!item->_assetInfo.lock()->displayName.IsSame(item->text().toStdString().c_str()))
 		{
 			ContentManager::Get()->SetVirtualName(item->_assetInfo.lock().get(), item->text().toStdString().c_str());
+			item->_toolTip = UpdateToolTips(item->_assetInfo);
 			ContentManager::Get()->MarkAssetDirty(item->_assetInfo);
 		}
 		_ediingItem = nullptr;
@@ -469,15 +593,7 @@ CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase>
 	if (!assetInfo.expired())
 	{
 		//收集资产的ToolTip
-		ToolTip newToolTip;
-		for (auto& i : assetInfo.lock()->toolTips)
-		{
-			if (newToolTip._tooltip.length() > 1)
-			{
-				newToolTip._tooltip += "\n";
-			}
-			newToolTip._tooltip += i.c_str();
-		}
+		ToolTip newToolTip = UpdateToolTips(assetInfo);
 		auto iconPath = assetInfo.lock()->absFilePath + ".png";
 		if (!FileSystem::FileExist(iconPath))
 		{
@@ -501,6 +617,8 @@ CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase>
 		}
 		auto newItem = AddItem(assetInfo.lock()->displayName.c_str(), iconPath.c_str(), newToolTip);
 		newItem->_assetInfo = assetInfo;
+		newItem->_path = assetInfo.lock()->virtualPath.c_str();
+		newItem->_fullPath = assetInfo.lock()->virtualFilePath.c_str();
 		return newItem;
 	}
 	return nullptr;
@@ -604,6 +722,7 @@ QList<ContentBrowser*>ContentBrowser::_contentBrowser;
 ContentBrowser::ContentBrowser(QWidget* parent )
 	:QWidget(parent)
 {
+	this->setObjectName("ContentBrowser");
 	ui.setupUi(this);
 	ui.horizontalLayout_2->setSpacing(2);
 	ui.horizontalLayout_2->setContentsMargins(1, 1, 1, 1);
@@ -616,7 +735,7 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	ui.BackspaceButton->setObjectName("ContentBrowser_Button");
 	ui.SaveButton->setObjectName("ContentBrowser_Button");
 
-	this->setObjectName("ContentBrowser");
+	ui.horizontalLayout_2->setObjectName("ContentBrowser");
 	
 	_splitterBox = new QSplitter(Qt::Horizontal, this);
 	_splitterBox->setObjectName("ContentBrowser_Splitter");
@@ -698,13 +817,17 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	connect(ui.BackToParentButton, &QPushButton::clicked, this, [this]() {
 		if (_treeView->currentIndex().isValid())
 		{
-			_treeView->_bSaveSelectionItem = true;
-			QStandardItemModel* model = (QStandardItemModel*)_treeView->model();
-			CustomViewItem* item = (CustomViewItem*)model->itemFromIndex(_treeView->currentIndex());
-			if (item && item->parent() && item->parent()->index().isValid())
+			if (_treeView->_newSelectionItems.size() > 0 && _treeView->_newSelectionItems.size() > _treeView->_currentSelectionItem + 1)
 			{
-				_treeView->selectionModel()->clearSelection();
-				_treeView->selectionModel()->setCurrentIndex(item->parent()->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
+				_treeView->_currentSelectionItem++;
+				QStandardItemModel* model = (QStandardItemModel*)_treeView->model();
+				CustomViewItem* item = (CustomViewItem*)model->itemFromIndex(_treeView->currentIndex());
+				if (item && item->parent() && item->parent()->index().isValid())
+				{
+					_treeView->_bSaveSelectionItem = false;
+					_treeView->selectionModel()->clearSelection();
+					_treeView->selectionModel()->setCurrentIndex(item->parent()->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
+				}
 			}
 		}
 	});

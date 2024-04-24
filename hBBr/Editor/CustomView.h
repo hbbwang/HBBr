@@ -99,13 +99,14 @@ public:
 
 protected:
 	void resizeEvent(QResizeEvent* e) override;
-	void mouseMoveEvent(QMouseEvent* event) override;
+	virtual void mouseMoveEvent(QMouseEvent* event) override;
 	void leaveEvent(QEvent* event) override;
 
 	CustomListItem* _currentMouseTrackItem;
 
 	ToolTipWidget* _toolTipWidget;
-	QLabel* _toolTipLabel;
+	QLabel* _toolTipLabel = nullptr;
+	//QLabel* _dirtyMark = nullptr;
 
 private slots:
 	void indexesMoved(const QModelIndexList& indexes);
