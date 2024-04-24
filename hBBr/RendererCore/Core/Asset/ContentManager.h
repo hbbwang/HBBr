@@ -247,7 +247,7 @@ public:
 	*/
 	HBBR_API static void MarkAssetDirty(std::weak_ptr<AssetInfoBase> asset);
 	static std::vector<std::weak_ptr<AssetInfoBase>> _dirtyAssets;
-	HBBR_API static std::vector<std::weak_ptr<AssetInfoBase>> GetDirtyAssets() {
+	HBBR_API static const std::vector<std::weak_ptr<AssetInfoBase>> GetDirtyAssets() {
 		//for safe:
 		std::vector<std::weak_ptr<AssetInfoBase>> result;
 		result.reserve(_dirtyAssets.size());
@@ -261,6 +261,7 @@ public:
 		return result;
 	}
 	HBBR_API static void ClearDirtyAssets();
+	HBBR_API static void RemoveDirtyAsset(AssetInfoBase* asset);
 
 	/*
 		创建一个新的虚拟文件夹

@@ -113,10 +113,6 @@ QListView
 { 
     outline: 0; 
 } 
-QTreeView 
-{ 
-    outline: 0; 
-} 
 QMenuBar
 {
     background-color: rgb(40,40,40);
@@ -245,8 +241,8 @@ QScrollBar::sub-line:horizontal
 /* PushButton */
 QPushButton
 {
-    background-color: rgb(70,70,70);
-    color:antiquewhite;
+    background-color: rgb(50, 50, 50);
+    color:rgb(202, 202, 202);
     font-family:  FontFamily;
     border-radius: 4px;
     width: 100%;
@@ -254,8 +250,8 @@ QPushButton
 }
 QPushButton:hover
 {
-    background-color: rgb(130, 100, 100);
-    color:antiquewhite;
+    background-color: rgb(102, 86, 86);
+    color:#FFFFFF;
     font-family: FontFamily;
     border-radius: 4px;
     width:100%;
@@ -263,7 +259,7 @@ QPushButton:hover
 }
 QPushButton:pressed
 {
-    background-color: rgb(170,120,120);
+    background-color: rgb(115, 89, 89);
     color:#FFFFFF;
     font-family:  FontFamily;
     border: 1.5px solid rgb(210, 210, 210);
@@ -361,6 +357,7 @@ QTreeWidget
 QTreeWidget::item
 {
     outline: 0;
+    font-family: FontFamily;
 }
 QTreeWidget::item:selected
 {
@@ -373,9 +370,8 @@ QTreeWidget::item:selected
 QTreeWidget::item:hover
 {
     font-family: FontFamily;
-    color :rgb(234, 209, 209);
-    background-color: rgba(79, 64, 64, 0.8);
-    border: 1px solid rgb(180, 180, 180);
+    color :rgb(236, 229, 229);
+    background-color: rgba(56, 50, 50, 0.8);
     outline: 0;
 }
 /* QTreeWidget::branch:closed:has-children:!has-siblings,
@@ -411,6 +407,7 @@ QTreeWidget::branch:closed:!has-children
 QListWidget
 {
     background-color:BackgroundColor;
+    high-light : none;
 }
 QListWidget::item:hover
 {
@@ -640,11 +637,50 @@ QSplitter::handle
 }
 #ContentBrowser_Button
 {
-    color : rgb(197, 191, 174);
-    width: 100px;
 }
 #ContentBrowser_PathLabel
 {
     /* border: 1px solid rgb(140, 90, 100); */
     background-color:transparent;
+    color:rgb(175,175,175);
+}
+QHeaderView::section
+{
+    background-color: rgb(41, 50, 32);
+    border: 1px solid rgb(189, 169, 158);
+    color:rgb(218, 211, 192);
+}
+#DirtyAssetsManager
+{
+    border-left: 2px solid rgb(77, 79, 76);
+    border-right: 2px solid rgb(77, 79, 76);
+    border-bottom: 2px solid rgb(77, 79, 76);
+    color:rgb(240,240,240);
+}
+#DirtyAssetsManager .QTreeWidget::item
+{
+    height: 30px;
+    color:rgb(170, 170, 170);
+    border:none;
+    border: 1px solid rgb(86, 86, 86);
+    background-color: rgb(15, 15, 15);
+}
+#DirtyAssetsManager .QTreeWidget::item:hover
+{
+    color:rgb(190, 190, 190);
+    border:none;
+    border: 1px solid rgb(90, 90, 90);
+    background-color: rgb(35, 35, 35);
+}
+#DirtyAssetsManager .QTreeWidget::item:selected
+{
+    color:rgb(240,240,240);
+    border:none;
+    border: 1px solid rgb(100, 100, 100);
+    background-color: rgb(46, 48, 44);
+}
+#DirtyAssetsManager .QPushButton
+{
+    height: 35px ;
+    border: 2px solid rgb(72, 85, 81);
 };

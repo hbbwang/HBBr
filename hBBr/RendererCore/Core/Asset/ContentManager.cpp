@@ -443,13 +443,7 @@ void ContentManager::SaveAssetInfo(AssetInfoBase* assetInfo)
 
 			//保存了的资产自动退出Dirty Mark
 			{
-				auto vit = std::remove_if(_dirtyAssets.begin(), _dirtyAssets.end(), [assetInfo](std::weak_ptr<AssetInfoBase>& a) {
-					return a.lock()->guid == assetInfo->guid;
-					});
-				if (vit != _dirtyAssets.end())
-				{
-					_dirtyAssets.erase(vit);
-				}
+				RemoveDirtyAsset(assetInfo);
 			}
 
 		}
@@ -488,6 +482,18 @@ void  ContentManager::ClearDirtyAssets()
 		}
 	}
 	_dirtyAssets.clear();
+}
+
+void ContentManager::RemoveDirtyAsset(AssetInfoBase* assetInfo)
+{
+	auto vit = std::remove_if(_dirtyAssets.begin(), _dirtyAssets.end(), [assetInfo](std::weak_ptr<AssetInfoBase>& a) {
+		return a.lock()->guid == assetInfo->guid;
+		});
+	if (vit != _dirtyAssets.end())
+	{
+		_dirtyAssets.erase(vit);
+	}
+	assetInfo->bDirty = false;
 }
 
 void ContentManager::CreateNewVirtualFolder(HString folderFullPath)

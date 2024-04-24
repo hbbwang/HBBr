@@ -32,6 +32,8 @@ public:
     class Inspector* _inspector = nullptr;
     class QDockWidget* _inspector_dock = nullptr;
 
+    void ShowDirtyAssetsManager();
+
     virtual void closeEvent(QCloseEvent* event);
 
     virtual void resizeEvent(QResizeEvent* event)override;

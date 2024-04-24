@@ -831,7 +831,10 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 			}
 		}
 	});
-
+	//保存按钮
+	connect(ui.SaveButton, &QPushButton::clicked, this, [this]() {
+		EditorMain::_self->ShowDirtyAssetsManager();
+	});
 
 	//Refresh
 	RefreshContentBrowsers();

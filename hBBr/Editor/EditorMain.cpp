@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <qfileinfo.h>
 #include "LineEditDialog.h"
+#include "DirtyAssetsManager.h"
 #include "RendererCore/Core/VulkanRenderer.h"
 #include "RendererCore/Core/Asset/World.h"
 EditorMain* EditorMain::_self = nullptr;
@@ -116,6 +117,15 @@ void EditorMain::UpdateRender()
         _inspector->PropertyUpdate();
     if (_mainRenderView)
         _mainRenderView->Update();
+}
+
+void EditorMain::ShowDirtyAssetsManager()
+{
+    auto dirtyAssetsManager = new DirtyAssetsManager(this);
+    //if (ContentManager::Get()->GetDirtyAssets().size > 0)
+    {
+        dirtyAssetsManager->exec();
+    }
 }
 
 void EditorMain::closeEvent(QCloseEvent* event)
