@@ -4,10 +4,14 @@
 #include "qevent.h"
 #include <qwindow.h>
 #include <qmessagebox.h>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <qmimedata.h>
 #include "GLFWInclude.h"
 #include "ConsoleDebug.h"
 #include "Component/GameObject.h"
 #include "Component/ModelComponent.h"
+#include "ContentBrowser.h"
 #include "Asset/World.h"
 #include "VulkanRenderer.h"
 #ifdef _WIN32
@@ -48,26 +52,26 @@ RenderView::RenderView(QWidget* parent)
 		//}
 
 
-		auto dropFunc = [](VulkanForm *from, HString file) {
-			//QMessageBox::information(0, from->name.c_str(), file.c_str(),0);
-			ConsoleDebug::printf_endl(" [%s]Drop File : %s", from->name.c_str(), file.c_str());
-			auto mainForm = VulkanApp::GetMainForm();
-			if (from->renderer == mainForm->renderer && from->renderer->GetWorld())
-			{
-				auto assetInfo = ContentManager::Get()->GetAssetInfo(file);
-				if (!assetInfo.expired())
-				{
-					GameObject* newObject = from->renderer->GetWorld()->SpawnGameObject(assetInfo.lock()->displayName);
-					if (newObject)
-					{
-						auto modelComp = newObject->AddComponent<ModelComponent>();
-						modelComp->SetModelByAssetPath(assetInfo.lock()->assetFilePath);
-						newObject->SetObjectName(assetInfo.lock()->displayName);
-					}
-				}
-			}
-		};
-		VulkanApp::AddDropCallback(dropFunc);
+		//auto dropFunc = [](VulkanForm *from, HString file) {
+		//	//QMessageBox::information(0, from->name.c_str(), file.c_str(),0);
+		//	ConsoleDebug::printf_endl(" [%s]Drop File : %s", from->name.c_str(), file.c_str());
+		//	auto mainForm = VulkanApp::GetMainForm();
+		//	if (from->renderer == mainForm->renderer && from->renderer->GetWorld())
+		//	{
+		//		auto assetInfo = ContentManager::Get()->GetAssetInfo(file);
+		//		if (!assetInfo.expired())
+		//		{
+		//			GameObject* newObject = from->renderer->GetWorld()->SpawnGameObject(assetInfo.lock()->displayName);
+		//			if (newObject)
+		//			{
+		//				auto modelComp = newObject->AddComponent<ModelComponent>();
+		//				modelComp->SetModelByAssetPath(assetInfo.lock()->assetFilePath);
+		//				newObject->SetObjectName(assetInfo.lock()->displayName);
+		//			}
+		//		}
+		//	}
+		//};
+		//VulkanApp::AddDropCallback(dropFunc);
 		
 	}
 }
@@ -134,6 +138,79 @@ void RenderView::keyPressEvent(QKeyEvent* event)
 void RenderView::keyReleaseEvent(QKeyEvent* event)
 {
 
+}
+
+void RenderView::dragEnterEvent(QDragEnterEvent* e)
+{
+    if (e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))//如果是来自Item的数据
+    {
+        e->acceptProposedAction();
+    }
+}
+
+void RenderView::dropEvent(QDropEvent* e)
+{
+	//Get Items
+	{
+		QByteArray encoded = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
+        auto cb = ContentBrowser::GetContentBrowsers();
+        auto source = dynamic_cast<VirtualFileListView*>(e->source());
+		if (!encoded.isEmpty() && source && cb.size()>0)
+		{
+			std::vector<AssetInfoBase*> assets;
+			QDataStream stream(&encoded, QIODevice::ReadOnly);
+			while (!stream.atEnd())
+			{
+				if (assets.capacity() < assets.size())
+				{
+					assets.reserve(assets.capacity() + 25);
+				}
+				int row, col;
+				QMap<int, QVariant> roleDataMap;
+				stream >> row >> col >> roleDataMap;
+				if (roleDataMap.contains(Qt::DisplayRole))
+				{
+					//收集拖拽的AssetInfos
+					if (e->source()->objectName().compare(cb[0]->_treeView->objectName()) == 0)//Tree View
+					{
+						//QMessageBox::information(0, 0, "Tree View", 0);
+					}
+					else if (e->source()->objectName().compare(source->objectName()) == 0)//List View
+					{
+                        //QMessageBox::information(0, 0, "List View", 0);
+                        CustomListItem* Item =(CustomListItem*)source->item(row);
+                        if (Item && !Item->_assetInfo.expired())
+                        {
+                            auto world = _mainRenderer->renderer->GetWorld();
+                            HString name = Item->_assetInfo.lock()->displayName;
+                            //int index = -1;
+                            //while (true)
+                            //{
+                            //    bool bFound = false;
+                            //    for (auto& l : world->GetLevels())
+                            //    {
+                            //        for (auto& g : l->GetAllGameObjects())
+                            //        {
+
+                            //        }
+                            //    }
+                            //    if (!bFound)
+                            //    {
+                            //        break;
+                            //    }
+                            //}
+                            auto gameObject = _mainRenderer->renderer->GetWorld()->SpawnGameObject(name);
+                            if (gameObject)
+                            {
+                            	auto modelComp = gameObject->AddComponent<ModelComponent>();
+                            	modelComp->SetModelByAssetPath(Item->_assetInfo.lock()->virtualFilePath);
+                            }
+                        }
+					}
+				}
+			}
+		}
+	}
 }
 
 void RenderView::focusInEvent(QFocusEvent* event)

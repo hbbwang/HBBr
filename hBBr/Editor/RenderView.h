@@ -47,4 +47,8 @@ protected:
 
 	virtual void keyReleaseEvent(QKeyEvent* event)override;
 
+	virtual void dragEnterEvent(QDragEnterEvent* event)override;
+
+	virtual void dropEvent(QDropEvent* event)override;
+
 };

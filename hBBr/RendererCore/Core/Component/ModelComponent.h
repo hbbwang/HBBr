@@ -15,7 +15,7 @@ public:
 	HBBR_API void SetModelByRealPath(HString path);
 
 	//path = virtual relative path (Asset/...)
-	HBBR_API void SetModelByAssetPath(HString path);
+	HBBR_API void SetModelByAssetPath(HString virtualPath);
 
 	HBBR_API void SetModel(HGUID guid);
 
@@ -43,6 +43,8 @@ private:
 	std::vector<HGUID> _materialGUIDs;
 
 	std::vector<HGUID> _oldMaterialGUIDs;
+
+	std::weak_ptr <Model> _modelCache;
 
 	std::vector<ModelPrimitive*> _primitives;
 

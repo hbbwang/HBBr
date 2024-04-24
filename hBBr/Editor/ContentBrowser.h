@@ -136,6 +136,13 @@ public:
 	void RefreshFileOnListView();
 	void ShowRepositorySelection();
 	void ImportAssets();
+	static const QList<ContentBrowser*> GetContentBrowsers() {
+		return _contentBrowser
+			;
+	}
+
+	VirtualFolderTreeView* _treeView = nullptr;
+	VirtualFileListView* _listView = nullptr;
 
 protected:
 
@@ -150,11 +157,6 @@ protected:
 	class QSplitter*		_splitterBox = nullptr;
 	class QWidget*		_listWidget = nullptr;
 	class QWidget*		_treeWidget = nullptr;
-
-
-
-	VirtualFolderTreeView*		_treeView = nullptr;
-	VirtualFileListView*			_listView = nullptr;
 
 	QStringList _importFileNames;
 

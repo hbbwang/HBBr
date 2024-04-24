@@ -14,10 +14,9 @@ void ModelComponent::OnConstruction()
 	AddProperty(Material, "Material", &_materialGUIDs, false, "Default", 0);
 }
 
-void ModelComponent::SetModelByAssetPath(HString path)
+void ModelComponent::SetModelByAssetPath(HString virtualPath)
 {
-	path = FileSystem::FillUpAssetPath(path);
-	auto info = ContentManager::Get()->GetAssetInfo(path);
+	auto info = ContentManager::Get()->GetAssetInfo(virtualPath);
 	if (info.expired())
 		return;
 	SetModel(info.lock()->guid);
@@ -36,6 +35,7 @@ void ModelComponent::SetModel(std::weak_ptr<class Model> model)
 	ClearPrimitves();
 	if (!model.expired())
 	{
+		_modelCache = model;
 		_modelGUID = model.lock()->_assetInfo->guid;
 		_oldModelGUID = model.lock()->_assetInfo->guid;
 		Model::BuildModelPrimitives(model.lock().get(), _primitives);
