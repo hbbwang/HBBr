@@ -12,6 +12,8 @@
 #include "Component/GameObject.h"
 #include "Component/ModelComponent.h"
 #include "ContentBrowser.h"
+#include "EditorMain.h"
+#include "SceneOutline.h"
 #include "Asset/World.h"
 #include "VulkanRenderer.h"
 #ifdef _WIN32
@@ -202,7 +204,12 @@ void RenderView::dropEvent(QDropEvent* e)
                             //}
                             if (info->type == AssetType::Model)
                             {
-                                auto gameObject = _mainRenderer->renderer->GetWorld()->SpawnGameObject(name);
+                                Level* level = nullptr;
+                                if (EditorMain::_self->_sceneOutline->_currentLevelItem && !EditorMain::_self->_sceneOutline->_currentLevelItem->_level.expired())
+                                {
+                                    level = EditorMain::_self->_sceneOutline->_currentLevelItem->_level.lock().get();
+                                }
+                                auto gameObject = _mainRenderer->renderer->GetWorld()->SpawnGameObject(name, level);
                                 if (gameObject)
                                 {
                                     auto modelComp = gameObject->AddComponent<ModelComponent>();

@@ -15,6 +15,7 @@ class GameObject
 	friend class Inspector;
 	GameObject(HString objectName = "NewGameObject", class Level* level = nullptr, bool SceneEditorHide = false);
 	GameObject(class Level* level = nullptr, bool SceneEditorHide = false);
+	GameObject(HString objectName, HString guidStr, class Level* level = nullptr);
 public:
 	~GameObject();
 
@@ -143,6 +144,8 @@ private:
 	std::weak_ptr<GameObject>_selfWeak;
 
 	HGUID _guid;
+
+	HString _guidStr;
 
 	//Component spawn by name <class name , spawn function>
 	static std::map<HString, std::function<class Component*(class GameObject*)>> _componentSpawnFunctions;

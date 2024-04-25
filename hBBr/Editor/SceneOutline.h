@@ -31,6 +31,7 @@ public:
     virtual void mouseMoveEvent(QMouseEvent* event)override;
     virtual void dropEvent(class QDropEvent* event) override;
     QList<std::weak_ptr<GameObject>> GetSelectionObjects();
+    QList<std::weak_ptr<Level>> GetSelectionLevels();
 protected:
 
     virtual void commitData(QWidget* editor)
@@ -40,6 +41,7 @@ protected:
 
         QTreeWidget::commitData(editor);
     }
+    class SceneOutline* _parent = nullptr;
     VulkanRenderer* _renderer = nullptr;
     QTreeWidgetItem* _curItem;
     QTreeWidgetItem* _mouseTouchItem;
@@ -54,10 +56,15 @@ protected:
     QAction* _createSphere = nullptr;
     QAction* _createPlane = nullptr;
 
+    QAction* _createNewLevel = nullptr;
+    QAction* _deleteLevel = nullptr;
+    QAction* _renameLevel = nullptr;
+    QAction* _loadLevel = nullptr;
+    QAction* _unloadLevel = nullptr;
+
     virtual void contextMenuEvent(QContextMenuEvent*) override;
 
 private slots:
-
     void ItemDoubleClicked(QTreeWidgetItem* item, int column);
     void ItemEditFinished(QString newText);
     void ItemSelectionChanged();
@@ -84,8 +91,6 @@ public:
     SceneOutlineItem* FindLevel(QString levelName);
     QMap<QString, SceneOutlineItem*>_levelItems;
 private slots:
-
     void TreeSearch();
-
 };
 

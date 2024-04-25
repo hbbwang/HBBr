@@ -51,8 +51,8 @@ void World::AddLevel(HString levelNameOrAssetPath)
 void World::AddNewLevel(HString name)
 {
 	std::shared_ptr<Level> newLevel = nullptr;
-	newLevel.reset(new Level(name));
-	newLevel->Load(this, "?");
+	newLevel.reset(new Level(this, name));
+	newLevel->Load();
 	_levels.push_back(newLevel);
 #if IS_EDITOR
 	_editorLevelChanged();
@@ -102,7 +102,6 @@ GameObject* World::SpawnGameObject(HString name, class Level* level)
 		return nullptr;
 	}
 	GameObject* newObject = GameObject::CreateGameObject(name, level);
-	newObject->SetObjectName(name);
 	return newObject;
 }
 
@@ -144,8 +143,8 @@ void World::Load(HString worldName)
 #if IS_EDITOR
 
 	//Create editor only level.
-	_editorLevel.reset(new Level("EditorLevel"));
-	_editorLevel->Load(this, "");
+	_editorLevel.reset(new Level(this, "EditorLevel"));
+	_editorLevel->Load();
 	_editorLevel->_isEditorLevel = true;
 
 	//create editor camera
@@ -210,11 +209,9 @@ void World::WorldUpdate()
 	for (int i = 0; i < _levels.size(); i++)
 	{
 		_levelPtrs[i] = _levels[i];
-		if (_levels[i]->bLoad)
-		{
-			_levels[i]->LevelUpdate();
-		}
+		_levels[i]->LevelUpdate();
 	}
+
 
 	//Update Editor if the function is not null.
 #if IS_EDITOR

@@ -66,6 +66,7 @@ void SceneOutlineItem::Destroy()
 SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* parent)
     :QTreeWidget(parent)
 {
+    _parent = (SceneOutline*)parent;
     setFocusPolicy(Qt::FocusPolicy::ClickFocus);
     setHeaderHidden(true);
     setIconSize({ 0,0 });
@@ -74,7 +75,7 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
     setDragDropMode(QAbstractItemView::InternalMove);
     //允许接受drop操作
     setAcceptDrops(true);
-    //setEditTriggers(EditTrigger::DoubleClicked); 
+    setEditTriggers(EditTrigger::NoEditTriggers);//关掉双击改名的功能
     //setMouseTracking(true);
 
     setObjectName("SceneOutline");
@@ -94,15 +95,11 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
     _createSphere = new QAction(QString::fromLocal8Bit("Sphere"), _menu_createBasic);
     _createPlane = new QAction(QString::fromLocal8Bit("Plane"), _menu_createBasic);
 
-    _menu_createBasic->addAction(_createCube);
-    _menu_createBasic->addAction(_createSphere);
-    _menu_createBasic->addAction(_createPlane);
-
-    _menu->addAction(_createNewGameObject);
-    _menu->addMenu(_menu_createBasic);
-    _menu->addAction(_renameGameObject);
-    _menu->addSeparator();
-    _menu->addAction(_deleteGameObject);
+    _createNewLevel = new QAction(QString::fromLocal8Bit("生成新的空场景"), _menu_createBasic);
+     _deleteLevel = new QAction(QString::fromLocal8Bit("删除场景"), _menu_createBasic);
+     _renameLevel = new QAction(QString::fromLocal8Bit("场景重命名"), _menu_createBasic);
+     _loadLevel = new QAction(QString::fromLocal8Bit("场景加载"), _menu_createBasic);
+     _unloadLevel = new QAction(QString::fromLocal8Bit("场景卸载"), _menu_createBasic);
 
     //setRootIsDecorated(false);
     connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),this,SLOT(ItemDoubleClicked(QTreeWidgetItem*, int)));
@@ -133,7 +130,6 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
                     }
                 });
         });
-    //
     connect(_createCube, &QAction::triggered, this, [this](bool bChecked)
         {
             _renderer->ExecFunctionOnRenderThread([]()
@@ -158,11 +154,110 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
                     //GameObject::CreateModelGameObject(fi.absolutePath().toStdString().c_str());
                 });
         });
+    //创建新场景
+    connect(_createNewLevel, &QAction::triggered, this, [this](bool bChecked)
+        {
+            HString newLevelName = "New Level";
+            int index = 0;
+            while (true)
+            {
+                bool bFound = false;
+                for (auto& i : _parent->currentWorld.lock()->GetLevels())
+                {
+                    if (i->GetLevelName().IsSame(newLevelName))
+                    {
+                        bFound = true;
+                        newLevelName = "New Level " + HString::FromInt(index);
+                        index++;
+                        break;
+                    }
+                }
+                if (!bFound)
+                    break;
+            }
+            _parent->currentWorld.lock()->AddNewLevel(newLevelName);
+        });
+    //删除场景
+    connect(_deleteLevel, &QAction::triggered, this, [this](bool bChecked)
+        {
+
+        });
+    //场景重命名
+    connect(_renameLevel, &QAction::triggered, this, [this](bool bChecked)
+        {
+
+        });
+    //场景加载
+    connect(_loadLevel, &QAction::triggered, this, [this](bool bChecked)
+        {
+            for (auto& i : GetSelectionLevels())
+            {
+                i.lock()->Load();
+            }
+        });
+    //场景卸载
+    connect(_unloadLevel, &QAction::triggered, this, [this](bool bChecked)
+        {
+            for (auto& i : GetSelectionLevels())
+            {
+                i.lock()->UnLoad();
+            }
+        });
+    //当Item发生变化
+    connect(this, &QTreeWidget::itemChanged, this, [this](QTreeWidgetItem* item, int column)
+        {
+            SceneOutlineItem* sceneItem = (SceneOutlineItem*)item;
+            if (!sceneItem->_level.expired())
+            {
+                //我们只运行编辑一个Level，不可同时编辑多个
+                for (auto& i : _parent->_levelItems)
+                {
+                    if (i->_level.lock().get() == sceneItem->_level.lock().get() && i->checkState(0) == Qt::Checked)
+                    {
+                        _parent ->_currentLevelItem = sceneItem;
+                        //开启编辑的Level将会自动Load
+                        i->_level.lock()->Load();
+                    }
+                    else
+                    {
+                        i->setCheckState(0, Qt::Unchecked);
+                    }
+                }
+            }
+        });
 }
 
 void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
 {
-    _menu->exec(event->globalPos());
+    _menu->clear();
+    _menu_createBasic->clear();
+    //
+    auto item = (SceneOutlineItem*)itemAt(event->pos());
+    if (item)
+    {
+        if (!item->_gameObject.expired())
+        {
+            _menu_createBasic->addAction(_createCube);
+            _menu_createBasic->addAction(_createSphere);
+            _menu_createBasic->addAction(_createPlane);
+
+            _menu->addAction(_createNewGameObject);
+            _menu->addMenu(_menu_createBasic);
+            _menu->addAction(_renameGameObject);
+            _menu->addSeparator();
+            _menu->addAction(_deleteGameObject);
+        }
+        else if (!item->_level.expired())
+        {
+            _menu->addAction(_createNewLevel);
+            _menu->addAction(_renameLevel);
+            _menu->addAction(_loadLevel);
+            _menu->addAction(_unloadLevel);
+            _menu->addSeparator();
+            _menu->addAction(_deleteLevel);
+        }
+        _menu->exec(event->globalPos());
+    }
 }
 
 void SceneOutlineTree::ItemSelectionChanged()
@@ -238,22 +333,36 @@ QList<std::weak_ptr<GameObject>> SceneOutlineTree::GetSelectionObjects()
     return result;
 }
 
+QList<std::weak_ptr<Level>> SceneOutlineTree::GetSelectionLevels()
+{
+    QList<std::weak_ptr<Level>> result;
+    for (auto i : this->selectedItems())
+    {
+        auto item = dynamic_cast<SceneOutlineItem*>(i);
+        if (item != nullptr && !item->_level.expired())
+        {
+            result.append(item->_level);
+        }
+    }
+    return result;
+}
+
 void SceneOutlineTree::ItemDoubleClicked(QTreeWidgetItem* item, int column)
 {
-    if (item->isExpanded())
+    if (!item->isExpanded())
     {
-        item->setExpanded(false);
+        collapseItem(item);
     }
     else
     {
-        item->setExpanded(true);
+        expandItem(item);
     }
 }
 
 void SceneOutlineTree::ItemEditFinished(QString newText)
 {
     SceneOutlineItem* objItem = (SceneOutlineItem*)currentItem();
-    if(objItem->_gameObject.lock()->GetObjectName() != newText.toStdString().c_str())
+    if(!objItem->_gameObject.expired() && objItem->_gameObject.lock()->GetObjectName() != newText.toStdString().c_str())
         objItem->_gameObject.lock()->SetObjectName(newText.toStdString().c_str());
 }
 
@@ -303,7 +412,8 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                     {
                         //生成Level目录
                         auto item = new SceneOutlineItem(i, std::weak_ptr<GameObject>(), _treeWidget);
-                        _treeWidget->itemExpanded(item);
+                        item->setFlags(item->flags() | Qt::ItemIsUserCheckable); //场景选项支持CheckBox，用于确定当前正在修改的是哪个场景
+                        item->setCheckState(0, Qt::Unchecked);
                         _treeWidget->addTopLevelItem(item);
                         _levelItems.insert(i->GetLevelName().c_str(), item);
                         if (!i->IsLoaded())
@@ -311,6 +421,9 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                             item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
                         }
                     }
+                    ////默认第一个场景开启编辑
+                    //_levelItems.first()->setCheckState(0, Qt::Checked);
+                    //_treeWidget->expandItem(_levelItems.first());
                 }
             };
 

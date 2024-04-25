@@ -71,7 +71,7 @@ bool XMLStream::LoadXML(const wchar_t* path, pugi::xml_document& doc)
 
 bool XMLStream::SaveXML(HString path, pugi::xml_document& doc)
 {
-	return CreateXMLFile(path,doc);
+	return CreateXMLDocument(path,doc);
 }
 
 bool XMLStream::LoadXMLNode(pugi::xml_document& doc, const wchar_t* nodeName, pugi::xml_node& node)
@@ -191,7 +191,7 @@ bool XMLStream::LoadXMLAttributeFloat(pugi::xml_node& node, const wchar_t* attri
 	return false;
 }
 
-bool XMLStream::CreateXMLFile(HString path, pugi::xml_document& doc)
+bool XMLStream::CreateXMLDocument(HString path, pugi::xml_document& doc)
 {
 	pugi::xml_node decl = doc.prepend_child(pugi::node_declaration);
 	decl.append_attribute(L"version") = L"1.0";

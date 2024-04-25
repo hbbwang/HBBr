@@ -89,6 +89,6 @@ public:
 		return pugi::xml_node();
 	}
 
-	static bool CreateXMLFile(HString path , pugi::xml_document& doc);
+	static bool CreateXMLDocument(HString path , pugi::xml_document& doc);
 
 };

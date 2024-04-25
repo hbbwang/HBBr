@@ -4,10 +4,12 @@
 #include "XMLStream.h"
 #include "Component/Component.h"
 
-Level::Level(HString name)
+Level::Level(class World* world, HString name)
 {
-	_levelName = name;
-	_levelName = _levelName.ClearSpace();
+	_levelDoc = pugi::xml_document();
+	_levelName = name.ClearSpace();
+	_levelPath = FileSystem::Append(world->_worldAssetPath, _levelName) + ".level";
+	_world = world;
 }
 
 Level::~Level()
@@ -25,10 +27,11 @@ Level::~Level()
 
 void Level::Rename(HString newName)
 {
-	_levelName = newName;
+	_levelName = newName.ClearSpace();
 	if (FileSystem::FileExist(_levelPath))
 	{
 		FileSystem::FileRemove(_levelPath.c_str());
+		_levelPath = FileSystem::Append(_world->_worldAssetPath, _levelName) + ".level";
 		SaveLevel();
 	}
 #if IS_EDITOR
@@ -48,39 +51,68 @@ GameObject* Level::FindGameObjectByGUID(HGUID guid)
 	return nullptr;
 }
 
-void Level::Load(World* world, HString levelPath)
+void Level::Load()
 {
-	if (world)
+	if (_world)
 	{
-		_world = world;
 		if (!bLoad)
 		{
-			XMLStream::LoadXML(levelPath.c_wstr(), _levelDoc);
-			if (_levelDoc && !_levelDoc.empty())
+			bLoad = true;
+			int count = 0;
+			for (auto i : _levelDoc.children())
+				count++;
+			if (count ==0)
 			{
-				//先生成
-				auto root = _levelDoc.child(L"root");
-				HString type;
-				for (pugi::xml_node item = root.first_child(); item; item = item.next_sibling())
+				if (XMLStream::LoadXML(_levelPath.c_wstr(), _levelDoc))
 				{
-					HString type = item.attribute(L"Type").as_string();					
-					if (type == "GameObject")
+					_levelRoot = _levelDoc.child(TEXT("root"));
+					if (!_levelRoot)
+						_levelRoot = _levelDoc.append_child(L"root");
+				}
+				else
+				{
+					//这里我们不打算保存该xml,保存的决定留给用户
+					XMLStream::CreateXMLDocument("?", _levelDoc);
+					_levelRoot = _levelDoc.append_child(TEXT("root"));
+				}
+			}
+			//
+			{
+				struct PickObject {
+					GameObject* obj = nullptr;
+					HString type;
+					HString name;
+					pugi::xml_node item;
+				};
+				std::vector<PickObject> objs;
+				//先 生成
+				{
+					for (pugi::xml_node item = _levelRoot.first_child(); item; item = item.next_sibling())
 					{
-						HString name = item.attribute(L"Name").as_string();
-						auto object = _world->SpawnGameObject(name, this);
+						HString type = item.attribute(L"Type").as_string();
+						if (type == "GameObject")
+						{
+							HString name = item.attribute(L"Name").as_string();
+							HString guidStr = item.attribute(L"GUID").as_string();
+							GameObject* newObject = new GameObject(name, guidStr, this);
+							if (objs.capacity() < objs.size())  objs.reserve(objs.capacity() + 25);
+							PickObject newPick;
+							newPick.obj = newObject;
+							newPick.item = item;
+							newPick.type = type;
+							newPick.name = name;
+							objs.push_back(newPick);
+						}
 					}
 				}
 				//再考虑父子关系
-				uint32_t objectIndex = 0;
-				for (pugi::xml_node item = root.first_child(); item; item = item.next_sibling())
+				for (auto & i : objs)
 				{
-					if (type == "GameObject")
+					if (i.type == "GameObject")
 					{
-						HString guidStr = item.attribute(L"GUID").as_string();
-						HGUID  guid; StringToGUID(guidStr.c_str(), &guid);
-						auto object = _gameObjects[objectIndex];
+						auto object = i.obj;
 						//Parent
-						HString parentGuidStr = item.attribute(L"Parent").as_string();
+						HString parentGuidStr = i.item.attribute(L"Parent").as_string();
 						HGUID parentGuid; StringToGUID(parentGuidStr.c_str(), &parentGuid);
 						if (parentGuid.isValid())
 						{
@@ -89,7 +121,7 @@ void Level::Load(World* world, HString levelPath)
 						}
 						//Transform
 						{
-							auto tranNode = item.child(L"Transform");
+							auto tranNode = i.item.child(L"Transform");
 							glm::vec3 pos = glm::vec3(0), rot = glm::vec3(0), scale = glm::vec3(0);
 							pos.x = (float)tranNode.attribute(L"PosX").as_double();
 							pos.y = (float)tranNode.attribute(L"PosY").as_double();
@@ -106,7 +138,7 @@ void Level::Load(World* world, HString levelPath)
 						}
 						//Component
 						{
-							auto Component = item.child(L"Component");
+							auto Component = i.item.child(L"Component");
 							for (pugi::xml_node compItem = Component.first_child(); compItem; compItem = compItem.next_sibling())
 							{
 								HString className = compItem.attribute(L"Class").as_string();
@@ -116,94 +148,41 @@ void Level::Load(World* world, HString levelPath)
 								HString proName = pro.attribute(L"Name").as_string();
 								HString proType = pro.attribute(L"Type").as_string();
 								HString proValue = pro.attribute(L"Value").as_string();
-								
-
 							}
 						}
 					}
-					objectIndex++;
 				}
+				//
 			}
-			bLoad = true;
 		}
 	}
 }
 
-bool Level::UnLoad()
+void Level::UnLoad()
 {
-	return false;
-}
-
-bool Level::ResetLevel()
-{
-	if (UnLoad())
+	bLoad = false;
+	for (auto& i : this->_gameObjects)
 	{
-		_levelDoc = pugi::xml_document();
-		return true;
+		i->Destroy();
 	}
-	return false;
 }
 
 void Level::SaveLevel()
 {
+	//我们不在乎编辑器相关的内容
+	if (_isEditorLevel)
+	{
+		return;
+	}
+
 	if (!_world)
 		return;
 
-	auto root = _levelDoc.child(L"root");
-	if (!root || root.empty())
-	{
-		root = _levelDoc.append_child(L"root");
-	}
 	for (auto g : _gameObjects)
 	{
-		auto Item = root.append_child(L"Item");
-		Item.append_attribute(L"Type").set_value(L"GameObject");
-		Item.append_attribute(L"GUID").set_value(HString(g->_guid.str().c_str()).c_wstr());
-		Item.append_attribute(L"Name").set_value(g->GetObjectName().c_wstr());
-		//Parent guid
-		if (g->_parent)
-			Item.append_attribute(L"Parent").set_value(HString(g->_parent->_guid.str().c_str()).c_wstr());
-		else
-			Item.append_attribute(L"Parent").set_value(HString(HGUID().str().c_str()).c_wstr());
-		//Transform
-		{
-			auto Transform = Item.append_child(L"Transform");
-			Transform.append_attribute(L"PosX").set_value(g->_transform->GetLocation().x);
-			Transform.append_attribute(L"PosY").set_value(g->_transform->GetLocation().y);
-			Transform.append_attribute(L"PosZ").set_value(g->_transform->GetLocation().z);
-			Transform.append_attribute(L"RotX").set_value(g->_transform->GetRotation().x);
-			Transform.append_attribute(L"RotY").set_value(g->_transform->GetRotation().y);
-			Transform.append_attribute(L"RotZ").set_value(g->_transform->GetRotation().z);
-			Transform.append_attribute(L"ScaX").set_value(g->_transform->GetScale3D().x);
-			Transform.append_attribute(L"ScaY").set_value(g->_transform->GetScale3D().y);
-			Transform.append_attribute(L"ScaZ").set_value(g->_transform->GetScale3D().z);
-		}
-		//Components
-		{
-			auto Component = Item.append_child(L"Component");
-			for (auto c : g->_comps)
-			{
-				auto compItem = Component.append_child(L"Item");
-				compItem.append_attribute(L"Class").set_value(c->GetComponentName().c_wstr());
-				//Variables
-				for (auto p : c->_compProperties)
-				{
-					auto valueStr = Component::AnalysisPropertyValue(p);
-					if (valueStr.Length() > 0)
-					{
-						auto pro = compItem.append_child(L"Item");
-						pro.append_attribute(L"Name").set_value(p.name.c_wstr());
-						pro.append_attribute(L"Type").set_value(p.type.c_wstr());
-						pro.append_attribute(L"Value").set_value(valueStr.c_wstr());
-					}
-				}
-			}
-		}
+		XML_UpdateGameObject(g.get(), true);
 	}
-
-	HString worldPath = _world->_worldAssetPath;
-	HString levelPath = worldPath + "/" + _levelName + ".level";
-	_levelDoc.save_file(levelPath.c_wstr());
+	_levelDoc.save_file(_levelPath.c_wstr());
 }
 
 void Level::LevelUpdate()
@@ -236,6 +215,7 @@ void Level::AddNewObject(std::shared_ptr<GameObject> newObject)
 {
 	_gameObjects.push_back(newObject);
 	_world->AddNewObject(newObject);
+	XML_UpdateGameObject(newObject.get());
 }
 
 void Level::RemoveObject(GameObject* object)
@@ -253,3 +233,68 @@ void Level::RemoveObject(GameObject* object)
 	}
 }
 
+//---------------------------------------------------------------------------------XML Document-------------
+#pragma region XML Document
+void Level::XML_UpdateGameObject(GameObject* g, bool bUpdateParameters)
+{
+	//我们不在乎编辑器相关的内容
+	if (_isEditorLevel || g->_IsEditorObject)
+	{
+		return;
+	}
+	//根据GUID查找
+	auto item = _levelRoot.find_child_by_attribute(TEXT("GUID"), g->_guidStr.c_wstr());
+	if (!item)
+	{
+		item = _levelRoot.append_child(L"Item");
+		item.append_attribute(L"Type").set_value(L"GameObject");
+		item.append_attribute(L"GUID").set_value(g->_guidStr.c_wstr());
+		bUpdateParameters = true;//新建的对象，必须写入参数
+	}
+	if (bUpdateParameters)
+	{
+		item.append_attribute(L"Name").set_value(g->GetObjectName().c_wstr());
+		//Parent guid
+		if (g->_parent)
+			item.append_attribute(L"Parent").set_value(g->_parent->_guidStr.c_wstr());
+		else
+			item.append_attribute(L"Parent").set_value(HString(HGUID().str().c_str()).c_wstr());
+		//Transform
+		{
+			auto Transform = item.append_child(L"Transform");
+			Transform.append_attribute(L"PosX").set_value(g->_transform->GetLocation().x);
+			Transform.append_attribute(L"PosY").set_value(g->_transform->GetLocation().y);
+			Transform.append_attribute(L"PosZ").set_value(g->_transform->GetLocation().z);
+			Transform.append_attribute(L"RotX").set_value(g->_transform->GetRotation().x);
+			Transform.append_attribute(L"RotY").set_value(g->_transform->GetRotation().y);
+			Transform.append_attribute(L"RotZ").set_value(g->_transform->GetRotation().z);
+			Transform.append_attribute(L"ScaX").set_value(g->_transform->GetScale3D().x);
+			Transform.append_attribute(L"ScaY").set_value(g->_transform->GetScale3D().y);
+			Transform.append_attribute(L"ScaZ").set_value(g->_transform->GetScale3D().z);
+		}
+		//Components
+		{
+			auto Component = item.append_child(L"Component");
+			for (auto c : g->_comps)
+			{
+				auto compItem = Component.append_child(L"Item");
+				compItem.append_attribute(L"Class").set_value(c->GetComponentName().c_wstr());
+				//Variables
+				for (auto p : c->_compProperties)
+				{
+					auto valueStr = Component::AnalysisPropertyValue(p);
+					if (valueStr.Length() > 0)
+					{
+						auto pro = compItem.append_child(L"Item");
+						pro.append_attribute(L"Name").set_value(p.name.c_wstr());
+						pro.append_attribute(L"Type").set_value(p.type.c_wstr());
+						pro.append_attribute(L"Value").set_value(valueStr.c_wstr());
+					}
+				}
+			}
+		}
+	}
+}
+
+
+#pragma endregion XML Document

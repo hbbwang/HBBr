@@ -45,7 +45,7 @@ void Archive::InitArchive(HString assetSavePath)
 	}
 	else
 	{
-		XMLStream::CreateXMLFile(ArchiveTargetAbsFilePath, ArchiveTargetFile);
+		XMLStream::CreateXMLDocument(ArchiveTargetAbsFilePath, ArchiveTargetFile);
 		ArchiveTargetFile.append_child(TEXT("root"));
 	}
 }

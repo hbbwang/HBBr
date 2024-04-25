@@ -19,6 +19,13 @@ GameObject::GameObject(Level* level, bool SceneEditorHide)
 	ObjectInit("NewGameObject", level, SceneEditorHide);
 }
 
+GameObject::GameObject(HString objectName, HString guidStr, Level* level)
+{
+	_guidStr = guidStr;
+	StringToGUID(guidStr.c_str(), &_guid);
+	ObjectInit("NewGameObject", level);
+}
+
 GameObject::~GameObject()
 {
 
@@ -26,7 +33,10 @@ GameObject::~GameObject()
 
 void GameObject::ObjectInit(HString objectName, Level* level, bool SceneEditorHide)
 {
-	_guid = CreateGUID();
+	if (!_guid.isValid())
+	{
+		_guidStr = CreateGUIDAndString(_guid);
+	}
 #if IS_EDITOR
 	_sceneEditorHide = SceneEditorHide;
 #endif

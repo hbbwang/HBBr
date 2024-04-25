@@ -341,12 +341,11 @@ QTreeView::indicator
 }
 QTreeWidget::indicator:unchecked
 {
-	image:url(:/icon/iconmain/New_ui/icon_addcontacts_normal.png);
-}
 
+}
 QTreeWidget::indicator:checked
 {
-	image:url(:/icon/iconmain/New_ui/icon_addcontacts_press.png); 
+
 }
 QTreeWidget
 {

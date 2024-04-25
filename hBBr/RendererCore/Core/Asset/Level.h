@@ -16,8 +16,7 @@ class Level
 	friend class World;
 public:
 
-	Level() {}
-	Level(HString name);
+	Level(class World* world, HString name);
 	~Level();
 
 	//序列化
@@ -32,11 +31,11 @@ public:
 
 	HBBR_API GameObject* FindGameObjectByGUID(HGUID guid);
 
-	//Release level
-	HBBR_API bool UnLoad();
+	//Load level
+	HBBR_API void Load();
 
-	//Release level and xml file
-	HBBR_API bool ResetLevel();
+	//Release level
+	HBBR_API void UnLoad();
 
 	HBBR_API void SaveLevel();
 
@@ -50,7 +49,6 @@ public:
 	HBBR_API class World* GetWorld()const { return _world; }
 
 private:
-	HBBR_API void Load(class World* world, HString levelAssetPathOrName);
 
 	void LevelUpdate();
 
@@ -63,7 +61,12 @@ private:
 	HString _levelPath = "";
 
 	pugi::xml_document _levelDoc;
-	
+	pugi::xml_node _levelRoot;
+
+	//更新或者创建GameObject的Xml数据在level文档里
+	//bUpdateParameters是否写入参数
+	void XML_UpdateGameObject(GameObject* gameObject, bool bUpdateParameters = true);
+
 	//请勿要主动使用该函数
 	void AddNewObject(std::shared_ptr<GameObject> newObject);
 
