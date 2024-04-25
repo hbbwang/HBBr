@@ -100,14 +100,14 @@ void VulkanRenderer::Init()
 
 }
 
-void VulkanRenderer::LoadWorld(HString worldNameOrAssetPath)
+void VulkanRenderer::LoadWorld(HString worldName)
 {
-	_world.reset(new World(this, worldNameOrAssetPath));
+	_world.reset(new World(this));
 	for (auto i : _spwanNewWorld)
 	{
 		i(_world);
 	}
-	_world->Load();
+	_world->Load(worldName);
 }
 
 void VulkanRenderer::CreateEmptyWorld()
@@ -117,7 +117,7 @@ void VulkanRenderer::CreateEmptyWorld()
 	{
 		i(_world);
 	}
-	_world->Load();
+	_world->Load("");
 }
 
 void VulkanRenderer::Render()

@@ -116,7 +116,7 @@ public:
 		return _bIsInGame;
 	}
 
-	HBBR_API void LoadWorld(HString worldNameOrAssetPath);
+	HBBR_API void LoadWorld(HString worldName);
 
 	HBBR_API void CreateEmptyWorld();
 

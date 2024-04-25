@@ -40,6 +40,8 @@ public:
 
 	HBBR_API void SaveLevel();
 
+	HBBR_API const bool IsLoaded()const { return bLoad; }
+
 	//Get all game objects from this level.
 	HBBR_API std::vector<std::shared_ptr<GameObject>>& GetAllGameObjects() {
 		return _gameObjects;

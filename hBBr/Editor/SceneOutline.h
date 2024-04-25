@@ -7,12 +7,16 @@
 #include <QMimeData>
 #include <qlineedit.h>
 #include "HGuid.h"
-class GameObjectItem :public QTreeWidgetItem
+#include "World.h"
+class SceneOutlineItem :public QTreeWidgetItem
 {
 public:
-    GameObjectItem(class GameObject* gameObject, QTreeWidget* view);
-    ~GameObjectItem();
-    class GameObject* _gameObject = nullptr;
+    SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, QTreeWidget* view);
+    SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, SceneOutlineItem* parent);
+    ~SceneOutlineItem();
+    void Init(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject);
+    std::weak_ptr<GameObject> _gameObject;
+    std::weak_ptr<Level> _level;
     void Destroy();
 };
 
@@ -20,12 +24,13 @@ class SceneOutlineTree :public QTreeWidget
 {
     Q_OBJECT
 public:
+
     explicit SceneOutlineTree(class VulkanRenderer* renderer, QWidget* parent = nullptr);
     ~SceneOutlineTree() {}
     virtual void mousePressEvent(QMouseEvent* event)override ;
     virtual void mouseMoveEvent(QMouseEvent* event)override;
     virtual void dropEvent(class QDropEvent* event) override;
-    QList<class GameObject*> GetSelectionObjects();
+    QList<std::weak_ptr<GameObject>> GetSelectionObjects();
 protected:
 
     virtual void commitData(QWidget* editor)
@@ -71,10 +76,15 @@ public:
     virtual void focusInEvent(QFocusEvent* event);
     virtual void paintEvent(QPaintEvent* event);
     class  VulkanRenderer* _renderer = nullptr;
-    class ComboBox* _currentLevel;
     static SceneOutlineTree* _treeWidget;
     class CustomSearchLine* _search;
+    std::weak_ptr<World> currentWorld;
+
+    SceneOutlineItem* _currentLevelItem;
+    SceneOutlineItem* FindLevel(QString levelName);
+    QMap<QString, SceneOutlineItem*>_levelItems;
 private slots:
+
     void TreeSearch();
 
 };

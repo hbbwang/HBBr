@@ -53,6 +53,9 @@
     <Filter Include="Renderer\Core\Asset\AssetType">
       <UniqueIdentifier>{155f6a91-dbaa-4948-8952-ff3219806098}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderer\Core\World">
+      <UniqueIdentifier>{b07b8a36-0ebd-4a4a-8858-b145bf5dbe21}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\VulkanManager.h">
@@ -211,9 +214,6 @@
     <ClInclude Include="Core\Asset\ContentManager.h">
       <Filter>Renderer\Core\Asset</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Asset\Level.h">
-      <Filter>Renderer\Core\Asset\AssetType</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Asset\Material.h">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClInclude>
@@ -226,11 +226,14 @@
     <ClInclude Include="Core\Asset\Texture2D.h">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Asset\World.h">
-      <Filter>Renderer\Core\Asset\AssetType</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Asset\Archive.h">
       <Filter>Renderer\Core\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Asset\World.h">
+      <Filter>Renderer\Core\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Asset\Level.h">
+      <Filter>Renderer\Core\World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -366,9 +369,6 @@
     <ClCompile Include="Core\Asset\ContentManager.cpp">
       <Filter>Renderer\Core\Asset</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Asset\Level.cpp">
-      <Filter>Renderer\Core\Asset\AssetType</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Asset\Material.cpp">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClCompile>
@@ -381,11 +381,14 @@
     <ClCompile Include="Core\Asset\Texture2D.cpp">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Asset\World.cpp">
-      <Filter>Renderer\Core\Asset\AssetType</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Asset\Archive.cpp">
       <Filter>Renderer\Core\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Asset\World.cpp">
+      <Filter>Renderer\Core\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Asset\Level.cpp">
+      <Filter>Renderer\Core\World</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

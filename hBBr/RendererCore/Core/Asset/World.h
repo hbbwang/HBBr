@@ -21,7 +21,6 @@ class World
 	friend class Level;
 public:
 	World(class VulkanRenderer* renderer);
-	World(class VulkanRenderer* renderer, HString worldName);
 	~World();
 
 #if IS_EDITOR
@@ -56,6 +55,7 @@ public:
 	std::function<void(std::shared_ptr<GameObject>)> _editorGameObjectAddFunc = [](std::shared_ptr<GameObject> newObject) {};
 	std::function<void(std::shared_ptr<GameObject>)> _editorGameObjectRemoveFunc = [](std::shared_ptr<GameObject> oldObject) {};
 	std::function<void(std::shared_ptr<GameObject>)> _editorGameObjectUpdateFunc = [](std::shared_ptr<GameObject> oldObject) {};
+	std::function<void(std::shared_ptr<GameObject>,  std::shared_ptr<GameObject>)> _editorGameObjectSetParentFunc = [](std::shared_ptr<GameObject> Object, std::shared_ptr<GameObject> newParent) {};
 	std::function<void(std::vector<std::weak_ptr<Level>>&)> _editorWorldUpdate = [](std::vector<std::weak_ptr<Level>> levels) {};
 	std::function<void()> _editorLevelChanged = []() {};
 
@@ -68,10 +68,10 @@ public:
 private:
 
 	//加载场景,此状态不可以加载普通Object,会和编辑器起冲突报错! 除非_sceneEditorHide=true
-	void PreLoad(class VulkanRenderer* renderer, HString worldAssetPath);
+	void PreLoad(class VulkanRenderer* renderer);
 
 	//加载场景资产
-	void Load();
+	void Load(HString worldName);
 
 	//释放场景
 	bool ReleaseWorld();

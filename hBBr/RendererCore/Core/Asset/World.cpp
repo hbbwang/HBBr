@@ -9,12 +9,7 @@
 #include "ConsoleDebug.h"
 World::World(class VulkanRenderer* renderer)
 {
-	PreLoad(renderer, "");
-}
-
-World::World(VulkanRenderer* renderer, HString worldAssetPath)
-{
-	PreLoad(renderer, worldAssetPath);
+	PreLoad(renderer);
 }
 
 World::~World()
@@ -57,7 +52,7 @@ void World::AddNewLevel(HString name)
 {
 	std::shared_ptr<Level> newLevel = nullptr;
 	newLevel.reset(new Level(name));
-	newLevel->Load(this, "");
+	newLevel->Load(this, "?");
 	_levels.push_back(newLevel);
 #if IS_EDITOR
 	_editorLevelChanged();
@@ -111,13 +106,16 @@ GameObject* World::SpawnGameObject(HString name, class Level* level)
 	return newObject;
 }
 
-void World::PreLoad(class VulkanRenderer* renderer, HString worldName)
+void World::PreLoad(class VulkanRenderer* renderer)
 {
 	_renderer = renderer;
+}
 
+void World::Load(HString worldName)
+{
 	if (worldName.GetSuffix() == "world" && FileSystem::IsDir(worldName))
 	{
-		HString fullPath = FileSystem::Append(FileSystem::GetWorldAbsPath() , worldName);
+		HString fullPath = FileSystem::Append(FileSystem::GetWorldAbsPath(), worldName);
 		_worldAssetPath = FileSystem::GetRelativePath(fullPath);
 		FileSystem::FixUpPath(_worldAssetPath);
 
@@ -144,6 +142,7 @@ void World::PreLoad(class VulkanRenderer* renderer, HString worldName)
 	}
 
 #if IS_EDITOR
+
 	//Create editor only level.
 	_editorLevel.reset(new Level("EditorLevel"));
 	_editorLevel->Load(this, "");
@@ -160,19 +159,17 @@ void World::PreLoad(class VulkanRenderer* renderer, HString worldName)
 
 #else
 
-//	//Test game camera
-//	auto backCamera = new GameObject("Camera");
-//	backCamera->GetTransform()->SetWorldLocation(glm::vec3(0, 2, -3.0));
-//	auto cameraComp = backCamera->AddComponent<CameraComponent>();
-//	cameraComp->OverrideMainCamera();
+	//	//Test game camera
+	//	auto backCamera = new GameObject("Camera");
+	//	backCamera->GetTransform()->SetWorldLocation(glm::vec3(0, 2, -3.0));
+	//	auto cameraComp = backCamera->AddComponent<CameraComponent>();
+	//	cameraComp->OverrideMainCamera();
 
 #endif
 
 	bLoad = true;
-}
 
-void World::Load()
-{
+
 #if IS_GAME
 	//-----model--camera
 	auto backCamera = GameObject::CreateGameObject("TestGameCamera", _levels[0].get());
@@ -180,11 +177,13 @@ void World::Load()
 	auto cameraComp = backCamera->AddComponent<CameraComponent>();
 	cameraComp->OverrideMainCamera();
 #endif
+
 	//-----model--test
 	auto testModel = GameObject::CreateGameObject("Test", _levels[0].get());
 	auto modelComp = testModel->AddComponent<ModelComponent>();
 	modelComp->SetModel(HGUID("c51a01e8-9349-660a-d2df-353a310db461"));
 	ConsoleDebug::printf_endl("Test Model Spawn......");
+
 }
 
 bool World::ReleaseWorld()
