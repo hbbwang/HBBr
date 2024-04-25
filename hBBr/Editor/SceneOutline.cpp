@@ -202,6 +202,11 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
             {
                 i.lock()->UnLoad();
             }
+            if (_parent->_currentLevelItem)
+            {
+                //卸载的时候关闭编辑
+                _parent->_currentLevelItem->setCheckState(0, Qt::Unchecked);
+            }
         });
     //当Item发生变化
     connect(this, &QTreeWidget::itemChanged, this, [this](QTreeWidgetItem* item, int column)
