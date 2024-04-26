@@ -81,7 +81,7 @@ public:
 		return !obj.expired() && !obj.lock()->_bWantDestroy && obj.lock()->_transform != nullptr;
 	}
 
-	HBBR_INLINE static std::map<HString, std::function<class Component* (class GameObject*)>> GetCompSpawnMap()	{
+	HBBR_INLINE static std::map<HString, std::function<class Component* (class GameObject*)>>& GetCompSpawnMap()	{
 		return _componentSpawnFunctions;
 	}
 
@@ -99,7 +99,6 @@ public:
 		if (it != _componentSpawnFunctions.end())
 		{
 			auto newComp = it->second(this);
-			_comps.push_back(newComp);
 			return newComp;
 		}
 		return nullptr;

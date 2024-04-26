@@ -130,13 +130,13 @@ void Level::Load()
 							pos.y = (float)tranNode.attribute(L"PosY").as_double();
 							pos.z = (float)tranNode.attribute(L"PosZ").as_double();
 							object->_transform->SetLocation(pos);
-							pos.x = (float)tranNode.attribute(L"RotX").as_double();
-							pos.y = (float)tranNode.attribute(L"RotY").as_double();
-							pos.z = (float)tranNode.attribute(L"RotZ").as_double();
+							rot.x = (float)tranNode.attribute(L"RotX").as_double();
+							rot.y = (float)tranNode.attribute(L"RotY").as_double();
+							rot.z = (float)tranNode.attribute(L"RotZ").as_double();
 							object->_transform->SetRotation(rot);
-							pos.x = (float)tranNode.attribute(L"ScaX").as_double();
-							pos.y = (float)tranNode.attribute(L"ScaY").as_double();
-							pos.z = (float)tranNode.attribute(L"ScaZ").as_double();
+							scale.x = (float)tranNode.attribute(L"ScaX").as_double();
+							scale.y = (float)tranNode.attribute(L"ScaY").as_double();
+							scale.z = (float)tranNode.attribute(L"ScaZ").as_double();
 							object->_transform->SetScale3D(scale);
 						}
 						//Component
@@ -146,11 +146,23 @@ void Level::Load()
 							{
 								HString className = compItem.attribute(L"Class").as_string();
 								auto component = object->AddComponent(className);
-								auto pro = compItem.child(L"Item");
 
-								HString proName = pro.attribute(L"Name").as_string();
-								HString proType = pro.attribute(L"Type").as_string();
-								HString proValue = pro.attribute(L"Value").as_string();
+								for (pugi::xml_node pro = compItem.first_child(); pro; pro = pro.next_sibling())
+								{
+									HString proName = pro.attribute(L"Name").as_string();
+									HString proType = pro.attribute(L"Type").as_string();
+									HString proValue = pro.attribute(L"Value").as_string();
+
+									for (auto& p : component->_compProperties)
+									{
+										if (p.name == proName && p.type == proType)
+										{
+											Component::StringToPropertyValue(p, proValue);
+											break;
+										}
+									}
+								}
+								component->UpdateData();
 							}
 						}
 					}
@@ -269,51 +281,65 @@ void Level::XML_UpdateGameObject(GameObject* g)
 
 void Level::XML_UpdateGameObjectTransform(GameObject* g)
 {
-	g->_xmlNode.append_attribute(L"Name").set_value(g->GetObjectName().c_wstr());
+	if (g == nullptr)
+		return;
+	XMLStream::SetXMLAttribute(g->_xmlNode, TEXT("Name"), g->GetObjectName().c_wstr());
 	//Parent guid
 	if (g->_parent)
-		g->_xmlNode.append_attribute(L"Parent").set_value(g->_parent->_guidStr.c_wstr());
+		XMLStream::SetXMLAttribute(g->_xmlNode, TEXT("Parent"), g->_parent->_guidStr.c_wstr());
 	else
-		g->_xmlNode.append_attribute(L"Parent").set_value(HString(HGUID().str().c_str()).c_wstr());
+		XMLStream::SetXMLAttribute(g->_xmlNode, TEXT("Parent"), HString(HGUID().str().c_str()).c_wstr());
 	//Transform
 	{
-		auto Transform = g->_xmlNode.append_child(L"Transform");
+		auto transform = XMLStream::CreateXMLNode(g->_xmlNode,TEXT("Transform"));
 		auto pos = g->_transform->GetLocation();
 		auto rota = g->_transform->GetRotation();
 		auto scale = g->_transform->GetScale3D();
-		Transform.append_attribute(L"PosX").set_value(pos.x);
-		Transform.append_attribute(L"PosY").set_value(pos.y);
-		Transform.append_attribute(L"PosZ").set_value(pos.z);
-		Transform.append_attribute(L"RotX").set_value(rota.x);
-		Transform.append_attribute(L"RotY").set_value(rota.y);
-		Transform.append_attribute(L"RotZ").set_value(rota.z);
-		Transform.append_attribute(L"ScaX").set_value(scale.x);
-		Transform.append_attribute(L"ScaY").set_value(scale.y);
-		Transform.append_attribute(L"ScaZ").set_value(scale.z);
+
+		XMLStream::SetXMLAttribute(transform, TEXT("PosX"), pos.x);
+		XMLStream::SetXMLAttribute(transform, TEXT("PosY"), pos.y);
+		XMLStream::SetXMLAttribute(transform, TEXT("PosZ"), pos.z);
+
+		XMLStream::SetXMLAttribute(transform, TEXT("RotX"), rota.x);
+		XMLStream::SetXMLAttribute(transform, TEXT("RotY"), rota.y);
+		XMLStream::SetXMLAttribute(transform, TEXT("RotZ"), rota.z);
+
+		XMLStream::SetXMLAttribute(transform, TEXT("ScaX"), scale.x);
+		XMLStream::SetXMLAttribute(transform, TEXT("ScaY"), scale.y);
+		XMLStream::SetXMLAttribute(transform, TEXT("ScaZ"), scale.z);
 	}
 }
 
 void Level::XML_UpdateGameObjectComponent(GameObject* g)
 {
-	auto Component = g->_xmlNode.append_child(L"Component");
+	if (g == nullptr)
+		return;
+	auto Component = XMLStream::CreateXMLNode(g->_xmlNode, TEXT("Component"));
+	int compIndex = 0;
 	for (auto c : g->_comps)
 	{
-		auto compItem = Component.append_child(L"Item");
-		compItem.append_attribute(L"Class").set_value(c->GetComponentName().c_wstr());
+		HString indexStr = HString::FromInt(compIndex);
+		auto compItem = Component.find_child_by_attribute(TEXT("Index"), indexStr.c_wstr());
+		if (compItem.empty())
+		{
+			compItem = Component.append_child(TEXT("Item"));
+		}
+		XMLStream::SetXMLAttribute(compItem, TEXT("Class"), c->GetComponentName().c_wstr());
+		XMLStream::SetXMLAttribute(compItem, TEXT("Index"), HString::FromInt(compIndex).c_wstr());
 		//Variables
 		for (auto p : c->_compProperties)
 		{
-			auto valueStr = Component::AnalysisPropertyValue(p);
+			auto valueStr = Component::PropertyValueToString(p);
 			if (valueStr.Length() > 0)
 			{
 				auto pro = compItem.append_child(L"Item");
-				pro.append_attribute(L"Name").set_value(p.name.c_wstr());
-				pro.append_attribute(L"Type").set_value(p.type.c_wstr());
-				pro.append_attribute(L"Value").set_value(valueStr.c_wstr());
+				XMLStream::SetXMLAttribute(pro, TEXT("Name"), p.name.c_wstr());
+				XMLStream::SetXMLAttribute(pro, TEXT("Type"), p.type.c_wstr());
+				XMLStream::SetXMLAttribute(pro, TEXT("Value"), valueStr.c_wstr());
 			}
 		}
+		compIndex++;
 	}
 }
-
 
 #pragma endregion XML Document

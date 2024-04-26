@@ -139,8 +139,6 @@ protected:
 		AddProperty("bool", "bActive", &_bActive, false, "Default", 0, "");
 	}
 
-	static HString AnalysisPropertyValue(ComponentProperty& p);
-
 	//<displayName , component>
 	std::vector<ComponentProperty> _compProperties;
 
@@ -198,4 +196,86 @@ protected:
 	class VulkanRenderer* _renderer = nullptr;
 
 	class World* _world = nullptr;
+
+
+	static HString PropertyValueToString(ComponentProperty& p)
+	{
+		if (p.type.IsSame("bool", false))
+		{
+			if (p.bArray)
+			{
+				auto value = (std::vector<bool>*)p.value;
+				HString result;
+				for (auto i : *value) {
+					result += (i == true) ? "1;" : "0;";
+				}
+				return result;
+			}
+			else
+			{
+				auto value = (bool*)p.value;
+				return (*value == true) ? "1" : "0";
+			}
+		}
+		else 	if (p.type.IsSame("AssetPath", false))
+		{
+			if (p.bArray)
+			{
+				auto value = (std::vector<AssetPath>*)p.value;
+				HString result;
+				for (auto i : *value) {
+					result += i.path + ";";
+				}
+			}
+			else
+			{
+				auto value = (AssetPath*)p.value;
+				return value->path;
+			}
+		}
+		return "";
+	}
+
+	static void StringToPropertyValue(ComponentProperty& p , HString& valueStr)
+	{
+		if (p.type.IsSame("bool", false))
+		{
+			if (p.bArray)
+			{
+				auto bools = valueStr.Split(";");
+				auto valuePtr = ((std::vector<bool>*)p.value);
+				valuePtr->resize(bools.size());
+				for (int i = 0; i < bools.size(); i++)
+				{
+					valuePtr->push_back(HString::ToInt(bools[i]) == 1 ? true : false);
+				}
+			}
+			else
+			{
+				*((bool*)p.value) = HString::ToInt(valueStr) == 1 ? true : false;
+			}
+		}
+		else 	if (p.type.IsSame("AssetPath", false))
+		{
+			if (p.bArray)
+			{
+				auto values = valueStr.Split(";");
+				auto valuePtr = ((std::vector<AssetPath>*)p.value);
+				valuePtr->resize(values.size());
+				for (int i = 0; i < values.size(); i++)
+				{
+					AssetPath newAssetPath;
+					newAssetPath.path = values[i];
+					valuePtr->push_back(newAssetPath);
+				}
+			}
+			else
+			{
+				((AssetPath*)p.value)->path = valueStr;
+			}
+		}
+
+	}
+
+
 };

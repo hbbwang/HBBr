@@ -23,7 +23,7 @@ GameObject::GameObject(HString objectName, HString guidStr, Level* level)
 {
 	_guidStr = guidStr;
 	StringToGUID(guidStr.c_str(), &_guid);
-	ObjectInit("NewGameObject", level);
+	ObjectInit(objectName, level);
 }
 
 GameObject::~GameObject()
@@ -33,9 +33,14 @@ GameObject::~GameObject()
 
 void GameObject::ObjectInit(HString objectName, Level* level, bool SceneEditorHide)
 {
+	bool FromXmlNode = false;
 	if (!_guid.isValid())
 	{
 		_guidStr = CreateGUIDAndString(_guid);
+	}
+	else
+	{
+		FromXmlNode = true;//GUID已知，是从scene xml里获取到的
 	}
 #if IS_EDITOR
 	_sceneEditorHide = SceneEditorHide;
@@ -61,7 +66,12 @@ void GameObject::ObjectInit(HString objectName, Level* level, bool SceneEditorHi
 	auto sharedPtr = std::shared_ptr<GameObject>(this);
 	_selfWeak = sharedPtr;
 	_level->AddNewObject(sharedPtr);
-	_level->XML_UpdateGameObject(this);
+
+	//从xml场景获取到的数据，不进行node更新
+	if (!FromXmlNode)
+	{
+		_level->XML_UpdateGameObject(this);
+	}
 }
 
 GameObject* GameObject::CreateGameObject(HString objectName, Level* level)
