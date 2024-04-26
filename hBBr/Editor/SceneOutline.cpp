@@ -10,6 +10,7 @@
 #include <QMimeData>
 #include <QApplication>
 #include <QDrag>
+#include <QStyledItemDelegate>
 #include <QStyleOption>
 #include <QPainter>
 #include <qmenu.h>
@@ -24,6 +25,17 @@ SceneOutlineItem::SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<Gam
     :QTreeWidgetItem(view)
 {
     Init(level, gameObject);
+}
+
+SceneOutlineItem::SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, QString iconPath, QTreeWidget* view)
+{
+    Init(level, gameObject);
+    QFileInfo info(iconPath);
+    if (info.exists())
+    {
+        auto icon = QIcon(iconPath);
+        this->setIcon(0, icon);
+    }
 }
 
 SceneOutlineItem::SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, SceneOutlineItem* parent)
@@ -63,6 +75,39 @@ void SceneOutlineItem::Destroy()
     delete this;
 }
 
+class SceneOutlineTreeDelegate : public QStyledItemDelegate
+{
+public:
+    class SceneOutlineTree* _tree;
+    SceneOutlineTreeDelegate(SceneOutlineTree* parent) :QStyledItemDelegate(parent)
+    {
+        _tree = parent;
+    }
+    
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
+    {
+        QStyleOptionViewItem opt = option;
+        initStyleOption(&opt, index);
+        SceneOutlineItem* item = (SceneOutlineItem*)(_tree->invisibleRootItem()->child(index.row()));
+        if (item) {
+            if (!item->_level.expired())
+            {
+                if (item->_level.lock()->IsLoaded())
+                {
+                    opt.font.setStrikeOut(false);
+                    opt.font.setBold(true);
+                }
+                else// 场景没加载的时候，显示划去效果
+                {
+                    opt.font.setStrikeOut(true);
+                    opt.font.setBold(false);
+                }
+            }
+        }
+        QStyledItemDelegate::paint(painter, opt, index);
+    }
+};
+
 SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* parent)
     :QTreeWidget(parent)
 {
@@ -100,6 +145,8 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
      _renameLevel = new QAction(QString::fromLocal8Bit("场景重命名"), _menu_createBasic);
      _loadLevel = new QAction(QString::fromLocal8Bit("场景加载"), _menu_createBasic);
      _unloadLevel = new QAction(QString::fromLocal8Bit("场景卸载"), _menu_createBasic);
+
+     setItemDelegate(new SceneOutlineTreeDelegate(this));
 
     //setRootIsDecorated(false);
     connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),this,SLOT(ItemDoubleClicked(QTreeWidgetItem*, int)));
@@ -286,6 +333,10 @@ void SceneOutlineTree::mousePressEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton) {
         _curItem = this->itemAt(event->pos());
+        if (_curItem == nullptr)
+        {
+            this->clearSelection();
+        }
     }
     QTreeWidget::mousePressEvent(event);
 }
@@ -416,15 +467,11 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                     if(itemExist == nullptr)
                     {
                         //生成Level目录
-                        auto item = new SceneOutlineItem(i, std::weak_ptr<GameObject>(), _treeWidget);
+                        auto item = new SceneOutlineItem(i, std::weak_ptr<GameObject>(), (FileSystem::GetConfigAbsPath() + "Theme/Icons/ICON_SCENE.png").c_str(), _treeWidget);
                         item->setFlags(item->flags() | Qt::ItemIsUserCheckable); //场景选项支持CheckBox，用于确定当前正在修改的是哪个场景
                         item->setCheckState(0, Qt::Unchecked);
                         _treeWidget->addTopLevelItem(item);
                         _levelItems.insert(i->GetLevelName().c_str(), item);
-                        if (!i->IsLoaded())
-                        {
-                            item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
-                        }
                     }
                     ////默认第一个场景开启编辑
                     //_levelItems.first()->setCheckState(0, Qt::Checked);

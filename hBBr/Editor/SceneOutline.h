@@ -12,6 +12,7 @@ class SceneOutlineItem :public QTreeWidgetItem
 {
 public:
     SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, QTreeWidget* view);
+    SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, QString iconPath, QTreeWidget* view);
     SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, SceneOutlineItem* parent);
     ~SceneOutlineItem();
     void Init(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject);
@@ -32,6 +33,7 @@ public:
     virtual void dropEvent(class QDropEvent* event) override;
     QList<std::weak_ptr<GameObject>> GetSelectionObjects();
     QList<std::weak_ptr<Level>> GetSelectionLevels();
+    class SceneOutline* _parent = nullptr;
 protected:
 
     virtual void commitData(QWidget* editor)
@@ -41,7 +43,7 @@ protected:
 
         QTreeWidget::commitData(editor);
     }
-    class SceneOutline* _parent = nullptr;
+
     VulkanRenderer* _renderer = nullptr;
     QTreeWidgetItem* _curItem;
     QTreeWidgetItem* _mouseTouchItem;
@@ -87,7 +89,7 @@ public:
     class CustomSearchLine* _search;
     std::weak_ptr<World> currentWorld;
 
-    SceneOutlineItem* _currentLevelItem;
+    SceneOutlineItem* _currentLevelItem = nullptr;
     SceneOutlineItem* FindLevel(QString levelName);
     QMap<QString, SceneOutlineItem*>_levelItems;
 private slots:
