@@ -26,6 +26,8 @@ public:
 	int	_stringArrayBindIndex = 0;
 
 	std::function<void(AssetLine* ,const char*)> _bindStringFunc = [](AssetLine*,const char*) {};
+	std::function<void(const char*)> _bindAssetPath = [](const char*newPath) {};
+
 	std::function<void(const char*)> _bindFindButtonFunc = [](const char*) {};
 	void ShowClearButton(bool bShow);
 

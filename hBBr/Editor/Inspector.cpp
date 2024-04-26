@@ -93,6 +93,7 @@ if (!newObject.expired())\
 }\
 line->_objectBind = ((std::weak_ptr<class AssetObject>*) * className##_value);
 
+#define IsType(typeStr) p.type.IsSame(typeStr, false)
 
 void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool bFoucsUpdate)
 {
@@ -203,7 +204,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 		for (auto p : pro)
 		{
 			//Bool value
-			if (p.type_runtime == typeid(bool).name())
+			if (IsType("bool"))
 			{
 				if (p.bArray)
 				{
@@ -222,11 +223,11 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				continue;
 			}
 			//std::weak_ptr<Model> value
-			else if (p.bAsset)
+			else if (IsType("AssetPath"))
 			{
 				if (p.bArray)
 				{
-					auto value = ((std::vector<HGUID>*)p.value);
+				/*	auto value = ((std::vector<HGUID>*)p.value);
 					ToolBox* box = new ToolBox("Material", true, this);
 					compWidget->layout()->addWidget(box);
 					for (int i = 0; i < value->size(); i++)
@@ -261,81 +262,28 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 								}
 							};
 						}
-					}
+					}*/
 				}
 				else
 				{
-					auto value = ((HGUID*)p.value);
-					HGUID guid = *value;
-					auto info = ContentManager::Get()->GetAssetInfo(guid);
-					if (!info.expired())
-					{
-						AssetLine* line = new AssetLine(p.name, this, info.lock()->assetFilePath, info.lock()->suffix);
-						compWidget->layout()->addWidget(line);
-						line->_bindFindButtonFunc = [](const char* p) {
-
-						};
-						line->_bindStringFunc = [p,value](AssetLine* line, const char* s) {
-							auto guidStr = FileSystem::GetBaseName(s);
-							HGUID newGuid;
-							StringToGUID(guidStr.c_str(), &newGuid);
-							if (newGuid.isValid())
-							{
-								*value = newGuid;
-								if (p.type_runtime == typeid(Model).name())
-								{
-									auto newObject = Model::LoadAsset(newGuid);
-									auto shared = newObject.lock();
-									line->_objectBind = shared.get();
-								}
-								else	if (p.type_runtime == typeid(Material).name())
-								{
-									auto newObject = Material::LoadAsset(newGuid);
-									auto shared = newObject.lock();
-									line->_objectBind = shared.get();
-								}
-							}
-						};
-					}
+					AssetPath* path = (AssetPath*)p.value;
+					AssetLine* line = new AssetLine(p.name, this, path->path.c_str(), p.condition);
+					compWidget->layout()->addWidget(line);
+					path->callBack = [line,path]() {
+						line->ui.LineEdit->setText(path->path.c_str());
+					};
+					//查找按钮
+					line->_bindFindButtonFunc = [](const char* p) {
+						
+					};
+					//路径发生变化的时候执行
+					line->_bindAssetPath = [p, path](const char* s) {
+						path->path = s;
+						p.comp->UpdateData();
+					};
 				}
 				continue;
-			}
-			//std::vector<std::weak_ptr<Material>> value array
-			/*else if (p.type_runtime == typeid(Material).name())
-			{
-				if (p.bArray)
-				{
-					auto value = ((std::vector<std::weak_ptr<Material>>*)p.value);
-					ToolBox* box = new ToolBox("Material", true, this);
-					compWidget->layout()->addWidget(box);
-					for (int i = 0; i < value->size(); i++)
-					{
-						AssetLine* line = new AssetLine(value->at(i).lock()->GetPrimitive()->graphicsName, this, value->at(i).lock()->_assetInfo->virtualPath, value->at(i).lock()->_assetInfo->suffix);
-						box->addSubWidget(line);
-						line->_bindFindButtonFunc = [](const char* p) {
-						};
-						line->_bindStringFunc = [value, i](AssetLine* line, const char* s) {
-							auto guidStr = FileSystem::GetBaseName(s);
-							HGUID guid;
-							StringToGUID(guidStr.c_str(), &guid);
-							if (guid.isValid())
-							{
-								if (!value->at(i).expired())
-								{
-									auto newObject = Material::LoadAsset(guid);
-									if (!newObject.expired())
-									{
-										value->at(i) = newObject;
-									}
-									line->_objectBind = ((std::weak_ptr<class AssetObject>*)value);
-								}
-							}
-						};
-					}
-				}			
-				continue;
-			}*/
-
+			}	
 		}
 	}
 	box->ui.verticalLayout->addStretch(999);

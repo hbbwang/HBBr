@@ -65,7 +65,9 @@ private:
 
 	//更新或者创建GameObject的Xml数据在level文档里
 	//bUpdateParameters是否写入参数
-	void XML_UpdateGameObject(GameObject* gameObject, bool bUpdateParameters = true);
+	void XML_UpdateGameObject(GameObject* gameObject);
+	void XML_UpdateGameObjectTransform(GameObject* gameObject);
+	void XML_UpdateGameObjectComponent(GameObject* gameObject);
 
 	//请勿要主动使用该函数
 	void AddNewObject(std::shared_ptr<GameObject> newObject);

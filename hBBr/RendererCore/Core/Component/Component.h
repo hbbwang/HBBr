@@ -32,17 +32,14 @@ ComponentClassName::ComponentClassName(class GameObject* parent) :Component(pare
 \
 ComponentClassName  _component_construct_##ComponentClassName;
 
-#define AddProperty(_class,_name,_value,_bArray,_category,_sort)\
+#define AddProperty(_typeString,_name,_value,_bArray,_category,_sort,_condition)\
 {\
 	ComponentProperty pro;\
-	if (std::is_base_of<AssetObject, _class>::value)\
-	{\
-		pro.bAsset = true;\
-	}\
+	pro.comp = this;\
+	pro.condition = _condition;\
 	pro.name = _name;\
 	pro.value = _value;\
-	pro.type = #_class;\
-	pro.type_runtime = typeid(_class).name();\
+	pro.type = _typeString;\
 	pro.category = _category;\
 	pro.bArray = _bArray;\
 	pro.sort = _sort;\
@@ -53,22 +50,35 @@ ComponentClassName  _component_construct_##ComponentClassName;
 	std::sort(_compProperties.begin(), _compProperties.end(), valueCompare);\
 }
 
+struct AssetPath
+{
+	HString path = "";
+	std::function<void()> callBack = []() {};
+};
+
 struct ComponentProperty
 {
+	class Component* comp = nullptr;
+
 	HString name;
+
 	//指向参数的指针
 	void* value = nullptr;
+
 	//分类
 	HString category;
+
+	HString condition;
+
 	//排序
 	int sort = 32;
+
 	//Type String
 	HString type = "void";
-	//runtime type id
-	std::string type_runtime = "";
+
 	bool bArray = false;
-	bool bAsset = false;
 };
+
 
 class Component
 {
@@ -117,12 +127,16 @@ public:
 	HBBR_API HBBR_INLINE class World* GetWorld() const {
 		return _world;
 	}
-	
+
+	//不是每帧执行,一般用于编辑器的对象数据刷新
+	//编辑器Inspector如果改了组件的参数，是通过调用这个函数进行刷新
+	HBBR_API virtual void UpdateData() {}
+
 protected:
 
 	HBBR_INLINE virtual void OnConstruction() {
 		//Component Property Reflection Add.
-		AddProperty(bool, "bActive", &_bActive, false, "Default", 0);
+		AddProperty("bool", "bActive", &_bActive, false, "Default", 0, "");
 	}
 
 	static HString AnalysisPropertyValue(ComponentProperty& p);

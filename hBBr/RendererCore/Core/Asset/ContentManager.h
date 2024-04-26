@@ -292,6 +292,8 @@ public:
 
 	HBBR_API inline const  std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> GetAssetsByVirtualFolder(HString virtualFolder)const;
 
+	HBBR_API inline const  std::weak_ptr<AssetInfoBase> GetAssetByVirtualPath(HString virtualPath)const;
+
 	HBBR_API inline const std::map<HString, VirtualFolder>& GetVirtualFolders()const { return _assets_vf; }
 
 	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HGUID guid, AssetType type = AssetType::Unknow)const;

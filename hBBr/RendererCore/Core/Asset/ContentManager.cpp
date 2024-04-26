@@ -683,7 +683,7 @@ void ContentManager::UpdateAssetReference(HGUID obj)
 	}
 }
 
-inline const std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> ContentManager::GetAssetsByVirtualFolder(HString virtualFolder) const
+const std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> ContentManager::GetAssetsByVirtualFolder(HString virtualFolder) const
 {
 	FileSystem::ClearPathSeparation(virtualFolder);
 	auto it = _assets_vf.find(virtualFolder);
@@ -692,6 +692,29 @@ inline const std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> ContentMa
 		return it->second.assets;
 	}
 	return std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>();
+}
+
+const std::weak_ptr<AssetInfoBase> ContentManager::GetAssetByVirtualPath(HString virtualPath) const
+{
+	auto name = FileSystem::GetBaseName(virtualPath);
+	auto suffix = virtualPath.GetSuffix();
+	auto folder = FileSystem::GetFilePath(virtualPath);
+	FileSystem::ClearPathSeparation(folder);
+	auto it = _assets_vf.find(folder);
+	if (it != _assets_vf.end())
+	{
+		for (auto& i : it->second.assets)
+		{
+			if (i.second->displayName.Contains(name))
+			{			
+				if(i.second->suffix.IsSame(suffix))
+				{
+					return i.second;
+				}
+			}
+		}
+	}
+	return std::weak_ptr<AssetInfoBase>();
 }
 
 void ContentManager::UpdateAssetReference(std::weak_ptr<AssetInfoBase> info)

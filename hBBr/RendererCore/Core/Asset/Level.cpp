@@ -95,6 +95,9 @@ void Level::Load()
 							HString name = item.attribute(L"Name").as_string();
 							HString guidStr = item.attribute(L"GUID").as_string();
 							GameObject* newObject = new GameObject(name, guidStr, this);
+							//另存 xmlNode，这样就不用每次都去levelRoot里大范围遍历搜索了。
+							newObject->_xmlNode = item;
+							//
 							if (objs.capacity() < objs.size())  objs.reserve(objs.capacity() + 25);
 							PickObject newPick;
 							newPick.obj = newObject;
@@ -161,6 +164,14 @@ void Level::Load()
 void Level::UnLoad()
 {
 	bLoad = false;
+
+	//临时保存一份数据在内存中，不会实际保存到XML里
+	for (auto g : _gameObjects)
+	{
+		XML_UpdateGameObject(g.get());
+	}
+
+	//
 	for (auto& i : this->_gameObjects)
 	{
 		i->Destroy();
@@ -180,7 +191,7 @@ void Level::SaveLevel()
 
 	for (auto g : _gameObjects)
 	{
-		XML_UpdateGameObject(g.get(), true);
+		XML_UpdateGameObject(g.get());
 	}
 	_levelDoc.save_file(_levelPath.c_wstr());
 }
@@ -215,7 +226,6 @@ void Level::AddNewObject(std::shared_ptr<GameObject> newObject)
 {
 	_gameObjects.push_back(newObject);
 	_world->AddNewObject(newObject);
-	XML_UpdateGameObject(newObject.get());
 }
 
 void Level::RemoveObject(GameObject* object)
@@ -235,62 +245,71 @@ void Level::RemoveObject(GameObject* object)
 
 //---------------------------------------------------------------------------------XML Document-------------
 #pragma region XML Document
-void Level::XML_UpdateGameObject(GameObject* g, bool bUpdateParameters)
+void Level::XML_UpdateGameObject(GameObject* g)
 {
 	//我们不在乎编辑器相关的内容
 	if (_isEditorLevel || g->_IsEditorObject)
-	{
 		return;
-	}
-	//根据GUID查找
-	auto item = _levelRoot.find_child_by_attribute(TEXT("GUID"), g->_guidStr.c_wstr());
-	if (!item)
+	//如果节点为空，则在LevelRoot里根据GUID查找，找不到就建一个新的
+	if (g->_xmlNode.empty())
 	{
-		item = _levelRoot.append_child(L"Item");
-		item.append_attribute(L"Type").set_value(L"GameObject");
-		item.append_attribute(L"GUID").set_value(g->_guidStr.c_wstr());
-		bUpdateParameters = true;//新建的对象，必须写入参数
-	}
-	if (bUpdateParameters)
-	{
-		item.append_attribute(L"Name").set_value(g->GetObjectName().c_wstr());
-		//Parent guid
-		if (g->_parent)
-			item.append_attribute(L"Parent").set_value(g->_parent->_guidStr.c_wstr());
-		else
-			item.append_attribute(L"Parent").set_value(HString(HGUID().str().c_str()).c_wstr());
-		//Transform
+		g->_xmlNode = _levelRoot.find_child_by_attribute(TEXT("GUID"), g->_guidStr.c_wstr());
+		if (g->_xmlNode.empty())
 		{
-			auto Transform = item.append_child(L"Transform");
-			Transform.append_attribute(L"PosX").set_value(g->_transform->GetLocation().x);
-			Transform.append_attribute(L"PosY").set_value(g->_transform->GetLocation().y);
-			Transform.append_attribute(L"PosZ").set_value(g->_transform->GetLocation().z);
-			Transform.append_attribute(L"RotX").set_value(g->_transform->GetRotation().x);
-			Transform.append_attribute(L"RotY").set_value(g->_transform->GetRotation().y);
-			Transform.append_attribute(L"RotZ").set_value(g->_transform->GetRotation().z);
-			Transform.append_attribute(L"ScaX").set_value(g->_transform->GetScale3D().x);
-			Transform.append_attribute(L"ScaY").set_value(g->_transform->GetScale3D().y);
-			Transform.append_attribute(L"ScaZ").set_value(g->_transform->GetScale3D().z);
+			g->_xmlNode = _levelRoot.append_child(L"Item");
+			g->_xmlNode.append_attribute(L"Type").set_value(L"GameObject");
+			g->_xmlNode.append_attribute(L"GUID").set_value(g->_guidStr.c_wstr());
 		}
-		//Components
+	}
+	//Transform and parent
+	XML_UpdateGameObjectTransform(g);
+	//Components
+	XML_UpdateGameObjectComponent(g);
+}
+
+void Level::XML_UpdateGameObjectTransform(GameObject* g)
+{
+	g->_xmlNode.append_attribute(L"Name").set_value(g->GetObjectName().c_wstr());
+	//Parent guid
+	if (g->_parent)
+		g->_xmlNode.append_attribute(L"Parent").set_value(g->_parent->_guidStr.c_wstr());
+	else
+		g->_xmlNode.append_attribute(L"Parent").set_value(HString(HGUID().str().c_str()).c_wstr());
+	//Transform
+	{
+		auto Transform = g->_xmlNode.append_child(L"Transform");
+		auto pos = g->_transform->GetLocation();
+		auto rota = g->_transform->GetRotation();
+		auto scale = g->_transform->GetScale3D();
+		Transform.append_attribute(L"PosX").set_value(pos.x);
+		Transform.append_attribute(L"PosY").set_value(pos.y);
+		Transform.append_attribute(L"PosZ").set_value(pos.z);
+		Transform.append_attribute(L"RotX").set_value(rota.x);
+		Transform.append_attribute(L"RotY").set_value(rota.y);
+		Transform.append_attribute(L"RotZ").set_value(rota.z);
+		Transform.append_attribute(L"ScaX").set_value(scale.x);
+		Transform.append_attribute(L"ScaY").set_value(scale.y);
+		Transform.append_attribute(L"ScaZ").set_value(scale.z);
+	}
+}
+
+void Level::XML_UpdateGameObjectComponent(GameObject* g)
+{
+	auto Component = g->_xmlNode.append_child(L"Component");
+	for (auto c : g->_comps)
+	{
+		auto compItem = Component.append_child(L"Item");
+		compItem.append_attribute(L"Class").set_value(c->GetComponentName().c_wstr());
+		//Variables
+		for (auto p : c->_compProperties)
 		{
-			auto Component = item.append_child(L"Component");
-			for (auto c : g->_comps)
+			auto valueStr = Component::AnalysisPropertyValue(p);
+			if (valueStr.Length() > 0)
 			{
-				auto compItem = Component.append_child(L"Item");
-				compItem.append_attribute(L"Class").set_value(c->GetComponentName().c_wstr());
-				//Variables
-				for (auto p : c->_compProperties)
-				{
-					auto valueStr = Component::AnalysisPropertyValue(p);
-					if (valueStr.Length() > 0)
-					{
-						auto pro = compItem.append_child(L"Item");
-						pro.append_attribute(L"Name").set_value(p.name.c_wstr());
-						pro.append_attribute(L"Type").set_value(p.type.c_wstr());
-						pro.append_attribute(L"Value").set_value(valueStr.c_wstr());
-					}
-				}
+				auto pro = compItem.append_child(L"Item");
+				pro.append_attribute(L"Name").set_value(p.name.c_wstr());
+				pro.append_attribute(L"Type").set_value(p.type.c_wstr());
+				pro.append_attribute(L"Value").set_value(valueStr.c_wstr());
 			}
 		}
 	}

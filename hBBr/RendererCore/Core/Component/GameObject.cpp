@@ -61,6 +61,7 @@ void GameObject::ObjectInit(HString objectName, Level* level, bool SceneEditorHi
 	auto sharedPtr = std::shared_ptr<GameObject>(this);
 	_selfWeak = sharedPtr;
 	_level->AddNewObject(sharedPtr);
+	_level->XML_UpdateGameObject(this);
 }
 
 GameObject* GameObject::CreateGameObject(HString objectName, Level* level)

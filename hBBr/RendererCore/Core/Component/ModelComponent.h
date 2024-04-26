@@ -32,24 +32,20 @@ public:
 	virtual void ClearPrimitves();
 
 protected:
+	//不是每帧执行,一般用于编辑器的对象数据刷新
+	virtual void UpdateData()override;
 
 	//Component Property Reflection Add.
 	HBBR_INLINE virtual void OnConstruction()override;
 
 private:
 
-	HGUID _modelGUID;
+	AssetPath  _modelPath;
 
-	HGUID _oldModelGUID;
+	std::vector<AssetPath> _materialPath;
 
-	std::vector<HGUID> _materialGUIDs;
-
-	std::vector<HGUID> _oldMaterialGUIDs;
-
-	std::weak_ptr <Model> _modelCache;
+	std::vector<std::weak_ptr<Material>> _materials;
 
 	std::vector<ModelPrimitive*> _primitives;
-
-	std::vector<std::weak_ptr<Material>>_materials;
 
 };

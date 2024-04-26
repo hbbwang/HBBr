@@ -10,8 +10,8 @@ COMPONENT_IMPLEMENT(ModelComponent)
 void ModelComponent::OnConstruction()
 {
 	Component::OnConstruction();
-	AddProperty(Model, "Model", &_modelGUID, false, "Default", 0);
-	AddProperty(Material, "Material", &_materialGUIDs, false, "Default", 0);
+	AddProperty("AssetPath", "Model", &_modelPath, false, "Default", 0, "fbx");
+	AddProperty("AssetPath", "Material", &_materialPath, true, "Default", 0, "mat");
 }
 
 void ModelComponent::SetModelByAssetPath(HString virtualPath)
@@ -39,11 +39,7 @@ void ModelComponent::SetModel(std::weak_ptr<class Model> model)
 	ClearPrimitves();
 	if (!model.expired())
 	{
-		_modelCache = model;
-		_modelGUID = model.lock()->_assetInfo->guid;
-		_oldModelGUID = model.lock()->_assetInfo->guid;
 		Model::BuildModelPrimitives(model.lock().get(), _primitives);
-		_materialGUIDs.resize(_primitives.size());
 		_materials.resize(_primitives.size());
 		for (int i = 0; i < (int)_primitives.size(); i++)
 		{
@@ -52,6 +48,8 @@ void ModelComponent::SetModel(std::weak_ptr<class Model> model)
 				_materials[i] = Material::LoadAsset(HGUID("b51e2e9a-0985-75e8-6138-fa95efcbab57"));
 			PrimitiveProxy::AddModelPrimitive(_materials[i].lock()->GetPrimitive(), _primitives[i], _gameObject->GetWorld()->GetRenderer());
 		}
+		_modelPath.path = model.lock()->_assetInfo->virtualFilePath;
+		_modelPath.callBack();
 	}
 }
 
@@ -59,7 +57,11 @@ void ModelComponent::GameObjectActiveChanged(bool objActive)
 {
 	if ( _bActive && objActive )
 	{
-		SetModel(_modelGUID);
+		auto info = ContentManager::Get()->GetAssetByVirtualPath(_modelPath.path);
+		if (!info.expired())
+		{
+			SetModel(info.lock()->GetAssetObject<Model>());
+		}
 	}
 	else
 	{
@@ -67,12 +69,17 @@ void ModelComponent::GameObjectActiveChanged(bool objActive)
 	}
 }
 
+void ModelComponent::UpdateData()
+{
+	auto info = ContentManager::Get()->GetAssetByVirtualPath(_modelPath.path);
+	if (!info.expired())
+	{
+		SetModel(info.lock()->GetAssetObject<Model>());
+	}
+}
+
 void ModelComponent::Update()
 {
-	if (_modelGUID != _oldModelGUID)
-	{
-		SetModel(_modelGUID);
-	}
 }
 
 void ModelComponent::ExecuteDestroy()
