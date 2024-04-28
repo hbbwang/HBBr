@@ -15,15 +15,20 @@ public:
     SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, QString iconPath, QTreeWidget* view);
     SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, SceneOutlineItem* parent);
     ~SceneOutlineItem();
-    void Init(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject);
+    void Init(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject , class SceneOutlineTree* tree);
+    QString _iconPath;
     std::weak_ptr<GameObject> _gameObject;
     std::weak_ptr<Level> _level;
     void Destroy();
+    SceneOutlineTree* _tree = nullptr;
+protected:
+    virtual QVariant data(int column, int role) const override;
 };
 
 class SceneOutlineTree :public QTreeWidget
 {
     Q_OBJECT
+        friend class SceneOutlineTreeDelegate;
 public:
 
     explicit SceneOutlineTree(class VulkanRenderer* renderer, QWidget* parent = nullptr);
@@ -34,6 +39,8 @@ public:
     QList<std::weak_ptr<GameObject>> GetSelectionObjects();
     QList<std::weak_ptr<Level>> GetSelectionLevels();
     class SceneOutline* _parent = nullptr;
+
+    SceneOutlineItem* IndexToItem(QModelIndex index);
 protected:
 
     virtual void commitData(QWidget* editor)

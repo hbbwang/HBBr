@@ -74,13 +74,11 @@ public:
 protected:
 
 	class QMenu* _contextMenu = nullptr;
-
 	virtual void contextMenuEvent(QContextMenuEvent* event)override;
-
 	virtual void mouseMoveEvent(QMouseEvent* event) override;
-
 	virtual void paintEvent(QPaintEvent* event)override;
-
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
 	//滚动到指定Item位置
 	//void scrollToItem(const QListWidgetItem* item, QAbstractItemView::ScrollHint hint = EnsureVisible);
 

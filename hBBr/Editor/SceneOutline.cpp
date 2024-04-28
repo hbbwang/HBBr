@@ -10,6 +10,7 @@
 #include <QMimeData>
 #include <QApplication>
 #include <QDrag>
+#include <QDir>
 #include <QStyledItemDelegate>
 #include <QStyleOption>
 #include <QPainter>
@@ -24,24 +25,29 @@ SceneOutlineTree* SceneOutline::_treeWidget = nullptr;
 SceneOutlineItem::SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, QTreeWidget* view)
     :QTreeWidgetItem(view)
 {
-    Init(level, gameObject);
+    Init(level, gameObject, (SceneOutlineTree*)view);
 }
 
 SceneOutlineItem::SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, QString iconPath, QTreeWidget* view)
 {
-    Init(level, gameObject);
+    Init(level, gameObject, (SceneOutlineTree*)view);
     QFileInfo info(iconPath);
     if (info.exists())
     {
-        auto icon = QIcon(iconPath);
-        this->setIcon(0, icon);
+        iconPath = QDir::toNativeSeparators(iconPath);
+        _iconPath = iconPath;
+
+        QIcon icon;
+        auto icon0 = QPixmap::fromImage(QImage(_iconPath));
+        icon.addPixmap(icon0,  QIcon::Selected);
+        setIcon(0, icon);
     }
 }
 
 SceneOutlineItem::SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, SceneOutlineItem* parent)
     :QTreeWidgetItem(parent)
 {
-    Init(level, gameObject);
+    Init(level, gameObject, parent->_tree);
 }
 
 SceneOutlineItem::~SceneOutlineItem()
@@ -49,7 +55,7 @@ SceneOutlineItem::~SceneOutlineItem()
 
 }
 
-void SceneOutlineItem::Init(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject)
+void SceneOutlineItem::Init(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, SceneOutlineTree* tree)
 {
     if (!level.expired())
     {
@@ -62,7 +68,7 @@ void SceneOutlineItem::Init(std::weak_ptr<Level> level, std::weak_ptr<GameObject
         _gameObject.lock()->_editorObject = this;
         this->setText(0, _gameObject.lock()->GetObjectName().c_str());
     }
-    setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
+    setFlags(flags() | Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
 }
 
 void SceneOutlineItem::Destroy()
@@ -73,6 +79,15 @@ void SceneOutlineItem::Destroy()
         _gameObject.lock()->Destroy();
     }
     delete this;
+}
+
+QVariant SceneOutlineItem::data(int column, int role) const
+{
+    //if (!_level.expired() && role == Qt::DecorationRole)
+    //{
+    //    return QIcon(_iconPath);
+    //}
+    return QTreeWidgetItem::data(column, role);
 }
 
 class SceneOutlineTreeDelegate : public QStyledItemDelegate
@@ -88,8 +103,9 @@ public:
     {
         QStyleOptionViewItem opt = option;
         initStyleOption(&opt, index);
-        SceneOutlineItem* item = (SceneOutlineItem*)(_tree->invisibleRootItem()->child(index.row()));
-        if (item) {
+        SceneOutlineItem* item = (SceneOutlineItem*)_tree->itemFromIndex(index);
+        if (item) 
+        {
             if (!item->_level.expired())
             {
                 if (item->_level.lock()->IsLoaded())
@@ -102,6 +118,11 @@ public:
                     opt.font.setStrikeOut(true);
                     opt.font.setBold(false);
                 }
+            }
+            else
+            {
+                opt.font.setStrikeOut(false);
+                opt.font.setBold(false);
             }
         }
         QStyledItemDelegate::paint(painter, opt, index);
@@ -277,6 +298,11 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
                 }
             }
         });
+}
+
+SceneOutlineItem* SceneOutlineTree::IndexToItem(QModelIndex index)
+{
+    return (SceneOutlineItem*)this->itemFromIndex(index);
 }
 
 void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)

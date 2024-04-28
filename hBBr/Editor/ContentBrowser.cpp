@@ -270,12 +270,24 @@ void VirtualFolderTreeView::dragEnterEvent(QDragEnterEvent* e)
 	qDebug() << e->mimeData()->text();
 	if (e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))//如果是来自Item的数据
 	{
-		e->acceptProposedAction();
+		//QT 的Item，只支持来自ContentBrowser的拖拽
+		QObject* par = e->source();int count =0;
+		while(par)
+		{
+			if (par->objectName().contains("ContentBrowser", Qt::CaseInsensitive))
+			{
+				e->acceptProposedAction();
+				break;
+			}
+			par = par->parent();
+			count++; if (count > 10)break;
+		}
 	}
 }
 
 void VirtualFolderTreeView::dropEvent(QDropEvent* e)
 {
+	bool bDeleteEmptyFolder = false;
 	//Get Items
 	{
 		QByteArray encoded = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
@@ -289,12 +301,14 @@ void VirtualFolderTreeView::dropEvent(QDropEvent* e)
 		if (target && !encoded.isEmpty())
 		{
 			std::vector<AssetInfoBase*> assets;
+			std::vector<HString> newVirtualFolderNames;
 			QDataStream stream(&encoded, QIODevice::ReadOnly);
 			while (!stream.atEnd())
 			{
 				if (assets.capacity() < assets.size())
 				{
 					assets.reserve(assets.capacity() + 25);
+					newVirtualFolderNames.reserve(assets.capacity() + 25);
 				}
 				int row, col;
 				QMap<int, QVariant> roleDataMap;
@@ -305,13 +319,26 @@ void VirtualFolderTreeView::dropEvent(QDropEvent* e)
 					if (e->source()->objectName().compare(this->objectName()) == 0)//Tree View
 					{
 						//QMessageBox::information(0, 0, QString::number(row), 0);
-						auto from = (CustomViewItem*)model->item(row);
-						auto folderAssets = ContentManager::Get()->GetAssetsByVirtualFolder(from->_fullPath.toStdString().c_str());
-						assets.reserve(assets.capacity() + folderAssets.size());
-						for (auto& i : folderAssets)
+						//auto from = (CustomViewItem*)model->item(row);
+						bDeleteEmptyFolder = true;
+						auto selectItems = GetSelectionItems();
+						clearSelection();
+
+						HString msg = "You're moving the virtual directory, are you sure?";
+						QMessageBox::StandardButton reply = QMessageBox::question(this, "Move folder", msg.c_str(), QMessageBox::Yes | QMessageBox::Cancel);
+						if (reply == QMessageBox::Yes)
 						{
-							assets.push_back(i.second.get());				
-						}
+							for (auto& i : selectItems)
+							{
+								auto folderAssets = ContentManager::Get()->GetAssetsByVirtualFolder(i->_fullPath.toStdString().c_str());
+								for (auto& i : folderAssets)
+								{
+									assets.push_back(i.second.get());
+									HString oldFolderName = "/" + i.second->virtualPath.GetBaseName();
+									newVirtualFolderNames.push_back(oldFolderName);
+								}
+							}
+						}						
 					}
 					else if (e->source()->objectName().compare(_contentBrowser->_listView->objectName()) == 0)//List View
 					{
@@ -328,7 +355,10 @@ void VirtualFolderTreeView::dropEvent(QDropEvent* e)
 			//
 			if (assets.size() > 0)
 			{
-				ContentManager::Get()->SetNewVirtualPath(assets, target->_fullPath.toStdString().c_str(), false);
+				for (int i = 0; i <newVirtualFolderNames.size();i++)
+				{
+					ContentManager::Get()->SetNewVirtualPath({ assets[i] }, HString(target->_fullPath.toStdString().c_str() )+ newVirtualFolderNames[i], bDeleteEmptyFolder);
+				}
 			}
 			ContentBrowser::RefreshContentBrowsers();
 		}
@@ -550,6 +580,61 @@ void VirtualFileListView::mouseMoveEvent(QMouseEvent* event)
 void VirtualFileListView::paintEvent(QPaintEvent* event)
 {
 	CustomListView::paintEvent(event);
+}
+
+void VirtualFileListView::dragEnterEvent(QDragEnterEvent* e)
+{
+	if (e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))//如果是来自Item的数据
+	{
+		//QT 的Item，只支持来自ContentBrowser的拖拽
+		QObject* par = e->source(); int count = 0;
+		while (par)
+		{
+			if (par->objectName().contains("ContentBrowser", Qt::CaseInsensitive))
+			{
+				e->acceptProposedAction();
+				break;
+			}
+			par = par->parent();
+			count++; if (count > 10)break;
+		}
+	}
+}
+
+void VirtualFileListView::dropEvent(QDropEvent* e)
+{
+	//Get Items
+	{
+		QByteArray encoded = e->mimeData()->data("application/x-qabstractitemmodeldatalist");
+		if (!encoded.isEmpty())
+		{
+			std::vector<AssetInfoBase*> assets;
+			QDataStream stream(&encoded, QIODevice::ReadOnly);
+			while (!stream.atEnd())
+			{
+				if (assets.capacity() < assets.size())
+				{
+					assets.reserve(assets.capacity() + 25);
+				}
+				int row, col;
+				QMap<int, QVariant> roleDataMap;
+				stream >> row >> col >> roleDataMap;
+				if (roleDataMap.contains(Qt::DisplayRole))
+				{
+					//收集拖拽的AssetInfos
+					if (e->source()->objectName().compare(this->objectName()) == 0)//List View
+					{
+						
+					}
+					else if (e->source()->objectName().compare(_contentBrowser->_treeView->objectName()) == 0)//Tree View
+					{
+						
+					}
+				}
+			}
+			ContentBrowser::RefreshContentBrowsers();
+		}
+	}
 }
 
 ToolTip VirtualFileListView::UpdateToolTips(std::weak_ptr<struct AssetInfoBase>& assetInfo)

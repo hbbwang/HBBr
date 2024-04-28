@@ -109,10 +109,6 @@ QMessageBox .QLabel
     background-color: rgb(40,40,40);
     color:#ffffff;
 }
-QListView
-{ 
-    outline: 0; 
-} 
 QMenuBar
 {
     background-color: rgb(40,40,40);
@@ -334,85 +330,24 @@ QTreeView::branch:open:has-children
 {
     image: url(./Config/Theme/Icons/TreeWidget_Open.png);
 }
-QTreeView::indicator
+QTreeView::indicator:unchecked
 {
-    width: 18px;
-    height: 18px;
+    
 }
-QTreeWidget::indicator:unchecked
-{
-
-}
-QTreeWidget::indicator:checked
+QTreeView::indicator:checked
 {
 
 }
-QTreeWidget
+QListView
 {
-    background-color: BackgroundColor;
-    color: antiquewhite;
-    outline: 0;
-}
-QTreeWidget::item
-{
-    outline: 0;
-    font-family: FontFamily;
-}
-QTreeWidget::item:selected
-{
-    font-family: FontFamily;
-    color :rgb(210, 210, 210);
-    background-color: rgba(90, 85, 80, 0.8);
-    border: 1px solid rgb(120, 120, 120);
-    outline: 0;
-}
-QTreeWidget::item:hover
-{
-    font-family: FontFamily;
-    color :rgb(236, 229, 229);
-    background-color: rgba(56, 50, 50, 0.8);
-    outline: 0;
-}
-/* QTreeWidget::branch:closed:has-children:!has-siblings,
-QTreeWidget::branch:closed:has-children:has-siblings */
-QTreeWidget::branch:open:has-children
-{    
-    width: 10px;
-    height: 10px;
-    border-image: url(./Config/Theme/Icons/TreeWidget_Open.png) ;
-    border-color: rgba(255,255,255,0.25);
-}
-QTreeWidget::branch:open:!has-children
-{
-    width: 10px;
-    height: 10px;
-    /* border-image: url(./Config/Theme/Icons/TreeWidget_Open.png) ; */
-    border-color: rgba(255,255,255,0.25);
-}
-QTreeWidget::branch:closed:has-children
-{
-    width: 10px;
-    height: 10px;
-    border-image: url(./Config/Theme/Icons/TreeWidget_Close.png) ;
-    border-color: rgba(255,255,255,0.25);
-}
-QTreeWidget::branch:closed:!has-children
-{    
-    width: 10px;
-    height: 10px;
-    /* border-image: url(./Config/Theme/Icons/TreeWidget_Close.png) ; */
-    border-color: rgba(255,255,255,0.25);
-}
-QListWidget
-{
+    outline: 0; 
     background-color:BackgroundColor;
-    high-light : none;
 }
-QListWidget::item:hover
+QListView::item:hover
 {
 
 }
-QListWidget::item:selected
+QListView::item:selected
 {
 
 }
