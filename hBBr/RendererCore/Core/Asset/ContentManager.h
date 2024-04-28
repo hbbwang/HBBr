@@ -229,18 +229,18 @@ public:
 	资产虚拟目录更改(不会更改仓库)
 	assetInfos:需要更改虚拟路径的资产信息
 	*/
-	HBBR_API void SetNewVirtualPath(std::vector<AssetInfoBase*> assetInfos , HString newVirtualPath , bool bDeleteEmptyFolder = true);
+	HBBR_API void SetNewVirtualPath(std::vector<std::weak_ptr<AssetInfoBase>> assetInfos , HString newVirtualPath , bool bDeleteEmptyFolder = true);
 
 	/*
 	保存AssetInfo到.repository
 	*/
-	HBBR_API void SaveAssetInfo(AssetInfoBase*  assetInfo);
+	HBBR_API void SaveAssetInfo(std::weak_ptr<AssetInfoBase>&  assetInfo);
 
 	/*
 		设置资产的虚拟名字(DIsplayName,非GUID)
 		bSave:是否直接保存到仓库xml里,默认false
 	*/
-	HBBR_API void SetVirtualName(AssetInfoBase* assetInfo,HString newName,bool bSave = false);
+	HBBR_API void SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo,HString newName,bool bSave = false);
 
 	/*
 		标记已经改动过的资产,告诉用户这些资产可能需要手动保存
@@ -248,20 +248,28 @@ public:
 	HBBR_API static void MarkAssetDirty(std::weak_ptr<AssetInfoBase> asset);
 	static std::vector<std::weak_ptr<AssetInfoBase>> _dirtyAssets;
 	HBBR_API static const std::vector<std::weak_ptr<AssetInfoBase>> GetDirtyAssets() {
-		//for safe:
+		//为了安全多做些检测
 		std::vector<std::weak_ptr<AssetInfoBase>> result;
 		result.reserve(_dirtyAssets.size());
 		for (auto& i : _dirtyAssets)
 		{
 			if (!i.expired())
 			{
-				result.push_back(i);
+				//防止相同的对象出现
+				bool bFound = false;
+				for (auto& p : result)
+				{
+					if (p.lock().get() == i.lock().get())
+						bFound = true;
+				}
+				if(!bFound)
+					result.push_back(i);
 			}
 		}
 		return result;
 	}
 	HBBR_API static void ClearDirtyAssets();
-	HBBR_API static void RemoveDirtyAsset(AssetInfoBase* asset);
+	HBBR_API static void RemoveDirtyAsset(std::weak_ptr<AssetInfoBase> asset);
 
 	/*
 		创建一个新的虚拟文件夹
@@ -305,6 +313,9 @@ public:
 
 	/* 重载仓库 */
 	HBBR_API void ReloadRepository(HString repositoryName);
+
+	/* 重载单个资产 */
+	HBBR_API std::weak_ptr<AssetInfoBase> ReloadAsset(pugi::xml_node& assetNode, HString& repositoryName);
 
 	template<class T>
 	HBBR_INLINE std::weak_ptr<T> GetAsset(HGUID guid , AssetType type = AssetType::Unknow)

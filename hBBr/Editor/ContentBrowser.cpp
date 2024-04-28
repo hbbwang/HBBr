@@ -285,6 +285,22 @@ void VirtualFolderTreeView::dragEnterEvent(QDragEnterEvent* e)
 	}
 }
 
+void VirtualFolderTreeView::FindAllFolders(CustomViewItem* item , QList<CustomViewItem*>lists)
+{
+	if (item->hasChildren())
+	{
+		for (int i = 0; i < item->rowCount(); i++)
+		{
+			auto child = (CustomViewItem*)(item->child(i));
+			if (child)
+			{
+				lists.append(child);
+				FindAllFolders(child, lists);
+			}
+		}
+	}
+}
+
 void VirtualFolderTreeView::dropEvent(QDropEvent* e)
 {
 	bool bDeleteEmptyFolder = false;
@@ -300,15 +316,15 @@ void VirtualFolderTreeView::dropEvent(QDropEvent* e)
 		}
 		if (target && !encoded.isEmpty())
 		{
-			std::vector<AssetInfoBase*> assets;
-			std::vector<HString> newVirtualFolderNames;
+			std::vector<std::weak_ptr<AssetInfoBase>> assets;
+			std::vector<HString> newVirtualFolderPaths;
 			QDataStream stream(&encoded, QIODevice::ReadOnly);
 			while (!stream.atEnd())
 			{
 				if (assets.capacity() < assets.size())
 				{
 					assets.reserve(assets.capacity() + 25);
-					newVirtualFolderNames.reserve(assets.capacity() + 25);
+					newVirtualFolderPaths.reserve(assets.capacity() + 25);
 				}
 				int row, col;
 				QMap<int, QVariant> roleDataMap;
@@ -328,14 +344,19 @@ void VirtualFolderTreeView::dropEvent(QDropEvent* e)
 						QMessageBox::StandardButton reply = QMessageBox::question(this, "Move folder", msg.c_str(), QMessageBox::Yes | QMessageBox::Cancel);
 						if (reply == QMessageBox::Yes)
 						{
+							//遍历里面的子项
+							for (auto& i : selectItems)
+							{
+								FindAllFolders(i, selectItems);
+							}
 							for (auto& i : selectItems)
 							{
 								auto folderAssets = ContentManager::Get()->GetAssetsByVirtualFolder(i->_fullPath.toStdString().c_str());
 								for (auto& i : folderAssets)
 								{
-									assets.push_back(i.second.get());
-									HString oldFolderName = "/" + i.second->virtualPath.GetBaseName();
-									newVirtualFolderNames.push_back(oldFolderName);
+									assets.push_back(i.second);
+									HString newPath = HString(target->_fullPath.toStdString().c_str()) + "/" + i.second->virtualPath.GetBaseName();
+									newVirtualFolderPaths.push_back(newPath);
 								}
 							}
 						}						
@@ -346,7 +367,7 @@ void VirtualFolderTreeView::dropEvent(QDropEvent* e)
 						auto from = ((CustomListItem*)_contentBrowser->_listView->item(row));
 						if (from && !from->_assetInfo.expired())
 						{
-							assets.push_back(from->_assetInfo.lock().get());
+							assets.push_back(from->_assetInfo);
 						}
 
 					}
@@ -355,9 +376,9 @@ void VirtualFolderTreeView::dropEvent(QDropEvent* e)
 			//
 			if (assets.size() > 0)
 			{
-				for (int i = 0; i <newVirtualFolderNames.size();i++)
+				for (int i = 0; i < newVirtualFolderPaths.size();i++)
 				{
-					ContentManager::Get()->SetNewVirtualPath({ assets[i] }, HString(target->_fullPath.toStdString().c_str() )+ newVirtualFolderNames[i], bDeleteEmptyFolder);
+					ContentManager::Get()->SetNewVirtualPath({ assets[i] },  newVirtualFolderPaths[i], bDeleteEmptyFolder);
 				}
 			}
 			ContentBrowser::RefreshContentBrowsers();
@@ -424,11 +445,11 @@ void VirtualFolderTreeView::onDataChanged(const QModelIndex& topLeft, const QMod
 			//把资产都移动到新目录
 			if (assets.size() > 0)
 			{
-				std::vector<AssetInfoBase*> infos;
+				std::vector<std::weak_ptr<AssetInfoBase>> infos;
 				infos.reserve(assets.size());
 				for (auto& i : assets)
 				{
-					infos.push_back(i.second.get());
+					infos.push_back(i.second);
 				}
 				ContentManager::Get()->SetNewVirtualPath(infos, currentItem->_fullPath.toStdString().c_str());
 			}
@@ -665,7 +686,7 @@ void VirtualFileListView::ItemTextChange(QListWidgetItem* widgetItem)
 	{
 		if (!item->_assetInfo.lock()->displayName.IsSame(item->text().toStdString().c_str()))
 		{
-			ContentManager::Get()->SetVirtualName(item->_assetInfo.lock().get(), item->text().toStdString().c_str());
+			ContentManager::Get()->SetVirtualName(item->_assetInfo, item->text().toStdString().c_str());
 			item->_toolTip = UpdateToolTips(item->_assetInfo);
 			ContentManager::Get()->MarkAssetDirty(item->_assetInfo);
 		}

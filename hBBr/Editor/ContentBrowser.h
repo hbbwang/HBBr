@@ -22,6 +22,8 @@ public:
 	//虚拟路径统一用“/”分割，不存在使用"\\"
 	CustomViewItem* FindFolder(QString virtualPath);
 
+	void FindAllFolders(CustomViewItem* item, QList<CustomViewItem*>lists);
+
 	virtual void SelectionItem(QString vPath)override;
 
 	class  ContentBrowser* _contentBrowser;

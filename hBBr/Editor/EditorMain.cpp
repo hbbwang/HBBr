@@ -121,11 +121,14 @@ void EditorMain::UpdateRender()
 
 void EditorMain::ShowDirtyAssetsManager()
 {
-    auto dirtyAssetsManager = new DirtyAssetsManager(this);
-    //if (ContentManager::Get()->GetDirtyAssets().size > 0)
+    if (ContentManager::Get()->GetDirtyAssets().size() > 0)
     {
-        dirtyAssetsManager->exec();
-    }
+        auto dirtyAssetsManager = new DirtyAssetsManager(this);
+        //if (ContentManager::Get()->GetDirtyAssets().size > 0)
+        {
+            dirtyAssetsManager->exec();
+        }
+    }  
 }
 
 void EditorMain::closeEvent(QCloseEvent* event)

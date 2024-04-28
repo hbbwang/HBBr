@@ -88,6 +88,8 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 	if (XMLStream::LoadXML(repositoryXMLPath.c_wstr(), doc))
 	{
 		auto root = doc.child(TEXT("root"));
+		std::vector<pugi::xml_node> newAssetNode;
+		newAssetNode.reserve(importFiles.size());
 		for (auto& i : importFiles)
 		{
 			HString suffix = FileSystem::GetFileExt(i.absAssetFilePath);
@@ -157,7 +159,6 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 			if(type != AssetType::Unknow)
 			{
 				assetTypeName = GetAssetTypeString(type);
-				//auto newItem = root.append_child(TEXT("Item"));	
 				auto newItem = pugi::xml_node();
 				if (bFound)
 				{
@@ -186,6 +187,9 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				XMLStream::SetXMLAttribute(newItem, TEXT("Format"), suffix.c_wstr());
 				XMLStream::SetXMLAttribute(newItem, TEXT("VPath"), i.virtualPath.c_wstr());
 				XMLStream::SetXMLAttribute(newItem, TEXT("RPath"), (assetTypeName + "/").c_wstr());
+
+				newAssetNode.push_back(newItem);
+
 				if (!doc.save_file(repositoryXMLPath.c_wstr()))
 				{
 					MessageOut("Save repository xml failed.", false, true, "255,255,0");
@@ -201,8 +205,12 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				return false;
 			}
 		}
-		ReloadRepository(repositoryName);
-		UpdateAllAssetReference();
+		//加载新资产和引用
+		for (auto& i : newAssetNode)
+		{
+			auto info = ReloadAsset(i, repositoryName);
+			UpdateAssetReference(info);
+		}
 		if (out != nullptr)
 		{
 			for (auto& i : guids)
@@ -310,10 +318,15 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 			}
 		}
 
-		//移除内存中的AssetInfo
+		//移除内存中的AssetInfo，并收集 引用和依赖
+		std::vector<std::weak_ptr<AssetInfoBase>> refs;
+		std::vector<std::weak_ptr<AssetInfoBase>> deps;
 		{
 			for (auto& i : assetInfosPtr)
 			{
+				refs.insert(refs.end(), i->refs.begin(), i->refs.end());
+				deps.insert(deps.end(), i->deps.begin(), i->deps.end());
+
 				_assets[(int)i->type].erase(i->guid);
 				_assets_repos[i->repository].erase(i->guid);
 				HString vpvf = i->virtualPath;
@@ -327,23 +340,35 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 						_assets_vf.erase(vpvf);
 					}
 				}
-			}		
+			}
+			for (auto& i : refs)
+			{
+				if (!i.expired())
+				{
+					UpdateAssetReference(i);
+				}
+			}
+			for (auto& i : deps)
+			{
+				if (!i.expired())
+				{
+					UpdateAssetReference(i);
+				}
+			}
 		}
-
-		//重新刷新仓库和引用
-		for (auto& r : repositories)
-		{
-			ReloadRepository(r);
-		}
-		UpdateAllAssetReference();
 	}
 }
 
-void ContentManager::SetNewVirtualPath(std::vector<AssetInfoBase*> assetInfos, HString newVirtualPath, bool bDeleteEmptyFolder)
+void ContentManager::SetNewVirtualPath(std::vector<std::weak_ptr<AssetInfoBase>> assetInfos, HString newVirtualPath, bool bDeleteEmptyFolder)
 {
 	std::vector<HString> repositories;
-	for (auto& i : assetInfos)
+	for (auto& asset : assetInfos)
 	{
+		if (asset.expired())
+			continue;
+
+		auto i = asset.lock();
+
 		HString assetRepository = i->repository;
 		HString oldVirtualPath = i->virtualPath;
 		//修改info的虚拟路径
@@ -358,7 +383,7 @@ void ContentManager::SetNewVirtualPath(std::vector<AssetInfoBase*> assetInfos, H
 			repositories.push_back(assetRepository);
 		}
 		//保存进.repository
-		SaveAssetInfo(i);
+		SaveAssetInfo(asset);
 		{
 			//添加
 			HString vpf = i->virtualPath;
@@ -390,23 +415,17 @@ void ContentManager::SetNewVirtualPath(std::vector<AssetInfoBase*> assetInfos, H
 				}
 			}
 		}
+
+		//刷新引用(只是改个虚拟路径一般不需要刷新引用)
+		UpdateAssetReference(i);
 	}
-
-	//for (auto& i : repositories)
-	//{
-	//	//重新加载
-	//	ReloadRepository(i);
-	//}
-
-	//刷新引用(只是改个虚拟路径不需要刷新引用)
-	//UpdateAllAssetReference();
 }
 
-void ContentManager::SaveAssetInfo(AssetInfoBase* assetInfo)
+void ContentManager::SaveAssetInfo(std::weak_ptr<AssetInfoBase>& assetInfo)
 {
-	if (assetInfo)
+	if (!assetInfo.expired())
 	{
-		HString repositoryXMLPath = FileSystem::GetRepositoryXMLAbsPath(assetInfo->repository);
+		HString repositoryXMLPath = FileSystem::GetRepositoryXMLAbsPath(assetInfo.lock()->repository);
 		pugi::xml_document doc;
 		pugi::xml_node target = pugi::xml_node();
 		if (XMLStream::LoadXML(repositoryXMLPath.c_wstr(), doc))
@@ -418,7 +437,7 @@ void ContentManager::SaveAssetInfo(AssetInfoBase* assetInfo)
 			{	
 				guidStr = n.attribute(TEXT("GUID")).as_string();
 				StringToGUID(guidStr.c_str(), &guid);
-				if (guid == assetInfo->guid)
+				if (guid == assetInfo.lock()->guid)
 				{
 					target = n;
 					break;
@@ -429,12 +448,12 @@ void ContentManager::SaveAssetInfo(AssetInfoBase* assetInfo)
 				target = XMLStream::CreateXMLNode(root, TEXT("item"));
 			}
 			//设置属性,保存XML
-			HString assetTypeName = GetAssetTypeString(assetInfo->type);
+			HString assetTypeName = GetAssetTypeString(assetInfo.lock()->type);
 			XMLStream::SetXMLAttribute(target, TEXT("GUID"), guidStr.c_wstr());
-			XMLStream::SetXMLAttribute(target, TEXT("Type"), (int)assetInfo->type);
-			XMLStream::SetXMLAttribute(target, TEXT("Name"), assetInfo->displayName.c_wstr());
-			XMLStream::SetXMLAttribute(target, TEXT("VPath"), assetInfo->virtualPath.c_wstr());
-			XMLStream::SetXMLAttribute(target, TEXT("Format"), assetInfo->suffix.c_wstr());
+			XMLStream::SetXMLAttribute(target, TEXT("Type"), (int)assetInfo.lock()->type);
+			XMLStream::SetXMLAttribute(target, TEXT("Name"), assetInfo.lock()->displayName.c_wstr());
+			XMLStream::SetXMLAttribute(target, TEXT("VPath"), assetInfo.lock()->virtualPath.c_wstr());
+			XMLStream::SetXMLAttribute(target, TEXT("Format"), assetInfo.lock()->suffix.c_wstr());
 			XMLStream::SetXMLAttribute(target, TEXT("RPath"), (assetTypeName + "/").c_wstr());
 			if (!doc.save_file(repositoryXMLPath.c_wstr()))
 			{
@@ -450,15 +469,15 @@ void ContentManager::SaveAssetInfo(AssetInfoBase* assetInfo)
 	}
 }
 
-void ContentManager::SetVirtualName(AssetInfoBase* assetInfo, HString newName, bool bSave)
+void ContentManager::SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo, HString newName, bool bSave)
 {
-	if (assetInfo)
+	if (!assetInfo.expired())
 	{
 		//更新asset info
-		assetInfo->displayName = newName;
-		assetInfo->virtualFilePath = FileSystem::Append(assetInfo->virtualPath, assetInfo->displayName + "." + assetInfo->suffix);
-		assetInfo->virtualFilePath.Replace("\\", "/");
-		UpdateToolTips(assetInfo);
+		assetInfo.lock()->displayName = newName;
+		assetInfo.lock()->virtualFilePath = FileSystem::Append(assetInfo.lock()->virtualPath, assetInfo.lock()->displayName + "." + assetInfo.lock()->suffix);
+		assetInfo.lock()->virtualFilePath.Replace("\\", "/");
+		UpdateToolTips(assetInfo.lock().get());
 		if (bSave)
 		{
 			SaveAssetInfo(assetInfo);
@@ -484,16 +503,16 @@ void  ContentManager::ClearDirtyAssets()
 	_dirtyAssets.clear();
 }
 
-void ContentManager::RemoveDirtyAsset(AssetInfoBase* assetInfo)
+void ContentManager::RemoveDirtyAsset(std::weak_ptr<AssetInfoBase> assetInfo)
 {
 	auto vit = std::remove_if(_dirtyAssets.begin(), _dirtyAssets.end(), [assetInfo](std::weak_ptr<AssetInfoBase>& a) {
-		return a.lock()->guid == assetInfo->guid;
-		});
+		return a.lock()->guid == assetInfo.lock()->guid;
+	});
 	if (vit != _dirtyAssets.end())
 	{
 		_dirtyAssets.erase(vit);
 	}
-	assetInfo->bDirty = false;
+	assetInfo.lock()->bDirty = false;
 }
 
 void ContentManager::CreateNewVirtualFolder(HString folderFullPath)
@@ -560,115 +579,121 @@ void ContentManager::ReloadRepository(HString repositoryName)
 	auto root = doc.child(TEXT("root"));
 	for (pugi::xml_node i = root.first_child(); i; i = i.next_sibling())
 	{
-		HGUID guid;
-		HString guidStr;
-		XMLStream::LoadXMLAttributeString(i, L"GUID", guidStr);
-		StringToGUID(guidStr.c_str(), &guid);
-		AssetType type = (AssetType)i.attribute(L"Type").as_int();
-		//查看下是否已经加载过AssetInfo了,已经加载过就不需要创建了
-		auto checkExist = GetAssetInfo(guid);
-		bool bExist = !checkExist.expired();
-		std::shared_ptr<AssetInfoBase> info = nullptr;
-		if (checkExist.expired())
+		ReloadAsset(i, repositoryName);
+	}
+}
+
+std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(pugi::xml_node& i, HString& repositoryName)
+{
+	HString fullPath = FileSystem::GetRepositoryAbsPath(repositoryName);
+	HGUID guid;
+	HString guidStr;
+	XMLStream::LoadXMLAttributeString(i, L"GUID", guidStr);
+	StringToGUID(guidStr.c_str(), &guid);
+	AssetType type = (AssetType)i.attribute(L"Type").as_int();
+	//查看下是否已经加载过AssetInfo了,已经加载过就不需要创建了
+	auto checkExist = GetAssetInfo(guid);
+	bool bExist = !checkExist.expired();
+	std::shared_ptr<AssetInfoBase> info = nullptr;
+	if (checkExist.expired())
+	{
+		info = CreateInfo(type);
+	}
+	else
+	{
+		info = checkExist.lock();
+	}
+	//设置参数
+	info->type = type;
+	info->guid = guid;
+	info->displayName = i.attribute(L"Name").as_string();
+	info->suffix = i.attribute(L"Format").as_string();
+	info->absFilePath = FileSystem::Append(FileSystem::Append(fullPath, i.attribute(L"RPath").as_string()), guidStr) + "." + info->suffix;
+	FileSystem::FixUpPath(info->absFilePath);
+	info->absPath = FileSystem::Append(fullPath, i.attribute(L"RPath").as_string());
+	FileSystem::FixUpPath(info->absPath);
+	info->assetFilePath = FileSystem::GetRelativePath(info->absFilePath.c_str());
+	FileSystem::FixUpPath(info->assetFilePath);
+	info->assetPath = FileSystem::GetRelativePath(info->absPath.c_str());
+	FileSystem::FixUpPath(info->assetPath);
+	//虚拟路径Virtual Path
+	info->virtualPath = i.attribute(L"VPath").as_string();
+	//FileSystem::FixUpPath(info->virtualPath);
+	info->virtualFilePath = FileSystem::Append(info->virtualPath, info->displayName + "." + info->suffix);
+	info->virtualFilePath.Replace("\\", "/");
+
+	//FileSystem::FixUpPath(info->virtualFilePath);
+	info->repository = repositoryName;
+
+	info->toolTips.reserve(20);
+	UpdateToolTips(info.get());
+
+	//读取引用关系
+	info->depTemps.clear();
+	info->refTemps.clear();
+	for (auto j = i.first_child(); j; j = j.next_sibling())//<Ref>
+	{
+		HGUID subGuid;
+		HString guidText = j.text().as_string();
+		StringToGUID(guidText.c_str(), &guid);
+		uint32_t typeIndex;
+		XMLStream::LoadXMLAttributeUInt(j, L"Type", typeIndex);
+		AssetInfoRefTemp newTemp;
+		newTemp.guid = guid;
+		newTemp.type = (AssetType)typeIndex;
+		//先加载完所有资产信息,再处理引用关系!
+		if (HString("Dep").IsSame(j.name()))
 		{
-			info = CreateInfo(type);
+			info->depTemps.push_back(newTemp);
 		}
 		else
 		{
-			info = checkExist.lock();
+			info->refTemps.push_back(newTemp);
 		}
-		//设置参数
-		info->type = type;
-		info->guid = guid;
-		info->displayName = i.attribute(L"Name").as_string();
-		info->suffix = i.attribute(L"Format").as_string();
-		info->absFilePath = FileSystem::Append(FileSystem::Append(fullPath , i.attribute(L"RPath").as_string()), guidStr) + "." +info->suffix;
-		FileSystem::FixUpPath(info->absFilePath);
-		info->absPath = FileSystem::Append(fullPath, i.attribute(L"RPath").as_string());
-		FileSystem::FixUpPath(info->absPath);
-		info->assetFilePath = FileSystem::GetRelativePath(info->absFilePath.c_str());
-		FileSystem::FixUpPath(info->assetFilePath);
-		info->assetPath = FileSystem::GetRelativePath(info->absPath.c_str());
-		FileSystem::FixUpPath(info->assetPath);
-		//虚拟路径Virtual Path
-		info->virtualPath = i.attribute(L"VPath").as_string();
-		//FileSystem::FixUpPath(info->virtualPath);
-		info->virtualFilePath = FileSystem::Append(info->virtualPath , info->displayName + "." + info->suffix);
-		info->virtualFilePath.Replace("\\","/");
-
-		//FileSystem::FixUpPath(info->virtualFilePath);
-		info->repository = repositoryName;
-
-		info->toolTips.reserve(20);
-		UpdateToolTips(info.get());
-
-		//读取引用关系
-		info->depTemps.clear();
-		info->refTemps.clear();
-		for (auto j = i.first_child(); j; j = j.next_sibling())//<Ref>
-		{
-			HGUID subGuid;
-			HString guidText = j.text().as_string();
-			StringToGUID(guidText.c_str(), &guid);
-			uint32_t typeIndex;
-			XMLStream::LoadXMLAttributeUInt(j, L"Type", typeIndex);
-			AssetInfoRefTemp newTemp;
-			newTemp.guid = guid;
-			newTemp.type = (AssetType)typeIndex;
-			//先加载完所有资产信息,再处理引用关系!
-			if (HString("Dep").IsSame(j.name()))
-			{
-				info->depTemps.push_back(newTemp);
-			}
-			else
-			{
-				info->refTemps.push_back(newTemp);
-			}
-		}
-
-		//Get memory
-		{
-			//1
-			auto ait = _assets[(uint32_t)type].find(info->guid);
-			if (ait == _assets[(uint32_t)type].end())
-			{
-				_assets[(uint32_t)type].emplace(info->guid, info);
-			}
-			else
-			{
-				_assets[(uint32_t)type][info->guid] = info;
-			}
-			//2
-			auto it = _assets_repos.find(repositoryName);
-			if (it == _assets_repos.end())
-			{
-				std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> newItem;
-				newItem.emplace(info->guid, info);
-				_assets_repos.emplace(repositoryName, newItem);
-			}
-			else
-			{
-				it->second.emplace(info->guid, info);
-			}
-			//3
-			HString vpvf = info->virtualPath;
-			FileSystem::ClearPathSeparation(vpvf);
-			auto vfit = _assets_vf.find(vpvf);
-			if (vfit == _assets_vf.end())
-			{
-				VirtualFolder newVF;
-				newVF.assets.emplace(info->guid, info);
-				newVF.FolderName = FileSystem::GetFileName(info->virtualPath);
-				newVF.Path = info->virtualPath;
-				_assets_vf.emplace(vpvf, newVF);
-			}
-			else
-			{
-				vfit->second.assets.emplace(info->guid, info);
-			}
-		}
-
 	}
+
+	//Get memory
+	{
+		//1
+		auto ait = _assets[(uint32_t)type].find(info->guid);
+		if (ait == _assets[(uint32_t)type].end())
+		{
+			_assets[(uint32_t)type].emplace(info->guid, info);
+		}
+		else
+		{
+			_assets[(uint32_t)type][info->guid] = info;
+		}
+		//2
+		auto it = _assets_repos.find(repositoryName);
+		if (it == _assets_repos.end())
+		{
+			std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> newItem;
+			newItem.emplace(info->guid, info);
+			_assets_repos.emplace(repositoryName, newItem);
+		}
+		else
+		{
+			it->second.emplace(info->guid, info);
+		}
+		//3
+		HString vpvf = info->virtualPath;
+		FileSystem::ClearPathSeparation(vpvf);
+		auto vfit = _assets_vf.find(vpvf);
+		if (vfit == _assets_vf.end())
+		{
+			VirtualFolder newVF;
+			newVF.assets.emplace(info->guid, info);
+			newVF.FolderName = FileSystem::GetFileName(info->virtualPath);
+			newVF.Path = info->virtualPath;
+			_assets_vf.emplace(vpvf, newVF);
+		}
+		else
+		{
+			vfit->second.assets.emplace(info->guid, info);
+		}
+	}
+	return info;
 }
 
 void ContentManager::UpdateAssetReference(HGUID obj)
@@ -730,6 +755,10 @@ void ContentManager::UpdateAssetReference(std::weak_ptr<AssetInfoBase> info)
 			{
 				info.lock()->refs.push_back(it->second);
 			}
+			else
+			{
+				//出现没找到的,就是引用缺失了，此处可以弹出警告或者Log
+			}
 		}
 		for (auto i : info.lock()->depTemps)
 		{
@@ -737,6 +766,10 @@ void ContentManager::UpdateAssetReference(std::weak_ptr<AssetInfoBase> info)
 			if (it != _assets[(uint32_t)i.type].end())
 			{
 				info.lock()->deps.push_back(it->second);
+			}
+			else
+			{
+				//出现没找到的,就是依赖缺失了，此处可以弹出警告或者Log
 			}
 		}
 	}

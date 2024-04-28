@@ -48,7 +48,8 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 			{
 				if (!i.expired())
 				{
-					ContentManager::Get()->SaveAssetInfo(i.lock().get());
+					auto info = i;
+					ContentManager::Get()->SaveAssetInfo(info);
 				}
 			}
 			ContentManager::Get()->ClearDirtyAssets();
