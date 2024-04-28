@@ -32,21 +32,34 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 		"Type",
 		"Virtual Path",
 		"Repository"});
-	
+
+
 	auto dirtyAssets = ContentManager::Get()->GetDirtyAssets();
 
 	_allItems.clear();
 	//第一行为功能item
-	_headerItem = new DurtyAssetItem(ui.treeWidget);
-	ui.treeWidget->addTopLevelItem(_headerItem);
-	_headerItem->setCheckState(0, Qt::Unchecked);
+	{
+		//_headerItem = new DurtyAssetItem(ui.treeWidget);
+		//ui.treeWidget->addTopLevelItem(_headerItem);
+		//_headerItem->setCheckState(0, Qt::Checked);
+		//_headerItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren);
+		ui.SelectAllCheckBox->setCheckState(Qt::Checked);
+	}
 
 	for (auto& i : dirtyAssets)
 	{
 		if (!i.expired())
 		{
 			DurtyAssetItem* item = new DurtyAssetItem(ui.treeWidget);
-			item->setCheckState(0, Qt::Unchecked);
+
+			if(i.lock()->bDirtySelect)
+				item->setCheckState(0, Qt::Checked);
+			else
+			{
+				item->setCheckState(0, Qt::Unchecked);
+				ui.SelectAllCheckBox->setCheckState(Qt::Unchecked);
+			}
+
 			item->_asset = i;
 			//Column
 			item->setText(0, i.lock()->displayName.c_str());//Name
@@ -58,6 +71,12 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 			_allItems.append(item);
 		}
 	}
+
+	//设置排序属性
+	ui.treeWidget->setSortingEnabled(true);
+
+	// 设置默认排序列和顺序
+	ui.treeWidget->sortByColumn(0, Qt::AscendingOrder);
 
 	//	
 	connect(ui.SaveButton, &QPushButton::clicked, this, [this, dirtyAssets]()
@@ -79,28 +98,37 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 			close();
 		});
 
+	connect(ui.treeWidget, &QTreeWidget::itemChanged, this, [this](QTreeWidgetItem* item, int column) 
+		{
+			auto di =(DurtyAssetItem*)item;
+			if (di->checkState(0) == Qt::Checked && !di->_asset.expired())
+			{
+				di->_asset.lock()->bDirtySelect = true;
+			}
+			else if (di->checkState(0) == Qt::Unchecked && !di->_asset.expired())
+			{
+				di->_asset.lock()->bDirtySelect = false;
+			}
+		});
 
 	//    void itemChanged(QTreeWidgetItem *item, int column);
-	connect(ui.treeWidget, &QTreeWidget::itemChanged, this, [this](QTreeWidgetItem* item, int column)
-	{
-			if (_headerItem == item)
+	connect(ui.SelectAllCheckBox, &QCheckBox::stateChanged, this, [this](int state)
+		{
+			if (state == Qt::Checked)
 			{
-				if (_headerItem->checkState(0) == Qt::Checked)
+				for (auto& i : _allItems)
 				{
-					for (auto& i : _allItems)
-					{
-						i->setCheckState(0, Qt::Checked);
-					}
-				}
-				else if (_headerItem->checkState(0) == Qt::Unchecked)
-				{
-					for (auto& i : _allItems)
-					{
-						i->setCheckState(0, Qt::Unchecked);
-					}
+					i->setCheckState(0, Qt::Checked);
 				}
 			}
-	});
+			else if (state == Qt::Unchecked)
+			{
+				for (auto& i : _allItems)
+				{
+					i->setCheckState(0, Qt::Unchecked);
+				}
+			}
+		});
 
 }
 

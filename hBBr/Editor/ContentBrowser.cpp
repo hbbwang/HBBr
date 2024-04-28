@@ -368,8 +368,8 @@ void VirtualFolderTreeView::dropEvent(QDropEvent* e)
 						if (from && !from->_assetInfo.expired())
 						{
 							assets.push_back(from->_assetInfo);
+							newVirtualFolderPaths.push_back(target->_fullPath.toStdString().c_str());
 						}
-
 					}
 				}
 			}
@@ -437,6 +437,33 @@ void VirtualFolderTreeView::onDataChanged(const QModelIndex& topLeft, const QMod
 		CustomViewItem* currentItem = (CustomViewItem*)itemModel->itemFromIndex(topLeft);
 		{
 			//此函数是Item已经改完名字之后触发的，所有不需要创建新的目录.
+			if (currentItem->text().length() <= 1)
+			{
+				ConsoleDebug::print_endl("Folder name length must be greater than 1","255,255,0");
+			}
+			QString newName = currentItem->text();
+			int index = -1;
+			while (true)
+			{
+				bool bFound = false;
+				int rowCount = currentItem->rowCount();
+				for (int row = 0; row < rowCount; ++row)
+				{
+					QStandardItem* childItem = currentItem->child(row);
+					if (childItem->text().compare(newName) == 0)
+					{
+						bFound = true;
+						index++;
+						newName = currentItem->text() + "_" + QString::number(index);
+						break;
+					}
+				}
+				if (!bFound)
+				{
+					break;
+				}
+			}
+
 			auto assets = ContentManager::Get()->GetAssetsByVirtualFolder(currentItem->_fullPath.toStdString().c_str());
 			HString oldName = currentItem->_text.toStdString().c_str();
 			currentItem->_text = currentItem->text();
@@ -686,7 +713,8 @@ void VirtualFileListView::ItemTextChange(QListWidgetItem* widgetItem)
 	{
 		if (!item->_assetInfo.lock()->displayName.IsSame(item->text().toStdString().c_str()))
 		{
-			ContentManager::Get()->SetVirtualName(item->_assetInfo, item->text().toStdString().c_str());
+			HString newName = ContentManager::Get()->SetVirtualName(item->_assetInfo, item->text().toStdString().c_str());
+			item->setText(newName.c_str());
 			item->_toolTip = UpdateToolTips(item->_assetInfo);
 			ContentManager::Get()->MarkAssetDirty(item->_assetInfo);
 		}

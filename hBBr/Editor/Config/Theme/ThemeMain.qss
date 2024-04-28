@@ -332,7 +332,7 @@ QTreeView::branch:open:has-children
 }
 QTreeView::indicator:unchecked
 {
-    
+
 }
 QTreeView::indicator:checked
 {
@@ -520,15 +520,16 @@ QSplitter::handle
     width: 28px;
     height: 28px;
 }
-#CustomTreeView_VirtualFolderTreeView::branch:closed:has-children
+#CustomTreeView_VirtualFolderTreeView::branch:closed:has-children:!has-siblings,  
+#CustomTreeView_VirtualFolderTreeView::branch:closed:has-children:has-siblings
 {
     image: url(./Config/Theme/Icons/ContentBrowser_FolderClose.png);
 }
-#CustomTreeView_VirtualFolderTreeView::branch:open:has-children
+#CustomTreeView_VirtualFolderTreeView::branch:open:has-children:!has-siblings,  
+#CustomTreeView_VirtualFolderTreeView::branch:open:has-children:has-siblings
 {
     image: url(./Config/Theme/Icons/ContentBrowser_FolderOpen.png);
 }
-
 #CustomListView_VirtualFileListView 
 {
     background-color:transparent;

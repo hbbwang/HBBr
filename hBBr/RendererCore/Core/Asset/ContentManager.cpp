@@ -382,6 +382,9 @@ void ContentManager::SetNewVirtualPath(std::vector<std::weak_ptr<AssetInfoBase>>
 		{
 			repositories.push_back(assetRepository);
 		}
+		//资产进行一次重命名(主要是为了规避相同名字的资产)
+		SetVirtualName(asset, i->displayName);
+
 		//保存进.repository
 		SaveAssetInfo(asset);
 		{
@@ -469,10 +472,33 @@ void ContentManager::SaveAssetInfo(std::weak_ptr<AssetInfoBase>& assetInfo)
 	}
 }
 
-void ContentManager::SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo, HString newName, bool bSave)
+HString ContentManager::SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo, HString newName, bool bSave)
 {
 	if (!assetInfo.expired())
 	{
+		//规避相同名字的资产
+		{
+			HString cache = newName;
+			int index = 0; 
+			auto assets = GetAssetsByVirtualFolder(assetInfo.lock()->virtualPath);
+			while (true)
+			{
+				bool bFound = false;
+				for (auto& i : assets)
+				{
+					if (i.second->displayName.IsSame(cache, false))
+					{
+						bFound = true;
+						cache = newName + "_" + HString::FromInt(index);
+						index++;
+						break;
+					}
+				}
+				if (!bFound)break;
+			}
+			newName = cache;
+		}
+
 		//更新asset info
 		assetInfo.lock()->displayName = newName;
 		assetInfo.lock()->virtualFilePath = FileSystem::Append(assetInfo.lock()->virtualPath, assetInfo.lock()->displayName + "." + assetInfo.lock()->suffix);
@@ -482,7 +508,9 @@ void ContentManager::SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo, HSt
 		{
 			SaveAssetInfo(assetInfo);
 		}
+		return assetInfo.lock()->displayName;
 	}
+	return "";
 }
 
 void ContentManager::MarkAssetDirty(std::weak_ptr<AssetInfoBase> asset)

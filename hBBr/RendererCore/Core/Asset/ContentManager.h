@@ -96,13 +96,15 @@ public:
 	std::vector<AssetInfoRefTemp> refTemps;
 	std::vector<AssetInfoRefTemp> depTemps;
 
-
 	bool bAssetLoad = false;
+
 #if IS_EDITOR
 	//编辑器ListWidget生成Item图标的时候使用
 	//每个HString为单独一行
 	std::unordered_map<HString, HString> toolTips;
 	bool bDirty = false;
+	bool bDirtySelect = true;
+
 #endif
 	//
 	AssetInfoBase() {
@@ -239,8 +241,9 @@ public:
 	/*
 		设置资产的虚拟名字(DIsplayName,非GUID)
 		bSave:是否直接保存到仓库xml里,默认false
+		返回最终的DisplayName
 	*/
-	HBBR_API void SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo,HString newName,bool bSave = false);
+	HBBR_API HString SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo,HString newName,bool bSave = false);
 
 	/*
 		标记已经改动过的资产,告诉用户这些资产可能需要手动保存
