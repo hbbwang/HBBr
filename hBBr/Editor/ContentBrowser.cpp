@@ -969,7 +969,19 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	connect(ui.SaveButton, &QPushButton::clicked, this, [this]() {
 		EditorMain::_self->ShowDirtyAssetsManager();
 	});
-
+	//设置选项
+	//ui.OptionButton->setIcon(QIcon((FileSystem::GetConfigAbsPath() + "Theme/Icons/ICON_OPTION.png").c_str()));
+	_refreshContentBrowser = new QAction("Refresh content browser", this);
+	ActionConnect(_refreshContentBrowser, [this]() { ContentBrowser::RefreshContentBrowsers(); });
+	_cbOptionMenu = new QMenu(this);
+	_cbOptionMenu->addAction(_refreshContentBrowser);
+	connect(ui.OptionButton, &QToolButton::clicked, this, [&, this]()
+		{
+			auto pos = QPoint(0, 0 + ui.OptionButton->height());
+			pos = ui.OptionButton->mapToGlobal(pos);
+			_cbOptionMenu->exec(pos);
+		});
+	
 	//Refresh
 	RefreshContentBrowsers();
 }

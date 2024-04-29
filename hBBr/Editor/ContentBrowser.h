@@ -144,6 +144,9 @@ public:
 	VirtualFolderTreeView* _treeView = nullptr;
 	VirtualFileListView* _listView = nullptr;
 
+	QAction* _refreshContentBrowser = nullptr;
+	QMenu* _cbOptionMenu = nullptr;
+
 protected:
 
 	virtual void focusInEvent(QFocusEvent* event);
