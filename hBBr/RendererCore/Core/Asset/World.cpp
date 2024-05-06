@@ -7,9 +7,12 @@
 #include "XMLStream.h"
 #include "HInput.h"
 #include "ConsoleDebug.h"
-World::World(class VulkanRenderer* renderer)
+#include "FormMain.h"
+std::map<HString, std::shared_ptr<World>>World::_worlds;
+
+World::World()
 {
-	PreLoad(renderer);
+
 }
 
 World::~World()
@@ -36,7 +39,7 @@ void World::AddLevel(HString levelNameOrAssetPath)
 		//Name
 		else
 		{
-			path = FileSystem::Append(_worldAssetPath, levelNameOrAssetPath) + ".level";
+			path = FileSystem::Append(_worldAbsPath, levelNameOrAssetPath) + ".level";
 			if (FileSystem::FileExist(path))
 			{
 
@@ -59,26 +62,66 @@ void World::AddNewLevel(HString name)
 #endif
 }
 
+std::weak_ptr<World> World::CreateNewWorld(HString newWorldName)
+{
+	std::shared_ptr<World> world;
+	world.reset(new World());
+
+	HString finalName = newWorldName;
+	auto it = _worlds.find(finalName);
+	int index = 0;
+	while (it != _worlds.end())
+	{
+		finalName = newWorldName + HString::FromInt(index);
+		it = _worlds.find(finalName);
+	}
+
+	world->_guid = CreateGUID();
+	world->_worldName = finalName;
+	world->_worldAbsPath = FileSystem::Append(FileSystem::GetWorldAbsPath(), world->_worldName) + ".world";
+	FileSystem::FixUpPath(world->_worldAbsPath);
+	World::_worlds.emplace(finalName, world);
+
+	world->_worldSettingAbsPath = FileSystem::GetWorldAbsPath() + "/" + ".WorldSetting";
+	FileSystem::FixUpPath(world->_worldSettingAbsPath);
+
+	return world;
+}
+
+std::map<HString, std::shared_ptr<World>>& World::CollectWorlds()
+{
+	std::shared_ptr<World> world;
+	world.reset(new World());
+	HString worldPath = FileSystem::GetWorldAbsPath();
+	auto worldFolders = FileSystem::GetAllFolders(worldPath.c_str());
+	for (auto& i : worldFolders)
+	{
+		world->_worldName = i.baseName;
+
+		HString assetPath = FileSystem::GetWorldAbsPath();
+		HString dirPath = assetPath + "/" + world->_worldName + ".world";
+		FileSystem::FixUpPath(dirPath);
+
+		world->_worldAbsPath = dirPath;
+		world->_guid = CreateGUID();
+
+		world->_worldSettingAbsPath = assetPath + "/" + ".WorldSetting";
+		FileSystem::FixUpPath(world->_worldSettingAbsPath);
+
+		_worlds.emplace(world->_worldName , world);
+	}
+	return _worlds;
+}
+
 void World::SaveWorld(HString newWorldName)
 {
 	newWorldName.ClearSpace();
-	HString worldSettingPath;
-	if (newWorldName.Length() > 1)
-	{
-		HString assetPath = FileSystem::GetWorldAbsPath();
-		worldSettingPath = assetPath;
-		newWorldName = assetPath + "/" + newWorldName + ".world";
-		worldSettingPath ="World/" + newWorldName + ".world/WorldSetting.xml";
-		FileSystem::FixUpPath(worldSettingPath);
-		FileSystem::FixUpPath(newWorldName);
-		_worldAssetPath = newWorldName;
-	}
 	//
-	WorldSetting.InitArchive(worldSettingPath);
+	WorldSetting.InitArchive(_worldSettingAbsPath);
 	WorldSetting.SaveArchive();
 	//
 	//创建World目录
-	FileSystem::CreateDir(_worldAssetPath.c_str());
+	FileSystem::CreateDir(_worldAbsPath.c_str());
 	for (auto& i : _levels)
 	{
 		i->SaveLevel();
@@ -105,39 +148,15 @@ GameObject* World::SpawnGameObject(HString name, class Level* level)
 	return newObject;
 }
 
-void World::PreLoad(class VulkanRenderer* renderer)
+void World::Load(class VulkanRenderer* renderer)
 {
 	_renderer = renderer;
-}
 
-void World::Load(HString worldName)
-{
-	if (worldName.GetSuffix() == "world" && FileSystem::IsDir(worldName))
+	//Find all levels
+	auto levelFiles = FileSystem::GetFilesBySuffix(_worldAbsPath.c_str(), "level");
+	for (auto f : levelFiles)
 	{
-		HString fullPath = FileSystem::Append(FileSystem::GetWorldAbsPath(), worldName);
-		_worldAssetPath = FileSystem::GetRelativePath(fullPath);
-		FileSystem::FixUpPath(_worldAssetPath);
-
-		//Find all levels
-		auto levelFiles = FileSystem::GetFilesBySuffix(_worldAssetPath.c_str(), "level");
-		for (auto f : levelFiles)
-		{
-			AddLevel(f.relativePath);
-		}
-	}
-	else
-	{
-		HString assetPath = FileSystem::GetWorldAbsPath();
-		if (!FileSystem::FileExist(assetPath))
-		{
-			FileSystem::CreateDir(assetPath.c_str());
-		}
-		HString dirPath = assetPath + "/" + _worldName + ".world";
-		FileSystem::FixUpPath(dirPath);
-		_worldAssetPath = dirPath;
-
-		//This is a new world ,create a empty level .
-		AddNewLevel("Empty Level");
+		AddLevel(f.relativePath);
 	}
 
 #if IS_EDITOR

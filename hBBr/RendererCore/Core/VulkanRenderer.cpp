@@ -100,36 +100,58 @@ void VulkanRenderer::Init()
 
 }
 
-void VulkanRenderer::LoadWorld(HString worldName)
+void VulkanRenderer::LoadWorld(HString worldNameOrGUID)
 {
-	_world.reset(new World(this));
-	for (auto i : _spwanNewWorld)
+	auto& worlds = World::GetWorlds();
+	
+	if (HGUID(worldNameOrGUID.c_str()).isValid())
 	{
-		i(_world);
+		for (auto& i : worlds)
+		{
+			if (HString(i.second->_guid.str().c_str()) == worldNameOrGUID)
+			{
+				for (auto i : _spwanNewWorld)
+				{
+					i(_world);
+				}
+				_world = i.second;
+				_world.lock()->Load(this);
+				break;
+			}
+		}
 	}
-	_world->Load(worldName);
+	else
+	{
+		auto it = worlds.find(worldNameOrGUID);
+		if (it != worlds.end())
+		{
+			for (auto i : _spwanNewWorld)
+			{
+				i(_world);
+			}
+			_world = it->second;
+			_world.lock()->Load(this);
+		}
+	}
+
 }
 
 void VulkanRenderer::CreateEmptyWorld()
 {
-	_world.reset(new World(this));
-	for (auto i : _spwanNewWorld)
-	{
-		i(_world);
-	}
-	_world->Load("");
+	_world = World::CreateNewWorld("NewWorld");
+	_world.lock()->Load(this);
 }
 
 void VulkanRenderer::Render()
 {
 	if (!_bInit) //Render loop Init.
 	{
-		HString defaultWorldName;
-		auto defaultLevelNode = XMLStream::GetXMLNode(RendererConfig::Get()->_configFileRootNode, TEXT("DefaultLevel"));
-		defaultWorldName = defaultLevelNode.text().as_string();
-		LoadWorld(defaultWorldName);
+		HString defaultWorldGUID;
+		auto defaultLevelNode = XMLStream::GetXMLNode(RendererConfig::Get()->_configFileRootNode, TEXT("DefaultWorld"));
+		defaultWorldGUID = defaultLevelNode.text().as_string();
+		LoadWorld(defaultWorldGUID);
 
-		if (!_world)
+		if (_world.expired())
 		{
 			CreateEmptyWorld();
 		}
@@ -166,8 +188,8 @@ void VulkanRenderer::Render()
 			func();
 		}
 
-		if (_world)
-			_world->WorldUpdate();
+		if (!_world.expired())
+			_world.lock()->WorldUpdate();
 
 		SetupPassUniformBuffer();
 

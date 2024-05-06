@@ -20,7 +20,7 @@ class World
 	friend class CameraComponent;
 	friend class Level;
 public:
-	World(class VulkanRenderer* renderer);
+	World();
 	~World();
 
 #if IS_EDITOR
@@ -39,6 +39,14 @@ public:
 	HBBR_API void AddLevel(HString levelNameOrAssetPath);
 
 	HBBR_API void AddNewLevel(HString name);
+
+	HBBR_API const HGUID GetGUID()const { return _guid; }
+
+	HBBR_API static std::map<HString, std::shared_ptr<World>>& GetWorlds() { return _worlds; }
+
+	HBBR_API static std::weak_ptr<World>  CreateNewWorld(HString newWorldName);
+
+	HBBR_API static std::map<HString, std::shared_ptr<World>>& CollectWorlds();
 
 	//保存世界xml,路径都是固定在Asset/World里
 	//World 的结构大致如下:
@@ -67,11 +75,8 @@ public:
 
 private:
 
-	//加载场景,此状态不可以加载普通Object,会和编辑器起冲突报错! 除非_sceneEditorHide=true
-	void PreLoad(class VulkanRenderer* renderer);
-
 	//加载场景资产
-	void Load(HString worldName);
+	void Load(class VulkanRenderer* renderer);
 
 	//释放场景
 	bool ReleaseWorld();
@@ -97,11 +102,18 @@ private:
 
 	HString _worldName = "NewWorld";
 
-	HString _worldAssetPath = "";
+	HString _worldAbsPath = "";
+
+	HString _worldSettingAbsPath = "";
 
 	bool bLoad = false;
 
 	Archive WorldSetting;
+
+	HGUID _guid;
+
+	//<WorldName , WorldPtr>
+	static std::map<HString, std::shared_ptr<World>> _worlds;
 };
 
 

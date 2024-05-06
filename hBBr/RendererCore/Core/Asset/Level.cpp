@@ -8,7 +8,7 @@ Level::Level(class World* world, HString name)
 {
 	_levelDoc = pugi::xml_document();
 	_levelName = name.ClearSpace();
-	_levelPath = FileSystem::Append(world->_worldAssetPath, _levelName) + ".level";
+	_levelPath = FileSystem::Append(world->_worldAbsPath, _levelName) + ".level";
 	_world = world;
 }
 
@@ -31,7 +31,7 @@ void Level::Rename(HString newName)
 	if (FileSystem::FileExist(_levelPath))
 	{
 		FileSystem::FileRemove(_levelPath.c_str());
-		_levelPath = FileSystem::Append(_world->_worldAssetPath, _levelName) + ".level";
+		_levelPath = FileSystem::Append(_world->_worldAbsPath, _levelName) + ".level";
 		SaveLevel();
 	}
 #if IS_EDITOR

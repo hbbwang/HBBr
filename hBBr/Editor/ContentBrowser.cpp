@@ -950,7 +950,7 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	//回到当前的父文件夹 ↑
 	connect(ui.BackToParentButton, &QPushButton::clicked, this, [this]() {
 		if (_treeView->currentIndex().isValid())
-		{
+		{ 
 			if (_treeView->_newSelectionItems.size() > 0 && _treeView->_newSelectionItems.size() > _treeView->_currentSelectionItem + 1)
 			{
 				_treeView->_currentSelectionItem++;

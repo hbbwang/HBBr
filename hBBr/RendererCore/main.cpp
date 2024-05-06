@@ -5,6 +5,7 @@
 #include "./Core/Pipeline.h"
 #include "./Common/HInput.h"
 #include "./Asset/Texture2D.h"
+#include "./Asset/World.h"
 #include "./Common/XMLStream.h"
 #include "./Core/RendererConfig.h"
 #if IS_EDITOR
@@ -155,6 +156,8 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	//Texture2D::CreateFontTexture(ttfFontPath, outFontTexturePath, true, 16U, 4096U);
 
 	Texture2D::GlobalInitialize();
+
+	World::CollectWorlds();
 
 	//Create Main Window
 	auto win = CreateNewWindow(128, 128, "MainRenderer", false, parent);

@@ -2,6 +2,6 @@
 <root>
 	<WorldName>TestWorld</WorldName>
 	<Levels>
-		<Main Visibility="1"/>
+		<Item Name="Main" Visibility="1"/>
 	</Levels>
 </root>
