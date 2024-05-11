@@ -54,6 +54,9 @@ public:
 	//文件夹内储存的则是level后缀的xml文件
 	HBBR_API void SaveWorld(HString newWorldName = "");
 
+	//重新读取世界设置
+	HBBR_API void ReloadWorldSetting();
+
 	HBBR_API GameObject* SpawnGameObject(HString name, class Level* level = nullptr);
 
 #if IS_EDITOR
@@ -108,12 +111,17 @@ private:
 
 	bool bLoad = false;
 
-	Archive WorldSetting;
-
 	HGUID _guid;
+
+	HString _guidStr;
 
 	//<WorldName , WorldPtr>
 	static std::map<HString, std::shared_ptr<World>> _worlds;
+
+	//World Setting
+	pugi::xml_document _worldSettingDoc;
+	pugi::xml_node _worldSettingRoot;
+
 };
 
 

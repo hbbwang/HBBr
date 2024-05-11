@@ -8,7 +8,7 @@ Level::Level(class World* world, HString name)
 {
 	_levelDoc = pugi::xml_document();
 	_levelName = name.ClearSpace();
-	_levelPath = FileSystem::Append(world->_worldAbsPath, _levelName) + ".level";
+	_levelAbsPath = FileSystem::Append(world->_worldAbsPath, _levelName) + ".level";
 	_world = world;
 }
 
@@ -28,10 +28,10 @@ Level::~Level()
 void Level::Rename(HString newName)
 {
 	_levelName = newName.ClearSpace();
-	if (FileSystem::FileExist(_levelPath))
+	if (FileSystem::FileExist(_levelAbsPath))
 	{
-		FileSystem::FileRemove(_levelPath.c_str());
-		_levelPath = FileSystem::Append(_world->_worldAbsPath, _levelName) + ".level";
+		FileSystem::FileRemove(_levelAbsPath.c_str());
+		_levelAbsPath = FileSystem::Append(_world->_worldAbsPath, _levelName) + ".level";
 		SaveLevel();
 	}
 #if IS_EDITOR
@@ -63,7 +63,7 @@ void Level::Load()
 				count++;
 			if (count ==0)
 			{
-				if (XMLStream::LoadXML(_levelPath.c_wstr(), _levelDoc))
+				if (XMLStream::LoadXML(_levelAbsPath.c_wstr(), _levelDoc))
 				{
 					_levelRoot = _levelDoc.child(TEXT("root"));
 					if (!_levelRoot)
@@ -205,7 +205,7 @@ void Level::SaveLevel()
 	{
 		XML_UpdateGameObject(g.get());
 	}
-	_levelDoc.save_file(_levelPath.c_wstr());
+	_levelDoc.save_file(_levelAbsPath.c_wstr());
 }
 
 void Level::LevelUpdate()

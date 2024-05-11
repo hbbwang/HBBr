@@ -82,7 +82,7 @@ std::weak_ptr<World> World::CreateNewWorld(HString newWorldName)
 	FileSystem::FixUpPath(world->_worldAbsPath);
 	World::_worlds.emplace(finalName, world);
 
-	world->_worldSettingAbsPath = FileSystem::GetWorldAbsPath() + "/" + ".WorldSetting";
+	world->_worldSettingAbsPath = FileSystem::GetWorldAbsPath() + "/" + ".WorldSettings";
 	FileSystem::FixUpPath(world->_worldSettingAbsPath);
 
 	return world;
@@ -90,23 +90,24 @@ std::weak_ptr<World> World::CreateNewWorld(HString newWorldName)
 
 std::map<HString, std::shared_ptr<World>>& World::CollectWorlds()
 {
+	_worlds.clear();
+
 	std::shared_ptr<World> world;
 	world.reset(new World());
 	HString worldPath = FileSystem::GetWorldAbsPath();
 	auto worldFolders = FileSystem::GetAllFolders(worldPath.c_str());
 	for (auto& i : worldFolders)
 	{
-		world->_worldName = i.baseName;
+		world->_guidStr = i.baseName;
+		StringToGUID(world->_guidStr.c_str(), &world->_guid);		
 
-		HString assetPath = FileSystem::GetWorldAbsPath();
-		HString dirPath = assetPath + "/" + world->_worldName + ".world";
-		FileSystem::FixUpPath(dirPath);
+		world->_worldAbsPath = worldPath + "/" + world->_guidStr + ".world";
+		FileSystem::FixUpPath(world->_worldAbsPath);
 
-		world->_worldAbsPath = dirPath;
-		world->_guid = CreateGUID();
-
-		world->_worldSettingAbsPath = assetPath + "/" + ".WorldSetting";
+		world->_worldSettingAbsPath = world->_worldAbsPath + "/" + ".WorldSettings";
 		FileSystem::FixUpPath(world->_worldSettingAbsPath);
+
+		world->ReloadWorldSetting();
 
 		_worlds.emplace(world->_worldName , world);
 	}
@@ -116,15 +117,41 @@ std::map<HString, std::shared_ptr<World>>& World::CollectWorlds()
 void World::SaveWorld(HString newWorldName)
 {
 	newWorldName.ClearSpace();
-	//
-	WorldSetting.InitArchive(_worldSettingAbsPath);
-	WorldSetting.SaveArchive();
-	//
 	//创建World目录
 	FileSystem::CreateDir(_worldAbsPath.c_str());
 	for (auto& i : _levels)
 	{
 		i->SaveLevel();
+	}
+	//World Setting
+
+}
+
+void World::ReloadWorldSetting()
+{
+	if (FileSystem::FileExist(_worldSettingAbsPath))
+	{
+		if (XMLStream::LoadXML(_worldSettingAbsPath.c_wstr(), _worldSettingDoc))
+		{
+			_worldSettingRoot = _worldSettingDoc.child(TEXT("root"));
+			//World Name
+			_worldName = _worldSettingRoot.child(TEXT("WorldName")).text().as_string();
+			//Levels init
+			{
+				auto node_levels= _worldSettingRoot.child(TEXT("Levels"));
+				for (auto i = node_levels.first_child(); i; i = i.next_sibling())
+				{
+					HString levelName;
+					int Visibility = 0;
+					XMLStream::LoadXMLAttributeString(i, TEXT("Name"), levelName);
+					XMLStream::LoadXMLAttributeInt(i, TEXT("Visibility"), Visibility);
+					std::shared_ptr<Level> newLevel;
+					newLevel.reset(new Level(this, levelName));
+					newLevel->_bInitVisibility = Visibility > 0 ;
+					_levels.push_back(newLevel);
+				}
+			}
+		}
 	}
 }
 
@@ -151,13 +178,6 @@ GameObject* World::SpawnGameObject(HString name, class Level* level)
 void World::Load(class VulkanRenderer* renderer)
 {
 	_renderer = renderer;
-
-	//Find all levels
-	auto levelFiles = FileSystem::GetFilesBySuffix(_worldAbsPath.c_str(), "level");
-	for (auto f : levelFiles)
-	{
-		AddLevel(f.relativePath);
-	}
 
 #if IS_EDITOR
 

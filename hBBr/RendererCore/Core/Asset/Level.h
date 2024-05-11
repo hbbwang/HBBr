@@ -58,7 +58,7 @@ private:
 
 	HString _levelName = "NewLevel";
 
-	HString _levelPath = "";
+	HString _levelAbsPath = "";
 
 	pugi::xml_document _levelDoc;
 	pugi::xml_node _levelRoot;
@@ -82,6 +82,8 @@ private:
 	std::vector<std::shared_ptr<GameObject>> _gameObjectNeedDestroy;
 
 	bool _isEditorLevel = false;
+
+	bool _bInitVisibility = false;
 };
 
 

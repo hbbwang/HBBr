@@ -103,12 +103,13 @@ void VulkanRenderer::Init()
 void VulkanRenderer::LoadWorld(HString worldNameOrGUID)
 {
 	auto& worlds = World::GetWorlds();
-	
+	//检查GUID
 	if (HGUID(worldNameOrGUID.c_str()).isValid())
 	{
 		for (auto& i : worlds)
 		{
-			if (HString(i.second->_guid.str().c_str()) == worldNameOrGUID)
+			auto worldGuidStr = HString(i.second->_guid.str().c_str());
+			if (worldGuidStr == worldNameOrGUID)
 			{
 				for (auto i : _spwanNewWorld)
 				{
