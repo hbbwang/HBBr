@@ -20,6 +20,7 @@
 #include "Inspector.h"
 #include "CheckBox.h"
 #include "ComboBox.h"
+#include "FormMain.h"
 SceneOutlineTree* SceneOutline::_treeWidget = nullptr;
 
 SceneOutlineItem::SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, QTreeWidget* view)
@@ -129,7 +130,7 @@ public:
     }
 };
 
-SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* parent)
+SceneOutlineTree::SceneOutlineTree(QWidget* parent)
     :QTreeWidget(parent)
 {
     _parent = (SceneOutline*)parent;
@@ -149,7 +150,6 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
 
     setIndentation(10);
 
-    _renderer = renderer;
     _menu = new QMenu(this);
     _createNewGameObject    = new QAction(QString::fromLocal8Bit("创建GameObject"), _menu);
     _deleteGameObject       = new QAction(QString::fromLocal8Bit("删除"), _menu);
@@ -175,22 +175,22 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
     connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(ItemSelectionChanged()));
     connect(_createNewGameObject, &QAction::triggered, this, [this](bool bChecked) 
 		{
-            _renderer->ExecFunctionOnRenderThread([]() 
-                {
-                    GameObject::CreateGameObject();
-                });           
+            if (VulkanApp::GetMainForm()->renderer)
+            {
+                VulkanApp::GetMainForm()->renderer->ExecFunctionOnRenderThread([]()
+                    {
+                        GameObject::CreateGameObject();
+                    });
+            }
 		});
     connect(_renameGameObject, &QAction::triggered, this, [this](bool bChecked)
         {
-            _renderer->ExecFunctionOnRenderThread([this]()
-                {
-                    if (this->currentItem())
-                        editItem(this->currentItem());
-                });
+            if (this->currentItem())
+                editItem(this->currentItem());
         });
     connect(_deleteGameObject, &QAction::triggered, this, [this](bool bChecked)
         {
-            _renderer->ExecFunctionOnRenderThread([this]()
+            VulkanApp::GetMainForm()->renderer->ExecFunctionOnRenderThread([this]()
                 {
                     if (this->currentItem())
                     {
@@ -200,7 +200,7 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
         });
     connect(_createCube, &QAction::triggered, this, [this](bool bChecked)
         {
-            _renderer->ExecFunctionOnRenderThread([]()
+            VulkanApp::GetMainForm()->renderer->ExecFunctionOnRenderThread([]()
                 {
                     QFileInfo fi("./Asset/Content/Core/Basic/Cube");
                     //GameObject::CreateModelGameObject(fi.absolutePath().toStdString().c_str());
@@ -208,7 +208,7 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
         });
     connect(_createSphere, &QAction::triggered, this, [this](bool bChecked)
         {
-            _renderer->ExecFunctionOnRenderThread([]()
+            VulkanApp::GetMainForm()->renderer->ExecFunctionOnRenderThread([]()
                 {
                     QFileInfo fi("./Asset/Content/Core/Basic/Sphere");
                     //GameObject::CreateModelGameObject(fi.absolutePath().toStdString().c_str());
@@ -216,7 +216,7 @@ SceneOutlineTree::SceneOutlineTree(class VulkanRenderer* renderer, QWidget* pare
         });
     connect(_createPlane, &QAction::triggered, this, [this](bool bChecked)
         {
-            _renderer->ExecFunctionOnRenderThread([]()
+            VulkanApp::GetMainForm()->renderer->ExecFunctionOnRenderThread([]()
                 {
                     QFileInfo fi("./Asset/Content/Core/Basic/Plane");
                     //GameObject::CreateModelGameObject(fi.absolutePath().toStdString().c_str());
@@ -464,7 +464,7 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     mainLayout->addWidget(_search);
     connect(_search->ui.lineEdit, SIGNAL(returnPressed()), this, SLOT(TreeSearch()));
 
-    _treeWidget = new SceneOutlineTree(renderer, this);
+    _treeWidget = new SceneOutlineTree(this);
     mainLayout->addWidget(_treeWidget);
 
     _renderer = renderer;
@@ -499,9 +499,26 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                         _treeWidget->addTopLevelItem(item);
                         _levelItems.insert(i->GetLevelName().c_str(), item);
                     }
-                    ////默认第一个场景开启编辑
-                    //_levelItems.first()->setCheckState(0, Qt::Checked);
-                    //_treeWidget->expandItem(_levelItems.first());
+                }
+            };
+
+            world.lock()->_editorLevelVisibilityChanged =
+                [this, world](Level* level , bool bVisibility)
+            {
+                if (level)
+                {
+                    auto levelItem = FindLevel(level->GetLevelName().c_str());
+                    if (levelItem)
+                    {
+                        if (bVisibility)
+                        {
+                            levelItem->setCheckState(0, Qt::Checked);
+                        }
+                        else
+                        {
+                            levelItem->setCheckState(0, Qt::Unchecked);
+                        }
+                    }   
                 }
             };
 
@@ -575,7 +592,7 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
 
             }
         }
-    };   
+    }; 
     _renderer->_spwanNewWorld.push_back(spawnNewWorldCallBack);
 
 }

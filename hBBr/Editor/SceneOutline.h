@@ -31,7 +31,7 @@ class SceneOutlineTree :public QTreeWidget
         friend class SceneOutlineTreeDelegate;
 public:
 
-    explicit SceneOutlineTree(class VulkanRenderer* renderer, QWidget* parent = nullptr);
+    explicit SceneOutlineTree(QWidget* parent = nullptr);
     ~SceneOutlineTree() {}
     virtual void mousePressEvent(QMouseEvent* event)override ;
     virtual void mouseMoveEvent(QMouseEvent* event)override;
@@ -50,8 +50,6 @@ protected:
 
         QTreeWidget::commitData(editor);
     }
-
-    VulkanRenderer* _renderer = nullptr;
     QTreeWidgetItem* _curItem;
     QTreeWidgetItem* _mouseTouchItem;
 

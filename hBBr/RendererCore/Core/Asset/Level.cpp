@@ -55,9 +55,9 @@ void Level::Load()
 {
 	if (_world)
 	{
-		if (!bLoad)
+		if (!_bLoad)
 		{
-			bLoad = true;
+			_bLoad = true;
 			int count = 0;
 			for (auto i : _levelDoc.children())
 				count++;
@@ -171,11 +171,15 @@ void Level::Load()
 			}
 		}
 	}
+
+#if IS_EDITOR
+	_world->_editorLevelVisibilityChanged(this,_bLoad);
+#endif
 }
 
 void Level::UnLoad()
 {
-	bLoad = false;
+	_bLoad = false;
 
 	//临时保存一份数据在内存中，不会实际保存到XML里
 	for (auto g : _gameObjects)
@@ -188,6 +192,10 @@ void Level::UnLoad()
 	{
 		i->Destroy();
 	}
+
+#if IS_EDITOR
+	_world->_editorLevelVisibilityChanged(this, _bLoad);
+#endif
 }
 
 void Level::SaveLevel()

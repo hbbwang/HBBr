@@ -111,11 +111,11 @@ void VulkanRenderer::LoadWorld(HString worldNameOrGUID)
 			auto worldGuidStr = HString(i.second->_guid.str().c_str());
 			if (worldGuidStr == worldNameOrGUID)
 			{
-				for (auto i : _spwanNewWorld)
-				{
-					i(_world);
-				}
 				_world = i.second;
+				for (auto f : _spwanNewWorld)
+				{
+					f(_world);
+				}
 				_world.lock()->Load(this);
 				break;
 			}
@@ -126,11 +126,11 @@ void VulkanRenderer::LoadWorld(HString worldNameOrGUID)
 		auto it = worlds.find(worldNameOrGUID);
 		if (it != worlds.end())
 		{
+			_world = it->second;
 			for (auto i : _spwanNewWorld)
 			{
 				i(_world);
 			}
-			_world = it->second;
 			_world.lock()->Load(this);
 		}
 	}

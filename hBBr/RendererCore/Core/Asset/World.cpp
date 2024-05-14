@@ -150,6 +150,9 @@ void World::ReloadWorldSetting()
 					newLevel->_bInitVisibility = Visibility > 0 ;
 					_levels.push_back(newLevel);
 				}
+				#if IS_EDITOR
+					_editorLevelChanged();
+				#endif
 			}
 		}
 	}
@@ -166,7 +169,7 @@ GameObject* World::SpawnGameObject(HString name, class Level* level)
 	{
 		level = this->_levels[0].get();
 	}
-	if (!level->bLoad)
+	if (!level->_bLoad)
 	{
 		MsgBox("World.cpp/SpawnGameObject", "Spawn game object failed.The level is not loading.");
 		return nullptr;
@@ -178,6 +181,10 @@ GameObject* World::SpawnGameObject(HString name, class Level* level)
 void World::Load(class VulkanRenderer* renderer)
 {
 	_renderer = renderer;
+
+#if IS_EDITOR
+	_editorLevelChanged();
+#endif
 
 #if IS_EDITOR
 
@@ -205,8 +212,15 @@ void World::Load(class VulkanRenderer* renderer)
 
 #endif
 
-	bLoad = true;
+	_bLoad = true;
 
+	for (auto& i : _levels)
+	{
+		if (i->_bInitVisibility)
+		{
+			i->Load();
+		}
+	}
 
 #if IS_GAME
 	//-----model--camera
@@ -221,7 +235,6 @@ void World::Load(class VulkanRenderer* renderer)
 	auto modelComp = testModel->AddComponent<ModelComponent>();
 	modelComp->SetModel(HGUID("c51a01e8-9349-660a-d2df-353a310db461"));
 	ConsoleDebug::printf_endl("Test Model Spawn......");
-
 }
 
 bool World::ReleaseWorld()
@@ -241,7 +254,7 @@ void World::WorldUpdate()
 {
 	std::vector < std::weak_ptr<Level> >_levelPtrs;
 	_levelPtrs.resize(_levels.size() + 1);
-	if (!bLoad)
+	if (!_bLoad)
 	{
 		return;
 	}
