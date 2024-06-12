@@ -1,7 +1,9 @@
-<?xml version="1.0"?>
-<root>
-	<WorldName>TestWorld</WorldName>
-	<Levels>
-		<Item Name="Main" Visibility="1"/>
-	</Levels>
-</root>
+{
+    "Levels": [
+        {
+            "Name": "Main",
+            "Visibility": true
+        }
+    ],
+    "WorldName": "TestWorld"
+}
