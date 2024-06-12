@@ -223,7 +223,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				continue;
 			}
 			//std::weak_ptr<Model> value
-			else if (IsType("AssetPath"))
+			else if (IsType("AssetRef"))
 			{
 				if (p.bArray)
 				{
@@ -266,7 +266,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				}
 				else
 				{
-					AssetPath* path = (AssetPath*)p.value;
+					AssetRef* path = (AssetRef*)p.value;
 					AssetLine* line = new AssetLine(p.name, this, path->path.c_str(), p.condition);
 					compWidget->layout()->addWidget(line);
 					path->callBack = [line,path]() {

@@ -10,8 +10,8 @@ COMPONENT_IMPLEMENT(ModelComponent)
 void ModelComponent::OnConstruction()
 {
 	Component::OnConstruction();
-	AddProperty("AssetPath", "Model", &_modelPath, false, "Default", 0, "fbx");
-	AddProperty("AssetPath", "Material", &_materialPath, true, "Default", 0, "mat");
+	AddProperty("AssetRef", "Model", &_modelPath, false, "Default", 0, "fbx");
+	AddProperty("AssetRef", "Material", &_materialPath, true, "Default", 0, "mat");
 }
 
 void ModelComponent::SetModelByAssetPath(HString virtualPath)
