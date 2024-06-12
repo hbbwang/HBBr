@@ -40,9 +40,9 @@ protected:
 
 private:
 
-	AssetPath  _modelPath;
+	AssetRef  _modelPath;
 
-	std::vector<AssetPath> _materialPath;
+	std::vector<AssetRef> _materialPath;
 
 	std::vector<std::weak_ptr<Material>> _materials;
 

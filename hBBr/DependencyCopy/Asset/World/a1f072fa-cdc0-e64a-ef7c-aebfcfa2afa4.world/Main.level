@@ -12,7 +12,7 @@
                     },
                     {
                         "Name": "Model",
-                        "Type": "AssetPath",
+                        "Type": "AssetRef",
                         "Value": "Content/Core/Model/TestFbx_1_Combine.fbx"
                     }
                 ]

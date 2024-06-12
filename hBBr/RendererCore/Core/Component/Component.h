@@ -50,7 +50,7 @@ ComponentClassName  _component_construct_##ComponentClassName;
 	std::sort(_compProperties.begin(), _compProperties.end(), valueCompare);\
 }
 
-struct AssetPath
+struct AssetRef
 {
 	HString path = "";
 	std::function<void()> callBack = []() {};
@@ -217,11 +217,11 @@ protected:
 				return (*value == true) ? "1" : "0";
 			}
 		}
-		else 	if (p.type.IsSame("AssetPath", false))
+		else 	if (p.type.IsSame("AssetRef", false))
 		{
 			if (p.bArray)
 			{
-				auto value = (std::vector<AssetPath>*)p.value;
+				auto value = (std::vector<AssetRef>*)p.value;
 				HString result;
 				for (auto i : *value) {
 					result += i.path + ";";
@@ -229,7 +229,7 @@ protected:
 			}
 			else
 			{
-				auto value = (AssetPath*)p.value;
+				auto value = (AssetRef*)p.value;
 				return value->path;
 			}
 		}
@@ -255,23 +255,23 @@ protected:
 				*((bool*)p.value) = HString::ToInt(valueStr) == 1 ? true : false;
 			}
 		}
-		else 	if (p.type.IsSame("AssetPath", false))
+		else 	if (p.type.IsSame("AssetRef", false))
 		{
 			if (p.bArray)
 			{
 				auto values = valueStr.Split(";");
-				auto valuePtr = ((std::vector<AssetPath>*)p.value);
+				auto valuePtr = ((std::vector<AssetRef>*)p.value);
 				valuePtr->resize(values.size());
 				for (int i = 0; i < values.size(); i++)
 				{
-					AssetPath newAssetPath;
+					AssetRef newAssetPath;
 					newAssetPath.path = values[i];
 					valuePtr->push_back(newAssetPath);
 				}
 			}
 			else
 			{
-				((AssetPath*)p.value)->path = valueStr;
+				((AssetRef*)p.value)->path = valueStr;
 			}
 		}
 
