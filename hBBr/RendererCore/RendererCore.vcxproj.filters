@@ -226,7 +226,7 @@
     <ClInclude Include="Core\Asset\Texture2D.h">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Asset\Archive.h">
+    <ClInclude Include="Core\Asset\Serializable.h">
       <Filter>Renderer\Core\Asset</Filter>
     </ClInclude>
     <ClInclude Include="Core\Asset\World.h">
@@ -381,7 +381,7 @@
     <ClCompile Include="Core\Asset\Texture2D.cpp">
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Asset\Archive.cpp">
+    <ClCompile Include="Core\Asset\Serializable.cpp">
       <Filter>Renderer\Core\Asset</Filter>
     </ClCompile>
     <ClCompile Include="Core\Asset\World.cpp">

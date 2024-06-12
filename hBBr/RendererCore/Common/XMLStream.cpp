@@ -191,6 +191,57 @@ bool XMLStream::LoadXMLAttributeFloat(pugi::xml_node& node, const wchar_t* attri
 	return false;
 }
 
+bool XMLStream::FindNodeByPath(pugi::xml_node& node, HString path, pugi::xml_node& result, bool bCreateEmpty)
+{
+	path = path.ClearSpace();
+	if (path[0] == '/')
+	{
+		path = path.Right(1);
+	}
+	std::vector<HString>paths = path.Split("/");
+	result = pugi::xml_node();
+
+	pugi::xml_node current = node;
+	bool bFound = true;
+	for (int  i = 0 ; i < paths.size() ;i++)
+	{
+		auto next = current.child(paths[i].c_wstr());
+		if (!next)
+		{
+			bFound = false;
+			if (bCreateEmpty)
+			{
+				next = current.append_child(paths[i].c_wstr());
+			}
+			else
+				break;
+		}
+		current = next;
+		if (i >= paths.size() - 1)
+		{
+			result = current;
+		}
+	}
+	if (bFound)
+		return true;
+	else
+		return false;
+}
+
+pugi::xml_node XMLStream::FindNodeByPath(pugi::xml_node& node, HString path)
+{
+	pugi::xpath_query xQuery(path.c_wstr());
+	if (xQuery)
+	{
+		auto xNodeSet = node.select_node(xQuery);
+		if (xNodeSet)
+		{
+			return xNodeSet.node();
+		}
+	}
+	return pugi::xml_node();
+}
+
 bool XMLStream::CreateXMLDocument(HString path, pugi::xml_document& doc)
 {
 	pugi::xml_node decl = doc.prepend_child(pugi::node_declaration);

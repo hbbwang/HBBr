@@ -47,7 +47,7 @@
 
 //图方便,直接用SDL的函数吧，而且直接跨平台
 #include <SDL3/SDL.h>
-
+#include "ThirdParty/nlohmann/json.hpp"
 class  HString
 {
 private:
@@ -144,7 +144,14 @@ public:
 			this->length = 0;
 		}
 	}
-
+	HString(const std::string str)
+	{
+		clear();
+		this->length = str.size();
+		this->_str = new char[str.size()+1];
+		strcpy_s(this->_str, this->length + 1, str.c_str());
+		this->_str[this->length] = '\0';
+	}
 	~HString()
 	{
 		clear();
@@ -807,9 +814,46 @@ public:
 		return i == true ? "true": "false";
 	}
 
+	template<class T>
+	static HBBR_INLINE HString ToString(T value)
+	{
+		if (typeid(value) == typeid(float) || typeid(value) == typeid(double))
+		{
+			return HString::FromFloat(value);
+		}
+		else if (typeid(value) == typeid(int))
+		{
+			return HString::FromInt(value);
+		}
+		else if (typeid(value) == typeid(HString))
+		{
+			return value;
+		}
+		else if (typeid(value) == typeid(unsigned int))
+		{
+			return HString::FromUInt(value);
+		}
+		else if (typeid(value) == typeid(bool))
+		{
+			return HString::FromBool(value);
+		}
+		else if (typeid(value) == typeid(glm::vec2))
+		{
+			return HString::FromVec2(value);
+		}
+		else if (typeid(value) == typeid(size_t))
+		{
+			return HString::FromSize_t(value);
+		}
+		else
+		{
+			return value;
+		}
+	}
+
 	static HBBR_INLINE bool ToBool(const char* str)
 	{
-		return  str[0]== 't'|| str[0] == 'T'? true : false;
+		return  str[0]== 't' || str[0] == 'T' || atoi(str) > 0 ? true : false;
 	}
 
 	static HBBR_INLINE bool ToBool(HString str)

@@ -7,8 +7,9 @@
 #include "Component/GameObject.h"
 #include "./ThirdParty/pugixml/pugixml.hpp"
 #include "Asset/HGuid.h"
+#include "Asset/Serializable.h"
 
-class Level 
+class Level :public Serializable
 {
 	friend class VulkanRenderer;
 	friend class GameObject;
@@ -18,12 +19,6 @@ public:
 
 	Level(class World* world, HString name);
 	~Level();
-
-	//序列化
-	template<class Archive>
-	void serialize(Archive& ar) {
-		//ar(name_, age_);
-	}
 
 	HBBR_INLINE HBBR_API HString GetLevelName()const { return _levelName; }
 
@@ -60,14 +55,11 @@ private:
 
 	HString _levelAbsPath = "";
 
-	pugi::xml_document _levelDoc;
-	pugi::xml_node _levelRoot;
-
 	//更新或者创建GameObject的Xml数据在level文档里
 	//bUpdateParameters是否写入参数
-	void XML_UpdateGameObject(GameObject* gameObject);
-	void XML_UpdateGameObjectTransform(GameObject* gameObject);
-	void XML_UpdateGameObjectComponent(GameObject* gameObject);
+	void SaveGameObject(GameObject* gameObject);
+	void SaveGameObjectTransform(GameObject* gameObject);
+	void SaveGameObjectComponent(GameObject* gameObject);
 
 	//请勿要主动使用该函数
 	void AddNewObject(std::shared_ptr<GameObject> newObject);
@@ -82,8 +74,12 @@ private:
 	std::vector<std::shared_ptr<GameObject>> _gameObjectNeedDestroy;
 
 	bool _isEditorLevel = false;
-
 	bool _bInitVisibility = false;
+
+public:
+	virtual nlohmann::json ToJson()override;
+	virtual void FromJson() override;
+
 };
 
 

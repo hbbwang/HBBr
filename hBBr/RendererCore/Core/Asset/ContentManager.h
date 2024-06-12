@@ -104,7 +104,6 @@ public:
 	std::unordered_map<HString, HString> toolTips;
 	bool bDirty = false;
 	bool bDirtySelect = true;
-
 #endif
 	//
 	AssetInfoBase() {

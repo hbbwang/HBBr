@@ -11,9 +11,9 @@
 #include "Component/GameObject.h"
 #include "Asset/HGuid.h"
 #include "Asset/Level.h"
-#include "Archive.h"
+#include "Asset/Serializable.h"
 
-class World
+class World :public Serializable
 {
 	friend class VulkanRenderer;
 	friend class GameObject;
@@ -48,11 +48,14 @@ public:
 
 	HBBR_API static std::map<HString, std::shared_ptr<World>>& CollectWorlds();
 
-	//保存世界xml,路径都是固定在Asset/World里
-	//World 的结构大致如下:
-	//'Asset/World/$(_worldName).world/' 这个$(_worldName).world是一个文件夹。
-	//文件夹内储存的则是level后缀的xml文件
+	HBBR_API HString GetWorldName()const { return _worldName; }
+
+	//保存世界,路径都是固定在Asset/World里
+	//文件夹内储存的则是level后缀
 	HBBR_API void SaveWorld(HString newWorldName = "");
+
+	// 创建/保存 世界设置，世界的属性和参数都在这里
+	HBBR_API void SaveWorldSetting();
 
 	//重新读取世界设置
 	HBBR_API void ReloadWorldSetting();
@@ -74,6 +77,38 @@ public:
 	std::shared_ptr<Level> _editorLevel;
 
 	void SetCurrentSelectionLevel(std::weak_ptr<Level> level);
+
+	static std::vector<std::weak_ptr<World>> _dirtyWorlds;
+	HBBR_API static std::vector<std::weak_ptr<World>> GetDirtyWorlds() { return _dirtyWorlds; }
+	bool bDirtySelect;
+	HBBR_API  bool IsDirtySelect() { return bDirtySelect; }
+	HBBR_API  void SetDirtySelect(bool input) { bDirtySelect = input; }
+
+	HBBR_API static void AddDirtyWorld(std::weak_ptr<World> dirtyWorld)
+	{
+		auto it = std::find_if(_dirtyWorlds.begin(), _dirtyWorlds.end(), [dirtyWorld](std::weak_ptr<World>& w) {
+			return !w.expired() && dirtyWorld.expired() && w.lock().get() == dirtyWorld.lock().get();
+		});
+		if (it == _dirtyWorlds.end())
+		{
+			_dirtyWorlds.push_back(dirtyWorld);
+		}
+	}
+	HBBR_API static void RemoveDirtyWorld(std::weak_ptr<World> dirtyWorld)
+	{
+		auto it = std::remove_if(_dirtyWorlds.begin(), _dirtyWorlds.end(), [dirtyWorld](std::weak_ptr<World>& w) {
+			return !w.expired() && dirtyWorld.expired() && w.lock().get() == dirtyWorld.lock().get();
+			});
+		if (it != _dirtyWorlds.end())
+		{
+			_dirtyWorlds.erase(it);
+		}
+	}
+	HBBR_API static void ClearDirtyWorlds()
+	{
+		_dirtyWorlds.clear();
+	}
+
 
 #endif
 
@@ -120,8 +155,9 @@ private:
 	static std::map<HString, std::shared_ptr<World>> _worlds;
 
 	//World Setting
-	pugi::xml_document _worldSettingDoc;
-	pugi::xml_node _worldSettingRoot;
+	public:
+		nlohmann::json ToJson()  override;
+		void FromJson() override;
 
 };
 

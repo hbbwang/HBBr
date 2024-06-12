@@ -1,10 +1,12 @@
 #include "DirtyAssetsManager.h"
 #include "ContentManager.h"
+#include "World.h"
 
 class DurtyAssetItem :public QTreeWidgetItem
 {
 public:
 	std::weak_ptr<AssetInfoBase> _asset;
+	std::weak_ptr<World> _world;
 	DurtyAssetItem(QTreeWidget* view) :QTreeWidgetItem(view)
 	{
 	}
@@ -35,6 +37,7 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 
 
 	auto dirtyAssets = ContentManager::Get()->GetDirtyAssets();
+	auto dirtyWorlds = World::GetDirtyWorlds();
 
 	_allItems.clear();
 	//第一行为功能item
@@ -59,13 +62,37 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 				item->setCheckState(0, Qt::Unchecked);
 				ui.SelectAllCheckBox->setCheckState(Qt::Unchecked);
 			}
-
 			item->_asset = i;
 			//Column
 			item->setText(0, i.lock()->displayName.c_str());//Name
 			item->setText(1, (GetAssetTypeString(i.lock()->type)).c_str());//Type
 			item->setText(2, i.lock()->virtualFilePath.c_str());//Virtual path
-			item->setText(3, i.lock()->repository.c_str());//Virtual path
+			item->setText(3, i.lock()->repository.c_str());//Repository
+
+			ui.treeWidget->addTopLevelItem(item);
+			_allItems.append(item);
+		}
+	}
+
+	for (auto& i : dirtyWorlds)
+	{
+		if (!i.expired())
+		{
+			DurtyAssetItem* item = new DurtyAssetItem(ui.treeWidget);
+
+			if (i.lock()->IsDirtySelect())
+				item->setCheckState(0, Qt::Checked);
+			else
+			{
+				item->setCheckState(0, Qt::Unchecked);
+				ui.SelectAllCheckBox->setCheckState(Qt::Unchecked);
+			}
+			item->_world = i;
+			//Column
+			item->setText(0, i.lock()->GetWorldName().c_str());//Name
+			item->setText(1, "World");//Type
+			item->setText(2, "");//Virtual path
+			item->setText(3, "");
 
 			ui.treeWidget->addTopLevelItem(item);
 			_allItems.append(item);
@@ -83,11 +110,18 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 		{
 			for (auto& i : _allItems)
 			{
-				if (i->checkState(0) == Qt::Checked &&  !i->_asset.expired())
+				if (i->checkState(0) == Qt::Checked)
 				{
-					auto info = i;
-					ContentManager::Get()->SaveAssetInfo(i->_asset);
-					ContentManager::Get()->RemoveDirtyAsset(i->_asset);
+					if (!i->_asset.expired())
+					{
+						ContentManager::Get()->SaveAssetInfo(i->_asset);
+						ContentManager::Get()->RemoveDirtyAsset(i->_asset);
+					}
+					else if (!i->_world.expired())
+					{
+						i->_world.lock()->SaveWorld();
+						World::RemoveDirtyWorld(i->_world);
+					}
 				}
 			}
 			_finishExec();

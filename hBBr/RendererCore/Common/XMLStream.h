@@ -40,6 +40,12 @@ public:
 	/* 读取xml节点的Float属性 */
 	static bool LoadXMLAttributeFloat(pugi::xml_node& node, const wchar_t* attributeName, float& attri);
 
+	/* 通过路径格式查找节点，bCreateEmpty 如果查找失败，是否创建，如果找不到，还不让创建，就返回空节点 */
+	static bool FindNodeByPath(pugi::xml_node& node, HString path, pugi::xml_node& result,bool bCreateEmpty);
+
+	/* 通过X路径格式查找节点，但无法创建，不过效率会高一点 */
+	static pugi::xml_node FindNodeByPath(pugi::xml_node& node, HString path);
+
 	static pugi::xml_node GetXMLNode(pugi::xml_node& node, const wchar_t* name)
 	{
 		if (node)

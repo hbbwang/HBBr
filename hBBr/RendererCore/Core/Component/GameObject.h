@@ -6,6 +6,7 @@
 #include "Transform.h"
 #include "HGuid.h"
 #include "pugixml/pugixml.hpp"
+#include "Serializable.h"
 
 class GameObject
 {
@@ -147,8 +148,8 @@ private:
 
 	HString _guidStr;
 
-	//记录了XML场景文件里对应guid的属性,默认为空节点
-	pugi::xml_node _xmlNode ;
+	//记录场景文件里对应guid的属性,默认为空节点
+	nlohmann::json _levelNode;
 
 	//Component spawn by name <class name , spawn function>
 	static std::map<HString, std::function<class Component*(class GameObject*)>> _componentSpawnFunctions;

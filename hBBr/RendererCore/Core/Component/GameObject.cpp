@@ -67,11 +67,6 @@ void GameObject::ObjectInit(HString objectName, Level* level, bool SceneEditorHi
 	_selfWeak = sharedPtr;
 	_level->AddNewObject(sharedPtr);
 
-	//从xml场景获取到的数据，不进行node更新
-	if (!FromXmlNode)
-	{
-		_level->XML_UpdateGameObject(this);
-	}
 }
 
 GameObject* GameObject::CreateGameObject(HString objectName, Level* level)

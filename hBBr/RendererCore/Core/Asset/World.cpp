@@ -4,12 +4,11 @@
 #include "Component/ModelComponent.h"
 #include "Component/CameraComponent.h"
 #include "FileSystem.h"
-#include "XMLStream.h"
 #include "HInput.h"
 #include "ConsoleDebug.h"
 #include "FormMain.h"
 std::map<HString, std::shared_ptr<World>>World::_worlds;
-
+std::vector<std::weak_ptr<World>>World::_dirtyWorlds;
 World::World()
 {
 
@@ -124,36 +123,47 @@ void World::SaveWorld(HString newWorldName)
 		i->SaveLevel();
 	}
 	//World Setting
+	SaveWorldSetting();
+}
 
+void World::SaveWorldSetting()
+{
+	ToJson();
+	SaveJson(_worldSettingAbsPath);
 }
 
 void World::ReloadWorldSetting()
 {
 	if (FileSystem::FileExist(_worldSettingAbsPath))
 	{
-		if (XMLStream::LoadXML(_worldSettingAbsPath.c_wstr(), _worldSettingDoc))
+		if (LoadJson(_worldSettingAbsPath, _json))
 		{
-			_worldSettingRoot = _worldSettingDoc.child(TEXT("root"));
-			//World Name
-			_worldName = _worldSettingRoot.child(TEXT("WorldName")).text().as_string();
-			//Levels init
+			_worldName = _json["WorldName"];
+			std::vector<nlohmann::json> levels = _json["Levels"];
+			for (auto& i : levels)
 			{
-				auto node_levels= _worldSettingRoot.child(TEXT("Levels"));
-				for (auto i = node_levels.first_child(); i; i = i.next_sibling())
+				HString levelName = i["Name"];
+				bool bVisibility = i["Visibility"];
+				std::shared_ptr<Level> newLevel;
+
+				auto level_it = std::find_if(_levels.begin(), _levels.end(), [levelName](std::shared_ptr<Level>& l) {
+					return l->GetLevelName() == levelName;
+				});
+				if (level_it != _levels.end())
 				{
-					HString levelName;
-					int Visibility = 0;
-					XMLStream::LoadXMLAttributeString(i, TEXT("Name"), levelName);
-					XMLStream::LoadXMLAttributeInt(i, TEXT("Visibility"), Visibility);
-					std::shared_ptr<Level> newLevel;
+					level_it->get()->_bInitVisibility = bVisibility;
+					level_it->get()->Rename(levelName);
+				}
+				else
+				{
 					newLevel.reset(new Level(this, levelName));
-					newLevel->_bInitVisibility = Visibility > 0 ;
+					newLevel->_bInitVisibility = bVisibility;
 					_levels.push_back(newLevel);
 				}
-				#if IS_EDITOR
-					_editorLevelChanged();
-				#endif
 			}
+			#if IS_EDITOR
+				_editorLevelChanged();
+			#endif
 		}
 	}
 }
@@ -230,11 +240,11 @@ void World::Load(class VulkanRenderer* renderer)
 	cameraComp->OverrideMainCamera();
 #endif
 
-	//-----model--test
-	auto testModel = GameObject::CreateGameObject("Test", _levels[0].get());
-	auto modelComp = testModel->AddComponent<ModelComponent>();
-	modelComp->SetModel(HGUID("c51a01e8-9349-660a-d2df-353a310db461"));
-	ConsoleDebug::printf_endl("Test Model Spawn......");
+	////-----model--test
+	//auto testModel = GameObject::CreateGameObject("Test", _levels[0].get());
+	//auto modelComp = testModel->AddComponent<ModelComponent>();
+	//modelComp->SetModel(HGUID("c51a01e8-9349-660a-d2df-353a310db461"));
+	//ConsoleDebug::printf_endl("Test Model Spawn......");
 }
 
 bool World::ReleaseWorld()
@@ -309,6 +319,24 @@ void World::SetCurrentSelectionLevel(std::weak_ptr<Level> level)
 {
 	_currentSelectionLevel = level;
 }
-
 #endif
 
+nlohmann::json World::ToJson()
+{
+	std::vector<nlohmann::json> levels;
+	levels.resize(_levels.size());
+	for (int i = 0; i < _levels.size(); i++)
+	{
+		levels[i]["Name"] = _levels[i]->GetLevelName().c_str();
+		levels[i]["Visibility"] = _levels[i]->_bInitVisibility;
+	}
+	//
+	_json["WorldName"] = _worldName.c_str();
+	_json["Levels"] = levels;
+	return _json;
+}
+
+void World::FromJson()
+{
+	_json.at("WorldName").get_to(_worldName);
+}
