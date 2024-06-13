@@ -80,7 +80,7 @@ HString FileSystem::GetWorldAbsPath()
     return path;
 }
 
-HString FileSystem::GetRepositoryXMLAbsPath(HString repositoryName)
+HString FileSystem::GetRepositoryConfigAbsPath(HString repositoryName)
 {
     HString contentPath = FileSystem::GetContentAbsPath();
     HString repositoryPath = FileSystem::Append(contentPath, repositoryName);

@@ -200,8 +200,8 @@ void World::Load(class VulkanRenderer* renderer)
 
 	//Create editor only level.
 	_editorLevel.reset(new Level(this, "EditorLevel"));
-	_editorLevel->Load();
 	_editorLevel->_isEditorLevel = true;
+	_editorLevel->Load();
 
 	//create editor camera
 	auto backCamera = GameObject::CreateGameObject("EditorCamera", _editorLevel.get());

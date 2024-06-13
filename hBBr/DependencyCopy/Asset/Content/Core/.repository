@@ -1,26 +1,139 @@
-<?xml version="1.0"?>
-<root>
-	<Item GUID="7e5e05bb-aa1a-f8c0-b08d-b5dde955807b" Type="1" Name="Cube" VPath="Content/Core/Model" Format="fbx" RPath="Model/">
-		<Dep Type="2">b51e2e9a-0985-75e8-6138-fa95efcbab57</Dep>
-	</Item>
-	<Item GUID="8b5fc385-2f6e-611e-415e-d5fa39875e50" Type="1" Name="Plane" VPath="Content/Core/Model" Format="fbx" RPath="Model/">
-		<Dep Type="2">b51e2e9a-0985-75e8-6138-fa95efcbab57</Dep>
-	</Item>
-	<Item GUID="6146e15a-0632-b197-b6f9-b12fc8a16b05" Type="1" Name="Sphere" VPath="Content/Core/Model" Format="fbx" RPath="Model/">
-		<Dep Type="2">b51e2e9a-0985-75e8-6138-fa95efcbab57</Dep>
-	</Item>
-	<Item GUID="c51a01e8-9349-660a-d2df-353a310db461" Type="1" Name="TestFbx_1_Combine" VPath="Content/Core/Model" Format="fbx" RPath="Model/">
-		<Dep Type="2">b51e2e9a-0985-75e8-6138-fa95efcbab57</Dep>
-	</Item>
-	<Item GUID="b51e2e9a-0985-75e8-6138-fa95efcbab57" Type="2" Name="DefaultPBR" VPath="Content/Core/Material" Format="mat" RPath="Material/">
-		<Ref Type="1">7e5e05bb-aa1a-f8c0-b08d-b5dde955807b</Ref>
-		<Ref Type="1">8b5fc385-2f6e-611e-415e-d5fa39875e50</Ref>
-		<Ref Type="1">6146e15a-0632-b197-b6f9-b12fc8a16b05</Ref>
-		<Ref Type="1">c51a01e8-9349-660a-d2df-353a310db461</Ref>
-	</Item>
-	<Item GUID="9eb473e5-6ef2-d6a8-9a31-8f4b26eb9f12" Type="3" Name="T_System_Black" Format="dds" VPath="Content/Core/Texture" RPath="Texture/" />
-	<Item GUID="fa3e3e63-872f-99e3-a126-6ce5b8fedfae" Type="3" Name="T_System_Normal" Format="dds" VPath="Content/Core/Texture" RPath="Texture/" />
-	<Item GUID="69056105-8b40-a3b2-65d4-95ebf2fe28fb" Type="3" Name="T_System_UVGrid" Format="dds" VPath="Content/Core/Texture" RPath="Texture/" />
-	<Item GUID="38c42242-404c-b372-fac8-d0441f2100f8" Type="3" Name="T_System_White" Format="dds" VPath="Content/Core/Texture" RPath="Texture/" />
-	<Item GUID="eb8ac147-e469-f5a3-c48a-5daec8880f1f" Type="3" Name="TestTex" Format="dds" VPath="Content/Core/Texture" RPath="Texture/" />
-</root>
+{
+	"7e5e05bb-aa1a-f8c0-b08d-b5dde955807b": {
+		"Type": 1,
+		"Name": "Cube",
+		"VPath": "Content/Core/Model",
+		"Format": "fbx",
+		"RPath": "Model/",
+		"GUID": "7e5e05bb-aa1a-f8c0-b08d-b5dde955807b",
+		"Dep": [
+			{
+				"Type": 2,
+				"GUID": "b51e2e9a-0985-75e8-6138-fa95efcbab57"
+			}
+		],
+		"Ref": []
+	},
+	"8b5fc385-2f6e-611e-415e-d5fa39875e50": {
+		"Type": 1,
+		"Name": "Plane",
+		"VPath": "Content/Core/Model",
+		"Format": "fbx",
+		"RPath": "Model/",
+		"GUID": "8b5fc385-2f6e-611e-415e-d5fa39875e50",
+		"Dep": [
+			{
+				"Type": 2,
+				"GUID": "b51e2e9a-0985-75e8-6138-fa95efcbab57"
+			}
+		],
+		"Ref": []
+	},
+	"6146e15a-0632-b197-b6f9-b12fc8a16b05": {
+		"Type": 1,
+		"Name": "Sphere",
+		"VPath": "Content/Core/Model",
+		"Format": "fbx",
+		"RPath": "Model/",
+		"GUID": "6146e15a-0632-b197-b6f9-b12fc8a16b05",
+		"Dep": [
+			{
+				"Type": 2,
+				"GUID": "b51e2e9a-0985-75e8-6138-fa95efcbab57"
+			}
+		],
+		"Ref": []
+	},
+	"c51a01e8-9349-660a-d2df-353a310db461": {
+		"Type": 1,
+		"Name": "TestFbx_1_Combine",
+		"VPath": "Content/Core/Model",
+		"Format": "fbx",
+		"RPath": "Model/",
+		"GUID": "c51a01e8-9349-660a-d2df-353a310db461",
+		"Dep": [
+			{
+				"Type": 2,
+				"GUID": "b51e2e9a-0985-75e8-6138-fa95efcbab57"
+			}
+		],
+		"Ref": []
+	},
+	"b51e2e9a-0985-75e8-6138-fa95efcbab57": {
+		"Type": 2,
+		"Name": "DefaultPBR",
+		"VPath": "Content/Core/Material",
+		"Format": "mat",
+		"RPath": "Material/",
+		"GUID": "b51e2e9a-0985-75e8-6138-fa95efcbab57",
+		"Dep": [],
+		"Ref": [
+			{
+				"Type": 1,
+				"GUID": "7e5e05bb-aa1a-f8c0-b08d-b5dde955807b"
+			},
+			{
+				"Type": 1,
+				"GUID": "8b5fc385-2f6e-611e-415e-d5fa39875e50"
+			},
+			{
+				"Type": 1,
+				"GUID": "6146e15a-0632-b197-b6f9-b12fc8a16b05"
+			},
+			{
+				"Type": 1,
+				"GUID": "c51a01e8-9349-660a-d2df-353a310db461"
+			}
+		]
+	},
+	"9eb473e5-6ef2-d6a8-9a31-8f4b26eb9f12": {
+		"Type": 3,
+		"Name": "T_System_Black",
+		"VPath": "Content/Core/Texture",
+		"Format": "dds",
+		"RPath": "Texture/",
+		"GUID": "9eb473e5-6ef2-d6a8-9a31-8f4b26eb9f12",
+		"Dep": [],
+		"Ref": []
+	},
+	"fa3e3e63-872f-99e3-a126-6ce5b8fedfae": {
+		"Type": 3,
+		"Name": "T_System_Normal",
+		"VPath": "Content/Core/Texture",
+		"Format": "dds",
+		"RPath": "Texture/",
+		"GUID": "fa3e3e63-872f-99e3-a126-6ce5b8fedfae",
+		"Dep": [],
+		"Ref": []
+	},
+	"69056105-8b40-a3b2-65d4-95ebf2fe28fb": {
+		"Type": 3,
+		"Name": "T_System_UVGrid",
+		"VPath": "Content/Core/Texture",
+		"Format": "dds",
+		"RPath": "Texture/",
+		"GUID": "69056105-8b40-a3b2-65d4-95ebf2fe28fb",
+		"Dep": [],
+		"Ref": []
+	},
+	"38c42242-404c-b372-fac8-d0441f2100f8": {
+		"Type": 3,
+		"Name": "T_System_White",
+		"VPath": "Content/Core/Texture",
+		"Format": "dds",
+		"RPath": "Texture/",
+		"GUID": "38c42242-404c-b372-fac8-d0441f2100f8",
+		"Dep": [],
+		"Ref": []
+	},
+	"eb8ac147-e469-f5a3-c48a-5daec8880f1f": {
+		"Type": 3,
+		"Name": "TestTex",
+		"VPath": "Content/Core/Texture",
+		"Format": "dds",
+		"RPath": "Texture/",
+		"GUID": "eb8ac147-e469-f5a3-c48a-5daec8880f1f",
+		"Dep": [],
+		"Ref": []
+	}
+}

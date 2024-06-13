@@ -57,7 +57,9 @@ void Level::Load()
 		if (!_bLoad)
 		{
 			_bLoad = true;
-			bool bLoadFileSucceed = LoadJson(_levelAbsPath);
+			bool bLoadFileSucceed = false;
+			if(!_isEditorLevel)
+				bLoadFileSucceed = LoadJson(_levelAbsPath);
 			//
 			if (!bLoadFileSucceed)
 			{

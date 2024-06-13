@@ -23,17 +23,27 @@ bool Serializable::SaveJson(nlohmann::json& json, HString path)
 
 bool Serializable::LoadJson(HString path, nlohmann::json& json)
 {
-    std::ifstream file(path.c_str(), std::ios::in);
-    if (file.is_open())
+    std::ifstream file(path.c_str());
+    if (file)
     {
-        file >>  json ;
+        try 
+        {
+            std::string jsonStr((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            json = nlohmann::json::parse(jsonStr);
+        }
+        catch (const nlohmann::json::parse_error& e)
+        {
+            //ConsoleDebug::print_endl(HString("Failed to read JSON data..") + e.what(), "255,0,0");
+            MessageOut(HString(HString("Failed to read JSON data : \n") + path  + "\n"+ e.what()).c_str(), true, false, "255,0,0");
+            return false;
+        }
         file.close();
         ConsoleDebug::print_endl("JSON data has been read to file.");
         return true;
     }
     else
     {
-        ConsoleDebug::print_endl("Failed to read JSON data..", "255,0,0");
+        MessageOut(HString(HString("Failed to open JSON file : \n") + path ).c_str(), false, false, "255,0,0");
         return false;
     }
 }

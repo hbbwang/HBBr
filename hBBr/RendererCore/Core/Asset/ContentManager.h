@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 #include "RendererType.h"
-#include "pugixml/pugixml.hpp"
+#include "Asset/Serializable.h"
 #include "Asset/HGuid.h"
 #include "HString.h"
 #include "Asset/HGuid.h"
@@ -239,7 +239,7 @@ public:
 
 	/*
 		设置资产的虚拟名字(DIsplayName,非GUID)
-		bSave:是否直接保存到仓库xml里,默认false
+		bSave:是否直接保存到仓库文件里,默认false
 		返回最终的DisplayName
 	*/
 	HBBR_API HString SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo,HString newName,bool bSave = false);
@@ -317,7 +317,7 @@ public:
 	HBBR_API void ReloadRepository(HString repositoryName);
 
 	/* 重载单个资产 */
-	HBBR_API std::weak_ptr<AssetInfoBase> ReloadAsset(pugi::xml_node& assetNode, HString& repositoryName);
+	HBBR_API std::weak_ptr<AssetInfoBase> ReloadAsset(nlohmann::json& assetNode, HString& repositoryName);
 
 	template<class T>
 	HBBR_INLINE std::weak_ptr<T> GetAsset(HGUID guid , AssetType type = AssetType::Unknow)

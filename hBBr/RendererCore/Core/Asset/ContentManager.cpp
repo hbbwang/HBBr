@@ -1,5 +1,4 @@
 ﻿#include "ContentManager.h"
-#include "XMLStream.h"
 #include "FileSystem.h"
 #include "Asset/AssetObject.h"
 #include "Asset/Model.h"
@@ -72,8 +71,7 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 {
 	HString contentPath = FileSystem::GetContentAbsPath();
 	HString repositoryPath = FileSystem::Append(contentPath, repositoryName);
-	HString repositoryXMLPath = FileSystem::Append(repositoryPath,".repository");
-	pugi::xml_document doc;
+	HString repositoryFilePath = FileSystem::Append(repositoryPath,".repository");
 	struct resultFind
 	{
 		HGUID guid;
@@ -85,11 +83,11 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 		guids.reserve(importFiles.size());
 		out->reserve(importFiles.size());
 	}
-	if (XMLStream::LoadXML(repositoryXMLPath.c_wstr(), doc))
+	nlohmann::json json;
+	if(Serializable::LoadJson(repositoryFilePath, json))
 	{
-		auto root = doc.child(TEXT("root"));
-		std::vector<pugi::xml_node> newAssetNode;
-		newAssetNode.reserve(importFiles.size());
+		std::vector<nlohmann::json>newItems;
+		newItems.reserve(importFiles.size());
 		for (auto& i : importFiles)
 		{
 			HString suffix = FileSystem::GetFileExt(i.absAssetFilePath);
@@ -159,45 +157,20 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 			if(type != AssetType::Unknow)
 			{
 				assetTypeName = GetAssetTypeString(type);
-				auto newItem = pugi::xml_node();
-				if (bFound)
-				{
-					bool bFindGUID = false;
-					for (auto n = root.first_child(); n; n = n.next_sibling())
-					{
-						if (guidStr.IsSame(n.attribute(TEXT("GUID")).as_string()))
-						{
-							bFindGUID = true;
-							newItem = XMLStream::CreateXMLNode(root, TEXT("Item"), true);
-						}
-					}
-					if (!bFindGUID)
-					{
-						//仓库文件中没找到该GUID的Item，重新添加一份上去。
-						newItem = XMLStream::CreateXMLNode(root, TEXT("Item"), false);
-					}
-				}
-				else
-				{
-					newItem = XMLStream::CreateXMLNode(root, TEXT("Item"), false);
-				}
-				XMLStream::SetXMLAttribute(newItem,TEXT("GUID"), guidStr.c_wstr());
-				XMLStream::SetXMLAttribute(newItem, TEXT("Type"), (int)type);
-				XMLStream::SetXMLAttribute(newItem, TEXT("Name"), baseName.c_wstr());
-				XMLStream::SetXMLAttribute(newItem, TEXT("Format"), suffix.c_wstr());
-				XMLStream::SetXMLAttribute(newItem, TEXT("VPath"), i.virtualPath.c_wstr());
-				XMLStream::SetXMLAttribute(newItem, TEXT("RPath"), (assetTypeName + "/").c_wstr());
-
-				newAssetNode.push_back(newItem);
-
-				if (!doc.save_file(repositoryXMLPath.c_wstr()))
-				{
-					MessageOut("Save repository xml failed.", false, true, "255,255,0");
-				}
+				auto newItem = nlohmann::json();
+				newItem["Type"] = (int)type;
+				newItem["Name"] = baseName;
+				newItem["Format"] = suffix;
+				newItem["VPath"] = i.virtualPath;
+				newItem["RPath"] = (assetTypeName + "/");
+				newItem["GUID"] = guid;
+				json[guid] = newItem;
+				Serializable::SaveJson(json, repositoryFilePath);
 				resultFind newFind;
 				newFind.guid = guid;
 				newFind.VirtualPath = i.virtualPath;
 				guids.push_back(newFind);
+				newItems.push_back(newItem);
 			}
 			else
 			{
@@ -206,7 +179,7 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 			}
 		}
 		//加载新资产和引用
-		for (auto& i : newAssetNode)
+		for (auto& i : newItems)
 		{
 			auto info = ReloadAsset(i, repositoryName);
 			UpdateAssetReference(info);
@@ -285,36 +258,26 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 			//移除.repository内储存的Item信息
 			HString contentPath = FileSystem::GetContentAbsPath();
 			HString repositoryPath = FileSystem::Append(contentPath, repository);
-			HString repositoryXMLPath = FileSystem::Append(repositoryPath, ".repository");
-			pugi::xml_document doc;
-			if (XMLStream::LoadXML(repositoryXMLPath.c_wstr(), doc))
+			HString repositoryConfigPath = FileSystem::Append(repositoryPath, ".repository");
+			nlohmann::json json;
+			if (Serializable::LoadJson(repositoryConfigPath, json))
 			{
-				auto root = doc.child(TEXT("root"));
-				HGUID guid;
-				for (auto n = root.first_child(); n; n = n.next_sibling())
+				auto jit = json.find(i->guid);
+				if (jit != json.end())
 				{
-					HString guidStr = n.attribute(TEXT("GUID")).as_string();
-					StringToGUID(guidStr.c_str(), &guid);
-					if (guid == i->guid)
+					json.erase(jit);
+					if (!Serializable::SaveJson(json, repositoryConfigPath))
 					{
-						root.remove_child(n);
-						break;
+						MessageOut("[AssetDelete] Save repository failed.", false, true, "255,255,0");
+						continue;
+					}
+					//收集临时共享指针,防止因为earse导致指针释放
+					auto assetIt = _assets[(int)i->type].find(i->guid);
+					if (assetIt != _assets[(int)i->type].end())
+					{
+						assetInfosPtr.push_back(assetIt->second);
 					}
 				}
-				if (!doc.save_file(repositoryXMLPath.c_wstr()))
-				{
-					MessageOut("Save repository xml failed.", false, true, "255,255,0");
-					continue;
-				}
-
-
-				//收集临时共享指针,防止因为earse导致指针释放
-				auto assetIt = _assets[(int)i->type].find(guid);
-				if (assetIt != _assets[(int)i->type].end())
-				{
-					assetInfosPtr.push_back(assetIt->second);
-				}
-
 			}
 		}
 
@@ -428,41 +391,48 @@ void ContentManager::SaveAssetInfo(std::weak_ptr<AssetInfoBase>& assetInfo)
 {
 	if (!assetInfo.expired())
 	{
-		HString repositoryXMLPath = FileSystem::GetRepositoryXMLAbsPath(assetInfo.lock()->repository);
-		pugi::xml_document doc;
-		pugi::xml_node target = pugi::xml_node();
-		if (XMLStream::LoadXML(repositoryXMLPath.c_wstr(), doc))
+		HString repositoryConfigPath = FileSystem::GetRepositoryConfigAbsPath(assetInfo.lock()->repository);
+		nlohmann::json json;
+		if (Serializable::LoadJson(repositoryConfigPath, json))
 		{
-			auto root = doc.child(TEXT("root"));
-			HGUID guid;
-			HString guidStr;
-			for (auto n = root.first_child(); n; n = n.next_sibling())
-			{	
-				guidStr = n.attribute(TEXT("GUID")).as_string();
-				StringToGUID(guidStr.c_str(), &guid);
-				if (guid == assetInfo.lock()->guid)
+			//保存基本属性
+			HString assetTypeName = GetAssetTypeString(assetInfo.lock()->type);
+			nlohmann::json target;
+			target["Type"] = (int)assetInfo.lock()->type;
+			target["Name"] = assetInfo.lock()->displayName;
+			target["VPath"] = assetInfo.lock()->virtualPath;
+			target["Format"] = assetInfo.lock()->suffix;
+			target["RPath"] = (assetTypeName + "/");
+			target["GUID"] = assetInfo.lock()->guid;
+			//保存引用
+			std::vector<nlohmann::json> deps,refs;
+			deps.reserve(assetInfo.lock()->deps.size());
+			refs.reserve(assetInfo.lock()->refs.size());
+			for (auto& i : assetInfo.lock()->deps)
+			{
+				if (!i.expired())
 				{
-					target = n;
-					break;
+					nlohmann::json dep;
+					dep["Type"] = (int)i.lock()->type;
+					dep["GUID"] = i.lock()->guid;
+					deps.push_back(dep);
 				}
 			}
-			if (!target)
+			for (auto& i : assetInfo.lock()->refs)
 			{
-				target = XMLStream::CreateXMLNode(root, TEXT("item"));
+				if (!i.expired())
+				{
+					nlohmann::json ref;
+					ref["Type"] = (int)i.lock()->type;
+					ref["GUID"] = i.lock()->guid;
+					refs.push_back(ref);
+				}
 			}
-			//设置属性,保存XML
-			HString assetTypeName = GetAssetTypeString(assetInfo.lock()->type);
-			XMLStream::SetXMLAttribute(target, TEXT("GUID"), guidStr.c_wstr());
-			XMLStream::SetXMLAttribute(target, TEXT("Type"), (int)assetInfo.lock()->type);
-			XMLStream::SetXMLAttribute(target, TEXT("Name"), assetInfo.lock()->displayName.c_wstr());
-			XMLStream::SetXMLAttribute(target, TEXT("VPath"), assetInfo.lock()->virtualPath.c_wstr());
-			XMLStream::SetXMLAttribute(target, TEXT("Format"), assetInfo.lock()->suffix.c_wstr());
-			XMLStream::SetXMLAttribute(target, TEXT("RPath"), (assetTypeName + "/").c_wstr());
-			if (!doc.save_file(repositoryXMLPath.c_wstr()))
-			{
-				MessageOut("Save repository xml failed.", false, true, "255,255,0");
-			}
-
+			target["Dep"] = deps;
+			target["Ref"] = refs;
+			//输出
+			json[assetInfo.lock()->guid] = target;
+			Serializable::SaveJson(json, repositoryConfigPath);
 			//保存了的资产自动退出Dirty Mark
 			{
 				RemoveDirtyAsset(assetInfo);
@@ -602,23 +572,23 @@ void ContentManager::ReloadRepository(HString repositoryName)
 {
 	HString fullPath = FileSystem::Append(FileSystem::GetContentAbsPath(), repositoryName);
 	HString repositoryConfigPath = FileSystem::Append(fullPath, ".repository");
-	pugi::xml_document doc;
-	XMLStream::LoadXML(repositoryConfigPath.c_wstr(), doc);
-	auto root = doc.child(TEXT("root"));
-	for (pugi::xml_node i = root.first_child(); i; i = i.next_sibling())
+	nlohmann::json json;
+	if (Serializable::LoadJson(repositoryConfigPath, json))
 	{
-		ReloadAsset(i, repositoryName);
+		for (auto& i : json.items())
+		{
+			ReloadAsset(i.value(), repositoryName);
+		}
 	}
 }
 
-std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(pugi::xml_node& i, HString& repositoryName)
+std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(nlohmann::json&i, HString& repositoryName)
 {
 	HString fullPath = FileSystem::GetRepositoryAbsPath(repositoryName);
-	HGUID guid;
-	HString guidStr;
-	XMLStream::LoadXMLAttributeString(i, L"GUID", guidStr);
+	HGUID guid; from_json(i["GUID"], guid);
+	HString guidStr = guid.str();
 	StringToGUID(guidStr.c_str(), &guid);
-	AssetType type = (AssetType)i.attribute(L"Type").as_int();
+	AssetType type = (AssetType)i["Type"];
 	//查看下是否已经加载过AssetInfo了,已经加载过就不需要创建了
 	auto checkExist = GetAssetInfo(guid);
 	bool bExist = !checkExist.expired();
@@ -634,18 +604,18 @@ std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(pugi::xml_node& i, HStr
 	//设置参数
 	info->type = type;
 	info->guid = guid;
-	info->displayName = i.attribute(L"Name").as_string();
-	info->suffix = i.attribute(L"Format").as_string();
-	info->absFilePath = FileSystem::Append(FileSystem::Append(fullPath, i.attribute(L"RPath").as_string()), guidStr) + "." + info->suffix;
+	info->displayName = i["Name"];
+	info->suffix = i["Format"];
+	info->absFilePath = FileSystem::Append(FileSystem::Append(fullPath, i["RPath"]), guidStr) + "." + info->suffix;
 	FileSystem::FixUpPath(info->absFilePath);
-	info->absPath = FileSystem::Append(fullPath, i.attribute(L"RPath").as_string());
+	info->absPath = FileSystem::Append(fullPath, i["RPath"]);
 	FileSystem::FixUpPath(info->absPath);
 	info->assetFilePath = FileSystem::GetRelativePath(info->absFilePath.c_str());
 	FileSystem::FixUpPath(info->assetFilePath);
 	info->assetPath = FileSystem::GetRelativePath(info->absPath.c_str());
 	FileSystem::FixUpPath(info->assetPath);
 	//虚拟路径Virtual Path
-	info->virtualPath = i.attribute(L"VPath").as_string();
+	info->virtualPath = i["VPath"];
 	//FileSystem::FixUpPath(info->virtualPath);
 	info->virtualFilePath = FileSystem::Append(info->virtualPath, info->displayName + "." + info->suffix);
 	info->virtualFilePath.Replace("\\", "/");
@@ -657,26 +627,30 @@ std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(pugi::xml_node& i, HStr
 	UpdateToolTips(info.get());
 
 	//读取引用关系
-	info->depTemps.clear();
-	info->refTemps.clear();
-	for (auto j = i.first_child(); j; j = j.next_sibling())//<Ref>
 	{
-		HGUID subGuid;
-		HString guidText = j.text().as_string();
-		StringToGUID(guidText.c_str(), &guid);
-		uint32_t typeIndex;
-		XMLStream::LoadXMLAttributeUInt(j, L"Type", typeIndex);
-		AssetInfoRefTemp newTemp;
-		newTemp.guid = guid;
-		newTemp.type = (AssetType)typeIndex;
-		//先加载完所有资产信息,再处理引用关系!
-		if (HString("Dep").IsSame(j.name()))
+		std::vector<nlohmann::json>refJsons;
+		refJsons = i["Ref"];
+		for (auto& j : refJsons)
 		{
-			info->depTemps.push_back(newTemp);
-		}
-		else
-		{
+			uint32_t typeIndex = j["Type"];
+			HGUID subGuid; from_json(j["GUID"],subGuid);
+			AssetInfoRefTemp newTemp;
+			newTemp.guid = subGuid;
+			newTemp.type = (AssetType)typeIndex;
 			info->refTemps.push_back(newTemp);
+		}
+	}
+	{
+		std::vector<nlohmann::json>depJsons;
+		depJsons = i["Dep"];
+		for (auto& j : depJsons)
+		{
+			uint32_t typeIndex = j["Type"];
+			HGUID subGuid; from_json(j["GUID"], subGuid);
+			AssetInfoRefTemp newTemp;
+			newTemp.guid = subGuid;
+			newTemp.type = (AssetType)typeIndex;
+			info->depTemps.push_back(newTemp);
 		}
 	}
 

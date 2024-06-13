@@ -1051,7 +1051,8 @@ void ContentBrowser::RefreshFolderOnTreeView()
 		{
 			_treeView->_bSaveSelectionItem = false;
 			_treeView->selectionModel()->clearSelection();
-			_treeView->selectionModel()->setCurrentIndex(firstChoose->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
+			if(firstChoose)
+				_treeView->selectionModel()->setCurrentIndex(firstChoose->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
 		}
 		_treeView->expand(_treeView->currentIndex());
 	}
