@@ -18,38 +18,38 @@ Hbb Renderer.
 
 # 关于第三方引用，在此处说明一下：
 ## 1.assimp        
-这个库不用说，用来作为模型文件导入工具实在是太方便了，强烈推荐。  
-https://github.com/assimp/assimp
+这个库不用说，用来作为模型文件导入工具实在是太方便了，强烈推荐。<br>
+https://github.com/assimp/assimp<br>
 ## 2.crossguid     
-guid库，简单易用，用作唯一识别。  
-https://github.com/graeme-hill/crossguid
+guid库，简单易用，用作唯一识别。<br>
+https://github.com/graeme-hill/crossguid<br>
 ## 3.Imgui         
-渲染器GUI库，著名程度不用多说，大公司做编辑器也会用。  
-https://github.com/ocornut/imgui
+渲染器GUI库，著名程度不用多说，大公司做编辑器也会用。<br>
+https://github.com/ocornut/imgui<br>
 ## 4.lodepng       
-png库，使用简单便捷，不过后面改用英伟达的nvtt了，基本不怎么用到。 
-https://github.com/lvandeve/lodepng
+png库，使用简单便捷，不过后面改用英伟达的nvtt了，基本不怎么用到。 <br>
+https://github.com/lvandeve/lodepng<br>
 ## 5.nlohmann      
-主要是用它的nlohmann/json库，这个json库主要实现序列化数据储存的功能，推荐。  
-https://github.com/nlohmann/json
+主要是用它的nlohmann/json库，这个json库主要实现序列化数据储存的功能，推荐。<br>  
+https://github.com/nlohmann/json<br>
 ## 6.nvtt          
-Nvidia Texture Tools，主要是为了实现图像导入后转为dds的功能，用法也简单。 
-https://developer.nvidia.com/gpu-accelerated-texture-compression
+Nvidia Texture Tools，主要是为了实现图像导入后转为dds的功能，用法也简单。 <br>
+https://developer.nvidia.com/gpu-accelerated-texture-compression<br>
 ## 7.pugixml       
-也是大家常用的xml库，也非常好用，用来存一些数据。不过大概率后面都会换成json了，个人觉得便捷程度不如json。 
-https://github.com/zeux/pugixml
+也是大家常用的xml库，也非常好用，用来存一些数据。不过大概率后面都会换成json了，个人觉得便捷程度不如json。 <br>
+https://github.com/zeux/pugixml<br>
 ## 8.sdl3          
-sdl跨平台窗口库，版本是2，官方定义的3，不过里面部分代码已经不适用2了...不用glfw的原因是它不支持安卓平台。 
-https://github.com/libsdl-org/SDL
+sdl跨平台窗口库，版本是2，官方定义的3，不过里面部分代码已经不适用2了...不用glfw的原因是它不支持安卓平台。 <br>
+https://github.com/libsdl-org/SDL<br>
 ## 9.shaderc       
-shader编译库，其实vulkan sdk里也自带了这个，不用另外下的。 
-https://github.com/google/shaderc
+shader编译库，其实vulkan sdk里也自带了这个，不用另外下的。 <br>
+https://github.com/google/shaderc<br>
 ## 10.stb          
-stb库，主要用到里面stb_truetype，用来实现字体转纹理，给UI用的。 
-https://github.com/nothings/stb/?login=from_csdn
+stb库，主要用到里面stb_truetype，用来实现字体转纹理，给UI用的。 <br>
+https://github.com/nothings/stb/?login=from_csdn<br>
 ## 11.vld          
-用来查内存泄漏的。  
-https://github.com/KindDragon/vld
+用来查内存泄漏的。  <br>
+https://github.com/KindDragon/vld<br>
 ## 12.vulkan      
-把vulkan sdk里的头文件搬过来了，已经忘记为什么要这么干了...好像没啥必要,需要注意的是IOS和安卓的sdk是要另外下的。 
-https://vulkan.lunarg.com/
+把vulkan sdk里的头文件搬过来了，已经忘记为什么要这么干了...好像没啥必要,需要注意的是IOS和安卓的sdk是要另外下的。 <br>
+https://vulkan.lunarg.com/<br>
