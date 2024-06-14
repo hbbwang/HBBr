@@ -572,6 +572,9 @@ QSplitter::handle
 }
 #ContentBrowser_Button
 {
+    width: 140%;
+    height: 40%;
+    margin-left: 2px;
 }
 #ContentBrowser_PathLabel
 {

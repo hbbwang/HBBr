@@ -4,18 +4,16 @@
             {
                 "Class": "ModelComponent",
                 "Index": 0,
-                "Properties": [
-                    {
-                        "Name": "bActive",
-                        "Type": "bool",
-                        "Value": "1"
-                    },
-                    {
-                        "Name": "Model",
+                "Properties": {
+                    "Model": {
                         "Type": "AssetRef",
                         "Value": "Content/Core/Model/TestFbx_1_Combine.fbx"
+                    },
+                    "bActive": {
+                        "Type": "bool",
+                        "Value": "1"
                     }
-                ]
+                }
             }
         ],
         "Name": "Test",
@@ -36,25 +34,24 @@
                 "y": 1.0,
                 "z": 1.0
             }
-        }
+        },
+        "bActive": true
     },
     "d7887ccc-f4a7-4b61-ad9c-698bcd0e1103": {
         "Components": [
             {
                 "Class": "ModelComponent",
                 "Index": 0,
-                "Properties": [
-                    {
-                        "Name": "bActive",
-                        "Type": "bool",
-                        "Value": "1"
-                    },
-                    {
-                        "Name": "Model",
+                "Properties": {
+                    "Model": {
                         "Type": "AssetRef",
                         "Value": "Content/Core/Model/Sphere.fbx"
+                    },
+                    "bActive": {
+                        "Type": "bool",
+                        "Value": "1"
                     }
-                ]
+                }
             }
         ],
         "Name": "Sphere",
@@ -75,6 +72,7 @@
                 "y": 1.0,
                 "z": 1.0
             }
-        }
+        },
+        "bActive": true
     }
 }

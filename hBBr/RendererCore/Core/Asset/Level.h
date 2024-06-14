@@ -59,7 +59,7 @@ private:
 	//bUpdateParameters是否写入参数
 	void SaveGameObject(GameObject* gameObject);
 	void SaveGameObjectTransform(GameObject* gameObject);
-	void SaveGameObjectComponent(GameObject* gameObject);
+	void SaveGameObjectComponents(GameObject* gameObject);
 
 	//请勿要主动使用该函数
 	void AddNewObject(std::shared_ptr<GameObject> newObject);

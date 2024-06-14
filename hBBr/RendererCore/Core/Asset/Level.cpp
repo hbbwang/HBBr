@@ -129,12 +129,12 @@ void Level::Load()
 						{
 							HString className = c["Class"];
 							auto component = object->AddComponent(className);
-							std::vector<nlohmann::json>compPros = c["Properties"];
-							for (auto& p : compPros)
+							nlohmann::json compPros = c["Properties"];
+							for (auto& p : compPros.items())
 							{
-								HString proName = p["Name"];
-								HString proType =  p["Type"];
-								HString proValue = p["Value"];
+								HString proName = p.key();
+								HString proType =  p.value()["Type"];
+								HString proValue = p.value()["Value"];
 								for (auto& pp : component->_compProperties)
 								{
 									if (pp.name == proName && pp.type == proType)
@@ -272,7 +272,7 @@ void Level::SaveGameObject(GameObject* g)
 	//Transform and parent
 	SaveGameObjectTransform(g);
 	//Components
-	SaveGameObjectComponent(g);
+	SaveGameObjectComponents(g);
 	//Save
 	_json[g->_guid.str()] = g->_levelNode;
 }
@@ -291,7 +291,7 @@ void Level::SaveGameObjectTransform(GameObject* g)
 
 }
 
-void Level::SaveGameObjectComponent(GameObject* g)
+void Level::SaveGameObjectComponents(GameObject* g)
 {
 	if (g == nullptr)
 		return;
@@ -302,21 +302,19 @@ void Level::SaveGameObjectComponent(GameObject* g)
 	for (auto c : g->_comps)
 	{
 		nlohmann::json sub;
-		std::vector<nlohmann::json> subPros;
-		subPros.reserve(c->_compProperties.size());
+		nlohmann::json subPros;
 		sub["Index"] = compIndex;
 		sub["Class"] = c->GetComponentName();
 		//Variables
-		for (auto p : c->_compProperties)
+		for (auto& p : c->_compProperties)
 		{
 			nlohmann::json subPro;
 			auto valueStr = Component::PropertyValueToString(p);
 			if (valueStr.Length() > 0)
 			{
-				subPro["Name"] = p.name;
 				subPro["Type"] = p.type;
 				subPro["Value"] = valueStr;
-				subPros.push_back(subPro);
+				subPros[p.name.c_str()] = subPro;
 			}
 		}
 		sub["Properties"] = subPros;
