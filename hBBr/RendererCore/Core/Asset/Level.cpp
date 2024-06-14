@@ -81,8 +81,16 @@ void Level::Load()
 					{
 						HGUID guid(item.key());
 						auto i = item.value();
-						HString name = i["Name"];
+						HString name = "none";
+						bool obj_active = true;
+						auto name_it = i.find("Name");
+						auto obj_active_it = i.find("bActive");
+						if (name_it != i.end())
+							name = name_it.value();
+						if (obj_active_it != i.end())
+							obj_active = obj_active_it.value();
 						GameObject* newObject = new GameObject(name, guid.str(), this);
+						newObject->SetActive(obj_active);
 						newObject->_levelNode = i;
 						if (objs.capacity() < objs.size())
 							objs.reserve(objs.capacity() + 25);
@@ -255,6 +263,7 @@ void Level::SaveGameObject(GameObject* g)
 		return;
 
 	g->_levelNode["Name"] = g->_name;
+	g->_levelNode["bActive"] = g->IsActive();
 	if (g->_parent)
 		g->_levelNode["Parent"] = g->_parent->_guid;
 	else

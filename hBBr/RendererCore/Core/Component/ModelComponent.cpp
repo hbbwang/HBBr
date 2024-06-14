@@ -16,6 +16,8 @@ void ModelComponent::OnConstruction()
 
 void ModelComponent::SetModelByAssetPath(HString virtualPath)
 {
+	if (!_bActive || !_gameObject->IsActive())
+		return;
 	auto info = ContentManager::Get()->GetAssetInfo(virtualPath);
 	if (info.expired())
 		return;
@@ -28,7 +30,7 @@ void ModelComponent::SetModelByAssetPath(HString virtualPath)
 
 void ModelComponent::SetModel(HGUID guid)
 {
-	if (!guid.isValid())
+	if (!guid.isValid() || !_bActive || !_gameObject->IsActive() )
 		return;
 	//create
 	SetModel(Model::LoadAsset(guid));
@@ -36,6 +38,8 @@ void ModelComponent::SetModel(HGUID guid)
 
 void ModelComponent::SetModel(std::weak_ptr<class Model> model)
 {
+	if (!_bActive || !_gameObject->IsActive())
+		return;
 	ClearPrimitves();
 	if (!model.expired())
 	{

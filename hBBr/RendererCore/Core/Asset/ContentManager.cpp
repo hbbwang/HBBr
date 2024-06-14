@@ -163,14 +163,16 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				newItem["Format"] = suffix;
 				newItem["VPath"] = i.virtualPath;
 				newItem["RPath"] = (assetTypeName + "/");
-				newItem["GUID"] = guid;
 				json[guid] = newItem;
 				Serializable::SaveJson(json, repositoryFilePath);
 				resultFind newFind;
 				newFind.guid = guid;
 				newFind.VirtualPath = i.virtualPath;
 				guids.push_back(newFind);
-				newItems.push_back(newItem);
+
+				nlohmann::json newItem_cache;
+				newItem_cache[guid] = newItem;
+				newItems.push_back(newItem_cache);
 			}
 			else
 			{
@@ -403,7 +405,6 @@ void ContentManager::SaveAssetInfo(std::weak_ptr<AssetInfoBase>& assetInfo)
 			target["VPath"] = assetInfo.lock()->virtualPath;
 			target["Format"] = assetInfo.lock()->suffix;
 			target["RPath"] = (assetTypeName + "/");
-			target["GUID"] = assetInfo.lock()->guid;
 			//保存引用
 			std::vector<nlohmann::json> deps,refs;
 			deps.reserve(assetInfo.lock()->deps.size());
@@ -577,15 +578,21 @@ void ContentManager::ReloadRepository(HString repositoryName)
 	{
 		for (auto& i : json.items())
 		{
-			ReloadAsset(i.value(), repositoryName);
+			nlohmann::json child;
+			child[i.key()]= i.value();
+			ReloadAsset(child, repositoryName);
 		}
 	}
 }
 
-std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(nlohmann::json&i, HString& repositoryName)
+std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(nlohmann::json&input, HString& repositoryName)
 {
 	HString fullPath = FileSystem::GetRepositoryAbsPath(repositoryName);
-	HGUID guid; from_json(i["GUID"], guid);
+
+	nlohmann::json i = input.items().begin().value();
+
+	HGUID guid; from_json(input.items().begin().key(), guid);
+
 	HString guidStr = guid.str();
 	StringToGUID(guidStr.c_str(), &guid);
 	AssetType type = (AssetType)i["Type"];

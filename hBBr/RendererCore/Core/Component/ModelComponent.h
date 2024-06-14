@@ -21,7 +21,7 @@ public:
 	//写Hard code之类的就比较适合。
 	HBBR_API void SetModel(HGUID guid);
 
-	HBBR_API void SetModel(std::weak_ptr<class Model> model);
+	HBBR_API virtual void SetModel(std::weak_ptr<class Model> model);
 
 	virtual void GameObjectActiveChanged(bool objActive)override;
 
