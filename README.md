@@ -16,7 +16,7 @@ Hbb Renderer.
 ![PreviewImageCube](/PreviewCube.png) 
 ![PreviewImageCube](/PreviewFBX.png) 
 
-关于第三方引用，在此处说明一下：
+# 关于第三方引用，在此处说明一下：
 1.assimp        这个库不用说，用来作为模型文件导入工具实在是太方便了，强烈推荐。
 ```
 https://github.com/assimp/assimp
