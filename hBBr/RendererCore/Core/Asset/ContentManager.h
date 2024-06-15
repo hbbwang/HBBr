@@ -23,8 +23,9 @@ enum class AssetType : uint32_t
 	Model = 1,			//.fbx
 	Material = 2,		//.mat
 	Texture2D = 3,		//.tex2D
+	TextureCube = 4,
 
-	MaxNum = 4,
+	MaxNum = 5,
 };
 
 
@@ -52,6 +53,7 @@ inline static HString GetAssetTypeString(AssetType type)
 	case AssetType::Model:return "Model";
 	case AssetType::Material:return "Material";
 	case AssetType::Texture2D:return "Texture2D";
+	case AssetType::TextureCube:return "TextureCube";
 	case AssetType::Unknow:
 	case AssetType::MaxNum:	return "Unknow";
 	}
@@ -140,14 +142,14 @@ public:
 	AssetInfo():AssetInfoBase(){}
 	virtual ~AssetInfo() { ReleaseData(); }
 	inline std::weak_ptr<T> GetData()const{
-		if (data)
+		if (data && bAssetLoad)
 		{
 			return data;
 		}
 		return T::LoadAsset(this->guid);
 	}
 	inline std::weak_ptr<class AssetObject> GetAssetData()const override {
-		if (data)
+		if (data && bAssetLoad)
 		{
 			return data;
 		}
@@ -164,7 +166,7 @@ public:
 	}
 private:
 	virtual std::shared_ptr<class AssetObject> GetSharedData()const override {
-		if (GetData().expired())
+		if (GetData().expired() || !bAssetLoad)
 		{
 			T::LoadAsset(this->guid);
 		}

@@ -690,7 +690,7 @@ void Texture2D::CompressionImage2D(const char* imagePath, const char* outputDDS,
 
 	CompressionOptions options;
 	options.setFormat(format);
-	options.setQuality(Quality_Production);
+	options.setQuality(Quality_Normal);
 	if (bAutoFormat)
 	{
 		if (hasAlpha)

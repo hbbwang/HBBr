@@ -131,12 +131,13 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 			if (suffix.IsSame("fbx", false))
 			{
 				type = AssetType::Model;
-				HString savePath = FileSystem::Append(repositoryPath, "Model");
+				assetTypeName = GetAssetTypeString(type);
+				HString savePath = FileSystem::Append(repositoryPath, assetTypeName);
 				savePath = FileSystem::Append(savePath, guidStr + "." + suffix);
 				//复制fbx到项目目录
 				FileSystem::FileCopy(i.absAssetFilePath.c_str(), savePath.c_str());
 			}
-			//----------------------------------------Texture
+			//----------------------------------------Texture2D
 			else if (suffix.IsSame("png", false)
 				|| suffix.IsSame("tga", false)
 				|| suffix.IsSame("jpg", false)
@@ -144,19 +145,23 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				)
 			{
 				type = AssetType::Texture2D;
-				HString savePath = FileSystem::Append(repositoryPath, "Texture");
-
+				assetTypeName = GetAssetTypeString(type);
+				HString savePath = FileSystem::Append(repositoryPath, assetTypeName);
+				savePath = FileSystem::Append(savePath, guidStr + ".dds" );
+				//使用nvtt插件导入dds
+				Texture2D::CompressionImage2D(i.absAssetFilePath.c_str(), savePath.c_str(),true,nvtt::Format_BC7,false);
 			}
 			//----------------------------------------Material
 			else if (suffix.IsSame("mat", false))
 			{
 				//材质球只能在编辑器创建,无法导入
 				type = AssetType::Material;
+				assetTypeName = GetAssetTypeString(type);
+
 			}
 			//导入AssetInfo
 			if(type != AssetType::Unknow)
 			{
-				assetTypeName = GetAssetTypeString(type);
 				auto newItem = nlohmann::json();
 				newItem["Type"] = (int)type;
 				newItem["Name"] = baseName;
@@ -630,34 +635,45 @@ std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(nlohmann::json&input, H
 	//FileSystem::FixUpPath(info->virtualFilePath);
 	info->repository = repositoryName;
 
+	//资产重新导入了，如果资产已经导入过了，就需要卸载掉内存，等待重新导入刷新
+	info->ReleaseData();
+
 	info->toolTips.reserve(20);
 	UpdateToolTips(info.get());
 
 	//读取引用关系
 	{
 		std::vector<nlohmann::json>refJsons;
-		refJsons = i["Ref"];
-		for (auto& j : refJsons)
+		auto ref_it = i.find("Ref");
+		if (ref_it != i.end())
 		{
-			uint32_t typeIndex = j["Type"];
-			HGUID subGuid; from_json(j["GUID"],subGuid);
-			AssetInfoRefTemp newTemp;
-			newTemp.guid = subGuid;
-			newTemp.type = (AssetType)typeIndex;
-			info->refTemps.push_back(newTemp);
+			refJsons = ref_it.value();
+			for (auto& j : refJsons)
+			{
+				uint32_t typeIndex = j["Type"];
+				HGUID subGuid; from_json(j["GUID"], subGuid);
+				AssetInfoRefTemp newTemp;
+				newTemp.guid = subGuid;
+				newTemp.type = (AssetType)typeIndex;
+				info->refTemps.push_back(newTemp);
+			}
 		}
 	}
 	{
 		std::vector<nlohmann::json>depJsons;
-		depJsons = i["Dep"];
-		for (auto& j : depJsons)
+		auto dep_it = i.find("Dep");
+		if (dep_it != i.end())
 		{
-			uint32_t typeIndex = j["Type"];
-			HGUID subGuid; from_json(j["GUID"], subGuid);
-			AssetInfoRefTemp newTemp;
-			newTemp.guid = subGuid;
-			newTemp.type = (AssetType)typeIndex;
-			info->depTemps.push_back(newTemp);
+			depJsons = dep_it.value();
+			for (auto& j : depJsons)
+			{
+				uint32_t typeIndex = j["Type"];
+				HGUID subGuid; from_json(j["GUID"], subGuid);
+				AssetInfoRefTemp newTemp;
+				newTemp.guid = subGuid;
+				newTemp.type = (AssetType)typeIndex;
+				info->depTemps.push_back(newTemp);
+			}
 		}
 	}
 

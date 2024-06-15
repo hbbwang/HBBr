@@ -149,31 +149,67 @@ SceneOutlineTree::SceneOutlineTree(QWidget* parent)
 
     setIndentation(10);
 
-    _menu = new QMenu(this);
-    _createNewGameObject    = new QAction(QString::fromLocal8Bit("创建GameObject"), _menu);
-    _deleteGameObject       = new QAction(QString::fromLocal8Bit("删除"), _menu);
-    _renameGameObject       = new QAction(QString::fromLocal8Bit("重命名"), _menu);
+     setItemDelegate(new SceneOutlineTreeDelegate(this));
 
-    _menu_createBasic = new QMenu(this);
+     _menu = new QMenu(this);
+     _menu_createBasic = new QMenu(this);
+
+    //setRootIsDecorated(false);
+    connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),this,SLOT(ItemDoubleClicked(QTreeWidgetItem*, int)));
+    connect(this, SIGNAL(sigEditFinished(QString)), this, SLOT(ItemEditFinished(QString)));
+    connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(ItemSelectionChanged()));
+   
+    //当Item发生变化
+    connect(this, &QTreeWidget::itemChanged, this, [this](QTreeWidgetItem* item, int column)
+        {
+            SceneOutlineItem* sceneItem = (SceneOutlineItem*)item;
+            if (!sceneItem->_level.expired())
+            {
+                //我们只运行编辑一个Level，不可同时编辑多个
+                for (auto& i : _parent->_levelItems)
+                {
+                    if (i->_level.lock().get() == sceneItem->_level.lock().get() && i->checkState(0) == Qt::Checked)
+                    {
+                        _parent ->_currentLevelItem = sceneItem;
+                        //开启编辑的Level将会自动Load
+                        i->_level.lock()->Load();
+                    }
+                    else
+                    {
+                        i->setCheckState(0, Qt::Unchecked);
+                    }
+                }
+            }
+        });
+}
+
+SceneOutlineItem* SceneOutlineTree::IndexToItem(QModelIndex index)
+{
+    return (SceneOutlineItem*)this->itemFromIndex(index);
+}
+
+void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
+{
+    _menu->clear();
+    _menu_createBasic->clear();
+
+    _createNewGameObject = new QAction(QString::fromLocal8Bit("创建GameObject"), _menu);
+    _deleteGameObject = new QAction(QString::fromLocal8Bit("删除"), _menu);
+    _renameGameObject = new QAction(QString::fromLocal8Bit("重命名"), _menu);
+
     _menu_createBasic->setTitle(QString::fromLocal8Bit("创建预设模型"));
     _createCube = new QAction(QString::fromLocal8Bit("Cube"), _menu_createBasic);
     _createSphere = new QAction(QString::fromLocal8Bit("Sphere"), _menu_createBasic);
     _createPlane = new QAction(QString::fromLocal8Bit("Plane"), _menu_createBasic);
 
     _createNewLevel = new QAction(QString::fromLocal8Bit("生成新的空场景"), _menu_createBasic);
-     _deleteLevel = new QAction(QString::fromLocal8Bit("删除场景"), _menu_createBasic);
-     _renameLevel = new QAction(QString::fromLocal8Bit("场景重命名"), _menu_createBasic);
-     _loadLevel = new QAction(QString::fromLocal8Bit("场景加载"), _menu_createBasic);
-     _unloadLevel = new QAction(QString::fromLocal8Bit("场景卸载"), _menu_createBasic);
-
-     setItemDelegate(new SceneOutlineTreeDelegate(this));
-
-    //setRootIsDecorated(false);
-    connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),this,SLOT(ItemDoubleClicked(QTreeWidgetItem*, int)));
-    connect(this, SIGNAL(sigEditFinished(QString)), this, SLOT(ItemEditFinished(QString)));
-    connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(ItemSelectionChanged()));
-    connect(_createNewGameObject, &QAction::triggered, this, [this](bool bChecked) 
-		{
+    _deleteLevel = new QAction(QString::fromLocal8Bit("删除场景"), _menu_createBasic);
+    _renameLevel = new QAction(QString::fromLocal8Bit("场景重命名"), _menu_createBasic);
+    _loadLevel = new QAction(QString::fromLocal8Bit("场景加载"), _menu_createBasic);
+    _unloadLevel = new QAction(QString::fromLocal8Bit("场景卸载"), _menu_createBasic);
+    //
+    connect(_createNewGameObject, &QAction::triggered, this, [this](bool bChecked)
+        {
             if (VulkanApp::GetMainForm()->renderer)
             {
                 VulkanApp::GetMainForm()->renderer->ExecFunctionOnRenderThread([]()
@@ -181,7 +217,7 @@ SceneOutlineTree::SceneOutlineTree(QWidget* parent)
                         GameObject::CreateGameObject();
                     });
             }
-		});
+        });
     connect(_renameGameObject, &QAction::triggered, this, [this](bool bChecked)
         {
             if (this->currentItem())
@@ -275,39 +311,6 @@ SceneOutlineTree::SceneOutlineTree(QWidget* parent)
                 _parent->_currentLevelItem->setCheckState(0, Qt::Unchecked);
             }
         });
-    //当Item发生变化
-    connect(this, &QTreeWidget::itemChanged, this, [this](QTreeWidgetItem* item, int column)
-        {
-            SceneOutlineItem* sceneItem = (SceneOutlineItem*)item;
-            if (!sceneItem->_level.expired())
-            {
-                //我们只运行编辑一个Level，不可同时编辑多个
-                for (auto& i : _parent->_levelItems)
-                {
-                    if (i->_level.lock().get() == sceneItem->_level.lock().get() && i->checkState(0) == Qt::Checked)
-                    {
-                        _parent ->_currentLevelItem = sceneItem;
-                        //开启编辑的Level将会自动Load
-                        i->_level.lock()->Load();
-                    }
-                    else
-                    {
-                        i->setCheckState(0, Qt::Unchecked);
-                    }
-                }
-            }
-        });
-}
-
-SceneOutlineItem* SceneOutlineTree::IndexToItem(QModelIndex index)
-{
-    return (SceneOutlineItem*)this->itemFromIndex(index);
-}
-
-void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
-{
-    _menu->clear();
-    _menu_createBasic->clear();
     //
     auto item = (SceneOutlineItem*)itemAt(event->pos());
     if (item)
