@@ -5,13 +5,7 @@
 #include "FileSystem.h"
 #include "RendererType.h"
 #include "ContentManager.h"
-
-static const char* DefaultMaterial = 
-"< ? xml version = \"1.0\" encoding = \"UTF - 8\" ? >"
-"<root GUID = \"7117EDF7-FECB-45C3-AB7A-A4DD4A32FFAE\" >"
-"<MaterialPrimitive vsShader = \"PBR\" psShader = \"PBR\" pass = \"0\" / >"
-"</root>"
-;
+#include "Asset/Serializable.h"
 
 Material::Material()
 {
@@ -47,27 +41,25 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		return std::weak_ptr<Material>();
 	}
 
-	pugi::xml_document materialDoc;
+	nlohmann::json json;
 	HString vsFullName;
 	HString psFullName;
-	if (XMLStream::LoadXML(filePath.c_wstr(), materialDoc))
+	if (Serializable::LoadJson(filePath, json))
 	{
 		std::shared_ptr<Material> mat (new Material) ;
-		auto root = materialDoc.child(L"root");
-		auto materialPrim = root.child(L"MaterialPrimitive");
 		//MaterialPrimitive
 		mat->_primitive.reset(new MaterialPrimitive());
 		mat->_assetInfo = dataPtr.get();
 		mat->_primitive->graphicsName = it->second->displayName;
-		XMLStream::LoadXMLAttributeString(materialPrim, L"vsShader", mat->_primitive->vsShader);
-		XMLStream::LoadXMLAttributeString(materialPrim, L"psShader", mat->_primitive->psShader);
+		mat->_primitive->vsShader = json["vsShader"];
+		mat->_primitive->psShader = json["psShader"];
 		uint32_t vs_varient = 0;
 		uint32_t ps_varient = 0;
-		XMLStream::LoadXMLAttributeUInt(materialPrim, L"vsVarient", vs_varient);
-		XMLStream::LoadXMLAttributeUInt(materialPrim, L"psVarient", ps_varient);
+		vs_varient = json["vsVarient"];
+		ps_varient = json["psVarient"];
 		mat->_primitive->graphicsIndex.SetVarient(vs_varient, ps_varient);
-		uint32_t pass;
-		XMLStream::LoadXMLAttributeUInt(materialPrim, L"pass", pass);
+		uint32_t pass = json["pass"];
+
 		mat->_primitive->passUsing = (Pass)pass;
 
 		vsFullName = mat->_primitive->vsShader + "@" + HString::FromUInt(mat->_primitive->graphicsIndex.GetVSVarient());
@@ -75,14 +67,14 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		auto vsCache = Shader::_vsShader[vsFullName];
 		auto psCache = Shader::_psShader[psFullName];
 		mat->_primitive->inputLayout = VertexFactory::VertexInput::BuildLayout(vsCache.header.vertexInput);
+
 		//Parameters
 		{
-			auto parameters = root.child(L"Parameters");
+			nlohmann::json parameters = json["Parameters"];
 			//primitive参数的长度以shader为主
 			mat->_primitive->_paramterInfos.resize(psCache.header.shaderParameterCount);
 			mat->_primitive->uniformBuffer.reserve(psCache.header.shaderParameterCount);
 			//初始化
-			glm::vec4 param = glm::vec4(0);
 			for (int i = 0; i < psCache.header.shaderParameterCount; i++)
 			{
 				mat->_primitive->_paramterInfos[i] = *psCache.pi[i];
@@ -95,16 +87,11 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 					mat->_primitive->uniformBuffer[psCache.pi[i]->arrayIndex][psCache.pi[i]->vec4Index + p] = psCache.pi[i]->value[p];				
 				}
 			}
-			param = glm::vec4(0);
-			int alignmentFloat4 = 0; // float4 对齐
-			uint32_t arrayIndex = 0;
 			int paramIndex = 0;
-			for (auto i = parameters.first_child(); i ; i = i.next_sibling())
+			for (auto& i : parameters.items())
 			{
-				int type;
-				XMLStream::LoadXMLAttributeInt(i, L"type", type);
-				HString matParamName;
-				XMLStream::LoadXMLAttributeString(i, L"name", matParamName);
+				HString matParamName = i.key();
+				int type = i.value()["type"];
 				//从shader中查找是否存在相同参数(名字&类型)
 				auto it = std::find_if(psCache.params.begin(), psCache.params.end(), [type , matParamName](ShaderParameterInfo& info) {
 					return matParamName == info.name && type == (int)info.type;
@@ -117,32 +104,24 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 					//type
 					info.type = (MPType)type;
 					//ui
-					XMLStream::LoadXMLAttributeString(i, L"ui", info.ui);
+					info.ui = i.value()["ui"];
 					//value
-					HString value;
-					XMLStream::LoadXMLAttributeString(i, L"value", value);
-					auto splitValue = value.Split(",");
-					if (alignmentFloat4 + splitValue.size() > 4)//超出部分直接进行填充
+					if (info.type == MPType::Float)
 					{
-						mat->_primitive->uniformBuffer[arrayIndex] = (param);
-						alignmentFloat4 = 0;
-						param = glm::vec4(0);
-						info.arrayIndex = arrayIndex;
-						arrayIndex++;
+						info.arrayIndex;
+						info.vec4Index;
 					}
-					info.vec4Index = alignmentFloat4;
-					for (int i = 0; i < splitValue.size(); i++)
+					else if (info.type == MPType::Float2)
 					{
-						param[alignmentFloat4] = (float)HString::ToDouble(splitValue[i]);
-						alignmentFloat4++;
-						if (alignmentFloat4 >= 4)
-						{
-							mat->_primitive->uniformBuffer[arrayIndex] = (param);
-							alignmentFloat4 = 0;
-							param = glm::vec4(0);
-							info.arrayIndex = arrayIndex;
-							arrayIndex++;
-						}
+
+					}
+					else if (info.type == MPType::Float3)
+					{
+
+					}
+					else if (info.type == MPType::Float4)
+					{
+
 					}
 					mat->_primitive->_paramterInfos[paramIndex] = (info);
 					paramIndex++;
@@ -154,7 +133,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		
 		//Textures
 		{
-			auto textures = root.child(L"Textures");
+			nlohmann::json textures = json["Textures"];
 			int texCount = 0;
 			//primitive参数的长度以shader为主
 			mat->_primitive->_textureInfos.reserve(psCache.header.shaderTextureCount);
@@ -190,12 +169,10 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 				}
 			}
 			//赋值
-			for (auto i = textures.first_child(); i ; i = i.next_sibling())
+			for (auto& i : textures.items())
 			{
-				int type;
-				XMLStream::LoadXMLAttributeInt(i, L"type", type);
-				HString matParamName;
-				XMLStream::LoadXMLAttributeString(i, L"name", matParamName);
+				int type = i.value()["type"];
+				HString matParamName = i.key();
 				//从shader中查找是否存在相同参数(名字&类型)
 				auto it = std::find_if(psCache.texs.begin(), psCache.texs.end(), [type, matParamName](ShaderTextureInfo& info) {
 					return matParamName == info.name && type == (int)info.type;
@@ -214,10 +191,9 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 					//filter
 					info.samplerFilter = it->msFilter;
 					//ui
-					XMLStream::LoadXMLAttributeString(i, L"ui", info.ui);
+					info.ui = i.value()["ui"];
 					//value
-					HString value;
-					XMLStream::LoadXMLAttributeString(i, L"value", value);
+					HString value = i.value()["value"];
 					HGUID guid;
 					StringToGUID(value.c_str(), &guid);
 					if (!guid.isValid())
@@ -253,6 +229,11 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		return dataPtr->GetData();
 	}
 	return std::weak_ptr<Material>();
+}
+
+void Material::SaveAsset(HString path)
+{
+
 }
 
 std::weak_ptr<AssetInfoBase> Material::CreateMaterial(HString repository, HString virtualPath)

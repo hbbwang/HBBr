@@ -53,7 +53,6 @@ SceneOutlineItem::SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<Gam
 
 SceneOutlineItem::~SceneOutlineItem()
 {
-
 }
 
 void SceneOutlineItem::Init(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, SceneOutlineTree* tree)
@@ -573,18 +572,21 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                 //QT5 QTreeWidgetItem 删除了父节点,子节点内存也会更着一起销毁,
                 //会导致object->_editorObject(内存已被删除)获取出现异常,
                 //所以销毁节点之前先把子节点取出，防止冲突。
-                if (item->childCount() > 0)
+                if (item != nullptr)
                 {
-                    if (item->parent())
+                    if (item->childCount() > 0)
                     {
-                        item->parent()->addChildren(item->takeChildren());
+                        if (item->parent())
+                        {
+                            item->parent()->addChildren(item->takeChildren());
+                        }
+                        else
+                        {
+                            _treeWidget->addTopLevelItems(item->takeChildren());
+                        }
                     }
-                    else
-                    {
-                        _treeWidget->addTopLevelItems(item->takeChildren());
-                    }
+                    item->Destroy();
                 }
-                item->Destroy();
             };
             
             for (auto &i : world.lock()->GetLevels())

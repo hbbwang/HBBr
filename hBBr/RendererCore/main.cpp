@@ -23,10 +23,10 @@
 
 #include "main.h"
 
-//#if _DEBUG
-//#include "include/vld.h"
-//#pragma comment(lib ,"vld.lib")
-//#endif
+#if _DEBUG
+#include "include/vld.h"
+#pragma comment(lib ,"vld.lib")
+#endif
 
 std::vector<VulkanForm*> VulkanApp::_forms;
 VulkanForm* VulkanApp::_mainForm = nullptr;
@@ -210,6 +210,8 @@ void VulkanApp::DeInitVulkanManager()
 		}
 		_forms.clear();
 	}
+	//销毁所有世界
+	World::GetWorlds().clear();
 	Shader::DestroyAllShaderCache();
 	PipelineManager::ClearPipelineObjects();
 	ContentManager::Get()->Release();
@@ -233,7 +235,7 @@ bool VulkanApp::UpdateForm()
 		SDL_Window* win = nullptr;
 
 #ifdef IS_EDITOR
-		ImGui_ImplSDL3_ProcessEvent(&event);
+		ImGui_ImplSDL3_ProcessEvent(&event); 
 #endif
 
 		//Get SDL_Window

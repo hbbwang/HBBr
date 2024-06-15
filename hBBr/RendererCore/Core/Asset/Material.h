@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-#define DefaultMaterialGuid "61A147FF-32BD-48EC-B523-57BC75EB16BA"
+#define DefaultMaterialGuid "b51e2e9a-0985-75e8-6138-fa95efcbab57"
 
 class Material :public AssetObject
 {
@@ -19,6 +19,8 @@ public:
 	~Material();
 
 	HBBR_API static std::weak_ptr<Material> LoadAsset(HGUID guid);
+
+	HBBR_API void SaveAsset(HString path);
 
 	HBBR_API static  std::weak_ptr<AssetInfoBase> CreateMaterial(HString repository,HString virtualPath);
 

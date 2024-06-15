@@ -6,11 +6,10 @@
 #include "./Asset/HGuid.h"
 enum class MPType : uint8_t
 {
-	Unknow = 0,
-	Float = 1,
-	Float2 = 2,
-	Float3 = 3,
-	Float4 = 4
+	Float = 0,
+	Float2 = 1,
+	Float3 = 2,
+	Float4 = 3
 };
 
 enum class MTType : uint8_t
