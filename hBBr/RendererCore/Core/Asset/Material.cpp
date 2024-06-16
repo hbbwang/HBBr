@@ -198,7 +198,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 					StringToGUID(value.c_str(), &guid);
 					if (!guid.isValid())
 					{
-						MessageOut(HString(("Material load texture failed : ") + value).c_str(), false, false, "255,0,0");
+						MessageOut((GetInternationalizationText("Renderer","A000020") + value).c_str(), false, false, "255,0,0");
 						Texture2D::GetSystemTexture(it->defaultTexture);
 						mat->_primitive->SetTexture(it->index, Texture2D::GetSystemTexture(it->defaultTexture));
 					}
@@ -274,12 +274,12 @@ std::weak_ptr<AssetInfoBase> Material::CreateMaterial(HString repository, HStrin
 		newInfo.absAssetFilePath = saveFilePath;
 		newInfo.virtualPath = virtualPath;
 		ContentManager::Get()->AssetImport(repository, { newInfo }, &results);
-		MessageOut("Create a new material successful.", false, false, "0,255,0");
+		MessageOut(GetInternationalizationText("Renderer", "A000021").c_str(), false, false, "0,255,0");
 		return results[0];
 	}
 	else
 	{
-		MessageOut("Create material failed.", false, false, "255,0,0");
+		MessageOut(GetInternationalizationText("Renderer", "A000022").c_str(), false, false, "255,0,0");
 	}
 	return std::weak_ptr<AssetInfoBase>();
 }

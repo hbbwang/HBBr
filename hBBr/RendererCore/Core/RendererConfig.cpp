@@ -1,8 +1,9 @@
 ﻿#include "RendererConfig.h"
 #include "Common.h"
 #include "FileSystem.h"
+#include "Serializable.h"
+
 std::unique_ptr<RendererConfig> RendererConfig::_rendererConfig;
-std::map<HString, HString> RendererLauguage::_rendererLauguageItem;
 
 RendererConfig* RendererConfig::Get()
 {
@@ -21,33 +22,25 @@ RendererConfig* RendererConfig::Get()
 	return _rendererConfig.get();
 }
 
-HString RendererLauguage::GetText(HString key)
+HString GetInternationalizationText(HString Group, HString name)
 {
-	if (_rendererLauguageItem.size() <= 0)
+	static nlohmann::json json;
+	if (json.is_null())
 	{
-		HString LauguageFilePath = RendererConfig::Get()->_configFile.child(L"root").child(L"Language").attribute(L"path").as_string();
-		LauguageFilePath = FileSystem::GetRelativePath(LauguageFilePath.c_str());
-		LauguageFilePath = FileSystem::GetProgramPath() + LauguageFilePath;
-		FileSystem::CorrectionPath(LauguageFilePath);
-		pugi::xml_document doc;
-		if (!XMLStream::LoadXML(LauguageFilePath.c_wstr(), doc))
+		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "localization.json", json);
+	}
+	if (!json.is_null())
+	{
+		auto git = json.find(Group.c_str());
+		if (git != json.end())
 		{
-			MessageOut("Fatal error! Load lauguage file error.", true, true);
+			nlohmann::json group= git.value();
+			auto tit = group.find(name.c_str());
+			if (tit != group.end())
+			{
+				return tit.value();
+			}
 		}
-		for (pugi::xml_node node = doc.child(L"root").first_child(); node ; node = node.next_sibling())
-		{
-			HString nodeName = node.name();
-			HString text = node.attribute(L"text").as_string();
-			_rendererLauguageItem.insert(std::make_pair(nodeName , text));
-		}
 	}
-	auto it = _rendererLauguageItem.find(key);
-	if (it != _rendererLauguageItem.end())
-	{
-		return it->second;
-	}
-	else
-	{
-		return HString("???");
-	}
+	return "????";
 }

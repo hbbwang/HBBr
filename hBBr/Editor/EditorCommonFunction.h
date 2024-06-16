@@ -22,3 +22,5 @@ bool SearchFile(QString path, QString searchText, QList<SFileSearch>& ResultOutp
 QImage GetImageFromTGA(QString path);
 
 bool GetPreviewImage(QString resourceFilePath , QPixmap& pixmap);
+
+QString GetEditorInternationalization(QString Group, QString name);

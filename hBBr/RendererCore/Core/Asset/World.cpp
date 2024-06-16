@@ -19,46 +19,37 @@ World::~World()
 	ReleaseWorld();
 }
 
-void World::AddLevel(HString levelNameOrAssetPath)
-{
-	HString path = levelNameOrAssetPath; 
-	//Asset完整路径
-	if (FileSystem::FileExist(path))
-	{
-
-	}
-	else
-	{
-		//Asset相对路径
-		path = FileSystem::FillUpAssetPath(levelNameOrAssetPath);
-		if (FileSystem::FileExist(path))
-		{
-
-		}
-		//Name
-		else
-		{
-			path = FileSystem::Append(_worldAbsPath, levelNameOrAssetPath) + ".level";
-			if (FileSystem::FileExist(path))
-			{
-
-			}
-		}
-	}
-#if IS_EDITOR
-	_editorLevelChanged();
-#endif
-}
-
 void World::AddNewLevel(HString name)
 {
 	std::shared_ptr<Level> newLevel = nullptr;
 	newLevel.reset(new Level(this, name));
 	newLevel->Load();
 	_levels.push_back(newLevel);
+	newLevel->MarkDirty();
 #if IS_EDITOR
 	_editorLevelChanged();
+	MarkDirty();
 #endif
+}
+
+void World::DeleteLevel(HString levelName)
+{
+	//此操作并不会删除.level文件，只会更改World的_levels，等待DirtyAssetsManager里确认保存了才会真正删除保存
+
+	//移除World里面的内存，保存的时候会根据_levels重新写入json
+	auto it = std::remove_if(_levels.begin(), _levels.end(), 
+		[&](std::shared_ptr<Level>& l) {
+			return l->GetLevelName().IsSame(levelName);
+		});
+	if (it != _levels.end())
+	{
+		it->get()->DeleteLevel();
+		_levels.erase(it);
+		//标记需要保存
+		#if IS_EDITOR
+			MarkDirty();
+		#endif
+	}
 }
 
 std::weak_ptr<World> World::CreateNewWorld(HString newWorldName)
@@ -139,11 +130,11 @@ void World::ReloadWorldSetting()
 		if (LoadJson(_worldSettingAbsPath, _json))
 		{
 			_worldName = _json["WorldName"];
-			std::vector<nlohmann::json> levels = _json["Levels"];
-			for (auto& i : levels)
+			nlohmann::json levels = _json["Levels"];
+			for (auto& i : levels.items())
 			{
-				HString levelName = i["Name"];
-				bool bVisibility = i["Visibility"];
+				HString levelName = i.key();
+				bool bVisibility = i.value()["Visibility"];
 				std::shared_ptr<Level> newLevel;
 
 				auto level_it = std::find_if(_levels.begin(), _levels.end(), [levelName](std::shared_ptr<Level>& l) {
@@ -319,16 +310,25 @@ void World::SetCurrentSelectionLevel(std::weak_ptr<Level> level)
 {
 	_currentSelectionLevel = level;
 }
+
+void World::MarkDirty()
+{
+	auto lit = _worlds.find(GetWorldName());
+	if (lit != _worlds.end())
+		AddDirtyWorld(lit->second);
+}
+
 #endif
 
 nlohmann::json World::ToJson()
 {
-	std::vector<nlohmann::json> levels;
-	levels.resize(_levels.size());
+	nlohmann::json levels;
 	for (int i = 0; i < _levels.size(); i++)
 	{
-		levels[i]["Name"] = _levels[i]->GetLevelName().c_str();
-		levels[i]["Visibility"] = _levels[i]->_bInitVisibility;
+		nlohmann::json subLevel;
+		subLevel["Visibility"] = _levels[i]->_bLoad;
+
+		levels[_levels[i]->GetLevelName().c_str()] = subLevel;
 	}
 	//
 	_json["WorldName"] = _worldName.c_str();
@@ -338,5 +338,4 @@ nlohmann::json World::ToJson()
 
 void World::FromJson()
 {
-	_json.at("WorldName").get_to(_worldName);
 }

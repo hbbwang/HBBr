@@ -6,6 +6,7 @@
 #include "Asset/Texture2D.h"
 #include "Asset/Level.h"
 #include "Asset/World.h"
+#include "RendererConfig.h"
 std::unique_ptr<ContentManager> ContentManager::_ptr;
 std::vector<std::weak_ptr<AssetInfoBase>> ContentManager::_dirtyAssets;
 ContentManager::ContentManager()
@@ -212,13 +213,14 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 	bool bSure = true;
 	if (messageBox)
 	{
-		MessageOut("You are deleting assets, are you sure?");
+		MessageOut(GetInternationalizationText("Renderer", "A000017").c_str());
 		HString msg;
 		for (auto& i : assetInfos)
 		{
 			msg += i->virtualFilePath + "\n";
 		}
-		msg = HString("You are deleting assets, are you sure?\nPlease check the asset reference relationship before deleting.\n\n") + msg;
+		
+		msg = GetInternationalizationText("Renderer", "A000018") + " \n\n " + msg;
 		SDL_MessageBoxButtonData buttons[] = {
 			{ SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 1, "Cancel" },
 			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 0, "Contunue" },
@@ -275,7 +277,7 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 					json.erase(jit);
 					if (!Serializable::SaveJson(json, repositoryConfigPath))
 					{
-						MessageOut("[AssetDelete] Save repository failed.", false, true, "255,255,0");
+						MessageOut(GetInternationalizationText("Renderer", "A000019").c_str(), false, true, "255,255,0");
 						continue;
 					}
 					//收集临时共享指针,防止因为earse导致指针释放

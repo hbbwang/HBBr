@@ -2,7 +2,7 @@
 #include "FileSystem.h"
 #include <iostream>
 #include <fstream>
-
+#include "RendererConfig.h"
 #include "AndroidCommon.h"
 
 namespace fs = std::filesystem;
@@ -145,7 +145,7 @@ uint32_t FileSystem::GetPathFileNum(const char* path)
 {
     if (!fs::exists(path))
     {
-        MessageOut("Get Files By Suffix Failed.Path is not exists.", false, true);
+        MessageOut(GetInternationalizationText("Renderer", "A000016").c_str(), false, true);
         return 0;
     }
     uint32_t count = 0;
@@ -197,7 +197,7 @@ bool FileSystem::CreateDir(const char* path)
     {
         if (!result)
         {
-            MessageOut("[CreateDir]Dir exist.", false, false, "255,255,0");
+            MessageOut(GetInternationalizationText("Renderer","A000014").c_str(), false, false, "255,255,0");
         }
     }
     return result;
@@ -341,8 +341,8 @@ HString FileSystem::GetFileExt(HString path)
 std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char* suffix)
 {
     if (!fs::is_directory(path))
-    {
-        MessageOut("Get Files By Suffix Failed.Path is not exists.",false,false);
+    { 
+        MessageOut(GetInternationalizationText("Renderer", "A000015").c_str(),false,false);
         return {};
     }
     std::vector<FileEntry> result;
@@ -381,7 +381,7 @@ std::vector<FileEntry> FileSystem::GetAllFilesExceptFolders(const char* path)
 {
     if (!fs::is_directory(path))
     {
-        MessageOut("Get Files By Suffix Failed.Path is not exists.", false, false);
+        MessageOut(GetInternationalizationText("Renderer", "A000015").c_str(), false, false);
         return {};
     }
     std::vector<FileEntry> result;
@@ -419,7 +419,7 @@ std::vector<FileEntry> FileSystem::GetAllFolders(const char* path, bool currentD
 {
     if (!fs::is_directory(path))
     {
-        MessageOut("Get Files By Suffix Failed.Path is not exists.", false, false);
+        MessageOut(GetInternationalizationText("Renderer", "A000015").c_str(), false, false);
         return {};
     }
     std::vector<FileEntry> result;

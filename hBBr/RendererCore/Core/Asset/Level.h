@@ -26,6 +26,8 @@ public:
 
 	HBBR_API GameObject* FindGameObjectByGUID(HGUID guid);
 
+	HBBR_API HString GetLevelAbsPath()const { return _levelAbsPath; }
+
 	//Load level
 	HBBR_API void Load();
 
@@ -42,6 +44,46 @@ public:
 	}
 
 	HBBR_API class World* GetWorld()const { return _world; }
+
+#if IS_EDITOR
+
+	HBBR_API void DeleteLevel(bool bImmediately = false);
+
+	HBBR_API void MarkDirty();
+
+	static std::vector<std::weak_ptr<Level>> _dirtyLevels;
+	HBBR_API static std::vector<std::weak_ptr<Level>> GetDirtyLevels() { return _dirtyLevels; }
+	bool bDirtySelect = true;
+	std::vector<std::function<void()>> dirtyFunc;
+	HBBR_API  std::vector<std::function<void()>> GetDirtyFunc() { return dirtyFunc; }
+	HBBR_API  bool IsDirtySelect() { return bDirtySelect; }
+	HBBR_API  void SetDirtySelect(bool input) { bDirtySelect = input; }
+	HBBR_API static void AddDirtyLevel(std::weak_ptr<Level> dirtyLevel)
+	{
+		auto it = std::find_if(_dirtyLevels.begin(), _dirtyLevels.end(), [dirtyLevel](std::weak_ptr<Level>& w) {
+			return !w.expired() && !dirtyLevel.expired() && w.lock().get() == dirtyLevel.lock().get() && w.lock()->GetLevelName() == dirtyLevel.lock()->GetLevelName();
+		});
+		if (it == _dirtyLevels.end())
+		{
+			_dirtyLevels.push_back(dirtyLevel);
+		}
+	}
+	HBBR_API static void RemoveDirtyLevel(std::weak_ptr<Level> dirtyLevel)
+	{
+		auto it = std::remove_if(_dirtyLevels.begin(), _dirtyLevels.end(), [dirtyLevel](std::weak_ptr<Level>& w) {
+			return !w.expired() && !dirtyLevel.expired() && w.lock().get() == dirtyLevel.lock().get();
+			});
+		if (it != _dirtyLevels.end())
+		{
+			_dirtyLevels.erase(it);
+		}
+	}
+	HBBR_API static void ClearDirtyLevels()
+	{
+		_dirtyLevels.clear();
+	}
+
+#endif
 
 private:
 

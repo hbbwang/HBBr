@@ -68,10 +68,10 @@ VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrows
 	{
 		setContextMenuPolicy(Qt::ContextMenuPolicy::DefaultContextMenu);
 		_contextMenu = new QMenu(this);
-		QAction* importAssets = new QAction("Import Assets", _contextMenu);
-		QAction* createFolder = new QAction("Create Folder", _contextMenu);
-		QAction* deleteFile = new QAction("Delete Folder", _contextMenu);
-		QAction* rename = new QAction("Rename", _contextMenu);
+		QAction* importAssets = new QAction(GetEditorInternationalization("ContentBrowser","ImportAssets"), _contextMenu);
+		QAction* createFolder = new QAction(GetEditorInternationalization("ContentBrowser", "CreateFolder"), _contextMenu);
+		QAction* deleteFile = new QAction(GetEditorInternationalization("ContentBrowser", "DeleteFolder"), _contextMenu);
+		QAction* rename = new QAction(GetEditorInternationalization("ContentBrowser", "Rename"), _contextMenu);
 		_contextMenu->addAction(importAssets);
 		_contextMenu->addAction(createFolder);
 		_contextMenu->addAction(rename);
@@ -245,7 +245,7 @@ void VirtualFolderTreeView::currentChanged(const QModelIndex& current, const QMo
 		{
 			text = "/" + text;
 		}
-		text = "Asset" + text.replace("/", " - ");
+		text = "Asset" + text.replace("/", " / ");
 		_contentBrowser->ui.PathLabel->setText(text);
 
 		if (_bSaveSelectionItem || _newSelectionItems.size() <=0 )//第一个目录记一下
@@ -513,12 +513,12 @@ VirtualFileListView::VirtualFileListView(class  ContentBrowser* contentBrowser, 
 	{
 		setContextMenuPolicy(Qt::ContextMenuPolicy::DefaultContextMenu);
 		_contextMenu = new QMenu(this);
-		QAction* importAssets = new QAction("Import Assets",_contextMenu);
+		QAction* importAssets = new QAction(GetEditorInternationalization("ContentBrowser", "ImportAssets"),_contextMenu);
 		_contextMenu->addAction(importAssets);
 		{
 			QMenu* createFile = new QMenu("Create", _contextMenu);
 			_contextMenu->addMenu(createFile);
-			QAction* createMaterial = new QAction("Create Material", createFile);
+			QAction* createMaterial = new QAction(GetEditorInternationalization("ContentBrowser", "CreateMaterialInstance"), createFile);
 			createFile->addAction(createMaterial);
 			ActionConnect(createMaterial, [this]()
 				{
@@ -537,8 +537,8 @@ VirtualFileListView::VirtualFileListView(class  ContentBrowser* contentBrowser, 
 					repositorySelection->exec();
 				});
 		}
-		QAction* deleteFile = new QAction("Delete", _contextMenu);
-		QAction* rename = new QAction("Rename", _contextMenu);
+		QAction* deleteFile = new QAction(GetEditorInternationalization("ContentBrowser", "DeleteFile"), _contextMenu);
+		QAction* rename = new QAction(GetEditorInternationalization("ContentBrowser", "Rename"), _contextMenu);
 		_contextMenu->addAction(rename);
 		_contextMenu->addSeparator();
 		_contextMenu->addAction(deleteFile);
@@ -863,14 +863,23 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	ui.ContentBrowserVBoxLayout->setSpacing(1);
 	ui.ContentBrowserVBoxLayout->setContentsMargins(1, 1, 1, 1);
 
+	ui.horizontalLayout_2->setObjectName("ContentBrowser");
+	ui.horizontalLayout_2->setSizeConstraint(QLayout::SetMinimumSize);
+
 	ui.ImportButton->setObjectName("ContentBrowser_Button");
 	ui.FrontspaceButton->setObjectName("ContentBrowser_Button");
 	ui.BackToParentButton->setObjectName("ContentBrowser_Button");
 	ui.BackspaceButton->setObjectName("ContentBrowser_Button");
 	ui.SaveButton->setObjectName("ContentBrowser_Button");
+	ui.OptionButton->setObjectName("ContentBrowser_Button");
 
-	ui.horizontalLayout_2->setObjectName("ContentBrowser");
-	
+	ui.ImportButton->setMinimumWidth(1);
+	ui.SaveButton->setMinimumWidth(1);
+	ui.BackToParentButton->setMinimumWidth(1);
+	ui.BackspaceButton->setMinimumWidth(1);
+	ui.FrontspaceButton->setMinimumWidth(1);
+	ui.OptionButton->setMinimumWidth(1);
+
 	_splitterBox = new QSplitter(Qt::Horizontal, this);
 	_splitterBox->setObjectName("ContentBrowser_Splitter");
 	//
@@ -897,7 +906,7 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	
 	//Path label
 	ui.PathLabel->setObjectName("ContentBrowser_PathLabel");
-	ui.PathLabel->setText("Asset -");
+	ui.PathLabel->setText("Asset /");
 
 	_contentBrowser.append(this);
 	//Connect
@@ -910,11 +919,11 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 		}
 	});
 	//资产导入按钮
-	connect(ui.ImportButton, &QPushButton::clicked, this, [this]() {
+	connect(ui.ImportButton, &QAbstractButton::clicked, this, [this]() {
 		ImportAssets();
 	}); 
 	//回到下一个文件夹 →
-	connect(ui.FrontspaceButton, &QPushButton::clicked, this, [this]() {
+	connect(ui.FrontspaceButton, &QAbstractButton::clicked, this, [this]() {
 		if (_treeView->_newSelectionItems.size() > 0 && _treeView->_currentSelectionItem > 0)
 		{
 			_treeView->_currentSelectionItem--;
@@ -931,7 +940,7 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 		}
 	});
 	//回到上一个文件夹 ←
-	connect(ui.BackspaceButton, &QPushButton::clicked, this, [this]() {
+	connect(ui.BackspaceButton, &QAbstractButton::clicked, this, [this]() {
 		if (_treeView->_newSelectionItems.size() > 0 && _treeView->_newSelectionItems.size() > _treeView->_currentSelectionItem + 1)
 		{
 			_treeView->_currentSelectionItem++;
@@ -948,7 +957,7 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 		}
 	});
 	//回到当前的父文件夹 ↑
-	connect(ui.BackToParentButton, &QPushButton::clicked, this, [this]() {
+	connect(ui.BackToParentButton, &QAbstractButton::clicked, this, [this]() {
 		if (_treeView->currentIndex().isValid())
 		{ 
 			if (_treeView->_newSelectionItems.size() > 0 && _treeView->_newSelectionItems.size() > _treeView->_currentSelectionItem + 1)
@@ -966,16 +975,16 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 		}
 	});
 	//保存按钮
-	connect(ui.SaveButton, &QPushButton::clicked, this, [this]() {
+	connect(ui.SaveButton, &QAbstractButton::clicked, this, [this]() {
 		EditorMain::_self->ShowDirtyAssetsManager();
 	});
 	//设置选项
 	//ui.OptionButton->setIcon(QIcon((FileSystem::GetConfigAbsPath() + "Theme/Icons/ICON_OPTION.png").c_str()));
-	_refreshContentBrowser = new QAction("Refresh content browser", this);
+	_refreshContentBrowser = new QAction(GetEditorInternationalization("ContentBrowser", "RefreshContentBrowser"), this);
 	ActionConnect(_refreshContentBrowser, [this]() { ContentBrowser::RefreshContentBrowsers(); });
 	_cbOptionMenu = new QMenu(this);
 	_cbOptionMenu->addAction(_refreshContentBrowser);
-	connect(ui.OptionButton, &QToolButton::clicked, this, [&, this]()
+	connect(ui.OptionButton, &QAbstractButton::clicked, this, [&, this]()
 		{
 			auto pos = QPoint(0, 0 + ui.OptionButton->height());
 			pos = ui.OptionButton->mapToGlobal(pos);

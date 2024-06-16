@@ -21,6 +21,12 @@ bool Serializable::SaveJson(nlohmann::json& json, HString path)
     }
 }
 
+std::string gbk_to_utf8(const std::string& in) {
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+    std::wstring wide_str = conv.from_bytes(in);
+    return conv.to_bytes(wide_str);
+}
+
 bool Serializable::LoadJson(HString path, nlohmann::json& json)
 {
     std::ifstream file(path.c_str());
@@ -30,8 +36,8 @@ bool Serializable::LoadJson(HString path, nlohmann::json& json)
         try
         {
 #endif
-            std::string jsonStr((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-            json = nlohmann::json::parse(jsonStr);
+            //std::string jsonStr((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            file >> json;
 #if  _DEBUG
         }
         catch (const nlohmann::json::parse_error& e)

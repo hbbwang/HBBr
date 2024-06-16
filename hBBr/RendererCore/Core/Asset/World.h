@@ -33,12 +33,9 @@ public:
 
 	HBBR_API HBBR_INLINE std::vector<std::shared_ptr<Level>> GetLevels()const { return _levels; }
 
-	//参数可以支持两种形式：
-	// 1.Level名称,会在World目录下查找是否存在该Level
-	// 2.根据Asset相对路径(Asset/World/aaa.world/bbb.level)
-	HBBR_API void AddLevel(HString levelNameOrAssetPath);
-
 	HBBR_API void AddNewLevel(HString name);
+
+	HBBR_API void DeleteLevel(HString levelName);
 
 	HBBR_API const HGUID GetGUID()const { return _guid; }
 
@@ -77,17 +74,16 @@ public:
 	std::shared_ptr<Level> _editorLevel;
 
 	void SetCurrentSelectionLevel(std::weak_ptr<Level> level);
-
+	HBBR_API void MarkDirty();
 	static std::vector<std::weak_ptr<World>> _dirtyWorlds;
 	HBBR_API static std::vector<std::weak_ptr<World>> GetDirtyWorlds() { return _dirtyWorlds; }
-	bool bDirtySelect;
+	bool bDirtySelect = true;
 	HBBR_API  bool IsDirtySelect() { return bDirtySelect; }
 	HBBR_API  void SetDirtySelect(bool input) { bDirtySelect = input; }
-
 	HBBR_API static void AddDirtyWorld(std::weak_ptr<World> dirtyWorld)
 	{
 		auto it = std::find_if(_dirtyWorlds.begin(), _dirtyWorlds.end(), [dirtyWorld](std::weak_ptr<World>& w) {
-			return !w.expired() && dirtyWorld.expired() && w.lock().get() == dirtyWorld.lock().get();
+			return !w.expired() && !dirtyWorld.expired() && w.lock().get() == dirtyWorld.lock().get() && w.lock()->GetWorldName()== dirtyWorld.lock()->GetWorldName();
 		});
 		if (it == _dirtyWorlds.end())
 		{
@@ -97,7 +93,7 @@ public:
 	HBBR_API static void RemoveDirtyWorld(std::weak_ptr<World> dirtyWorld)
 	{
 		auto it = std::remove_if(_dirtyWorlds.begin(), _dirtyWorlds.end(), [dirtyWorld](std::weak_ptr<World>& w) {
-			return !w.expired() && dirtyWorld.expired() && w.lock().get() == dirtyWorld.lock().get();
+			return !w.expired() && !dirtyWorld.expired() && w.lock().get() == dirtyWorld.lock().get();
 			});
 		if (it != _dirtyWorlds.end())
 		{

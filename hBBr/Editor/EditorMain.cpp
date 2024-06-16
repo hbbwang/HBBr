@@ -121,7 +121,7 @@ void EditorMain::UpdateRender()
 
 void EditorMain::ShowDirtyAssetsManager()
 {
-    if (ContentManager::Get()->GetDirtyAssets().size() > 0)
+    if (ContentManager::Get()->GetDirtyAssets().size() + World::GetDirtyWorlds().size() + Level::GetDirtyLevels().size() > 0)
     {
         auto dirtyAssetsManager = new DirtyAssetsManager(this);
         //if (ContentManager::Get()->GetDirtyAssets().size > 0)

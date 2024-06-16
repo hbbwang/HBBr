@@ -4,6 +4,8 @@
 #include "XMLStream.h"
 #include "Component/Component.h"
 
+std::vector<std::weak_ptr<Level>> Level::_dirtyLevels;
+
 Level::Level(class World* world, HString name)
 {
 	_levelName = name.ClearSpace();
@@ -195,6 +197,41 @@ void Level::SaveLevel()
 		SaveGameObject(g.get());
 	}
 	SaveJson(_levelAbsPath);
+}
+
+void Level::DeleteLevel(bool bImmediately)
+{
+	auto lit = std::find_if(_world->_levels.begin(), _world->_levels.end(), [this](std::shared_ptr<Level>& l) {
+		return l->GetLevelName() == this->GetLevelName();
+		});
+	if (lit != _world->_levels.end())
+		AddDirtyLevel(*lit);
+	auto func =
+	[this]()
+	{
+		nlohmann::json levels =  _world->_json["Levels"];
+		//移除Json的level数据
+		auto jit = levels.find(_levelName.c_str());
+		if (jit != levels.end())
+		{
+			_world->_json["Levels"].erase(_levelName.c_str());
+		}
+		//删除level文件
+		FileSystem::FileRemove(_levelAbsPath.c_str());
+	};
+	if (!bImmediately)
+		dirtyFunc.push_back(func);
+	else
+		func();
+}
+
+void Level::MarkDirty()
+{
+	auto lit = std::find_if(_world->_levels.begin(), _world->_levels.end(), [this](std::shared_ptr<Level>& l) {
+		return l && l->GetLevelName() == this->GetLevelName();
+		});
+	if (lit != _world->_levels.end())
+		AddDirtyLevel(*lit);
 }
 
 void Level::LevelUpdate()

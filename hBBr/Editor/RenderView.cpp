@@ -30,7 +30,7 @@ RenderView::RenderView(QWidget* parent)
 	//不须要默认的Qt背景
 	setAttribute(Qt::WA_NoSystemBackground, true);
 	//重绘时，绘制全部像素
-	setAttribute(Qt::WA_OpaquePaintEvent, true);
+	//setAttribute(Qt::WA_OpaquePaintEvent, true);
 
 	setObjectName("RenderView");
 
@@ -46,35 +46,6 @@ RenderView::RenderView(QWidget* parent)
 		//实在不行就麻烦一点把QEvent解析成SDL的按键传过去...
 		//_mainRenderer = VulkanApp::InitVulkanManager(false, true, nullptr);
 		hwnd = (HWND)VulkanApp::GetWindowHandle(_mainRenderer);
-		//{
-		//	auto mainRendererWindow = QWindow::fromWinId((WId)hwnd);
-		//	_mainRendererWidget = QWidget::createWindowContainer(mainRendererWindow, this);
-		//	_mainRendererWidget->setFocusPolicy(Qt::StrongFocus);
-		//	_mainRendererWidget->setObjectName("RenderView");
-		//}
-
-
-		//auto dropFunc = [](VulkanForm *from, HString file) {
-		//	//QMessageBox::information(0, from->name.c_str(), file.c_str(),0);
-		//	ConsoleDebug::printf_endl(" [%s]Drop File : %s", from->name.c_str(), file.c_str());
-		//	auto mainForm = VulkanApp::GetMainForm();
-		//	if (from->renderer == mainForm->renderer && from->renderer->GetWorld())
-		//	{
-		//		auto assetInfo = ContentManager::Get()->GetAssetInfo(file);
-		//		if (!assetInfo.expired())
-		//		{
-		//			GameObject* newObject = from->renderer->GetWorld()->SpawnGameObject(assetInfo.lock()->displayName);
-		//			if (newObject)
-		//			{
-		//				auto modelComp = newObject->AddComponent<ModelComponent>();
-		//				modelComp->SetModelByAssetPath(assetInfo.lock()->assetFilePath);
-		//				newObject->SetObjectName(assetInfo.lock()->displayName);
-		//			}
-		//		}
-		//	}
-		//};
-		//VulkanApp::AddDropCallback(dropFunc);
-		
 	}
 }
 
@@ -210,6 +181,9 @@ void RenderView::dropEvent(QDropEvent* e)
                                     level = EditorMain::_self->_sceneOutline->_currentLevelItem->_level.lock().get();
                                 }
                                 auto gameObject = _mainRenderer->renderer->GetWorld()->SpawnGameObject(name, level);
+
+                                level->MarkDirty();
+
                                 if (gameObject)
                                 {
                                     auto modelComp = gameObject->AddComponent<ModelComponent>();

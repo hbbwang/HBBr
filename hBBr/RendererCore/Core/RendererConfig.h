@@ -18,16 +18,5 @@ private :
 
 };
 
-class RendererLauguage
-{
-
-public:
-
-	static HString GetText(HString key);
-
-private:
-
-	static std::map<HString, HString> _rendererLauguageItem;
-
-};
+HString GetInternationalizationText(HString Group, HString name);
 

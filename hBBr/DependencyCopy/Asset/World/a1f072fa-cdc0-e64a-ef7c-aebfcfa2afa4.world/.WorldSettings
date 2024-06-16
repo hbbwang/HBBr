@@ -1,9 +1,11 @@
 {
-    "Levels": [
-        {
-            "Name": "Main",
+    "Levels": {
+        "Main": {
             "Visibility": true
+        },
+        "NewLevel": {
+            "Visibility": false
         }
-    ],
+    },
     "WorldName": "TestWorld"
 }

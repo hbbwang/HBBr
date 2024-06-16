@@ -1,0 +1,25 @@
+{
+    "SceneOutline":{
+        "CreateNewGameObject": "生成新的GameObject",
+        "DeleteGameObject":"删除",
+        "RenameGameObject":"重命名",
+        "CreateBasicGameObject":"预设创建",
+        "CreateCube":"创建Cube",
+        "CreateSphere":"创建Sphere",
+        "CreatePlane":"创建Plane",
+        "CreateNewLevel":"创建新场景",
+        "DeleteLevel":"删除场景",
+        "RenameLevel":"重命名场景",
+        "LoadLevel":"加载场景",
+        "UnloadLevel":"卸载场景"
+    },
+    "ContentBrowser":{
+        "ImportAssets":"导入资产",
+        "CreateFolder":"创建新的目录",
+        "DeleteFolder":"删除目录",
+        "DeleteFile":"删除文件",
+        "Rename":"目录重命名",
+        "CreateMaterialInstance":"创建材质实例",
+        "RefreshContentBrowser":"刷新内容浏览器"
+    }
+}

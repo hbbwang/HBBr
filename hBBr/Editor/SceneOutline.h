@@ -39,7 +39,7 @@ public:
     QList<std::weak_ptr<GameObject>> GetSelectionObjects();
     QList<std::weak_ptr<Level>> GetSelectionLevels();
     class SceneOutline* _parent = nullptr;
-
+    SceneOutlineItem* _mouse_select_item = nullptr;
     SceneOutlineItem* IndexToItem(QModelIndex index);
 protected:
 

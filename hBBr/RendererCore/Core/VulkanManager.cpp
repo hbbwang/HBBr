@@ -118,7 +118,7 @@ VulkanManager::VulkanManager(bool bDebug)
 	}
 #endif
 	ConsoleDebug::print_endl("hBBr:InitVulkan");
-	ConsoleDebug::print_endl(RendererLauguage::GetText("T000000"));
+	ConsoleDebug::print_endl(GetInternationalizationText("Renderer", "T000000"));
 
 	_bDebugEnable = false;
 	_graphicsQueueFamilyIndex = -1;
@@ -333,10 +333,10 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 
 	VkResult result = vkCreateInstance(&createInfo, VK_NULL_HANDLE, &_instance);
 	if (result == VK_ERROR_INCOMPATIBLE_DRIVER) {
-		MessageOut( RendererLauguage::GetText("A000000").c_str() , false, true);
+		MessageOut(GetInternationalizationText("Renderer", "A000000").c_str(), false, true);
 	}
 	else if (result != VK_SUCCESS) {
-		MessageOut(RendererLauguage::GetText("A000001").c_str(), false, true);
+		MessageOut(GetInternationalizationText("Renderer", "A000001").c_str(), false, true);
 	}
 }
 
@@ -369,7 +369,7 @@ void VulkanManager::InitDevice()
 		if (_gpuDevice == VK_NULL_HANDLE)
 		{
 			_Sleep(500);
-			MessageOut(RendererLauguage::GetText("A000002").c_str(), false, true);
+			MessageOut(GetInternationalizationText("Renderer", "A000002").c_str(), false, true);
 		}
 		//vkGetPhysicalDeviceProperties2(_gpuDevice, &_gpuProperties);
 		vkGetPhysicalDeviceProperties(_gpuDevice, &_gpuProperties);
@@ -415,7 +415,7 @@ void VulkanManager::InitDevice()
 		//if (!bFound_Graphics && !bFound_Transfer)
 		if (!bFound_Graphics)
 		{
-			MessageOut(RendererLauguage::GetText("A000003").c_str(), false, true);
+			MessageOut(GetInternationalizationText("Renderer", "A000003").c_str(), false, true);
 		}
 	}
 	ConsoleDebug::print_endl("Get Device Layers and Extensions...", "0,255,0");
@@ -656,7 +656,7 @@ void VulkanManager::InitDevice()
 	//device_create_info.pNext = &_gpuVk12Features;
 	auto result = vkCreateDevice(_gpuDevice, &device_create_info, VK_NULL_HANDLE, &_device);
 	if(result!= VK_SUCCESS) 
-		MessageOut((RendererLauguage::GetText("A000004") + GetVkResult(result)).c_str() , false, true);
+		MessageOut((GetInternationalizationText("Renderer", "A000004").c_str() + GetVkResult(result)).c_str() , false, true);
 	vkGetDeviceQueue(_device, _graphicsQueueFamilyIndex, 0, &_graphicsQueue);
 	//vkGetDeviceQueue(_device, _transferQueueFamilyIndex, 0, &_transfer_Queue);
 #ifdef _WIN32
@@ -783,7 +783,7 @@ void VulkanManager::CheckSurfaceFormat(VkSurfaceKHR surface, VkSurfaceFormatKHR&
 	vkGetPhysicalDeviceSurfaceSupportKHR(_gpuDevice, _graphicsQueueFamilyIndex, surface, &IsSupportSurface);
 	if (!IsSupportSurface)
 	{
-		MessageOut(RendererLauguage::GetText("A000006").c_str(), false, true);
+		MessageOut(GetInternationalizationText("Renderer", "A000006").c_str(), false, true);
 	}
 	{
 		const VkFormat requestSurfaceImageFormat[] = { VK_FORMAT_R8G8B8A8_UNORM , VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8_UNORM };
@@ -1108,7 +1108,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
         if (result != VK_SUCCESS)
 #endif
 		{
-			MessageOut((RendererLauguage::GetText("A000007").c_str() + GetVkResult(result)).c_str(), false, true);
+			MessageOut((GetInternationalizationText("Renderer", "A000007").c_str() + GetVkResult(result)).c_str(), false, true);
 		}
 	}
 
@@ -1256,7 +1256,7 @@ VkExtent2D VulkanManager::CreateSwapchainFromTextures(VkExtent2D surfaceSize, Vk
 	auto result = vkCreateSwapchainKHR(_device, &info, VK_NULL_HANDLE, &newSwapchain);
 	if (result != VK_SUCCESS)
 	{
-		MessageOut((RendererLauguage::GetText("A000007").c_str() + GetVkResult(result)).c_str(), false, true);
+		MessageOut((GetInternationalizationText("Renderer", "A000007").c_str() + GetVkResult(result)).c_str(), false, true);
 	}
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, VK_NULL_HANDLE);
 	textures.resize(_swapchainBufferCount);
@@ -1590,7 +1590,7 @@ void VulkanManager::AllocateCommandBuffer(VkCommandPool commandPool, VkCommandBu
 	VkResult result = vkAllocateCommandBuffers(_device, &cmdBufAllocInfo,&cmdBuf);
 	if (result != VK_SUCCESS)
 	{
-		MessageOut(RendererLauguage::GetText("A000008").c_str(), true, true);
+		MessageOut(GetInternationalizationText("Renderer", "A000008").c_str(), true, true);
 	}
 }
 
@@ -1675,7 +1675,7 @@ bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore 
 	}
 	else if (result != VK_SUCCESS)
 	{
-		MessageOut(RendererLauguage::GetText("A000010").c_str(), false, false);
+		MessageOut(GetInternationalizationText("Renderer", "A000010").c_str(), false, false);
 		return false;
 	}
 	return true;
@@ -1701,7 +1701,7 @@ bool VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore& semaphore, ui
 	}
 	else if (result != VK_SUCCESS || infoResult != VK_SUCCESS)
 	{
-		MessageOut(RendererLauguage::GetText("A000011").c_str(), false, true);
+		MessageOut(GetInternationalizationText("Renderer", "A000011").c_str(), false, true);
 		return false;
 	}
 	return true;
@@ -2076,7 +2076,7 @@ void VulkanManager::CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info, V
 	auto result = vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &info, VK_NULL_HANDLE, &pipeline);
 	if (result != VK_SUCCESS)
 	{
-		MessageOut(RendererLauguage::GetText("A000012").c_str(), false, true);
+		MessageOut(GetInternationalizationText("Renderer", "A000012").c_str(), false, true);
 	}
 }
 
@@ -2300,7 +2300,7 @@ void VulkanManager::SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, V
 {
 	if (cmdBufs.size() <= 0)
 	{
-		MessageOut(RendererLauguage::GetText("A000013").c_str(), false, true);
+		MessageOut(GetInternationalizationText("Renderer","A000013").c_str(), false, true);
 	}
 	VkSubmitInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -2325,7 +2325,7 @@ void VulkanManager::SubmitQueue(std::vector<VkCommandBuffer> cmdBufs, std::vecto
 {
 	if (cmdBufs.size() <= 0)
 	{
-		MessageOut(RendererLauguage::GetText("A000013").c_str(), false, true);
+		MessageOut(GetInternationalizationText("Renderer", "A000013").c_str(), false, true);
 	}
 	VkSubmitInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

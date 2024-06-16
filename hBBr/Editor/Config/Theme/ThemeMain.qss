@@ -2,7 +2,7 @@ VariableDefine {
     BackgroundColor: rgb(31, 31, 31) ;
     FontFamily:  微软雅黑 , Arial, Helvetica, sans-serif;
     SplitterHandleColor : rgb(125,125,125);
-    SplitterWidth : 5px;
+    SplitterWidth : 3px;
 }
 #EditorMain
 {
@@ -28,6 +28,7 @@ QMainWindow::separator
 {
     background-color:SplitterHandleColor;
     width: SplitterWidth;
+    border: 1px solid rgb(0,0,0);
 }
 QTabBar::tab 
 {
@@ -496,29 +497,28 @@ QSplitter::handle
 }
 #CustomListView_Text
 {
-    font-family: 微软雅黑, Arial, Helvetica, sans-serif;
+    font-family: FontFamily;
 }
 #CustomTreeView_VirtualFolderTreeView
 {
+    font-family: Arial, Helvetica, sans-serif;
     color: rgb(140, 140, 140) ;
     font-weight:400;
-    font-size: 17px;
+    font-size: 14px;
     icon-size: 32px;
 }
 #CustomTreeView_VirtualFolderTreeView::item 
 {
     color: rgb(195, 195, 195) ;
-    height: 25px;
+    height: 20px;
 }
 #CustomTreeView_VirtualFolderTreeView::item:selected
 {
-    color: rgb(255, 175, 175) ;
-    height: 25px;
+    color: rgb(208, 223, 255) ;
 }
 #CustomTreeView_VirtualFolderTreeView::branch
 {
-    width: 28px;
-    height: 28px;
+
 }
 #CustomTreeView_VirtualFolderTreeView::branch:closed:has-children:!has-siblings,  
 #CustomTreeView_VirtualFolderTreeView::branch:closed:has-children:has-siblings
@@ -533,22 +533,24 @@ QSplitter::handle
 #CustomListView_VirtualFileListView 
 {
     background-color:transparent;
-    font-size: 18px;
+    font-size: 14px;
 }
 #CustomListView_VirtualFileListView::item
 {
     color:rgb(184, 184, 184);
     text-align:left;
-    border:2px dashed rgb(107, 103, 103);
+    border:1px dashed rgb(107, 103, 103);
     border-radius:6px;
     margin: 2;
+    padding-top: 4px;
+    padding-bottom: 4px;
     /* padding: 10px; */
 }
 #CustomListView_VirtualFileListView::item:selected
 {
-    background: #3a2a2d;
-    color:rgb(255, 227, 237);
-    border:2px solid rgb(154, 103, 110);
+    background: #2a303a;
+    color:rgb(227, 255, 250);
+    border:1px solid rgb(103, 134, 154);
     font-weight: 400;
 }
 /* ContentBrowser */
@@ -572,9 +574,16 @@ QSplitter::handle
 }
 #ContentBrowser_Button
 {
-    width: 140%;
-    height: 40%;
-    margin-left: 2px;
+    font-family: FontFamily;
+    min-width: 25px;
+    height: 25%;
+    border-radius: 2px;
+    border: 1px solid rgb(70, 70, 70);
+}
+#ContentBrowser_Button:hover
+{
+    color:#fff ;
+    background-color: #353132;
 }
 #ContentBrowser_PathLabel
 {

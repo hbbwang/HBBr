@@ -9,6 +9,8 @@
 #include "ConsoleDebug.h"
 #include "qapplication.h"
 #include "FileSystem.h"
+#include "Serializable.h"
+
 QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
 {
 	QString result;
@@ -401,4 +403,21 @@ bool GetPreviewImage(QString resourceFilePath, QPixmap& pixmap)
  //   }
  //   pixmap = QPixmap(previewImagePath);
     return true;
+}
+
+QString GetEditorInternationalization(QString Group, QString name)
+{
+    static nlohmann::json json;
+    if (json.is_null())
+    {
+        Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor_localization.json", json);
+    }
+    if (!json.is_null())
+    {
+        nlohmann::json j = json[Group.toStdString()];
+        std::string str = j[name.toStdString()];
+        //MessageOut(str.c_str(), true, false, "255,0,0");
+        return QString::fromStdString(str);
+    }
+    return "????";
 }

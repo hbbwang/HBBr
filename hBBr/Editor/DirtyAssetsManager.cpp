@@ -6,7 +6,8 @@ class DurtyAssetItem :public QTreeWidgetItem
 {
 public:
 	std::weak_ptr<AssetInfoBase> _asset;
-	std::weak_ptr<World> _world;
+	std::shared_ptr<World> _world;
+	std::shared_ptr<Level> _level;
 	DurtyAssetItem(QTreeWidget* view) :QTreeWidgetItem(view)
 	{
 	}
@@ -38,7 +39,7 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 
 	auto dirtyAssets = ContentManager::Get()->GetDirtyAssets();
 	auto dirtyWorlds = World::GetDirtyWorlds();
-
+	auto dirtyLevels = Level::GetDirtyLevels();
 	_allItems.clear();
 	//第一行为功能item
 	{
@@ -87,10 +88,35 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 				item->setCheckState(0, Qt::Unchecked);
 				ui.SelectAllCheckBox->setCheckState(Qt::Unchecked);
 			}
-			item->_world = i;
+			item->_world = i.lock();
 			//Column
 			item->setText(0, i.lock()->GetWorldName().c_str());//Name
 			item->setText(1, "World");//Type
+			item->setText(2, "");//Virtual path
+			item->setText(3, "");
+
+			ui.treeWidget->addTopLevelItem(item);
+			_allItems.append(item);
+		}
+	}
+
+	for (auto& i : dirtyLevels)
+	{
+		if (!i.expired())
+		{
+			DurtyAssetItem* item = new DurtyAssetItem(ui.treeWidget);
+
+			if (i.lock()->IsDirtySelect())
+				item->setCheckState(0, Qt::Checked);
+			else
+			{
+				item->setCheckState(0, Qt::Unchecked);
+				ui.SelectAllCheckBox->setCheckState(Qt::Unchecked);
+			}
+			item->_level = i.lock();
+			//Column
+			item->setText(0, i.lock()->GetLevelName().c_str());//Name
+			item->setText(1, "Level");//Type
 			item->setText(2, "");//Virtual path
 			item->setText(3, "");
 
@@ -117,10 +143,19 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 						ContentManager::Get()->SaveAssetInfo(i->_asset);
 						ContentManager::Get()->RemoveDirtyAsset(i->_asset);
 					}
-					else if (!i->_world.expired())
+					else if (i->_world)
 					{
-						i->_world.lock()->SaveWorld();
+						i->_world->SaveWorld();
 						World::RemoveDirtyWorld(i->_world);
+					}
+					else if (i->_level)
+					{
+						i->_level->SaveLevel();
+						for (auto& i : i->_level->GetDirtyFunc())
+						{
+							i();
+						}
+						Level::RemoveDirtyLevel(i->_level);
 					}
 				}
 			}
@@ -142,6 +177,24 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 			else if (di->checkState(0) == Qt::Unchecked && !di->_asset.expired())
 			{
 				di->_asset.lock()->bDirtySelect = false;
+			}
+			//
+			if (di->checkState(0) == Qt::Checked && di->_world)
+			{
+				di->_world->bDirtySelect = true;
+			}
+			else if (di->checkState(0) == Qt::Unchecked && di->_world)
+			{
+				di->_world->bDirtySelect = false;
+			}
+			//
+			if (di->checkState(0) == Qt::Checked && di->_level)
+			{
+				di->_level->bDirtySelect = true;
+			}
+			else if (di->checkState(0) == Qt::Unchecked && di->_level)
+			{
+				di->_level->bDirtySelect = false;
 			}
 		});
 
