@@ -236,7 +236,7 @@ void VirtualFolderTreeView::currentChanged(const QModelIndex& current, const QMo
 		QStandardItemModel* Itemmodel = (QStandardItemModel*)model();
 		CustomViewItem* item = (CustomViewItem*)(Itemmodel->itemFromIndex(current));
 		CustomViewItem* lastItem = (CustomViewItem*)(Itemmodel->itemFromIndex(previous));
-		if (item == lastItem)
+		if (item ==nullptr || item == lastItem)
 		{
 			return;
 		}
