@@ -33,6 +33,8 @@ public:
 
 	HBBR_API HBBR_INLINE std::vector<std::shared_ptr<Level>> GetLevels()const { return _levels; }
 
+	HBBR_API Level* GetLevel(HString name);
+
 	HBBR_API void AddNewLevel(HString name);
 
 	HBBR_API void DeleteLevel(HString levelName);

@@ -19,6 +19,18 @@ World::~World()
 	ReleaseWorld();
 }
 
+Level* World::GetLevel(HString name)
+{
+	auto it = std::find_if(_levels.begin(), _levels.end(), [&](std::shared_ptr<Level>& level) {
+		return level->GetLevelName().IsSame(name);
+	});
+	if (it != _levels.end())
+	{
+		return it->get();
+	}
+	return nullptr;
+}
+
 void World::AddNewLevel(HString name)
 {
 	std::shared_ptr<Level> newLevel = nullptr;
@@ -151,6 +163,7 @@ void World::ReloadWorldSetting()
 					newLevel->_bInitVisibility = bVisibility;
 					_levels.push_back(newLevel);
 				}
+				from_json(i.value()["GUID"], newLevel->_guid);
 			}
 			#if IS_EDITOR
 				_editorLevelChanged();
@@ -327,7 +340,7 @@ nlohmann::json World::ToJson()
 	{
 		nlohmann::json subLevel;
 		subLevel["Visibility"] = _levels[i]->_bLoad;
-
+		subLevel["GUID"] = _levels[i]->GetGUID();
 		levels[_levels[i]->GetLevelName().c_str()] = subLevel;
 	}
 	//

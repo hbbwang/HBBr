@@ -29,13 +29,20 @@ Level::~Level()
 void Level::Rename(HString newName)
 {
 	_levelName = newName.ClearSpace();
-	if (FileSystem::FileExist(_levelAbsPath))
+	auto func = [this]() 
 	{
-		FileSystem::FileRemove(_levelAbsPath.c_str());
-		_levelAbsPath = FileSystem::Append(_world->_worldAbsPath, _levelName) + ".level";
-		SaveLevel();
-	}
+		if (FileSystem::FileExist(_levelAbsPath))
+		{
+			HString newFilePath = FileSystem::Append(_world->_worldAbsPath, _levelName) + ".level";
+			FileSystem::FileRename(_levelAbsPath.c_str() , newFilePath.c_str());
+			_levelAbsPath = newFilePath;
+			SaveLevel();
+		}
+	};
+	dirtyFunc.push_back(func);
 #if IS_EDITOR
+	_world->MarkDirty();
+	MarkDirty();
 	_world->_editorLevelChanged();
 #endif
 }
@@ -66,6 +73,7 @@ void Level::Load()
 			if (!bLoadFileSucceed)
 			{
 				_json.clear();
+				_guid = CreateGUID();
 			}
 			else
 			{
@@ -108,7 +116,7 @@ void Level::Load()
 				{
 					auto object = i.obj;
 					//Parent
-					HGUID parentGuid; to_json(i.item["Parent"], parentGuid);
+					HGUID parentGuid; from_json(i.item["Parent"], parentGuid);
 					if (parentGuid.isValid())
 					{
 						auto parent = FindGameObjectByGUID(parentGuid);
@@ -164,13 +172,6 @@ void Level::UnLoad()
 {
 	_bLoad = false;
 
-	//临时保存一份数据在内存中，不会实际保存到文件
-	for (auto g : _gameObjects)
-	{
-		SaveGameObject(g.get());
-	}
-
-	//
 	for (auto& i : this->_gameObjects)
 	{
 		i->Destroy();
@@ -192,46 +193,13 @@ void Level::SaveLevel()
 	if (!_world)
 		return;
 
+	_json.clear();
+
 	for (auto g : _gameObjects)
 	{
 		SaveGameObject(g.get());
 	}
 	SaveJson(_levelAbsPath);
-}
-
-void Level::DeleteLevel(bool bImmediately)
-{
-	auto lit = std::find_if(_world->_levels.begin(), _world->_levels.end(), [this](std::shared_ptr<Level>& l) {
-		return l->GetLevelName() == this->GetLevelName();
-		});
-	if (lit != _world->_levels.end())
-		AddDirtyLevel(*lit);
-	auto func =
-	[this]()
-	{
-		nlohmann::json levels =  _world->_json["Levels"];
-		//移除Json的level数据
-		auto jit = levels.find(_levelName.c_str());
-		if (jit != levels.end())
-		{
-			_world->_json["Levels"].erase(_levelName.c_str());
-		}
-		//删除level文件
-		FileSystem::FileRemove(_levelAbsPath.c_str());
-	};
-	if (!bImmediately)
-		dirtyFunc.push_back(func);
-	else
-		func();
-}
-
-void Level::MarkDirty()
-{
-	auto lit = std::find_if(_world->_levels.begin(), _world->_levels.end(), [this](std::shared_ptr<Level>& l) {
-		return l && l->GetLevelName() == this->GetLevelName();
-		});
-	if (lit != _world->_levels.end())
-		AddDirtyLevel(*lit);
 }
 
 void Level::LevelUpdate()
@@ -260,13 +228,16 @@ void Level::LevelUpdate()
 	}
 }
 
-void Level::AddNewObject(std::shared_ptr<GameObject> newObject)
+void Level::AddNewObject(std::shared_ptr<GameObject> newObject, bool bSkipWorldCallback)
 {
 	_gameObjects.push_back(newObject);
-	_world->AddNewObject(newObject);
+	if (!bSkipWorldCallback)
+	{
+		_world->AddNewObject(newObject);
+	}
 }
 
-void Level::RemoveObject(GameObject* object)
+void Level::RemoveObject(GameObject* object, bool bNotDestoryObject)
 {
 	auto it = std::find_if(_gameObjects.begin(), _gameObjects.end(), [object](std::shared_ptr<GameObject>& obj)
 		{
@@ -274,9 +245,12 @@ void Level::RemoveObject(GameObject* object)
 		});
 	if (it != _gameObjects.end())
 	{
-		//延迟到下一帧再销毁
-		_gameObjectNeedDestroy.push_back(*it);
-		_world->RemoveObject(*it);
+		if (!bNotDestoryObject)
+		{
+			//延迟到下一帧再销毁
+			_gameObjectNeedDestroy.push_back(*it);
+			_world->RemoveObject(*it);
+		}
 		_gameObjects.erase(it);
 	}
 }
@@ -291,6 +265,43 @@ void Level::FromJson()
 
 }
 
+#if IS_EDITOR
+void Level::DeleteLevel(bool bImmediately)
+{
+	auto lit = std::find_if(_world->_levels.begin(), _world->_levels.end(), [this](std::shared_ptr<Level>& l) {
+		return l->GetLevelName() == this->GetLevelName();
+		});
+	if (lit != _world->_levels.end())
+		AddDirtyLevel(*lit);
+	auto func =
+		[this]()
+		{
+			nlohmann::json levels = _world->_json["Levels"];
+			//移除Json的level数据
+			auto jit = levels.find(_levelName.c_str());
+			if (jit != levels.end())
+			{
+				_world->_json["Levels"].erase(_levelName.c_str());
+			}
+			//删除level文件
+			FileSystem::FileRemove(_levelAbsPath.c_str());
+		};
+	if (!bImmediately)
+		dirtyFunc.push_back(func);
+	else
+		func();
+}
+
+void Level::MarkDirty()
+{
+	auto lit = std::find_if(_world->_levels.begin(), _world->_levels.end(), [this](std::shared_ptr<Level>& l) {
+		return l && l->GetLevelName() == this->GetLevelName();
+		});
+	if (lit != _world->_levels.end())
+		AddDirtyLevel(*lit);
+}
+
+#endif
 //---------------------------------------------------------------------------------XML Document-------------
 #pragma region XML Document
 void Level::SaveGameObject(GameObject* g)

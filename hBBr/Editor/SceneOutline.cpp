@@ -21,6 +21,7 @@
 #include "CheckBox.h"
 #include "ComboBox.h"
 #include "FormMain.h"
+#include "ConsoleDebug.h"
 SceneOutlineTree* SceneOutline::_treeWidget = nullptr;
 
 SceneOutlineItem::SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, QTreeWidget* view)
@@ -60,7 +61,7 @@ void SceneOutlineItem::Init(std::weak_ptr<Level> level, std::weak_ptr<GameObject
     if (!level.expired())
     {
         _level = level;
-        this->setText(0, _level.lock()->GetLevelName().c_str());
+        this->setText(0, (_level.lock()->GetLevelName()).c_str());
     }
     else if (!gameObject.expired())
     {
@@ -228,7 +229,6 @@ void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
         {
             if (this->currentItem())
                 editItem(this->currentItem());
-            ((SceneOutlineItem*)this->currentItem())->_gameObject.lock()->GetLevel()->MarkDirty();
         });
     connect(_deleteGameObject, &QAction::triggered, this, [this](bool bChecked)
         {
@@ -316,8 +316,8 @@ void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
     //场景重命名
     connect(_renameLevel, &QAction::triggered, this, [this](bool bChecked)
         {
-
-            ((SceneOutlineItem*)this->currentItem())->_gameObject.lock()->GetLevel()->MarkDirty();
+            if (this->currentItem())
+                editItem(this->currentItem());
         });
     //场景加载
     connect(_loadLevel, &QAction::triggered, this, [this](bool bChecked)
@@ -413,30 +413,54 @@ void SceneOutlineTree::mouseMoveEvent(QMouseEvent* event)
 
 void SceneOutlineTree::dropEvent(QDropEvent* event)
 {
-   /* QTreeWidget::dropEvent(event);
+    QTreeWidget::dropEvent(event);
     if (_curItem != nullptr)
     {
         SceneOutlineItem* dragItem = (SceneOutlineItem*)_curItem;
         if (_mouseTouchItem == nullptr)
         {
-            dragItem->_gameObject->SetParent(nullptr);
+            if(!dragItem->_gameObject.expired())
+                dragItem->_gameObject.lock()->SetParent(nullptr);
         }
         else
         {
             SceneOutlineItem* currentItem = (SceneOutlineItem*)(_mouseTouchItem);
+            if(!dragItem->_gameObject.expired())
             {
+                //GameObject
                 if (dragItem->parent())
                 {
-                    dragItem->_gameObject->SetParent(((SceneOutlineItem*)dragItem->parent())->_gameObject);
+                    auto newParent = ((SceneOutlineItem*)(dragItem->parent()))->_gameObject;
+                    if (!newParent.expired())
+                    {
+
+                        //场景不相同,先更换场景
+                        if (dragItem->_gameObject.lock()->GetLevel()->GetGUID() != newParent.lock()->GetLevel()->GetGUID())
+                        {
+                            dragItem->_gameObject.lock()->ChangeLevel(newParent.lock()->GetLevel()->GetLevelName());
+                            ConsoleDebug::printf_endl(GetEditorInternationalization("SceneOutline","SetGameObjectLevel").toStdString().c_str(), dragItem->_gameObject.lock()->GetObjectName().c_str(), newParent.lock()->GetLevel()->GetLevelName().c_str());
+                        }
+                        dragItem->_gameObject.lock()->SetParent(newParent.lock().get());
+                        ConsoleDebug::printf_endl(GetEditorInternationalization("SceneOutline", "SetGameObjectParent").toStdString().c_str(), dragItem->_gameObject.lock()->GetObjectName().c_str(), newParent.lock()->GetObjectName().c_str());
+                    }
                 }
                 else
                 {
-                    dragItem->_gameObject->SetParent(nullptr);
+                    dragItem->_gameObject.lock()->SetParent(nullptr);
+                    ConsoleDebug::printf_endl(GetEditorInternationalization("SceneOutline", "SetGameObjectParent").toStdString().c_str(), dragItem->_gameObject.lock()->GetObjectName().c_str(), "null");
+                }
+
+                //Level
+                auto newLevelItem = ((SceneOutlineItem*)(dragItem->parent()))->_level;
+                if (!newLevelItem.expired())
+                {
+                    dragItem->_gameObject.lock()->ChangeLevel(newLevelItem.lock()->GetLevelName());
+                    ConsoleDebug::printf_endl(GetEditorInternationalization("SceneOutline", "SetGameObjectLevel").toStdString().c_str(), dragItem->_gameObject.lock()->GetObjectName().c_str(), newLevelItem.lock()->GetLevelName().c_str());
                 }
             }
         }
         _curItem = nullptr;
-    }*/
+    }
 }
 
 QList<std::weak_ptr<GameObject>> SceneOutlineTree::GetSelectionObjects()
@@ -482,8 +506,17 @@ void SceneOutlineTree::ItemDoubleClicked(QTreeWidgetItem* item, int column)
 void SceneOutlineTree::ItemEditFinished(QString newText)
 {
     SceneOutlineItem* objItem = (SceneOutlineItem*)currentItem();
-    if(!objItem->_gameObject.expired() && objItem->_gameObject.lock()->GetObjectName() != newText.toStdString().c_str())
+    if (!objItem->_gameObject.expired() && objItem->_gameObject.lock()->GetObjectName() != newText.toStdString().c_str())
+    {
         objItem->_gameObject.lock()->SetObjectName(newText.toStdString().c_str());
+        objItem->_gameObject.lock()->GetLevel()->MarkDirty();
+    }
+    else if (!objItem->_level.expired() && !objItem->_level.lock()->GetLevelName().IsSame(newText.toStdString().c_str()))
+    {
+        objItem->_level.lock()->Rename(newText.toStdString().c_str());
+        objItem->_level.lock()->MarkDirty();
+        _parent->currentWorld.lock()->MarkDirty();
+    }
 }
 
 SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
@@ -527,7 +560,7 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                 if (!world.expired())
                 for (auto& i : world.lock()->GetLevels())
                 {
-                    auto itemExist = FindLevel(i->GetLevelName().c_str());
+                    auto itemExist = FindLevel(i->GetGUID());
                     if(itemExist == nullptr)
                     {
                         //生成Level目录
@@ -546,7 +579,7 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                 if (level)
                 {
                     auto levelItem = FindLevel(level->GetLevelName().c_str());
-                    if (levelItem)
+                    /*if (levelItem)
                     {
                         if (bVisibility)
                         {
@@ -556,7 +589,7 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                         {
                             levelItem->setCheckState(0, Qt::Unchecked);
                         }
-                    }   
+                    }   */
                 }
             };
 
@@ -577,7 +610,13 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
             world.lock()->_editorGameObjectSetParentFunc = [this]
             (std::shared_ptr<GameObject> object, std::shared_ptr<GameObject> newParent)
             {
-
+                    if (newParent && object->_editorObject && newParent->_editorObject)
+                    {
+                        SceneOutlineItem* child = (SceneOutlineItem*)object->_editorObject;
+                        SceneOutlineItem* parent = (SceneOutlineItem*)newParent->_editorObject;
+                        child->parent()->takeChild(child->parent()->indexOfChild(child));
+                        parent->addChild(child);
+                    }
             };
             
 
@@ -736,6 +775,23 @@ SceneOutlineItem* SceneOutline::FindLevel(QString levelName)
     if (it != _levelItems.end())
     {
         result = it.value();
+    }
+    return result;
+}
+
+SceneOutlineItem* SceneOutline::FindLevel(HGUID guid)
+{
+    SceneOutlineItem* result = nullptr;
+    for (auto& i : _levelItems)
+    {
+        if (!i->_level.expired())
+        {
+            if (i->_level.lock()->GetGUID() == guid)
+            {
+                result = i;
+                break;
+            }
+        }
     }
     return result;
 }

@@ -96,6 +96,7 @@ public:
 
     SceneOutlineItem* _currentLevelItem = nullptr;
     SceneOutlineItem* FindLevel(QString levelName);
+    SceneOutlineItem* FindLevel(HGUID guid);
     QMap<QString, SceneOutlineItem*>_levelItems;
 private slots:
     void TreeSearch();

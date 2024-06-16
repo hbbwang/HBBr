@@ -279,6 +279,7 @@ QDockWidget::title
     background-color: rgb(0, 0, 0);
     padding-left: 6px;
     padding-top: 6px;
+    border-bottom: 1px solid rgb(100, 100, 100);
 }
 QDockWidget::close-button,
 QDockWidget::float-button
@@ -307,16 +308,16 @@ QTreeView::item
 QTreeView::item:hover 
 {
     font-family: FontFamily;
-    color :rgb(234, 209, 209);
-    background-color: rgba(79, 64, 64, 0.8);
+    color :rgb(209, 209, 209);
+    background-color: rgba(56, 53, 53, 0.8);
     border: 1px solid rgb(180, 180, 180);
     outline: 0;
 }
 QTreeView::item:selected
 {
     font-family: FontFamily;
-    color :rgb(210, 210, 210);
-    background-color: rgba(90, 85, 80, 0.8);
+    color :rgb(255, 255, 255);
+    background-color: rgba(32, 40, 56, 0.8);
     border: 1px solid rgb(120, 120, 120);
     outline: 0;
 }

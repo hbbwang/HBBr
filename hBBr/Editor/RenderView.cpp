@@ -16,6 +16,7 @@
 #include "SceneOutline.h"
 #include "Asset/World.h"
 #include "VulkanRenderer.h"
+#include "EditorCommonFunction.h"
 #ifdef _WIN32
 #pragma comment(lib , "RendererCore.lib")
 #endif
@@ -180,15 +181,21 @@ void RenderView::dropEvent(QDropEvent* e)
                                 {
                                     level = EditorMain::_self->_sceneOutline->_currentLevelItem->_level.lock().get();
                                 }
-                                auto gameObject = _mainRenderer->renderer->GetWorld()->SpawnGameObject(name, level);
-
-                                level->MarkDirty();
-
-                                if (gameObject)
+                                if (level)
                                 {
-                                    auto modelComp = gameObject->AddComponent<ModelComponent>();
-                                    modelComp->SetModelByAssetPath(Item->_assetInfo.lock()->virtualFilePath);
+                                    auto gameObject = _mainRenderer->renderer->GetWorld()->SpawnGameObject(name, level);
+                                    level->MarkDirty();
+                                    if (gameObject)
+                                    {
+                                        auto modelComp = gameObject->AddComponent<ModelComponent>();
+                                        modelComp->SetModelByAssetPath(Item->_assetInfo.lock()->virtualFilePath);
+                                    }
                                 }
+                                else
+                                {
+                                    ConsoleDebug::print_endl(GetEditorInternationalization("RenderView","SpawnGameObject").toStdString().c_str(),"255,255,0");
+                                }
+                             
                             }                           
                         }
 					}

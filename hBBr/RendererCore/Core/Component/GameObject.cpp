@@ -158,6 +158,29 @@ void GameObject::SetParent(GameObject* newParent)
 
 }
 
+void GameObject::ChangeLevel(HString newLevel)
+{
+	auto level = this->_world->GetLevel(newLevel);
+	auto oldLevel = _level;
+	if (level)
+	{
+		//移动到新的Level需要加载,才能正常保存
+		level->Load();
+		//把共享指针移动到新的Level
+		level->AddNewObject(this->_selfWeak.lock(), true);
+		//移动到新Level，删除Parent
+		SetParent(nullptr);
+		//设置新的level
+		_level = level;
+		//移除旧Level内的共享指针
+		oldLevel->RemoveObject(this, true);
+		#if IS_EDITOR
+		level->MarkDirty();
+		oldLevel->MarkDirty();
+		#endif
+	}
+}
+
 void GameObject::Init()
 {
 	#if IS_EDITOR

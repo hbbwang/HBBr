@@ -45,6 +45,8 @@ public:
 
 	HBBR_API class World* GetWorld()const { return _world; }
 
+	HBBR_API HGUID GetGUID()const { return _guid; }
+
 #if IS_EDITOR
 
 	HBBR_API void DeleteLevel(bool bImmediately = false);
@@ -53,8 +55,10 @@ public:
 
 	static std::vector<std::weak_ptr<Level>> _dirtyLevels;
 	HBBR_API static std::vector<std::weak_ptr<Level>> GetDirtyLevels() { return _dirtyLevels; }
+
 	bool bDirtySelect = true;
 	std::vector<std::function<void()>> dirtyFunc;
+
 	HBBR_API  std::vector<std::function<void()>> GetDirtyFunc() { return dirtyFunc; }
 	HBBR_API  bool IsDirtySelect() { return bDirtySelect; }
 	HBBR_API  void SetDirtySelect(bool input) { bDirtySelect = input; }
@@ -104,10 +108,10 @@ private:
 	void SaveGameObjectComponents(GameObject* gameObject);
 
 	//请勿要主动使用该函数
-	void AddNewObject(std::shared_ptr<GameObject> newObject);
+	void AddNewObject(std::shared_ptr<GameObject> newObject, bool bSkipWorldCallback = false);
 
 	//请勿要主动使用该函数
-	void RemoveObject(GameObject* object);
+	void RemoveObject(GameObject* object,bool bNotDestoryObject = false);
 
 	//游戏对象
 	std::vector<std::shared_ptr<GameObject>> _gameObjects;
@@ -117,6 +121,8 @@ private:
 
 	bool _isEditorLevel = false;
 	bool _bInitVisibility = false;
+
+	HGUID _guid;
 
 public:
 	virtual nlohmann::json ToJson()override;

@@ -78,6 +78,8 @@ public:
 
 	HBBR_API void SetParent(GameObject* newParent);
 
+	HBBR_API void ChangeLevel(HString newLevel);
+
 	HBBR_API static bool IsValid(std::weak_ptr<GameObject> obj){
 		return !obj.expired() && !obj.lock()->_bWantDestroy && obj.lock()->_transform != nullptr;
 	}

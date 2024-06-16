@@ -11,7 +11,9 @@
         "DeleteLevel":"删除场景",
         "RenameLevel":"重命名场景",
         "LoadLevel":"加载场景",
-        "UnloadLevel":"卸载场景"
+        "UnloadLevel":"卸载场景",
+        "SetGameObjectParent":"对象[%s]变换Parent[%s]",
+        "SetGameObjectLevel":"对象[%s]移动到新的场景[%s]"
     },
     "ContentBrowser":{
         "ImportAssets":"导入资产",
@@ -21,5 +23,8 @@
         "Rename":"目录重命名",
         "CreateMaterialInstance":"创建材质实例",
         "RefreshContentBrowser":"刷新内容浏览器"
+    },
+    "RenderView":{
+        "SpawnGameObject":"目前没有场景开启编辑状态!"
     }
 }
