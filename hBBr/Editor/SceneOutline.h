@@ -21,6 +21,8 @@ public:
     std::weak_ptr<Level> _level;
     void Destroy();
     SceneOutlineTree* _tree = nullptr;
+    class QCheckBox* _checkBox = nullptr;
+    class QLabel* _checkBoxLabel = nullptr;
 protected:
     virtual QVariant data(int column, int role) const override;
 };
@@ -92,6 +94,7 @@ public:
     class  VulkanRenderer* _renderer = nullptr;
     static SceneOutlineTree* _treeWidget;
     class CustomSearchLine* _search;
+    class ComboBox* _comboBox;
     std::weak_ptr<World> currentWorld;
 
     SceneOutlineItem* _currentLevelItem = nullptr;

@@ -11,12 +11,13 @@ CustomSearchLine::CustomSearchLine(QWidget *parent)
 	ui.setupUi(this);
 
 	this->setObjectName("SearchLine");
+	ui.lineEdit->setObjectName("SearchLine_LineEdit");
 	ui.comboBox->setObjectName("SearchLine_ComboBox");
-	ui.comboBox->view()->viewport()->setObjectName("setObjectName_ComboBoxViewport");
-	ui.label->setMinimumSize(30, 30);
-	ui.label->setMaximumSize(30, 30);
-	this->setMaximumHeight(30);
-	this->setMinimumHeight(30);
+	ui.comboBox->view()->viewport()->setObjectName("SearchLine_ComboBoxViewport");
+	ui.label->setMinimumSize(20, 20);
+	ui.label->setMaximumSize(20, 20);
+	this->setMaximumHeight(20);
+	this->setMinimumHeight(20);
 	//QPixmap image((FileSystem::GetProgramPath() + "Config/Theme/Icons/ICON_SEARCH.png").c_str());
 	//image.scaled(4,4);
 	//ui.label->setPixmap(image);

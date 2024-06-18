@@ -54,6 +54,7 @@ SceneOutlineItem::SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<Gam
 
 SceneOutlineItem::~SceneOutlineItem()
 {
+
 }
 
 void SceneOutlineItem::Init(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, SceneOutlineTree* tree)
@@ -62,14 +63,15 @@ void SceneOutlineItem::Init(std::weak_ptr<Level> level, std::weak_ptr<GameObject
     {
         _level = level;
         this->setText(0, (_level.lock()->GetLevelName()).c_str());
+        setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDropEnabled);
     }
     else if (!gameObject.expired())
     {
         _gameObject = gameObject;
         _gameObject.lock()->_editorObject = this;
         this->setText(0, _gameObject.lock()->GetObjectName().c_str());
-    }
-    setFlags(flags() | Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
+        setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
+    }  
 }
 
 void SceneOutlineItem::Destroy()
@@ -135,7 +137,7 @@ SceneOutlineTree::SceneOutlineTree(QWidget* parent)
 {
     _parent = (SceneOutline*)parent;
     setFocusPolicy(Qt::FocusPolicy::ClickFocus);
-    setHeaderHidden(true);
+    setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
     setIconSize({ 0,0 });
     //setDragDropMode(QAbstractItemView::DragDropMode::DragDrop);
     //设置拖放模式为内部移动
@@ -149,6 +151,11 @@ SceneOutlineTree::SceneOutlineTree(QWidget* parent)
     viewport()->setObjectName("SceneOutline");
 
     setIndentation(10);
+    setHeaderHidden(true);
+    //setColumnCount(2);
+    //setHeaderLabels({
+    //    "",
+    //    "Label" });
 
      setItemDelegate(new SceneOutlineTreeDelegate(this));
 
@@ -163,29 +170,7 @@ SceneOutlineTree::SceneOutlineTree(QWidget* parent)
     //当Item发生变化
     connect(this, &QTreeWidget::itemChanged, this, [this](QTreeWidgetItem* item, int column)
         {
-            SceneOutlineItem* sceneItem = (SceneOutlineItem*)item;
-
-            if (!sceneItem->_level.expired())
-            {
-                //我们只运行编辑一个Level，不可同时编辑多个
-                if (_mouse_select_item != nullptr)
-                {
-                    _mouse_select_item = nullptr;
-                    for (auto& i : _parent->_levelItems)
-                    {
-                        if (i->_level.lock().get() == sceneItem->_level.lock().get())
-                        {
-                            _parent->_currentLevelItem = sceneItem;
-                            //开启编辑的Level将会自动Load
-                            i->_level.lock()->Load();
-                        }
-                        else
-                        {
-                            i->setCheckState(0, Qt::Unchecked);
-                        }
-                    }
-                }
-            }
+            
         });
 }
 
@@ -302,7 +287,7 @@ void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
             for (auto i : this->selectedItems())
             {
                 //卸载的时候关闭编辑状态
-                i->setCheckState(0, Qt::Unchecked);
+                ((SceneOutlineItem*)i)->_checkBox->setChecked(false);
             }
             // ((SceneOutlineItem*)this->currentItem())->_gameObject.lock()->GetLevel()->MarkDirty();
 
@@ -338,7 +323,7 @@ void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
             for (auto i : this->selectedItems())
             {
                 //卸载的时候关闭编辑状态
-                i->setCheckState(0, Qt::Unchecked);
+                ((SceneOutlineItem*)i)->_checkBox->setChecked(false);
             }
             _parent->currentWorld.lock()->MarkDirty();
         });
@@ -538,8 +523,16 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     _treeWidget = new SceneOutlineTree(this);
     mainLayout->addWidget(_treeWidget);
 
-    _renderer = renderer;
+    //Level selection
+    _comboBox = new ComboBox(GetEditorInternationalization("SceneOutline", "LevelSelection"), this);
+    _comboBox->setObjectName("SceneOutline_ComboBox_Main");
+    _comboBox->ui.ComboBox_0->setObjectName("SceneOutline_ComboBox");
+    _comboBox->ui.Name->setObjectName("SceneOutline_Name");
+    _comboBox->ui.horizontalLayout->setStretch(0, 0);
+    _comboBox->ui.horizontalLayout->setStretch(1, 0);
+    mainLayout->addWidget(_comboBox);
 
+    _renderer = renderer;
     //World生成的时候执行
     auto spawnNewWorldCallBack = [this](std::weak_ptr<World> world)
     {
@@ -557,18 +550,32 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
             world.lock()->_editorLevelChanged =
                 [this, world]()
             {
-                if (!world.expired())
-                for (auto& i : world.lock()->GetLevels())
-                {
-                    auto itemExist = FindLevel(i->GetGUID());
-                    if(itemExist == nullptr)
+                    if (!world.expired())
                     {
-                        //生成Level目录
-                        auto item = new SceneOutlineItem(i, std::weak_ptr<GameObject>(), (FileSystem::GetConfigAbsPath() + "Theme/Icons/ICON_SCENE.png").c_str(), _treeWidget);
-                        item->setFlags(item->flags() | Qt::ItemIsUserCheckable); //场景选项支持CheckBox，用于确定当前正在修改的是哪个场景
-                        item->setCheckState(0, Qt::Unchecked);
-                        _treeWidget->addTopLevelItem(item);
-                        _levelItems.insert(i->GetLevelName().c_str(), item);
+                        for (auto& i : world.lock()->GetLevels())
+                        {
+                            auto itemExist = FindLevel(i->GetGUID());
+                            if (itemExist == nullptr)
+                            {
+                                //生成Level目录
+                                auto item = new SceneOutlineItem(i, std::weak_ptr<GameObject>(), (FileSystem::GetConfigAbsPath() + "Theme/Icons/ICON_SCENE.png").c_str(), _treeWidget);
+                                item->setFlags(item->flags() | Qt::ItemIsUserCheckable); //场景选项支持CheckBox，用于确定当前正在修改的是哪个场景
+                                _treeWidget->addTopLevelItem(item);
+                                _levelItems.insert(i->GetLevelName().c_str(), item);
+
+                                _comboBox->AddItem(i->GetLevelName().c_str());
+                                _comboBox->_bindCurrentTextChanged =
+                                    [this, item](const int index, const char* text)
+                                    {
+                                        _currentLevelItem = item;
+                                        item->_level.lock()->Load();
+                                    };
+                            }
+                            if (_currentLevelItem == nullptr && world.lock()->GetLevels().size() > 0)
+                            {
+                                _currentLevelItem = FindLevel(world.lock()->GetLevels()[0]->GetGUID());
+                                _comboBox->SetCurrentSelection(world.lock()->GetLevels()[0]->GetLevelName().c_str());
+                            }
                     }
                 }
             };
@@ -579,17 +586,6 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                 if (level)
                 {
                     auto levelItem = FindLevel(level->GetLevelName().c_str());
-                    /*if (levelItem)
-                    {
-                        if (bVisibility)
-                        {
-                            levelItem->setCheckState(0, Qt::Checked);
-                        }
-                        else
-                        {
-                            levelItem->setCheckState(0, Qt::Unchecked);
-                        }
-                    }   */
                 }
             };
 

@@ -158,22 +158,6 @@ void RenderView::dropEvent(QDropEvent* e)
                             const auto info = Item->_assetInfo.lock().get();
                             auto world = _mainRenderer->renderer->GetWorld();
                             HString name = Item->_assetInfo.lock()->displayName;
-                            //int index = -1;
-                            //while (true)
-                            //{
-                            //    bool bFound = false;
-                            //    for (auto& l : world->GetLevels())
-                            //    {
-                            //        for (auto& g : l->GetAllGameObjects())
-                            //        {
-
-                            //        }
-                            //    }
-                            //    if (!bFound)
-                            //    {
-                            //        break;
-                            //    }
-                            //}
                             if (info->type == AssetType::Model)
                             {
                                 Level* level = nullptr;

@@ -55,6 +55,10 @@ QTabBar::tab::label
 {
     width: 120px;
 }
+QCheckBox{
+    font-family:  FontFamily;
+    background-color:transparent;
+}
 QLabel
 {    
     font-family:  FontFamily;
@@ -67,6 +71,7 @@ QComboBox
     color:rgb(180,180,180);
     border:1px solid  rgb(80,80,80);
     height: 50;
+    border-radius: 2px;
 }
 QComboBox QAbstractItemView
 {    
@@ -310,15 +315,15 @@ QTreeView::item:hover
     font-family: FontFamily;
     color :rgb(209, 209, 209);
     background-color: rgba(56, 53, 53, 0.8);
-    border: 1px solid rgb(180, 180, 180);
     outline: 0;
 }
 QTreeView::item:selected
 {
     font-family: FontFamily;
     color :rgb(255, 255, 255);
-    background-color: rgba(32, 40, 56, 0.8);
+    background-color: rgb(59, 61, 65);
     border: 1px solid rgb(120, 120, 120);
+    border-radius: 2px;
     outline: 0;
 }
 QTreeView::branch:selected 
@@ -369,6 +374,17 @@ QSplitter::handle
     color:rgb(151, 151, 151);
     font-family: FontFamily;
     background-color: BackgroundColor;
+}
+#SceneOutline_ComboBox_Main
+{
+}
+#SceneOutline_ComboBox
+{
+    height: 20px;
+}
+#SceneOutline_Name
+{
+
 }
 /* All Property Name */
 #PropertyName
@@ -466,15 +482,20 @@ QSplitter::handle
 /* SearchLine */
 #SearchLine
 {
-    border-bottom: 2px solid rgb(125, 125, 125);
+    border: 1px solid rgb(125, 125, 125);
+}
+#SearchLine_LineEdit
+{
+    margin: 1px;
+    border-radius: 4px;
 }
 #SearchLine_ComboBox
 {
 
 }
-#setObjectName_ComboBoxViewport
+#SearchLine_ComboBoxViewport
 {
-
+    
 }
 #SearchLine .QLabel
 {

@@ -13,7 +13,8 @@
         "LoadLevel":"加载场景",
         "UnloadLevel":"卸载场景",
         "SetGameObjectParent":"对象[%s]变换Parent[%s]",
-        "SetGameObjectLevel":"对象[%s]移动到新的场景[%s]"
+        "SetGameObjectLevel":"对象[%s]移动到新的场景[%s]",
+        "LevelSelection":"当前编辑场景"
     },
     "ContentBrowser":{
         "ImportAssets":"导入资产",
