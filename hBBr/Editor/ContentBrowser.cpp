@@ -185,9 +185,10 @@ void VirtualFolderTreeView::SelectionItem(QString vPath)
 	}
 }
 
+//点击TreeView之后更新FileListView
 void VirtualFolderTreeView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
-	_contentBrowser->RefreshFileOnListView();
+	_contentBrowser->RefreshFileOnListView(false);
 	CustomTreeView::selectionChanged(selected, deselected);
 }
 
@@ -496,10 +497,7 @@ void VirtualFolderTreeView::onDataChanged(const QModelIndex& topLeft, const QMod
 		}	
 	}
 }
-
 #pragma endregion
-
-
 //--------------------------------------Virtual File List View-------------------
 #pragma region VirtualFileListView
 VirtualFileListView::VirtualFileListView(class  ContentBrowser* contentBrowser, QWidget* parent)
@@ -722,17 +720,25 @@ void VirtualFileListView::ItemTextChange(QListWidgetItem* widgetItem)
 	}
 }
 
-CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase> assetInfo)
+CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase> assetInfo, bool bUpdatePreview)
 {
 	if (!assetInfo.expired())
 	{
 		//收集资产的ToolTip
 		ToolTip newToolTip = UpdateToolTips(assetInfo);
-		auto iconPath = assetInfo.lock()->absFilePath + ".png";
-		if (!FileSystem::FileExist(iconPath))
+		//生成一下预览图
+		if (bUpdatePreview)
 		{
-			iconPath = assetInfo.lock()->absFilePath + ".jpg";
+			if (assetInfo.lock()->type == AssetType::Texture2D)
+			{
+				Texture2D::DecompressionImage2D(
+					assetInfo.lock()->absFilePath.c_str(),
+					(assetInfo.lock()->absFilePath + ".jpg").c_str(),
+					nullptr,64,64);
+			}
 		}
+		//目录下的jpg格式图像作为预览图存在
+		auto	iconPath = assetInfo.lock()->absFilePath + ".jpg";
 		if (!FileSystem::FileExist(iconPath))
 		{
 			iconPath = FileSystem::GetConfigAbsPath();
@@ -759,7 +765,6 @@ CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase>
 }
 
 #pragma endregion
-
 //--------------------------------------Repository Selection Widget-------------------
 #pragma region RepositorySelectionWidget
 RepositorySelection::RepositorySelection(QWidget* parent) :QDialog(parent)
@@ -981,9 +986,14 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	//设置选项
 	//ui.OptionButton->setIcon(QIcon((FileSystem::GetConfigAbsPath() + "Theme/Icons/ICON_OPTION.png").c_str()));
 	_refreshContentBrowser = new QAction(GetEditorInternationalization("ContentBrowser", "RefreshContentBrowser"), this);
+	_updateFileListPreviewImage = new QAction(GetEditorInternationalization("ContentBrowser", "UpdateFileListPreviewImage"), this);
 	ActionConnect(_refreshContentBrowser, [this]() { ContentBrowser::RefreshContentBrowsers(); });
+	ActionConnect(_updateFileListPreviewImage, [this]() { 
+			this->RefreshFileOnListView(true);
+		});
 	_cbOptionMenu = new QMenu(this);
 	_cbOptionMenu->addAction(_refreshContentBrowser);
+	_cbOptionMenu->addAction(_updateFileListPreviewImage);
 	connect(ui.OptionButton, &QAbstractButton::clicked, this, [&, this]()
 		{
 			auto pos = QPoint(0, 0 + ui.OptionButton->height());
@@ -1067,7 +1077,8 @@ void ContentBrowser::RefreshFolderOnTreeView()
 	}
 }
 
-void ContentBrowser::RefreshFileOnListView()
+//更新FileListView的显示
+void ContentBrowser::RefreshFileOnListView(bool bUpdatePreview)
 {
 	_listView->RemoveAllItems();
 	auto item = _treeView->GetSelectionItems();
@@ -1077,7 +1088,7 @@ void ContentBrowser::RefreshFileOnListView()
 		auto assets = ContentManager::Get()->GetAssetsByVirtualFolder(i->_fullPath.toStdString().c_str());
 		for (auto& a : assets)
 		{
-			auto item = _listView->AddFile(a.second);
+			auto item = _listView->AddFile(a.second, bUpdatePreview);
 			_listView->_currentVirtualFolderItems.append(item);
 		}
 	}

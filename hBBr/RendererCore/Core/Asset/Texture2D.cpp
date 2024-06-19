@@ -1016,7 +1016,7 @@ void Texture2D::CreateFontTexture(HString ttfFontPath, HString outTexturePath, b
 
 	if (!FileSystem::FileExist(ttfFontPath.c_str()))
 	{
-		ttfFontPath = FileSystem::GetAssetAbsPath() + "Font/arial.ttf";
+		ttfFontPath = FileSystem::GetConfigAbsPath() + "Theme/Fonts/arial.ttf";
 		FileSystem::CorrectionPath(ttfFontPath);
 		if (!FileSystem::FileExist(ttfFontPath.c_str()))
 		{

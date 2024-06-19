@@ -292,9 +292,12 @@ CustomListItem* CustomListView::AddItem(QString name, QString iconPath, ToolTip 
 	CustomListItem* item = nullptr;
 	if (!iconPath.isEmpty())
 	{
-		auto icon = QIcon(iconPath);
-		icon.addFile(iconPath,QSize(),QIcon::Selected);
-		item= new CustomListItem(icon,name,this);
+		//auto icon = QIcon(iconPath);
+		////icon.addFile(iconPath,QSize(256, 256),QIcon::Selected);
+		//item= new CustomListItem(icon,name,this);
+		QPixmap icon(iconPath);
+		icon = icon.scaled(128,128);
+		item = new CustomListItem(icon, name, this);
 	}
 	else
 	{

@@ -19,6 +19,11 @@
 
 EditorMain* EditorMain::_self = nullptr;
 
+CustomDockWidget::CustomDockWidget(QWidget* parent) :QDockWidget(parent)
+{
+
+}
+
 EditorMain::EditorMain(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -29,7 +34,7 @@ EditorMain::EditorMain(QWidget *parent)
     setCentralWidget(_mainRenderView);
 
     _sceneOutline = new SceneOutline(_mainRenderView->_mainRenderer->renderer, this);
-    _sceneOutline_dock = new QDockWidget(this);
+    _sceneOutline_dock = new CustomDockWidget(this);
     _sceneOutline_dock->setFeatures(
         QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     _sceneOutline_dock->setWidget(_sceneOutline);
@@ -38,7 +43,7 @@ EditorMain::EditorMain(QWidget *parent)
     addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, _sceneOutline_dock);
 
     _contentBrowser = new ContentBrowser(this);
-    _contentBrowser_dock = new QDockWidget(this);
+    _contentBrowser_dock = new CustomDockWidget(this);
     _contentBrowser_dock->setFeatures(
         QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     _contentBrowser_dock->setWidget(_contentBrowser);
@@ -47,7 +52,7 @@ EditorMain::EditorMain(QWidget *parent)
     addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, _contentBrowser_dock);
 
     _inspector = new Inspector(this);
-    _inspector_dock = new QDockWidget(this);
+    _inspector_dock = new CustomDockWidget(this);
     _inspector_dock->setFeatures(
         QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     _inspector_dock->setWidget(_inspector);
@@ -149,4 +154,3 @@ void EditorMain::resizeEvent(QResizeEvent* event)
 {
 
 }
-

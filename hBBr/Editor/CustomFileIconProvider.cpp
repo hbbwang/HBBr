@@ -50,10 +50,7 @@ QIcon CustomFileIconProvider::icon(const QFileInfo& info) const
             FileSystem::CorrectionPath(pp);
             return QIcon(pp.c_str());
         }
-        else if (
-            info.suffix().compare("tex", Qt::CaseInsensitive) == 0
-            //||info.suffix().compare("dds", Qt::CaseInsensitive) == 0
-            )
+        else if (info.suffix().compare("dds", Qt::CaseInsensitive) == 0)
         {
             if (bSucceed)
             {

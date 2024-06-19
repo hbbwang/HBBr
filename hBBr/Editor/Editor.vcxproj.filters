@@ -46,9 +46,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EditorMain.cpp">
-      <Filter>Widgets</Filter>
-    </ClCompile>
     <ClCompile Include="RenderView.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
@@ -111,6 +108,9 @@
     </ClCompile>
     <ClCompile Include="DirtyAssetsManager.cpp">
       <Filter>Widgets\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorMain.cpp">
+      <Filter>Widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

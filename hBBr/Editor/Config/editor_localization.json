@@ -24,7 +24,8 @@
         "DeleteFile":"删除文件",
         "Rename":"目录重命名",
         "CreateMaterialInstance":"创建材质实例",
-        "RefreshContentBrowser":"刷新内容浏览器"
+        "RefreshContentBrowser":"刷新内容浏览器",
+        "UpdateFileListPreviewImage":"刷新当前目录的预览图"
     },
     "RenderView":{
         "SpawnGameObject":"目前没有场景开启编辑状态!"

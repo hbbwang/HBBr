@@ -6,6 +6,13 @@
 #include <qtimer.h>
 #include <qthread.h>
 
+class CustomDockWidget : public QDockWidget
+{
+    Q_OBJECT
+public:
+    CustomDockWidget(QWidget* parent);
+};
+
 class EditorMain : public QMainWindow
 {
     Q_OBJECT
@@ -22,15 +29,15 @@ public:
 
     //场景大纲
     class SceneOutline* _sceneOutline = nullptr;
-    class QDockWidget* _sceneOutline_dock = nullptr;
+    class CustomDockWidget* _sceneOutline_dock = nullptr;
 
     //内容管理器
     class ContentBrowser* _contentBrowser = nullptr;
-    class QDockWidget* _contentBrowser_dock = nullptr;
+    class CustomDockWidget* _contentBrowser_dock = nullptr;
 
     //检查器/参数编辑器
     class Inspector* _inspector = nullptr;
-    class QDockWidget* _inspector_dock = nullptr;
+    class CustomDockWidget* _inspector_dock = nullptr;
 
     void ShowDirtyAssetsManager();
 

@@ -67,7 +67,7 @@ public:
 
 	ToolTip UpdateToolTips(std::weak_ptr<struct AssetInfoBase> &assetInfo);
 
-	CustomListItem* AddFile(std::weak_ptr<struct AssetInfoBase> assetInfo);
+	CustomListItem* AddFile(std::weak_ptr<struct AssetInfoBase> assetInfo, bool bUpdatePreview = false);
 
 	VirtualFolder _currentTreeViewSelection;
 
@@ -133,7 +133,7 @@ public:
 	static void RefreshContentBrowsers();
 	void Refresh();
 	void RefreshFolderOnTreeView();
-	void RefreshFileOnListView();
+	void RefreshFileOnListView(bool bUpdatePreview);
 	void ShowRepositorySelection();
 	void ImportAssets();
 	static const QList<ContentBrowser*> GetContentBrowsers() {
@@ -145,6 +145,7 @@ public:
 	VirtualFileListView* _listView = nullptr;
 
 	QAction* _refreshContentBrowser = nullptr;
+	QAction* _updateFileListPreviewImage = nullptr;
 	QMenu* _cbOptionMenu = nullptr;
 
 protected:
