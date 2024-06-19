@@ -18,7 +18,6 @@
 #include "EditorCommonFunction.h"
 #include "CustomSearchLine.h"
 #include "Inspector.h"
-#include "CheckBox.h"
 #include "ComboBox.h"
 #include "FormMain.h"
 #include "ConsoleDebug.h"
@@ -38,11 +37,6 @@ SceneOutlineItem::SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<Gam
     {
         iconPath = QDir::toNativeSeparators(iconPath);
         _iconPath = iconPath;
-
-        QIcon icon;
-        auto icon0 = QPixmap::fromImage(QImage(_iconPath));
-        icon.addPixmap(icon0,  QIcon::Selected);
-        setIcon(0, icon);
     }
 }
 
@@ -157,7 +151,7 @@ SceneOutlineTree::SceneOutlineTree(QWidget* parent)
     //    "",
     //    "Label" });
 
-     setItemDelegate(new SceneOutlineTreeDelegate(this));
+     //setItemDelegate(new SceneOutlineTreeDelegate(this));
 
      _menu = new QMenu(this);
      _menu_createBasic = new QMenu(this);
@@ -284,11 +278,7 @@ void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
             {
                 i.lock()->UnLoad();
             }
-            for (auto i : this->selectedItems())
-            {
-                //卸载的时候关闭编辑状态
-                ((SceneOutlineItem*)i)->_checkBox->setChecked(false);
-            }
+            _parent->ClearCurrentLevelSelection();
             // ((SceneOutlineItem*)this->currentItem())->_gameObject.lock()->GetLevel()->MarkDirty();
 
             std::vector<HString> levelName; 
@@ -323,7 +313,7 @@ void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
             for (auto i : this->selectedItems())
             {
                 //卸载的时候关闭编辑状态
-                ((SceneOutlineItem*)i)->_checkBox->setChecked(false);
+                _parent->ClearCurrentLevelSelection();
             }
             _parent->currentWorld.lock()->MarkDirty();
         });
@@ -529,7 +519,25 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     _comboBox->ui.ComboBox_0->setObjectName("SceneOutline_ComboBox");
     _comboBox->ui.Name->setObjectName("SceneOutline_Name");
     _comboBox->ui.horizontalLayout->setStretch(0, 0);
-    _comboBox->ui.horizontalLayout->setStretch(1, 0);
+    _comboBox->ui.horizontalLayout->setStretch(1, 0); 
+    //设置ComboBox回调
+    _comboBox->_bindCurrentTextChanged =
+        [this](const int index, const char* text)
+    {
+        for (auto& i : _levelItems)
+        {
+            if (!i->_level.expired())
+            {
+                if (i->_level.lock()->GetLevelName().IsSame(text))
+                {
+                    _currentLevelItem = i;
+                    ConsoleDebug::printf_endl(GetEditorInternationalization("SceneOutline", "CurrentEditLevelLog").toStdString().c_str(), i->_level.lock()->GetLevelName().c_str());
+                    i->_level.lock()->Load();
+                    break;
+                }
+            }
+        }
+    };
     mainLayout->addWidget(_comboBox);
 
     _renderer = renderer;
@@ -552,6 +560,7 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
             {
                     if (!world.expired())
                     {
+                        _levelItems.clear();
                         for (auto& i : world.lock()->GetLevels())
                         {
                             auto itemExist = FindLevel(i->GetGUID());
@@ -559,23 +568,15 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                             {
                                 //生成Level目录
                                 auto item = new SceneOutlineItem(i, std::weak_ptr<GameObject>(), (FileSystem::GetConfigAbsPath() + "Theme/Icons/ICON_SCENE.png").c_str(), _treeWidget);
-                                item->setFlags(item->flags() | Qt::ItemIsUserCheckable); //场景选项支持CheckBox，用于确定当前正在修改的是哪个场景
                                 _treeWidget->addTopLevelItem(item);
                                 _levelItems.insert(i->GetLevelName().c_str(), item);
 
-                                _comboBox->AddItem(i->GetLevelName().c_str());
-                                _comboBox->_bindCurrentTextChanged =
-                                    [this, item](const int index, const char* text)
-                                    {
-                                        _currentLevelItem = item;
-                                        item->_level.lock()->Load();
-                                    };
+                                auto iconPath = FileSystem::Append(FileSystem::GetConfigAbsPath() , "Theme/Icons/ICON_SCENE.png");
+                                QIcon icon(iconPath.c_str());
+                                item->setIcon(0, icon);
+
                             }
-                            if (_currentLevelItem == nullptr && world.lock()->GetLevels().size() > 0)
-                            {
-                                _currentLevelItem = FindLevel(world.lock()->GetLevels()[0]->GetGUID());
-                                _comboBox->SetCurrentSelection(world.lock()->GetLevels()[0]->GetLevelName().c_str());
-                            }
+                            ResetLevelSelectionComboBox();
                     }
                 }
             };
@@ -762,6 +763,35 @@ void SceneOutline::paintEvent(QPaintEvent* event)
     styleOpt.init(this);
     QPainter painter(this);
     style()->drawPrimitive(QStyle::PE_Widget, &styleOpt, &painter, this);
+}
+
+void SceneOutline::ClearCurrentLevelSelection()
+{
+    _currentLevelItem = nullptr;
+    _comboBox->SetCurrentSelection(" ??? ");
+}
+
+void SceneOutline::ResetLevelSelectionComboBox()
+{
+    _comboBox->ClearItems();
+
+    for (auto& i : _levelItems)
+    {
+        if (!i->_level.expired())
+        {
+            _comboBox->AddItem(i->_level.lock()->GetLevelName().c_str());
+            //默认开启第一个level的编辑和加载（如果有
+            if (_currentLevelItem == nullptr && _levelItems.size() > 0)
+            {
+                _currentLevelItem = FindLevel(i->_level.lock()->GetGUID());
+                _comboBox->SetCurrentSelection(i->_level.lock()->GetLevelName().c_str());
+            }
+        }
+    }
+    if (_currentLevelItem == nullptr && _levelItems.size() <= 0)
+    {
+        ClearCurrentLevelSelection();
+    }
 }
 
 SceneOutlineItem* SceneOutline::FindLevel(QString levelName)

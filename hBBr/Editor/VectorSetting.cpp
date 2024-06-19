@@ -8,10 +8,7 @@ VectorSetting::VectorSetting(QString name, QWidget *parent,const int demensional
 {
 	ui.setupUi(this);
 	ui.Name->setText(name);
-	//QFont font("Microsoft YaHei", 10, 50); 
 	ui.Name->setObjectName("PropertyName");
-	//ui.Name->setFont(font);
-	//this->setStyleSheet("color:rgb(230,230,230);");
 	Demensionality = demensionality;
 	ui.horizontalLayout->setStretch(0 , 1);
 	ui.horizontalLayout->setStretch(1,	1);

@@ -210,7 +210,25 @@ void World::Load(class VulkanRenderer* renderer)
 	//create editor camera
 	auto backCamera = GameObject::CreateGameObject("EditorCamera", _editorLevel.get());
 	backCamera->_sceneEditorHide = true;
-	backCamera->GetTransform()->SetWorldLocation(glm::vec3(0, 2, -3.0));
+	
+	glm::vec3 camPos = glm::vec3(0, 2, -3.0);
+	glm::vec3 camRot = glm::vec3(0);
+	{
+		auto it = _json.find("DefaultCameraPosition");
+		if (it != _json.end())
+		{
+			from_json(it.value(), camPos);
+		}
+	}
+	{
+		auto it = _json.find("DefaultCameraRotation");
+		if (it != _json.end())
+		{
+			from_json(it.value(), camRot);
+		}
+	}
+	backCamera->GetTransform()->SetWorldLocation(camPos);
+	backCamera->GetTransform()->SetWorldRotation(camRot);
 	auto cameraComp = backCamera->AddComponent<CameraComponent>();
 	cameraComp->OverrideMainCamera();
 	_editorCamera = cameraComp;
@@ -346,6 +364,13 @@ nlohmann::json World::ToJson()
 	//
 	_json["WorldName"] = _worldName.c_str();
 	_json["Levels"] = levels;
+	//cam
+	if (_mainCamera)
+	{
+		to_json(_json["DefaultCameraPosition"], _mainCamera->GetTransform()->GetWorldLocation());
+		to_json(_json["DefaultCameraRotation"], _mainCamera->GetTransform()->GetWorldRotation());
+	}
+
 	return _json;
 }
 

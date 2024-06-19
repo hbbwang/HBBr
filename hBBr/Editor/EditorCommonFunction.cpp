@@ -10,7 +10,7 @@
 #include "qapplication.h"
 #include "FileSystem.h"
 #include "Serializable.h"
-
+#include<QRegularExpression>
 QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
 {
 	QString result;
@@ -57,13 +57,12 @@ QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
                 }
                 if (bFoundVariable)
                 {
-                    auto noSpace = strLine.remove(" ");
-                    noSpace = strLine.remove("\r");
-                    noSpace = noSpace.remove("\t");
-                    auto l = noSpace.split(':');
+                    auto l = strLine.split(':');
                     if (l.size() > 1)
                     {
-                        QString name = l[0];
+                        QString name = l[0].remove(" ");
+                        name = name.remove("\r");
+                        name = name.remove("\t");
                         QString value = l[1].remove(';');
                         vars.append({ name , value });
                     }
@@ -81,7 +80,9 @@ QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
             styleFile.close();
             for (auto i : vars)
             {
-                result.replace(i.name, i.value); 
+                QString re = "\\b" + i.name + "\\b";
+                auto reg = QRegularExpression(re);
+                result.replace(reg, i.value);
             }
 		}
 		else
@@ -90,6 +91,7 @@ QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
 		}
 	}
 	//QMessageBox::information(this, "Check", result);
+    //ConsoleDebug::print_endl(result.toStdString());
 	return result;
 }
 

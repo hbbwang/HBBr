@@ -14,6 +14,9 @@
 #include "DirtyAssetsManager.h"
 #include "RendererCore/Core/VulkanRenderer.h"
 #include "RendererCore/Core/Asset/World.h"
+#include "QFontDatabase.h"
+#include "ConsoleDebug.h"
+
 EditorMain* EditorMain::_self = nullptr;
 
 EditorMain::EditorMain(QWidget *parent)
@@ -53,7 +56,7 @@ EditorMain::EditorMain(QWidget *parent)
     addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, _inspector_dock);
 
     setObjectName("EditorMain");
-    setStyleSheet(GetWidgetStyleSheetFromFile("EditorMain"));
+    //setStyleSheet(GetWidgetStyleSheetFromFile("EditorMain"));
 
     connect(ui.ResetWindowStyle, &QAction::triggered, this, [this](bool bChecked) {
         setStyleSheet(GetWidgetStyleSheetFromFile("EditorMain"));

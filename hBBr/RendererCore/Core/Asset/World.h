@@ -76,12 +76,19 @@ public:
 	std::shared_ptr<Level> _editorLevel;
 
 	void SetCurrentSelectionLevel(std::weak_ptr<Level> level);
+
 	HBBR_API void MarkDirty();
+
 	static std::vector<std::weak_ptr<World>> _dirtyWorlds;
+
 	HBBR_API static std::vector<std::weak_ptr<World>> GetDirtyWorlds() { return _dirtyWorlds; }
+
 	bool bDirtySelect = true;
+
 	HBBR_API  bool IsDirtySelect() { return bDirtySelect; }
+
 	HBBR_API  void SetDirtySelect(bool input) { bDirtySelect = input; }
+
 	HBBR_API static void AddDirtyWorld(std::weak_ptr<World> dirtyWorld)
 	{
 		auto it = std::find_if(_dirtyWorlds.begin(), _dirtyWorlds.end(), [dirtyWorld](std::weak_ptr<World>& w) {

@@ -1,4 +1,14 @@
 {
+    "DefaultCameraPosition": {
+        "x": -2.934718132019043,
+        "y": 1.3076127767562866,
+        "z": -1.9723643064498901
+    },
+    "DefaultCameraRotation": {
+        "x": 3.75,
+        "y": 53.5,
+        "z": 0.0
+    },
     "Levels": {
         "Main": {
             "GUID": "7340fb5d-cea2-4090-bc3a-67aadcd4ab92",

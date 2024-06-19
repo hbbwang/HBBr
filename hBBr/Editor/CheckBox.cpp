@@ -8,7 +8,6 @@ CheckBox::CheckBox(QWidget* parent , bool bEnbale )
 	//ui.checkBox->setGeometry(0, 0, 30, 30);
 	ui.Name->setHidden(true);
 	ui.horizontalSpacer->setGeometry(QRect(0, 0, 0, 0));
-	ui.checkBox->resize(20,20);
 	ui.checkBox->setChecked(bEnbale);
 	ui.checkBox->setObjectName("PropertyCheckBox");
 	connect(ui.checkBox,SIGNAL(stateChanged(int)),this,SLOT(stateChanged(int)));

@@ -128,6 +128,10 @@ public:
 		return _world;
 	}
 
+	HBBR_API HBBR_INLINE class Transform* GetTransform() {
+		return _gameObject->_transform;
+	}
+
 	//不是每帧执行,一般用于编辑器的对象数据刷新
 	//编辑器Inspector如果改了组件的参数，是通过调用这个函数进行刷新
 	HBBR_API virtual void UpdateData() {}

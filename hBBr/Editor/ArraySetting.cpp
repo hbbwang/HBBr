@@ -27,8 +27,6 @@ ArraySetting::ArraySetting(QString name ,QWidget *parent, QString type)
 	ui.ArrayNum->setAlignment(Qt::AlignRight);
 	this->setContextMenuPolicy(Qt::NoContextMenu);
 
-	QFont font("Microsoft YaHei", 11, 50);
-	this->setFont(font);
 	//
 	//
 	if (type.compare("float", Qt::CaseInsensitive)==0)

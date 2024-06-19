@@ -104,12 +104,19 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 	ClearInspector();
 	_currentGameObject = gameObj.lock()->GetSelfWeekPtr();
 	std::shared_ptr<GameObject> obj = gameObj.lock();
+	_layoutMain->setContentsMargins(1, 1, 1, 1);
+	_layoutMain->setSpacing(1);
 	//---------------------- Active & Title (GameObject Name)
 	QWidget* titleWidget = new QWidget(this);
 	QHBoxLayout* horLayout = new QHBoxLayout(this);
-	_layoutMain->addWidget(titleWidget);
+	horLayout->setContentsMargins(1, 1, 1, 1);
+	horLayout->setSpacing(1);
 	titleWidget->setLayout(horLayout);
+	_layoutMain->addWidget(titleWidget);
+	_layoutMain->addStretch(10);
 	CheckBox* active = new CheckBox(this, obj->IsActive());
+	active->setObjectName("Inspector_Active");
+	active->ui.checkBox->setObjectName("Inspector_Active");
 	active->_callback = [obj](bool bb) {
 		if (obj)
 		{
@@ -118,21 +125,17 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 	};
 	active->_boolBind = &obj->_bActive;
 	horLayout->addWidget(active);
-	QTextEdit* title = new QTextEdit(this);
-	title->setObjectName("InspectorTitle");
-	title->setLineWrapMode(QTextEdit::LineWrapMode::NoWrap);
-	title->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
-	title->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
-	title->setMaximumHeight(20);
-	title->setMinimumHeight(20);
+	QLineEdit* title = new QLineEdit(this);
+	title->setObjectName("Inspector_ObjectName");
 	title->setText(obj->GetObjectName().c_str());
 	horLayout->addWidget(title);
-	horLayout->addStretch(999);
-	connect(title, &QTextEdit::textChanged, this, 
+	horLayout->setStretch(0, 0);
+	horLayout->setStretch(1, 10);
+	connect(title, &QLineEdit::editingFinished, this,
 		[title , this]() {
-			if (title && !_currentGameObject.expired() && title->toPlainText().endsWith('\n'))
+			if (title && !_currentGameObject.expired()&& _currentGameObject.lock()->GetObjectName() != title->text().toStdString())
 			{
-				_currentGameObject.lock()->SetObjectName(title->toPlainText().toStdString().c_str());
+				_currentGameObject.lock()->SetObjectName(title->text().toStdString().c_str());
 				title->clearFocus();
 			}
 		});

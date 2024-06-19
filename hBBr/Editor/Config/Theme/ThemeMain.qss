@@ -1,6 +1,7 @@
 VariableDefine {
     BackgroundColor: rgb(31, 31, 31) ;
-    FontFamily:  微软雅黑 , Arial, Helvetica, sans-serif;
+    FontFamily:  'Zen Maru Gothic';
+    FontFamily2: Arial, Helvetica, sans-serif;
     SplitterHandleColor : rgb(125,125,125);
     SplitterWidth : 3px;
 }
@@ -18,6 +19,7 @@ VariableDefine {
 }
 QWidget
 {
+    font-family:  FontFamily;
     background-color: BackgroundColor;
     color: rgb(190, 190, 190);
     border: 0px;
@@ -78,8 +80,8 @@ QComboBox QAbstractItemView
     font-family:  FontFamily;
     background-color: rgba(25,25,25,0.1);
     color:rgb(150,150,150);
-    border: 1.5px solid rgb(180,150,150);
-    selection-background-color: rgb(220,150,140);
+    border: 1.5px solid rgb(179, 171, 171);
+    selection-background-color: rgb(82, 82, 82);
     selection-color: rgb(255,255,255);
 }
 QLineEdit
@@ -87,22 +89,19 @@ QLineEdit
     background-color: rgba(25,25,25,0.9);
     color:rgb(160,160,160);
     border:1px solid  rgb(80,80,80);
-    font-family:  FontFamily;
-    height: 50;
+    font-family:  FontFamily2;
 }
 QLineEdit:focus
 {
     background-color: rgb(25,25,25);
     color:rgb(200,200,200);
     border: 1px solid rgb(100,100,100);
-    font-family:  FontFamily;
 }
 QLineEdit:hover
 {
     background-color: rgb(25,20,20);
     color:rgb(200,200,200);
     border: 1px solid rgb(200,180,180);
-    font-family:  FontFamily;
 }
 QMessageBox 
 { 
@@ -127,17 +126,23 @@ QMenu
     border: 1px solid rgb(125, 125, 125);
     Color:rgb(160,160,160);
 }
+QMenu::item
+{
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 5px;
+}
 QMenu::item:selected
 {
-    background-color: rgb(127, 127, 127);
-    border: 1px solid rgb(200, 200, 200);
+    background-color: rgb(81, 81, 81);
+    /* border: 1px solid rgb(200, 200, 200); */
     Color:rgb(255,255,255);
-    padding-left: 5px;
+    padding-left: 6px;
 }
 QMenu::separator
 {
     height:1px;
-    background-color:rgba(150, 100, 105 , 0.5);
+    background-color:rgb(118, 118, 118);
     /* margin-left:5px;
     margin-right:5px; */
 }
@@ -279,12 +284,12 @@ QDockWidget
 }
 QDockWidget::title
 {
-    font-family: FontFamily;
+    font-family: FontFamily2;
     color:rgb(200, 200, 200);
     background-color: rgb(0, 0, 0);
     padding-left: 6px;
     padding-top: 6px;
-    border-bottom: 1px solid rgb(100, 100, 100);
+    border-bottom: 2px solid rgb(100, 100, 100);
 }
 QDockWidget::close-button,
 QDockWidget::float-button
@@ -300,26 +305,28 @@ QDockWidget::close-button:hover
 }
 QTreeView 
 {
+    font-family: FontFamily2;
     background-color: BackgroundColor;
     color: antiquewhite;
     outline: 0;
+    font-weight:400;
+    font-size: 18px;
 }
 QTreeView::item 
 {
     height: 20px;
     border: none;
-    color: antiquewhite;
+    color: rgb(184, 184, 184);
+    margin: 2px;
 }
 QTreeView::item:hover 
 {
-    font-family: FontFamily;
     color :rgb(209, 209, 209);
-    background-color: rgba(56, 53, 53, 0.8);
+    background-color: rgba(66, 66, 66, 0.8);
     outline: 0;
 }
 QTreeView::item:selected
 {
-    font-family: FontFamily;
     color :rgb(255, 255, 255);
     background-color: rgb(59, 61, 65);
     border: 1px solid rgb(120, 120, 120);
@@ -371,8 +378,6 @@ QSplitter::handle
 }
 #SceneOutline
 {
-    color:rgb(151, 151, 151);
-    font-family: FontFamily;
     background-color: BackgroundColor;
 }
 #SceneOutline_ComboBox_Main
@@ -380,19 +385,26 @@ QSplitter::handle
 }
 #SceneOutline_ComboBox
 {
-    height: 20px;
+    height: 25px;
+    font-family: FontFamily;
+    font-weight: 400;
 }
 #SceneOutline_Name
 {
-
+    color: #adadad;
+    height: 25px;
+    font-family: FontFamily2;
+    font-weight: 400;
+    margin-left: 4px;
+    margin-right: 4px;
 }
 /* All Property Name */
 #PropertyName
 {
-    font-family: FontFamily;
+    font-family: FontFamily2;
     color:rgb(200,200,200);
     background-color: transparent;
-    font-size: 13px;
+    font-size: 18px;
 }
 /* Property SpinBox */
 #PropertySpinBox_X
@@ -432,17 +444,17 @@ QSplitter::handle
 {
     width: 10px; 
     height: 10px; 
+    border:4px double rgb(20,20,20);
 }
 #PropertyCheckBox::indicator:checked
 {   
     background:rgb(105, 255, 50);
-    border:4px double rgb(20,20,20);
+
     border-radius:2px;		
 }
 #PropertyCheckBox::indicator:unchecked  
 {     
     background:rgb(200,50,20);
-    border:4px double rgb(20,20,20);
     border-radius:	2px;		
 }
 /* Property AssetLine */
@@ -452,10 +464,9 @@ QSplitter::handle
 #PropertyAssetLine_LineEdit
 {
     border:1px solid rgb(10,10,10);
-    border-radius:8px;
+    border-radius:2px;
     background-color:rgb(75,75,75);
     color:rgb(200,200,200);
-    height: 20px;
 }
 #PropertyAssetLine_Button
 {  
@@ -487,7 +498,7 @@ QSplitter::handle
 #SearchLine_LineEdit
 {
     margin: 1px;
-    border-radius: 4px;
+    border-radius: 2px;
 }
 #SearchLine_ComboBox
 {
@@ -501,32 +512,27 @@ QSplitter::handle
 {
     border-image: url(./Config/Theme/Icons/ICON_SEARCH.png);
 }
-/* Inspector */
-#Inspector
-{
-    background-color: BackgroundColor;
-}
 #CustomTreeView
 {
-
+    font-family: FontFamily2;
 }
 #CustomListView_ToolTip
 {
-    font-family: FontFamily;
+    font-family: FontFamily2;
     background-color: rgb(20,20,20);
     color : rgb(235,235,235);
     border:2px solid rgb(63, 117, 124);
 }
 #CustomListView_Text
 {
-    font-family: FontFamily;
+    font-family: FontFamily2;
 }
 #CustomTreeView_VirtualFolderTreeView
 {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: FontFamily2;
     color: rgb(140, 140, 140) ;
-    font-weight:400;
-    font-size: 14px;
+    font-weight:100;
+    font-size: 18px;
     icon-size: 32px;
 }
 #CustomTreeView_VirtualFolderTreeView::item 
@@ -555,7 +561,7 @@ QSplitter::handle
 #CustomListView_VirtualFileListView 
 {
     background-color:transparent;
-    font-size: 14px;
+    font-size: 18px;
 }
 #CustomListView_VirtualFileListView::item
 {
@@ -612,6 +618,7 @@ QSplitter::handle
     /* border: 1px solid rgb(140, 90, 100); */
     background-color:transparent;
     color:rgb(175,175,175);
+    margin-left: 6px
 }
 QHeaderView::section
 {
@@ -628,6 +635,7 @@ QHeaderView::section
 }
 #DirtyAssetsManager .QTreeWidget::item
 {
+    font-family:  FontFamily;
     height: 30px;
     color:rgb(170, 170, 170);
     border:none;
@@ -652,4 +660,32 @@ QHeaderView::section
 {
     height: 35px ;
     border: 2px solid rgb(72, 85, 81);
+}
+/* Inspector */
+#Inspector
+{
+    background-color: BackgroundColor;
+    font-family:  FontFamily2;
+}
+#Inspector_Active::indicator 
+{
+    width: 14px; 
+    height: 14px; 
+    border:4px double rgb(20,20,20);
+    font-size: 0;
+}
+#Inspector_Active::indicator:checked
+{   
+    background:rgb(105, 255, 50);
+    border-radius:2px;		
+}
+#Inspector_Active::indicator:unchecked  
+{     
+    background:rgb(200,50,20);
+    border-radius:	2px;
+}
+#Inspector_ObjectName
+{
+    background-color: rgb(10,10,10);
+    border-radius:	2px;
 };

@@ -6,6 +6,9 @@
 #include "RenderView.h"
 #include "HInput.h"
 #include "ContentBrowser.h"
+#include "qfontdatabase.h"
+#include "ConsoleDebug.h"
+#include "EditorCommonFunction.h"
 #include <Windows.h> //为了支持SetFocus(nullptr);
 
 QWidget* currentFocusWidget = nullptr;
@@ -57,7 +60,37 @@ int main(int argc, char *argv[])
     MyEventFilter filter;
     a.installEventFilter(&filter); // 安装事件过滤器
 
+    //构造窗口
     EditorMain w;
+
+    //载入字体
+    auto allFonts = FileSystem::GetAllFilesExceptFolders(FileSystem::Append(FileSystem::GetConfigAbsPath(), "Theme/Fonts").c_str());
+    for (auto& i : allFonts)
+    {
+        QString fontPath = QString::fromStdWString(i.absPath.c_wstr());
+        auto fontId = QFontDatabase::addApplicationFont(fontPath);
+        if (fontId != -1)
+        {
+            QStringList fonts = QFontDatabase::applicationFontFamilies(fontId);
+            foreach(QString font, fonts)
+            {
+                ConsoleDebug::printf_endl("Loaded font:%s", font.toStdString().c_str());
+            }
+            QString fontFamily = fonts.at(0);
+            QFont defaultFont = a.font();
+            defaultFont.setFamily(fontFamily);
+            a.setFont(defaultFont);
+        }
+        else
+        {
+            ConsoleDebug::printf_endl("Failed to load the font: %s", fontPath.toStdString().c_str());
+        }
+    }
+
+    //刷新一下样式
+    w.setStyleSheet(GetWidgetStyleSheetFromFile("EditorMain"));
+
+    //显示窗口
     w.show();
     w.resize(1024, 768);
 
