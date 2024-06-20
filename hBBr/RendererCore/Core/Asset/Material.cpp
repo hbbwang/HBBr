@@ -16,6 +16,16 @@ Material::~Material()
 	PrimitiveProxy::RemoveMaterialPrimitive(_primitive->passUsing, _primitive.get());
 }
 
+std::weak_ptr<Material> Material::GetDefaultMaterial()
+{
+	static std::weak_ptr<Material> defaultMat;
+	if (defaultMat.expired())
+	{
+		defaultMat = Material::LoadAsset(HGUID("b51e2e9a-0985-75e8-6138-fa95efcbab57"));
+	}
+	return defaultMat;
+}
+
 std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 {
 	const auto matAssets = ContentManager::Get()->GetAssets(AssetType::Material);
@@ -49,7 +59,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		std::shared_ptr<Material> mat (new Material) ;
 		//MaterialPrimitive
 		mat->_primitive.reset(new MaterialPrimitive());
-		mat->_assetInfo = dataPtr.get();
+		mat->_assetInfo = dataPtr;
 		mat->_primitive->graphicsName = it->second->displayName;
 		mat->_primitive->vsShader = json["vsShader"];
 		mat->_primitive->psShader = json["psShader"];

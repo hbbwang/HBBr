@@ -192,7 +192,7 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 	uint32_t h = out->data_header.height;
 	VkFormat format = out->texFormat;
 	std::shared_ptr<Texture2D> newTexture = std::make_shared<Texture2D>();
-	newTexture->_assetInfo = dataPtr.get();
+	newTexture->_assetInfo = dataPtr;
 	newTexture->_textureName = dataPtr->displayName;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = { w, h };

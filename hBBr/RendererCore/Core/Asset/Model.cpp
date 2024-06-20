@@ -75,7 +75,7 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 	}
 
 	auto model = std::make_shared<Model>();
-	model->_assetInfo = dataPtr.get();
+	model->_assetInfo = dataPtr;
 	glm::vec3 boundingBox_min = glm::vec3(0, 0, 0);
 	glm::vec3 boundingBox_max = glm::vec3(0, 0, 0);
 	for (unsigned int nm = 0; nm < scene->mNumMeshes; nm++)
@@ -217,7 +217,7 @@ bool Model::BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prim
 			prims[i]->boundingBox_min = data->boundingBox_min;
 			prims[i]->boundingBox_max = data->boundingBox_max;
 			prims[i]->vertexInput = data->faces[i].vertexData;
-			prims[i]->modelPrimitiveName = data->_assetInfo->displayName;
+			prims[i]->modelPrimitiveName = data->_assetInfo.lock()->displayName;
 		}
 		return true;
 	}

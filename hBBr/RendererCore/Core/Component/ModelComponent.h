@@ -38,13 +38,13 @@ protected:
 	//Component Property Reflection Add.
 	HBBR_INLINE virtual void OnConstruction()override;
 
+	void UpdateMaterial();
+
 private:
 
 	AssetRef  _modelPath;
 
 	std::vector<AssetRef> _materialPath;
-
-	std::vector<std::weak_ptr<Material>> _materials;
 
 	std::vector<ModelPrimitive*> _primitives;
 

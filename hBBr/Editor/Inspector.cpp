@@ -5,6 +5,7 @@
 #include "SceneOutline.h"
 #include "CheckBox.h"
 #include "Component.h"
+#include "CollapsedWidget.h"
 #include "ToolBox.h"
 #include "VectorSetting.h"
 #include "AssetLine.h"
@@ -231,22 +232,71 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 			{
 				if (p.bArray)
 				{
-
+					std::vector<AssetRef>* refs = (std::vector<AssetRef>*)p.value;
+					ToolBox* cw = new ToolBox(p.name.c_str(), true, this);
+					compWidget->layout()->addWidget(cw);
+					for (int i = 0; i < refs->size(); i++)
+					{
+						AssetLine* line = new AssetLine(p.name, this, refs->at(i).assetInfo.lock()->virtualFilePath.c_str(), p.condition);
+						cw->addSubWidget(line);
+						//component callback
+						refs->at(i).callBack = [line, refs,i]() {
+							line->ui.LineEdit->setText(refs->at(i).assetInfo.lock()->virtualFilePath.c_str());
+						};
+						//查找按钮
+						line->_bindFindButtonFunc = [refs, i](const char* p) {
+							auto assetInfo = refs->at(i).assetInfo;
+							if (!assetInfo.expired())
+							{
+								auto treeItems = assetInfo.lock()->virtualPath.Split("/");
+								QString path;
+								CustomViewItem* treeItem = nullptr;
+								QModelIndex treeIndex;
+								for (auto& i : treeItems)
+								{
+									path += ("/" + i).c_str();
+									treeItem = ContentBrowser::GetCurrentBrowser()->_treeView->FindItem(path);
+									if (treeItem)
+									{
+										ContentBrowser::GetCurrentBrowser()->_treeView->_bSaveSelectionItem = true;
+										treeIndex = ((QStandardItemModel*)ContentBrowser::GetCurrentBrowser()->_treeView->model())->indexFromItem(treeItem);
+										ContentBrowser::GetCurrentBrowser()->_treeView->expand(treeIndex);
+									}
+								}
+								if (treeIndex.isValid())
+								{
+									ContentBrowser::GetCurrentBrowser()->_treeView->selectionModel()->setCurrentIndex(treeIndex, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+								}
+								auto item = ContentBrowser::GetCurrentBrowser()->_listView->FindAssetItem(assetInfo.lock()->guid);
+								if (item)
+								{
+									ContentBrowser::GetCurrentBrowser()->_listView->scrollToItem(item);
+									ContentBrowser::GetCurrentBrowser()->_listView->setCurrentItem(item, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+								}
+							}
+						};
+						//路径发生变化的时候执行
+						line->_bindAssetPath = [p, refs, i](const char* s) {
+							refs->at(i).path = s;
+							p.comp->UpdateData();
+						};
+					}
 				}
 				else
 				{
 					AssetRef* ref = (AssetRef*)p.value;
-					AssetLine* line = new AssetLine(p.name, this, ref->assetInfo->virtualFilePath.c_str(), p.condition);
+					AssetLine* line = new AssetLine(p.name, this, ref->assetInfo.lock()->virtualFilePath.c_str(), p.condition);
 					compWidget->layout()->addWidget(line);
+					//component callback
 					ref->callBack = [line,ref]() {
-						line->ui.LineEdit->setText(ref->assetInfo->virtualFilePath.c_str());
+						line->ui.LineEdit->setText(ref->assetInfo.lock()->virtualFilePath.c_str());
 					};
 					//查找按钮
 					line->_bindFindButtonFunc = [ref](const char* p) {
 						auto assetInfo = ref->assetInfo;
-						if (assetInfo)
+						if (!assetInfo.expired())
 						{
-							auto treeItems = assetInfo->virtualPath.Split("/");
+							auto treeItems = assetInfo.lock()->virtualPath.Split("/");
 							QString path;
 							CustomViewItem* treeItem = nullptr;
 							QModelIndex treeIndex;
@@ -265,7 +315,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 							{
 								ContentBrowser::GetCurrentBrowser()->_treeView->selectionModel()->setCurrentIndex(treeIndex, QItemSelectionModel::SelectionFlag::ClearAndSelect);
 							}
-							auto item = ContentBrowser::GetCurrentBrowser()->_listView->FindAssetItem(assetInfo->guid);
+							auto item = ContentBrowser::GetCurrentBrowser()->_listView->FindAssetItem(assetInfo.lock()->guid);
 							if (item)
 							{
 								ContentBrowser::GetCurrentBrowser()->_listView->scrollToItem(item);
