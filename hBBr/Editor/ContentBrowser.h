@@ -33,7 +33,7 @@ public:
 private:
 	CustomViewItem* _ediingItem = nullptr;
 protected:
-
+	virtual void mousePressEvent(QMouseEvent* event) override;
 	virtual void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)override;
 	virtual void currentChanged(const QModelIndex& current, const QModelIndex& previous) override;
 	virtual void contextMenuEvent(QContextMenuEvent* event)override;

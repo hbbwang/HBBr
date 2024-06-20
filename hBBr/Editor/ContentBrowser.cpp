@@ -229,6 +229,12 @@ void VirtualFolderTreeView::DeleteFolders(QList<CustomViewItem*> allFoldersForDe
 
 }
 
+void VirtualFolderTreeView::mousePressEvent(QMouseEvent* event)
+{
+	CustomTreeView::mousePressEvent(event);
+
+}
+
 void VirtualFolderTreeView::currentChanged(const QModelIndex& current, const QModelIndex& previous)
 {
 	CustomTreeView::currentChanged(current, previous);
@@ -251,7 +257,6 @@ void VirtualFolderTreeView::currentChanged(const QModelIndex& current, const QMo
 
 		if (_bSaveSelectionItem || _newSelectionItems.size() <=0 )//第一个目录记一下
 		{
-			if (_newSelectionItems.size() <= 0 || (_newSelectionItems.size()>0 && _newSelectionItems[0] != item->_fullPath))
 			{
 				_newSelectionItems.insert(0, item->_fullPath);
 				if (_newSelectionItems.size() > 50)
@@ -958,8 +963,6 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	ui.PathLabel->setObjectName("ContentBrowser_PathLabel");
 	ui.PathLabel->setText("Asset /");
 
-	_treeView->_newSelectionItems.append("/Content");s
-
 	_contentBrowser.append(this);
 	_currentBrowser = this;
 	//Connect
@@ -967,7 +970,9 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 		_treeView->_bSaveSelectionItem = true;
 		if (_treeView->_currentSelectionItem != 0 && _treeView->_newSelectionItems.size() > 0)
 		{
-			_treeView->_newSelectionItems.erase(_treeView->_newSelectionItems.begin(), _treeView->_newSelectionItems.end() - (_treeView->_newSelectionItems.size() - _treeView->_currentSelectionItem));
+			_treeView->_newSelectionItems.erase(
+				_treeView->_newSelectionItems.begin(), 
+				_treeView->_newSelectionItems.end() - (_treeView->_newSelectionItems.size() - _treeView->_currentSelectionItem));
 			_treeView->_currentSelectionItem = 0;
 		}
 	});
@@ -993,17 +998,14 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	});
 	//回到上一个文件夹 ←
 	connect(ui.BackspaceButton, &QAbstractButton::clicked, this, [this]() {
-		if (_treeView->_newSelectionItems.size() > 0 && _treeView->_newSelectionItems.size() > _treeView->_currentSelectionItem + 1)
+		if (_treeView->_newSelectionItems.size() > 0 && _treeView->_newSelectionItems.size() > _treeView->_currentSelectionItem)
 		{
+			auto itemFullPath = _treeView->_newSelectionItems[_treeView->_currentSelectionItem];
 			_treeView->_currentSelectionItem++;
-			if (_treeView->_newSelectionItems.size() > _treeView->_currentSelectionItem)
+			auto item = _treeView->FindFolder(itemFullPath);
 			{
-				auto itemFullPath = _treeView->_newSelectionItems[_treeView->_currentSelectionItem];
-				auto item = _treeView->FindFolder(itemFullPath);
-				{
-					_treeView->_bSaveSelectionItem = false;
-					_treeView->selectionModel()->setCurrentIndex(item->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
-				}
+				_treeView->_bSaveSelectionItem = false;
+				_treeView->selectionModel()->setCurrentIndex(item->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
 			}
 		}
 	});
@@ -1011,9 +1013,8 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	connect(ui.BackToParentButton, &QAbstractButton::clicked, this, [this]() {
 		if (_treeView->currentIndex().isValid())
 		{ 
-			if (_treeView->_newSelectionItems.size() > 0 && _treeView->_newSelectionItems.size() > _treeView->_currentSelectionItem + 1)
+			if (_treeView->_newSelectionItems.size() > 0 && _treeView->_newSelectionItems.size() > _treeView->_currentSelectionItem)
 			{
-				_treeView->_currentSelectionItem++;
 				QStandardItemModel* model = (QStandardItemModel*)_treeView->model();
 				CustomViewItem* item = (CustomViewItem*)model->itemFromIndex(_treeView->currentIndex());
 				if (item && item->parent() && item->parent()->index().isValid())
