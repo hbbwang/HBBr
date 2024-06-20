@@ -10,6 +10,7 @@
 #include "AssetLine.h"
 #include "AssetObject.h"
 #include "FileSystem.h"
+#include "ContentBrowser.h"
 
 #include "Model.h"
 #include "Material.h"
@@ -230,58 +231,52 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 			{
 				if (p.bArray)
 				{
-				/*	auto value = ((std::vector<HGUID>*)p.value);
-					ToolBox* box = new ToolBox("Material", true, this);
-					compWidget->layout()->addWidget(box);
-					for (int i = 0; i < value->size(); i++)
-					{
-						auto info = ContentManager::Get()->GetAssetInfo(value->at(i));
-						if (!info.expired())
-						{
-							AssetLine* line = new AssetLine(p.name, this, info.lock()->assetFilePath, info.lock()->suffix);
-							compWidget->layout()->addWidget(line);
-							line->_bindFindButtonFunc = [](const char* p) {
 
-							};
-							line->_bindStringFunc = [p, value, i](AssetLine* line, const char* s) {
-								auto guidStr = FileSystem::GetBaseName(s);
-								HGUID newGuid;
-								StringToGUID(guidStr.c_str(), &newGuid);
-								if (newGuid.isValid())
-								{
-									value->at(i) = newGuid;
-									if (p.type_runtime == typeid(Model).name())
-									{
-										auto newObject = Model::LoadAsset(newGuid);
-										auto shared = newObject.lock();
-										line->_objectBind = shared.get();
-									}
-									else	if (p.type_runtime == typeid(Material).name())
-									{
-										auto newObject = Material::LoadAsset(newGuid);
-										auto shared = newObject.lock();
-										line->_objectBind = shared.get();
-									}
-								}
-							};
-						}
-					}*/
 				}
 				else
 				{
-					AssetRef* path = (AssetRef*)p.value;
-					AssetLine* line = new AssetLine(p.name, this, path->path.c_str(), p.condition);
+					AssetRef* ref = (AssetRef*)p.value;
+					AssetLine* line = new AssetLine(p.name, this, ref->assetInfo->virtualFilePath.c_str(), p.condition);
 					compWidget->layout()->addWidget(line);
-					path->callBack = [line,path]() {
-						line->ui.LineEdit->setText(path->path.c_str());
+					ref->callBack = [line,ref]() {
+						line->ui.LineEdit->setText(ref->assetInfo->virtualFilePath.c_str());
 					};
 					//查找按钮
-					line->_bindFindButtonFunc = [](const char* p) {
-						
+					line->_bindFindButtonFunc = [ref](const char* p) {
+						auto assetInfo = ref->assetInfo;
+						if (assetInfo)
+						{
+							auto treeItems = assetInfo->virtualPath.Split("/");
+							QString path;
+							CustomViewItem* treeItem = nullptr;
+							QModelIndex treeIndex;
+							for (auto& i : treeItems)
+							{
+								path += ("/" + i).c_str();
+								treeItem = ContentBrowser::GetCurrentBrowser()->_treeView->FindItem(path);
+								if (treeItem)
+								{
+									ContentBrowser::GetCurrentBrowser()->_treeView->_bSaveSelectionItem = true;
+									treeIndex = ((QStandardItemModel*)ContentBrowser::GetCurrentBrowser()->_treeView->model())->indexFromItem(treeItem);
+									ContentBrowser::GetCurrentBrowser()->_treeView->expand(treeIndex);
+								}
+							}
+							if (treeIndex.isValid())
+							{
+								ContentBrowser::GetCurrentBrowser()->_treeView->selectionModel()->setCurrentIndex(treeIndex, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+							}
+							auto item = ContentBrowser::GetCurrentBrowser()->_listView->FindAssetItem(assetInfo->guid);
+							if (item)
+							{
+								ContentBrowser::GetCurrentBrowser()->_listView->scrollToItem(item);
+								ContentBrowser::GetCurrentBrowser()->_listView->setCurrentItem(item, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+							}
+						}
+
 					};
 					//路径发生变化的时候执行
-					line->_bindAssetPath = [p, path](const char* s) {
-						path->path = s;
+					line->_bindAssetPath = [p, ref](const char* s) {
+						ref->path = s;
 						p.comp->UpdateData();
 					};
 				}

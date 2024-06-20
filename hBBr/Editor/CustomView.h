@@ -69,7 +69,9 @@ public:
 
 	QList<CustomViewItem*> FindItems(QString name);
 
-	virtual void SelectionItem(QString text);
+	CustomViewItem* FindItem(QString path);
+
+	virtual void SelectionItem(QString itemPath);
 
 	virtual void RemoveAllItems();
 
@@ -89,7 +91,9 @@ public:
 
 	virtual CustomListItem* AddItem(QString name, QString iconPath = "", ToolTip toolTip = ToolTip());
 
-	QList<CustomListItem*> FindItems(QString name);
+	virtual QList<CustomListItem*> FindItems(QString name);
+
+	virtual CustomListItem* FindItem(QString itemPath);
 
 	virtual const QList<CustomListItem*> GetSelectionItems()const;
 

@@ -22,6 +22,7 @@ protected:
         if (event->type() == QEvent::MouseButtonPress) 
         {
             QWidget* newCurrentFocusWidget = QApplication::widgetAt(mouseEvent->globalPos());
+            auto cursorPos = mouseEvent->globalPos();
             if (currentFocusWidget && currentFocusWidget != newCurrentFocusWidget && currentFocusWidget != QApplication::focusWidget())
             {
                 if (
@@ -43,6 +44,19 @@ protected:
                     SetFocus(nullptr);
                     //再重新赋予QT焦点
                     currentFocusWidget->setFocus();
+                }
+            }
+            //ContentBrowser focus
+            for (auto& cb : ContentBrowser::GetContentBrowsers())
+            {
+                if (cb)
+                {
+                    QPoint localCursorPos = cb->mapFromGlobal(mouseEvent->globalPos());
+                    if (cb->rect().contains(localCursorPos))
+                    {
+                        ContentBrowser::SetCurrentBrowser(cb);
+                        break;
+                    }
                 }
             }
         }

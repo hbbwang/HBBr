@@ -137,7 +137,7 @@ void VirtualFolderTreeView::AddItem(CustomViewItem* newItem, CustomViewItem* par
 	else
 	{
 		//newItem->_path = parent->_path + "/" + _rootItem->_text;
-		newItem->_fullPath = newItem->_text;
+		newItem->_fullPath = "/" + newItem->_text;
 		((QStandardItemModel*)model())->appendRow(newItem);
 	}
 	_allItems.append(newItem);
@@ -251,11 +251,15 @@ void VirtualFolderTreeView::currentChanged(const QModelIndex& current, const QMo
 
 		if (_bSaveSelectionItem || _newSelectionItems.size() <=0 )//第一个目录记一下
 		{
-			_newSelectionItems.insert(0, item->_fullPath);
-			if (_newSelectionItems.size() > 50)
+			if (_newSelectionItems.size() <= 0 || (_newSelectionItems.size()>0 && _newSelectionItems[0] != item->_fullPath))
 			{
-				_newSelectionItems.removeLast();
+				_newSelectionItems.insert(0, item->_fullPath);
+				if (_newSelectionItems.size() > 50)
+				{
+					_newSelectionItems.removeLast();
+				}
 			}
+
 		}
 	}
 }
@@ -764,6 +768,47 @@ CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase>
 	return nullptr;
 }
 
+QList<CustomListItem*> VirtualFileListView::FindItems(QString itemPath)
+{
+	return CustomListView::FindItems(itemPath);
+}
+
+CustomListItem* VirtualFileListView::FindItem(QString itemPath)
+{
+	return CustomListView::FindItem(itemPath);
+}
+
+CustomListItem* VirtualFileListView::FindAssetItem(HGUID guid)
+{
+	CustomListItem* result = nullptr;
+	for (auto & i : _allItems) 
+	{
+		if (!i->_assetInfo.expired())
+		{
+			if (i->_assetInfo.lock()->guid == guid)
+			{
+				return  i;
+			}
+		}
+	}
+	return nullptr;
+}
+
+CustomListItem* VirtualFileListView::FindAssetItem(QString assetName)
+{
+	for (auto& i : _allItems)
+	{
+		if (!i->_assetInfo.expired())
+		{
+			if (i->_assetInfo.lock()->displayName.IsSame(assetName.toStdString()))
+			{
+				return i;
+			}
+		}
+	}
+	return nullptr;
+}
+
 #pragma endregion
 //--------------------------------------Repository Selection Widget-------------------
 #pragma region RepositorySelectionWidget
@@ -857,7 +902,7 @@ void RepositorySelection::resizeEvent(QResizeEvent* event)
 //--------------------------------------Content Browser Widget-------------------
 #pragma region ContentBrowserWidget
 QList<ContentBrowser*>ContentBrowser::_contentBrowser;
-
+class ContentBrowser* ContentBrowser::_currentBrowser = nullptr;
 ContentBrowser::ContentBrowser(QWidget* parent )
 	:QWidget(parent)
 {
@@ -913,7 +958,10 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	ui.PathLabel->setObjectName("ContentBrowser_PathLabel");
 	ui.PathLabel->setText("Asset /");
 
+	_treeView->_newSelectionItems.append("/Content");s
+
 	_contentBrowser.append(this);
+	_currentBrowser = this;
 	//Connect
 	connect(_treeView, &QTreeView::clicked, this, [this]() {
 		_treeView->_bSaveSelectionItem = true;
@@ -938,7 +986,6 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 				auto item = _treeView->FindFolder(itemFullPath);
 				{
 					_treeView->_bSaveSelectionItem = false;
-					_treeView->selectionModel()->clearSelection();
 					_treeView->selectionModel()->setCurrentIndex(item->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
 				}
 			}
@@ -955,7 +1002,6 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 				auto item = _treeView->FindFolder(itemFullPath);
 				{
 					_treeView->_bSaveSelectionItem = false;
-					_treeView->selectionModel()->clearSelection();
 					_treeView->selectionModel()->setCurrentIndex(item->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
 				}
 			}
@@ -973,7 +1019,6 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 				if (item && item->parent() && item->parent()->index().isValid())
 				{
 					_treeView->_bSaveSelectionItem = false;
-					_treeView->selectionModel()->clearSelection();
 					_treeView->selectionModel()->setCurrentIndex(item->parent()->index(), QItemSelectionModel::SelectionFlag::ClearAndSelect);
 				}
 			}
@@ -1008,6 +1053,14 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 ContentBrowser::~ContentBrowser()
 {
 	_contentBrowser.removeOne(this);
+	if (_currentBrowser == this)
+	{
+		_currentBrowser = nullptr;
+	}
+	if (_contentBrowser.size() > 0)
+	{
+		_currentBrowser = _contentBrowser[0];
+	}
 }
 
 void ContentBrowser::RefreshContentBrowsers()

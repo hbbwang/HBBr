@@ -28,6 +28,8 @@ public:
 
 	class  ContentBrowser* _contentBrowser;
 
+	bool _bSaveSelectionItem;
+
 private:
 	CustomViewItem* _ediingItem = nullptr;
 protected:
@@ -38,7 +40,6 @@ protected:
 	virtual void dragEnterEvent(QDragEnterEvent* event) override;
 	virtual void dropEvent(QDropEvent* event) override;
 
-
 	CustomViewItem* CreateNewVirtualFolder(CustomViewItem* parent , QString folderName = "NewFolder");
 
 	class QMenu* _contextMenu = nullptr;
@@ -47,8 +48,6 @@ protected:
 	QList<QString> _newSelectionItems;
 
 	int _currentSelectionItem;
-
-	bool _bSaveSelectionItem;
 
 private slots:
 	void onDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
@@ -68,6 +67,14 @@ public:
 	ToolTip UpdateToolTips(std::weak_ptr<struct AssetInfoBase> &assetInfo);
 
 	CustomListItem* AddFile(std::weak_ptr<struct AssetInfoBase> assetInfo, bool bUpdatePreview = false);
+
+	virtual QList<CustomListItem*> FindItems(QString name)override;
+
+	virtual CustomListItem* FindItem(QString itemPath);
+
+	CustomListItem* FindAssetItem(HGUID guid);
+
+	CustomListItem* FindAssetItem(QString assetName);
 
 	VirtualFolder _currentTreeViewSelection;
 
@@ -122,7 +129,7 @@ protected:
 class ContentBrowser : public QWidget
 {
 	Q_OBJECT
-	friend class VirtualFileListView;
+		friend class VirtualFileListView;
 	friend class VirtualFolderTreeView;
 	friend class RepositorySelection;
 public:
@@ -139,6 +146,13 @@ public:
 	static const QList<ContentBrowser*> GetContentBrowsers() {
 		return _contentBrowser
 			;
+	}
+	static class ContentBrowser* GetCurrentBrowser() {
+		return _currentBrowser;
+	}
+
+	static void SetCurrentBrowser(ContentBrowser* cb) {
+		_currentBrowser = cb;
 	}
 
 	VirtualFolderTreeView* _treeView = nullptr;
@@ -163,7 +177,7 @@ protected:
 	class QWidget*		_treeWidget = nullptr;
 
 	QStringList _importFileNames;
-
+	static class ContentBrowser* _currentBrowser;
 private:
 
 	Ui::ContentBrowser ui;

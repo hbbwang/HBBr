@@ -35,6 +35,7 @@
      <addaction name="CreateNewWorld"/>
     </widget>
     <addaction name="Menu_CreateNew"/>
+    <addaction name="OpenWorld"/>
     <addaction name="SaveWorld"/>
     <addaction name="SaveAsWorld"/>
     <addaction name="OpenProgramDir"/>
@@ -82,6 +83,11 @@
   <action name="CreateNewLevel">
    <property name="text">
     <string>新建关卡</string>
+   </property>
+  </action>
+  <action name="OpenWorld">
+   <property name="text">
+    <string>打开世界</string>
    </property>
   </action>
  </widget>

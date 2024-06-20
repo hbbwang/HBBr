@@ -48,6 +48,8 @@ CustomViewItem::CustomViewItem(const QIcon& icon, const QString& text) : QStanda
 	);
 }
 
+///
+
 CustomListItem::CustomListItem(const QString& text, QListWidget* view, int type):QListWidgetItem(text, view, type)
 {
 	setFlags(Qt::ItemIsSelectable 
@@ -149,8 +151,21 @@ QList<CustomViewItem*> CustomTreeView::FindItems(QString name)
 	return result;
 }
 
-void CustomTreeView::SelectionItem(QString text)
+CustomViewItem* CustomTreeView::FindItem(QString path)
 {
+	for (auto& i : _allItems)
+	{
+		if (i->_fullPath.compare(path, Qt::CaseInsensitive) == 0)
+		{
+			return  i;
+		}
+	}
+	return nullptr;
+}
+
+void CustomTreeView::SelectionItem(QString itemPath)
+{
+
 }
 
 void CustomTreeView::RemoveAllItems()
@@ -315,12 +330,23 @@ QList<CustomListItem*> CustomListView::FindItems(QString name)
 	QList<CustomListItem*> result;
 	for (auto& i : _allItems)
 	{
-		if (i->_path.compare(name, Qt::CaseInsensitive) == 0)
+		if (i->text().compare(name, Qt::CaseInsensitive) == 0)
 		{
 			result.append(i);
 		}
 	}
 	return result;
+}
+
+CustomListItem* CustomListView::FindItem(QString itemPath)
+{
+	for (auto& i : _allItems)
+	{
+		if (i->_fullPath.compare(itemPath, Qt::CaseInsensitive) == 0)
+		{
+			return i;
+		}
+	}
 }
 
 const QList<CustomListItem*> CustomListView::GetSelectionItems() const

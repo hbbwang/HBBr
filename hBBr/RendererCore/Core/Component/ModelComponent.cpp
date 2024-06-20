@@ -53,6 +53,7 @@ void ModelComponent::SetModel(std::weak_ptr<class Model> model)
 			PrimitiveProxy::AddModelPrimitive(_materials[i].lock()->GetPrimitive(), _primitives[i], _gameObject->GetWorld()->GetRenderer());
 		}
 		_modelPath.path = model.lock()->_assetInfo->virtualFilePath;
+		_modelPath.assetInfo = model.lock()->_assetInfo;
 		_modelPath.callBack();
 	}
 }
