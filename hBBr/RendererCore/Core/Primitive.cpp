@@ -20,22 +20,22 @@ void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, HStri
 	if (vsFullName.Length() <= 1 || psFullName.Length() <= 1)
 	{
 		prim->graphicsIndex = PipelineIndex::GetPipelineIndex(
-			&Shader::_vsShader[prim->vsShader + "@" + HString::FromUInt(prim->graphicsIndex.GetVSVarient())],
-			&Shader::_psShader[prim->psShader + "@" + HString::FromUInt(prim->graphicsIndex.GetPSVarient())]);
+			Shader::_vsShader[prim->vsShader + "@" + HString::FromUInt(prim->graphicsIndex.GetVSVarient())],
+			Shader::_psShader[prim->psShader + "@" + HString::FromUInt(prim->graphicsIndex.GetPSVarient())]);
 	}
 	else
 	{
 		prim->graphicsIndex = PipelineIndex::GetPipelineIndex(
-			&Shader::_vsShader[vsFullName],
-			&Shader::_psShader[psFullName]);
+			Shader::_vsShader[vsFullName],
+			Shader::_psShader[psFullName]);
 	}
 }
 
-void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, ShaderCache& vs, ShaderCache& ps)
+void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, std::weak_ptr<ShaderCache> vs, std::weak_ptr<ShaderCache> ps)
 {
 	prim->graphicsIndex = PipelineIndex::GetPipelineIndex(
-		&vs,
-		&ps);
+		vs,
+		ps);
 }
 
 void PrimitiveProxy::RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
@@ -54,7 +54,7 @@ void PrimitiveProxy::RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
 
 void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim, class VulkanRenderer* renderer)
 {
-	prim->vertexData = prim->vertexInput.GetData(Shader::_vsShader[mat->vsShader + "@" + HString::FromUInt(mat->graphicsIndex.GetVSVarient())].header.vertexInput);
+	prim->vertexData = prim->vertexInput.GetData(Shader::_vsShader[mat->vsShader + "@" + HString::FromUInt(mat->graphicsIndex.GetVSVarient())]->header.vertexInput);
 	prim->vertexIndices = prim->vertexInput.vertexIndices;
 	prim->vbSize = prim->vertexData.size() * sizeof(float);
 	prim->ibSize = prim->vertexIndices.size() * sizeof(uint32_t);

@@ -6,7 +6,7 @@
 #include "RendererType.h"
 #include "ContentManager.h"
 #include "RendererConfig.h"
-
+#include "ConsoleDebug.h"
 Material::Material()
 {
 }
@@ -61,40 +61,66 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		mat->_primitive.reset(new MaterialPrimitive());
 		mat->_assetInfo = dataPtr;
 		mat->_primitive->graphicsName = it->second->displayName;
-		mat->_primitive->vsShader = json["vsShader"];
-		mat->_primitive->psShader = json["psShader"];
+
+		uint32_t pass = json["pass"];
+		mat->_primitive->passUsing = (Pass)pass;
+
 		uint32_t vs_varient = 0;
 		uint32_t ps_varient = 0;
 		vs_varient = json["vsVarient"];
 		ps_varient = json["psVarient"];
-		mat->_primitive->graphicsIndex.SetVarient(vs_varient, ps_varient);
-		uint32_t pass = json["pass"];
+		mat->_primitive->vsShader = json["vsShader"];
+		mat->_primitive->psShader = json["psShader"];
+		vsFullName = mat->_primitive->vsShader + "@" + HString::FromUInt(vs_varient);
+		psFullName = mat->_primitive->psShader + "@" + HString::FromUInt(ps_varient);
 
-		mat->_primitive->passUsing = (Pass)pass;
+		//根据变体查找ShaderCache
+		std::shared_ptr<ShaderCache> vsCache;
+		std::shared_ptr<ShaderCache> psCache;
+		{
+			auto vs_it = Shader::_vsShader.find(vsFullName);
+			if (vs_it != Shader::_vsShader.end())
+				vsCache = vs_it->second;
+			else
+			{
+				ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000023"), vsFullName.c_str());
+				mat->_primitive->vsShader ="Error";
+				vsCache = Shader::_vsShader["Error@0"];
+			}
+		}
+		{
+			auto ps_it = Shader::_psShader.find(psFullName);
+			if (ps_it != Shader::_psShader.end())
+				psCache = ps_it->second;
+			else
+			{
+				ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000023"), psFullName.c_str());
+				mat->_primitive->psShader = "Error";
+				psCache = Shader::_psShader["Error@0"];
+			}
+		}
 
-		vsFullName = mat->_primitive->vsShader + "@" + HString::FromUInt(mat->_primitive->graphicsIndex.GetVSVarient());
-		psFullName = mat->_primitive->psShader + "@" + HString::FromUInt(mat->_primitive->graphicsIndex.GetPSVarient());
-		auto vsCache = Shader::_vsShader[vsFullName];
-		auto psCache = Shader::_psShader[psFullName];
-		mat->_primitive->inputLayout = VertexFactory::VertexInput::BuildLayout(vsCache.header.vertexInput);
+		//获取布局
+		mat->_primitive->inputLayout = VertexFactory::VertexInput::BuildLayout(vsCache->header.vertexInput);
 
+		//一旦应用了错误shader cache，就不会再去读取参数和纹理了，直到Material重新编译成功。
 		//Parameters
 		{
 			nlohmann::json parameters = json["Parameters"];
 			//primitive参数的长度以shader为主
-			mat->_primitive->_paramterInfos.resize(psCache.header.shaderParameterCount);
-			mat->_primitive->uniformBuffer.reserve(psCache.header.shaderParameterCount);
+			mat->_primitive->_paramterInfos.resize(psCache->header.shaderParameterCount);
+			mat->_primitive->uniformBuffer.reserve(psCache->header.shaderParameterCount);
 			//初始化
-			for (int i = 0; i < psCache.header.shaderParameterCount; i++)
+			for (int i = 0; i < psCache->header.shaderParameterCount; i++)
 			{
-				mat->_primitive->_paramterInfos[i] = *psCache.pi[i];
-				for (int p = 0; p < psCache.pi[i]->value.size();p++)
+				mat->_primitive->_paramterInfos[i] = *psCache->pi[i];
+				for (int p = 0; p < psCache->pi[i]->value.size();p++)
 				{
-					if (mat->_primitive->uniformBuffer.size() <= psCache.pi[i]->arrayIndex)
+					if (mat->_primitive->uniformBuffer.size() <= psCache->pi[i]->arrayIndex)
 					{
 						mat->_primitive->uniformBuffer.push_back(glm::vec4());
 					}
-					mat->_primitive->uniformBuffer[psCache.pi[i]->arrayIndex][psCache.pi[i]->vec4Index + p] = psCache.pi[i]->value[p];				
+					mat->_primitive->uniformBuffer[psCache->pi[i]->arrayIndex][psCache->pi[i]->vec4Index + p] = psCache->pi[i]->value[p];				
 				}
 			}
 			int paramIndex = 0;
@@ -103,10 +129,10 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 				HString matParamName = i.key();
 				int type = i.value()["type"];
 				//从shader中查找是否存在相同参数(名字&类型)
-				auto it = std::find_if(psCache.params.begin(), psCache.params.end(), [type , matParamName](ShaderParameterInfo& info) {
+				auto it = std::find_if(psCache->params.begin(), psCache->params.end(), [type , matParamName](ShaderParameterInfo& info) {
 					return matParamName == info.name && type == (int)info.type;
 				});
-				if (it != psCache.params.end())
+				if (it != psCache->params.end())
 				{
 					MaterialParameterInfo info = {};
 					//name
@@ -146,35 +172,35 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 			nlohmann::json textures = json["Textures"];
 			int texCount = 0;
 			//primitive参数的长度以shader为主
-			mat->_primitive->_textureInfos.reserve(psCache.header.shaderTextureCount);
-			mat->_primitive->textures.resize(psCache.header.shaderTextureCount);
-			mat->_primitive->_samplers.resize(psCache.header.shaderTextureCount);
+			mat->_primitive->_textureInfos.reserve(psCache->header.shaderTextureCount);
+			mat->_primitive->textures.resize(psCache->header.shaderTextureCount);
+			mat->_primitive->_samplers.resize(psCache->header.shaderTextureCount);
 			//初始化
-			for (int i = 0; i < psCache.header.shaderTextureCount; i++)
+			for (int i = 0; i < psCache->header.shaderTextureCount; i++)
 			{
-				mat->_primitive->_textureInfos.push_back(*psCache.ti[i]);
-				mat->_primitive->SetTexture(i, Texture2D::GetSystemTexture(psCache.texs[i].defaultTexture));
+				mat->_primitive->_textureInfos.push_back(*psCache->ti[i]);
+				mat->_primitive->SetTexture(i, Texture2D::GetSystemTexture(psCache->texs[i].defaultTexture));
 				//Set Sampler
-				if (psCache.texs[i].msFilter == MSFilter::Nearest)
+				if (psCache->texs[i].msFilter == MSFilter::Nearest)
 				{
-					if (psCache.texs[i].msAddress == MSAddress::Clamp)
+					if (psCache->texs[i].msAddress == MSAddress::Clamp)
 						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp));
-					else if (psCache.texs[i].msAddress == MSAddress::Wrap)
+					else if (psCache->texs[i].msAddress == MSAddress::Wrap)
 						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Wrap));
-					else if (psCache.texs[i].msAddress == MSAddress::Mirror)
+					else if (psCache->texs[i].msAddress == MSAddress::Mirror)
 						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Mirror));
-					else if (psCache.texs[i].msAddress == MSAddress::Border)
+					else if (psCache->texs[i].msAddress == MSAddress::Border)
 						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Border));
 				}
-				else if (psCache.texs[i].msFilter == MSFilter::Linear)
+				else if (psCache->texs[i].msFilter == MSFilter::Linear)
 				{
-					if (psCache.texs[i].msAddress == MSAddress::Clamp)
+					if (psCache->texs[i].msAddress == MSAddress::Clamp)
 						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Linear_Clamp));
-					else if (psCache.texs[i].msAddress == MSAddress::Wrap)
+					else if (psCache->texs[i].msAddress == MSAddress::Wrap)
 						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Linear_Wrap));
-					else if (psCache.texs[i].msAddress == MSAddress::Mirror)
+					else if (psCache->texs[i].msAddress == MSAddress::Mirror)
 						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Linear_Mirror));
-					else if (psCache.texs[i].msAddress == MSAddress::Border)
+					else if (psCache->texs[i].msAddress == MSAddress::Border)
 						mat->_primitive->SetTextureSampler(i, Texture2D::GetSampler(TextureSampler::TextureSampler_Linear_Border));
 				}
 			}
@@ -184,10 +210,10 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 				int type = i.value()["type"];
 				HString matParamName = i.key();
 				//从shader中查找是否存在相同参数(名字&类型)
-				auto it = std::find_if(psCache.texs.begin(), psCache.texs.end(), [type, matParamName](ShaderTextureInfo& info) {
+				auto it = std::find_if(psCache->texs.begin(), psCache->texs.end(), [type, matParamName](ShaderTextureInfo& info) {
 					return matParamName == info.name && type == (int)info.type;
 					});
-				if (it != psCache.texs.end())
+				if (it != psCache->texs.end())
 				{
 					MaterialTextureInfo info = {};
 					//name
@@ -229,6 +255,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 			}
 		}
 		//
+
 		PrimitiveProxy::GetNewMaterialPrimitiveIndex(mat->_primitive.get(), vsCache, psCache);
 		PrimitiveProxy::AddMaterialPrimitive( mat->_primitive.get());
 

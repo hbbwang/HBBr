@@ -184,19 +184,19 @@ void PipelineManager::SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& creat
 	createInfo.CreateInfo.layout = pipelineLayout;
 }
 
-void PipelineManager::SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache vs, ShaderCache ps)
+void PipelineManager::SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache *vs, ShaderCache *ps)
 {
 	//vs.shaderStageInfo.module = vs.shaderModule[varient];
 	//ps.shaderStageInfo.module = ps.shaderModule[varient];
 
-	createInfo.stages.push_back(vs.shaderStageInfo);
-	createInfo.stages.push_back(ps.shaderStageInfo);
+	createInfo.stages.push_back(vs->shaderStageInfo);
+	createInfo.stages.push_back(ps->shaderStageInfo);
 
 	createInfo.CreateInfo.stageCount = (uint32_t)createInfo.stages.size();
 	createInfo.CreateInfo.pStages = createInfo.stages.data();
 
-	createInfo.bHasMaterialParameter = vs.params.size() > 0 && ps.params.size() > 0;
-	createInfo.bHasMaterialTexture = vs.texs.size() > 0 && ps.texs.size() > 0;
+	createInfo.bHasMaterialParameter = vs->params.size() > 0 && ps->params.size() > 0;
+	createInfo.bHasMaterialTexture = vs->texs.size() > 0 && ps->texs.size() > 0;
 }
 
 void PipelineManager::BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCache& createInfo, VkRenderPass renderPass, uint32_t subpassIndex, VkPipeline& pipelineObj)
@@ -244,13 +244,13 @@ void PipelineManager::ClearCreateInfo(VkGraphicsPipelineCreateInfoCache& createI
 	createInfo = VkGraphicsPipelineCreateInfoCache();
 }
 
-PipelineIndex PipelineManager::AddPipelineObject(ShaderCache* vs, ShaderCache* ps, VkPipeline pipeline, VkPipelineLayout pipelineLayout)
+PipelineIndex PipelineManager::AddPipelineObject(std::weak_ptr<ShaderCache>vs, std::weak_ptr<ShaderCache>ps, VkPipeline pipeline, VkPipelineLayout pipelineLayout)
 {
 	PipelineIndex index = PipelineIndex::GetPipelineIndex(vs,ps);
 	std::unique_ptr<PipelineObject> newPSO = std::make_unique<PipelineObject>();
 	newPSO->pipeline = pipeline;
-	newPSO->bHasMaterialTexture = vs->texs.size() > 0;
-	newPSO->bHasMaterialParameter = vs->params.size() > 0;
+	newPSO->bHasMaterialTexture = vs.lock()->texs.size() > 0;
+	newPSO->bHasMaterialParameter = vs.lock()->params.size() > 0;
 	newPSO->layout = pipelineLayout;
 	newPSO->pipelineType = PipelineType::Graphics;
 	_graphicsPipelines.emplace(std::make_pair(index, std::move(newPSO)));

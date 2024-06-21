@@ -116,9 +116,9 @@ class Shader
 public:
 	HBBR_API static void LoadShaderCache(const char* cachePath);
 	HBBR_API static void DestroyAllShaderCache();
-	static std::map<HString, ShaderCache> _vsShader;
-	static std::map<HString, ShaderCache> _psShader;
-	static std::map<HString, ShaderCache> _csShader;
+	static std::map<HString, std::shared_ptr<ShaderCache>> _vsShader;
+	static std::map<HString, std::shared_ptr<ShaderCache>> _psShader;
+	static std::map<HString, std::shared_ptr<ShaderCache>> _csShader;
 };
 
 

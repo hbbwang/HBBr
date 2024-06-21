@@ -5,7 +5,6 @@
 
 [Varient]//变体定义
 {
-    USE_COLOR = 1;
 };
 
 #define MATERIAL_SHADINGMODEL_DEFAULT_LIT   1

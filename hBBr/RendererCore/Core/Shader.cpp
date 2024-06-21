@@ -3,9 +3,9 @@
 #include "VulkanManager.h"
 #include "./Asset/Material.h"
 #include <fstream>
-std::map<HString, ShaderCache> Shader::_vsShader;
-std::map<HString, ShaderCache> Shader::_psShader;
-std::map<HString, ShaderCache> Shader::_csShader;
+std::map<HString, std::shared_ptr<ShaderCache>> Shader::_vsShader;
+std::map<HString, std::shared_ptr<ShaderCache>> Shader::_psShader;
+std::map<HString, std::shared_ptr<ShaderCache>> Shader::_csShader;
 
 void Shader::LoadShaderCache(const char* cachePath)
 {
@@ -169,26 +169,40 @@ void Shader::LoadShaderCache(const char* cachePath)
 			cache.shaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
 			cache.shaderStageInfo.pName = "VSMain";
 			cache.shaderType = ShaderType::VertexShader;
-			_vsShader.emplace(std::make_pair(cache.shaderFullName, cache));
+
+			std::shared_ptr<ShaderCache>newCache;
+			newCache.reset(new ShaderCache);
+			*newCache = cache;
+
+			_vsShader.emplace(std::make_pair(cache.shaderFullName, newCache));
 		}
 		else if (split[1] == "ps")
 		{
 			cache.shaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 			cache.shaderStageInfo.pName = "PSMain";
 			cache.shaderType = ShaderType::PixelShader;
-			_psShader.emplace(std::make_pair(cache.shaderFullName, cache));
+
+			std::shared_ptr<ShaderCache>newCache;
+			newCache.reset(new ShaderCache);
+			*newCache = cache;
+
+			_psShader.emplace(std::make_pair(cache.shaderFullName, newCache));
 		}
 		else if (split[1] == "cs")
 		{
 			cache.shaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
 			cache.shaderStageInfo.pName = "CSMain";
 			cache.shaderType = ShaderType::ComputeShader;
-			_csShader.emplace(std::make_pair(cache.shaderFullName, cache));
+
+			std::shared_ptr<ShaderCache>newCache;
+			newCache.reset(new ShaderCache);
+			*newCache = cache;
+
+			_csShader.emplace(std::make_pair(cache.shaderFullName, newCache));
 		}
 
 		cacheIndex++;
 	}
-
 }
 
 void Shader::DestroyAllShaderCache()
@@ -197,15 +211,15 @@ void Shader::DestroyAllShaderCache()
 	vkDeviceWaitIdle(manager->GetDevice());
 	for (auto& i : _vsShader)
 	{
-		vkDestroyShaderModule(manager->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
+		vkDestroyShaderModule(manager->GetDevice(), i.second->shaderModule, VK_NULL_HANDLE);
 	}
 	for (auto& i : _psShader)
 	{
-		vkDestroyShaderModule(manager->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
+		vkDestroyShaderModule(manager->GetDevice(), i.second->shaderModule, VK_NULL_HANDLE);
 	}
 	for (auto& i : _csShader)
 	{
-		vkDestroyShaderModule(manager->GetDevice(), i.second.shaderModule, VK_NULL_HANDLE);
+		vkDestroyShaderModule(manager->GetDevice(), i.second->shaderModule, VK_NULL_HANDLE);
 	}
 	_vsShader.clear();
 	_psShader.clear();

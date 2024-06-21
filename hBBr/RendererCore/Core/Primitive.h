@@ -78,7 +78,22 @@ class MaterialPrimitive
 {
 	friend class Material;
 public:
-
+	MaterialPrimitive()
+	{
+		inputLayout = {};
+		graphicsIndex = {};
+		int priority = 0;
+		HString graphicsName = "";
+		Pass passUsing = Pass::OpaquePass;
+		uniformBufferSize = 0;
+		uniformBuffer.clear();
+		_paramterInfos.clear();
+		_textureInfos.clear();
+		textures.clear();
+		_samplers.clear();
+		VkDescriptorSet _descriptorSet_tex = {};
+		_needUpdateDescriptorSet_tex = true;
+	}
 	//Get material instance texture descriptor set.
 	//If material instance number of textures is 0,it will return nullptr.
 	HBBR_INLINE VkDescriptorSet GetDescriptorSet() {
@@ -186,7 +201,7 @@ public:
 
 	static void GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim ,HString vsFullName = "",HString psFullName = "");
 
-	static void GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, ShaderCache& vs, ShaderCache& ps);
+	static void GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, std::weak_ptr<ShaderCache> vs, std::weak_ptr<ShaderCache> ps);
 
 	static void RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim);
 

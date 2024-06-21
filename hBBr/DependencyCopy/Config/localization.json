@@ -23,6 +23,7 @@
         "A000019":"[AssetDelete] 保存仓库失败。",
         "A000020":"[Material::LoadAsset] 材质实力加载纹理失败。",
         "A000021":"[Material::CreateMaterial] 创建新材质实力成功。",
-        "A000022":"[Material::CreateMaterial] 创建新材质实力失败。"
+        "A000022":"[Material::CreateMaterial] 创建新材质实力失败。",
+        "A000023":"[Material::LoadAsset] 没有找到对应的ShaderCache:%s ,将应用Error Cache..."
     }
 }

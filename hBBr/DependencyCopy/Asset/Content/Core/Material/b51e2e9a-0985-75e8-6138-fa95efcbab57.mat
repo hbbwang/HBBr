@@ -1,8 +1,8 @@
 {
     "vsShader": "PBR",
     "psShader": "PBR",
-    "vsVarient": 1,
-    "psVarient": 1,
+    "vsVarient": 0,
+    "psVarient": 0,
     "pass": 0,
     "Parameters":{
         "A": {
