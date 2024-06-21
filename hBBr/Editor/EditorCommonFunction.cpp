@@ -416,10 +416,39 @@ QString GetEditorInternationalization(QString Group, QString name)
     }
     if (!json.is_null())
     {
-        nlohmann::json j = json[Group.toStdString()];
-        std::string str = j[name.toStdString()];
-        //MessageOut(str.c_str(), true, false, "255,0,0");
-        return QString::fromStdString(str);
+        auto it = json.find(Group.toStdString());
+        if (it != json.end())
+        {
+            auto va_it = it.value().find(name.toStdString());
+            if (va_it != it.value().end())
+            {
+                std::string result = va_it.value();
+                return result.c_str();
+            }
+        }
+    }
+    return "????";
+}
+
+QString GetEditorConfig(QString Group, QString name)
+{
+    static nlohmann::json json;
+    if (json.is_null())
+    {
+        Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor.json", json);
+    }
+    if (!json.is_null())
+    {
+       auto it =  json.find(Group.toStdString());
+       if (it != json.end())
+       {
+           auto va_it = it.value().find(name.toStdString());
+           if (va_it != it.value().end())
+           {
+               std::string result = va_it.value();
+               return result.c_str();
+           }
+       }
     }
     return "????";
 }

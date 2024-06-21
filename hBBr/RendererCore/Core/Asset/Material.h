@@ -4,7 +4,6 @@
 #include "Pass/PassType.h"
 #include "Primitive.h"
 #include "Asset/HGuid.h"
-#include "XMLStream.h"
 #include "AssetObject.h"
 #include <unordered_map>
 #include <vector>

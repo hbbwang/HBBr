@@ -24,3 +24,5 @@ QImage GetImageFromTGA(QString path);
 bool GetPreviewImage(QString resourceFilePath , QPixmap& pixmap);
 
 QString GetEditorInternationalization(QString Group, QString name);
+
+QString GetEditorConfig(QString Group, QString name);

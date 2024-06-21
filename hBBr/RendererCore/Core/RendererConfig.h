@@ -1,22 +1,31 @@
 ﻿#pragma once
-//#include "Common.h"
-#include "XMLStream.h"
+#include "Common.h"
 #include "HString.h"
 #include <map>
 #include <memory>
-class RendererConfig
+#include "Serializable.h"
+#include "FileSystem.h"
+
+class RenderConfig
 {
 public:
-
-	static RendererConfig* Get();
-
-	pugi::xml_document _configFile;
-	pugi::xml_node _configFileRootNode;
-
-private :
-	static std::unique_ptr<RendererConfig> _rendererConfig;
-
+	static nlohmann::json _renderer_json;
+	static nlohmann::json _internationalzation_json;
 };
 
-HString GetInternationalizationText(HString Group, HString name);
+HString GetRendererConfig(HString Group, HString name);
+void SaveRendererConfig();
+template<class T>
+void UpdateRendererConfig(HString Group, HString name,T &value)
+{
+	if (RenderConfig::_renderer_json.is_null())
+	{
+		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "renderer.json", RenderConfig::_renderer_json);
+	}
+	if (!RenderConfig::_renderer_json.is_null())
+	{
+		RenderConfig::_renderer_json[Group.c_str()][name.c_str()] = value;
+	}
+}
 
+HString GetInternationalizationText(HString Group, HString name);

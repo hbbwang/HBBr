@@ -1,0 +1,8 @@
+{
+    "Default":{
+        "Font": "C:/Windows/Fonts/msyh.ttc",
+        "FontTexture": "Asset/Font/font.png",
+        "FontConfig": "Asset/Font/Font.xml",
+        "DefaultWorld": "a1f072fa-cdc0-e64a-ef7c-aebfcfa2afa4"
+    }
+}

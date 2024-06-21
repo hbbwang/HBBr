@@ -5,7 +5,7 @@
 #include "FileSystem.h"
 #include "RendererType.h"
 #include "ContentManager.h"
-#include "Asset/Serializable.h"
+#include "RendererConfig.h"
 
 Material::Material()
 {
@@ -265,18 +265,16 @@ std::weak_ptr<AssetInfoBase> Material::CreateMaterial(HString repository, HStrin
 			break;
 		}
 	}
-	pugi::xml_document doc;
+	nlohmann::json json;
 	saveFilePath += ".mat";
 
-	auto root = doc.append_child(TEXT("root"));
-	auto mp = XMLStream::CreateXMLNode(root,TEXT("MaterialPrimitive"));
-	XMLStream::SetXMLAttribute(mp,TEXT("vsShader"),TEXT("PBR"));
-	XMLStream::SetXMLAttribute(mp, TEXT("psShader"), TEXT("PBR"));
-	XMLStream::SetXMLAttribute(mp, TEXT("vsVarient"), 1);
-	XMLStream::SetXMLAttribute(mp, TEXT("psVarient"), 1);
-	XMLStream::SetXMLAttribute(mp, TEXT("pass"), 0);
-
-	if (XMLStream::SaveXML(saveFilePath.c_wstr(), doc))
+	json["vsShader"] = "PBR";
+	json["psShader"] = "PBR";
+	json["vsVarient"] = "0";
+	json["psVarient"] = "0";
+	json["pass"] = "0";
+	
+	if (Serializable::SaveJson(json, saveFilePath.c_str()))
 	{
 		std::vector<std::weak_ptr<AssetInfoBase> > results;
 		//导入AssetInfo

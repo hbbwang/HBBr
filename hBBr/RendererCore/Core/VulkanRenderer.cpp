@@ -147,9 +147,7 @@ void VulkanRenderer::Render()
 {
 	if (!_bInit) //Render loop Init.
 	{
-		HString defaultWorldGUID;
-		auto defaultLevelNode = XMLStream::GetXMLNode(RendererConfig::Get()->_configFileRootNode, TEXT("DefaultWorld"));
-		defaultWorldGUID = defaultLevelNode.text().as_string();
+		auto defaultWorldGUID = GetRendererConfig("Default", "DefaultWorld");
 		LoadWorld(defaultWorldGUID);
 
 		if (_world.expired())
@@ -296,7 +294,7 @@ bool VulkanRenderer::ResizeBuffer()
 
 			//重置buffer会导致画面丢失，我们要在这一瞬间重新把buffer绘制回去，缓解黑屏。
 			_currentFrameIndex = 0;
-			for (int i = 0; i < _vulkanManager->GetSwapchainBufferCount(); i++)
+			for (int i = 0; i < (int)_vulkanManager->GetSwapchainBufferCount(); i++)
 			{
 				Render();
 			}

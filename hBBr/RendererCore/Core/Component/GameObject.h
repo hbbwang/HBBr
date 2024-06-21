@@ -56,7 +56,7 @@ public:
 		return _parent;
 	}
 
-	HBBR_API HBBR_INLINE Transform* GetTransform() {
+	HBBR_API HBBR_INLINE class Transform* GetTransform() {
 		return _transform;
 	}
 

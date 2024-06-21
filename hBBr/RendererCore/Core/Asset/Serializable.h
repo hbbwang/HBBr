@@ -1,13 +1,12 @@
 ﻿#pragma once
 //Json序列化接口类
+#include "Common.h"
+#include "HGuid.h"
 #include "HString.h"
-#include "FileSystem.h"
 #include <vector>
 #include <any>
 #include <map>
 #include "ThirdParty/nlohmann/json.hpp"
-#include "Component/GameObject.h"
-#include "RendererConfig.h"
 class Serializable {
 public:
     virtual ~Serializable() = default;

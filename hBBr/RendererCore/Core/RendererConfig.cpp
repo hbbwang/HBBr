@@ -1,38 +1,46 @@
 ﻿#include "RendererConfig.h"
 #include "Common.h"
-#include "FileSystem.h"
-#include "Serializable.h"
 
-std::unique_ptr<RendererConfig> RendererConfig::_rendererConfig;
+nlohmann::json RenderConfig::_renderer_json;
+nlohmann::json RenderConfig::_internationalzation_json;
 
-RendererConfig* RendererConfig::Get()
+HString GetRendererConfig(HString Group, HString name)
 {
-	if (!_rendererConfig)
+	if (RenderConfig::_renderer_json.is_null())
 	{
-		_rendererConfig.reset(new RendererConfig);
-		HString path = FileSystem::GetProgramPath() + "Config/Renderer.xml";
-		FileSystem::CorrectionPath(path);
-		auto pathChar = path.c_wstr();
-		if (!XMLStream::LoadXML(pathChar, _rendererConfig->_configFile))
-		{
-			MessageOut("Fatal error! Load renderer config failed !!", true, true);
-		}
-		_rendererConfig->_configFileRootNode = _rendererConfig->_configFile.child(TEXT("root"));
+		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "renderer.json", RenderConfig::_renderer_json);
 	}
-	return _rendererConfig.get();
+	if (!RenderConfig::_renderer_json.is_null())
+	{
+		auto git = RenderConfig::_renderer_json.find(Group.c_str());
+		if (git != RenderConfig::_renderer_json.end())
+		{
+			nlohmann::json group = git.value();
+			auto tit = group.find(name.c_str());
+			if (tit != group.end())
+			{
+				return tit.value();
+			}
+		}
+	}
+	return "????";
+}
+
+void SaveRendererConfig()
+{
+	Serializable::SaveJson(RenderConfig::_renderer_json, FileSystem::GetConfigAbsPath() + "renderer.json");
 }
 
 HString GetInternationalizationText(HString Group, HString name)
 {
-	static nlohmann::json json;
-	if (json.is_null())
+	if (RenderConfig::_internationalzation_json.is_null())
 	{
-		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "localization.json", json);
+		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "localization.json", RenderConfig::_internationalzation_json);
 	}
-	if (!json.is_null())
+	if (!RenderConfig::_internationalzation_json.is_null())
 	{
-		auto git = json.find(Group.c_str());
-		if (git != json.end())
+		auto git = RenderConfig::_internationalzation_json.find(Group.c_str());
+		if (git != RenderConfig::_internationalzation_json.end())
 		{
 			nlohmann::json group= git.value();
 			auto tit = group.find(name.c_str());
@@ -43,4 +51,9 @@ HString GetInternationalizationText(HString Group, HString name)
 		}
 	}
 	return "????";
+}
+
+void SaveInternationalizationText(HString Group, HString name)
+{
+
 }

@@ -1,7 +1,6 @@
 ﻿#include "Asset/Level.h"
 #include "Asset/World.h"
 #include "FileSystem.h"
-#include "XMLStream.h"
 #include "Component/Component.h"
 
 std::vector<std::weak_ptr<Level>> Level::_dirtyLevels;

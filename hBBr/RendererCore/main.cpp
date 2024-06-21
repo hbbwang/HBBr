@@ -6,7 +6,6 @@
 #include "./Common/HInput.h"
 #include "./Asset/Texture2D.h"
 #include "./Asset/World.h"
-#include "./Common/XMLStream.h"
 #include "./Core/RendererConfig.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
@@ -147,9 +146,9 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 
 	//Import font
 	//HString ttfFontPath = FileSystem::GetAssetAbsPath() + "Font/msyhl.ttc";
-	HString ttfFontPath = RendererConfig::Get()->_configFile.child(L"root").child(L"Font").attribute(L"absPath").as_string();
+	HString ttfFontPath = GetRendererConfig("Default", "Font") ;
 	FileSystem::CorrectionPath(ttfFontPath);
-	HString outFontTexturePath = RendererConfig::Get()->_configFile.child(L"root").child(L"FontTexture").attribute(L"path").as_string();
+	HString outFontTexturePath = GetRendererConfig("Default", "FontTexture") ;
 	outFontTexturePath = FileSystem::GetRelativePath(outFontTexturePath.c_str());
 	outFontTexturePath = FileSystem::GetProgramPath() + outFontTexturePath;
 	FileSystem::CorrectionPath(outFontTexturePath);
@@ -217,6 +216,8 @@ void VulkanApp::DeInitVulkanManager()
 	ContentManager::Get()->Release();
 	Texture2D::GlobalRelease();
 	VulkanManager::ReleaseManager();
+	//保存配置文件
+	SaveRendererConfig();
 	SDL_Quit();
 }
 

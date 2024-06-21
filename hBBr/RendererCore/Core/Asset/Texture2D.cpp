@@ -306,7 +306,7 @@ void Texture2D::GlobalInitialize()
 
 	//导入文字纹理
 	{
-		HString fontTexturePath = RendererConfig::Get()->_configFile.child(L"root").child(L"FontTexture").attribute(L"path").as_string();
+		HString fontTexturePath = GetRendererConfig("Default", "FontTexture");
 		fontTexturePath = FileSystem::GetRelativePath(fontTexturePath.c_str());
 		fontTexturePath = FileSystem::GetProgramPath() + fontTexturePath;
 		FileSystem::CorrectionPath(fontTexturePath);
@@ -339,7 +339,7 @@ void Texture2D::GlobalInitialize()
 
 	//导入文字信息
 	{
-		HString fontDocPath = RendererConfig::Get()->_configFile.child(L"root").child(L"FontConfig").attribute(L"path").as_string();
+		HString fontDocPath = GetRendererConfig("Default", "FontConfig");
 		fontDocPath = FileSystem::GetRelativePath(fontDocPath.c_str());
 		fontDocPath = FileSystem::GetProgramPath() + fontDocPath;
 		FileSystem::CorrectionPath(fontDocPath);
@@ -1216,7 +1216,7 @@ void Texture2D::CreateFontTexture(HString ttfFontPath, HString outTexturePath, b
 	pugi::xml_document doc;
 
 	//把文字信息保存到xml配置
-	HString fontDocPath = RendererConfig::Get()->_configFile.child(L"root").child(L"FontConfig").attribute(L"path").as_string();
+	HString fontDocPath = GetRendererConfig("Default", "FontConfig") ;
 	fontDocPath = FileSystem::GetRelativePath(fontDocPath.c_str());
 	fontDocPath = FileSystem::GetProgramPath() + fontDocPath;
 	FileSystem::CorrectionPath(fontDocPath);

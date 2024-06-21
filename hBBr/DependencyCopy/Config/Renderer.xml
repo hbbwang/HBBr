@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<root>
-    <Language path="Config/Internationalization/zh_CN.xml"/>
-    <Font absPath="C:/Windows/Fonts/msyh.ttc"/>
-    <FontTexture path="Asset/Font/font.png"/>
-    <FontConfig path="Asset/Font/Font.xml"/>
-    <DefaultWorld>a1f072fa-cdc0-e64a-ef7c-aebfcfa2afa4</DefaultWorld>
-</root>

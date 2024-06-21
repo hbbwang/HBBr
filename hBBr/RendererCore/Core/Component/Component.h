@@ -8,6 +8,7 @@
 #include <any>
 #include "HInput.h"
 #include "AssetObject.h"
+#include "GameObject.h"
 
 #define COMPONENT_DEFINE(ComponentClassName)\
 public:\
