@@ -167,10 +167,18 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 		}
 	}
 	auto dataPtr = std::static_pointer_cast<AssetInfo<Texture2D>>(it->second);
+
+	//是否需要重新加载
+	bool bReload = false;
 	if (dataPtr->IsAssetLoad())
 	{
 		return dataPtr->GetData();
 	}
+	else if (!dataPtr->IsAssetLoad() && dataPtr->GetMetadata())
+	{
+		bReload = true;
+	}
+
 	//获取实际路径
 	HString filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
@@ -187,11 +195,23 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 	{
 		return std::weak_ptr<Texture2D>();
 	}
+
+	std::shared_ptr<Texture2D> newTexture;
+	if (!bReload)
+	{
+		newTexture.reset(new Texture2D);
+	}
+	else
+	{
+		//重新刷新asset
+		newTexture = dataPtr->GetMetadata();
+	}
+
 	//Create Texture2D Object.
 	uint32_t w = out->data_header.width;
 	uint32_t h = out->data_header.height;
 	VkFormat format = out->texFormat;
-	std::shared_ptr<Texture2D> newTexture = std::make_shared<Texture2D>();
+
 	newTexture->_assetInfo = dataPtr;
 	newTexture->_textureName = dataPtr->displayName;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;

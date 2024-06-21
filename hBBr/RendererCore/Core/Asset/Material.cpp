@@ -40,10 +40,18 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		}
 	}
 	auto dataPtr = std::static_pointer_cast<AssetInfo<Material>>(it->second);
+
+	//是否需要重新加载
+	bool bReload = false;
 	if (dataPtr->IsAssetLoad())
 	{
 		return dataPtr->GetData();
 	}
+	else if (!dataPtr->IsAssetLoad() && dataPtr->GetMetadata())
+	{
+		bReload = true;
+	}
+
 	//获取实际路径
 	HString filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
@@ -56,9 +64,18 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 	HString psFullName;
 	if (Serializable::LoadJson(filePath, json))
 	{
-		std::shared_ptr<Material> mat (new Material) ;
+		std::shared_ptr<Material> mat;
+		if (!bReload)
+		{
+			mat.reset(new Material);
+			mat->_primitive.reset(new MaterialPrimitive());
+		}
+		else
+		{
+			//重新刷新asset
+			mat = dataPtr->GetMetadata();
+		}
 		//MaterialPrimitive
-		mat->_primitive.reset(new MaterialPrimitive());
 		mat->_assetInfo = dataPtr;
 		mat->_primitive->graphicsName = it->second->displayName;
 
@@ -140,24 +157,13 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 					//type
 					info.type = (MPType)type;
 					//ui
-					info.ui = i.value()["ui"];
-					//value
-					if (info.type == MPType::Float)
 					{
-						info.arrayIndex;
-						info.vec4Index;
-					}
-					else if (info.type == MPType::Float2)
-					{
-
-					}
-					else if (info.type == MPType::Float3)
-					{
-
-					}
-					else if (info.type == MPType::Float4)
-					{
-
+						info.ui = "";
+						auto ui_it = i.value().find("ui");
+						if (ui_it != i.value().end())
+						{
+							info.ui = ui_it.value();
+						}				
 					}
 					mat->_primitive->_paramterInfos[paramIndex] = (info);
 					paramIndex++;
@@ -255,14 +261,13 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 			}
 		}
 		//
-
 		PrimitiveProxy::GetNewMaterialPrimitiveIndex(mat->_primitive.get(), vsCache, psCache);
-		PrimitiveProxy::AddMaterialPrimitive( mat->_primitive.get());
-
+		if (!bReload)
+		{
+			PrimitiveProxy::AddMaterialPrimitive(mat->_primitive.get());
+		}
 		dataPtr->SetData(std::move(mat));
-
 		//_allMaterials.emplace(std::make_pair(guid, std::move(mat)));
-
 		return dataPtr->GetData();
 	}
 	return std::weak_ptr<Material>();

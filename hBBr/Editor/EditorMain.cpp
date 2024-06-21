@@ -76,6 +76,7 @@ EditorMain::EditorMain(QWidget *parent)
     });
     connect(ui.CompileAllShader, &QAction::triggered, this, [this](bool bChecked) {
         VulkanApp::RecompileAllShader();
+
     });
     connect(ui.SaveWorld, &QAction::triggered, this, [this](bool bChecked) {
         VulkanApp::GetMainForm()->renderer->GetWorld()->SaveWorld();

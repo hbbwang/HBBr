@@ -34,10 +34,18 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 		}
 	}
 	auto dataPtr = std::static_pointer_cast<AssetInfo<Model>>(it->second);
+
+	//是否需要重新加载
+	bool bReload = false;
 	if (dataPtr->IsAssetLoad())
 	{
 		return dataPtr->GetData();
 	}
+	else if (!dataPtr->IsAssetLoad() && dataPtr->GetMetadata())
+	{
+		bReload = true;
+	}
+
 	//获取实际路径
 	HString filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
@@ -74,7 +82,17 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 		return std::weak_ptr<Model>();
 	}
 
-	auto model = std::make_shared<Model>();
+	std::shared_ptr<Model> model;
+	if (!bReload)
+	{
+		model.reset(new Model);
+	}
+	else
+	{
+		//重新刷新asset
+		model = dataPtr->GetMetadata();
+	}
+
 	model->_assetInfo = dataPtr;
 	glm::vec3 boundingBox_min = glm::vec3(0, 0, 0);
 	glm::vec3 boundingBox_max = glm::vec3(0, 0, 0);

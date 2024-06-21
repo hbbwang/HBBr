@@ -477,82 +477,82 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 			}
 			else if (bCollectMaterialParameter)
 			{
-			if (setting.Contains("}"))
-			{
-				bCollectMaterialParameter = false;
-			}
-			if (setting[0] == 'f' && setting[1] == 'l' && setting[2] == 'o' && setting[3] == 'a' && setting[4] == 't')
-			{
-				shaderParamInfos.push_back(ShaderParameterInfo({}));
-				//提取param
-				std::stringstream param(line[s].c_str());
-				std::string type, name;
-				param >> type >> name;
-				size_t shaderParamSize = shaderParamInfos.size();
-				if (name[name.size() - 1] == ';')
+				if (setting.Contains("}"))
 				{
-					name.erase(name.begin() + name.size() - 1);
+					bCollectMaterialParameter = false;
 				}
-				name.copy(shaderParamInfos[shaderParamSize - 1].name, sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1);
-				shaderParamInfos[shaderParamSize - 1].name[sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1] = '\0';
-				//
-				if (type.compare("float4") == 0)
+				if (setting[0] == 'f' && setting[1] == 'l' && setting[2] == 'o' && setting[3] == 'a' && setting[4] == 't')
 				{
-					shaderParamInfos[shaderParamSize - 1].type = MPType::Float4;
-					shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
-					CollectMaterialParameterIndex += 4;
-				}
-
-				else if (type.compare("float3") == 0)
-				{
-					shaderParamInfos[shaderParamSize - 1].type = MPType::Float3;
-					shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
-					CollectMaterialParameterIndex += 3;
-				}
-				else if (type.compare("float2") == 0)
-				{
-					shaderParamInfos[shaderParamSize - 1].type = MPType::Float2;
-					shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
-					CollectMaterialParameterIndex += 2;
-				}
-				else if (type.compare("float") == 0)
-				{
-					shaderParamInfos[shaderParamSize - 1].type = MPType::Float;
-					shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
-					CollectMaterialParameterIndex += 1;
-				}
-				header.shaderParameterCount++;
-				auto lastLineStr = line[s - 1].ClearSpace();
-				if (lastLineStr[0] == '[')
-				{
-					//提取每个属性的拓展信息
-					lastLineStr.Replace("[", "");
-					lastLineStr.Replace("]", "");
-					auto paramProperty = lastLineStr.Split(";");//获取上一行的代码
-					line[s - 1] = "//" + line[s - 1];//拓展信息非着色器正式代码,填充注释防止编译错误
-					for (auto i : paramProperty)
+					shaderParamInfos.push_back(ShaderParameterInfo({}));
+					//提取param
+					std::stringstream param(line[s].c_str());
+					std::string type, name;
+					param >> type >> name;
+					size_t shaderParamSize = shaderParamInfos.size();
+					if (name[name.size() - 1] == ';')
 					{
-						//提取属性里的值
-						auto value = i.Split("=");
-						if (value.size() > 1)
+						name.erase(name.begin() + name.size() - 1);
+					}
+					name.copy(shaderParamInfos[shaderParamSize - 1].name, sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1);
+					shaderParamInfos[shaderParamSize - 1].name[sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1] = '\0';
+					//
+					if (type.compare("float4") == 0)
+					{
+						shaderParamInfos[shaderParamSize - 1].type = MPType::Float4;
+						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						CollectMaterialParameterIndex += 4;
+					}
+
+					else if (type.compare("float3") == 0)
+					{
+						shaderParamInfos[shaderParamSize - 1].type = MPType::Float3;
+						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						CollectMaterialParameterIndex += 3;
+					}
+					else if (type.compare("float2") == 0)
+					{
+						shaderParamInfos[shaderParamSize - 1].type = MPType::Float2;
+						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						CollectMaterialParameterIndex += 2;
+					}
+					else if (type.compare("float") == 0)
+					{
+						shaderParamInfos[shaderParamSize - 1].type = MPType::Float;
+						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						CollectMaterialParameterIndex += 1;
+					}
+					header.shaderParameterCount++;
+					auto lastLineStr = line[s - 1].ClearSpace();
+					if (lastLineStr[0] == '[')
+					{
+						//提取每个属性的拓展信息
+						lastLineStr.Replace("[", "");
+						lastLineStr.Replace("]", "");
+						auto paramProperty = lastLineStr.Split(";");//获取上一行的代码
+						line[s - 1] = "//" + line[s - 1];//拓展信息非着色器正式代码,填充注释防止编译错误
+						for (auto i : paramProperty)
 						{
-							if (value[0].Contains("Default", false))
+							//提取属性里的值
+							auto value = i.Split("=");
+							if (value.size() > 1)
 							{
-								auto values = value[1].Split(",");
-								auto maxCount = std::min((int)values.size(), 4);
-								for (int vv = 0; vv < maxCount; vv++)
-									shaderParamInfos[shaderParamSize - 1].defaultValue[vv] = (float)HString::ToDouble(values[vv]);
-							}
-							else if (value[0].Contains("Name", false))
-							{
-								std::string name = value[1].c_str();
-								name.copy(shaderParamInfos[shaderParamSize - 1].name, sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1);
-								shaderParamInfos[shaderParamSize - 1].name[sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1] = '\0';
+								if (value[0].Contains("Default", false))
+								{
+									auto values = value[1].Split(",");
+									auto maxCount = std::min((int)values.size(), 4);
+									for (int vv = 0; vv < maxCount; vv++)
+										shaderParamInfos[shaderParamSize - 1].defaultValue[vv] = (float)HString::ToDouble(values[vv]);
+								}
+								else if (value[0].Contains("Name", false))
+								{
+									std::string name = value[1].c_str();
+									name.copy(shaderParamInfos[shaderParamSize - 1].name, sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1);
+									shaderParamInfos[shaderParamSize - 1].name[sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1] = '\0';
+								}
 							}
 						}
 					}
 				}
-			}
 			}
 			//Texture2D
 			else if (setting[0] == 'T' && setting[1] == 'e' && setting[2] == 'x' && setting[3] == 't'

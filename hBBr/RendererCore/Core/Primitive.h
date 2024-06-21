@@ -8,6 +8,7 @@
 #include "Pipeline.h"
 #include "Shader.h"
 
+//从Shader源码里获取到的Parameter信息
 struct MaterialParameterInfo
 {
 	MPType type;
@@ -16,10 +17,11 @@ struct MaterialParameterInfo
 	uint32_t arrayIndex = 0;
 	//配合上面索引获取到的vec4,该索引用来表示该参数处于vec4的什么位置
 	uint32_t vec4Index = 0;
-
+	//参数默认值
 	std::vector<float> value;
 };
 
+//从Shader源码里获取到的Texture信息
 struct MaterialTextureInfo
 {
 	MTType type;

@@ -98,8 +98,6 @@ public:
 	std::vector<AssetInfoRefTemp> refTemps;
 	std::vector<AssetInfoRefTemp> depTemps;
 
-	bool bAssetLoad = false;
-
 #if IS_EDITOR
 	//编辑器ListWidget生成Item图标的时候使用
 	//每个HString为单独一行
@@ -110,15 +108,23 @@ public:
 	//
 	AssetInfoBase() {
 	}
+
 	virtual ~AssetInfoBase() {}
 
 	virtual std::weak_ptr<class AssetObject> GetAssetData()const { return std::weak_ptr<class AssetObject>(); }
-	
+
+protected:
+	bool bAssetLoad = false;
+
 private:
 	virtual std::shared_ptr<class AssetObject> GetSharedData()const {
 		return std::shared_ptr<class AssetObject>();}
 
 public:
+	void NeedToReload() {
+		bAssetLoad = false;
+	}
+
 	template<class T>
 	std::weak_ptr<T>GetAssetObject()const {
 		return std::static_pointer_cast<T>(GetSharedData());
@@ -129,7 +135,6 @@ public:
 	{
 		return bAssetLoad;
 	}
-
 };
 
 #define GetAssetByInfo(type,assetInfo)  (std::weak_ptr<type>)std::static_pointer_cast<type>(assetInfo->GetAssetData().lock())
@@ -147,6 +152,10 @@ public:
 			return data;
 		}
 		return T::LoadAsset(this->guid);
+	}
+	//获取元数据,很危险,建议使用GetData或者GetAssetData
+	inline const std::shared_ptr<T> GetMetadata()const {
+		return data;
 	}
 	inline std::weak_ptr<class AssetObject> GetAssetData()const override {
 		if (data && bAssetLoad)

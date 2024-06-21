@@ -7,6 +7,7 @@
 #include "./Asset/Texture2D.h"
 #include "./Asset/World.h"
 #include "./Core/RendererConfig.h"
+#include "./Asset/Material.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #include "Imgui/backends/imgui_impl_sdl3.h"
@@ -410,6 +411,13 @@ bool VulkanApp::UpdateForm()
 		Shaderc::ShaderCompiler::CompileAllShaders(FileSystem::GetShaderIncludeAbsPath().c_str());
 #endif
 		Shader::LoadShaderCache(FileSystem::GetShaderCacheAbsPath().c_str());
+		//需要重新加载所有材质
+		auto allMaterials = ContentManager::Get()->GetAssets(AssetType::Material);
+		for (auto& i : allMaterials)
+		{
+			i.second->NeedToReload();
+			Material::LoadAsset(i.second->guid);
+		}
 	}
 	else if (!bStopRender)
 	{
