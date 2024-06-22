@@ -4,7 +4,6 @@
 #include "Component/ModelComponent.h"
 #include "Component/CameraComponent.h"
 #include "FileSystem.h"
-#include "HInput.h"
 #include "ConsoleDebug.h"
 #include "FormMain.h"
 std::map<HString, std::shared_ptr<World>>World::_worlds;
@@ -74,8 +73,9 @@ std::weak_ptr<World> World::CreateNewWorld(HString newWorldName)
 	int index = 0;
 	while (it != _worlds.end())
 	{
-		finalName = newWorldName + HString::FromInt(index);
+		finalName = newWorldName + "_" +  HString::FromInt(index);
 		it = _worlds.find(finalName);
+		index++;
 	}
 
 	world->_guid = CreateGUID();

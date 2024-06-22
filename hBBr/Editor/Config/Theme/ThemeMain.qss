@@ -31,6 +31,14 @@ QMainWindow::separator
     width: SplitterWidth;
     border: 1px solid rgb(0,0,0);
 }
+QTabWidget
+{
+
+}
+QTabWidget::pane
+{
+
+}
 QTabBar::tab 
 {
     height: 25px;
@@ -686,4 +694,28 @@ QSplitter::handle
 {
     background-color: rgb(10,10,10);
     border-radius:	2px;
-};
+}
+#MaterialEditor
+{
+
+}
+#MaterialEditor_Instance
+{
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#End{};

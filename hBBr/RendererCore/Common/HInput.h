@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <map>
-#include "VulkanRenderer.h"
 #include "FormMain.h"
 enum class Action : int
 {
@@ -332,105 +331,35 @@ enum MouseButton
 
 struct KeyCallBack
 {
-	KeyCode key;
-	Action  action;
-	KeyMod  mod;
+    KeyCode key;
+    Action  action;
+    KeyMod  mod;
     VulkanForm* focusWindowHandle = nullptr;
     bool bKeyDown = false;
 };
 
 struct MouseCallBack
 {
-	MouseButton button;
-	Action  action;
-	VulkanForm* focusWindowHandle = nullptr;
+    MouseButton button;
+    Action  action;
+    VulkanForm* focusWindowHandle = nullptr;
     bool bMouseDown = false;
 };
 
-class HInput
+class HInput 
 {
-	friend class VulkanApp;
-
-    static std::vector<KeyCallBack> _keyRegisterDefault;
-    static std::vector<KeyCallBack> _keyRegisterRepeat;
-    //
-    static std::vector<MouseCallBack> _mouseRegisterDefault;
-    static std::vector<MouseCallBack> _mouseRegisterRepeat;
-
 public:
-	//Keyboard	注册当前帧反馈按键
-
-	static inline bool GetKey(KeyCode key, class VulkanRenderer* renderer = nullptr) {
-        if (!renderer)
-        {
-            renderer = VulkanApp::_mainForm->renderer;
-        }
-		if (!renderer)
-			return false;
-		return FindRepeatKey(key, renderer) != nullptr;
-	}
-
-	static inline bool GetKeyDown(KeyCode key, class VulkanRenderer* renderer = nullptr) {
-        if (!renderer)
-        {
-            renderer = VulkanApp::_mainForm->renderer;
-        }
-        if (!renderer)
-            return false;
-		return FindDefaultKeyDown(key, Action::PRESS, renderer) != nullptr;
-	}
-
-	static inline bool GetKeyUp(KeyCode key, class VulkanRenderer* renderer = nullptr) {
-        if (!renderer)
-        {
-            renderer = VulkanApp::_mainForm->renderer;
-        }
-        if (!renderer)
-            return false;
-		return FindDefaultKey(key, Action::RELEASE, renderer) != nullptr;
-	}
-
-	static inline bool GetMouse(MouseButton button, class VulkanRenderer* renderer = nullptr) {
-        if (!renderer)
-        {
-            renderer = VulkanApp::_mainForm->renderer;
-        }
-        if (!renderer)
-            return false;
-		return FindRepeatMouse(button, renderer) != nullptr;
-	}
-
-	static inline bool GetMouseDown(MouseButton button, class VulkanRenderer* renderer = nullptr) {
-        if (!renderer)
-        {
-            renderer = VulkanApp::_mainForm->renderer;
-        }
-        if (!renderer)
-            return false;
-		return FindDefaultMouseDown(button, Action::PRESS, renderer) != nullptr;
-	}
-
-	static inline bool GetMouseUp(MouseButton button, class VulkanRenderer* renderer = nullptr) {
-        if (!renderer)
-        {
-            renderer = VulkanApp::_mainForm->renderer;
-        }
-        if (!renderer)
-            return false;
-		return FindDefaultMouse(button, Action::RELEASE, renderer) != nullptr;
-	}
-
-    static inline void SetCursorPos(glm::vec2 pos)
+    static inline void SetMousePos(glm::vec2 pos)
     {
         SDL_WarpMouseGlobal(pos.x, pos.y);
     }
 
-    static inline void SetCursorPosClient(glm::vec2 pos)
+    static inline void SetMousePosClient(glm::vec2 pos)
     {
         if (VulkanApp::GetFocusForm() && VulkanApp::GetFocusForm()->window)
         {
             SDL_WarpMouseInWindow(VulkanApp::GetFocusForm()->window, pos.x, pos.y);
-        }     
+        }
     }
 
     static inline void ShowCursor(bool bShow)
@@ -441,13 +370,13 @@ public:
             SDL_HideCursor();
     }
 
-	static inline glm::vec2 GetMousePos()
-	{
+    static inline glm::vec2 GetMousePos()
+    {
         glm::vec2 result(0);
         SDL_GetGlobalMouseState(&result.x, &result.y);
         //return _mousePos;
         return result;
-	}
+    }
 
     static inline glm::vec2 GetMousePosClient()
     {
@@ -456,99 +385,4 @@ public:
         //return _mousePosInWindow;
         return result;
     }
-
-	//键盘输入的回调函数中调用,记录当前帧按下的按键,其他时候不要主动调用该函数!
-	static void KeyProcess(VulkanForm* focusWindowHandle , KeyCode key, KeyMod mod ,Action action);
-
-	//鼠标输入的回调函数中调用,记录当前帧按下的按键,其他时候不要主动调用该函数!
-	static void MouseProcess(VulkanForm* focusWindowHandle, MouseButton mouse, Action action);
-
-private:
-
-	static inline KeyCallBack* FindDefaultKey(KeyCode key , Action action, class VulkanRenderer* renderer)
-	{
-		auto it = std::find_if(_keyRegisterDefault.begin(), _keyRegisterDefault.end(), [key, action, renderer](KeyCallBack& callback) {
-			return callback.key == key && callback.action == action && callback.focusWindowHandle && callback.focusWindowHandle->renderer == renderer;
-			});
-		if (it != _keyRegisterDefault.end())
-			return &(*it);
-		else
-			return nullptr;
-	}
-
-    static inline KeyCallBack* FindDefaultKeyDown(KeyCode key, Action action, class VulkanRenderer* renderer)
-    {
-        auto it = std::find_if(_keyRegisterRepeat.begin(), _keyRegisterRepeat.end(), [key, action, renderer](KeyCallBack& callback) {
-            return callback.key == key && callback.action == action && callback.focusWindowHandle && callback.focusWindowHandle->renderer == renderer && callback.bKeyDown ==true;
-            });
-        if (it != _keyRegisterRepeat.end())
-            return &(*it); 
-        else
-            return nullptr;
-    }
-
-	static inline KeyCallBack* FindRepeatKey(KeyCode key, class VulkanRenderer* renderer)
-	{
-		auto it = std::find_if(_keyRegisterRepeat.begin(), _keyRegisterRepeat.end(), [renderer,key](KeyCallBack& callback) {
-            return callback.key == key && callback.focusWindowHandle && callback.focusWindowHandle->renderer == renderer;
-			});
-		if (it != _keyRegisterRepeat.end())
-			return &(*it);
-		else
-			return nullptr;
-	}
-
-	//
-	static inline MouseCallBack* FindDefaultMouse(MouseButton mouse, Action action, class VulkanRenderer* renderer)
-	{
-		auto it = std::find_if(_mouseRegisterDefault.begin(), _mouseRegisterDefault.end(), [mouse, action, renderer](MouseCallBack& callback) {
-			return callback.button == mouse && callback.action == action && callback.focusWindowHandle && callback.focusWindowHandle->renderer == renderer;
-			});
-		if (it != _mouseRegisterDefault.end())
-			return &(*it);
-		else
-			return nullptr;
-	}
-
-    static inline MouseCallBack* FindDefaultMouseDown(MouseButton mouse, Action action, class VulkanRenderer* renderer)
-    {
-        auto it = std::find_if(_mouseRegisterRepeat.begin(), _mouseRegisterRepeat.end(), [mouse, action, renderer](MouseCallBack& callback) {
-            return callback.button == mouse && callback.action == action && callback.focusWindowHandle && callback.focusWindowHandle->renderer == renderer && callback.bMouseDown == true;
-            });
-        if (it != _mouseRegisterRepeat.end())
-            return &(*it);
-        else
-            return nullptr;
-    }
-
-	static inline MouseCallBack* FindRepeatMouse(MouseButton mouse, class VulkanRenderer* renderer)
-	{
-		auto it = std::find_if(_mouseRegisterRepeat.begin(), _mouseRegisterRepeat.end(), [mouse, renderer](MouseCallBack& callback) {
-			return callback.button == mouse && callback.focusWindowHandle && callback.focusWindowHandle->renderer == renderer;
-			});
-        if (it != _mouseRegisterRepeat.end())
-        {
-            return &(*it);
-        }
-		else
-			return nullptr;
-	}
-
-    //清空当前帧的输入缓存,其他时候不要主动调用该函数!
-    static void ClearInput()
-    {
-        _keyRegisterDefault.clear();
-        //_keyRegisterRepeat.clear();
-        _mouseRegisterDefault.clear();
-        //_mouseRegisterRepeat.clear();
-        for (auto& i : _keyRegisterRepeat)
-        {
-            i.bKeyDown = false;
-        }
-        for (auto& i : _mouseRegisterRepeat)
-        {
-            i.bMouseDown = false;
-        }
-    }
-
 };

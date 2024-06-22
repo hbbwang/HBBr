@@ -18,6 +18,8 @@ CameraComponent::CameraComponent(GameObject* parent)
 	{
 		_gameObject->GetWorld()->_mainCamera = this;
 	}
+	EnableKeyInput(true);
+	EnableMouseInput(true);
 }
 
 void CameraComponent::OverrideMainCamera()
@@ -43,57 +45,40 @@ void CameraComponent::Update()
 	{
 		static glm::vec2 lastMousePos;
 		static glm::vec2 lockMousePos;
-		glm::vec2 currentMousePos = GetMousePos();
+		glm::vec2 currentMousePos = HInput::GetMousePos();
 		if (GetMouse(Button_Right))
 		{					
 			glm::vec2 mouseAxis = lastMousePos - currentMousePos;
-			HInput::SetCursorPos(lockMousePos);
-			lastMousePos = GetMousePos();
+			HInput::SetMousePos(lockMousePos);
+			lastMousePos = HInput::GetMousePos();
 			
-			float frameRate = (float)renderer->GetFrameRateS();
+			double frameRate = VulkanApp::GetFrameRateS() * (double)_editorMoveSpeed;
 			worldRot.y -= mouseAxis.x * _editorMouseSpeed;
 			worldRot.x -= mouseAxis.y * _editorMouseSpeed;
 			trans->SetWorldRotation(worldRot);
-			//
-			//if (GetKeyDown(Key_D) && GetKeyDown(Key_A))
-			//{
-			//	ConsoleDebug::printf_endl_warning("GetKeyDown");
-			//}
-			//if (GetKeyDown(Key_W))
-			//{
-			//	ConsoleDebug::printf_endl_warning("GetKeyDown : Key_W");
-			//}
-			//if (GetMouseDown(Button_Left))
-			//{
-			//	ConsoleDebug::printf_endl_warning("GetMouseDown : Button_Left");
-			//}
-			//if (GetMouseUp(Button_Left))
-			//{
-			//	ConsoleDebug::printf_endl_warning("GetMouseUp : Button_Left");
-			//}
 			if (GetKey(Key_W))
 			{
-				worldPos += trans->GetForwardVector() * _editorMoveSpeed * frameRate;
+				worldPos += trans->GetForwardVector() * (float)frameRate;
 			}
 			if (GetKey(Key_S))
 			{
-				worldPos -= trans->GetForwardVector() * _editorMoveSpeed * frameRate;
+				worldPos -= trans->GetForwardVector() * (float)frameRate;
 			}
 			if (GetKey(Key_A))
 			{
-				worldPos -= trans->GetRightVector() * _editorMoveSpeed * frameRate;
+				worldPos -= trans->GetRightVector() * (float)frameRate;
 			}
 			if (GetKey(Key_D))
 			{
-				worldPos += trans->GetRightVector() * _editorMoveSpeed * frameRate;
+				worldPos += trans->GetRightVector() * (float)frameRate;
 			}
 			if (GetKey(Key_Q))
 			{
-				worldPos -= trans->GetUpVector() * _editorMoveSpeed * frameRate;
+				worldPos -= trans->GetUpVector() * (float)frameRate;
 			}
 			if (GetKey(Key_E))
 			{
-				worldPos += trans->GetUpVector() * _editorMoveSpeed * frameRate;
+				worldPos += trans->GetUpVector() * (float)frameRate;
 			}		
 			trans->SetWorldLocation(worldPos);
 		}

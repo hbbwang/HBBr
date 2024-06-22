@@ -44,10 +44,10 @@ void GUIPass::PassInit()
 void GUIPass::ShowPerformance()
 {
 	GUIDrawText("ShowPerf_frame",
-		HString("Frame " + HString::FromFloat(_renderer->GetFrameRate(), 2) + " ms\n").c_wstr()
+		HString("Frame " + HString::FromFloat(VulkanApp::GetFrameRate(), 2) + " ms\n").c_wstr()
 		, 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1)), 20.0f);
 	GUIDrawText("ShowPerf_fps",
-		HString("FPS " + HString::FromUInt((uint32_t)(1.0f / (float)(_renderer->GetFrameRate() / 1000.0)))).c_wstr()
+		HString("FPS " + HString::FromUInt((uint32_t)(1.0f / (float)(VulkanApp::GetFrameRate() / 1000.0)))).c_wstr()
 		, 0, 20.0f, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1)), 20.0f);
 }
 

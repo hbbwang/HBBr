@@ -215,7 +215,7 @@ bool GameObject::Update()
 				const auto compCount = _comps.size();
 				for (int i = 0; i < compCount; i++)
 				{
-					_comps[i]->Update();
+					_comps[i]->CompUpdate();
 				}
 			}
 		}

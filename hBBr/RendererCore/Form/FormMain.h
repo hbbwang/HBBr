@@ -45,7 +45,22 @@ public:
 	{
 		_dropFuns.push_back(func);
 	}
+	//ms
+	HBBR_API HBBR_INLINE static double GetFrameRate() {
+		return _frameRate;
+	}
+	//s
+	HBBR_API HBBR_INLINE static double GetFrameRateS() {
+		return _frameRate / 1000.0f;
+	}
+	//获取游戏时间(秒)
+	HBBR_INLINE static const double GetGameTime()
+	{
+		return _gameTime.End_s();
+	}
+
 	static std::vector<FormDropFun>& GetDropCallbacks() { return _dropFuns; }
+
 private:
 
 	//Callbacks
@@ -60,6 +75,12 @@ private:
 	static std::vector<VulkanForm*> _forms;
 
 	static VulkanForm* _mainForm;
+
+	static HTime _frameTime;
+
+	static HTime _gameTime;
+
+	static double _frameRate;
 
 };
 

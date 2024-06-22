@@ -9,6 +9,7 @@
 #include "Pass/PassType.h"
 #include "Asset/HGuid.h"
 #include "HTime.h"
+#include "HInput.h"
 
 class Texture2D;
 class Scene;
@@ -16,13 +17,14 @@ class Scene;
 class VulkanRenderer
 {
 	friend class PassManager;
+	friend class VulkanApp;
 public:
 	HBBR_API VulkanRenderer(SDL_Window* windowHandle, const char* rendererName);
 
 	HBBR_API ~VulkanRenderer();
 
 	/* Get current Frame buffer index. It is frequent use in the passes. */
-	HBBR_API HBBR_INLINE static int GetCurrentFrameIndex() {
+	HBBR_API HBBR_INLINE int GetCurrentFrameIndex() {
 		return _currentFrameIndex;
 	}
 
@@ -71,16 +73,6 @@ public:
 		return _cmdBuf[_currentFrameIndex];
 	}
 
-	//ms
-	HBBR_API HBBR_INLINE double GetFrameRate()const {
-		return _frameRate;
-	}
-
-	//s
-	HBBR_API HBBR_INLINE double GetFrameRateS()const {
-		return _frameRate/1000.0f;
-	}
-
 	HBBR_API HBBR_INLINE bool IsWorldValid()const{
 		if (!_world.expired())
 			return true;
@@ -120,10 +112,24 @@ public:
 
 	HBBR_API void CreateEmptyWorld();
 
-	//获取游戏时间(秒)
-	HBBR_INLINE const double GetGameTime()
+	HBBR_INLINE static void SetupKeyInput(void* ptr , std::function<void(class VulkanRenderer* renderer, KeyCode key, KeyMod mod, Action action)>func)
 	{
-		return _gameTime.End_s();
+		_key_inputs.emplace(ptr, func);
+	}
+
+	HBBR_INLINE static void SetupMouseInput(void* ptr, std::function<void(class VulkanRenderer* renderer, MouseButton mouse, Action action)>func)
+	{
+		_mouse_inputs.emplace(ptr, func);
+	}
+
+	HBBR_INLINE static void RemoveKeyInput(void* ptr)
+	{
+		_key_inputs.erase(ptr);
+	}
+
+	HBBR_INLINE static void RemoveMouseInput(void* ptr)
+	{
+		_mouse_inputs.erase(ptr);
 	}
 
 	/* 帧渲染函数 */
@@ -172,7 +178,7 @@ private:
 
 	//std::vector<VkFence> _imageAcquiredFences;
 
-	static uint32_t _currentFrameIndex;
+	uint32_t _currentFrameIndex;
 
 	uint32_t _maxSwapchainImages = 0;
 
@@ -193,17 +199,17 @@ private:
 	//World
 	std::weak_ptr<class World> _world;
 
-	HTime _frameTime;
-
-	HTime _gameTime;
-
-	double _frameRate;
-
 	std::vector<std::function<void()>> _renderThreadFuncsOnce;
 
 	std::vector<std::function<void()>> _renderThreadFuncs;
 
 	bool _bIsInGame;
 
+	//主渲染器，默认第一个创建的是，它会自动加载配置场景
+	bool _bIsMainRenderer;
+
+	//Input
+	static std::map < void*, std::function<void(class VulkanRenderer* renderer, KeyCode key, KeyMod mod, Action action)>> _key_inputs;
+	static std::map < void*, std::function<void(class VulkanRenderer* renderer, MouseButton mouse, Action action)>> _mouse_inputs;
 
 };

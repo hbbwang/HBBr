@@ -16,7 +16,8 @@
 #endif
 
 std::map<HString, VulkanRenderer*>		VulkanRenderer::_renderers;
-uint32_t								VulkanRenderer::_currentFrameIndex;
+std::map<void*, std::function<void(VulkanRenderer* renderer, KeyCode key, KeyMod mod, Action action)>> VulkanRenderer::_key_inputs;
+std::map<void*, std::function<void(VulkanRenderer* renderer, MouseButton mouse, Action action)>> VulkanRenderer::_mouse_inputs;
 
 VulkanRenderer::VulkanRenderer(SDL_Window* windowHandle, const char* rendererName)
 {
@@ -72,6 +73,10 @@ void VulkanRenderer::Init()
 
 	//Set renderer map , Add new renderer
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
+	if (_renderers.size() <= 0)
+	{
+		_bIsMainRenderer = true;
+	}
 	auto rendererName = _rendererName;
 	for (int nameIndex = -1;;)
 	{
@@ -85,7 +90,7 @@ void VulkanRenderer::Init()
 		{
 			nameIndex++;
 			_rendererName = HString(rendererName) + "_" + HString::FromInt(nameIndex);
-			MessageOut((HString("Has the same name of renderer.Random a new name is [") + _rendererName + "]").c_str(), false, true);
+			MessageOut((HString("Has the same name of renderer.Random a new name is [") + _rendererName + "]").c_str(), false, false);
 		}
 	}
 
@@ -94,9 +99,6 @@ void VulkanRenderer::Init()
 	 
 	//Init passes
 	_passManager.reset(new PassManager());
-
-	//Start GameTime
-	_gameTime.Start();
 
 }
 
@@ -147,13 +149,17 @@ void VulkanRenderer::Render()
 {
 	if (!_bInit) //Render loop Init.
 	{
-		auto defaultWorldGUID = GetRendererConfig("Default", "DefaultWorld");
-		LoadWorld(defaultWorldGUID);
+		if (_bIsMainRenderer)
+		{
+			auto defaultWorldGUID = GetRendererConfig("Default", "DefaultWorld");
+			LoadWorld(defaultWorldGUID);
+		}
 
 		if (_world.expired())
 		{
 			CreateEmptyWorld();
 		}
+
 		_passManager->PassesInit(this);
 		_bInit = true;
 	}
@@ -163,8 +169,6 @@ void VulkanRenderer::Render()
 		{
 			ResizeBuffer();
 		}
-
-		_frameRate = _frameTime.FrameRate_ms();
 
 		VulkanManager* _vulkanManager = VulkanManager::GetManager();
 
@@ -261,7 +265,7 @@ void VulkanRenderer::SetupPassUniformBuffer()
 		_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
 		_passUniformBuffer.ScreenInfo = glm::vec4((float)_surfaceSize.width, (float)_surfaceSize.height, mainCamera->GetNearClipPlane(), mainCamera->GetFarClipPlane());
 		auto trans = mainCamera->GetGameObject()->GetTransform();
-		_passUniformBuffer.CameraPos_GameTime = glm::vec4(trans->GetWorldLocation().x, trans->GetWorldLocation().y, trans->GetWorldLocation().z, (float)GetGameTime());
+		_passUniformBuffer.CameraPos_GameTime = glm::vec4(trans->GetWorldLocation().x, trans->GetWorldLocation().y, trans->GetWorldLocation().z, (float)VulkanApp::GetGameTime());
 		auto viewDir = glm::normalize(trans->GetForwardVector());
 		_passUniformBuffer.CameraDirection = glm::vec4(viewDir.x, viewDir.y, viewDir.z, 0.0f);
 

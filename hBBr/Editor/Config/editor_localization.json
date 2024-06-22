@@ -1,4 +1,9 @@
 {
+    "MainWindow":{
+        "WindowWidth": 1280,
+        "WindowHeight": 800,
+        "bWindowed":true
+    },
     "SceneOutline":{
         "CreateNewGameObject": "生成新的GameObject",
         "DeleteGameObject":"删除",
@@ -29,5 +34,9 @@
     },
     "RenderView":{
         "SpawnGameObject":"目前没有场景开启编辑状态!"
+    },
+    "MaterialEditor":{
+        "WindowWidth": 1024,
+        "WindowHeight": 768
     }
 }

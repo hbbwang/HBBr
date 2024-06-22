@@ -4,14 +4,58 @@
 #include "EditorMain.h"
 #include <qevent.h>
 #include <qmessagebox.h>
+#include <EditorCommonFunction.h>
+#include <QSplitter>
+#include <qlayout.h>
+#include "VulkanRenderer.h"
 MaterialDetailWindow::MaterialDetailWindow(std::weak_ptr<Material> mat, QWidget* parent)
 	:QWidget(parent)
 {
 	_material = mat;
 	_parent = (MaterialEditor*)parent;
+
+	//创建Material Editor 的内容
+	//分割窗口
+	_splitter = new QSplitter(this);
+	_splitter->setOrientation(Qt::Orientation::Horizontal);
+	_left = new QWidget(_splitter);
+	_right = new QWidget(_splitter);
+	_splitter->addWidget(_left);
+	_splitter->addWidget(_right);
+	//Left
+	{
+		QVBoxLayout* vlayout = new QVBoxLayout(_left);
+		_left->setLayout(vlayout); 
+		vlayout->setSpacing(0); vlayout->setContentsMargins(0, 0, 0, 0);
+		auto left_v_splitter = new QSplitter(_left);
+		vlayout->addWidget(left_v_splitter);
+		left_v_splitter->setOrientation(Qt::Orientation::Vertical);
+		_left_up = new QWidget(left_v_splitter); left_v_splitter->addWidget(_left_up);
+		_left_bottom = new QWidget(left_v_splitter); left_v_splitter->addWidget(_left_up);	
+		//左边面板，分上下两块，上面是三维视图，下面是材质属性设置
+		auto matWindow = VulkanApp::CreateNewWindow(512, 512, _material.lock()->_assetInfo.lock()->guid.str().c_str(), true);
+		HWND hwnd = (HWND)VulkanApp::GetWindowHandle(matWindow);
+
+	}
+	//Right
+	{
+		//右边面板，主要是材质（Shader）的参数设置
+
+	}
 }
 
 MaterialDetailWindow::~MaterialDetailWindow()
+{
+
+}
+
+void MaterialDetailWindow::resizeEvent(QResizeEvent* event)
+{
+	_splitter->resize(width(), height());
+	QWidget::resizeEvent(event);
+}
+
+void MaterialDetailWindow::closeEvent(QCloseEvent* event)
 {
 
 }
@@ -25,11 +69,6 @@ void MaterialDetailWindow::paintEvent(QPaintEvent* event)
 	style()->drawPrimitive(QStyle::PE_Widget, &styleOpt, &painter, this);
 	QWidget::paintEvent(event);
 }
-
-void MaterialDetailWindow::closeEvent(QCloseEvent* event)
-{
-}
-
 
 #include "qdebug.h"
 // 
@@ -46,7 +85,7 @@ MaterialEditor::MaterialEditor(QWidget *parent)
 
 	tabBar()->installEventFilter(this);
 	installEventFilter(this);
-	tabBar()->setDocumentMode(true);
+	//tabBar()->setDocumentMode(true);
 }
 
 MaterialEditor::~MaterialEditor()
@@ -76,10 +115,13 @@ void MaterialEditor::paintEvent(QPaintEvent* event)
 
 MaterialDetailWindow* MaterialEditor::OpenMaterialEditor(std::weak_ptr<Material> mat, bool bTab)
 {
+	int width = 1024, height = 768;
+	GetEditorInternationalizationInt("MaterialEditor", "WindowWidth", width);
+	GetEditorInternationalizationInt("MaterialEditor", "WindowHeight", height);
 	if (_mainWindow == nullptr)
 	{
 		MaterialEditor* main = new MaterialEditor(EditorMain::_self);
-		main->resize(1024, 768);
+		main->resize(width, height);
 		main->show();
 		_mainWindow = main;
 	}
@@ -107,7 +149,7 @@ MaterialDetailWindow* MaterialEditor::OpenMaterialEditor(std::weak_ptr<Material>
 	}
 	else
 	{
-		newWidget->resize(1024,768);
+		newWidget->resize(width, height);
 		newWidget->setWindowFlag(Qt::Window, true);
 		newWidget->show();
 	}

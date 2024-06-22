@@ -14,11 +14,17 @@ public:
 	~MaterialDetailWindow();
 
 	virtual void paintEvent(QPaintEvent* event)override;
+	virtual void resizeEvent(QResizeEvent* event)override;
 
 	class MaterialEditor* _parent = nullptr;
 	std::weak_ptr<Material> _material;
 protected:
 	virtual void closeEvent(QCloseEvent* event) override;
+	class QSplitter* _splitter = nullptr;
+	class QWidget* _left = nullptr;
+	class QWidget* _right = nullptr;
+	class QWidget* _left_up = nullptr;
+	class QWidget* _left_bottom = nullptr;
 };
 
 class MaterialEditor : public QTabWidget

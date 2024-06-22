@@ -33,7 +33,7 @@ void PassManager::PassesUpdate()
 {
 	const auto manager = VulkanManager::GetManager();
 
-	const uint32_t frameIndex = VulkanRenderer::GetCurrentFrameIndex();
+	const uint32_t frameIndex =_renderer->_currentFrameIndex;
 
 	if (_executeFence.size() != manager->GetSwapchainBufferCount())
 	{

@@ -4,7 +4,6 @@
 #include <qdebug.h>
 #include "FormMain.h"
 #include "RenderView.h"
-#include "HInput.h"
 #include "ContentBrowser.h"
 #include "qfontdatabase.h"
 #include "ConsoleDebug.h"
@@ -107,7 +106,12 @@ int main(int argc, char *argv[])
 
     //ÏÔÊ¾´°¿Ú
     w.show();
-    w.resize(1024, 768);
+
+    int width = 1024, height = 768;
+    GetEditorInternationalizationInt("MainWindow", "WindowWidth", width);
+    GetEditorInternationalizationInt("MainWindow", "WindowHeight", height);
+    w.resize(width, height);
+    SetWindowCenterPos(&w);
 
     return a.exec();
 }

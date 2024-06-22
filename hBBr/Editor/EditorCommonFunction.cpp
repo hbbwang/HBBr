@@ -11,6 +11,9 @@
 #include "FileSystem.h"
 #include "Serializable.h"
 #include<QRegularExpression>
+#include <qdesktopwidget.h>
+#include <qwindow.h>
+#include <QScreen>
 QString GetWidgetStyleSheetFromFile(QString objectName, QString path)
 {
 	QString result;
@@ -430,6 +433,29 @@ QString GetEditorInternationalization(QString Group, QString name)
     return "????";
 }
 
+bool GetEditorInternationalizationInt(QString Group, QString name, int& result)
+{
+    static nlohmann::json json;
+    if (json.is_null())
+    {
+        Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor_localization.json", json);
+    }
+    if (!json.is_null())
+    {
+        auto it = json.find(Group.toStdString());
+        if (it != json.end())
+        {
+            auto va_it = it.value().find(name.toStdString());
+            if (va_it != it.value().end())
+            {
+                result = va_it.value();
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 QString GetEditorConfig(QString Group, QString name)
 {
     static nlohmann::json json;
@@ -451,4 +477,10 @@ QString GetEditorConfig(QString Group, QString name)
        }
     }
     return "????";
+}
+
+void SetWindowCenterPos(QWidget* widget)
+{
+    auto rect = widget->windowHandle()->screen()->geometry();
+    widget->move(rect.width()/2 - widget->width()/2, rect.height()/2 - widget->height() / 2);
 }

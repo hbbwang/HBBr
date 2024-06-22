@@ -24,5 +24,7 @@ QImage GetImageFromTGA(QString path);
 bool GetPreviewImage(QString resourceFilePath , QPixmap& pixmap);
 
 QString GetEditorInternationalization(QString Group, QString name);
-
+bool GetEditorInternationalizationInt(QString Group, QString name, int& result);
 QString GetEditorConfig(QString Group, QString name);
+
+void SetWindowCenterPos(QWidget* widget);

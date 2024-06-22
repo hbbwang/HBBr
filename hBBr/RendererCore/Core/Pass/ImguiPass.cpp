@@ -54,7 +54,7 @@ void ImguiScreenPass::ShowPerformance()
 		ImGuiWindowFlags_NoTitleBar |
 		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs))
 	{
-		double frameRate = _renderer->GetFrameRate();
+		double frameRate = VulkanApp::GetFrameRate();
 		HString frameString = HString::FromFloat(frameRate, 2) + " ms";
 		HString fpsString = HString::FromUInt((uint32_t)(1.0f / (float)(frameRate / 1000.0)));
 		ImVec2 newPos = { (float)_currentFrameBufferSize.width - 80.f , (float)_currentFrameBufferSize.height * 0.0002f };

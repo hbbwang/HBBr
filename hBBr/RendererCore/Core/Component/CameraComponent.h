@@ -91,4 +91,5 @@ private:
 	float _editorMoveSpeed = 1.0f;
 
 	float _editorMouseSpeed = 0.25f;
+
 };

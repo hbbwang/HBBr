@@ -134,6 +134,14 @@ public:
 		return _gameObject->_transform;
 	}
 
+	HBBR_API HBBR_INLINE void EnableKeyInput(bool bEnable)	{
+		_bEnableKeyInput = bEnable;
+	}
+
+	HBBR_API HBBR_INLINE void EnableMouseInput(bool bEnable) {
+		_bEnableMouseInput = bEnable;
+	}
+
 	//不是每帧执行,一般用于编辑器的对象数据刷新
 	//编辑器Inspector如果改了组件的参数，是通过调用这个函数进行刷新
 	HBBR_API virtual void UpdateData() {}
@@ -143,6 +151,112 @@ protected:
 	HBBR_INLINE virtual void OnConstruction() {
 		//Component Property Reflection Add.
 		AddProperty("bool", "bActive", &_bActive, false, "Default", 0, "");
+	}
+
+	std::vector<KeyCallBack> _keys;
+	std::vector<MouseCallBack> _mouses;
+	std::vector<KeyCallBack> _keys_repeat;
+	std::vector<MouseCallBack> _mouses_repeat;
+
+	inline bool GetKey(KeyCode key) {
+		return FindRepeatKey(key) != nullptr;
+	}
+
+	inline bool GetKeyDown(KeyCode key) {
+		return FindDefaultKeyDown(key, Action::PRESS) != nullptr;
+	}
+
+	inline bool GetKeyUp(KeyCode key) {
+		return FindDefaultKey(key, Action::RELEASE) != nullptr;
+	}
+
+	inline bool GetMouse(MouseButton button) {
+		return FindRepeatMouse(button) != nullptr;
+	}
+
+	inline bool GetMouseDown(MouseButton button) {
+		return FindDefaultMouseDown(button, Action::PRESS) != nullptr;
+	}
+
+	inline bool GetMouseUp(MouseButton button) {
+		return FindDefaultMouse(button, Action::RELEASE) != nullptr;
+	}
+
+	inline KeyCallBack* FindDefaultKey(KeyCode key, Action action)
+	{
+		auto it = std::find_if(_keys.begin(), _keys.end(), [key, action](KeyCallBack& callback) {
+			return callback.key == key && callback.action == action;
+			});
+		if (it != _keys.end())
+			return &(*it);
+		else
+			return nullptr;
+	}
+
+	inline KeyCallBack* FindDefaultKeyDown(KeyCode key, Action action)
+	{
+		auto it = std::find_if(_keys_repeat.begin(), _keys_repeat.end(), [key, action](KeyCallBack& callback) {
+			return callback.key == key && callback.action == action && callback.bKeyDown == true;
+			});
+		if (it != _keys_repeat.end())
+			return &(*it);
+		else
+			return nullptr;
+	}
+
+	inline KeyCallBack* FindRepeatKey(KeyCode key)
+	{
+		auto it = std::find_if(_keys_repeat.begin(), _keys_repeat.end(), [key](KeyCallBack& callback) {
+			return callback.key == key ;
+			});
+		if (it != _keys_repeat.end())
+			return &(*it);
+		else
+			return nullptr;
+	}
+
+	//
+	inline MouseCallBack* FindDefaultMouse(MouseButton mouse, Action action)
+	{
+		auto it = std::find_if(_mouses.begin(), _mouses.end(), [mouse, action](MouseCallBack& callback) {
+			return callback.button == mouse && callback.action == action ;
+			});
+		if (it != _mouses.end())
+			return &(*it);
+		else
+			return nullptr;
+	}
+
+	inline MouseCallBack* FindDefaultMouseDown(MouseButton mouse, Action action)
+	{
+		auto it = std::find_if(_mouses_repeat.begin(), _mouses_repeat.end(), [mouse, action](MouseCallBack& callback) {
+			return callback.button == mouse && callback.action == action && callback.bMouseDown == true;
+			});
+		if (it != _mouses_repeat.end())
+			return &(*it);
+		else
+			return nullptr;
+	}
+
+	inline MouseCallBack* FindRepeatMouse(MouseButton mouse)
+	{
+		auto it = std::find_if(_mouses_repeat.begin(), _mouses_repeat.end(), [mouse](MouseCallBack& callback) {
+			return callback.button == mouse ;
+			});
+		if (it != _mouses_repeat.end())
+		{
+			return &(*it);
+		}
+		else
+			return nullptr;
+	}
+
+	virtual void KeyInput(KeyCode key, KeyMod mod, Action action) {
+
+	}
+
+	virtual void MouseInput(MouseButton mouse, Action action) {
+
 	}
 
 	//<displayName , component>
@@ -156,40 +270,9 @@ protected:
 
 	virtual void ExecuteDestroy();
 
-	//input fallback
-	inline bool GetKey(KeyCode key) {
-		return HInput::GetKey(key,_renderer);
-	}
+	bool _bEnableKeyInput = false;
 
-	inline bool GetKeyDown(KeyCode key) {
-		return HInput::GetKeyDown(key, _renderer);
-	}
-
-	inline bool GetKeyUp(KeyCode key) {
-		return HInput::GetKeyUp(key, _renderer);
-	}
-
-	inline bool GetMouse(MouseButton button) {
-		return HInput::GetMouse(button, _renderer);
-	}
-
-	inline bool GetMouseDown(MouseButton button) {
-		return HInput::GetMouseDown(button, _renderer);
-	}
-
-	inline bool GetMouseUp(MouseButton button) {
-		return HInput::GetMouseUp(button, _renderer);
-	}
-
-	inline glm::vec2 GetMousePos()
-	{
-		return HInput::GetMousePos();
-	}
-
-	inline glm::vec2 GetMousePosClient()
-	{
-		return HInput::GetMousePosClient();
-	}
+	bool _bEnableMouseInput = false;
 
 	bool _bActive;
 
@@ -283,5 +366,7 @@ protected:
 
 	}
 
+	private:
+		void CompUpdate();
 
 };
