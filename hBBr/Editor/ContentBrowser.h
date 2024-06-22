@@ -98,6 +98,7 @@ private:
 	CustomListItem* _ediingItem = nullptr;
 private slots:
 	void ItemTextChange(QListWidgetItem* item);
+	void ItemDoubleClicked(QListWidgetItem* item);
 
 };
 #pragma endregion

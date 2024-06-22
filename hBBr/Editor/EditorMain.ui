@@ -50,6 +50,7 @@
    <addaction name="MainMenu"/>
    <addaction name="menu_3"/>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="CreateNewWorld">
    <property name="text">
     <string>新建世界</string>

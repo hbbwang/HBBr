@@ -347,6 +347,7 @@ CustomListItem* CustomListView::FindItem(QString itemPath)
 			return i;
 		}
 	}
+	return nullptr;
 }
 
 const QList<CustomListItem*> CustomListView::GetSelectionItems() const

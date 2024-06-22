@@ -180,6 +180,7 @@
     <ClCompile Include="FloatSetting.cpp" />
     <ClCompile Include="Inspector.cpp" />
     <ClCompile Include="LineEditDialog.cpp" />
+    <ClCompile Include="MaterialEditor.cpp" />
     <ClCompile Include="PropertyClass.cpp" />
     <ClCompile Include="RenderView.cpp" />
     <ClCompile Include="SceneOutline.cpp" />
@@ -213,6 +214,7 @@
     <QtMoc Include="SceneOutline.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="MaterialEditor.h" />
     <QtMoc Include="LineEditDialog.h" />
     <QtMoc Include="PropertyClass.h" />
     <QtMoc Include="FloatSetting.h" />

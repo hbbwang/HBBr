@@ -61,6 +61,7 @@ protected:
             }
         }
 
+
         //if (event->type() == QEvent::MouseMove)
         //    qDebug() << QApplication::widgetAt(mouseEvent->globalPos())->objectName().toStdString().c_str();
         return false; // 事件未被处理，继续传递

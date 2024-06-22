@@ -29,6 +29,7 @@
 #include "ComboBox.h"
 #include "EditorMain.h"
 #include "ConsoleDebug.h"
+#include "MaterialEditor.h"
 //--------------------------------------VirtualFolderTreeView-------------------
 #pragma region VirtualFolderTreeView
 void GetAllFolderChildItems(CustomViewItem* parentItem , QList<CustomViewItem*> & out)
@@ -598,6 +599,7 @@ VirtualFileListView::VirtualFileListView(class  ContentBrowser* contentBrowser, 
 			});
 
 		connect(this,&QListWidget::itemChanged,this,&VirtualFileListView::ItemTextChange);
+		connect(this, &QListWidget::itemDoubleClicked, this, &VirtualFileListView::ItemDoubleClicked);
 	}
 
 }
@@ -688,6 +690,22 @@ void VirtualFileListView::dropEvent(QDropEvent* e)
 				}
 			}
 			ContentBrowser::RefreshContentBrowsers();
+		}
+	}
+}
+
+void VirtualFileListView::ItemDoubleClicked(QListWidgetItem* input_item)
+{
+	auto item = (CustomListItem*)input_item;
+	if (!item->_assetInfo.expired())
+	{
+		switch (item->_assetInfo.lock()->type)
+		{
+		case AssetType::Material:
+			MaterialEditor::OpenMaterialEditor(item->_assetInfo.lock()->GetAssetObject<Material>(), true);
+			break;
+		default:
+			break;
 		}
 	}
 }
