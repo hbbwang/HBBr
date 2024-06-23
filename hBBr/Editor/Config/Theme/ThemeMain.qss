@@ -392,7 +392,6 @@ QListView::item:selected
 QSplitter
 {
     background-color:BackgroundColor;
-    border: 1px solid rgb(110,110,110);
 }
 QSplitter::handle
 {
@@ -697,7 +696,11 @@ QSplitter::handle
 }
 #MaterialEditor
 {
-
+    background-color: rgb(53, 53, 53);
+}
+#MaterialEditor QSplitter::handle
+{
+    height: 2px;
 }
 #MaterialEditor_Instance
 {
@@ -712,7 +715,31 @@ QSplitter::handle
     border-bottom: 1px solid rgb(100,100,100);
     min-height: 25px;
 }
-
+#PropertyTableWidgetRow
+{
+    color: #cccccc;
+    font-family:  FontFamily;
+    font-size: 14px;
+    border-bottom: 1px solid rgb(100,100,100);
+}
+#PropertyTableWidgetRowName
+{
+    color: #cccccc;
+    font-family:  FontFamily;
+    font-size: 14px;
+    border: none;
+    background-color: transparent;
+}
+#PropertyTableWidgetRowName:hover
+{
+    border: none;
+    background-color: transparent;
+}
+#PropertyTableWidget QSplitter::handle
+{
+    height: 2px;
+    background-color: rgba(100,100,100,0.75);
+}
 
 
 

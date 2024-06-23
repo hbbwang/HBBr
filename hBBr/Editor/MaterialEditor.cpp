@@ -13,8 +13,6 @@
 #include <ToolBox.h>
 #include "qdebug.h"
 
-// 
-//
 MaterialEditor* MaterialEditor::_mainWindow = nullptr;
 
 MaterialEditor::MaterialEditor(QWidget *parent)
@@ -22,7 +20,7 @@ MaterialEditor::MaterialEditor(QWidget *parent)
 {
 	//ui.setupUi(this);
 	setObjectName("MaterialEditor");
-	setWindowFlags(Qt::Window);
+	setWindowFlag(Qt::Tool, true);
 	setMovable(true);
 
 	tabBar()->installEventFilter(this);
@@ -92,7 +90,7 @@ MaterialDetailEditor* MaterialEditor::OpenMaterialEditor(std::weak_ptr<Material>
 	else
 	{
 		newWidget->resize(width, height);
-		newWidget->setWindowFlag(Qt::Window, true);
+		newWidget->setWindowFlag(Qt::Tool, true);
 		newWidget->show();
 	}
 	_mainWindow->_allDetailWindows.append({ newWidget });

@@ -17,6 +17,8 @@ public:
 
 	QWidget* _mainRendererWidget = nullptr;
 
+	HWND hwnd;
+
 	class VulkanForm* _mainRenderer = nullptr;
 
 	static SDL_Keycode mapQtKeyToSdlKey(int qtKey);

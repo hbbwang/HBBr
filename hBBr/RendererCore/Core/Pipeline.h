@@ -295,8 +295,6 @@ public:
 		std::weak_ptr<ShaderCache> ps)
 	{
 		PipelineIndex index;
-		index.vsLoadIndex = vs.lock()->shaderLoadIndex;
-		index.psLoadIndex = ps.lock()->shaderLoadIndex;
 		index.vs_varients = vs.lock()->varients;
 		index.ps_varients = ps.lock()->varients;
 		index.pipelineIndex = 0;
@@ -308,9 +306,7 @@ public:
 	}
 
 	bool operator<(const PipelineIndex& id) const {
-		return (vsLoadIndex < id.vsLoadIndex)
-			|| (psLoadIndex < id.psLoadIndex)
-			|| (vs_varients < id.vs_varients)
+		return (vs_varients < id.vs_varients)
 			|| (ps_varients < id.ps_varients)
 			|| (pipelineIndex < id.pipelineIndex)
 			|| vsShaderCacheFullName< id.vsShaderCacheFullName
@@ -318,9 +314,7 @@ public:
 	}
 
 	bool operator==(const PipelineIndex& id) const {
-		return (vsLoadIndex == id.vsLoadIndex)
-			&& (psLoadIndex == id.psLoadIndex)
-			&& (vs_varients == id.vs_varients)
+		return  (vs_varients == id.vs_varients)
 			&& (ps_varients == id.ps_varients)
 			&& (pipelineIndex == id.pipelineIndex)
 			&& (vsShaderCacheFullName == id.vsShaderCacheFullName)
@@ -329,8 +323,6 @@ public:
 
 private:
 	uint32_t pipelineIndex = 0;//用来记录管线状态
-	uint32_t vsLoadIndex = 0;//顶点着色器加载序号
-	uint32_t psLoadIndex = 0;//像素着色器加载序号
 	uint32_t vs_varients = 0;//变体 32bit 相当于32个bool
 	uint32_t ps_varients = 0;
 	HString vsShaderCacheFullName = "";
@@ -347,41 +339,43 @@ public:
 	~PipelineManager();
 
 	//Graphics pipeline setting step 1
-	static void SetColorBlend(VkGraphicsPipelineCreateInfoCache & createInfo, bool bEnable, StaticBlendState blendState = StaticBlendState());
+	HBBR_API static void SetColorBlend(VkGraphicsPipelineCreateInfoCache & createInfo, bool bEnable, StaticBlendState blendState = StaticBlendState());
 
 	//Graphics pipeline setting step 2
-	static void SetRenderRasterizer(VkGraphicsPipelineCreateInfoCache& createInfo, Rasterizer rasterizer = Rasterizer());
+	HBBR_API static void SetRenderRasterizer(VkGraphicsPipelineCreateInfoCache& createInfo, Rasterizer rasterizer = Rasterizer());
 
 	//Graphics pipeline setting step 3
-	static void SetRenderDepthStencil(VkGraphicsPipelineCreateInfoCache& createInfo, DepthStencil depthStencil = DepthStencil());
+	HBBR_API static void SetRenderDepthStencil(VkGraphicsPipelineCreateInfoCache& createInfo, DepthStencil depthStencil = DepthStencil());
 
 	//Graphics pipeline setting step 4
-	static void SetVertexInput(VkGraphicsPipelineCreateInfoCache& createInfo, VertexInputLayout vertexInputLayout);
-	static void SetVertexInput(VkGraphicsPipelineCreateInfoCache& createInfo, uint32_t vertexInputStride ,VkVertexInputRate vertexInputRate,std::vector<VkFormat>inputLayout );
+	HBBR_API static void SetVertexInput(VkGraphicsPipelineCreateInfoCache& createInfo, VertexInputLayout vertexInputLayout);
+	HBBR_API static void SetVertexInput(VkGraphicsPipelineCreateInfoCache& createInfo, uint32_t vertexInputStride ,VkVertexInputRate vertexInputRate,std::vector<VkFormat>inputLayout );
 
 	//Graphics pipeline setting step 5 , also not.
-	static void SetDepthStencil(VkGraphicsPipelineCreateInfoCache& createInfo);
+	HBBR_API static void SetDepthStencil(VkGraphicsPipelineCreateInfoCache& createInfo);
 
 	//Graphics pipeline setting step 6
-	static void SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache* vs, ShaderCache* ps);
+	HBBR_API static void SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache* vs, ShaderCache* ps);
 
 	//Graphics pipeline setting the last step
-	static PipelineObject* CreatePipelineObject(
+	HBBR_API static PipelineObject* CreatePipelineObject(
 		VkGraphicsPipelineCreateInfoCache& createInfo,VkPipelineLayout layout, 
 		VkRenderPass renderPass, PipelineIndex pipelineIndex, 
 		uint32_t subpassCount = 1, PipelineType pipelineType = PipelineType::Graphics);
 
-	static PipelineObject* GetGraphicsPipelineMap(PipelineIndex index);
+	HBBR_API static PipelineObject* GetGraphicsPipelineMap(PipelineIndex index);
 
-	static void ClearPipelineObjects();
+	HBBR_API static void ClearPipelineObjects();
 
-	static void BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCache& createInfo, VkRenderPass renderPass, uint32_t subpassIndex, VkPipeline& pipelineObj);
+	HBBR_API static void RemovePipelineObjects(PipelineIndex& index);
 
-	static void SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& createInfo, VkPipelineLayout pipelineLayout);
+	HBBR_API static void BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCache& createInfo, VkRenderPass renderPass, uint32_t subpassIndex, VkPipeline& pipelineObj);
 
-	static void ClearCreateInfo(VkGraphicsPipelineCreateInfoCache& createInfo);
+	HBBR_API static void SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& createInfo, VkPipelineLayout pipelineLayout);
 
-	static PipelineIndex AddPipelineObject(std::weak_ptr<ShaderCache> vs, std::weak_ptr<ShaderCache> ps,VkPipeline pipeline,VkPipelineLayout pipelineLayout);
+	HBBR_API static void ClearCreateInfo(VkGraphicsPipelineCreateInfoCache& createInfo);
+
+	HBBR_API static PipelineIndex AddPipelineObject(std::weak_ptr<ShaderCache> vs, std::weak_ptr<ShaderCache> ps,VkPipeline pipeline,VkPipelineLayout pipelineLayout);
 private:
 	static std::map<PipelineIndex, std::unique_ptr<PipelineObject>> _graphicsPipelines;
 	static std::map<PipelineIndex, std::unique_ptr<PipelineObject>> _computePipelines;

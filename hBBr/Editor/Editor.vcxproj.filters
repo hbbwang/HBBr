@@ -118,6 +118,9 @@
     <ClCompile Include="MaterialDetailEditor.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="PropertyWidget.cpp">
+      <Filter>Widgets\Custom</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="EditorMain.h">
@@ -185,6 +188,9 @@
     </QtMoc>
     <QtMoc Include="MaterialDetailEditor.h">
       <Filter>Widgets</Filter>
+    </QtMoc>
+    <QtMoc Include="PropertyWidget.h">
+      <Filter>Widgets\Custom</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

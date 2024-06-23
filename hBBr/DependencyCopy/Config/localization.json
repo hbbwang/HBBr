@@ -25,6 +25,11 @@
         "A000021":"[Material::CreateMaterial] 创建新材质实力成功。",
         "A000022":"[Material::CreateMaterial] 创建新材质实力失败。",
         "A000023":"[Material::LoadAsset] 没有找到对应的ShaderCache:%s ,将应用Error Cache...",
-        "A000024":"[VulkanRenderer::ResizeBuffer] 重置Swapchain失败，Sufrace丢失"
+        "A000024":"[VulkanRenderer::ResizeBuffer] 重置Swapchain失败，Sufrace丢失",
+        "A000025":"[Shader::LoadShaderCacheFile] 导入ShaderCache失败:%s"
+    },
+    "ModelComponent":{
+        "SetMaterialIndexError": "[ModelComponent::SetMaterial]SetMaterial失败,Index错误."
+
     }
 }

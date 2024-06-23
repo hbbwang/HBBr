@@ -70,6 +70,22 @@ void ModelComponent::SetModel(std::weak_ptr<class Model> model)
 	}
 }
 
+void ModelComponent::SetMaterial(std::weak_ptr<class Material> mat, int index)
+{
+	if (index >= _materialPath.size())
+	{
+		ConsoleDebug::printf_endl_warning(GetInternationalizationText("ModelComponent","SetMaterialIndexError"));
+		return;
+	}
+	if (!mat.expired())
+	{
+		_materialPath[index].assetInfo = mat.lock()->_assetInfo;
+		_materialPath[index].path = mat.lock()->_assetInfo.lock()->virtualFilePath;
+		_materialPath[index].callBack();
+		UpdateData();
+	}
+}
+
 void ModelComponent::GameObjectActiveChanged(bool objActive)
 {
 	if ( _bActive && objActive )

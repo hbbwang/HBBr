@@ -101,9 +101,11 @@ struct ShaderCache
 	VkShaderModule shaderModule;
 	HString shaderName;
 	HString shaderFullName;
+	//RelativePath
 	HString shaderPath;
+	//AbsPath
+	HString shaderAbsPath;
 	VkPipelineShaderStageCreateInfo shaderStageInfo={};
-	uint32_t shaderLoadIndex = 0;
 	//Default 默认参数模板
 	std::vector<ShaderVarientGroup> vi;
 	uint32_t varients;
@@ -114,8 +116,42 @@ struct ShaderCache
 class Shader
 {
 public:
+	//加载所有Cache,如果已经加载了，会销毁掉重新加载
 	HBBR_API static void LoadShaderCache(const char* cachePath);
+	//根据Shader名字加载Cache (@前)，会销毁掉重新加载
+	HBBR_API static void LoadShaderCacheByShaderName(const char* cachePath, const char* ShaderName,ShaderType type);
+	//加载单个Cache，会销毁掉重新加载
+	HBBR_API static void LoadShaderCacheFile(const char* cacheFilePath);
+
 	HBBR_API static void DestroyAllShaderCache();
+
+	HBBR_API inline static std::weak_ptr<ShaderCache> GetVSCache(HString cacheFullName) {
+		auto it = _vsShader.find(cacheFullName);
+		if(it != _vsShader.end())
+		{ 
+			return it->second;
+		}
+		return std::weak_ptr<ShaderCache>();
+	}
+
+	HBBR_API inline static std::weak_ptr<ShaderCache> GetPSCache(HString cacheFullName) {
+		auto it = _psShader.find(cacheFullName);
+		if (it != _psShader.end())
+		{
+			return it->second;
+		}
+		return std::weak_ptr<ShaderCache>();
+	}
+
+	HBBR_API inline static std::weak_ptr<ShaderCache> GetCSCache(HString cacheFullName) {
+		auto it = _csShader.find(cacheFullName);
+		if (it != _csShader.end())
+		{
+			return it->second;
+		}
+		return std::weak_ptr<ShaderCache>();
+	}
+
 	static std::map<HString, std::shared_ptr<ShaderCache>> _vsShader;
 	static std::map<HString, std::shared_ptr<ShaderCache>> _psShader;
 	static std::map<HString, std::shared_ptr<ShaderCache>> _csShader;

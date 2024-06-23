@@ -777,6 +777,11 @@ VkExtent2D VulkanManager::GetSurfaceSize(VkExtent2D windowSize, VkSurfaceKHR sur
 	return windowSize;
 }
 
+void VulkanManager::DeviceWaitIdle()
+{
+	vkDeviceWaitIdle(_device);
+}
+
 void VulkanManager::CheckSurfaceFormat(VkSurfaceKHR surface, VkSurfaceFormatKHR& surfaceFormat)
 {
 	//Check Support

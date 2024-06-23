@@ -10,7 +10,6 @@
 #include "EditorCommonFunction.h"
 #include <Windows.h> //为了支持SetFocus(nullptr);
 
-QWidget* currentFocusWidget = nullptr;
 class MyEventFilter : public QObject
 {
 protected:
@@ -22,27 +21,26 @@ protected:
         {
             QWidget* newCurrentFocusWidget = QApplication::widgetAt(mouseEvent->globalPos());
             auto cursorPos = mouseEvent->globalPos();
-            if (currentFocusWidget && currentFocusWidget != newCurrentFocusWidget && currentFocusWidget != QApplication::focusWidget())
+            if (newCurrentFocusWidget)
             {
-                if (
-                    !currentFocusWidget->objectName().contains("menu", Qt::CaseInsensitive)//
-                    && !currentFocusWidget->objectName().contains("combo", Qt::CaseInsensitive)//
-                    && !currentFocusWidget->objectName().contains("lineEdit", Qt::CaseInsensitive)
-                    )
-                    bChangeFocus = true;
-                else if (currentFocusWidget->parent() || currentFocusWidget->parent()->parent())
+                //窗口ObjectName包含RenderView才会强制给予焦点
+                if (newCurrentFocusWidget->objectName().contains("RenderView", Qt::CaseInsensitive))
                 {
-                    if(!currentFocusWidget->parent()->objectName().contains("combo", Qt::CaseInsensitive))
-                        bChangeFocus = true;
-                    if (!currentFocusWidget->parent()->parent()->objectName().contains("combo", Qt::CaseInsensitive))
-                        bChangeFocus = true;
-                }
-                if (bChangeFocus)
-                {
-                    //取消所有焦点先
-                    SetFocus(nullptr);
-                    //再重新赋予QT焦点
-                    currentFocusWidget->setFocus();
+                    POINT point = {};
+                    point.x = mouseEvent->globalPos().x();
+                    point.y = mouseEvent->globalPos().y();
+                    HWND windowAt = WindowFromPoint(point);
+
+                    auto forms = VulkanApp::GetForms();
+                    for (auto& i : forms)
+                    {              
+                        auto winHwnd = (HWND)VulkanApp::GetWindowHandle(i);
+                        if (windowAt == winHwnd)
+                        {
+                            VulkanApp::SetFocusForm(i);
+                            SetFocus((HWND)VulkanApp::GetWindowHandle(i));
+                        }
+                    }
                 }
             }
             //ContentBrowser focus
@@ -65,6 +63,7 @@ protected:
         //    qDebug() << QApplication::widgetAt(mouseEvent->globalPos())->objectName().toStdString().c_str();
         return false; // 事件未被处理，继续传递
     }
+
 };
 
 int main(int argc, char *argv[])

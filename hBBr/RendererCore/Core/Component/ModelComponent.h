@@ -12,8 +12,6 @@ class ModelComponent :public Component
 
 public:
 
-	HBBR_API void SetModelByRealPath(HString path);
-
 	//path = virtual path (Content/...)
 	HBBR_API void SetModelByAssetPath(HString virtualPath);
 
@@ -22,6 +20,12 @@ public:
 	HBBR_API void SetModel(HGUID guid);
 
 	HBBR_API virtual void SetModel(std::weak_ptr<class Model> model);
+
+	HBBR_API virtual void SetMaterial(std::weak_ptr<class Material>mat, int index = 0);
+
+	HBBR_API int GetMaterialNum()const {
+		return _materialPath.size();
+	}
 
 	virtual void GameObjectActiveChanged(bool objActive)override;
 

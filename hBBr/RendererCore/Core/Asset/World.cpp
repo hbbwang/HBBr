@@ -174,7 +174,11 @@ void World::ReloadWorldSetting()
 
 GameObject* World::SpawnGameObject(HString name, class Level* level)
 {
+#if IS_EDITOR
+	if (level != _editorLevel.get() && this->_levels.size() <= 0)
+#else
 	if (this->_levels.size() <= 0)
+#endif
 	{
 		MsgBox("World.cpp/SpawnGameObject","Spawn game object failed.This world is not having any levels.");
 		return nullptr;
@@ -213,6 +217,7 @@ void World::Load(class VulkanRenderer* renderer)
 	
 	glm::vec3 camPos = glm::vec3(0, 2, -3.0);
 	glm::vec3 camRot = glm::vec3(0);
+	if(_renderer->IsMainRenderer())
 	{
 		auto it = _json.find("DefaultCameraPosition");
 		if (it != _json.end())
@@ -220,6 +225,7 @@ void World::Load(class VulkanRenderer* renderer)
 			from_json(it.value(), camPos);
 		}
 	}
+	if(_renderer->IsMainRenderer())
 	{
 		auto it = _json.find("DefaultCameraRotation");
 		if (it != _json.end())

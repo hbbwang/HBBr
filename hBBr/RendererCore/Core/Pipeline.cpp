@@ -65,6 +65,24 @@ void PipelineManager::ClearPipelineObjects()
 	_computePipelines.clear();
 }
 
+void PipelineManager::RemovePipelineObjects(PipelineIndex& index)
+{
+	{
+		auto it = _graphicsPipelines.find(index);
+		if (it != _graphicsPipelines.end())
+		{
+			_graphicsPipelines.erase(index);
+		}
+	}
+	{
+		auto it = _computePipelines.find(index);
+		if (it != _computePipelines.end())
+		{
+			_computePipelines.erase(index);
+		}
+	}
+}
+
 void PipelineManager::SetColorBlend(VkGraphicsPipelineCreateInfoCache& createInfo, bool bEnable, StaticBlendState blendState)
 {
 	createInfo.colorBlendAttachmentStates.clear();

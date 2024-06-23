@@ -40,6 +40,8 @@
         "WindowHeight": 768,
         "MaterialRendererTitle": "材质预览视口",
         "MaterialAttrbuteTitle": "材质属性",
-        "MaterialParameterTitle": "材质参数"
+        "MaterialParameterTitle": "材质参数",
+        "RefreshShaderButton": "刷新Shader",
+        "RefreshShader": "刷新Shader:[vs:%s][ps:%s]"
     }
 }

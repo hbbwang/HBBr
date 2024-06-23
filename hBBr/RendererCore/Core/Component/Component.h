@@ -159,27 +159,46 @@ protected:
 	std::vector<MouseCallBack> _mouses_repeat;
 
 	inline bool GetKey(KeyCode key) {
+		if (VulkanApp::GetFocusForm() && VulkanApp::GetFocusForm()->renderer != _renderer)
+			return false;
 		return FindRepeatKey(key) != nullptr;
 	}
 
 	inline bool GetKeyDown(KeyCode key) {
+		if (VulkanApp::GetFocusForm() && VulkanApp::GetFocusForm()->renderer != _renderer)
+			return false;
 		return FindDefaultKeyDown(key, Action::PRESS) != nullptr;
 	}
 
 	inline bool GetKeyUp(KeyCode key) {
+		if (VulkanApp::GetFocusForm() && VulkanApp::GetFocusForm()->renderer != _renderer)
+			return false;
 		return FindDefaultKey(key, Action::RELEASE) != nullptr;
 	}
 
 	inline bool GetMouse(MouseButton button) {
+		if (VulkanApp::GetFocusForm() && VulkanApp::GetFocusForm()->renderer != _renderer)
+			return false;
 		return FindRepeatMouse(button) != nullptr;
 	}
 
 	inline bool GetMouseDown(MouseButton button) {
+		if (VulkanApp::GetFocusForm() && VulkanApp::GetFocusForm()->renderer != _renderer)
+			return false;
 		return FindDefaultMouseDown(button, Action::PRESS) != nullptr;
 	}
 
 	inline bool GetMouseUp(MouseButton button) {
+		if (VulkanApp::GetFocusForm() && VulkanApp::GetFocusForm()->renderer != _renderer)
+			return false;
 		return FindDefaultMouse(button, Action::RELEASE) != nullptr;
+	}
+
+	inline void SetMousePos(glm::vec2 pos) 
+	{
+		if (VulkanApp::GetFocusForm() && VulkanApp::GetFocusForm()->renderer != _renderer)
+			return;
+		return HInput::SetMousePos(pos);
 	}
 
 	inline KeyCallBack* FindDefaultKey(KeyCode key, Action action)

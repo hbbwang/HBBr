@@ -17,6 +17,7 @@ public:
 	std::weak_ptr<Material> _material;
 	class VulkanForm* _matWindow;
 	class QSplitter* left_right = nullptr;
+	class GameObject* _gameObject = nullptr;
 protected:
 	virtual void resizeEvent(QResizeEvent* event);
 	virtual void closeEvent(QCloseEvent* event);

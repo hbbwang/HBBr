@@ -21,8 +21,6 @@
 #pragma comment(lib , "RendererCore.lib")
 #endif
 
-HWND hwnd;
-
 RenderView::RenderView(QWidget* parent)
 	: QWidget(parent)
 {
@@ -194,8 +192,8 @@ void RenderView::focusInEvent(QFocusEvent* event)
 	//if (GetFocus() != hwnd || VulkanApp::GetFocusForm() != _mainRenderer)
 	{
 		//SetFocus(nullptr);
-		VulkanApp::SetFocusForm(_mainRenderer);
-		SetFocus(hwnd);
+		//VulkanApp::SetFocusForm(_mainRenderer);
+		//SetFocus(hwnd);
 	}
 }
 
@@ -206,8 +204,8 @@ void RenderView::focusOutEvent(QFocusEvent* event)
 
 void RenderView::mousePressEvent(QMouseEvent* event)
 {
-	VulkanApp::SetFocusForm(_mainRenderer);
-	SetFocus(hwnd);
+	//VulkanApp::SetFocusForm(_mainRenderer);
+	//SetFocus(hwnd);
 }
 
 void RenderView::mouseReleaseEvent(QMouseEvent* event)

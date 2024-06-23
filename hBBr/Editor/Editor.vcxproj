@@ -183,6 +183,7 @@
     <ClCompile Include="MaterialDetailEditor.cpp" />
     <ClCompile Include="MaterialEditor.cpp" />
     <ClCompile Include="PropertyClass.cpp" />
+    <ClCompile Include="PropertyWidget.cpp" />
     <ClCompile Include="RenderView.cpp" />
     <ClCompile Include="SceneOutline.cpp" />
     <ClCompile Include="ToolBox.cpp" />
@@ -218,6 +219,7 @@
     <QtMoc Include="SceneOutline.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="PropertyWidget.h" />
     <QtMoc Include="MaterialDetailEditor.h" />
     <QtMoc Include="MaterialEditor.h" />
     <QtMoc Include="LineEditDialog.h" />

@@ -43,59 +43,93 @@ void CameraComponent::Update()
 	//Editor camera behavior.
 	if (_bIsEditorCamera && !renderer->IsInGame())
 	{
-		static glm::vec2 lastMousePos;
-		static glm::vec2 lockMousePos;
 		glm::vec2 currentMousePos = HInput::GetMousePos();
-		if (GetMouse(Button_Right))
-		{					
-			glm::vec2 mouseAxis = lastMousePos - currentMousePos;
-			HInput::SetMousePos(lockMousePos);
-			lastMousePos = HInput::GetMousePos();
-			
-			double frameRate = VulkanApp::GetFrameRateS() * (double)_editorMoveSpeed;
-			worldRot.y -= mouseAxis.x * _editorMouseSpeed;
-			worldRot.x -= mouseAxis.y * _editorMouseSpeed;
-			trans->SetWorldRotation(worldRot);
-			if (GetKey(Key_W))
-			{
-				worldPos += trans->GetForwardVector() * (float)frameRate;
-			}
-			if (GetKey(Key_S))
-			{
-				worldPos -= trans->GetForwardVector() * (float)frameRate;
-			}
-			if (GetKey(Key_A))
-			{
-				worldPos -= trans->GetRightVector() * (float)frameRate;
-			}
-			if (GetKey(Key_D))
-			{
-				worldPos += trans->GetRightVector() * (float)frameRate;
-			}
-			if (GetKey(Key_Q))
-			{
-				worldPos -= trans->GetUpVector() * (float)frameRate;
-			}
-			if (GetKey(Key_E))
-			{
-				worldPos += trans->GetUpVector() * (float)frameRate;
-			}		
-			trans->SetWorldLocation(worldPos);
-		}
-		//ConsoleDebug::print_endl(HString::FromVec2(mouseAxis));
-		else
+		if (_cameraType == EditorCameraType::Free)
 		{
-			lastMousePos = currentMousePos;
-			lockMousePos = currentMousePos;
+			if (GetMouse(Button_Right))
+			{
+				glm::vec2 mouseAxis = lastMousePos - currentMousePos;
+				SetMousePos(lockMousePos);
+				lastMousePos = HInput::GetMousePos();
+
+				double frameRate = VulkanApp::GetFrameRateS() * (double)_editorMoveSpeed;
+				worldRot.y -= mouseAxis.x * _editorMouseSpeed;
+				worldRot.x -= mouseAxis.y * _editorMouseSpeed;
+				trans->SetWorldRotation(worldRot);
+				if (GetKey(Key_W))
+				{
+					worldPos += trans->GetForwardVector() * (float)frameRate;
+				}
+				if (GetKey(Key_S))
+				{
+					worldPos -= trans->GetForwardVector() * (float)frameRate;
+				}
+				if (GetKey(Key_A))
+				{
+					worldPos -= trans->GetRightVector() * (float)frameRate;
+				}
+				if (GetKey(Key_D))
+				{
+					worldPos += trans->GetRightVector() * (float)frameRate;
+				}
+				if (GetKey(Key_Q))
+				{
+					worldPos -= trans->GetUpVector() * (float)frameRate;
+				}
+				if (GetKey(Key_E))
+				{
+					worldPos += trans->GetUpVector() * (float)frameRate;
+				}
+				trans->SetWorldLocation(worldPos);
+			}
+			//ConsoleDebug::print_endl(HString::FromVec2(mouseAxis));
+			else
+			{
+				lastMousePos = currentMousePos;
+				lockMousePos = currentMousePos;
+			}
+			_cameraPos = worldPos;
+			_cameraTarget = _cameraPos + trans->GetForwardVector();
+			_cameraUp = trans->GetUpVector();
+			//DirectX Left hand.
+			_viewMatrix = glm::lookAtLH(_cameraPos, _cameraTarget, _cameraUp);
+			_invViewMatrix = glm::inverse(_viewMatrix);
+		}
+		else if (_cameraType == EditorCameraType::TargetRotation)
+		{
+			if (GetMouse(Button_Left) || GetMouse(Button_Right))
+			{
+				glm::vec2 mouseAxis = lastMousePos - currentMousePos;
+				SetMousePos(lockMousePos);
+				lastMousePos = HInput::GetMousePos();
+				if (GetMouse(Button_Left))
+				{
+					worldRot.y -= mouseAxis.x * _editorMouseSpeed;
+					worldRot.x -= mouseAxis.y * _editorMouseSpeed;
+				}
+				if (GetMouse(Button_Right))
+				{
+					_targetLength += mouseAxis.y * _editorMouseSpeed * 0.25f;
+					_targetLength = glm::clamp(_targetLength , 0.0f , 200.0f);
+				}
+			}
+			else
+			{
+				lastMousePos = currentMousePos;
+				lockMousePos = currentMousePos;
+			}
+
+			trans->SetWorldRotation(worldRot);
+			trans->SetWorldLocation(trans->GetForwardVector() * -_targetLength);
+			_cameraPos = trans->GetWorldLocation();
+			_cameraTarget =glm::vec3(0);
+			_cameraUp = trans->GetUpVector();
+			//DirectX Left hand.
+			_viewMatrix = glm::lookAtLH(_cameraPos, _cameraTarget, _cameraUp);
+			_invViewMatrix = glm::inverse(_viewMatrix);
 		}
 	}
 #endif
-	_cameraPos = worldPos;
-	_cameraTarget = _cameraPos + trans->GetForwardVector();
-	_cameraUp = trans->GetUpVector();
-	//DirectX Left hand.
-	_viewMatrix = glm::lookAtLH(_cameraPos, _cameraTarget, _cameraUp);
-	_invViewMatrix = glm::inverse(_viewMatrix);
 }
 
 void CameraComponent::ExecuteDestroy()

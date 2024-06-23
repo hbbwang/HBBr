@@ -105,6 +105,8 @@ public:
 		return _graphicsQueue;
 	}
 
+	HBBR_API void DeviceWaitIdle();
+
 	/* 初始化Vulkan */
 
 	void InitInstance(bool bEnableDebug);

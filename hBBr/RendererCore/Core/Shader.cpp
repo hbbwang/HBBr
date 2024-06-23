@@ -10,13 +10,47 @@ std::map<HString, std::shared_ptr<ShaderCache>> Shader::_csShader;
 void Shader::LoadShaderCache(const char* cachePath)
 {
 	auto allCacheFiles = FileSystem::GetFilesBySuffix(cachePath, "spv");
-	uint32_t cacheIndex = 0;
 	for (auto i : allCacheFiles)
 	{
+		Shader::LoadShaderCacheFile(i.absPath.c_str());
+	}
+}
+
+void Shader::LoadShaderCacheByShaderName(const char* cachePath, const char* ShaderName, ShaderType type)
+{
+	auto allCacheFiles = FileSystem::GetFilesBySuffix(cachePath, "spv");
+	for (auto i : allCacheFiles)
+	{
+		HString name = i.baseName;
+		auto split = name.Split("@");
+		if (split[0].IsSame(ShaderName))
+		{
+			if (
+					(split[1].IsSame("vs") && type == ShaderType::VertexShader)
+				||	(split[1].IsSame("ps") && type == ShaderType::PixelShader)
+				||	(split[1].IsSame("cs") && type == ShaderType::ComputeShader)
+				)
+			{
+				Shader::LoadShaderCacheFile(i.absPath.c_str());
+			}
+		}
+	}
+}
+
+void Shader::LoadShaderCacheFile(const char* cacheFilePath)
+{
+	HString path = cacheFilePath;
+	path = FileSystem::GetFilePath(path);
+	auto allCacheFiles = FileSystem::GetFilesBySuffix(path.c_str(), "spv");
+	bool bSucceed = false;
+	for (auto i : allCacheFiles)
+	{
+		if (i.absPath != cacheFilePath)
+			continue;
+		bSucceed = true;
 		HString fileName = i.baseName;
 		auto split = fileName.Split("@");
 		ShaderCache cache = {};
-		cache.shaderLoadIndex = cacheIndex;
 		//
 		std::ifstream file(i.absPath.c_str(), std::ios::ate | std::ios::binary);
 		size_t fileSize = static_cast<size_t>(file.tellg());
@@ -51,8 +85,8 @@ void Shader::LoadShaderCache(const char* cachePath)
 		}
 		//cache
 		size_t shaderCodeSize =
-			fileSize 
-			- sizeof(ShaderCacheHeader) 
+			fileSize
+			- sizeof(ShaderCacheHeader)
 			- (sizeof(ShaderVarientGroup) * cache.header.varientCount)
 			- (sizeof(ShaderParameterInfo) * cache.header.shaderParameterCount)
 			- (sizeof(ShaderTextureInfo) * cache.header.shaderTextureCount)
@@ -64,7 +98,7 @@ void Shader::LoadShaderCache(const char* cachePath)
 		file.close();
 		if (!bSuccess)
 		{
-			MessageOut((HString("Load shader cache failed : ") + i.fileName)  ,false,false,"255,255,0");
+			MessageOut((HString("Load shader cache failed : ") + i.fileName), false, false, "255,255,0");
 			return;
 		}
 		//从cache名字split[2]里获取varient bool value
@@ -77,6 +111,7 @@ void Shader::LoadShaderCache(const char* cachePath)
 		cache.shaderStageInfo.module = shaderModule;
 		//
 		cache.shaderPath = i.relativePath;
+		cache.shaderAbsPath = i.absPath;
 		cache.shaderName = split[0];
 		cache.shaderFullName = split[0] + "@" + split[2];
 		cache.shaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -164,6 +199,8 @@ void Shader::LoadShaderCache(const char* cachePath)
 			}
 		}
 		//
+		auto manager = VulkanManager::GetManager();
+		manager->DeviceWaitIdle();
 		if (split[1] == "vs")
 		{
 			cache.shaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
@@ -174,7 +211,20 @@ void Shader::LoadShaderCache(const char* cachePath)
 			newCache.reset(new ShaderCache);
 			*newCache = cache;
 
-			_vsShader.emplace(std::make_pair(cache.shaderFullName, newCache));
+			//Set new
+			{
+				auto vs_it = _vsShader.find(cache.shaderFullName);
+				if (vs_it != _vsShader.end())
+				{
+					vkDestroyShaderModule(manager->GetDevice(), vs_it->second->shaderModule, VK_NULL_HANDLE);
+					vs_it->second->shaderModule = VK_NULL_HANDLE;
+					vs_it->second = newCache;
+				}
+				else
+				{
+					_vsShader.emplace(std::make_pair(cache.shaderFullName, newCache));
+				}
+			}
 		}
 		else if (split[1] == "ps")
 		{
@@ -186,7 +236,20 @@ void Shader::LoadShaderCache(const char* cachePath)
 			newCache.reset(new ShaderCache);
 			*newCache = cache;
 
-			_psShader.emplace(std::make_pair(cache.shaderFullName, newCache));
+			//Set new
+			{
+				auto vs_it = _psShader.find(cache.shaderFullName);
+				if (vs_it != _psShader.end())
+				{
+					vkDestroyShaderModule(manager->GetDevice(), vs_it->second->shaderModule, VK_NULL_HANDLE);
+					vs_it->second->shaderModule = VK_NULL_HANDLE;
+					vs_it->second = newCache;
+				}
+				else
+				{
+					_psShader.emplace(std::make_pair(cache.shaderFullName, newCache));
+				}
+			}
 		}
 		else if (split[1] == "cs")
 		{
@@ -198,10 +261,26 @@ void Shader::LoadShaderCache(const char* cachePath)
 			newCache.reset(new ShaderCache);
 			*newCache = cache;
 
-			_csShader.emplace(std::make_pair(cache.shaderFullName, newCache));
+			//Set new
+			{
+				auto vs_it = _csShader.find(cache.shaderFullName);
+				if (vs_it != _csShader.end())
+				{
+					vkDestroyShaderModule(manager->GetDevice(), vs_it->second->shaderModule, VK_NULL_HANDLE);
+					vs_it->second->shaderModule = VK_NULL_HANDLE;
+					vs_it->second = newCache;
+				}
+				else
+				{
+					_csShader.emplace(std::make_pair(cache.shaderFullName, newCache));
+				}
+			}
+			
 		}
-
-		cacheIndex++;
+	}
+	if (!bSucceed)
+	{
+		ConsoleDebug::printf_endl(GetInternationalizationText("Renderer","A000025"), cacheFilePath);
 	}
 }
 

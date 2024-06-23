@@ -390,7 +390,9 @@
     <ClCompile Include="Core\Asset\Level.cpp">
       <Filter>Renderer\Core\World</Filter>
     </ClCompile>
-    <ClCompile Include="Form\FormMain.cpp" />
+    <ClCompile Include="Form\FormMain.cpp">
+      <Filter>Renderer\Form</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
