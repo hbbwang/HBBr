@@ -125,6 +125,8 @@ public:
 	/* 检查Surface支持 */
 	void CheckSurfaceFormat(VkSurfaceKHR surface, VkSurfaceFormatKHR& surfaceFormat);
 
+	bool GetSurfaceCapabilities(VkSurfaceKHR& surface, VkSurfaceCapabilitiesKHR* surfaceCapabilities);
+
 	/* 创建Swapchain */
 	VkExtent2D CreateSwapchain(
 		VkExtent2D surfaceSize,

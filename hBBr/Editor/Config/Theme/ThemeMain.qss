@@ -42,18 +42,18 @@ QTabWidget::pane
 QTabBar::tab 
 {
     height: 25px;
-    width: 100%;
+    font-size: 16px ;
     background-color: rgb(25,25,25);
     color:rgb(150,150,150);
     font-family:  FontFamily;
-    border:1px solid  rgb(80,80,80);
+    border-bottom:1px solid  rgb(65, 65, 65);
 }
 QTabBar::tab:selected
 {
     height: 25px;
-    font-size: 14px ;
     color:rgb(230,230,230);
-    border: 1px solid rgb(180,150,150);
+    background-color: rgb(62, 66, 71);
+    border: 1px solid rgb(99, 197, 143);
 }
 QTabBar::tab:!selected:hover 
 {
@@ -703,7 +703,15 @@ QSplitter::handle
 {
 
 }
-
+#MaterialDetailEditor_RendererName,
+#MaterialDetailEditor_MaterialParameterName,
+#MaterialDetailEditor_MaterialAttributeName
+{
+    font-family:  FontFamily;
+    color:rgb(230, 230, 230);
+    border-bottom: 1px solid rgb(100,100,100);
+    min-height: 25px;
+}
 
 
 

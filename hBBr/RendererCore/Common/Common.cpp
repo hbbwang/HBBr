@@ -4,9 +4,9 @@
 #include "FormMain.h"
 #include <SDL3/SDL.h>
 #include "VulkanManager.h"
-void MessageOut(const char* msg, bool bExit, bool bMessageBox, const char* textColor)
+void MessageOut(HString msg, bool bExit, bool bMessageBox, const char* textColor)
 {
-	HString msgStr = msg;
+	HString msgStr = msg.c_wstr();
 	//msgStr = "[hBBr]:" + msgStr;
     if (bMessageBox && VulkanManager::_bDebugEnable)
     {

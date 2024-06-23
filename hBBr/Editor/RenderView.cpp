@@ -37,7 +37,7 @@ RenderView::RenderView(QWidget* parent)
 
     setAcceptDrops(true);
 
-	if (_mainRendererWidget == nullptr)
+	//if (_mainRendererWidget == nullptr)
 	{
 		//Enable custom loop
 		// 这个嵌入方法会导致窗口缩放闪黑,这是因为除了QT窗口，SDL自己也单独走了一次窗口缩放逻辑。

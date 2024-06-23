@@ -22,7 +22,7 @@ void Shader::LoadShaderCache(const char* cachePath)
 		size_t fileSize = static_cast<size_t>(file.tellg());
 		if (fileSize <= 1)
 		{
-			MessageOut((HString("Load shader cache failed : ") + i.fileName + " : Small size.").c_str(), false, false, "255,255,0");
+			MessageOut((HString("Load shader cache failed : ") + i.fileName + " : Small size."), false, false, "255,255,0");
 			return;
 		}
 		file.seekg(0);
@@ -64,7 +64,7 @@ void Shader::LoadShaderCache(const char* cachePath)
 		file.close();
 		if (!bSuccess)
 		{
-			MessageOut((HString("Load shader cache failed : ") + i.fileName).c_str()  ,false,false,"255,255,0");
+			MessageOut((HString("Load shader cache failed : ") + i.fileName)  ,false,false,"255,255,0");
 			return;
 		}
 		//从cache名字split[2]里获取varient bool value

@@ -8,69 +8,11 @@
 #include <QSplitter>
 #include <qlayout.h>
 #include "VulkanRenderer.h"
-MaterialDetailWindow::MaterialDetailWindow(std::weak_ptr<Material> mat, QWidget* parent)
-	:QWidget(parent)
-{
-	_material = mat;
-	_parent = (MaterialEditor*)parent;
-
-	//创建Material Editor 的内容
-	//分割窗口
-	_splitter = new QSplitter(this);
-	_splitter->setOrientation(Qt::Orientation::Horizontal);
-	_left = new QWidget(_splitter);
-	_right = new QWidget(_splitter);
-	_splitter->addWidget(_left);
-	_splitter->addWidget(_right);
-	//Left
-	{
-		QVBoxLayout* vlayout = new QVBoxLayout(_left);
-		_left->setLayout(vlayout); 
-		vlayout->setSpacing(0); vlayout->setContentsMargins(0, 0, 0, 0);
-		auto left_v_splitter = new QSplitter(_left);
-		vlayout->addWidget(left_v_splitter);
-		left_v_splitter->setOrientation(Qt::Orientation::Vertical);
-		_left_up = new QWidget(left_v_splitter); left_v_splitter->addWidget(_left_up);
-		_left_bottom = new QWidget(left_v_splitter); left_v_splitter->addWidget(_left_up);	
-		//左边面板，分上下两块，上面是三维视图，下面是材质属性设置
-		auto matWindow = VulkanApp::CreateNewWindow(512, 512, _material.lock()->_assetInfo.lock()->guid.str().c_str(), true);
-		HWND hwnd = (HWND)VulkanApp::GetWindowHandle(matWindow);
-
-	}
-	//Right
-	{
-		//右边面板，主要是材质（Shader）的参数设置
-
-	}
-}
-
-MaterialDetailWindow::~MaterialDetailWindow()
-{
-
-}
-
-void MaterialDetailWindow::resizeEvent(QResizeEvent* event)
-{
-	_splitter->resize(width(), height());
-	QWidget::resizeEvent(event);
-}
-
-void MaterialDetailWindow::closeEvent(QCloseEvent* event)
-{
-
-}
-
-void MaterialDetailWindow::paintEvent(QPaintEvent* event)
-{
-	Q_UNUSED(event);
-	QStyleOption styleOpt;
-	styleOpt.init(this);
-	QPainter painter(this);
-	style()->drawPrimitive(QStyle::PE_Widget, &styleOpt, &painter, this);
-	QWidget::paintEvent(event);
-}
-
+#include <QLabel>
+#include <qscrollarea.h>
+#include <ToolBox.h>
 #include "qdebug.h"
+
 // 
 //
 MaterialEditor* MaterialEditor::_mainWindow = nullptr;
@@ -113,7 +55,7 @@ void MaterialEditor::paintEvent(QPaintEvent* event)
 	QTabWidget::paintEvent(event);
 }
 
-MaterialDetailWindow* MaterialEditor::OpenMaterialEditor(std::weak_ptr<Material> mat, bool bTab)
+MaterialDetailEditor* MaterialEditor::OpenMaterialEditor(std::weak_ptr<Material> mat, bool bTab)
 {
 	int width = 1024, height = 768;
 	GetEditorInternationalizationInt("MaterialEditor", "WindowWidth", width);
@@ -139,7 +81,7 @@ MaterialDetailWindow* MaterialEditor::OpenMaterialEditor(std::weak_ptr<Material>
 				break;
 		}
 	}
-	MaterialDetailWindow* newWidget = new MaterialDetailWindow(mat, _mainWindow);
+	MaterialDetailEditor* newWidget = new MaterialDetailEditor(mat, _mainWindow);
 	newWidget->setObjectName("MaterialEditor_Instance");
 	newWidget->setWindowTitle(mat.lock()->_assetInfo.lock()->displayName.c_str());
 	newWidget->installEventFilter(_mainWindow);
@@ -153,7 +95,7 @@ MaterialDetailWindow* MaterialEditor::OpenMaterialEditor(std::weak_ptr<Material>
 		newWidget->setWindowFlag(Qt::Window, true);
 		newWidget->show();
 	}
-	//_mainWindow->_allDetailWindows.append({newWidget})
+	_mainWindow->_allDetailWindows.append({ newWidget });
 	return newWidget;
 }
 
@@ -186,7 +128,7 @@ bool MaterialEditor::eventFilter(QObject* watched, QEvent* event)
 						{
 							bInDrag = true;
 							removeTab(index);						
-							currentDragWidget = OpenMaterialEditor(((MaterialDetailWindow*)indexWidget)->_material, false);
+							currentDragWidget = OpenMaterialEditor(((MaterialDetailEditor*)indexWidget)->_material, false);
 						}
 					}
 				}
@@ -230,7 +172,7 @@ bool MaterialEditor::eventFilter(QObject* watched, QEvent* event)
 			//else if (event->type() == QEvent::MouseMove)
 		{
 			QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-			MaterialDetailWindow* dragWidget = (MaterialDetailWindow*)watched;
+			MaterialDetailEditor* dragWidget = (MaterialDetailEditor*)watched;
 			int distance = (mouseEvent->pos() - startPos).manhattanLength();
 			if (distance >= QApplication::startDragDistance())
 			{

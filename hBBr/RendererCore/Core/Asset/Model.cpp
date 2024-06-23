@@ -29,7 +29,7 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 	{	
 		if (it == modelAssets.end())
 		{
-			MessageOut(HString("Can not find [" + guidStr + "] model in content manager.").c_str(), false, false, "255,255,0");
+			MessageOut(HString("Can not find [" + guidStr + "] model in content manager."), false, false, "255,255,0");
 			return std::weak_ptr<Model>();
 		}
 	}

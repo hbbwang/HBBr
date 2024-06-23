@@ -110,7 +110,7 @@ void Texture2D::Resize(uint32_t width, uint32_t height)
 
 	if (_textureStreamingSize > _maxTextureStreamingSize)
 	{
-		MessageOut((HString("Max texture streaming size is ") + HString::FromSize_t(_maxTextureStreamingSize) + ", but current texture streaming size is  " + HString::FromSize_t(_textureStreamingSize)).c_str(), false, false, "255,255,0");
+		MessageOut((HString("Max texture streaming size is ") + HString::FromSize_t(_maxTextureStreamingSize) + ", but current texture streaming size is  " + HString::FromSize_t(_textureStreamingSize)), false, false, "255,255,0");
 	}
 
 	VulkanManager::GetManager()->CreateImageView(_image, _format, _imageAspectFlags, _imageView);
@@ -162,7 +162,7 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 	{
 		if (it == texAssets.end())
 		{
-			MessageOut(HString("Can not find [" + guidStr + "] texture in content manager.").c_str(), false, false, "255,255,0");
+			MessageOut(HString("Can not find [" + guidStr + "] texture in content manager."), false, false, "255,255,0");
 			return std::weak_ptr<Texture2D>();
 		}
 	}

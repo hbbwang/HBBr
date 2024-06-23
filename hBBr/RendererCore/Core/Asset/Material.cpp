@@ -35,7 +35,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 	{
 		if (it == matAssets.end())
 		{
-			MessageOut(HString("Can not find [" + guidStr + "] material in content manager.").c_str(), false, false, "255,255,0");
+			MessageOut(HString("Can not find [" + guidStr + "] material in content manager."), false, false, "255,255,0");
 			return std::weak_ptr<Material>();
 		}
 	}
@@ -240,7 +240,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 					StringToGUID(value.c_str(), &guid);
 					if (!guid.isValid())
 					{
-						MessageOut((GetInternationalizationText("Renderer","A000020") + value).c_str(), false, false, "255,0,0");
+						MessageOut((GetInternationalizationText("Renderer","A000020") + value), false, false, "255,0,0");
 						Texture2D::GetSystemTexture(it->defaultTexture);
 						mat->_primitive->SetTexture(it->index, Texture2D::GetSystemTexture(it->defaultTexture));
 					}
@@ -314,12 +314,12 @@ std::weak_ptr<AssetInfoBase> Material::CreateMaterial(HString repository, HStrin
 		newInfo.absAssetFilePath = saveFilePath;
 		newInfo.virtualPath = virtualPath;
 		ContentManager::Get()->AssetImport(repository, { newInfo }, &results);
-		MessageOut(GetInternationalizationText("Renderer", "A000021").c_str(), false, false, "0,255,0");
+		MessageOut(GetInternationalizationText("Renderer", "A000021"), false, false, "0,255,0");
 		return results[0];
 	}
 	else
 	{
-		MessageOut(GetInternationalizationText("Renderer", "A000022").c_str(), false, false, "255,0,0");
+		MessageOut(GetInternationalizationText("Renderer", "A000022"), false, false, "255,0,0");
 	}
 	return std::weak_ptr<AssetInfoBase>();
 }

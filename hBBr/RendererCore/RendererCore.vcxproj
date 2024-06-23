@@ -361,6 +361,7 @@
     <ClCompile Include="Core\VulkanManager.cpp" />
     <ClCompile Include="Core\VulkanRenderer.cpp" />
     <ClCompile Include="Editor\ShaderCompiler.cpp" />
+    <ClCompile Include="Form\FormMain.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>

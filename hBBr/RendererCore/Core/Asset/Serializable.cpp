@@ -43,7 +43,7 @@ bool Serializable::LoadJson(HString path, nlohmann::json& json)
         catch (const nlohmann::json::parse_error& e)
         {
             //ConsoleDebug::print_endl(HString("Failed to read JSON data..") + e.what(), "255,0,0");
-            MessageOut(HString(HString("Failed to read JSON data : \n") + path  + "\n"+ e.what()).c_str(), true, false, "255,0,0");
+            MessageOut(HString(HString("Failed to read JSON data : \n") + path  + "\n"+ e.what()), true, false, "255,0,0");
             return false;
         }
 #endif
@@ -53,7 +53,7 @@ bool Serializable::LoadJson(HString path, nlohmann::json& json)
     }
     else
     {
-        MessageOut(HString(HString("Failed to open JSON file : \n") + path ).c_str(), false, false, "255,0,0");
+        MessageOut(HString(HString("Failed to open JSON file : \n") + path ), false, false, "255,0,0");
         return false;
     }
 }

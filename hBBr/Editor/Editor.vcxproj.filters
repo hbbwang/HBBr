@@ -115,6 +115,9 @@
     <ClCompile Include="MaterialEditor.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="MaterialDetailEditor.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="EditorMain.h">
@@ -180,6 +183,9 @@
     <QtMoc Include="MaterialEditor.h">
       <Filter>Widgets</Filter>
     </QtMoc>
+    <QtMoc Include="MaterialDetailEditor.h">
+      <Filter>Widgets</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditorCommonFunction.h">
@@ -236,6 +242,15 @@
       <Filter>Widgets\Custom</Filter>
     </QtUic>
     <QtUic Include="DirtyAssetsManager.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="MaterialDetailEditor_Renderer.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="MaterialDetailEditor_MaterialAttribute.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="MaterialDetailEditor_MaterialParameter.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

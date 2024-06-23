@@ -145,7 +145,7 @@ uint32_t FileSystem::GetPathFileNum(const char* path)
 {
     if (!fs::exists(path))
     {
-        MessageOut(GetInternationalizationText("Renderer", "A000016").c_str(), false, true);
+        MessageOut(GetInternationalizationText("Renderer", "A000016"), false, true);
         return 0;
     }
     uint32_t count = 0;
@@ -191,13 +191,13 @@ bool FileSystem::CreateDir(const char* path)
     auto result = fs::create_directory(path, error);;
     if (error)
     {
-        MessageOut(error.message().c_str(), false, false, "255,255,0");
+        MessageOut(error.message(), false, false, "255,255,0");
     }
     else
     {
         if (!result)
         {
-            MessageOut(GetInternationalizationText("Renderer","A000014").c_str(), false, false, "255,255,0");
+            MessageOut(GetInternationalizationText("Renderer","A000014"), false, false, "255,255,0");
         }
     }
     return result;
@@ -209,7 +209,7 @@ bool FileSystem::CreateDirSymlink(const char* path, const char* linkTo)
     fs::create_directory_symlink(path, linkTo, error);
     if (error)
     {
-        MessageOut(error.message().c_str(), false, false, "255,255,0");
+        MessageOut(error.message(), false, false, "255,255,0");
         return false;
     }
     else
@@ -235,7 +235,7 @@ void FileSystem::FileCopy(const char* srcFile, const char* newPath)
         copyError += newPath;
         copyError += " : \n";
         copyError += error.message().c_str();
-        MessageOut(copyError.c_str(), false, false, "255,255,0");
+        MessageOut(copyError, false, false, "255,255,0");
     }
 }
 
@@ -342,7 +342,7 @@ std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char
 {
     if (!fs::is_directory(path))
     { 
-        MessageOut(GetInternationalizationText("Renderer", "A000015").c_str(),false,false);
+        MessageOut(GetInternationalizationText("Renderer", "A000015"),false,false);
         return {};
     }
     std::vector<FileEntry> result;
@@ -381,7 +381,7 @@ std::vector<FileEntry> FileSystem::GetAllFilesExceptFolders(const char* path)
 {
     if (!fs::is_directory(path))
     {
-        MessageOut(GetInternationalizationText("Renderer", "A000015").c_str(), false, false);
+        MessageOut(GetInternationalizationText("Renderer", "A000015"), false, false);
         return {};
     }
     std::vector<FileEntry> result;
@@ -419,7 +419,7 @@ std::vector<FileEntry> FileSystem::GetAllFolders(const char* path, bool currentD
 {
     if (!fs::is_directory(path))
     {
-        MessageOut(GetInternationalizationText("Renderer", "A000015").c_str(), false, false);
+        MessageOut(GetInternationalizationText("Renderer", "A000015"), false, false);
         return {};
     }
     std::vector<FileEntry> result;
@@ -460,7 +460,7 @@ std::vector<char> FileSystem::ReadBinaryFile(const char* filePath)
     if (!file.is_open())
     {
         //throw std::runtime_error((DString("failed to open file : ") + filePath).c_str());
-        MessageOut((HString("failed to open file : ") + filePath).c_str(), false, true, "255,0,0");
+        MessageOut((HString("failed to open file : ") + filePath), false, true, "255,0,0");
     }
     size_t fileSize = static_cast<size_t>(file.tellg());
     std::vector<char> buffer(fileSize);

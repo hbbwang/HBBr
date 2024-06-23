@@ -10,6 +10,7 @@ struct VulkanForm
 	SDL_Window* window = nullptr;
 	class VulkanRenderer* renderer = nullptr;
 	bool bMinimized = false;
+	~VulkanForm();
 };
 
 typedef void (*FormDropFun)(VulkanForm* form,  HString file);

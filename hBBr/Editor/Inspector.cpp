@@ -27,7 +27,7 @@ Inspector::Inspector(QWidget *parent)
 	this->setFocusPolicy(Qt::FocusPolicy::ClickFocus);
 	scrollArea = new QScrollArea(this);
 	scrollArea->setWidgetResizable(true);
-	scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);  // ���ú��������
+	scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff); 
 	_layoutMain = new QVBoxLayout(this);
 	scrollWidget = new QWidget(scrollArea);
 	scrollWidget->setLayout(_layoutMain);

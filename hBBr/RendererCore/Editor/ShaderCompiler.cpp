@@ -79,7 +79,7 @@ public:
 			result->user_data = nullptr;
 			if (std::find(samePath.begin(), samePath.end(), IncludePath) != samePath.end())
 			{
-				MessageOut(HString(HString(requesting_source) + (": Shader Include exist.")).c_str(), false, false, "255,255,0");
+				MessageOut(HString(HString(requesting_source) + (": Shader Include exist.")), false, false, "255,255,0");
 				result->content = " \n\n ";
 				result->content_length = strlen(result->content);
 			}
@@ -88,7 +88,7 @@ public:
 				samePath.push_back(IncludePath);
 			}
 		}
-		//MessageOut(contents[contents.size() - 1].c_str(), false, false);
+		//MessageOut(contents[contents.size() - 1], false, false);
 		return result;
 	}
 
@@ -189,7 +189,7 @@ void ExecCompileShader(HString& _shaderSrcCode, HString& fileName, const char* e
 	if (resultStatus != shaderc_compilation_status_success)
 	{
 		std::cerr << result.GetErrorMessage();
-		MessageOut(result.GetErrorMessage().c_str(), false, true, "255,0,0");
+		MessageOut(result.GetErrorMessage(), false, true, "255,0,0");
 		return;
 	}
 	else
@@ -255,7 +255,7 @@ void ExecCompileShader(HString& _shaderSrcCode, HString& fileName, const char* e
 			HString compileResultStr = TEXT("Compile shader [");
 			compileResultStr += srcShaderFileFullPath;
 			compileResultStr += TEXT("] successful.");
-			MessageOut(compileResultStr.c_str(), false, false, "0,255,50");
+			MessageOut(compileResultStr, false, false, "0,255,50");
 		}
 		else
 		{
@@ -285,9 +285,9 @@ void ProcessCombination(uint32_t bits, int count,
 			varients[i].defaultValue = '0';
 		std::string varientMsg(1, varients[i].defaultValue);
 		varientMsg = std::string("Varient : ") + varients[i].name + std::string(":") + varientMsg;
-		MessageOut(varientMsg.c_str(), false, false, "50,125,80");
+		MessageOut(varientMsg, false, false, "50,125,80");
 	}
-	MessageOut(out.c_str(), false, false);
+	MessageOut(out, false, false);
 	ExecCompileShader(_shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
 }
 
@@ -674,7 +674,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 	{
 		shaderTypeStr = ("Compute");
 	}
-	MessageOut((HString("-Start Compile ") + shaderTypeStr + " Shader Permutation--").c_str(), false, false);
+	MessageOut((HString("-Start Compile ") + shaderTypeStr + " Shader Permutation--"), false, false);
 	GenerateCombinations((int)varients.size(), 0, 0, _shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
 	//for (int i = 0; i < varients.size(); i++)
 	//{

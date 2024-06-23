@@ -213,7 +213,7 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 	bool bSure = true;
 	if (messageBox)
 	{
-		MessageOut(GetInternationalizationText("Renderer", "A000017").c_str());
+		MessageOut(GetInternationalizationText("Renderer", "A000017"));
 		HString msg;
 		for (auto& i : assetInfos)
 		{
@@ -277,7 +277,7 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 					json.erase(jit);
 					if (!Serializable::SaveJson(json, repositoryConfigPath))
 					{
-						MessageOut(GetInternationalizationText("Renderer", "A000019").c_str(), false, true, "255,255,0");
+						MessageOut(GetInternationalizationText("Renderer", "A000019"), false, true, "255,255,0");
 						continue;
 					}
 					//收集临时共享指针,防止因为earse导致指针释放

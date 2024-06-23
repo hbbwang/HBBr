@@ -5,27 +5,7 @@
 #include <QTabBar>
 #include "Material.h"
 #include "qdockwidget.h"
-
-class MaterialDetailWindow :public QWidget
-{
-	Q_OBJECT
-public:
-	MaterialDetailWindow(std::weak_ptr<Material> mat, QWidget* parent = nullptr);
-	~MaterialDetailWindow();
-
-	virtual void paintEvent(QPaintEvent* event)override;
-	virtual void resizeEvent(QResizeEvent* event)override;
-
-	class MaterialEditor* _parent = nullptr;
-	std::weak_ptr<Material> _material;
-protected:
-	virtual void closeEvent(QCloseEvent* event) override;
-	class QSplitter* _splitter = nullptr;
-	class QWidget* _left = nullptr;
-	class QWidget* _right = nullptr;
-	class QWidget* _left_up = nullptr;
-	class QWidget* _left_bottom = nullptr;
-};
+#include "MaterialDetailEditor.h"
 
 class MaterialEditor : public QTabWidget
 {
@@ -36,13 +16,13 @@ public:
 	static MaterialEditor* _mainWindow;
 
 	struct MaterialEditorItem {
+		class MaterialDetailEditor* editor;
 		bool bTab = true;
-		class MaterialDetailWindow* editor;
 		//class QDockWidget* dock;
 	};
 
 	QList<MaterialEditorItem> _allDetailWindows;
-	static MaterialDetailWindow* OpenMaterialEditor(std::weak_ptr<Material> mat , bool bTab); 
+	static MaterialDetailEditor* OpenMaterialEditor(std::weak_ptr<Material> mat , bool bTab); 
 
 protected:
 	MaterialEditor(QWidget *parent = nullptr);

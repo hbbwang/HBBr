@@ -132,6 +132,11 @@ public:
 		_mouse_inputs.erase(ptr);
 	}
 
+	HBBR_API HBBR_INLINE bool IsMainRenderer()
+	{
+		return _bIsMainRenderer;
+	}
+
 	/* 帧渲染函数 */
 	HBBR_API void Render();
 

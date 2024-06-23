@@ -425,7 +425,7 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 
 	if (!window)
 	{
-		MessageOut((HString("Create sdl3 window failed : ")+ SDL_GetError()).c_str(), true, true, "255,0,0");
+		MessageOut((HString("Create sdl3 window failed : ")+ SDL_GetError()), true, true, "255,0,0");
 		SDL_Quit();
 	}
 
@@ -464,6 +464,7 @@ void VulkanApp::RemoveWindow(VulkanForm* form)
 {
 	if (form != nullptr && form != nullptr)
 	{
+		ConsoleDebug::printf_endl("%s Renderer Quit.", form->name.c_str());
 		auto window = form->window;
 		auto it = std::remove_if(_forms.begin(), _forms.end(), [window](VulkanForm* &glfw) {
 			return window == glfw->window;

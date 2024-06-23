@@ -64,6 +64,7 @@ void VulkanRenderer::Init()
 	//Surface
 	ConsoleDebug::print_endl("hBBr:Start init Surface.");
 	_vulkanManager->ReCreateSurface_SDL(_windowHandle, _surface);
+	_vulkanManager->GetSurfaceCapabilities(_surface, &_surfaceCapabilities);
 
 	//Swapchain
 	ConsoleDebug::print_endl("hBBr:Start Check Surface Format.");
@@ -90,7 +91,7 @@ void VulkanRenderer::Init()
 		{
 			nameIndex++;
 			_rendererName = HString(rendererName) + "_" + HString::FromInt(nameIndex);
-			MessageOut((HString("Has the same name of renderer.Random a new name is [") + _rendererName + "]").c_str(), false, false);
+			MessageOut((HString("Has the same name of renderer.Random a new name is [") + _rendererName + "]"), false, false);
 		}
 	}
 
@@ -169,46 +170,48 @@ void VulkanRenderer::Render()
 		{
 			ResizeBuffer();
 		}
-
-		VulkanManager* _vulkanManager = VulkanManager::GetManager();
-
-		uint32_t _swapchainIndex = 0;
-
-		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], VK_NULL_HANDLE, &_swapchainIndex))
+		if(_swapchain)
 		{
-			ResizeBuffer();
-			return;
+			VulkanManager* _vulkanManager = VulkanManager::GetManager();
+
+			uint32_t _swapchainIndex = 0;
+
+			if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], VK_NULL_HANDLE, &_swapchainIndex))
+			{
+				ResizeBuffer();
+				return;
+			}
+
+			auto funcOnce = std::move(_renderThreadFuncsOnce);
+			for (auto& func : funcOnce)
+			{
+				func();
+			}
+
+			for (auto& func : _renderThreadFuncs)
+			{
+				func();
+			}
+
+			if (!_world.expired())
+				_world.lock()->WorldUpdate();
+
+			SetupPassUniformBuffer();
+
+			_passManager->PassesUpdate();
+
+			//Present swapchain.
+			if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], _swapchainIndex))
+			{
+				ResizeBuffer();
+				return;
+			}
+
+			//Get next frame index.
+			uint32_t maxNumSwapchainImages = _vulkanManager->GetSwapchainBufferCount();
+			_currentFrameIndex = (_currentFrameIndex + 1) % maxNumSwapchainImages;
 		}
-
-		auto funcOnce = std::move(_renderThreadFuncsOnce);
-		for (auto& func : funcOnce)
-		{
-			func();
 		}
-
-		for (auto& func : _renderThreadFuncs)
-		{
-			func();
-		}
-
-		if (!_world.expired())
-			_world.lock()->WorldUpdate();
-
-		SetupPassUniformBuffer();
-
-		_passManager->PassesUpdate();
-
-		//Present swapchain.
-		if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], _swapchainIndex))
-		{
-			ResizeBuffer();
-			return;
-		}
-
-		//Get next frame index.
-		uint32_t maxNumSwapchainImages = _vulkanManager->GetSwapchainBufferCount();
-		_currentFrameIndex = (_currentFrameIndex + 1) % maxNumSwapchainImages;
-	}
 }
 
 void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
@@ -274,7 +277,11 @@ void VulkanRenderer::SetupPassUniformBuffer()
 
 bool VulkanRenderer::ResizeBuffer()
 {
-	if (!_bRendererRelease)
+	if (_windowSize.width<=0 && _windowSize.height <= 0)
+	{
+		_windowSize = VulkanManager::GetManager()->GetSurfaceSize(_windowSize, _surface);
+	}
+	if (!_bRendererRelease && _windowSize.width > 0 && _windowSize.height > 0)
 	{
 		VulkanManager* _vulkanManager = VulkanManager::GetManager();
 		{
@@ -286,6 +293,13 @@ bool VulkanRenderer::ResizeBuffer()
 #endif
 			//部分情况下重置窗口会出现Surface被销毁的问题，最好Surface也重新创建一个
 			_vulkanManager->ReCreateSurface_SDL(_windowHandle, _surface);
+
+			//获取surfaceCapabilities，顺便检查一下Surface是否已经丢失了
+			if (!_vulkanManager->GetSurfaceCapabilities(_surface, &_surfaceCapabilities))
+			{
+				return false;
+			}
+
 			_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
 			_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore, &_queueSubmitSemaphore
 			,nullptr,false,true);

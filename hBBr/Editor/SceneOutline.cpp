@@ -544,7 +544,7 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     //World生成的时候执行
     auto spawnNewWorldCallBack = [this](std::weak_ptr<World> world)
     {
-        if (!world.expired())
+        if (!world.expired() && _renderer->IsMainRenderer())
         {
             currentWorld = world;
             //World每帧更新

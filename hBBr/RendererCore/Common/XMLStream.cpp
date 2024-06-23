@@ -63,7 +63,7 @@ bool XMLStream::LoadXML(const wchar_t* path, pugi::xml_document& doc)
 		default:
 			break;
 		}
-		MessageOut(errorMsg.c_str(), false, false);
+		MessageOut(errorMsg, false, false);
 		return false;
 	}
 	return true;
