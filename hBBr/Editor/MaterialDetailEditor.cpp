@@ -17,6 +17,9 @@
 #include "PropertyWidget.h"
 #include <CameraComponent.h>
 #include <ToolBox.h>
+#include <QMap>
+#include <QString>
+#include <VectorSetting.h>
 MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -103,25 +106,84 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 
 		}
 		ui_ma.scroll_verticalLayout->addStretch(20);
+		pw_ma->ShowItems();
 	}
 
+	PropertyWidget* pw_mp = new PropertyWidget(this);
+	ui_mp.scroll_verticalLayout->addWidget(pw_mp);
 	//Material parameter
 	//Uniform buffer
 	{
-		ToolBox* ubBox = new ToolBox(GetEditorInternationalization("MaterialEditor", "MaterialUniformBufferTitle"), true, this);
-		ui_mp.scroll_verticalLayout->addWidget(ubBox);
-		for (auto& i : _material.lock()->GetTextures())
+		pw_mp->AddItem(GetEditorInternationalization("MaterialEditor", "MaterialUniformBufferTitle"));
+		mpBox->addPage(GetEditorInternationalization("MaterialEditor", "MaterialUniformBufferTitle"), true);
+		ToolBox* mpGroup = new ToolBox(mpBox);
+		mpBox->addSubWidget(mpGroup);
+		std::map<QString, PropertyWidget*> groups;
+		for (auto& i : _material.lock()->GetPrimitive()->_paramterInfos)
 		{
-			
+			mpGroup->addPage(i.group.c_str(), true);
+
+			PropertyWidget* pw_mp = nullptr;
+			auto group_it = groups.find(i.group.c_str());
+			if (group_it == groups.end())
+			{
+				pw_mp = new PropertyWidget(this);
+				mpGroup->addSubWidget(pw_mp);
+				groups.emplace(i.group.c_str(), pw_mp);
+			}
+			else
+			{
+				pw_mp = group_it->second;
+			}
+
+			VectorSetting* vector = nullptr;
+			int vecType = 1;
+			if (i.type == MPType::Float)
+			{
+				vector = new VectorSetting(this, 1, 0.000001f, 8);
+				vector->SetValue(_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index]);
+			}
+			else if (i.type == MPType::Float2)
+			{
+				vector = new VectorSetting(this, 2, 0.000001f, 8);
+				vecType = 2;
+				vector->SetValue(
+					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index],
+					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 1],
+					0
+				);
+			}
+			else if (i.type == MPType::Float3)
+			{
+				vector = new VectorSetting(this, 3, 0.000001f, 8);
+				vecType = 3;
+				vector->SetValue(
+					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index],
+					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 1],
+					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 2]
+				);
+			}
+			else if (i.type == MPType::Float4)
+			{
+				vector = new VectorSetting(this, 4, 0.000001f, 8);
+				vecType = 4;
+				vector->SetValue(
+					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index],
+					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 1],
+					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 2],
+					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 3]
+				);
+			}
+			pw_mp->AddItem(i.name.c_str(), vector);
 		}
 	}
 	//Texture
 	{
-		ToolBox* ubBox = new ToolBox(GetEditorInternationalization("MaterialEditor", "MaterialTextureTitle"), true, this);
-		ui_mp.scroll_verticalLayout->addWidget(ubBox);
+		mpBox->addPage(GetEditorInternationalization("MaterialEditor", "MaterialTextureTitle"), true);
 
 	}
 	ui_mp.scroll_verticalLayout->addStretch(20);
+	pw_ma->ShowItems();
 }
 
 MaterialDetailEditor::~MaterialDetailEditor()

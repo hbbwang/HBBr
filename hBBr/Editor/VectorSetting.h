@@ -13,7 +13,9 @@ class VectorSetting : public PropertyClass
 
 public:
 	VectorSetting(QString name, QWidget* parent = Q_NULLPTR, const int demensionality = 1, float step = 0.01f, int precision = 3);
+	VectorSetting(QWidget* parent , const int demensionality = 1, float step = 0.01f, int precision = 3);
 	~VectorSetting();
+	void Init(QWidget* parent, const int demensionality, float step, int precision);
 
 	QList<FloatSetting*> floatSetting ;
 	std::function<void(QList<FloatSetting*>)> BindValue = [](QList<FloatSetting*>) {};

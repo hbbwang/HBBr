@@ -76,6 +76,7 @@ struct ShaderParameterInfo
 {
 	MPType type;
 	char name[32]="\0";
+	char group[16] = "Default\0";
 	glm::vec4 defaultValue;
 	uint16_t index = 0;
 };
@@ -123,7 +124,7 @@ public:
 	//加载单个Cache，会销毁掉重新加载
 	HBBR_API static void LoadShaderCacheFile(const char* cacheFilePath);
 	//Material ReloadCache & pipeline
-	HBBR_API static void ReloadMaterialShaderCacheAndPipelineObject(std::weak_ptr<Material>mat);
+	HBBR_API static void ReloadMaterialShaderCacheAndPipelineObject(std::weak_ptr<class Material>mat);
 
 	HBBR_API static void DestroyAllShaderCache();
 

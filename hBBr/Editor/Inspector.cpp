@@ -141,13 +141,15 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				title->clearFocus();
 			}
 		});
-	//---------------------- Transform
 	ToolBox* box = new ToolBox(this);
 	_layoutMain->addWidget(box);
+	//---------------------- Transform
+	box->addPage("Transform", true);
 	{
 		QWidget* transformWidget = new QWidget(this);
 		transformWidget->setLayout(new QVBoxLayout(this));
-		box->addWidget("Transform", transformWidget, true);
+		//box->addSubWidget("Transform", transformWidget);
+		box->addSubWidget(transformWidget);
 		auto transform = obj->_transform;
 		VectorSetting* pos =	new VectorSetting("Position", this, 3, 0.001f, 4);
 		VectorSetting* rot =	new VectorSetting("Rotation", this, 3, 0.01f, 4);
@@ -204,7 +206,8 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 		Component* comp = c ;
 		QWidget* compWidget = new QWidget(this);
 		compWidget->setLayout(new QVBoxLayout(this));
-		box->addWidget(c->GetComponentName().c_str(), compWidget, true);
+		box->addPage(c->GetComponentName().c_str(), true);
+		box->addSubWidget(compWidget);
 		auto pro = c->GetProperties();
 		for (auto p : pro)
 		{

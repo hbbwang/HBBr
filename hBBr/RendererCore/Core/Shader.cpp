@@ -129,6 +129,7 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 				info.reset(new MaterialParameterInfo);
 				info->name = cache.params[i].name;
 				info->type = (MPType)cache.params[i].type;
+				info->group = cache.params[i].group;
 				if (info->type == MPType::Float)
 				{
 					if (alignmentFloat4 + 1 > 4)

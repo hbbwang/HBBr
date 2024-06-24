@@ -538,16 +538,24 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 							{
 								if (value[0].Contains("Default", false))
 								{
-									auto values = value[1].Split(",");
-									auto maxCount = std::min((int)values.size(), 4);
+									auto p_values = value[1].Split(",");
+									auto maxCount = std::min((int)p_values.size(), 4);
 									for (int vv = 0; vv < maxCount; vv++)
-										shaderParamInfos[shaderParamSize - 1].defaultValue[vv] = (float)HString::ToDouble(values[vv]);
+										shaderParamInfos[shaderParamSize - 1].defaultValue[vv] = (float)HString::ToDouble(p_values[vv]);
 								}
 								else if (value[0].Contains("Name", false))
 								{
-									std::string name = value[1].c_str();
-									name.copy(shaderParamInfos[shaderParamSize - 1].name, sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1);
-									shaderParamInfos[shaderParamSize - 1].name[sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1] = '\0';
+									std::string p_name = value[1].c_str();
+									size_t numCharsToCopy = std::min(p_name.size(), sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1);
+									p_name.copy(shaderParamInfos[shaderParamSize - 1].name, numCharsToCopy);
+									shaderParamInfos[shaderParamSize - 1].name[numCharsToCopy] = '\0';
+								}
+								else if (value[0].Contains("Group", false))
+								{
+									std::string p_group = value[1].c_str();
+									size_t numCharsToCopy = std::min(p_group.size(), sizeof(shaderParamInfos[shaderParamSize - 1].group) - 1);
+									p_group.copy(shaderParamInfos[shaderParamSize - 1].group, numCharsToCopy);
+									shaderParamInfos[shaderParamSize - 1].group[numCharsToCopy] = '\0';
 								}
 							}
 						}

@@ -181,6 +181,86 @@ glm::vec4 MaterialPrimitive::GetVector4Parameter(HString name, int* arrayIndex, 
 	return result;
 }
 
+void MaterialPrimitive::SetScalarParameter(HString name, float value)
+{
+	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos.end())
+	{
+		uniformBuffer[it->arrayIndex][it->vec4Index] = value;
+	}
+}
+
+void MaterialPrimitive::SetVec2Parameter(HString name, glm::vec2 value)
+{
+	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos.end())
+	{
+		uniformBuffer[it->arrayIndex][it->vec4Index] = value.x;
+		uniformBuffer[it->arrayIndex][it->vec4Index + 1] = value.y;
+	}
+}
+
+void MaterialPrimitive::SetVec3Parameter(HString name, glm::vec3 value)
+{
+	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos.end())
+	{
+		uniformBuffer[it->arrayIndex][it->vec4Index] = value.x;
+		uniformBuffer[it->arrayIndex][it->vec4Index + 1] = value.y;
+		uniformBuffer[it->arrayIndex][it->vec4Index + 2] = value.z;
+	}
+}
+
+void MaterialPrimitive::SetVec4Parameter(HString name, glm::vec4 value)
+{
+	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos.end())
+	{
+		uniformBuffer[it->arrayIndex][it->vec4Index] = value.x;
+		uniformBuffer[it->arrayIndex][it->vec4Index + 1] = value.y;
+		uniformBuffer[it->arrayIndex][it->vec4Index + 2] = value.z;
+		uniformBuffer[it->arrayIndex][it->vec4Index + 3] = value.w;
+	}
+}
+
+void MaterialPrimitive::SetScalarParameter(int arrayIndex, int vec4Index, float value)
+{
+	uniformBuffer[arrayIndex][vec4Index] = value;
+}
+
+void MaterialPrimitive::SetVec2Parameter(int arrayIndex, int vec4Index, glm::vec2 value)
+{
+	uniformBuffer[arrayIndex][vec4Index] = value.x;
+	uniformBuffer[arrayIndex][vec4Index + 1] = value.y;
+}
+
+void MaterialPrimitive::SetVec3Parameter(int arrayIndex, int vec4Index, glm::vec3 value)
+{
+	uniformBuffer[arrayIndex][vec4Index] = value.x;
+	uniformBuffer[arrayIndex][vec4Index + 1] = value.y;
+	uniformBuffer[arrayIndex][vec4Index + 2] = value.z;
+}
+
+void MaterialPrimitive::SetVec4Parameter(int arrayIndex, int vec4Index, glm::vec4 value)
+{
+	uniformBuffer[arrayIndex][vec4Index] = value.x;
+	uniformBuffer[arrayIndex][vec4Index + 1] = value.y;
+	uniformBuffer[arrayIndex][vec4Index + 2] = value.z;
+	uniformBuffer[arrayIndex][vec4Index + 3] = value.w;
+}
+
 void MaterialPrimitive::SetTextureSampler(int index, VkSampler sampler)
 {
 	_samplers[index] = sampler;

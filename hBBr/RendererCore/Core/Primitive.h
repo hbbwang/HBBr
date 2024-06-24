@@ -13,6 +13,7 @@ struct MaterialParameterInfo
 {
 	MPType type;
 	HString name, ui;
+	HString group = "Default";
 	//shader uniform buffer 以vec4数组储存,这个索引用来读取数组对应的vec4
 	uint32_t arrayIndex = 0;
 	//配合上面索引获取到的vec4,该索引用来表示该参数处于vec4的什么位置
@@ -145,6 +146,26 @@ public:
 
 	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
 	HBBR_API glm::vec4 GetVector4Parameter(HString name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
+
+	HBBR_API void SetScalarParameter(HString name, float value);
+
+	HBBR_API void SetVec2Parameter(HString name, glm::vec2 value);
+
+	HBBR_API void SetVec3Parameter(HString name, glm::vec3 value);
+
+	HBBR_API void SetVec4Parameter(HString name, glm::vec4 value);
+
+	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
+	HBBR_API void SetScalarParameter(int arrayIndex, int vec4Index, float value);
+
+	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
+	HBBR_API void SetVec2Parameter(int arrayIndex, int vec4Index, glm::vec2 value);
+
+	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
+	HBBR_API void SetVec3Parameter(int arrayIndex, int vec4Index, glm::vec3 value);
+
+	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
+	HBBR_API void SetVec4Parameter(int arrayIndex, int vec4Index, glm::vec4 value);
 
 	HBBR_API void SetTextureSampler(int index, VkSampler sampler);
 

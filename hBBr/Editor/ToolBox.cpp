@@ -114,12 +114,39 @@ ToolBox::~ToolBox()
     m_widget = nullptr;
 }
 
-void ToolBox::addWidget(const QString& title, QWidget* widget, bool isExpanded)
+
+//void ToolBox::addWidget(const QString& title, QWidget* widget, bool isExpanded)
+//{
+//    m_widget = widget;
+//    ToolPage* page = new ToolPage(isExpanded, this);
+//    page->addWidget(title, widget);
+//    m_pContentVBoxLayout->addWidget(page);
+//    _widgets.emplace(title, widget);
+//}
+
+void ToolBox::addPage(const QString& title, bool isExpanded, bool bAdditive)
 {
-    m_widget = widget;
-    ToolPage* page = new ToolPage(isExpanded, this);
-    page->addWidget(title, widget);
-    m_pContentVBoxLayout->addWidget(page);
+    bool bFound = false;
+    if (!bAdditive)
+    {      
+        for (auto& i : _widgets)
+        {
+            if (i.first.compare(title, Qt::CaseInsensitive) == 0)
+            {
+                bFound = true;
+                return;
+            }
+        }
+    }
+    if(!bFound || bAdditive)
+    {
+        m_widget = new QWidget(this);
+        m_widget->setLayout(new QVBoxLayout(this));
+        ToolPage* page = new ToolPage(isExpanded, this);
+        page->addWidget(title, m_widget);
+        m_pContentVBoxLayout->addWidget(page);
+        _widgets.emplace(title, m_widget);
+    }
 }
 
 void ToolBox::addSubWidget(QWidget* widget)
@@ -127,5 +154,30 @@ void ToolBox::addSubWidget(QWidget* widget)
     if (m_widget && m_widget->layout())
     {
         m_widget->layout()->addWidget(widget);
+    }
+    else if (m_widget && !m_widget->layout())
+    {
+        m_widget->setLayout(new QVBoxLayout(m_widget));
+        m_widget->layout()->addWidget(widget);
+    }
+}
+
+void ToolBox::addSubWidget(const QString& title, QWidget* widget)
+{
+    for (auto& i : _widgets)
+    {
+        if (i.first.compare(title, Qt::CaseInsensitive) == 0)
+        {
+            if (i.second && i.second->layout())
+            {
+                i.second->layout()->addWidget(widget);
+            }
+            else if (i.second && !i.second->layout())
+            {
+                i.second->setLayout(new QVBoxLayout(i.second));
+                i.second->layout()->addWidget(widget);
+            }
+            break;
+        }
     }
 }

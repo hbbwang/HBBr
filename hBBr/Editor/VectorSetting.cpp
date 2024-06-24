@@ -9,9 +9,37 @@ VectorSetting::VectorSetting(QString name, QWidget *parent,const int demensional
 	ui.setupUi(this);
 	ui.Name->setText(name);
 	ui.Name->setObjectName("PropertyName");
+	Init(parent, demensionality, step, precision);
+}
+
+VectorSetting::VectorSetting(QWidget* parent, const int demensionality, float step, int precision)
+{
+	ui.setupUi(this);
+	Init(parent, demensionality, step, precision);
+	ui.horizontalLayout->removeItem(ui.horizontalSpacer);
+	ui.Name->setHidden(true);
+	ui.horizontalLayout->setStretch(0, 0);
+	ui.horizontalLayout->setStretch(1, 0);
+}
+
+VectorSetting::~VectorSetting()
+{
+	maxUpdatePoint = 0;
+	_vec4_f[0] = nullptr;
+	_vec4_f[1] = nullptr;
+	_vec4_f[2] = nullptr;
+	_vec4_f[3] = nullptr;
+	_old_vec4_f[0] = 0;
+	_old_vec4_f[1] = 0;
+	_old_vec4_f[2] = 0;
+	_old_vec4_f[3] = 0;
+}
+
+void VectorSetting::Init(QWidget* parent, const int demensionality, float step, int precision)
+{
 	Demensionality = demensionality;
-	ui.horizontalLayout->setStretch(0 , 1);
-	ui.horizontalLayout->setStretch(1,	1);
+	ui.horizontalLayout->setStretch(0, 1);
+	ui.horizontalLayout->setStretch(1, 1);
 	setAttribute(Qt::WA_DeleteOnClose);
 	_vec4_f[0] = nullptr;
 	_vec4_f[1] = nullptr;
@@ -19,15 +47,15 @@ VectorSetting::VectorSetting(QString name, QWidget *parent,const int demensional
 	_vec4_f[3] = nullptr;
 	for (int i = 0; i < demensionality; i++)
 	{
-		FloatSetting *f = new FloatSetting(this, 0, step, precision);
+		FloatSetting* f = new FloatSetting(this, 0, step, precision);
 		//f->setMaximumWidth(80);
 		//f->setFont(font);
-		floatSetting.append (f);
+		floatSetting.append(f);
 		ui.horizontalLayout->addWidget(f);
-		ui.horizontalLayout->setStretch(2+i ,0);
+		ui.horizontalLayout->setStretch(2 + i, 0);
 		//
 		////f->setSuffix("|");
-		if (demensionality > 1 && demensionality<=4)
+		if (demensionality > 1 && demensionality <= 4)
 		{
 			switch (i)
 			{
@@ -59,19 +87,6 @@ VectorSetting::VectorSetting(QString name, QWidget *parent,const int demensional
 	updatePoint = 0;
 	//3帧更新一次值
 	maxUpdatePoint = 3;
-}
-
-VectorSetting::~VectorSetting()
-{
-	maxUpdatePoint = 0;
-	_vec4_f[0] = nullptr;
-	_vec4_f[1] = nullptr;
-	_vec4_f[2] = nullptr;
-	_vec4_f[3] = nullptr;
-	_old_vec4_f[0] = 0;
-	_old_vec4_f[1] = 0;
-	_old_vec4_f[2] = 0;
-	_old_vec4_f[3] = 0;
 }
 
 void VectorSetting::SetValue(float x, float y , float z , float w)
