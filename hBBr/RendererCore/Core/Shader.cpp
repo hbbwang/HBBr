@@ -2,6 +2,9 @@
 #include "FileSystem.h"
 #include "VulkanManager.h"
 #include "./Asset/Material.h"
+#if IS_EDITOR
+#include "ShaderCompiler.h"
+#endif
 #include <fstream>
 std::map<HString, std::shared_ptr<ShaderCache>> Shader::_vsShader;
 std::map<HString, std::shared_ptr<ShaderCache>> Shader::_psShader;
@@ -281,6 +284,54 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 	if (!bSucceed)
 	{
 		ConsoleDebug::printf_endl(GetInternationalizationText("Renderer","A000025"), cacheFilePath);
+	}
+}
+
+void Shader::ReloadMaterialShaderCacheAndPipelineObject(std::weak_ptr<Material> mat)
+{
+	if (mat.expired())
+		return;
+	HString vs_n = mat.lock()->GetPrimitive()->graphicsIndex.GetVSShaderFullName();
+	HString ps_n = mat.lock()->GetPrimitive()->graphicsIndex.GetVSShaderFullName();
+	std::weak_ptr<ShaderCache> vs = Shader::GetVSCache(vs_n);
+	std::weak_ptr<ShaderCache> ps = Shader::GetPSCache(ps_n);
+	HString vs_shaderSourceName = vs.lock()->shaderName;
+	HString ps_shaderSourceName = ps.lock()->shaderName;
+	HString vs_shaderSourceFileName = vs.lock()->shaderName + ".fx";
+	HString ps_shaderSourceFileName = ps.lock()->shaderName + ".fx";
+	HString vs_cachePath = vs.lock()->shaderAbsPath;
+	HString ps_cachePath = ps.lock()->shaderAbsPath;
+
+	auto manager = VulkanManager::GetManager();
+	manager->DeviceWaitIdle();
+
+	//删除管线
+	PipelineManager::RemovePipelineObjects(mat.lock()->GetPrimitive()->graphicsIndex);
+
+	//重新编译所有变体
+#if IS_EDITOR
+	vs_shaderSourceFileName = FileSystem::Append(FileSystem::GetShaderIncludeAbsPath(), vs_shaderSourceFileName);
+	ps_shaderSourceFileName = FileSystem::Append(FileSystem::GetShaderIncludeAbsPath(), ps_shaderSourceFileName);
+	Shaderc::ShaderCompiler::CompileShader(vs_shaderSourceFileName.c_str(), "VSMain", CompileShaderType::VertexShader);
+	Shaderc::ShaderCompiler::CompileShader(ps_shaderSourceFileName.c_str(), "PSMain", CompileShaderType::PixelShader);
+#endif
+
+	//重新加载ShaderCache
+	Shader::LoadShaderCacheByShaderName(FileSystem::GetShaderCacheAbsPath().c_str(), vs_shaderSourceName.c_str(), ShaderType::VertexShader);
+	Shader::LoadShaderCacheByShaderName(FileSystem::GetShaderCacheAbsPath().c_str(), ps_shaderSourceName.c_str(), ShaderType::PixelShader);
+	//需要重新加载对应材质
+	auto allMaterials = ContentManager::Get()->GetAssets(AssetType::Material);
+	for (auto& i : allMaterials)
+	{
+		auto matCache = i.second->GetAssetObject<Material>();
+		if (
+			matCache.lock()->GetPrimitive()->graphicsIndex.GetVSShaderName() == vs_shaderSourceName
+			|| matCache.lock()->GetPrimitive()->graphicsIndex.GetPSShaderName() == ps_shaderSourceName
+			)
+		{
+			i.second->NeedToReload();
+			Material::LoadAsset(i.second->guid);
+		}
 	}
 }
 

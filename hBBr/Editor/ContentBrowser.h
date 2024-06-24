@@ -156,6 +156,9 @@ public:
 		_currentBrowser = cb;
 	}
 
+	//定位到当前资产
+	static void FocusToAsset(std::weak_ptr<AssetInfoBase>assetInfo, ContentBrowser* cb = nullptr);
+
 	VirtualFolderTreeView* _treeView = nullptr;
 	VirtualFileListView* _listView = nullptr;
 

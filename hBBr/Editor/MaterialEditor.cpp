@@ -25,6 +25,7 @@ MaterialEditor::MaterialEditor(QWidget *parent)
 
 	tabBar()->installEventFilter(this);
 	installEventFilter(this);
+	tabBar()->setTabsClosable(true);
 	//tabBar()->setDocumentMode(true);
 }
 
@@ -95,6 +96,17 @@ MaterialDetailEditor* MaterialEditor::OpenMaterialEditor(std::weak_ptr<Material>
 	}
 	_mainWindow->_allDetailWindows.append({ newWidget });
 	return newWidget;
+}
+
+void MaterialEditor::CloseMaterialEditor(std::weak_ptr<Material> mat)
+{
+	for (auto& i : _mainWindow->_allDetailWindows)
+	{
+		if (i.editor->_material.lock().get() == mat.lock().get())
+		{
+			i.editor->close();
+		}
+	}
 }
 
 bool MaterialEditor::eventFilter(QObject* watched, QEvent* event)

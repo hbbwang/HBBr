@@ -98,7 +98,7 @@ public:
 	}
 	//Get material instance texture descriptor set.
 	//If material instance number of textures is 0,it will return nullptr.
-	HBBR_INLINE VkDescriptorSet GetDescriptorSet() {
+	HBBR_API HBBR_INLINE VkDescriptorSet GetDescriptorSet() {
 		auto manager = VulkanManager::GetManager();
 		if (textures.size() > 0)
 		{
@@ -116,7 +116,7 @@ public:
 		}
 	}
 
-	HBBR_INLINE const bool NeedUpdateTexture()
+	HBBR_API HBBR_INLINE const bool NeedUpdateTexture()
 	{
 		bool result = _needUpdateDescriptorSet_tex;
 		if (result)
@@ -126,21 +126,33 @@ public:
 		return result;
 	}
 
-	HBBR_INLINE std::vector<class Texture2D*> GetTextures() {
+	HBBR_API HBBR_INLINE std::vector<class Texture2D*> GetTextures() {
 		return textures;
 	}
 
-	HBBR_INLINE std::vector<VkSampler> GetSamplers() {
+	HBBR_API HBBR_INLINE std::vector<VkSampler> GetSamplers() {
 		return _samplers;
 	}
 
-	void SetTextureSampler(int index, VkSampler sampler);
+	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
+	HBBR_API float GetScalarParameter(HString name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
 
-	void SetTextureSampler(HString textureName, VkSampler sampler);
+	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
+	HBBR_API glm::vec2 GetVector2Parameter(HString name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
 
-	void SetTexture(int index, class Texture2D* newTexture);
+	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
+	HBBR_API glm::vec3 GetVector3Parameter(HString name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
 
-	void SetTexture(HString textureName, class Texture2D* newTexture);
+	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
+	HBBR_API glm::vec4 GetVector4Parameter(HString name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
+
+	HBBR_API void SetTextureSampler(int index, VkSampler sampler);
+
+	HBBR_API void SetTextureSampler(HString textureName, VkSampler sampler);
+
+	HBBR_API void SetTexture(int index, class Texture2D* newTexture);
+
+	HBBR_API void SetTexture(HString textureName, class Texture2D* newTexture);
 
 	~MaterialPrimitive()
 	{

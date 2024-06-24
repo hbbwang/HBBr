@@ -1221,6 +1221,42 @@ void ContentBrowser::ImportAssets()
 	}
 }
 
+void ContentBrowser::FocusToAsset(std::weak_ptr<AssetInfoBase> assetInfo, ContentBrowser* cb)
+{
+	if (cb == nullptr)
+	{
+		cb = ContentBrowser::GetCurrentBrowser();
+	}
+	if (!assetInfo.expired())
+	{
+		auto treeItems = assetInfo.lock()->virtualPath.Split("/");
+		QString path;
+		CustomViewItem* treeItem = nullptr;
+		QModelIndex treeIndex;
+		for (auto& i : treeItems)
+		{
+			path += ("/" + i).c_str();
+			treeItem = cb->_treeView->FindItem(path);
+			if (treeItem)
+			{
+				cb->_treeView->_bSaveSelectionItem = true;
+				treeIndex = ((QStandardItemModel*)cb->_treeView->model())->indexFromItem(treeItem);
+				cb->_treeView->expand(treeIndex);
+			}
+		}
+		if (treeIndex.isValid())
+		{
+			cb ->_treeView->selectionModel()->setCurrentIndex(treeIndex, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+		}
+		auto item = cb->_listView->FindAssetItem(assetInfo.lock()->guid);
+		if (item)
+		{
+			cb->_listView->scrollToItem(item);
+			cb->_listView->setCurrentItem(item, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+		}
+	}
+}
+
 void ContentBrowser::focusInEvent(QFocusEvent* event)
 {
 	QWidget::focusInEvent(event);

@@ -23,7 +23,7 @@ public:
 
 	QList<MaterialEditorItem> _allDetailWindows;
 	static MaterialDetailEditor* OpenMaterialEditor(std::weak_ptr<Material> mat , bool bTab); 
-
+	static void CloseMaterialEditor(std::weak_ptr<Material> mat);
 protected:
 	MaterialEditor(QWidget *parent = nullptr);
 	~MaterialEditor();

@@ -24,7 +24,7 @@ public:
 	HBBR_API virtual void SetMaterial(std::weak_ptr<class Material>mat, int index = 0);
 
 	HBBR_API int GetMaterialNum()const {
-		return _materialPath.size();
+		return (int)_materialPath.size();
 	}
 
 	virtual void GameObjectActiveChanged(bool objActive)override;

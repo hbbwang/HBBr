@@ -105,6 +105,82 @@ void MaterialPrimitive::SetTexture(HString textureName, Texture2D* newTexture)
 	}
 }
 
+float MaterialPrimitive::GetScalarParameter(HString name, int* arrayIndex, int* vec4Index)
+{
+	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(), 
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos.end())
+	{
+		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
+		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
+		return uniformBuffer[it->arrayIndex][it->vec4Index];
+	}
+	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
+	return 0;
+}
+
+glm::vec2 MaterialPrimitive::GetVector2Parameter(HString name, int* arrayIndex, int* vec4Index)
+{
+	glm::vec2 result = glm::vec2(0);
+	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos.end())
+	{
+		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
+		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
+		result.x = uniformBuffer[it->arrayIndex][it->vec4Index];
+		result.y = uniformBuffer[it->arrayIndex][it->vec4Index + 1];
+		return result;
+	}
+	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
+	return result;
+}
+
+glm::vec3 MaterialPrimitive::GetVector3Parameter(HString name, int* arrayIndex, int* vec4Index)
+{
+	glm::vec3 result = glm::vec3(0);
+	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos.end())
+	{
+		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
+		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
+		result.x = uniformBuffer[it->arrayIndex][it->vec4Index];
+		result.y = uniformBuffer[it->arrayIndex][it->vec4Index + 1];
+		result.z = uniformBuffer[it->arrayIndex][it->vec4Index + 2];
+		return result;
+	}
+	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
+	return result;
+}
+
+glm::vec4 MaterialPrimitive::GetVector4Parameter(HString name, int* arrayIndex, int* vec4Index)
+{
+	glm::vec4 result = glm::vec4(0);
+	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos.end())
+	{
+		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
+		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
+		result.x = uniformBuffer[it->arrayIndex][it->vec4Index];
+		result.y = uniformBuffer[it->arrayIndex][it->vec4Index + 1];
+		result.z = uniformBuffer[it->arrayIndex][it->vec4Index + 2];
+		result.w = uniformBuffer[it->arrayIndex][it->vec4Index + 3];
+		return result;
+	}
+	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
+	return result;
+}
+
 void MaterialPrimitive::SetTextureSampler(int index, VkSampler sampler)
 {
 	_samplers[index] = sampler;

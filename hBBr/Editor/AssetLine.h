@@ -11,6 +11,7 @@ class AssetLine : public PropertyClass
 
 public:
 	AssetLine(HString name , QWidget *parent, HString text, HString condition = "");
+	AssetLine(QWidget* parent, HString text, HString condition = "");
 	~AssetLine();
 
 	QString mCondition;
@@ -32,6 +33,9 @@ public:
 	void ShowClearButton(bool bShow);
 
 protected:
+
+	void Init(QWidget* parent, HString text, HString condition = "");
+
 	void UpdateSetting();
 
 	virtual void resizeEvent(QResizeEvent* event);

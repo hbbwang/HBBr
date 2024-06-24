@@ -122,6 +122,8 @@ public:
 	HBBR_API static void LoadShaderCacheByShaderName(const char* cachePath, const char* ShaderName,ShaderType type);
 	//加载单个Cache，会销毁掉重新加载
 	HBBR_API static void LoadShaderCacheFile(const char* cacheFilePath);
+	//Material ReloadCache & pipeline
+	HBBR_API static void ReloadMaterialShaderCacheAndPipelineObject(std::weak_ptr<Material>mat);
 
 	HBBR_API static void DestroyAllShaderCache();
 

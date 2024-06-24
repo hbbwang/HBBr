@@ -16,9 +16,28 @@ AssetLine::AssetLine(HString name, QWidget *parent, HString text, HString condit
 	: PropertyClass(parent)
 {
 	ui.setupUi(this);
+	ui.Name->setText(name.c_str());
+	Init(parent, text, condition);
+}
+
+AssetLine::AssetLine(QWidget* parent, HString text, HString condition)
+{
+	ui.setupUi(this);
+	Init(parent, text, condition);
+	ui.horizontalLayout->removeItem(ui.horizontalSpacer);
+	ui.Name->setHidden(true);
+	ui.horizontalLayout->setStretch(0, 0);
+	ui.horizontalLayout->setStretch(1, 0);
+	ui.horizontalLayout->setStretch(2, 0);
+	ui.horizontalLayout->setStretch(3, 0);
+	ui.horizontalLayout->setStretch(4, 10);
+	ui.horizontalLayout->setStretch(5, 0);
+}
+
+void AssetLine::Init(QWidget* parent, HString text, HString condition)
+{
 	mCondition = condition.c_str();
 	//
-	ui.Name->setText(name.c_str());
 	ui.LineEdit->setText(text.c_str());
 	ui.LineEdit->setReadOnly(true);
 	ui.LineEdit->setDragEnabled(true);
@@ -41,10 +60,10 @@ AssetLine::AssetLine(HString name, QWidget *parent, HString text, HString condit
 	highLight->hide();
 
 	//
-	connect(ui.FindButton, &QPushButton::clicked, this, [this](){
+	connect(ui.FindButton, &QPushButton::clicked, this, [this]() {
 		_bindFindButtonFunc(this->ui.LineEdit->text().toStdString().c_str());
-	});
-	connect(ui.pushButton,SIGNAL(clicked(bool)),this,SLOT(clear()));
+		});
+	connect(ui.pushButton, SIGNAL(clicked(bool)), this, SLOT(clear()));
 	connect(ui.LineEdit, SIGNAL(textChanged(QString)), this, SLOT(lineChanged(QString)));
 	UpdateSetting();
 }
@@ -214,7 +233,6 @@ void AssetLine::ShowClearButton(bool bShow)
 {
 	ui.pushButton->setVisible(bShow);
 }
-
 
 void AssetLine::UpdateSetting()
 {

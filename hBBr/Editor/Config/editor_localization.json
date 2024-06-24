@@ -42,6 +42,8 @@
         "MaterialAttrbuteTitle": "材质属性",
         "MaterialParameterTitle": "材质参数",
         "RefreshShaderButton": "刷新Shader",
-        "RefreshShader": "刷新Shader:[vs:%s][ps:%s]"
+        "RefreshShader": "刷新Shader:[vs:%s][ps:%s]",
+        "MaterialUniformBufferTitle": "材质参数",
+        "MaterialTextureTitle": "材质纹理"
     }
 }

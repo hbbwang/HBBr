@@ -16,6 +16,7 @@
 #include <ModelComponent.h>
 #include "PropertyWidget.h"
 #include <CameraComponent.h>
+#include <ToolBox.h>
 MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -66,127 +67,61 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 			};
 		renderer->ExecFunctionOnRenderThread(func);
 	}
-
-	PropertyWidget* pw = new PropertyWidget(this);
-	ui_ma.scroll_verticalLayout->addWidget(pw);
-
 	//Material attribute
+	PropertyWidget* pw_ma = new PropertyWidget(this);
+	ui_ma.scroll_verticalLayout->addWidget(pw_ma);
 	{
 		//ui_ma.scroll_verticalLayout
-		//path
+		//material path text
 		{
-			AssetLine* path = new AssetLine("", this, "");
-			pw->AddItem("Virtual Path", path);
+			AssetLine* path = new AssetLine(this, "");
+			pw_ma->AddItem("Virtual Path", path);
 			path->ui.LineEdit->setReadOnly(true);
 			path->ui.LineEdit->setText(_material.lock()->_assetInfo.lock()->virtualFilePath.c_str());
-
-			path->ui.horizontalSpacer->setGeometry(QRect(0, 0, 0, 0));
-			path->ui.Name->setHidden(true);
 			path->ui.picture->setHidden(true);
-			path->ui.pushButton->setHidden(true);
-			path->ui.horizontalLayout->setStretch(0, 0);
-			path->ui.horizontalLayout->setStretch(1, 0);
-			path->ui.horizontalLayout->setStretch(2, 0);
-			path->ui.horizontalLayout->setStretch(3, 0);
-			path->ui.horizontalLayout->setStretch(4, 10);
-			path->ui.horizontalLayout->setStretch(5, 0);
-
+			path->ui.pushButton->setHidden(true);	
 			path->_bindFindButtonFunc = [this](const char* p) {
 				auto assetInfo = _material.lock()->_assetInfo;
-				if (!assetInfo.expired())
-				{
-					auto treeItems = assetInfo.lock()->virtualPath.Split("/");
-					QString path;
-					CustomViewItem* treeItem = nullptr;
-					QModelIndex treeIndex;
-					for (auto& i : treeItems)
-					{
-						path += ("/" + i).c_str();
-						treeItem = ContentBrowser::GetCurrentBrowser()->_treeView->FindItem(path);
-						if (treeItem)
-						{
-							ContentBrowser::GetCurrentBrowser()->_treeView->_bSaveSelectionItem = true;
-							treeIndex = ((QStandardItemModel*)ContentBrowser::GetCurrentBrowser()->_treeView->model())->indexFromItem(treeItem);
-							ContentBrowser::GetCurrentBrowser()->_treeView->expand(treeIndex);
-						}
-					}
-					if (treeIndex.isValid())
-					{
-						ContentBrowser::GetCurrentBrowser()->_treeView->selectionModel()->setCurrentIndex(treeIndex, QItemSelectionModel::SelectionFlag::ClearAndSelect);
-					}
-					auto item = ContentBrowser::GetCurrentBrowser()->_listView->FindAssetItem(assetInfo.lock()->guid);
-					if (item)
-					{
-						ContentBrowser::GetCurrentBrowser()->_listView->scrollToItem(item);
-						ContentBrowser::GetCurrentBrowser()->_listView->setCurrentItem(item, QItemSelectionModel::SelectionFlag::ClearAndSelect);
-					}
-				}
+				ContentBrowser::FocusToAsset(assetInfo);
 			};
 		}
-		//Refresh shader
+		//Refresh shader button
 		{
-			//((QHBoxLayout*)w->layout())->addStretch(100);
 			QToolButton* refreshButton = new QToolButton(this);
-			pw->AddItem("", refreshButton);
+			pw_ma->AddItem("", refreshButton);
 			refreshButton->setText(GetEditorInternationalization("MaterialEditor", "RefreshShaderButton"));
 			connect(refreshButton, &QAbstractButton::clicked, this, [this]() {
 				ConsoleDebug::printf_endl(
-					HString(GetEditorInternationalization("MaterialEditor", "RefreshShader").toStdString()), 
+					HString(GetEditorInternationalization("MaterialEditor", "RefreshShader").toStdString()),
 					_material.lock()->GetPrimitive()->vsShader.c_str(),
 					_material.lock()->GetPrimitive()->psShader.c_str());
-
-				HString vs_n = _material.lock()->GetPrimitive()->graphicsIndex.GetVSShaderFullName();
-				HString ps_n = _material.lock()->GetPrimitive()->graphicsIndex.GetVSShaderFullName();
-				std::weak_ptr<ShaderCache> vs = Shader::GetVSCache(vs_n);
-				std::weak_ptr<ShaderCache> ps = Shader::GetPSCache(ps_n);
-				HString vs_shaderSourceName = vs.lock()->shaderName;
-				HString ps_shaderSourceName = ps.lock()->shaderName;
-				HString vs_shaderSourceFileName = vs.lock()->shaderName + ".fx";
-				HString ps_shaderSourceFileName = ps.lock()->shaderName + ".fx";
-				HString vs_cachePath = vs.lock()->shaderAbsPath;
-				HString ps_cachePath = ps.lock()->shaderAbsPath;
-
-				auto manager = VulkanManager::GetManager();
-				manager->DeviceWaitIdle();
-
-				//删除管线
-				PipelineManager::RemovePipelineObjects(_material.lock()->GetPrimitive()->graphicsIndex);
-				//重新编译所有变体
-				vs_shaderSourceFileName = FileSystem::Append(FileSystem::GetShaderIncludeAbsPath(), vs_shaderSourceFileName);
-				ps_shaderSourceFileName = FileSystem::Append(FileSystem::GetShaderIncludeAbsPath(), ps_shaderSourceFileName);
-				Shaderc::ShaderCompiler::CompileShader(vs_shaderSourceFileName.c_str(), "VSMain", CompileShaderType::VertexShader);
-				Shaderc::ShaderCompiler::CompileShader(ps_shaderSourceFileName.c_str(), "PSMain", CompileShaderType::PixelShader);
-				//重新加载ShaderCache
-				Shader::LoadShaderCacheByShaderName(FileSystem::GetShaderCacheAbsPath().c_str(), vs_shaderSourceName.c_str(), ShaderType::VertexShader);
-				Shader::LoadShaderCacheByShaderName(FileSystem::GetShaderCacheAbsPath().c_str(), ps_shaderSourceName.c_str(), ShaderType::PixelShader);
-				//需要重新加载对应材质
-				auto allMaterials = ContentManager::Get()->GetAssets(AssetType::Material);
-				for (auto& i : allMaterials)
-				{
-					auto matCache = i.second->GetAssetObject<Material>();
-					if (
-							matCache.lock()->GetPrimitive()->graphicsIndex.GetVSShaderName() == vs_shaderSourceName
-						||	matCache.lock()->GetPrimitive()->graphicsIndex.GetPSShaderName() == ps_shaderSourceName
-						)
-					{
-						i.second->NeedToReload();
-						Material::LoadAsset(i.second->guid);
-					}
-				}
+				Shader::ReloadMaterialShaderCacheAndPipelineObject(_material);
 			});
 		}
 		//
 		{
 
 		}
-
-
 		ui_ma.scroll_verticalLayout->addStretch(20);
 	}
 
 	//Material parameter
+	//Uniform buffer
 	{
+		ToolBox* ubBox = new ToolBox(GetEditorInternationalization("MaterialEditor", "MaterialUniformBufferTitle"), true, this);
+		ui_mp.scroll_verticalLayout->addWidget(ubBox);
+		for (auto& i : _material.lock()->GetTextures())
+		{
+			
+		}
 	}
+	//Texture
+	{
+		ToolBox* ubBox = new ToolBox(GetEditorInternationalization("MaterialEditor", "MaterialTextureTitle"), true, this);
+		ui_mp.scroll_verticalLayout->addWidget(ubBox);
+
+	}
+	ui_mp.scroll_verticalLayout->addStretch(20);
 }
 
 MaterialDetailEditor::~MaterialDetailEditor()
@@ -200,7 +135,9 @@ void MaterialDetailEditor::resizeEvent(QResizeEvent * event)
 
 void MaterialDetailEditor::closeEvent(QCloseEvent* event)
 {
-	VulkanApp::RemoveWindow(_matWindow);
+	if(_matWindow)
+		VulkanApp::RemoveWindow(_matWindow);
+
 	for (int i = 0 ; i < _parent->_allDetailWindows.size() ; i++)
 	{
 		if (_parent->_allDetailWindows[i].editor == this)
