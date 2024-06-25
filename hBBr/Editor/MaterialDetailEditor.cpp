@@ -21,6 +21,7 @@
 #include <QString>
 #include <VectorSetting.h>
 #include <MaterialEditor.h>
+#include <ComboBox.h>
 MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -93,6 +94,34 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 		}
 		//Refresh shader button
 		{
+			QToolButton* saveButton = new QToolButton(this);
+			pw_ma->AddItem("", saveButton);
+			saveButton->setText(GetEditorInternationalization("MaterialEditor", "SaveButton"));
+			connect(saveButton, &QAbstractButton::clicked, this, [this]() {
+					_material.lock()->SaveAsset(_material.lock()->_assetInfo.lock()->absFilePath);
+				});
+		}
+		// Shader Selection
+		{
+			ComboBox * comboBox = new ComboBox(this);
+			pw_ma->AddItem("Shader", comboBox);
+			std::vector<HString> shaderNames;
+			for (auto& i : Shader::GetPSCaches())
+			{
+				HString shader_name = i.second->shaderName;
+				auto it = std::find_if(shaderNames.begin(), shaderNames.end(), [shader_name](HString& s) {
+						return s == shader_name;
+					});
+				if (it == shaderNames.end())
+				{
+					shaderNames.push_back(shader_name);
+					comboBox->AddItem(shader_name.c_str());
+				}
+			}
+			comboBox->SetCurrentSelection(_material.lock()->GetPrimitive()->psShader.c_str());
+		}
+		//Refresh shader button
+		{
 			QToolButton* refreshButton = new QToolButton(this);
 			pw_ma->AddItem("", refreshButton);
 			refreshButton->setText(GetEditorInternationalization("MaterialEditor", "RefreshShaderButton"));
@@ -106,10 +135,6 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 				MaterialEditor::CloseMaterialEditor(_material);
 				MaterialEditor::OpenMaterialEditor(_material, true);
 			});
-		}
-		//
-		{
-
 		}
 		ui_ma.scroll_verticalLayout->addStretch(20);
 		pw_ma->ShowItems();

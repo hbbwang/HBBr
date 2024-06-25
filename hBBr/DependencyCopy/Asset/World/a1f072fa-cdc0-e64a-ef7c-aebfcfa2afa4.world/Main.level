@@ -37,6 +37,44 @@
         },
         "bActive": true
     },
+    "5eb58082-fdce-456d-8c9b-2233355f464f": {
+        "Components": [
+            {
+                "Class": "ModelComponent",
+                "Index": 0,
+                "Properties": {
+                    "Model": {
+                        "Type": "AssetRef",
+                        "Value": "/Content/Core/Model/SoftCube_3Mat.fbx"
+                    },
+                    "bActive": {
+                        "Type": "bool",
+                        "Value": "1"
+                    }
+                }
+            }
+        ],
+        "Name": "SoftCube_3Mat",
+        "Parent": "00000000-0000-0000-0000-000000000000",
+        "Transform": {
+            "Position": {
+                "x": 0.0,
+                "y": 3.7279999256134033,
+                "z": 0.0
+            },
+            "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            }
+        },
+        "bActive": true
+    },
     "a983a360-f3e3-4320-85c1-2e0b2e016317": {
         "Components": [
             {
@@ -58,7 +96,7 @@
         "Parent": "59de3f33-b840-4532-b58d-f7af2be98165",
         "Transform": {
             "Position": {
-                "x": -0.9723628759384155,
+                "x": -0.9723628163337708,
                 "y": 1.9140000343322754,
                 "z": 2.6715457439422607
             },

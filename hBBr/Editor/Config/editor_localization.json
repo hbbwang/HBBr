@@ -44,6 +44,7 @@
         "RefreshShaderButton": "刷新Shader",
         "RefreshShader": "刷新Shader:[vs:%s][ps:%s]",
         "MaterialUniformBufferTitle": "Uniform Buffer",
-        "MaterialTextureTitle": "Texture"
+        "MaterialTextureTitle": "Texture",
+        "SaveButton":"保存"
     }
 }

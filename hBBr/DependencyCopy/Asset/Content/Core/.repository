@@ -1,4 +1,27 @@
 {
+    "0a13c94b-ff3a-4786-bc1b-10e420a23bf4": {
+        "Format": "fbx",
+        "Name": "UnknowMesh",
+        "RPath": "Model/",
+        "Type": 1,
+        "VPath": "/Content/Core/Model"
+    },
+    "154b8403-03f3-4623-a723-ad0d491f9713": {
+        "Format": "fbx",
+        "Name": "SoftCube_3Mat",
+        "RPath": "Model/",
+        "Type": 1,
+        "VPath": "/Content/Core/Model"
+    },
+    "22d44cd6-68c3-4997-ad5f-3d52c45ef8fe": {
+        "Dep": [],
+        "Format": "mat",
+        "Name": "M_Error",
+        "RPath": "Material/",
+        "Ref": [],
+        "Type": 2,
+        "VPath": "/Content/Core/Material"
+    },
     "38c42242-404c-b372-fac8-d0441f2100f8": {
         "Dep": [],
         "Format": "dds",
@@ -8,15 +31,6 @@
         "Ref": [],
         "Type": 3,
         "VPath": "Content/Core/Texture"
-    },
-    "3d661ab7-4689-4ad8-bafb-861d7255b87a": {
-        "Dep": [],
-        "Format": "png",
-        "Name": "T_M4A1_Test_color",
-        "RPath": "Texture2D/",
-        "Ref": [],
-        "Type": 3,
-        "VPath": "/Content/Core/M16_Test"
     },
     "6146e15a-0632-b197-b6f9-b12fc8a16b05": {
         "Dep": [
@@ -42,15 +56,6 @@
         "Ref": [],
         "Type": 3,
         "VPath": "Content/Core/Texture"
-    },
-    "7971664a-f3a7-4850-b825-9f7e8005edb0": {
-        "Dep": [],
-        "Format": "png",
-        "Name": "T_M4A1_Test_normals",
-        "RPath": "Texture2D/",
-        "Ref": [],
-        "Type": 3,
-        "VPath": "/Content/Core/M16_Test"
     },
     "7e5e05bb-aa1a-f8c0-b08d-b5dde955807b": {
         "Dep": [
@@ -95,8 +100,7 @@
     "b51e2e9a-0985-75e8-6138-fa95efcbab57": {
         "Dep": [],
         "Format": "mat",
-        "GUID": "b51e2e9a-0985-75e8-6138-fa95efcbab57",
-        "Name": "DefaultPBR",
+        "Name": "M_DefaultPBR",
         "RPath": "Material/",
         "Ref": [
             {
@@ -143,13 +147,6 @@
         "Ref": [],
         "Type": 3,
         "VPath": "Content/Core/Texture"
-    },
-    "ed95f1c8-e782-4ffc-b81a-a890c94d040d": {
-        "Format": "FBX",
-        "Name": "SM_M4A1_Test",
-        "RPath": "Model/",
-        "Type": 1,
-        "VPath": "/Content/Core/M16_Test"
     },
     "fa3e3e63-872f-99e3-a126-6ce5b8fedfae": {
         "Dep": [],

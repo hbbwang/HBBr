@@ -255,13 +255,13 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 	objectUboOffset = 0;
 	uint32_t dynamicOffset[] = { 0 };
 	uint32_t matIndex = 0;
-	auto curPipeline = pipelineTemps[matIndex];
-	//Pass uniform buffers
-	{
-		vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 0, 1, &pass->GetDescriptorSet(), 1, dynamicOffset);
-	}
 	for (auto m : *PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
 	{
+		auto curPipeline = pipelineTemps[matIndex];
+		//Pass uniform buffers
+		{
+			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 0, 1, &pass->GetDescriptorSet(), 1, dynamicOffset);
+		}
 		manager->CmdCmdBindPipeline(cmdBuf, curPipeline->pipeline);
 		//Material uniform buffers
 		if (curPipeline->bHasMaterialParameter)

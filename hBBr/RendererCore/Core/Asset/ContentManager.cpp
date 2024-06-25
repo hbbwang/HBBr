@@ -149,6 +149,7 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				assetTypeName = GetAssetTypeString(type);
 				HString savePath = FileSystem::Append(repositoryPath, assetTypeName);
 				savePath = FileSystem::Append(savePath, guidStr + ".dds" );
+				suffix = "dds" ;
 				//使用nvtt插件导入dds
 				Texture2D::CompressionImage2D(i.absAssetFilePath.c_str(), savePath.c_str(),true,nvtt::Format_BC7,false);
 			}
@@ -158,7 +159,10 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				//材质球只能在编辑器创建,无法导入
 				type = AssetType::Material;
 				assetTypeName = GetAssetTypeString(type);
-
+				HString savePath = FileSystem::Append(repositoryPath, assetTypeName);
+				savePath = FileSystem::Append(savePath, guidStr + "." + suffix);
+				//重命名为guid
+				FileSystem::FileRename(i.absAssetFilePath.c_str(), savePath.c_str());
 			}
 			//导入AssetInfo
 			if(type != AssetType::Unknow)

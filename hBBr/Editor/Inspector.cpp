@@ -240,6 +240,8 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 					compWidget->layout()->addWidget(cw);
 					for (int i = 0; i < refs->size(); i++)
 					{
+						if (refs->at(i).assetInfo.expired())
+							continue;
 						AssetLine* line = new AssetLine(p.name, this, refs->at(i).assetInfo.lock()->virtualFilePath.c_str(), p.condition);
 						cw->addSubWidget(line);
 						//component callback
@@ -288,6 +290,8 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				else
 				{
 					AssetRef* ref = (AssetRef*)p.value;
+					if (ref->assetInfo.expired())
+						continue;
 					AssetLine* line = new AssetLine(p.name, this, ref->assetInfo.lock()->virtualFilePath.c_str(), p.condition);
 					compWidget->layout()->addWidget(line);
 					//component callback

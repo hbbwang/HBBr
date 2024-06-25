@@ -16,6 +16,7 @@ void ModelComponent::OnConstruction()
 
 void ModelComponent::UpdateMaterial()
 {
+	Model::BuildModelPrimitives(_modelPath.assetInfo.lock()->GetAssetObject<Model>().lock().get(), _primitives);
 	_materialPath.resize(_primitives.size());
 	for (int i = 0; i < (int)_primitives.size(); i++)
 	{
@@ -62,7 +63,6 @@ void ModelComponent::SetModel(std::weak_ptr<class Model> model)
 	ClearPrimitves();
 	if (!model.expired())
 	{
-		Model::BuildModelPrimitives(model.lock().get(), _primitives);
 		UpdateMaterial();
 		_modelPath.assetInfo = model.lock()->_assetInfo;
 		_modelPath.path = model.lock()->_assetInfo.lock()->virtualFilePath;
@@ -79,10 +79,11 @@ void ModelComponent::SetMaterial(std::weak_ptr<class Material> mat, int index)
 	}
 	if (!mat.expired())
 	{
+		ClearPrimitves();
 		_materialPath[index].assetInfo = mat.lock()->_assetInfo;
 		_materialPath[index].path = mat.lock()->_assetInfo.lock()->virtualFilePath;
 		_materialPath[index].callBack();
-		UpdateData();
+		UpdateMaterial();
 	}
 }
 
@@ -110,6 +111,15 @@ void ModelComponent::UpdateData()
 	if (!_modelPath.assetInfo.expired())
 	{
 		SetModel(_modelPath.assetInfo.lock()->GetAssetObject<Model>());
+	}
+	else
+	{
+		_modelPath.assetInfo = ContentManager::Get()->GetAssetInfo(HGUID("0a13c94b-ff3a-4786-bc1b-10e420a23bf4"), AssetType::Model);
+		SetModel(_modelPath.assetInfo.lock()->GetAssetObject<Model>());
+		for (int i = 0; i < GetMaterialNum(); i++)
+		{
+			SetMaterial(Material::GetErrorMaterial(), i);
+		}
 	}
 }
 

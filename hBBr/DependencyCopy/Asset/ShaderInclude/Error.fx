@@ -24,9 +24,11 @@ VSToPS VSMain(VSInput IN)
 
     //Transform MVP
     OUT.LocalPosition = IN.Position;
-    float4 WorldPosition = mul(World, float4(IN.Position,1.0));
+    float theSin = sin(GameTime * 2);
+    float4 WorldPosition = mul(World, float4(IN.Position,1.0)) + float4(0,theSin*0.25,0, 0) ;
+    WorldPosition.xyz *= float3(1,saturate((theSin *0.5+0.5)*0.1 + 0.9),1);
     OUT.SVPosition = mul(VP, WorldPosition);
-    OUT.WorldPosition = WorldPosition.xyz;
+    OUT.WorldPosition = WorldPosition.xyz ;
 
     //Transform TangentSpace
     OUT.WorldNormal =  normalize(DirectionLocalToWorld(IN.Normal));
@@ -41,7 +43,7 @@ VSToPS VSMain(VSInput IN)
 //像素着色器补充
 void frag(in VSToPS IN , inout PixelShaderParameter Parameters)
 {
-    half3 color = (sin(GameTime) * 0.5 + 0.5) * half3(1,0,1);
+    half3 color = saturate((sin(GameTime * 4) * 0.5 + 0.5) * 0.75 + 0.25) * half3(1,0,1);
     Parameters.BaseColor = 0;
     Parameters.Emissive = color;
 }

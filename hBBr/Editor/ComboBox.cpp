@@ -7,6 +7,24 @@ ComboBox::ComboBox(QString name, QWidget *parent)
 	ui.setupUi(this);
 	ui.Name->setText(name);
 	ui.Name->setObjectName("PropertyName");
+	Init();
+}
+
+ComboBox::ComboBox(QWidget* parent)
+{
+	ui.setupUi(this);
+	ui.Name->setHidden(true);
+	ui.horizontalLayout->removeItem(ui.horizontalSpacer);
+	Init();
+}
+
+ComboBox::~ComboBox()
+{
+
+}
+
+void ComboBox::Init()
+{
 
 	//ui.ComboBox_0->setStyleSheet("border:2px solid rgb(10,10,10);border-radius:8px;background-color:rgb(75,75,75);color:rgb(255,255,255); height:22; outline: none;");
 	QLineEdit* line = new QLineEdit(this);
@@ -16,12 +34,7 @@ ComboBox::ComboBox(QString name, QWidget *parent)
 	line->setEnabled(false);
 	ui.ComboBox_0->setLineEdit(line);
 	ui.ComboBox_0->lineEdit()->setAlignment(Qt::AlignRight);
-	connect(ui.ComboBox_0,SIGNAL(currentTextChanged(const QString&)),this ,SLOT(currentTextChanged(const QString&)));
-
-}
-
-ComboBox::~ComboBox()
-{
+	connect(ui.ComboBox_0, SIGNAL(currentTextChanged(const QString&)), this, SLOT(currentTextChanged(const QString&)));
 
 }
 

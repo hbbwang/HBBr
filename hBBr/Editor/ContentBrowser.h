@@ -68,6 +68,8 @@ public:
 
 	CustomListItem* AddFile(std::weak_ptr<struct AssetInfoBase> assetInfo, bool bUpdatePreview = false);
 
+	void SpawnAssetPreviewImage(std::weak_ptr<struct AssetInfoBase> assetInfo);
+
 	virtual QList<CustomListItem*> FindItems(QString name)override;
 
 	virtual CustomListItem* FindItem(QString itemPath);

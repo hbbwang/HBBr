@@ -9,7 +9,10 @@ class ComboBox : public PropertyClass
 
 public:
 	ComboBox(QString name, QWidget *parent = Q_NULLPTR);
+	ComboBox(QWidget* parent );
 	~ComboBox();
+
+	void Init();
 
 	inline QComboBox* GetComboBox()const { return ui.ComboBox_0; }
 

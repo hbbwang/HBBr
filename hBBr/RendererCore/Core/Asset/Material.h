@@ -19,6 +19,8 @@ public:
 
 	HBBR_API static std::weak_ptr<Material> GetDefaultMaterial();
 
+	HBBR_API static std::weak_ptr<Material> GetErrorMaterial();
+
 	HBBR_API static std::weak_ptr<Material> LoadAsset(HGUID guid);
 
 	HBBR_API void SaveAsset(HString path);

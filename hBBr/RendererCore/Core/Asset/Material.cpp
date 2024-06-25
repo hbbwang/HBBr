@@ -26,6 +26,16 @@ std::weak_ptr<Material> Material::GetDefaultMaterial()
 	return defaultMat;
 }
 
+std::weak_ptr<Material> Material::GetErrorMaterial()
+{
+	static std::weak_ptr<Material> errorMat;
+	if (errorMat.expired())
+	{
+		errorMat = Material::LoadAsset(HGUID("22d44cd6-68c3-4997-ad5f-3d52c45ef8fe"));
+	}
+	return errorMat;
+}
+
 std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 {
 	const auto matAssets = ContentManager::Get()->GetAssets(AssetType::Material);
@@ -302,10 +312,11 @@ std::weak_ptr<AssetInfoBase> Material::CreateMaterial(HString repository, HStrin
 
 	json["vsShader"] = "PBR";
 	json["psShader"] = "PBR";
-	json["vsVarient"] = "0";
-	json["psVarient"] = "0";
-	json["pass"] = "0";
+	json["vsVarient"] = 0;
+	json["psVarient"] = 0;
+	json["pass"] = 0;
 	
+
 	if (Serializable::SaveJson(json, saveFilePath.c_str()))
 	{
 		std::vector<std::weak_ptr<AssetInfoBase> > results;

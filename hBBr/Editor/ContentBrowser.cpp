@@ -93,7 +93,7 @@ VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrows
 				}
 			});
 		//删除当前虚拟文件夹内的所有文件
-		ActionConnect(deleteFile, [this]()
+		ActionConnect(deleteFile, [this]() 
 			{
 				//收集当前选中的虚拟目录 + 它们的所以子目录
 				QList<CustomViewItem*> allFoldersForDelete; 
@@ -756,16 +756,10 @@ CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase>
 		//生成一下预览图
 		if (bUpdatePreview)
 		{
-			if (assetInfo.lock()->type == AssetType::Texture2D)
-			{
-				Texture2D::DecompressionImage2D(
-					assetInfo.lock()->absFilePath.c_str(),
-					(assetInfo.lock()->absFilePath + ".jpg").c_str(),
-					nullptr,64,64);
-			}
+			SpawnAssetPreviewImage(assetInfo);
 		}
 		//目录下的jpg格式图像作为预览图存在
-		auto	iconPath = assetInfo.lock()->absFilePath + ".jpg";
+		auto	iconPath = (FileSystem::Append(FileSystem::GetAssetAbsPath(), "Saved/PreviewImage/Content/" + assetInfo.lock()->repository + "/Texture2D/" + assetInfo.lock()->guid.str() + ".jpg"));;
 		if (!FileSystem::FileExist(iconPath))
 		{
 			iconPath = FileSystem::GetConfigAbsPath();
@@ -789,6 +783,18 @@ CustomListItem* VirtualFileListView::AddFile(std::weak_ptr<struct AssetInfoBase>
 		return newItem;
 	}
 	return nullptr;
+}
+
+void VirtualFileListView::SpawnAssetPreviewImage(std::weak_ptr<struct AssetInfoBase> assetInfo)
+{
+	if (assetInfo.lock()->type == AssetType::Texture2D)
+	{
+		HString previewPath = (FileSystem::Append(FileSystem::GetAssetAbsPath(), "Saved/PreviewImage/Content/" + assetInfo.lock()->repository + "/Texture2D/" + assetInfo.lock()->guid.str() + ".jpg"));
+		Texture2D::DecompressionImage2D(
+			assetInfo.lock()->absFilePath.c_str(),
+			previewPath.c_str(),
+			nullptr, 64, 64);
+	}
 }
 
 QList<CustomListItem*> VirtualFileListView::FindItems(QString itemPath)
@@ -1192,7 +1198,15 @@ void ContentBrowser::ShowRepositorySelection()
 					infos.push_back(newInfo);
 				}
 			}
-			bool bSucceed = ContentManager::Get()->AssetImport(repository.toStdString().c_str(), infos);
+			std::vector<std::weak_ptr<AssetInfoBase>>results;
+			bool bSucceed = ContentManager::Get()->AssetImport(repository.toStdString().c_str(), infos, &results);
+
+			//生成预览图
+			for (auto& i : results)
+			{
+				_listView->SpawnAssetPreviewImage(i);
+			}
+			
 			_importFileNames.clear();
 			if (bSucceed)
 			{

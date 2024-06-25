@@ -147,6 +147,10 @@ public:
 		return std::weak_ptr<ShaderCache>();
 	}
 
+	HBBR_API inline static  std::map<HString, std::shared_ptr<ShaderCache>> GetPSCaches() {
+		return _psShader;
+	}
+
 	HBBR_API inline static std::weak_ptr<ShaderCache> GetCSCache(HString cacheFullName) {
 		auto it = _csShader.find(cacheFullName);
 		if (it != _csShader.end())
