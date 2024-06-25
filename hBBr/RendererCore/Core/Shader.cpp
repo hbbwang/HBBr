@@ -139,7 +139,7 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 					}
 					info->arrayIndex = arrayIndex;
 					info->vec4Index = alignmentFloat4;
-					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4]);
+					info->value.push_back((float)cache.params[i].defaultValue.x);
 					alignmentFloat4 += 1;
 				}
 				else if (info->type == MPType::Float2)
@@ -151,8 +151,8 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 					}
 					info->arrayIndex = arrayIndex;
 					info->vec4Index = alignmentFloat4;
-					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4]);
-					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4 + 1]);
+					info->value.push_back((float)cache.params[i].defaultValue.x);
+					info->value.push_back((float)cache.params[i].defaultValue.y);
 					alignmentFloat4 += 2;
 				}
 				else if (info->type == MPType::Float3)
@@ -164,9 +164,9 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 					}
 					info->arrayIndex = arrayIndex;
 					info->vec4Index = alignmentFloat4;
-					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4]);
-					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4 + 1]);
-					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4 + 2]);
+					info->value.push_back((float)cache.params[i].defaultValue.x);
+					info->value.push_back((float)cache.params[i].defaultValue.y);
+					info->value.push_back((float)cache.params[i].defaultValue.z);
 					alignmentFloat4 += 3;
 				}
 				else if (info->type == MPType::Float4)
@@ -178,10 +178,10 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 					}
 					info->arrayIndex = arrayIndex;
 					info->vec4Index = alignmentFloat4;
-					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4]);
-					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4 + 1]);
-					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4 + 2]);
-					info->value.push_back((float)cache.params[i].defaultValue[alignmentFloat4 + 3]);
+					info->value.push_back((float)cache.params[i].defaultValue.x);
+					info->value.push_back((float)cache.params[i].defaultValue.y);
+					info->value.push_back((float)cache.params[i].defaultValue.z);
+					info->value.push_back((float)cache.params[i].defaultValue.w);
 					alignmentFloat4 += 4;
 				}
 				cache.pi.push_back(info);

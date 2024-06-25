@@ -187,7 +187,7 @@ void VectorSetting::setX(double val)
 	if (Demensionality >= 1)
 		floatSetting[0]->setValue(val);
 	BindValue(floatSetting);
-	if (_vec4_f[0] != nullptr && Demensionality >= 1 && floatSetting[0]->hasFocus())
+	if (_vec4_f[0] != nullptr && Demensionality >= 1 )
 	{
 		*_vec4_f[0] = floatSetting[0]->value();
 		_old_vec4_f[0] = *_vec4_f[0];
@@ -199,7 +199,7 @@ void VectorSetting::setY(double val)
 	if(Demensionality>=2)
 		floatSetting[1]->setValue(val);
 	BindValue(floatSetting);
-	if (_vec4_f[1] != nullptr && Demensionality >= 2 && floatSetting[1]->hasFocus())
+	if (_vec4_f[1] != nullptr && Demensionality >= 2 )
 	{
 		*_vec4_f[1] = floatSetting[1]->value();
 		_old_vec4_f[1] = *_vec4_f[1];
@@ -211,7 +211,7 @@ void VectorSetting::setZ(double val)
 	if (Demensionality >= 3)
 		floatSetting[2]->setValue(val);
 	BindValue(floatSetting);
-	if (_vec4_f[2] != nullptr && Demensionality >= 3 && floatSetting[2]->hasFocus())
+	if (_vec4_f[2] != nullptr && Demensionality >= 3 )
 	{
 		*_vec4_f[2] = floatSetting[2]->value();
 		_old_vec4_f[2] = *_vec4_f[2];
@@ -223,7 +223,7 @@ void VectorSetting::setW(double val)
 	if (Demensionality >= 4)
 		floatSetting[3]->setValue(val);
 	BindValue(floatSetting);
-	if (_vec4_f[3] != nullptr && Demensionality >= 4 && floatSetting[3]->hasFocus())
+	if (_vec4_f[3] != nullptr && Demensionality >= 4 )
 	{
 		*_vec4_f[3] = floatSetting[3]->value();
 		_old_vec4_f[3] = *_vec4_f[3];

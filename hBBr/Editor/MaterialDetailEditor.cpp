@@ -128,32 +128,38 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 			int vecType = 1;
 			if (i.type == MPType::Float)
 			{
-				vector = new VectorSetting(this, 1, 0.000001f, 8);
+				vector = new VectorSetting(this, 1, 0.0001f, 8);
 				vector->SetValue(_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index]);
+				vector->_vec4_f[0] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index];
 			}
 			else if (i.type == MPType::Float2)
 			{
-				vector = new VectorSetting(this, 2, 0.000001f, 8);
+				vector = new VectorSetting(this, 2, 0.0001f, 8);
 				vecType = 2;
 				vector->SetValue(
 					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index],
 					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 1],
 					0
 				);
+				vector->_vec4_f[0] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 1];
 			}
 			else if (i.type == MPType::Float3)
 			{
-				vector = new VectorSetting(this, 3, 0.000001f, 8);
+				vector = new VectorSetting(this, 3, 0.0001f, 8);
 				vecType = 3;
 				vector->SetValue(
 					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index],
 					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 1],
 					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 2]
 				);
+				vector->_vec4_f[0] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 1];
+				vector->_vec4_f[2] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 2];
 			}
 			else if (i.type == MPType::Float4)
 			{
-				vector = new VectorSetting(this, 4, 0.000001f, 8);
+				vector = new VectorSetting(this, 4, 0.0001f, 8);
 				vecType = 4;
 				vector->SetValue(
 					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index],
@@ -161,6 +167,10 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 2],
 					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 3]
 				);
+				vector->_vec4_f[0] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 1];
+				vector->_vec4_f[2] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 2];
+				vector->_vec4_f[3] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 3];
 			}
 			pw_mp->AddItem(i.name.c_str(), vector, 30, mp_sub_group);
 		}
