@@ -16,11 +16,11 @@
 [MaterialParameter]
 cbuffer Material
 {
-    [Name=Tint; Default=1,1,1,1;]
+    [Name=Tint;Default=1,1,1,1;Group=Default]
     float4 Tint;
-    [Name=Metallic; Default=0;]
+    [Name=Metallic;Default=0;Group=Default]
     float Metallic;
-    [Name=Roughness; Default=0.3;]
+    [Name=Roughness;Default=0.3;Group=Default]
     float Roughness;
 };
 
@@ -43,8 +43,9 @@ struct VSInput
 
 Texture2D BaseTexture
 {
-    Name = BaseTexture;//Custom name
-    Default = UVGrid;//Default value
+    Name = BaseTexture; //Custom name
+    Default = UVGrid;   //Default value
+    Group = Default;    //Group
     Filter = Linear;
     Address = Wrap;
 };

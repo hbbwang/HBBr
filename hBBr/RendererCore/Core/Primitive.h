@@ -26,6 +26,7 @@ struct MaterialParameterInfo
 struct MaterialTextureInfo
 {
 	MTType type;
+	HString group = "Default";
 	MSAddress samplerAddress = MSAddress::Wrap;
 	MSFilter samplerFilter = MSFilter::Linear;
 	HString name, ui;

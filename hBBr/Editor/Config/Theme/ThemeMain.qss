@@ -720,7 +720,7 @@ QSplitter::handle
     color: #cccccc;
     font-family:  FontFamily;
     font-size: 14px;
-    border-bottom: 1px solid rgb(100,100,100);
+    /* border-bottom: 1px solid rgb(100,100,100); */
 }
 #PropertyTableWidgetRowName
 {
@@ -740,10 +740,33 @@ QSplitter::handle
     height: 2px;
     background-color: rgba(100,100,100,0.75);
 }
+#PropertyTableWidgetRowButtonImage
+{
+    background-color: transparent;
 
+}
+#PropertyTableWidgetRowGroupButton
+{
 
+}
+#PropertyTableWidgetRowGroupButtonValue
+{
 
-
+}
+#PropertyTableGroup_0,
+#PropertyTableGroup_1,
+#PropertyTableGroup_2,
+#PropertyTableGroup_3,
+#PropertyTableGroup_4,
+#PropertyTableGroup_5,
+#PropertyTableGroup_6
+{
+    background-color: rgba(90, 90, 90, 0.5);
+    border: 1px solid rgb(118, 118, 118);
+    border-radius: 0%;
+    margin: 0px;
+    padding: 0px;
+}
 
 
 

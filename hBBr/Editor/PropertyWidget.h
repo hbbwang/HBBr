@@ -3,14 +3,15 @@
 #include <memory>
 #include <map>
 #include <QToolButton>
-
+#include <qlabel.h>
 class PropertyWidgetButton : public QWidget
 {
 	Q_OBJECT
 public:
-	PropertyWidgetButton(QToolButton* button, QWidget* parent = nullptr);
+	PropertyWidgetButton(QLabel* image, QToolButton* button, QWidget* parent = nullptr);
 	~PropertyWidgetButton();
 	QToolButton* _button;
+	QLabel* _image;
 	bool bVisiable = true;
 };
 

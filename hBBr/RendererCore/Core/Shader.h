@@ -85,6 +85,7 @@ struct ShaderTextureInfo
 {
 	MPType type;
 	char name[32] = "\0";
+	char group[16] = "Default\0";
 	char defaultTexture[16];//systemTexture
 	uint8_t index = 0;
 	MSFilter msFilter = MSFilter::Linear;

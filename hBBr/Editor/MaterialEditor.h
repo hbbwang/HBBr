@@ -22,10 +22,10 @@ public:
 	};
 
 	QList<MaterialEditorItem> _allDetailWindows;
-	static MaterialDetailEditor* OpenMaterialEditor(std::weak_ptr<Material> mat , bool bTab); 
+	static MaterialDetailEditor* OpenMaterialEditor(std::weak_ptr<Material> mat, bool bTab);
 	static void CloseMaterialEditor(std::weak_ptr<Material> mat);
 protected:
-	MaterialEditor(QWidget *parent = nullptr);
+	MaterialEditor(QWidget* parent = nullptr);
 	~MaterialEditor();
 	virtual void closeEvent(QCloseEvent* event) override;
 	virtual void paintEvent(QPaintEvent* event)override;
@@ -37,4 +37,6 @@ private:
 	bool bInDrag = false;
 	bool bResetDrag = false;
 	//Ui::MaterialEditorClass ui;
+private slots:
+	void onTabCloseRequested(int index);
 };

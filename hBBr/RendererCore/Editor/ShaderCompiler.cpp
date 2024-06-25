@@ -598,14 +598,16 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 						if (value[0].Contains("Default"))
 						{
 							std::string defaultValue = value[1].c_str();
-							defaultValue.copy(shaderTextureInfos[infoSize - 1].defaultTexture, sizeof(shaderTextureInfos[infoSize - 1].defaultTexture) - 1);
-							shaderTextureInfos[infoSize - 1].defaultTexture[sizeof(shaderTextureInfos[infoSize - 1].defaultTexture) - 1] = '\0';
+							size_t numCharsToCopy = std::min(defaultValue.size(), sizeof(shaderTextureInfos[infoSize - 1].defaultTexture) - 1);
+							defaultValue.copy(shaderTextureInfos[infoSize - 1].defaultTexture, numCharsToCopy);
+							shaderTextureInfos[infoSize - 1].defaultTexture[numCharsToCopy] = '\0';
 						}
 						else if (value[0].Contains("Name"))
 						{
 							std::string name = value[1].c_str();
-							name.copy(shaderTextureInfos[infoSize - 1].name, sizeof(shaderTextureInfos[infoSize - 1].name) - 1);
-							shaderTextureInfos[infoSize - 1].name[sizeof(shaderTextureInfos[infoSize - 1].name) - 1] = '\0';
+							size_t numCharsToCopy = std::min(name.size(), sizeof(shaderTextureInfos[infoSize - 1].name) - 1);
+							name.copy(shaderTextureInfos[infoSize - 1].name, numCharsToCopy);
+							shaderTextureInfos[infoSize - 1].name[numCharsToCopy] = '\0';
 						}
 						else if (value[0].Contains("Filter"))
 						{
@@ -614,6 +616,13 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 								shaderTextureInfos[infoSize - 1].msFilter = MSFilter::Linear;
 							else if (valueStr.IsSame("Nearest", false))
 								shaderTextureInfos[infoSize - 1].msFilter = MSFilter::Nearest;
+						}
+						else if (value[0].Contains("Group", false))
+						{
+							std::string group = value[1].c_str();
+							size_t numCharsToCopy = std::min(group.size(), sizeof(shaderTextureInfos[infoSize - 1].group) - 1);
+							group.copy(shaderTextureInfos[infoSize - 1].group, numCharsToCopy);
+							shaderTextureInfos[infoSize - 1].group[numCharsToCopy] = '\0';
 						}
 						else if (value[0].Contains("Address"))
 						{

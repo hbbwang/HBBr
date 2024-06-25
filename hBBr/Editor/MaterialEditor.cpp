@@ -25,8 +25,26 @@ MaterialEditor::MaterialEditor(QWidget *parent)
 
 	tabBar()->installEventFilter(this);
 	installEventFilter(this);
+
 	tabBar()->setTabsClosable(true);
+	this->setTabsClosable(true);
+
+	this->setAttribute(Qt::WA_DeleteOnClose, true);
+
+	connect(tabBar(), &QTabBar::tabCloseRequested, this, &MaterialEditor::onTabCloseRequested);
+
 	//tabBar()->setDocumentMode(true);
+}
+
+void MaterialEditor::onTabCloseRequested(int index)
+{
+	auto w = this->widget(index);
+	this->removeTab(index);
+	if (w)
+	{
+		auto materialDetail = (MaterialDetailEditor*)w;
+		materialDetail->close();
+	}
 }
 
 MaterialEditor::~MaterialEditor()

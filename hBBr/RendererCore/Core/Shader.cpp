@@ -197,6 +197,7 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 				info->type = (MTType)cache.texs[i].type;
 				info->index = cache.texs[i].index;
 				info->value = cache.texs[i].defaultTexture;
+				info->group = cache.texs[i].group;
 				info->samplerAddress = cache.texs[i].msAddress;
 				info->samplerFilter = cache.texs[i].msFilter;
 				cache.ti.push_back(info);

@@ -103,14 +103,14 @@ int main(int argc, char *argv[])
     //刷新一下样式
     w.setStyleSheet(GetWidgetStyleSheetFromFile("EditorMain"));
 
-    //显示窗口
-    w.show();
-
     int width = 1024, height = 768;
     GetEditorInternationalizationInt("MainWindow", "WindowWidth", width);
     GetEditorInternationalizationInt("MainWindow", "WindowHeight", height);
     w.resize(width, height);
-    SetWindowCenterPos(&w);
+    //SetWindowCenterPos(&w);
+
+    //显示窗口
+    w.show();
 
     return a.exec();
 }

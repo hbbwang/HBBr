@@ -14,10 +14,13 @@ public:
 	MaterialDetailEditor(std::weak_ptr<Material> mat ,QWidget *parent = nullptr);
 	~MaterialDetailEditor();
 	class MaterialEditor* _parent = nullptr;
-	std::weak_ptr<Material> _material;
-	class VulkanForm* _matWindow;
+
+	class VulkanForm* _matWindow = nullptr;
 	class QSplitter* left_right = nullptr;
+
+	std::weak_ptr<Material> _material;
 	class GameObject* _gameObject = nullptr;
+
 protected:
 	virtual void resizeEvent(QResizeEvent* event);
 	virtual void closeEvent(QCloseEvent* event);

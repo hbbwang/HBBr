@@ -20,9 +20,12 @@
 #include <QMap>
 #include <QString>
 #include <VectorSetting.h>
+#include <MaterialEditor.h>
 MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget *parent)
 	: QMainWindow(parent)
 {
+	this->setAttribute(Qt::WA_DeleteOnClose, true);
+
 	QWidget* r = new QWidget(this);
 	QWidget* ma = new QWidget(this);
 	QWidget* mp = new QWidget(this);
@@ -99,6 +102,9 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 					_material.lock()->GetPrimitive()->vsShader.c_str(),
 					_material.lock()->GetPrimitive()->psShader.c_str());
 				Shader::ReloadMaterialShaderCacheAndPipelineObject(_material);
+				//¹Ø±Õ±à¼­Æ÷
+				MaterialEditor::CloseMaterialEditor(_material);
+				MaterialEditor::OpenMaterialEditor(_material, true);
 			});
 		}
 		//
@@ -114,28 +120,10 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 	//Material parameter
 	//Uniform buffer
 	{
-		pw_mp->AddItem(GetEditorInternationalization("MaterialEditor", "MaterialUniformBufferTitle"));
-		mpBox->addPage(GetEditorInternationalization("MaterialEditor", "MaterialUniformBufferTitle"), true);
-		ToolBox* mpGroup = new ToolBox(mpBox);
-		mpBox->addSubWidget(mpGroup);
-		std::map<QString, PropertyWidget*> groups;
+		auto mp_group = pw_mp->AddGroup(GetEditorInternationalization("MaterialEditor", "MaterialUniformBufferTitle"));
 		for (auto& i : _material.lock()->GetPrimitive()->_paramterInfos)
 		{
-			mpGroup->addPage(i.group.c_str(), true);
-
-			PropertyWidget* pw_mp = nullptr;
-			auto group_it = groups.find(i.group.c_str());
-			if (group_it == groups.end())
-			{
-				pw_mp = new PropertyWidget(this);
-				mpGroup->addSubWidget(pw_mp);
-				groups.emplace(i.group.c_str(), pw_mp);
-			}
-			else
-			{
-				pw_mp = group_it->second;
-			}
-
+			auto mp_sub_group = pw_mp->AddGroup(i.group.c_str(), mp_group);
 			VectorSetting* vector = nullptr;
 			int vecType = 1;
 			if (i.type == MPType::Float)
@@ -174,16 +162,16 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 					_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 3]
 				);
 			}
-			pw_mp->AddItem(i.name.c_str(), vector);
+			pw_mp->AddItem(i.name.c_str(), vector, 30, mp_sub_group);
 		}
 	}
 	//Texture
 	{
-		mpBox->addPage(GetEditorInternationalization("MaterialEditor", "MaterialTextureTitle"), true);
+		//mpBox->addPage(GetEditorInternationalization("MaterialEditor", "MaterialTextureTitle"), true);
 
 	}
+	pw_mp->ShowItems();
 	ui_mp.scroll_verticalLayout->addStretch(20);
-	pw_ma->ShowItems();
 }
 
 MaterialDetailEditor::~MaterialDetailEditor()
@@ -208,4 +196,10 @@ void MaterialDetailEditor::closeEvent(QCloseEvent* event)
 			break;
 		}
 	}
+
+	if (_parent->_allDetailWindows.size() <= 0)
+	{
+		MaterialEditor::_mainWindow->close();
+	}
+
 }
