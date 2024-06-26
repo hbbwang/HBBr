@@ -195,6 +195,10 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 		{
 			auto info = ReloadAsset(i, repositoryName);
 			UpdateAssetReference(info);
+			//无论如何都需要重新加载
+			{
+				info.lock()->NeedToReload();
+			}
 		}
 		if (out != nullptr)
 		{

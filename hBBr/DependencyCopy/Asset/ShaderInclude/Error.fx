@@ -44,8 +44,9 @@ VSToPS VSMain(VSInput IN)
 void frag(in VSToPS IN , inout PixelShaderParameter Parameters)
 {
     half3 color = saturate((sin(GameTime * 4) * 0.5 + 0.5) * 0.75 + 0.25) * half3(1,0,1);
+    half nol = dot(normalize(half3(0.5,1,0)), IN.WorldNormal.xyz) * 0.5 + 0.5 ;
     Parameters.BaseColor = 0;
-    Parameters.Emissive = color;
+    Parameters.Emissive = color * nol;
 }
 
 #include "Include/BasePassVertexShader.hlsl"

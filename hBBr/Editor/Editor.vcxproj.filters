@@ -112,9 +112,6 @@
     <ClCompile Include="EditorMain.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="MaterialEditor.cpp">
-      <Filter>Widgets</Filter>
-    </ClCompile>
     <ClCompile Include="MaterialDetailEditor.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
@@ -182,9 +179,6 @@
     </QtMoc>
     <QtMoc Include="DirtyAssetsManager.h">
       <Filter>Widgets\Custom</Filter>
-    </QtMoc>
-    <QtMoc Include="MaterialEditor.h">
-      <Filter>Widgets</Filter>
     </QtMoc>
     <QtMoc Include="MaterialDetailEditor.h">
       <Filter>Widgets</Filter>

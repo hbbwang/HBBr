@@ -240,13 +240,23 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 					compWidget->layout()->addWidget(cw);
 					for (int i = 0; i < refs->size(); i++)
 					{
-						if (refs->at(i).assetInfo.expired())
-							continue;
-						AssetLine* line = new AssetLine(p.name, this, refs->at(i).assetInfo.lock()->virtualFilePath.c_str(), p.condition);
+						HString text = "";
+						if (!refs->at(i).assetInfo.expired())
+						{
+							text = refs->at(i).assetInfo.lock()->virtualFilePath;
+						}
+						AssetLine* line = new AssetLine(p.name, this, text, p.condition);
 						cw->addSubWidget(line);
 						//component callback
 						refs->at(i).callBack = [line, refs,i]() {
-							line->ui.LineEdit->setText(refs->at(i).assetInfo.lock()->virtualFilePath.c_str());
+							if (!refs->at(i).assetInfo.expired())
+							{
+								line->ui.LineEdit->setText(refs->at(i).assetInfo.lock()->virtualFilePath.c_str());
+							}
+							else
+							{
+								line->ui.LineEdit->setText("");
+							}
 						};
 						//查找按钮
 						line->_bindFindButtonFunc = [refs, i](const char* p) {
@@ -290,13 +300,23 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				else
 				{
 					AssetRef* ref = (AssetRef*)p.value;
-					if (ref->assetInfo.expired())
-						continue;
-					AssetLine* line = new AssetLine(p.name, this, ref->assetInfo.lock()->virtualFilePath.c_str(), p.condition);
+					HString text = "";
+					if (!ref->assetInfo.expired())
+					{
+						text = ref->assetInfo.lock()->virtualFilePath;
+					}
+					AssetLine* line = new AssetLine(p.name, this, text, p.condition);
 					compWidget->layout()->addWidget(line);
 					//component callback
 					ref->callBack = [line,ref]() {
-						line->ui.LineEdit->setText(ref->assetInfo.lock()->virtualFilePath.c_str());
+						if (!ref->assetInfo.expired())
+						{
+							line->ui.LineEdit->setText(ref->assetInfo.lock()->virtualFilePath.c_str());
+						}
+						else
+						{
+							line->ui.LineEdit->setText("");
+						}
 					};
 					//查找按钮
 					line->_bindFindButtonFunc = [ref](const char* p) {

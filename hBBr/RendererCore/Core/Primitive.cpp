@@ -54,12 +54,14 @@ void PrimitiveProxy::RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
 
 void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim, class VulkanRenderer* renderer)
 {
-	prim->vertexData = prim->vertexInput.GetData(Shader::_vsShader[mat->vsShader + "@" + HString::FromUInt(mat->graphicsIndex.GetVSVarient())]->header.vertexInput);
+	prim->vertexData = prim->vertexInput.GetData(Shader::_vsShader[mat->graphicsIndex.GetVSShaderFullName()]->header.vertexInput);
 	prim->vertexIndices = prim->vertexInput.vertexIndices;
 	prim->vbSize = prim->vertexData.size() * sizeof(float);
 	prim->ibSize = prim->vertexIndices.size() * sizeof(uint32_t);
-	//
-	prim->vertexInput = VertexFactory::VertexInput();
+
+	//顶点数据生成完毕，就把源数据卸载掉
+	prim->vertexInput = VertexFactory::VertexInput(); 
+
 	auto it = _allModelPrimitives[mat].find(renderer);
 	if (it == _allModelPrimitives[mat].end())
 	{

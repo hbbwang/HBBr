@@ -21,6 +21,14 @@ public:
 	std::weak_ptr<Material> _material;
 	class GameObject* _gameObject = nullptr;
 
+	static 	QList<MaterialDetailEditor*> _allDetailWindows;
+
+	static MaterialDetailEditor* OpenMaterialEditor(std::weak_ptr<Material> mat);
+
+	static void CloseMaterialEditor(std::weak_ptr<Material> mat);
+
+	static MaterialDetailEditor* RefreshMaterialEditor(std::weak_ptr<Material> mat);
+
 protected:
 	virtual void resizeEvent(QResizeEvent* event);
 	virtual void closeEvent(QCloseEvent* event);

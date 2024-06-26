@@ -14,11 +14,11 @@ PropertyWidget::PropertyWidget(QWidget* parent)
 	((QVBoxLayout*)layout())->addWidget(_splitter);
 	setObjectName("PropertyTableWidget");
 	//
-	_name_layout = new QVBoxLayout(this);
-	_value_layout = new QVBoxLayout(this);
 	QWidget* nw = new QWidget(this);
-	nw->setLayout(_name_layout);
 	QWidget* vw = new QWidget(this);
+	_name_layout = new QVBoxLayout(nw);
+	_value_layout = new QVBoxLayout(vw);
+	nw->setLayout(_name_layout);
 	vw->setLayout(_value_layout);
 
 	_splitter->addWidget(nw);
@@ -50,7 +50,7 @@ void PropertyWidget::AddItem(QString name, QWidget* widget, int Height, SGroup* 
 	name_label->setObjectName("PropertyTableWidgetRowName");
 
 	QWidget* p_name = new QWidget(this);
-	p_name->setLayout(new QHBoxLayout(this));
+	p_name->setLayout(new QHBoxLayout(p_name));
 	p_name->setObjectName("PropertyTableWidgetRow");
 	p_name->layout()->addWidget(name_label);
 	p_name->layout()->setContentsMargins(0, 0, 0, 0);
@@ -60,7 +60,7 @@ void PropertyWidget::AddItem(QString name, QWidget* widget, int Height, SGroup* 
 	//Widget
 	widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	QWidget* p_value = new QWidget(this);
-	p_value->setLayout(new QHBoxLayout(this));
+	p_value->setLayout(new QHBoxLayout(p_value));
 	p_value->setObjectName("PropertyTableWidgetRow");
 	p_value->layout()->addWidget(widget);
 	p_value->layout()->setContentsMargins(0, 0, 0, 0);
@@ -271,7 +271,7 @@ void PropertyWidget::AddGroupButton(std::shared_ptr<SGroup> g)
 	PropertyWidgetButton* n_space = new PropertyWidgetButton(nullptr , button, this);
 	n_space->setMinimumHeight(Height);
 	n_space->setMaximumHeight(Height);
-	n_space->setLayout(new QHBoxLayout(this));
+	n_space->setLayout(new QHBoxLayout(n_space));
 
 	QLabel* image = new QLabel(button);
 	image->setFixedSize(Height/2, Height /2);

@@ -278,9 +278,9 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 		auto prims = PrimitiveProxy::GetModelPrimitives(m, _renderer);
 		if (prims)
 		{
-			for (size_t m = 0; m < prims->size(); m++)
+			for (size_t pi = 0; pi < prims->size(); pi++)
 			{
-				ModelPrimitive* prim = prims->at(m);
+				ModelPrimitive* prim = prims->at(pi);
 				if (prim->bActive)
 				{
 					vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 1, 1, &obj->GetDescriptorSet(), 1, &objectUboOffset);

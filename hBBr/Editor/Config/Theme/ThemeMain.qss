@@ -2,7 +2,7 @@ VariableDefine {
     BackgroundColor: rgb(31, 31, 31) ;
     FontFamily:  Arial, Helvetica, sans-serif;
     SplitterHandleColor : rgb(125,125,125);
-    SplitterWidth : 3px;
+    SplitterWidth : 2px;
 }
 #EditorMain
 {
@@ -19,9 +19,7 @@ VariableDefine {
 QWidget
 {
     font-family:  FontFamily;
-    background-color: BackgroundColor;
     color: rgb(190, 190, 190);
-    border: 0px;
     selection-color:rgb(125,125,125);
     selection-background-color: rgb(80,80,80);
 }
@@ -157,13 +155,16 @@ QMenu::separator
 }
 QStatusBar
 {
+    color: #bababa;
     background-color: rgba(20,20,20,0.9);
-    border: 1.2px solid rgb(140, 90, 100);
+    border: 1px solid rgb(138, 138, 138);
+    margin-left: 1px;
+    margin-right: 1px;
 }
 QToolTip
 {
     background-color: rgba(20,20,20,0.9);
-    border: 2px solid rgb(140, 90, 100);
+    border: 2px solid rgb(137, 137, 137);
     color:rgb(200,200,210);
 }
 /* ScrollBar */
@@ -702,9 +703,9 @@ QSplitter::handle
 {
     height: 2px;
 }
-#MaterialEditor_Instance
+#MaterialDetailEditor
 {
-
+    
 }
 #MaterialDetailEditor_RendererName,
 #MaterialDetailEditor_MaterialParameterName,

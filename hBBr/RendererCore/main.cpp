@@ -462,17 +462,18 @@ bool VulkanApp::IsWindowFocus(SDL_Window* windowHandle)
 
 void VulkanApp::RemoveWindow(VulkanForm* form)
 {
-	if (form != nullptr && form != nullptr)
+	if (form != nullptr && form->window != nullptr)
 	{
 		ConsoleDebug::printf_endl("%s Renderer Quit.", form->name.c_str());
-		auto window = form->window;
-		auto it = std::remove_if(_forms.begin(), _forms.end(), [window](VulkanForm* &glfw) {
-			return window == glfw->window;
-			});
-		if (it != _forms.end())
+		for (int i = 0; i < _forms.size(); i++)
 		{
-			delete (*it);
-			_forms.erase(it);
+			if (_forms[i]->window == form->window)
+			{
+				auto form = _forms[i];
+				_forms.erase(_forms.begin() + i);
+				delete form;
+				break;
+			}
 		}
 	}
 }

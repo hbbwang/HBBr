@@ -109,7 +109,8 @@ namespace VertexFactory
 				4 * uv23.size() * mul[5]
 			);
 			uint32_t dataIndex = 0;
-			for (int i = 0; i < result.size(); i++)
+			const size_t count = result.size();
+			for (size_t i = 0; i < count; i++)
 			{
 				if (pos.size() > dataIndex && mul[0] > 0 )
 				{

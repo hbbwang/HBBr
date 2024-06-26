@@ -763,6 +763,7 @@ void SceneOutline::paintEvent(QPaintEvent* event)
     styleOpt.init(this);
     QPainter painter(this);
     style()->drawPrimitive(QStyle::PE_Widget, &styleOpt, &painter, this);
+    QWidget::paintEvent(event);
 }
 
 void SceneOutline::ClearCurrentLevelSelection()
