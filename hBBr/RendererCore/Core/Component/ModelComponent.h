@@ -27,6 +27,10 @@ public:
 		return (int)_materialPath.size();
 	}
 
+	virtual void Deserialization(nlohmann::json input)override;
+
+	virtual nlohmann::json Serialization()override;
+
 	virtual void GameObjectActiveChanged(bool objActive)override;
 
 	virtual void ExecuteDestroy()override;
@@ -51,5 +55,7 @@ private:
 	std::vector<AssetRef> _materialPath;
 
 	std::vector<ModelPrimitive*> _primitives;
+
+	bool _bErrorStatus = false;
 
 };

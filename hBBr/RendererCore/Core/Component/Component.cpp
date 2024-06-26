@@ -142,6 +142,46 @@ void Component::Init()
 	}
 }
 
+void Component::Deserialization(nlohmann::json input)
+{
+	nlohmann::json compPros = input["Properties"];
+	for (auto& p : compPros.items())
+	{
+		HString proName = p.key();
+		HString proType = p.value()["Type"];
+		HString proValue = p.value()["Value"];
+		for (auto& pp : _compProperties)
+		{
+			if (pp.name == proName && pp.type == proType)
+			{
+				Component::StringToPropertyValue(pp, proValue);
+				break;
+			}
+		}
+	}
+}
+
+nlohmann::json Component::Serialization()
+{
+	nlohmann::json sub;
+	nlohmann::json subPros;
+	sub["Class"] = GetComponentName();
+	//Variables
+	for (auto& p : _compProperties)
+	{
+		nlohmann::json subPro;
+		auto valueStr = Component::PropertyValueToString(p);
+		if (valueStr.Length() > 0)
+		{
+			subPro["Type"] = p.type;
+			subPro["Value"] = valueStr;
+			subPros[p.name.c_str()] = subPro;
+		}
+	}
+	sub["Properties"] = subPros;
+	return sub;
+}
+
 void Component::CompUpdate()
 {
 	if (_bActive)

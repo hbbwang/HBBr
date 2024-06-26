@@ -9,6 +9,7 @@
 #include "HInput.h"
 #include "AssetObject.h"
 #include "GameObject.h"
+#include "Serializable.h"
 
 #define COMPONENT_DEFINE(ComponentClassName)\
 public:\
@@ -33,7 +34,7 @@ ComponentClassName::ComponentClassName(class GameObject* parent) :Component(pare
 \
 ComponentClassName  _component_construct_##ComponentClassName;
 
-#define AddProperty(_typeString,_name,_value,_bArray,_category,_sort,_condition)\
+#define AddProperty(_typeString,_name,_value,_bArray,_category,_sort,_condition,_readOnly)\
 {\
 	ComponentProperty pro;\
 	pro.comp = this;\
@@ -44,6 +45,7 @@ ComponentClassName  _component_construct_##ComponentClassName;
 	pro.category = _category;\
 	pro.bArray = _bArray;\
 	pro.sort = _sort;\
+	pro.bReadOnly = _readOnly;\
 	_compProperties.push_back(pro);\
 	auto valueCompare = [](const ComponentProperty& p1, const ComponentProperty& p2)->bool {\
 		return p1.sort < p2.sort;\
@@ -79,6 +81,8 @@ struct ComponentProperty
 	HString type = "void";
 
 	bool bArray = false;
+
+	bool bReadOnly = false;
 };
 
 
@@ -146,11 +150,15 @@ public:
 	//编辑器Inspector如果改了组件的参数，是通过调用这个函数进行刷新
 	HBBR_API virtual void UpdateData() {}
 
+	HBBR_API virtual void Deserialization(nlohmann::json input);
+
+	HBBR_API virtual nlohmann::json Serialization();
+
 protected:
 
 	HBBR_INLINE virtual void OnConstruction() {
 		//Component Property Reflection Add.
-		AddProperty("bool", "bActive", &_bActive, false, "Default", 0, "");
+		AddProperty("bool", "bActive", &_bActive, false, "Default", 0, "", false);
 	}
 
 	std::vector<KeyCallBack> _keys;

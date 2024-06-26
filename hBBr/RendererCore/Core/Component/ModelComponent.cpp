@@ -10,8 +10,8 @@ COMPONENT_IMPLEMENT(ModelComponent)
 void ModelComponent::OnConstruction()
 {
 	Component::OnConstruction();
-	AddProperty("AssetRef", "Model", &_modelPath, false, "Default", 0, "fbx");
-	AddProperty("AssetRef", "Materials", &_materialPath, true, "Default", 0, "mat");
+	AddProperty("AssetRef", "Model", &_modelPath, false, "Default", 0, "fbx", false);
+	AddProperty("AssetRef", "Materials", &_materialPath, true, "Default", 0, "mat", false);
 }
 
 void ModelComponent::UpdateMaterial()
@@ -134,6 +134,7 @@ void ModelComponent::UpdateData()
 			mats[i] = info.lock()->GetAssetObject<Material>();
 		}
 		SetModel(_modelPath.assetInfo.lock()->GetAssetObject<Model>(), &mats);
+		_bErrorStatus = false;
 	}
 	else
 	{
@@ -143,6 +144,7 @@ void ModelComponent::UpdateData()
 		{
 			SetMaterial(Material::GetErrorMaterial(), i);
 		}
+		_bErrorStatus = true;
 	}
 }
 
@@ -171,4 +173,30 @@ void ModelComponent::ClearPrimitves()
 		}
 	}
 	_primitives.clear();
+}
+
+void ModelComponent::Deserialization(nlohmann::json input)
+{
+	nlohmann::json compPros = input["Properties"];
+	for (auto& p : compPros.items())
+	{
+		HString proName = p.key();
+		HString proType = p.value()["Type"];
+		HString proValue = p.value()["Value"];
+		for (auto& pp : _compProperties)
+		{
+			if (pp.name == proName && pp.type == proType)
+			{
+				Component::StringToPropertyValue(pp, proValue);
+				break;
+			}
+		}
+	}
+}
+
+nlohmann::json ModelComponent::Serialization()
+{
+	nlohmann::json result = Component::Serialization();
+
+	return result;
 }

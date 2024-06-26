@@ -138,21 +138,7 @@ void Level::Load()
 						{
 							HString className = c["Class"];
 							auto component = object->AddComponent(className);
-							nlohmann::json compPros = c["Properties"];
-							for (auto& p : compPros.items())
-							{
-								HString proName = p.key();
-								HString proType =  p.value()["Type"];
-								HString proValue = p.value()["Value"];
-								for (auto& pp : component->_compProperties)
-								{
-									if (pp.name == proName && pp.type == proType)
-									{
-										Component::StringToPropertyValue(pp, proValue);
-										break;
-									}
-								}
-							}
+							component->Deserialization(c);
 							component->UpdateData();
 						}
 					}
@@ -348,27 +334,12 @@ void Level::SaveGameObjectComponents(GameObject* g)
 	int compIndex = 0;
 	for (auto c : g->_comps)
 	{
-		nlohmann::json sub;
-		nlohmann::json subPros;
-		sub["Index"] = compIndex;
-		sub["Class"] = c->GetComponentName();
-		//Variables
-		for (auto& p : c->_compProperties)
-		{
-			nlohmann::json subPro;
-			auto valueStr = Component::PropertyValueToString(p);
-			if (valueStr.Length() > 0)
-			{
-				subPro["Type"] = p.type;
-				subPro["Value"] = valueStr;
-				subPros[p.name.c_str()] = subPro;
-			}
-		}
-		sub["Properties"] = subPros;
-		comps.push_back(sub);
+		comps.push_back(c->Serialization());
 		compIndex++;
 	}
+
 	g->_levelNode["Components"] = comps;
+
 }
 
 #pragma endregion XML Document
