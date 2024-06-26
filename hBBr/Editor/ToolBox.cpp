@@ -13,6 +13,8 @@ ToolPage::ToolPage(bool isExpanded, QWidget* parent) :
     m_bIsExpanded(true),
     m_pLabel(nullptr)
 {
+
+    this->setObjectName("ToolPage");
     ui.setupUi(this);
     ui.widgetContent->setAttribute(Qt::WA_StyledBackground);
 
@@ -71,6 +73,7 @@ ToolBox::ToolBox(QWidget* parent) :
     QWidget(parent),
     m_pContentVBoxLayout(nullptr)
 {
+    this->setObjectName("ToolBox");
     ui.setupUi(this);
     ui.scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     QWidget* widget = new QWidget(this);

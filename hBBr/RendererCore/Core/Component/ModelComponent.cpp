@@ -65,7 +65,7 @@ void ModelComponent::SetModel(std::weak_ptr<class Model> model, std::vector<std:
 		_modelPath.path = model.lock()->_assetInfo.lock()->virtualFilePath;
 		_modelPath.callBack();
 		ClearPrimitves();
-		Model::BuildModelPrimitives(_modelPath.assetInfo.lock()->GetAssetObject<Model>().lock().get(), _primitives);
+		Model::BuildModelPrimitives(_modelPath.assetInfo.lock()->GetAssetObject<Model>().lock().get(), _primitives, this->_renderer);
 		if (mats!=nullptr && mats->size()>0)
 		{
 			const int inputMatCount = (int)mats->size();
@@ -98,7 +98,7 @@ void ModelComponent::SetMaterial(std::weak_ptr<class Material> mat, int index)
 	if (!mat.expired() && !_modelPath.assetInfo.expired())
 	{
 		ClearPrimitves();
-		Model::BuildModelPrimitives(_modelPath.assetInfo.lock()->GetAssetObject<Model>().lock().get(), _primitives);
+		Model::BuildModelPrimitives(_modelPath.assetInfo.lock()->GetAssetObject<Model>().lock().get(), _primitives, this->_renderer);
 		_materialPath[index].assetInfo = mat.lock()->_assetInfo;
 		_materialPath[index].path = mat.lock()->_assetInfo.lock()->virtualFilePath;
 		_materialPath[index].callBack();

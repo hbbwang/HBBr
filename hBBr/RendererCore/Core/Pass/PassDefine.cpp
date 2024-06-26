@@ -281,7 +281,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 			for (size_t pi = 0; pi < prims->size(); pi++)
 			{
 				ModelPrimitive* prim = prims->at(pi);
-				if (prim->bActive)
+				if (prim->renderer == this->_renderer &&  prim->bActive)
 				{
 					vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 1, 1, &obj->GetDescriptorSet(), 1, &objectUboOffset);
 					objectUboOffset += sizeof(ObjectUniformBuffer);

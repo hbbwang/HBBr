@@ -136,7 +136,7 @@ public:
 
 	HBBR_API static std::weak_ptr<Model> LoadAsset(HGUID guid);
 
-	HBBR_API static bool BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prims);
+	HBBR_API static bool BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prims,class VulkanRenderer* renderer);
 
 	//根据材质区分面
 	std::vector<FaceData>		faces;

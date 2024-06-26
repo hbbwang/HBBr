@@ -70,6 +70,8 @@ struct ModelPrimitive
 
 	std::vector<class VulkanRenderer*> rendererFrom;
 
+	class VulkanRenderer* renderer = nullptr;
+
 	void SetActive(bool newActive)
 	{
 		if (newActive != bActive)

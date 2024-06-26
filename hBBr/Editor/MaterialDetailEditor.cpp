@@ -61,6 +61,9 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 		QWidget* r = new QWidget(this);
 		QWidget* ma = new QWidget(this);
 		QWidget* mp = new QWidget(this);
+		r->setObjectName("MaterialDetailEditor");
+		ma->setObjectName("MaterialDetailEditor");
+		mp->setObjectName("MaterialDetailEditor");
 		ui_r.setupUi(r);
 		ui_ma.setupUi(ma);
 		ui_mp.setupUi(mp);

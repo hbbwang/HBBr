@@ -223,7 +223,7 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 	return dataPtr->GetData();
 }
 
-bool Model::BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prims)
+bool Model::BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prims, class VulkanRenderer* renderer)
 {
 	if (data != nullptr)
 	{
@@ -236,6 +236,7 @@ bool Model::BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prim
 			prims[i]->boundingBox_max = data->boundingBox_max;
 			prims[i]->vertexInput = data->faces[i].vertexData;
 			prims[i]->modelPrimitiveName = data->_assetInfo.lock()->displayName;
+			prims[i]->renderer = renderer;
 		}
 		return true;
 	}

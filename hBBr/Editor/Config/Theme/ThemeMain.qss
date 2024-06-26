@@ -168,6 +168,10 @@ QToolTip
     color:rgb(200,200,210);
 }
 /* ScrollBar */
+QScrollArea QWidget
+{
+    background-color: BackgroundColor;
+}
 QScrollBar:vertical
 { 
     width: 16px;
@@ -399,6 +403,15 @@ QSplitter::handle
     background-color:SplitterHandleColor;
     height: SplitterWidth;
     /* border: 1px solid rgb(110,110,110); */
+}
+#ToolBox
+{
+
+}
+#ToolPage QPushButton
+{
+    background-color: rgb(53, 53, 53);
+    border: none;
 }
 #SceneOutline
 {
@@ -695,17 +708,15 @@ QSplitter::handle
     background-color: rgb(10,10,10);
     border-radius:	2px;
 }
-#MaterialEditor
+#MaterialDetailEditor,
+#MaterialDetailEditor_MaterialAttributeScroll,
+#scrollAreaWidgetContents
 {
-    background-color: rgb(53, 53, 53);
+    background-color: BackgroundColor;
 }
-#MaterialEditor QSplitter::handle
+#MaterialDetailEditor QSplitter::handle
 {
     height: 2px;
-}
-#MaterialDetailEditor
-{
-    
 }
 #MaterialDetailEditor_RendererName,
 #MaterialDetailEditor_MaterialParameterName,
