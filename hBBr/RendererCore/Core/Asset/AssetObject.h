@@ -1,7 +1,8 @@
 ﻿#pragma once
 #include "ContentManager.h"
+#include "Serializable.h"
 
-class AssetObject
+class AssetObject :public Serializable
 {
 public:
 	AssetObject()

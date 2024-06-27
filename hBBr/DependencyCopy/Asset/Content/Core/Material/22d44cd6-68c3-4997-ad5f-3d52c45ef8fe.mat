@@ -1,7 +1,9 @@
 {
-    "pass": 0,
+    "blendMode": 0,
+    "parameters": null,
     "psShader": "Error",
     "psVarient": 0,
+    "textures": null,
     "vsShader": "Error",
     "vsVarient": 0
 }

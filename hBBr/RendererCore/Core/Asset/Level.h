@@ -119,6 +119,8 @@ private:
 	//需要进行销毁的游戏对象
 	std::vector<std::shared_ptr<GameObject>> _gameObjectNeedDestroy;
 
+	std::map<HGUID, AssetType>_dependency;
+
 	bool _isEditorLevel = false;
 	bool _bInitVisibility = false;
 

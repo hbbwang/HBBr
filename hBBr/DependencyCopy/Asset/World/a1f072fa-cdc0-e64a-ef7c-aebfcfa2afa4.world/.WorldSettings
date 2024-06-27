@@ -12,11 +12,13 @@
     "Levels": {
         "Main": {
             "GUID": "7340fb5d-cea2-4090-bc3a-67aadcd4ab92",
-            "Visibility": true
+            "Visibility": true,
+            "Dep":{}
         },
         "TestLevel": {
             "GUID": "4f7c071c-20f2-44cd-964e-e80935017847",
-            "Visibility": true
+            "Visibility": true,
+            "Dep":{}
         }
     },
     "WorldName": "TestWorld"

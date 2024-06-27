@@ -142,6 +142,14 @@ void World::ReloadWorldSetting()
 					_levels.push_back(newLevel);
 				}
 				from_json(i.value()["GUID"], newLevel->_guid);
+				auto deps_it = i.value().find("Dep");
+				if (deps_it != i.value().end())
+				{
+					for (auto& i : deps_it.value().items())
+					{
+						newLevel->_dependency.emplace(i.key(), (AssetType)i.value()["Type"]);
+					}
+				}
 			}
 			#if IS_EDITOR
 				_editorLevelChanged();
@@ -335,15 +343,24 @@ void World::MarkDirty()
 
 nlohmann::json World::ToJson()
 {
+	//Level
 	nlohmann::json levels;
 	for (int i = 0; i < _levels.size(); i++)
 	{
 		nlohmann::json subLevel;
 		subLevel["Visibility"] = _levels[i]->_bLoad;
 		subLevel["GUID"] = _levels[i]->GetGUID();
+		//dep依赖
+		nlohmann::json levelDeps;
+		for (auto& i : _levels[i]->_dependency)
+		{
+			levelDeps[i.first.str()]["Type"] = (int)i.second;
+		}
+		subLevel["Dep"] = levelDeps;
 		levels[_levels[i]->GetLevelName().c_str()] = subLevel;
 	}
-	//
+
+	//World
 	_json["WorldName"] = _worldName.c_str();
 	_json["Levels"] = levels;
 	//cam

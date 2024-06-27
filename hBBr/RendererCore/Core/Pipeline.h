@@ -218,6 +218,13 @@ struct DepthStencil
 	{}
 };
 
+enum class BlendMode
+{
+	Opaque = 0,
+	Transparent = 1,
+	Additive = 2,
+};
+
 enum class PipelineType
 {
 	Graphics,
@@ -240,6 +247,7 @@ struct PipelineObject
 
 class PipelineIndex
 {
+	friend class Material;
 public:
 
 	HBBR_INLINE HString GetVSShaderFullName()
@@ -290,6 +298,11 @@ public:
 		SetPSVarient(new_ps_varient);
 	}
 
+	HBBR_INLINE BlendMode GetBlendMode()const
+	{
+		return blendMode;
+	}
+
 	static PipelineIndex GetPipelineIndex(
 		std::weak_ptr<ShaderCache> vs,
 		std::weak_ptr<ShaderCache> ps)
@@ -297,7 +310,7 @@ public:
 		PipelineIndex index;
 		index.vs_varients = vs.lock()->varients;
 		index.ps_varients = ps.lock()->varients;
-		index.pipelineIndex = 0;
+		index.blendMode = BlendMode::Opaque;
 		index.vsShaderCacheFullName = vs.lock()->shaderFullName;
 		index.psShaderCacheFullName = ps.lock()->shaderFullName;
 		index.vsShaderName = vs.lock()->shaderName;
@@ -308,7 +321,7 @@ public:
 	bool operator<(const PipelineIndex& id) const {
 		return (vs_varients < id.vs_varients)
 			|| (ps_varients < id.ps_varients)
-			|| (pipelineIndex < id.pipelineIndex)
+			|| (blendMode < id.blendMode)
 			|| vsShaderCacheFullName< id.vsShaderCacheFullName
 			|| psShaderCacheFullName < id.psShaderCacheFullName;
 	}
@@ -316,13 +329,13 @@ public:
 	bool operator==(const PipelineIndex& id) const {
 		return  (vs_varients == id.vs_varients)
 			&& (ps_varients == id.ps_varients)
-			&& (pipelineIndex == id.pipelineIndex)
+			&& (blendMode == id.blendMode)
 			&& (vsShaderCacheFullName == id.vsShaderCacheFullName)
 			&& (psShaderCacheFullName == id.psShaderCacheFullName);
 	}
 
 private:
-	uint32_t pipelineIndex = 0;//用来记录管线状态
+	BlendMode blendMode = BlendMode::Opaque;
 	uint32_t vs_varients = 0;//变体 32bit 相当于32个bool
 	uint32_t ps_varients = 0;
 	HString vsShaderCacheFullName = "";

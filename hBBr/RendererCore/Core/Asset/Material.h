@@ -12,6 +12,7 @@
 
 class Material :public AssetObject
 {
+	friend class PipelineIndex;
 public:
 	Material();
 	
@@ -38,5 +39,9 @@ private:
 	HString _materialName = "Unknow material" ;
 
 	std::unique_ptr<MaterialPrimitive> _primitive;
+
+	nlohmann::json ToJson()override;
+
+	void FromJson() override;
 
 };

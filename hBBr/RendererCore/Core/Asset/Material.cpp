@@ -89,9 +89,6 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		mat->_assetInfo = dataPtr;
 		mat->_primitive->graphicsName = it->second->displayName;
 
-		uint32_t pass = json["pass"];
-		mat->_primitive->passUsing = (Pass)pass;
-
 		uint32_t vs_varient = 0;
 		uint32_t ps_varient = 0;
 		vs_varient = json["vsVarient"];
@@ -132,8 +129,9 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 
 		//一旦应用了错误shader cache，就不会再去读取参数和纹理了，直到Material重新编译成功。
 		//Parameters
+		auto params_it = json.find("parameters");
+		if (params_it != json.end())
 		{
-			nlohmann::json parameters = json["Parameters"];
 			//primitive参数的长度以shader为主
 			mat->_primitive->_paramterInfos.resize(psCache->header.shaderParameterCount);
 			mat->_primitive->uniformBuffer.reserve(psCache->header.shaderParameterCount);
@@ -151,31 +149,55 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 				}
 			}
 			int paramIndex = 0;
-			for (auto& i : parameters.items())
+			for (auto& i : params_it.value().items())
 			{
 				HString matParamName = i.key();
 				int type = i.value()["type"];
 				//从shader中查找是否存在相同参数(名字&类型)
-				auto it = std::find_if(psCache->params.begin(), psCache->params.end(), [type , matParamName](ShaderParameterInfo& info) {
+				auto it = std::find_if(mat->_primitive->_paramterInfos.begin(), mat->_primitive->_paramterInfos.end(), [type , matParamName](MaterialParameterInfo& info) {
 					return matParamName == info.name && type == (int)info.type;
 				});
-				if (it != psCache->params.end())
+				if (it != mat->_primitive->_paramterInfos.end())
 				{
-					MaterialParameterInfo info = {};
-					//name
-					info.name = matParamName;
-					//type
-					info.type = (MPType)type;
-					//ui
+					auto& info = *it;
+					//value
+					std::vector<float> value;
+					value.reserve(4*4);
+					if (info.type == MPType::Float)
 					{
-						info.ui = "";
-						auto ui_it = i.value().find("ui");
-						if (ui_it != i.value().end())
-						{
-							info.ui = ui_it.value();
-						}				
+						float vf = 0;
+						from_json(i.value()["value"], vf);
+						value.push_back(vf);
 					}
-					mat->_primitive->_paramterInfos[paramIndex] = (info);
+					else if (info.type == MPType::Float2)
+					{
+						glm::vec2 v2;
+						from_json(i.value()["value"], v2);
+						value.push_back(v2.x);
+						value.push_back(v2.y);
+					}
+					else if (info.type == MPType::Float3)
+					{
+						glm::vec3 v3;
+						from_json(i.value()["value"], v3);
+						value.push_back(v3.x);
+						value.push_back(v3.y);
+						value.push_back(v3.z);
+					}
+					else if (info.type == MPType::Float4)
+					{
+						glm::vec4 v4;
+						from_json(i.value()["value"], v4);
+						value.push_back(v4.x);
+						value.push_back(v4.y);
+						value.push_back(v4.z);
+						value.push_back(v4.w);
+					}
+
+					for (uint32_t pi = 0; pi < info.value.size(); pi++)
+					{
+						mat->_primitive->uniformBuffer[info.arrayIndex][info.vec4Index + pi] = value[pi];
+					}
 					paramIndex++;
 				}
 			}
@@ -184,8 +206,9 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		}
 		
 		//Textures
+		auto texs_it = json.find("textures");
+		if (texs_it != json.end())
 		{
-			nlohmann::json textures = json["Textures"];
 			int texCount = 0;
 			//primitive参数的长度以shader为主
 			mat->_primitive->_textureInfos.reserve(psCache->header.shaderTextureCount);
@@ -221,29 +244,17 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 				}
 			}
 			//赋值
-			for (auto& i : textures.items())
+			for (auto& i : texs_it.value().items())
 			{
 				int type = i.value()["type"];
 				HString matParamName = i.key();
 				//从shader中查找是否存在相同参数(名字&类型)
-				auto it = std::find_if(psCache->texs.begin(), psCache->texs.end(), [type, matParamName](ShaderTextureInfo& info) {
+				auto it = std::find_if(mat->_primitive->_textureInfos.begin(), mat->_primitive->_textureInfos.end(), [type, matParamName](MaterialTextureInfo& info) {
 					return matParamName == info.name && type == (int)info.type;
 					});
-				if (it != psCache->texs.end())
+				if (it != mat->_primitive->_textureInfos.end())
 				{
-					MaterialTextureInfo info = {};
-					//name
-					info.name = matParamName;
-					//type
-					info.type = (MTType)type;
-					//index
-					info.index = it->index;
-					//address
-					info.samplerAddress = it->msAddress;
-					//filter
-					info.samplerFilter = it->msFilter;
-					//ui
-					info.ui = i.value()["ui"];
+					auto& info = *it;
 					//value
 					HString value = i.value()["value"];
 					HGUID guid;
@@ -251,8 +262,8 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 					if (!guid.isValid())
 					{
 						MessageOut((GetInternationalizationText("Renderer","A000020") + value), false, false, "255,0,0");
-						Texture2D::GetSystemTexture(it->defaultTexture);
-						mat->_primitive->SetTexture(it->index, Texture2D::GetSystemTexture(it->defaultTexture));
+						auto tex = Texture2D::GetSystemTexture(info.value);
+						mat->_primitive->SetTexture(it->index, tex);
 					}
 					else
 					{
@@ -262,7 +273,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 							mat->_primitive->SetTexture(it->index, asset.lock().get());
 						}					
 					}
-					mat->_primitive->_textureInfos.push_back(info);
+					texCount++;
 				}
 				else
 				{
@@ -270,12 +281,28 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 				}
 			}
 		}
-		//
+		//创建Material Primitive
 		PrimitiveProxy::GetNewMaterialPrimitiveIndex(mat->_primitive.get(), vsCache, psCache);
+
+		//Blend mode
+		{
+			auto bm_it = json.find("blendMode");
+			if (bm_it != json.end())
+			{
+				mat->_primitive->graphicsIndex.blendMode = (BlendMode)bm_it.value();
+			}
+			//分类
+			if (mat->_primitive->graphicsIndex.blendMode == BlendMode::Opaque)
+			{
+				mat->_primitive->passUsing = Pass::OpaquePass;
+			}
+		}
+
 		if (!bReload)
 		{
 			PrimitiveProxy::AddMaterialPrimitive(mat->_primitive.get());
 		}
+
 		dataPtr->SetData(std::move(mat));
 		//_allMaterials.emplace(std::make_pair(guid, std::move(mat)));
 		return dataPtr->GetData();
@@ -285,7 +312,9 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 
 void Material::SaveAsset(HString path)
 {
-
+	ToJson();
+	SaveJson(path);
+	ContentManager::Get()->SaveAssetInfo(this->_assetInfo);
 }
 
 std::weak_ptr<AssetInfoBase> Material::CreateMaterial(HString repository, HString virtualPath)
@@ -314,8 +343,7 @@ std::weak_ptr<AssetInfoBase> Material::CreateMaterial(HString repository, HStrin
 	json["psShader"] = "PBR";
 	json["vsVarient"] = 0;
 	json["psVarient"] = 0;
-	json["pass"] = 0;
-	
+	json["blendMode"] = 0;
 
 	if (Serializable::SaveJson(json, saveFilePath.c_str()))
 	{
@@ -333,4 +361,75 @@ std::weak_ptr<AssetInfoBase> Material::CreateMaterial(HString repository, HStrin
 		MessageOut(GetInternationalizationText("Renderer", "A000022"), false, false, "255,0,0");
 	}
 	return std::weak_ptr<AssetInfoBase>();
+}
+
+nlohmann::json Material::ToJson()
+{
+	//Base
+	_json["vsShader"] = GetPrimitive()->vsShader;
+	_json["psShader"] = GetPrimitive()->psShader;
+	_json["blendMode"] = (int)GetPrimitive()->graphicsIndex.blendMode;
+	_json["vsVarient"] = GetPrimitive()->graphicsIndex.vs_varients;
+	_json["psVarient"] = GetPrimitive()->graphicsIndex.ps_varients;
+	//Parameters
+	{
+		nlohmann::json p;
+		for (int i = 0; i < _primitive->_paramterInfos.size(); i++)
+		{
+			auto& info = _primitive->_paramterInfos[i];
+			if (info.type == MPType::Float)
+			{
+				p[info.name.c_str()]["value"] = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index];
+			}
+			else if (info.type == MPType::Float2)
+			{
+				glm::vec2 v2;
+				v2.x = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index];
+				v2.y = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index+1];
+				to_json(p[info.name.c_str()]["value"], v2);
+			}
+			else if (info.type == MPType::Float3)
+			{
+				glm::vec3 v3;
+				v3.x = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index];
+				v3.y = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index + 1];
+				v3.z = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index + 2];
+				to_json(p[info.name.c_str()]["value"], v3);
+			}
+			else if (info.type == MPType::Float4)
+			{
+				glm::vec4 v4;
+				v4.x = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index];
+				v4.y = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index + 1];
+				v4.z = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index + 2];
+				v4.w = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index + 3];
+				to_json(p[info.name.c_str()]["value"], v4);
+			}
+			p[info.name.c_str()]["type"] = (int)_primitive->_paramterInfos[i].type;
+		}
+		_json["parameters"] = p;
+	}
+
+	//Textures
+	{
+		nlohmann::json t;
+		for (int i = 0; i < _primitive->_textureInfos.size(); i++)
+		{
+			if (_primitive->textures.size() > i)
+			{
+				t[_primitive->_textureInfos[i].name.c_str()]["value"] = _primitive->textures[i]->_assetInfo.lock()->guid;
+				//考虑到需要区分texture2d和textureCube，所以还是要有个type
+				t[_primitive->_textureInfos[i].name.c_str()]["type"] = (int)_primitive->textures[i]->_assetInfo.lock()->type;
+			}
+		}
+		_json["textures"] = t;
+	}
+
+	return _json;
+}
+
+void Material::FromJson()
+{
+
+
 }

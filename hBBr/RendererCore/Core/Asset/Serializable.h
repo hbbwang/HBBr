@@ -11,8 +11,8 @@ class Serializable {
 public:
     virtual ~Serializable() = default;
 
-    HBBR_API virtual nlohmann::json ToJson()  = 0;
-    HBBR_API virtual void FromJson() = 0;
+    HBBR_API virtual nlohmann::json ToJson() {return _json;}
+    HBBR_API virtual void FromJson() {}
     HBBR_API virtual void SaveJson(HString path);
     HBBR_API virtual bool LoadJson(HString path);
     HBBR_API static bool SaveJson(nlohmann::json& json, HString path);
@@ -26,8 +26,14 @@ void from_json(const nlohmann::json& j, HString& s);
 //GUID
 void to_json(nlohmann::json& j, const HGUID& s);
 void from_json(const nlohmann::json& j, HGUID& s);
+//Vec2
+void to_json(nlohmann::json& j, const glm::vec2& v);
+void from_json(const nlohmann::json& j, glm::vec2& v);
 //Vec3
 void to_json(nlohmann::json& j, const glm::vec3& v);
 void from_json(const nlohmann::json& j, glm::vec3& v);
+//Vec4
+void to_json(nlohmann::json& j, const glm::vec4& v);
+void from_json(const nlohmann::json& j, glm::vec4& v);
 
 HBBR_API std::string gbk_to_utf8(const std::string& in);

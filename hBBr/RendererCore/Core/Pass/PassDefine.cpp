@@ -255,7 +255,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 	objectUboOffset = 0;
 	uint32_t dynamicOffset[] = { 0 };
 	uint32_t matIndex = 0;
-	for (auto m : *PrimitiveProxy::GetMaterialPrimitives((uint32_t)Pass::OpaquePass))
+	for (auto m : *PrimitiveProxy::GetMaterialPrimitives((uint32_t)p))
 	{
 		auto curPipeline = pipelineTemps[matIndex];
 		//Pass uniform buffers

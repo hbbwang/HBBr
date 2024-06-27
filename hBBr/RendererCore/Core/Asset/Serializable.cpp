@@ -89,6 +89,18 @@ void from_json(const nlohmann::json& j, HGUID& s)
     s = HGUID(guidStr.c_str());
 }
 
+void to_json(nlohmann::json& j, const glm::vec2& v)
+{
+    j["x"] = v.x;
+    j["y"] = v.y;
+}
+
+void from_json(const nlohmann::json& j, glm::vec2& v)
+{
+    v.x = j["x"];
+    v.y = j["y"];
+}
+
 void to_json(nlohmann::json& j, const glm::vec3& v)
 {
     j["x"] = v.x;
@@ -101,4 +113,20 @@ void from_json(const nlohmann::json& j, glm::vec3& v)
     v.x = j["x"];
     v.y = j["y"];
     v.z = j["z"];
+}
+
+void to_json(nlohmann::json& j, const glm::vec4& v)
+{
+    j["x"] = v.x;
+    j["y"] = v.y;
+    j["z"] = v.z;
+    j["w"] = v.w;
+}
+
+void from_json(const nlohmann::json& j, glm::vec4& v)
+{
+    v.x = j["x"];
+    v.y = j["y"];
+    v.z = j["z"];
+    v.w = j["w"];
 }

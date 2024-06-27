@@ -127,7 +127,7 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 					ContentBrowser::FocusToAsset(assetInfo);
 				};
 			}
-			//Refresh shader button
+			//Save
 			{
 				QToolButton* saveButton = new QToolButton(this);
 				pw_ma->AddItem("", saveButton);
