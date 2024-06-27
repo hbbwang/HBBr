@@ -65,16 +65,7 @@ void RenderView::showEvent(QShowEvent* event)
 
 void RenderView::resizeEvent(QResizeEvent* event)
 {
-	if (_mainRenderer && _mainRenderer->renderer)
-	{
-		_mainRenderer->renderer->RendererResize(width(), height());
-	}
-	if (_mainRendererWidget != nullptr)
-	{
-		_mainRendererWidget->setGeometry(0, 0, width(), height());
-	}
 	QWidget::resizeEvent(event);
-
 	//_sleep(1);
 }
 
@@ -94,12 +85,6 @@ void RenderView::closeEvent(QCloseEvent* event)
 
 void RenderView::paintEvent(QPaintEvent* event)
 {
-	//QStylePainter painter(this);
-	//QStyleOption opt;
-	//opt.initFrom(this);
-	//opt.rect = rect();
-	//painter.drawPrimitive(QStyle::PE_Widget, opt);
-	//QWidget::paintEvent(event);
 }
 
 void RenderView::keyPressEvent(QKeyEvent* event)
@@ -165,7 +150,7 @@ void RenderView::dropEvent(QDropEvent* e)
                                 }
                                 if (level)
                                 {
-                                    auto gameObject = _mainRenderer->renderer->GetWorld()->SpawnGameObject(name, level);
+                                    auto gameObject = _mainRenderer->renderer->GetWorld().lock()->SpawnGameObject(name, level);
                                     level->MarkDirty();
                                     if (gameObject)
                                     {

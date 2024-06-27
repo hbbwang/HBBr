@@ -47,8 +47,8 @@ void GameObject::ObjectInit(HString objectName, Level* level, bool SceneEditorHi
 #endif
 	if (level == nullptr)
 	{
-		_world = VulkanApp::GetMainForm()->renderer->GetWorld();
-		_level = VulkanApp::GetMainForm()->renderer->GetWorld()->_levels[0].get();
+		_world = VulkanApp::GetMainForm()->renderer->GetWorld().lock().get();
+		_level = _world->_levels[0].get();
 	}
 	else
 	{

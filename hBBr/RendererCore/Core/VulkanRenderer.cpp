@@ -37,6 +37,7 @@ VulkanRenderer::~VulkanRenderer()
 
 void VulkanRenderer::Release()
 {
+	//
 	_bRendererRelease = true;
 	_spwanNewWorld.clear();
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
@@ -103,47 +104,74 @@ void VulkanRenderer::Init()
 
 }
 
-void VulkanRenderer::LoadWorld(HString worldNameOrGUID)
+bool VulkanRenderer::LoadWorld(HString worldNameOrGUID)
 {
-	auto& worlds = World::GetWorlds();
+	if (_world)
+	{
+		_world.reset();
+	}
 	//检查GUID
+	HString worldPath = FileSystem::GetWorldAbsPath();
+	auto worldFolders = FileSystem::GetAllFolders(worldPath.c_str());
+	FileEntry worldFolder;
 	if (HGUID(worldNameOrGUID.c_str()).isValid())
 	{
-		for (auto& i : worlds)
+		for (auto& i : worldFolders)
 		{
-			auto worldGuidStr = HString(i.second->_guid.str().c_str());
-			if (worldGuidStr == worldNameOrGUID)
+			HGUID input = HGUID(worldNameOrGUID.c_str());
+			HGUID guid = HGUID(i.baseName.c_str());
+			if (guid == input)
 			{
-				_world = i.second;
-				for (auto f : _spwanNewWorld)
-				{
-					f(_world);
-				}
-				_world.lock()->Load(this);
+				worldFolder = i;
 				break;
 			}
-		}
-	}
-	else
-	{
-		auto it = worlds.find(worldNameOrGUID);
-		if (it != worlds.end())
-		{
-			_world = it->second;
-			for (auto i : _spwanNewWorld)
-			{
-				i(_world);
-			}
-			_world.lock()->Load(this);
-		}
-	}
 
+		}
+	}
+	else//不是GUID，那就看看是不是World名字
+	{
+		for (auto& i : worldFolders)
+		{
+			HString worldSettingPath = FileSystem::Append(i.absPath, ".WorldSettings");
+			nlohmann::json j;
+			if (Serializable::LoadJson(worldSettingPath, j))
+			{
+				auto it = j.find("WorldName");
+				if (it != j.end())
+				{
+					HString name = it.value();
+					if (name == worldNameOrGUID)
+					{
+						worldFolder = i;
+						break;
+					}
+				}			
+			}
+		}
+
+	}
+	if(worldFolder.type != FileEntryType::Unknow)
+	{
+		_world.reset(new World());
+		_world->_guidStr = worldFolder.baseName;
+		StringToGUID(_world->_guidStr.c_str(), &_world->_guid);
+		_world->_worldAbsPath = FileSystem::Append(worldPath, _world->_guidStr  + ".world");
+		_world->_worldSettingAbsPath = FileSystem::Append(worldFolder.absPath, ".WorldSettings");
+		_world->ReloadWorldSetting();
+		for (auto f : _spwanNewWorld)
+		{
+			f(_world);
+		}
+		_world->Load(this);
+		return true;
+	}
+	return false;
 }
 
 void VulkanRenderer::CreateEmptyWorld()
 {
 	_world = World::CreateNewWorld("NewWorld");
-	_world.lock()->Load(this);
+	_world->Load(this);
 }
 
 void VulkanRenderer::Render()
@@ -156,7 +184,7 @@ void VulkanRenderer::Render()
 			LoadWorld(defaultWorldGUID);
 		}
 
-		if (_world.expired())
+		if (!_world)
 		{
 			CreateEmptyWorld();
 		}
@@ -193,8 +221,8 @@ void VulkanRenderer::Render()
 				func();
 			}
 
-			if (!_world.expired())
-				_world.lock()->WorldUpdate();
+			if (_world)
+				_world->WorldUpdate();
 
 			SetupPassUniformBuffer();
 
@@ -230,10 +258,10 @@ void VulkanRenderer::SetupPassUniformBuffer()
 		return;
 	}
 	if (_bIsInGame)
-		mainCamera = GetWorld()->_mainCamera;
+		mainCamera = GetWorld().lock()->_mainCamera;
 #if IS_EDITOR
 	else
-		mainCamera = GetWorld()->_editorCamera;
+		mainCamera = GetWorld().lock()->_editorCamera;
 #endif
 	if (mainCamera != nullptr)
 	{
@@ -310,12 +338,12 @@ bool VulkanRenderer::ResizeBuffer()
 			_passManager->PassesReset();
 			bResizeBuffer = false;
 
-			//重置buffer会导致画面丢失，我们要在这一瞬间重新把buffer绘制回去，缓解黑屏。
-			_currentFrameIndex = 0;
-			for (int i = 0; i < (int)_vulkanManager->GetSwapchainBufferCount(); i++)
-			{
-				Render();
-			}
+			////重置buffer会导致画面丢失，我们要在这一瞬间重新把buffer绘制回去，缓解黑屏。
+			//_currentFrameIndex = 0;
+			//for (int i = 0; i < (int)_vulkanManager->GetSwapchainBufferCount(); i++)
+			//{
+			//	Render();
+			//}
 
 			return true;
 		}

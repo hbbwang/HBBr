@@ -148,8 +148,6 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 
 	Texture2D::GlobalInitialize();
 
-	World::CollectWorlds();
-
 	//Create Main Window
 	auto win = CreateNewWindow(128, 128, "MainRenderer", false, parent);
 
@@ -204,8 +202,6 @@ void VulkanApp::DeInitVulkanManager()
 		}
 		_forms.clear();
 	}
-	//销毁所有世界
-	World::GetWorlds().clear();
 	Shader::DestroyAllShaderCache();
 	PipelineManager::ClearPipelineObjects();
 	ContentManager::Get()->Release();
@@ -398,7 +394,7 @@ void VulkanApp::UpdateRender()
 	for (auto w : _forms)
 	{
 		Texture2D::GlobalUpdate();
-		if(w->renderer != nullptr && !w->bMinimized)
+		if(w->renderer != nullptr && !w->bMinimized && !w->bStopRender)
 			w->renderer->Render();
 	}
 }
@@ -471,6 +467,11 @@ void VulkanApp::RemoveWindow(VulkanForm* form)
 			{
 				auto form = _forms[i];
 				_forms.erase(_forms.begin() + i);
+				if (form->renderer)
+				{
+					form->renderer->Release();
+					form->renderer = nullptr;
+				}
 				delete form;
 				break;
 			}

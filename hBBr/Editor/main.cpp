@@ -10,6 +10,8 @@
 #include "EditorCommonFunction.h"
 #include <Windows.h> //为了支持SetFocus(nullptr);
 
+bool _bLeftButtonPress_ForResize = false;
+
 class MyEventFilter : public QObject
 {
 protected:
@@ -19,6 +21,10 @@ protected:
         bool bChangeFocus = false;
         if (event->type() == QEvent::MouseButtonPress) 
         {
+            if (mouseEvent->button() & Qt::MouseButton::LeftButton)
+            {
+                _bLeftButtonPress_ForResize = true;
+            }
             QWidget* newCurrentFocusWidget = QApplication::widgetAt(mouseEvent->globalPos());
             auto cursorPos = mouseEvent->globalPos();
             if (newCurrentFocusWidget)
@@ -57,8 +63,56 @@ protected:
                 }
             }
         }
+        else if (event->type() == QEvent::MouseButtonRelease)
+        {
+            if (mouseEvent->button() & Qt::MouseButton::LeftButton)
+            {
+                if (_bLeftButtonPress_ForResize)
+                {
+                    for (auto& i : VulkanApp::GetForms())
+                    {
+                        i->bStopRender = false;
+                    }
+                }
+                _bLeftButtonPress_ForResize = false;
+            }      
+        }
+        //防止闪屏，只有结束窗口缩放的时候才会恢复渲染
+        else if (event->type() == QEvent::Resize)
+        {
+            static QTimer* revert;
+            if (revert == nullptr)
+            {
+                revert = new QTimer(this);
+            }
+            else
+            {
+                revert->stop();
+            }
+            revert->setSingleShot(true);
+            revert->setInterval(5000);//5秒内没有任何缩放行为，就判断为结束
+            connect(revert, &QTimer::timeout, this, []() 
+                {
+                    if (_bLeftButtonPress_ForResize)
+                    {
+                        for (auto& i : VulkanApp::GetForms())
+                        {
+                            i->bStopRender = false;
+                        }
+                        ConsoleDebug::print_endl("Resize widget focus end.");
+                    }
+                    _bLeftButtonPress_ForResize = false;
+                });
+            revert->start();
 
-
+            if (_bLeftButtonPress_ForResize)
+            {
+                for (auto& i : VulkanApp::GetForms())
+                {
+                    i->bStopRender = true;
+                }
+            }
+        }
         //if (event->type() == QEvent::MouseMove)
         //    qDebug() << QApplication::widgetAt(mouseEvent->globalPos())->objectName().toStdString().c_str();
         return false; // 事件未被处理，继续传递

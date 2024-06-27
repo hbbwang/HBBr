@@ -41,11 +41,9 @@ public:
 
 	HBBR_API const HGUID GetGUID()const { return _guid; }
 
-	HBBR_API static std::map<HString, std::shared_ptr<World>>& GetWorlds() { return _worlds; }
+	HBBR_API static std::shared_ptr<World>  CreateNewWorld(HString newWorldName);
 
-	HBBR_API static std::weak_ptr<World>  CreateNewWorld(HString newWorldName);
-
-	HBBR_API static std::map<HString, std::shared_ptr<World>>& CollectWorlds();
+	HBBR_API void SetWorldName(HString name);
 
 	HBBR_API HString GetWorldName()const { return _worldName; }
 
@@ -155,9 +153,6 @@ private:
 	HGUID _guid;
 
 	HString _guidStr;
-
-	//<WorldName , WorldPtr>
-	static std::map<HString, std::shared_ptr<World>> _worlds;
 
 	//World Setting
 	public:

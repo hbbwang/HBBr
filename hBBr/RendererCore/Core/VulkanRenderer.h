@@ -74,18 +74,18 @@ public:
 	}
 
 	HBBR_API HBBR_INLINE bool IsWorldValid()const{
-		if (!_world.expired())
+		if (_world)
 			return true;
 		else
 			return false;
 	}
 
-	HBBR_API HBBR_INLINE class World* GetWorld() {
+	HBBR_API HBBR_INLINE class std::weak_ptr<class World> GetWorld() {
 		if (IsWorldValid()){
-			return _world.lock().get();
+			return _world;
 		}
 		else{
-			return nullptr;
+			return std::weak_ptr<class World>();
 		}
 	}
 
@@ -108,7 +108,7 @@ public:
 		return _bIsInGame;
 	}
 
-	HBBR_API void LoadWorld(HString worldNameOrGUID);
+	HBBR_API bool LoadWorld(HString worldNameOrGUID);
 
 	HBBR_API void CreateEmptyWorld();
 
@@ -202,7 +202,7 @@ private:
 	std::unique_ptr<class PassManager> _passManager;
 
 	//World
-	std::weak_ptr<class World> _world;
+	std::shared_ptr<class World> _world;
 
 	std::vector<std::function<void()>> _renderThreadFuncsOnce;
 

@@ -6,7 +6,6 @@
 #include "FileSystem.h"
 #include "ConsoleDebug.h"
 #include "FormMain.h"
-std::map<HString, std::shared_ptr<World>>World::_worlds;
 std::vector<std::weak_ptr<World>>World::_dirtyWorlds;
 World::World()
 {
@@ -16,6 +15,7 @@ World::World()
 World::~World()
 {
 	ReleaseWorld();
+	ConsoleDebug::printf_endl("Release World[%s][%s]", this->GetWorldName().c_str(), this->GetGUID().str().c_str());
 }
 
 Level* World::GetLevel(HString name)
@@ -63,57 +63,35 @@ void World::DeleteLevel(HString levelName)
 	}
 }
 
-std::weak_ptr<World> World::CreateNewWorld(HString newWorldName)
+std::shared_ptr<World> World::CreateNewWorld(HString newWorldName)
 {
 	std::shared_ptr<World> world;
 	world.reset(new World());
 
 	HString finalName = newWorldName;
-	auto it = _worlds.find(finalName);
+	/*auto it = _worlds.find(finalName);
 	int index = 0;
 	while (it != _worlds.end())
 	{
 		finalName = newWorldName + "_" +  HString::FromInt(index);
 		it = _worlds.find(finalName);
 		index++;
-	}
+	}*/
 
 	world->_guid = CreateGUID();
+	world->_guidStr = world->_guid.str();
 	world->_worldName = finalName;
-	world->_worldAbsPath = FileSystem::Append(FileSystem::GetWorldAbsPath(), world->_worldName) + ".world";
-	FileSystem::FixUpPath(world->_worldAbsPath);
-	World::_worlds.emplace(finalName, world);
-
-	world->_worldSettingAbsPath = FileSystem::GetWorldAbsPath() + "/" + ".WorldSettings";
+	world->_worldAbsPath = FileSystem::Append(FileSystem::GetWorldAbsPath(), world->_guidStr) + ".world";
+	world->_worldSettingAbsPath = FileSystem::Append(FileSystem::GetWorldAbsPath(), ".WorldSettings");
 	FileSystem::FixUpPath(world->_worldSettingAbsPath);
-
+	ConsoleDebug::printf_endl("Create new world[%s][%s]", finalName.c_str(), world->_guidStr.c_str());
 	return world;
 }
 
-std::map<HString, std::shared_ptr<World>>& World::CollectWorlds()
+void World::SetWorldName(HString name)
 {
-	_worlds.clear();
-
-	std::shared_ptr<World> world;
-	world.reset(new World());
-	HString worldPath = FileSystem::GetWorldAbsPath();
-	auto worldFolders = FileSystem::GetAllFolders(worldPath.c_str());
-	for (auto& i : worldFolders)
-	{
-		world->_guidStr = i.baseName;
-		StringToGUID(world->_guidStr.c_str(), &world->_guid);		
-
-		world->_worldAbsPath = worldPath + "/" + world->_guidStr + ".world";
-		FileSystem::FixUpPath(world->_worldAbsPath);
-
-		world->_worldSettingAbsPath = world->_worldAbsPath + "/" + ".WorldSettings";
-		FileSystem::FixUpPath(world->_worldSettingAbsPath);
-
-		world->ReloadWorldSetting();
-
-		_worlds.emplace(world->_worldName , world);
-	}
-	return _worlds;
+	_worldName = name;
+	ConsoleDebug::printf_endl("World rename[%s][%s]", _worldName.c_str(), _guidStr.c_str());
 }
 
 void World::SaveWorld(HString newWorldName)
@@ -350,9 +328,7 @@ void World::SetCurrentSelectionLevel(std::weak_ptr<Level> level)
 
 void World::MarkDirty()
 {
-	auto lit = _worlds.find(GetWorldName());
-	if (lit != _worlds.end())
-		AddDirtyWorld(lit->second);
+		AddDirtyWorld(this->_renderer->GetWorld());
 }
 
 #endif

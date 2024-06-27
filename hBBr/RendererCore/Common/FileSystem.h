@@ -6,6 +6,7 @@
 
 enum class FileEntryType
 {
+	Unknow = -1,
 	Dir = 0,
 	File = 1,
 };
@@ -17,7 +18,7 @@ struct FileEntry
 	HString fileName = " ";
 	HString baseName = " ";
 	HString suffix = " ";
-	FileEntryType type = FileEntryType::File;
+	FileEntryType type = FileEntryType::Unknow;
 };
 
 #if __ANDROID__

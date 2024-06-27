@@ -79,14 +79,14 @@ EditorMain::EditorMain(QWidget *parent)
 
     });
     connect(ui.SaveWorld, &QAction::triggered, this, [this](bool bChecked) {
-        VulkanApp::GetMainForm()->renderer->GetWorld()->SaveWorld();
+        VulkanApp::GetMainForm()->renderer->GetWorld().lock()->SaveWorld();
      });
     connect(ui.SaveAsWorld, &QAction::triggered, this, [this](bool bChecked) {
         LineEditDialog* dialog = new LineEditDialog("New World Name",this);
         dialog->EnterCallBack = [dialog]() {
             if (dialog->ui.lineEdit->text().size() > 1)
             {
-                VulkanApp::GetMainForm()->renderer->GetWorld()->SaveWorld(dialog->ui.lineEdit->text().toStdString().c_str());
+                VulkanApp::GetMainForm()->renderer->GetWorld().lock()->SaveWorld(dialog->ui.lineEdit->text().toStdString().c_str());
             }
         };       
     });

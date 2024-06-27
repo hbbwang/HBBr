@@ -91,13 +91,15 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 			_matWindow = VulkanApp::CreateNewWindow(512, 512, _material.lock()->_assetInfo.lock()->guid.str().c_str(), true, (void*)ui_r.MaterialDetailEditor_RenderView->winId());
 			//HWND hwnd = (HWND)VulkanApp::GetWindowHandle(_matWindow);
 			auto renderer = _matWindow->renderer;
+			//渲染器需要一帧时间去创建，所以下一帧执行
 			auto func = [this]()
 			{
 				auto renderer = _matWindow->renderer;
-				renderer->GetWorld()->GetMainCamera()->_cameraType = EditorCameraType::TargetRotation;
-				renderer->GetWorld()->GetMainCamera()->GetTransform()->SetWorldLocation(glm::vec3(0, 0, -2.0f));
+				renderer->GetWorld().lock()->SetWorldName("Material Editor Renderer");
+				renderer->GetWorld().lock()->GetMainCamera()->_cameraType = EditorCameraType::TargetRotation;
+				renderer->GetWorld().lock()->GetMainCamera()->GetTransform()->SetWorldLocation(glm::vec3(0, 0, -2.0f));
 
-				_gameObject = renderer->GetWorld()->SpawnGameObject("PreviewObject", renderer->GetWorld()->_editorLevel.get());
+				_gameObject = renderer->GetWorld().lock()->SpawnGameObject("PreviewObject", renderer->GetWorld().lock()->_editorLevel.get());
 				auto modelComp = _gameObject->AddComponent<ModelComponent>();
 				modelComp->SetModel(HGUID("6146e15a-0632-b197-b6f9-b12fc8a16b05"));
 				for (int i = 0; i < modelComp->GetMaterialNum(); i++)

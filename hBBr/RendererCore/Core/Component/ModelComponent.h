@@ -24,7 +24,7 @@ public:
 	HBBR_API virtual void SetMaterial(std::weak_ptr<class Material>mat, int index = 0);
 
 	HBBR_API int GetMaterialNum()const {
-		return (int)_materialPath.size();
+		return (int)_materials.size();
 	}
 
 	virtual void Deserialization(nlohmann::json input)override;
@@ -50,9 +50,11 @@ protected:
 
 private:
 
-	AssetRef  _modelPath;
+	AssetRef  _model;
 
-	std::vector<AssetRef> _materialPath;
+	std::vector<AssetRef> _materials;
+
+	HString  _errorModelPath;
 
 	std::vector<ModelPrimitive*> _primitives;
 
