@@ -8,6 +8,7 @@
 #include <QFile>
 #include <QPushButton>
 #include "FileSystem.h"
+
 ToolPage::ToolPage(bool isExpanded, QWidget* parent) :
     QWidget(parent),
     m_bIsExpanded(true),

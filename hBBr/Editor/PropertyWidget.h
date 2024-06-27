@@ -26,6 +26,7 @@ struct SGroup {
 	QString groupName = "";
 	SGroup* parentGroup = nullptr;
 	int depth = 0;
+	int count = 0;
 };
 
 class PropertyWidget : public QWidget
@@ -49,7 +50,7 @@ public:
 
 	//<Group,Item>
 	std::vector<std::shared_ptr<SGroup>> _groupCache;
-	std::map<SGroup*, QList<SItem>> _items;
+	std::map<SGroup*, std::vector<SItem>> _items;
 
 protected:
 	void AddGroupButton(std::shared_ptr<SGroup> g);

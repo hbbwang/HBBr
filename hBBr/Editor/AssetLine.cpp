@@ -53,8 +53,6 @@ void AssetLine::Init(QWidget* parent, HString text, HString condition)
 	ui.FindButton->setMaximumSize(20, 20);
 	ui.pushButton->setMaximumSize(20, 20);
 	//
-	ui.picture->setText("");
-	//
 	highLight = new QLabel(this);
 	highLight->setStyleSheet("background-color:transparent;border:3px dashed rgb(10,255,55);border-radius:4px;");
 	highLight->hide();
@@ -236,52 +234,52 @@ void AssetLine::ShowClearButton(bool bShow)
 
 void AssetLine::UpdateSetting()
 {
-	//����Ԥ��ͼ
-	QFileInfo info(ui.LineEdit->text());
-	if (info.isFile())
-	{		
-		//��ȡԤ��ͼ��·��
-		QString path = info.absoluteFilePath();
-		path.remove(info.suffix());
+	////����Ԥ��ͼ
+	//QFileInfo info(ui.LineEdit->text());
+	//if (info.isFile())
+	//{		
+	//	//��ȡԤ��ͼ��·��
+	//	QString path = info.absoluteFilePath();
+	//	path.remove(info.suffix());
 
-		bool  bExists = false;
-		bool bIsTga = false;
-		QFileInfo pp(path + "jpg");
-		bExists |= pp.exists();
-		if (!bExists)
-		{
-			pp.setFile(path + "png");
-			bExists |= pp.exists();
-		}
-		if (!bExists)
-		{
-			pp.setFile(path + "tga");
-			bExists |= pp.exists();
-			if (bExists)
-				bIsTga = true;
-		}
+	//	bool  bExists = false;
+	//	bool bIsTga = false;
+	//	QFileInfo pp(path + "jpg");
+	//	bExists |= pp.exists();
+	//	if (!bExists)
+	//	{
+	//		pp.setFile(path + "png");
+	//		bExists |= pp.exists();
+	//	}
+	//	if (!bExists)
+	//	{
+	//		pp.setFile(path + "tga");
+	//		bExists |= pp.exists();
+	//		if (bExists)
+	//			bIsTga = true;
+	//	}
 
-		if (bExists)
-		{
-			if (bIsTga)
-			{			
-				QPixmap map(QPixmap::fromImage(GetImageFromTGA(pp.filePath())));
-				map = map.scaled(60, 60, Qt::KeepAspectRatioByExpanding);
-				ui.picture->setPixmap(map);
-			}
-			else
-			{
-				QPixmap map(pp.filePath());
-				map = map.scaled(60, 60, Qt::KeepAspectRatioByExpanding);
-				ui.picture->setPixmap(map);
-			}
-		}
-	}
-	else
-	{
-		QPixmap null_Map(0,0);
-		ui.picture->setPixmap(null_Map);
-	}
+	//	if (bExists)
+	//	{
+	//		if (bIsTga)
+	//		{			
+	//			QPixmap map(QPixmap::fromImage(GetImageFromTGA(pp.filePath())));
+	//			map = map.scaled(60, 60, Qt::KeepAspectRatioByExpanding);
+	//			ui.picture->setPixmap(map);
+	//		}
+	//		else
+	//		{
+	//			QPixmap map(pp.filePath());
+	//			map = map.scaled(60, 60, Qt::KeepAspectRatioByExpanding);
+	//			ui.picture->setPixmap(map);
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//	QPixmap null_Map(0,0);
+	//	ui.picture->setPixmap(null_Map);
+	//}
 }
 
 void AssetLine::resizeEvent(QResizeEvent* event)

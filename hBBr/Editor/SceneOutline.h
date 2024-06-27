@@ -8,6 +8,8 @@
 #include <qlineedit.h>
 #include "HGuid.h"
 #include "World.h"
+#include <EditorMain.h>
+
 class SceneOutlineItem :public QTreeWidgetItem
 {
 public:
@@ -101,6 +103,11 @@ public:
     SceneOutlineItem* FindLevel(QString levelName);
     SceneOutlineItem* FindLevel(HGUID guid);
     QMap<QString, SceneOutlineItem*>_levelItems;
+
+    QSize sizeHint() const
+    {
+        return QSize(EditorMain::_self->width() / 5, EditorMain::_self->height() / 2);//这里定义dockwidget的初始大小
+    }
 private slots:
     void TreeSearch();
 };

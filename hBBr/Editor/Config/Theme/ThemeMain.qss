@@ -447,29 +447,37 @@ QSplitter::handle
 /* Property SpinBox */
 #PropertySpinBox_X
 {
-    border:1px solid rgb(10,10,10);
-    border-radius:4px;
+    margin-left: 2px;
+    margin-right: 2px;
+    border:1px solid rgb(105, 105, 105);
+    /* border-radius:4px; */
     color:rgb(255,255,255);
     background:qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb(155, 50, 25), stop:0.19 rgb(155, 50, 25), stop:0.2 rgb(75, 75, 75));
 }
 #PropertySpinBox_Y
 {
-    border:1px solid rgb(10,10,10);
-    border-radius:4px;
+    margin-left: 2px;
+    margin-right: 2px;
+    border:1px solid rgb(105, 105, 105);
+    /* border-radius:4px; */
     color:rgb(255,255,255);
     background:qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb(25, 155, 50), stop:0.19 rgb(25, 155, 50), stop:0.2 rgb(75, 75, 75));
 }
 #PropertySpinBox_Z
 {
-    border:1px solid rgb(10,10,10);
-    border-radius:4px;
+    margin-left: 2px;
+    margin-right: 2px;
+    border:1px solid rgb(105, 105, 105);
+    /* border-radius:4px; */
     color:rgb(255,255,255);
     background:qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb(25, 50, 155), stop:0.19 rgb(25, 50, 155), stop:0.2 rgb(75, 75, 75));
 }
 #PropertySpinBox_W
 {
-    border:1px solid rgb(10,10,10);
-    border-radius:4px;
+    margin-left: 2px;
+    margin-right: 2px;
+    border:1px solid rgb(105, 105, 105);
+    /* border-radius:4px; */
     color:rgb(255,255,255);
     background:qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb(155, 155, 155),stop:0.19 rgb(155, 155, 155), stop:0.2 rgb(75, 75, 75));
 }
@@ -727,12 +735,27 @@ QSplitter::handle
     border-bottom: 1px solid rgb(100,100,100);
     min-height: 25px;
 }
-#PropertyTableWidgetRow
+
+#PropertyTableWidgetRow,
+#PropertyTableWidgetRowValue
 {
     color: #cccccc;
     font-family:  FontFamily;
     font-size: 14px;
-    /* border-bottom: 1px solid rgb(100,100,100); */
+    margin: 0;
+    padding: 0;
+    border:none;
+    border-bottom: 1px solid rgb(100,100,100);
+    border-left: 1px solid rgb(100,100,100);
+}
+#PropertyTableWidgetRowValue
+{
+    border:none;
+    border-bottom: 1px solid rgb(100,100,100);
+}
+#PropertyTableWidgetRow:hover
+{
+    background-color: transparent;
 }
 #PropertyTableWidgetRowName
 {
@@ -741,11 +764,8 @@ QSplitter::handle
     font-size: 14px;
     border: none;
     background-color: transparent;
-}
-#PropertyTableWidgetRowName:hover
-{
-    border: none;
-    background-color: transparent;
+    margin: 0;
+    padding: 0;
 }
 #PropertyTableWidget QSplitter::handle
 {
@@ -755,15 +775,14 @@ QSplitter::handle
 #PropertyTableWidgetRowButtonImage
 {
     background-color: transparent;
-
 }
 #PropertyTableWidgetRowGroupButton
 {
-
+    border-bottom: 1px solid rgb(100,100,100);
 }
 #PropertyTableWidgetRowGroupButtonValue
 {
-
+    border-bottom: 1px solid rgb(100,100,100);
 }
 #PropertyTableGroup_0,
 #PropertyTableGroup_1,

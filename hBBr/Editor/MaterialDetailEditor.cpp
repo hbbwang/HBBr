@@ -33,6 +33,7 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 	QTimer* t = new QTimer(this);
 	t->setSingleShot(true);
 	t->setInterval(100);
+
 	connect(t, &QTimer::timeout, this, [this,mat](){
 		for (int i = 0; i < _allDetailWindows.size(); i++)
 		{
@@ -120,7 +121,6 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 				pw_ma->AddItem("Virtual Path", path);
 				path->ui.LineEdit->setReadOnly(true);
 				path->ui.LineEdit->setText(_material.lock()->_assetInfo.lock()->virtualFilePath.c_str());
-				path->ui.picture->setHidden(true);
 				path->ui.pushButton->setHidden(true);
 				path->_bindFindButtonFunc = [this](const char* p) {
 					auto assetInfo = _material.lock()->_assetInfo;

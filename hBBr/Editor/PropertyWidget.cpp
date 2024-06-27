@@ -31,10 +31,10 @@ PropertyWidget::PropertyWidget(QWidget* parent)
 	_value_layout->setContentsMargins(1, 1, 1, 1);
 	_value_layout->setSpacing(0);
 
-
-
-	QList <SItem> items = { };
+	std::vector <SItem> items = { };
 	_items.emplace(nullptr, items);
+
+	_splitter->setSizes({ _splitter->width() /2 , _splitter->width() /2});
 }
 
 PropertyWidget::~PropertyWidget()
@@ -45,23 +45,21 @@ PropertyWidget::~PropertyWidget()
 void PropertyWidget::AddItem(QString name, QWidget* widget, int Height, SGroup* group)
 {
 	//Name
-	QLineEdit* name_label = new QLineEdit(name, this);
-	name_label->setReadOnly(true);
-	name_label->setObjectName("PropertyTableWidgetRowName");
-
-	QWidget* p_name = new QWidget(this);
-	p_name->setLayout(new QHBoxLayout(p_name));
+	QLineEdit* p_name = new QLineEdit(name, this);
+	p_name->setReadOnly(true);
 	p_name->setObjectName("PropertyTableWidgetRow");
-	p_name->layout()->addWidget(name_label);
-	p_name->layout()->setContentsMargins(0, 0, 0, 0);
-	p_name->layout()->setSpacing(0);
 	p_name->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+
+	if (group)
+	{
+		p_name->setContentsMargins(group->depth * 16, 0, 0, 0);
+	}
 
 	//Widget
 	widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	QWidget* p_value = new QWidget(this);
 	p_value->setLayout(new QHBoxLayout(p_value));
-	p_value->setObjectName("PropertyTableWidgetRow");
+	p_value->setObjectName("PropertyTableWidgetRowValue");
 	p_value->layout()->addWidget(widget);
 	p_value->layout()->setContentsMargins(0, 0, 0, 0);
 	p_value->layout()->setSpacing(0);
@@ -69,8 +67,6 @@ void PropertyWidget::AddItem(QString name, QWidget* widget, int Height, SGroup* 
 
 	if (Height > 0)
 	{
-		name_label->setMinimumHeight(Height - 6);
-		name_label->setMaximumHeight(Height - 6);
 		widget->setMinimumHeight(Height - 6);
 		widget->setMaximumHeight(Height - 6);
 		p_name->setMinimumHeight(Height);
@@ -89,16 +85,16 @@ void PropertyWidget::AddItem(QString name, QWidget* widget, int Height, SGroup* 
 		auto it = _items.find(group);
 		if (it != _items.end())
 		{
-			_items[group].append(newItem);
+			_items[group].push_back(newItem);
 		}
 		else
 		{
-			_items[nullptr].append(newItem);
+			_items[nullptr].push_back(newItem);
 		}
 	}
 	else
 	{
-		_items[nullptr].append(newItem);
+		_items[nullptr].push_back(newItem);
 	}
 }
 
@@ -119,7 +115,7 @@ SGroup* PropertyWidget::AddGroup(QString groupName, SGroup* parent)
 			newGroup->depth = parent->depth + 1;
 		}
 		_groupCache.push_back(newGroup);
-		QList <SItem> items = { };
+		std::vector<SItem> items = { };
 		_items.emplace(newGroup.get(), items);
 	}
 	else
@@ -198,6 +194,7 @@ void PropertyWidget::ShowItems()
 	//Éú³É×é
 	for (auto& g : _groupCache)
 	{
+		g->count = 0;
 		AddGroupButton(g);
 	}
 
@@ -226,13 +223,14 @@ void PropertyWidget::ShowItems()
 				{
 					if (i.name)
 					{
-						i.name->setContentsMargins(g.first->depth * 16, 0, 0, 0);
-						_name_layout->insertWidget(index + 1, i.name);
+						//i.name->setContentsMargins(g.first->depth * 16, 0, 0, 0);
+						_name_layout->insertWidget(index + 1 + g.first->count, i.name);
 					}
 					if (i.value)
 					{
-						_value_layout->insertWidget(index + 1, i.value);
+						_value_layout->insertWidget(index + 1 + g.first->count, i.value);
 					}
+					g.first->count++;
 				}
 				connect(groupButton->_button, &QAbstractButton::clicked, this,
 					[this, group, groupButton]() {
@@ -265,8 +263,8 @@ void PropertyWidget::AddGroupButton(std::shared_ptr<SGroup> g)
 	QToolButton* button = new QToolButton(this);
 	button->setText(g->groupName);
 	button->setObjectName("PropertyTableWidgetRowGroupButton");
-	button->setMinimumHeight(Height-2);
-	button->setMaximumHeight(Height-2);
+	button->setMinimumHeight(Height);
+	button->setMaximumHeight(Height);
 	button->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Preferred);
 	PropertyWidgetButton* n_space = new PropertyWidgetButton(nullptr , button, this);
 	n_space->setMinimumHeight(Height);
@@ -280,6 +278,12 @@ void PropertyWidget::AddGroupButton(std::shared_ptr<SGroup> g)
 
 	n_space->_image = image;
 	//n_space->layout()->addWidget(image);
+
+	//QLabel* null = new QLabel(this);
+	//null->setMinimumHeight(Height - 2);
+	//null->setMaximumHeight(Height - 2);
+	//null->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Preferred);
+	//n_space->layout()->addWidget(null);
 	n_space->layout()->addWidget(button);
 
 	((QVBoxLayout*)n_space->layout())->setContentsMargins(0, 0, 0, 0);
@@ -287,8 +291,8 @@ void PropertyWidget::AddGroupButton(std::shared_ptr<SGroup> g)
 	n_space->setObjectName(g->groupName);
 
 	QWidget* v_space = new QWidget(this);
-	v_space->setMinimumHeight(Height - 2);
-	v_space->setMaximumHeight(Height - 2);
+	v_space->setMinimumHeight(Height );
+	v_space->setMaximumHeight(Height);
 	v_space->setObjectName(g->groupName);
 	v_space->setObjectName("PropertyTableWidgetRowGroupButtonValue");
 	v_space->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Preferred);
@@ -316,11 +320,11 @@ void PropertyWidget::AddGroupButton(std::shared_ptr<SGroup> g)
 		auto it = _items.find(g->parentGroup);
 		if (it != _items.end())
 		{
-			_items[g->parentGroup].append(newItem);
+			_items[g->parentGroup].push_back(newItem);
 		}
 		else
 		{
-			_items[nullptr].append(newItem);
+			_items[nullptr].push_back(newItem);
 		}
 	}
 }
@@ -347,7 +351,6 @@ void PropertyWidget::ChildrenHidden(SGroup* group, bool bHidden)
 			ChildrenHidden(i.get(), bHidden);
 		}
 	}
-
 }
 
 PropertyWidgetButton::PropertyWidgetButton(QLabel* image,QToolButton* button, QWidget* parent)

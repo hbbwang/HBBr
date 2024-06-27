@@ -12,7 +12,7 @@
 #include "AssetObject.h"
 #include "FileSystem.h"
 #include "ContentBrowser.h"
-
+#include "PropertyWidget.h"
 #include "Model.h"
 #include "Material.h"
 #include "Texture2D.h"
@@ -46,6 +46,7 @@ Inspector::Inspector(QWidget *parent)
 	_updateTimer->start();
 
 	_currentInspector = this;
+
 }
 
 Inspector::~Inspector()
@@ -115,7 +116,6 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 	horLayout->setSpacing(1);
 	titleWidget->setLayout(horLayout);
 	_layoutMain->addWidget(titleWidget);
-	_layoutMain->addStretch(10);
 	CheckBox* active = new CheckBox(this, obj->IsActive());
 	active->setObjectName("Inspector_Active");
 	active->ui.checkBox->setObjectName("Inspector_Active");
@@ -141,28 +141,24 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				title->clearFocus();
 			}
 		});
-	ToolBox* box = new ToolBox(this);
-	_layoutMain->addWidget(box);
+	PropertyWidget* pw = new PropertyWidget(this);
+	_layoutMain->addWidget(pw);
 	//---------------------- Transform
-	box->addPage("Transform", true);
+	auto group_transform = pw->AddGroup("Transform");
 	{
-		QWidget* transformWidget = new QWidget(this);
-		transformWidget->setLayout(new QVBoxLayout(this));
-		//box->addSubWidget("Transform", transformWidget);
-		box->addSubWidget(transformWidget);
 		auto transform = obj->_transform;
-		VectorSetting* pos =	new VectorSetting("Position", this, 3, 0.001f, 4);
-		VectorSetting* rot =	new VectorSetting("Rotation", this, 3, 0.01f, 4);
-		VectorSetting* scale =	new VectorSetting("Scale   ", this, 3, 0.001f, 4);
+		VectorSetting* pos =	new VectorSetting(this, 3, 0.001f, 4);
+		VectorSetting* rot =	new VectorSetting(this, 3, 0.01f, 4);
+		VectorSetting* scale =	new VectorSetting(this, 3, 0.001f, 4);
 		_property_needUpdate.append(pos);
 		_property_needUpdate.append(rot);
 		_property_needUpdate.append(scale);
 		pos->ui.Name->setMinimumWidth(50);
 		rot->ui.Name->setMinimumWidth(50);
 		scale->ui.Name->setMinimumWidth(50);
-		transformWidget->layout()->addWidget(pos);
-		transformWidget->layout()->addWidget(rot);
-		transformWidget->layout()->addWidget(scale);
+		pw->AddItem("Position ", pos, 30, group_transform);
+		pw->AddItem("Rotation", rot, 30, group_transform);
+		pw->AddItem("Scale     ", scale, 30, group_transform);
 
 		pos->SetValue(transform->location);
 		pos->_vec4_f[0] = &transform->location.x;
@@ -204,10 +200,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 	for (auto c : obj->_comps)
 	{
 		Component* comp = c ;
-		QWidget* compWidget = new QWidget(this);
-		compWidget->setLayout(new QVBoxLayout(this));
-		box->addPage(c->GetComponentName().c_str(), true);
-		box->addSubWidget(compWidget);
+		auto group_comp = pw->AddGroup(c->GetComponentName().c_str());
 		auto pro = c->GetProperties();
 		for (auto p : pro)
 		{
@@ -220,13 +213,13 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				else
 				{
 					auto value = (bool*)p.value;
-					CheckBox* checkBox = new CheckBox(p.name, this, c->IsActive());
+					CheckBox* checkBox = new CheckBox(this, c->IsActive());
 					checkBox->_callback = [comp](bool b) {
 						if (comp)
 							comp->SetActive(b);
 					};
 					checkBox->_boolBind = value;
-					compWidget->layout()->addWidget(checkBox);
+					pw->AddItem(p.name.c_str(), checkBox, 30, group_comp);
 				}
 				continue;
 			}
@@ -236,8 +229,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				if (p.bArray)
 				{
 					std::vector<AssetRef>* refs = (std::vector<AssetRef>*)p.value;
-					ToolBox* cw = new ToolBox(p.name.c_str(), true, this);
-					compWidget->layout()->addWidget(cw);
+					auto group_comp_sub = pw->AddGroup(p.name.c_str(), group_comp);
 					for (int i = 0; i < refs->size(); i++)
 					{
 						HString text = "";
@@ -245,8 +237,16 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 						{
 							text = refs->at(i).assetInfo.lock()->virtualFilePath;
 						}
-						AssetLine* line = new AssetLine(p.name, this, text, p.condition);
-						cw->addSubWidget(line);
+						AssetLine* line = new AssetLine(this, text, p.condition);
+						if (refs->at(i).displayName.Length() > 0)
+						{
+							pw->AddItem(refs->at(i).displayName.c_str(), line, 30, group_comp_sub);
+						}
+						else
+						{
+							pw->AddItem(HString::FromInt(i).c_str(), line, 30, group_comp_sub);
+						}
+
 						//component callback
 						refs->at(i).callBack = [line, refs,i]() {
 							if (!refs->at(i).assetInfo.expired())
@@ -305,8 +305,8 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 					{
 						text = ref->assetInfo.lock()->virtualFilePath;
 					}
-					AssetLine* line = new AssetLine(p.name, this, text, p.condition);
-					compWidget->layout()->addWidget(line);
+					AssetLine* line = new AssetLine(this, text, p.condition);
+					pw->AddItem(p.name.c_str(), line, 30, group_comp);
 					//component callback
 					ref->callBack = [line,ref]() {
 						if (!ref->assetInfo.expired())
@@ -361,8 +361,8 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 			}	
 		}
 	}
-	box->ui.verticalLayout->addStretch(999);
-	_layoutMain->addStretch(999);
+	pw->ShowItems();
+	_layoutMain->addStretch(20);
 }
 
 void Inspector::PropertyUpdate()

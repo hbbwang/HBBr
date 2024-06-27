@@ -56,6 +56,7 @@ ComponentClassName  _component_construct_##ComponentClassName;
 struct AssetRef
 {
 	HString path = "";
+	HString displayName = "";
 	std::weak_ptr<AssetInfoBase> assetInfo;
 	std::function<void()> callBack = []() {};
 };

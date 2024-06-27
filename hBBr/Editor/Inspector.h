@@ -5,6 +5,7 @@
 #include "ui_Inspector.h"
 #include <qtimer.h>
 #include "qscrollarea.h"
+#include <EditorMain.h>
 
 class Inspector : public QWidget
 {
@@ -31,6 +32,11 @@ public:
 	void ClearInspector();
 
 	void LoadInspector_GameObject(std::weak_ptr<class GameObject> gameObj , bool bFoucsUpdate = false);
+
+	QSize sizeHint() const
+	{
+		return QSize(EditorMain::_self->width()/5, EditorMain::_self->height()/2);//这里定义dockwidget的初始大小
+	}
 
 protected:
 
