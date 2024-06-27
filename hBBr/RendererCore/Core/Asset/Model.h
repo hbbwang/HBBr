@@ -138,6 +138,8 @@ public:
 
 	HBBR_API static bool BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prims,class VulkanRenderer* renderer);
 
+	HBBR_API void SaveAsset(HString path)override;
+
 	//根据材质区分面
 	std::vector<FaceData>		faces;
 	ModelFileDataStructFlags	fileFlags = //文件结构枚举,用于识别可能内容不同的模型文件

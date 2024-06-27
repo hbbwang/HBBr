@@ -242,3 +242,7 @@ bool Model::BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prim
 	}
 	return false;
 }
+
+void Model::SaveAsset(HString path)
+{
+}

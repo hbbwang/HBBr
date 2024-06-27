@@ -241,6 +241,10 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 	return dataPtr->GetData();
 }
 
+void Texture2D::SaveAsset(HString path)
+{
+}
+
 void Texture2D::GlobalInitialize()
 {
 	const auto& manager = VulkanManager::GetManager();

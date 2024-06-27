@@ -156,6 +156,8 @@ public:
 
 	HBBR_API static std::weak_ptr<Texture2D> LoadAsset(HGUID guid , VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
+	HBBR_API void SaveAsset(HString path)override;
+
 	static void GlobalInitialize();
 
 	static void GlobalUpdate();

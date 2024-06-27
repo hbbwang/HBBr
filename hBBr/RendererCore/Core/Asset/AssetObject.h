@@ -12,6 +12,13 @@ public:
 
 	virtual ~AssetObject() = default;
 
+	//继承了AssetObject的资产类，必须重写以下函数：
+	//		1.HBBR_API static std::weak_ptr<Material> LoadAsset(HGUID guid)
+	//		2.HBBR_API virtual void SaveAsset(HString path) = 0;
+
+	//
+	HBBR_API virtual void SaveAsset(HString path) = 0;
+
 	std::weak_ptr<AssetInfoBase> _assetInfo;
 
 	//编辑器ListWidget生成Item图标的时候触发...不要随意在其他(非编辑器)位置执行。

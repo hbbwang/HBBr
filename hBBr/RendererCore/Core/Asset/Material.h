@@ -24,7 +24,7 @@ public:
 
 	HBBR_API static std::weak_ptr<Material> LoadAsset(HGUID guid);
 
-	HBBR_API void SaveAsset(HString path);
+	HBBR_API void SaveAsset(HString path)override;
 
 	HBBR_API static  std::weak_ptr<AssetInfoBase> CreateMaterial(HString repository,HString virtualPath);
 
