@@ -39,7 +39,7 @@ public:
     class Inspector* _inspector = nullptr;
     class CustomDockWidget* _inspector_dock = nullptr;
 
-    void ShowDirtyAssetsManager();
+    class DirtyAssetsManager* ShowDirtyAssetsManager();
 
     virtual void closeEvent(QCloseEvent* event);
 

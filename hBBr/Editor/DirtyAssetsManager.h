@@ -11,7 +11,7 @@ public:
 	DirtyAssetsManager(QWidget *parent = nullptr);
 	~DirtyAssetsManager();
 
-	std::function<void()> _finishExec = []() {};
+	std::vector<std::function<void()>> _finishExec;
 	QList<class DurtyAssetItem*> _allItems;
 	DurtyAssetItem* _headerItem = nullptr;
 	virtual void paintEvent(QPaintEvent* event)override;

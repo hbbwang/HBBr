@@ -72,7 +72,7 @@ VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrows
 		QAction* importAssets = new QAction(GetEditorInternationalization("ContentBrowser","ImportAssets"), _contextMenu);
 		QAction* createFolder = new QAction(GetEditorInternationalization("ContentBrowser", "CreateFolder"), _contextMenu);
 		QAction* deleteFile = new QAction(GetEditorInternationalization("ContentBrowser", "DeleteFolder"), _contextMenu);
-		QAction* rename = new QAction(GetEditorInternationalization("ContentBrowser", "Rename"), _contextMenu);
+		QAction* rename = new QAction(GetEditorInternationalization("ContentBrowser", "FolderRename"), _contextMenu);
 		_contextMenu->addAction(importAssets);
 		_contextMenu->addAction(createFolder);
 		_contextMenu->addAction(rename);
@@ -546,7 +546,7 @@ VirtualFileListView::VirtualFileListView(class  ContentBrowser* contentBrowser, 
 				});
 		}
 		QAction* deleteFile = new QAction(GetEditorInternationalization("ContentBrowser", "DeleteFile"), _contextMenu);
-		QAction* rename = new QAction(GetEditorInternationalization("ContentBrowser", "Rename"), _contextMenu);
+		QAction* rename = new QAction(GetEditorInternationalization("ContentBrowser", "FileRename"), _contextMenu);
 		_contextMenu->addAction(rename);
 		_contextMenu->addSeparator();
 		_contextMenu->addAction(deleteFile);

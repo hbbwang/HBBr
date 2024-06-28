@@ -16,7 +16,7 @@
 #include "RendererCore/Core/Asset/World.h"
 #include "QFontDatabase.h"
 #include "ConsoleDebug.h"
-
+#include <QCloseEvent>
 EditorMain* EditorMain::_self = nullptr;
 
 CustomDockWidget::CustomDockWidget(QWidget* parent) :QDockWidget(parent)
@@ -109,15 +109,17 @@ EditorMain::~EditorMain()
 
 void EditorMain::showEvent(QShowEvent* event)
 {
-	
+    QMainWindow::showEvent(event);
 }
 
 void EditorMain::focusInEvent(QFocusEvent* event)
 {
+    QMainWindow::focusInEvent(event);
 }
 
 void EditorMain::focusOutEvent(QFocusEvent* event)
 {
+    QMainWindow::focusOutEvent(event);
 }
 
 void EditorMain::UpdateRender()
@@ -128,7 +130,7 @@ void EditorMain::UpdateRender()
         _mainRenderView->Update();
 }
 
-void EditorMain::ShowDirtyAssetsManager()
+DirtyAssetsManager* EditorMain::ShowDirtyAssetsManager()
 {
     if (ContentManager::Get()->GetDirtyAssets().size() + World::GetDirtyWorlds().size() + Level::GetDirtyLevels().size() > 0)
     {
@@ -136,22 +138,43 @@ void EditorMain::ShowDirtyAssetsManager()
         //if (ContentManager::Get()->GetDirtyAssets().size > 0)
         {
             dirtyAssetsManager->exec();
+            return dirtyAssetsManager;
         }
-    }  
+    } 
+    return nullptr;
 }
 
+bool finishSave = false;
 void EditorMain::closeEvent(QCloseEvent* event)
 {
-    _renderTimer->stop();
-    if (_inspector)
-        _inspector->close();
-    if(_sceneOutline)
-        _sceneOutline->close();
-    if(_mainRenderView)
-        _mainRenderView->close();
+    auto manager = new DirtyAssetsManager(this);
+    if (manager)
+    {
+        auto func = 
+            [this, event]() {
+                finishSave = true;
+            };
+        manager->_finishExec.push_back(func);
+        manager->exec();
+    }
+    if(finishSave)
+    {
+        _renderTimer->stop();
+        if (_inspector)
+            _inspector->close();
+        if (_sceneOutline)
+            _sceneOutline->close();
+        if (_mainRenderView)
+            _mainRenderView->close();
+        event->accept();
+    }
+    else
+    {
+        event->ignore();
+    }
 }
 
 void EditorMain::resizeEvent(QResizeEvent* event)
 {
-
+    QMainWindow::resizeEvent(event);
 }

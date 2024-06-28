@@ -159,7 +159,11 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 					}
 				}
 			}
-			_finishExec();
+			for (int i = 0; i < _finishExec.size(); i++)
+			{
+				_finishExec[i]();
+			}
+
 			close();
 		});
 	connect(ui.CancelButton, &QPushButton::clicked, this, [this]()
@@ -196,6 +200,7 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 			{
 				di->_level->bDirtySelect = false;
 			}
+			//
 		});
 
 	//    void itemChanged(QTreeWidgetItem *item, int column);

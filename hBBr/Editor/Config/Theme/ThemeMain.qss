@@ -655,6 +655,8 @@ QSplitter::handle
 }
 #DirtyAssetsManager
 {
+    font-family:  FontFamily;
+    background-color: BackgroundColor;
     border-left: 2px solid rgb(77, 79, 76);
     border-right: 2px solid rgb(77, 79, 76);
     border-bottom: 2px solid rgb(77, 79, 76);
@@ -686,7 +688,9 @@ QSplitter::handle
 #DirtyAssetsManager .QPushButton
 {
     height: 35px ;
-    border: 2px solid rgb(72, 85, 81);
+    border: 1px solid rgb(102, 116, 112);
+    border-radius: 0px;
+    margin-top: 5px;
 }
 /* Inspector */
 #Inspector
