@@ -33,6 +33,7 @@ extern "C" {
 		HBBR_API static HString GetShaderCacheAbsPath();
 		HBBR_API static HString GetAssetAbsPath();
 		HBBR_API static HString GetContentAbsPath();
+		HBBR_API static HString GetSavedAbsPath();
 		HBBR_API static HString GetConfigAbsPath();
 		HBBR_API static HString GetWorldAbsPath();
 		//获取仓库.repository 文件的绝对路径

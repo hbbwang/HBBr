@@ -17,6 +17,7 @@
 #include "QFontDatabase.h"
 #include "ConsoleDebug.h"
 #include <QCloseEvent>
+#include <WorldSelector.h>
 EditorMain* EditorMain::_self = nullptr;
 
 CustomDockWidget::CustomDockWidget(QWidget* parent) :QDockWidget(parent)
@@ -38,8 +39,8 @@ EditorMain::EditorMain(QWidget *parent)
     _sceneOutline_dock->setFeatures(
         QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     _sceneOutline_dock->setWidget(_sceneOutline);
-    _sceneOutline_dock->setWindowTitle("Scene Outline");
     _sceneOutline->setObjectName("SceneOutline");
+    _sceneOutline_dock->setWindowTitle(GetEditorInternationalization("MainWindow","SceneOutlineTitle"));
     addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, _sceneOutline_dock);
 
     _contentBrowser = new ContentBrowser(this);
@@ -47,8 +48,8 @@ EditorMain::EditorMain(QWidget *parent)
     _contentBrowser_dock->setFeatures(
         QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     _contentBrowser_dock->setWidget(_contentBrowser);
-    _contentBrowser_dock->setWindowTitle("Content Browser");
     _contentBrowser->setObjectName("ContentBrowser");
+    _contentBrowser_dock->setWindowTitle(GetEditorInternationalization("MainWindow", "ContentBrowserTitle"));
     addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, _contentBrowser_dock);
 
     _inspector = new Inspector(this);
@@ -56,8 +57,8 @@ EditorMain::EditorMain(QWidget *parent)
     _inspector_dock->setFeatures(
         QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     _inspector_dock->setWidget(_inspector);
-    _inspector_dock->setWindowTitle("Inspector");
     _inspector->setObjectName("Inspector");
+    _inspector_dock->setWindowTitle(GetEditorInternationalization("MainWindow", "Inspector"));
     addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, _inspector_dock);
 
     setObjectName("EditorMain");
@@ -100,6 +101,16 @@ EditorMain::EditorMain(QWidget *parent)
     _renderTimer->setInterval(1);
     connect(_renderTimer, SIGNAL(timeout()), this, SLOT(UpdateRender()));
     _renderTimer->start();
+
+    //打开世界
+    ActionConnect(ui.OpenWorld, [this]()
+        {
+            WorldSelector* ws = new WorldSelector(this);
+
+            ws->exec();
+        });
+
+    LoadEditorWindowSetting(this, "MainWindow");
 
 }
 
@@ -146,6 +157,7 @@ DirtyAssetsManager* EditorMain::ShowDirtyAssetsManager()
 
 void EditorMain::closeEvent(QCloseEvent* event)
 {
+
     auto manager = new DirtyAssetsManager(this);
     if (manager)
     {
@@ -161,6 +173,7 @@ void EditorMain::closeEvent(QCloseEvent* event)
     }
     if(!manager)
     {
+        SaveEditorWindowSetting(this, "MainWindow");
         _renderTimer->stop();
         if (_inspector)
             _inspector->close();

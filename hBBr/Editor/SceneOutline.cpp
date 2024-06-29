@@ -301,18 +301,21 @@ void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
                 {
                     items.push_back((SceneOutlineItem*)_parent->_treeWidget->takeTopLevelItem(_parent->_treeWidget->indexOfTopLevelItem(i)));
                 }
-                if (_parent->_comboBox->GetCurrentSelection().compare(_parent->_currentLevelItem->_level.lock()->GetLevelName().c_str(), Qt::CaseInsensitive))
+                if (_parent->_currentLevelItem != nullptr)
                 {
-                    _parent->ClearCurrentLevelSelection();
-                    for (auto& i : _parent->_levelItems)
+                    if (_parent->_comboBox->GetCurrentSelection().compare(_parent->_currentLevelItem->_level.lock()->GetLevelName().c_str(), Qt::CaseInsensitive))
                     {
-                        if (i->_level.lock()->IsLoaded())
+                        _parent->ClearCurrentLevelSelection();
+                        for (auto& i : _parent->_levelItems)
                         {
-                            _parent->SetCurrentLevelSelection(i);
-                            break;
+                            if (i->_level.lock()->IsLoaded())
+                            {
+                                _parent->SetCurrentLevelSelection(i);
+                                break;
+                            }
                         }
                     }
-                }
+                }          
                 for (auto& i :items)
                 {
                     delete i;
@@ -635,14 +638,33 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                 {
                     
                 };
+            //World卸载的时候执行
+            world.lock()->_editorWorldRelease =
+                [this, world]()
+                {
+                    for (auto& i : _levelItems)
+                    {
+                        auto level = _treeWidget->takeTopLevelItem(_treeWidget->indexOfTopLevelItem(i));
+                        delete level;
+                    }
+                    _levelItems.clear();
+                    //生成世界预览图
+
+
+                };
 
             //World的Level数组发生变化的时候执行(例如 新增或者删除Level)
             world.lock()->_editorLevelChanged =
                 [this, world]()
-            {
+                {
+                    for (auto& i : _levelItems)
+                    {
+                        auto level = _treeWidget->takeTopLevelItem(_treeWidget->indexOfTopLevelItem(i));
+                        delete level;
+                    }
+                    _levelItems.clear();
                     if (!world.expired())
                     {
-                        _levelItems.clear();
                         for (auto& i : world.lock()->GetLevels())
                         {
                             auto itemExist = FindLevel(i->GetGUID());
@@ -653,14 +675,15 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                                 _treeWidget->addTopLevelItem(item);
                                 _levelItems.insert(i->GetLevelName().c_str(), item);
 
-                                auto iconPath = FileSystem::Append(FileSystem::GetConfigAbsPath() , "Theme/Icons/ICON_SCENE.png");
+                                auto iconPath = FileSystem::Append(FileSystem::GetConfigAbsPath(), "Theme/Icons/ICON_SCENE.png");
                                 QIcon icon(iconPath.c_str());
                                 item->setIcon(0, icon);
                             }
                             ResetLevelSelectionComboBox();
+                        }
+                        EditorMain::_self->setWindowTitle(GetEditorInternationalization("MainWindow", "MainTitle") + " - " + world.lock()->GetWorldName().c_str());
                     }
-                }
-            };
+                };
 
             world.lock()->_editorLevelVisibilityChanged =
                 [this, world](Level* level , bool bVisibility)

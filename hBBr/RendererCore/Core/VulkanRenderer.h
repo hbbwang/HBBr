@@ -108,6 +108,8 @@ public:
 		return _bIsInGame;
 	}
 
+	HBBR_API void ReleaseWorld();
+
 	HBBR_API bool LoadWorld(HString worldNameOrGUID);
 
 	HBBR_API void CreateEmptyWorld();

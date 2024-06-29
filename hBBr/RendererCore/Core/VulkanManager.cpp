@@ -1490,7 +1490,10 @@ void VulkanManager::Transition(
 		dstFlags = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 		break;
 	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-		imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		if (oldLayout != VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)
+		{
+			imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		}
 		imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 		dstFlags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 		break;

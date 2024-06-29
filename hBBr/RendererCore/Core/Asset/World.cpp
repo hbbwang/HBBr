@@ -16,6 +16,9 @@ World::~World()
 {
 	ReleaseWorld();
 	ConsoleDebug::printf_endl("Release World[%s][%s]", this->GetWorldName().c_str(), this->GetGUID().str().c_str());
+#if IS_EDITOR
+	_editorWorldRelease();
+#endif
 }
 
 Level* World::GetLevel(HString name)

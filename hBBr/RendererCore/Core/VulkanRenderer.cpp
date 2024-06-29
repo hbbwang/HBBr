@@ -104,6 +104,14 @@ void VulkanRenderer::Init()
 
 }
 
+void VulkanRenderer::ReleaseWorld()
+{
+	if (_world)
+	{
+		_world.reset();
+	}
+}
+
 bool VulkanRenderer::LoadWorld(HString worldNameOrGUID)
 {
 	if (_world)

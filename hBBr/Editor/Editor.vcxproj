@@ -187,6 +187,7 @@
     <ClCompile Include="SceneOutline.cpp" />
     <ClCompile Include="ToolBox.cpp" />
     <ClCompile Include="VectorSetting.cpp" />
+    <ClCompile Include="WorldSelector.cpp" />
     <QtRcc Include="EditorMain.qrc" />
     <QtUic Include="ArraySetting.ui" />
     <QtUic Include="AssetLine.ui" />
@@ -210,6 +211,7 @@
     <QtUic Include="ToolBox.ui" />
     <QtUic Include="ToolPage.ui" />
     <QtUic Include="VectorSetting.ui" />
+    <QtUic Include="WorldSelector.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="RenderView.h" />
@@ -218,6 +220,7 @@
     <QtMoc Include="SceneOutline.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="WorldSelector.h" />
     <QtMoc Include="PropertyWidget.h" />
     <QtMoc Include="MaterialDetailEditor.h" />
     <QtMoc Include="LineEditDialog.h" />

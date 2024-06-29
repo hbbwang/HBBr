@@ -69,6 +69,7 @@ public:
 	std::function<void(std::shared_ptr<GameObject>,  std::shared_ptr<GameObject>)> _editorGameObjectSetParentFunc = [](std::shared_ptr<GameObject> Object, std::shared_ptr<GameObject> newParent) {};
 	std::function<void(std::vector<std::weak_ptr<Level>>&)> _editorWorldUpdate = [](std::vector<std::weak_ptr<Level>> levels) {};
 	std::function<void()> _editorLevelChanged = []() {};
+	std::function<void()> _editorWorldRelease = []() {};
 	std::function<void(Level*, bool)> _editorLevelVisibilityChanged = [](Level*, bool) {};
 
 	std::shared_ptr<Level> _editorLevel;

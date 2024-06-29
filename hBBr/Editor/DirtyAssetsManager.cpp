@@ -22,7 +22,6 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 	setAttribute(Qt::WidgetAttribute::WA_AlwaysStackOnTop);
 	setAttribute(Qt::WidgetAttribute::WA_DeleteOnClose);
 	setWindowFlags(Qt::Window);
-	setWindowFlags(Qt::Tool);
 	//setWindowFlag(Qt::FramelessWindowHint);
 	
 	ui.SaveButton->setText(GetEditorInternationalization("DirtyAssetsManager", "SaveButton"));
@@ -252,19 +251,7 @@ int DirtyAssetsManager::exec()
 		close();
 		return -10;
 	}
-
-	int w = 800, h = 600;
-	int wx = -1, wy = -1;
-	GetEditorInternationalizationInt("DirtyAssetsManager", "WindowWidth", w);
-	GetEditorInternationalizationInt("DirtyAssetsManager", "WindowHeight", h);
-	GetEditorInternationalizationInt("DirtyAssetsManager", "PosX", wx);
-	GetEditorInternationalizationInt("DirtyAssetsManager", "PosY", wy);
-	if (wx < 0)
-		wx = x();
-	if (wy < 0)
-		wy = y();
-	resize(w, h);
-	move(wx, wy);
+	LoadEditorWindowSetting(this, "DirtyAssetsManager");
 	return QDialog::exec();
 }
 
@@ -275,8 +262,5 @@ void DirtyAssetsManager::paintEvent(QPaintEvent* event)
 
 void DirtyAssetsManager::closeEvent(QCloseEvent* e)
 {
-	SetEditorInternationalizationInt("DirtyAssetsManager", "WindowWidth", this->width());
-	SetEditorInternationalizationInt("DirtyAssetsManager", "WindowHeight", this->height());
-	SetEditorInternationalizationInt("DirtyAssetsManager", "PosX", this->x());
-	SetEditorInternationalizationInt("DirtyAssetsManager", "PosY", this->y());
+	SaveEditorWindowSetting(this, "DirtyAssetsManager");
 }

@@ -4,6 +4,7 @@
 #include "Pass/PassDefine.h"
 #include "Pass/ImguiPass.h"
 #include "Pass/GUIPass.h"
+#include "Pass/ScreenshotPass.h"
 void PassManager::PassesInit(VulkanRenderer* renderer)
 {
 	_renderer = renderer;
@@ -15,6 +16,9 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 		//Opaque Pass
 		std::shared_ptr<BasePass> opaque = std::make_shared<BasePass>(renderer);
 		AddPass(opaque, "Opaque");
+		//Screenshot Pass
+		std::shared_ptr<ScreenshotPass> screenshot = std::make_shared<ScreenshotPass>(renderer);
+		AddPass(screenshot, "Screenshot");
 		//Screen GUI Pass
 		std::shared_ptr<GUIPass> gui = std::make_shared<GUIPass>(renderer);
 		AddPass(gui, "GUI");

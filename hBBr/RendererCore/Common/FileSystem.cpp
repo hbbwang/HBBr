@@ -62,6 +62,15 @@ HString FileSystem::GetContentAbsPath()
     return path;
 }
 
+HString FileSystem::GetSavedAbsPath()
+{
+    fs::path p = GetProgramPath().c_str();
+    HString path = (p / "Asset" / "Saved").c_str();
+    path += "/";
+    FileSystem::CorrectionPath(path);
+    return path;
+}
+
 HString FileSystem::GetConfigAbsPath()
 {
     fs::path p = GetProgramPath().c_str();

@@ -296,6 +296,7 @@
     <ClInclude Include="Core\Pass\ImguiPass.h" />
     <ClInclude Include="Core\Pass\PassDefine.h" />
     <ClInclude Include="Core\Pass\PassType.h" />
+    <ClInclude Include="Core\Pass\ScreenshotPass.h" />
     <ClInclude Include="Core\Pipeline.h" />
     <ClInclude Include="Core\Primitive.h" />
     <ClInclude Include="Core\RendererConfig.h" />
@@ -351,6 +352,7 @@
     <ClCompile Include="Core\Pass\GUIPass.cpp" />
     <ClCompile Include="Core\Pass\ImguiPass.cpp" />
     <ClCompile Include="Core\Pass\PassDefine.cpp" />
+    <ClCompile Include="Core\Pass\ScreenshotPass.cpp" />
     <ClCompile Include="Core\Pipeline.cpp" />
     <ClCompile Include="Core\Primitive.cpp" />
     <ClCompile Include="Core\RendererConfig.cpp" />

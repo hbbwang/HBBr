@@ -235,6 +235,9 @@
     <ClInclude Include="Core\Asset\Level.h">
       <Filter>Renderer\Core\World</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Pass\ScreenshotPass.h">
+      <Filter>Renderer\Core\Pass</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -392,6 +395,9 @@
     </ClCompile>
     <ClCompile Include="Form\FormMain.cpp">
       <Filter>Renderer\Form</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Pass\ScreenshotPass.cpp">
+      <Filter>Renderer\Core\Pass</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

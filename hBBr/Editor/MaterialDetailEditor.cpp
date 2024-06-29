@@ -45,15 +45,12 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 		}
 		setObjectName("MaterialDetailEditor");
 		setWindowTitle(mat.lock()->_assetInfo.lock()->displayName.c_str());
-		int width = 1024, height = 768;
-		GetEditorInternationalizationInt("MaterialEditor", "WindowWidth", width);
-		GetEditorInternationalizationInt("MaterialEditor", "WindowHeight", height);
-		resize(width, height);
+
 		setWindowFlag(Qt::Window, true);
 		_material = mat;
 		_allDetailWindows.append(this);
 
-
+		LoadEditorWindowSetting(this, "MaterialEditor");
 
 
 
@@ -303,4 +300,6 @@ void MaterialDetailEditor::closeEvent(QCloseEvent* event)
 			break;
 		}
 	}
+
+	SaveEditorWindowSetting(this, "MaterialEditor");
 }

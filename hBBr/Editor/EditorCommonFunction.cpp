@@ -502,3 +502,44 @@ void SetWindowCenterPos(QWidget* widget)
     auto rect = widget->windowHandle()->screen()->geometry();
     widget->move(rect.width()/2 - widget->width()/2, rect.height()/2 - widget->height() / 2);
 }
+
+void LoadEditorWindowSetting(QWidget* widget, QString Group)
+{
+    int w = 800, h = 600;
+    int wx = -1, wy = -1;
+    GetEditorInternationalizationInt(Group, "WindowWidth", w);
+    GetEditorInternationalizationInt(Group, "WindowHeight", h);
+    GetEditorInternationalizationInt(Group, "PosX", wx);
+    GetEditorInternationalizationInt(Group, "PosY", wy);
+
+    QDesktopWidget* desktop = QApplication::desktop();
+    QRect screenGeometry = desktop->screenGeometry();
+
+    if (wx < 0)
+    {
+        wx = widget->x();
+    }
+    if (wy < 0)
+    {
+        wy = widget->y();
+    }
+    //窗口位置不能比电脑屏幕大小还大
+    if (wx > screenGeometry.width() - w)
+    {
+        wx = screenGeometry.width() - w;
+    }
+    if (wy > screenGeometry.height() - h)
+    {
+        wy = screenGeometry.height() - h;
+    }
+    widget->resize(w, h);
+    widget->move(wx, wy);
+}
+
+void SaveEditorWindowSetting(QWidget* widget, QString Group)
+{
+    SetEditorInternationalizationInt(Group, "WindowWidth", widget->width());
+    SetEditorInternationalizationInt(Group, "WindowHeight", widget->height());
+    SetEditorInternationalizationInt(Group, "PosX", widget->x());
+    SetEditorInternationalizationInt(Group, "PosY", widget->y());
+}

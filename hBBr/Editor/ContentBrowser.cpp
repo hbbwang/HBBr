@@ -957,6 +957,9 @@ ContentBrowser::ContentBrowser(QWidget* parent )
 	ui.SaveButton->setObjectName("ContentBrowser_Button");
 	ui.OptionButton->setObjectName("ContentBrowser_Button");
 
+	ui.ImportButton->setText(GetEditorInternationalization("ContentBrowser","ImportButton"));
+	ui.SaveButton->setText(GetEditorInternationalization("ContentBrowser", "SaveButton"));
+
 	ui.ImportButton->setMinimumWidth(1);
 	ui.SaveButton->setMinimumWidth(1);
 	ui.BackToParentButton->setMinimumWidth(1);

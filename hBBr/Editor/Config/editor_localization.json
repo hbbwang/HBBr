@@ -7,7 +7,9 @@
         "FileRename": "资产重命名",
         "FolderRename": "目录重命名",
         "ImportAssets": "导入资产",
+        "ImportButton": "导入资产",
         "RefreshContentBrowser": "刷新内容浏览器",
+        "SaveButton": "保存所有",
         "UpdateFileListPreviewImage": "刷新当前目录的预览图"
     },
     "DirtyAssetsManager": {
@@ -16,18 +18,22 @@
         "CancelButton": "关闭窗口",
         "ClearButton": "清空(不保存)",
         "Name": "名字",
-        "PosX": 300,
-        "PosY": 159,
+        "PosX": 0,
+        "PosY": 0,
         "Repository": "仓库",
         "SaveButton": "保存选中",
         "Type": "类型",
         "VirtualPath": "路径",
-        "WindowHeight": 513,
-        "WindowWidth": 745
+        "WindowHeight": 247,
+        "WindowWidth": 367
     },
     "MainWindow": {
-        "PosX": -1,
-        "PosY": -1,
+        "ContentBrowserTitle": "内容浏览器",
+        "Inspector": "细节编辑器",
+        "MainTitle": "HBB渲染编辑器",
+        "PosX": 386,
+        "PosY": 227,
+        "SceneOutlineTitle": "场景大纲",
         "WindowHeight": 800,
         "WindowWidth": 1280,
         "bWindowed": true
