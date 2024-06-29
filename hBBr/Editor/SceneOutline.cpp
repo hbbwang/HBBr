@@ -21,6 +21,7 @@
 #include "ComboBox.h"
 #include "FormMain.h"
 #include "ConsoleDebug.h"
+#include "DirtyAssetsManager.h"
 SceneOutlineTree* SceneOutline::_treeWidget = nullptr;
 
 SceneOutlineItem::SceneOutlineItem(std::weak_ptr<Level> level, std::weak_ptr<GameObject> gameObject, QTreeWidget* view)
@@ -273,20 +274,58 @@ void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
     //删除场景
     connect(_deleteLevel, &QAction::triggered, this, [this](bool bChecked)
         {
-            //先卸载场景
-            for (auto& i : GetSelectionLevels())
+            auto manager = new DirtyAssetsManager(this);
+            if (manager)
             {
-                i.lock()->UnLoad();
+                manager->setWindowTitle(GetEditorInternationalization("DirtyAssetsManager", "BaseTitle1"));
+                auto func =
+                    [this, &manager]() {
+                    manager = nullptr;
+                    };
+                manager->_finishExec.push_back(func);
+                if (manager->exec() == -10)
+                {
+                    manager = nullptr;
+                }
             }
-            _parent->ClearCurrentLevelSelection();
-            // ((SceneOutlineItem*)this->currentItem())->_gameObject.lock()->GetLevel()->MarkDirty();
-
-            std::vector<HString> levelName; 
-            for (auto& i : GetSelectionLevels())
+            if (!manager)
             {
-                _parent->currentWorld.lock()->DeleteLevel(i.lock()->GetLevelName());
+                //先卸载场景
+                for (auto& i : GetSelectionLevels())
+                {
+                    i.lock()->UnLoad();
+                }
+                //更换编辑场景
+                std::vector<SceneOutlineItem*> items;
+                for (auto& i : _parent->_treeWidget->selectedItems())
+                {
+                    items.push_back((SceneOutlineItem*)_parent->_treeWidget->takeTopLevelItem(_parent->_treeWidget->indexOfTopLevelItem(i)));
+                }
+                if (_parent->_comboBox->GetCurrentSelection().compare(_parent->_currentLevelItem->_level.lock()->GetLevelName().c_str(), Qt::CaseInsensitive))
+                {
+                    _parent->ClearCurrentLevelSelection();
+                    for (auto& i : _parent->_levelItems)
+                    {
+                        if (i->_level.lock()->IsLoaded())
+                        {
+                            _parent->SetCurrentLevelSelection(i);
+                            break;
+                        }
+                    }
+                }
+                for (auto& i :items)
+                {
+                    delete i;
+                }
+                items.clear();
+                // ((SceneOutlineItem*)this->currentItem())->_gameObject.lock()->GetLevel()->MarkDirty();
+                std::vector<HString> levelName;
+                for (auto& i : GetSelectionLevels())
+                {
+                    _parent->currentWorld.lock()->DeleteLevel(i.lock()->GetLevelName());
+                }
+                _parent->currentWorld.lock()->MarkDirty();
             }
-
         });
     //场景重命名
     connect(_renameLevel, &QAction::triggered, this, [this](bool bChecked)
@@ -301,21 +340,43 @@ void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
             {
                 i.lock()->Load();
             }
-            _parent->currentWorld.lock()->MarkDirty();
         });
     //场景卸载
     connect(_unloadLevel, &QAction::triggered, this, [this](bool bChecked)
         {
-            for (auto& i : GetSelectionLevels())
+            auto manager = new DirtyAssetsManager(this);
+            if (manager)
             {
-                i.lock()->UnLoad();
+                auto func =
+                    [this,&manager]() {
+                        manager = nullptr;
+                    };
+                manager->_finishExec.push_back(func);
+                if (manager->exec() == -10)
+                {
+                    manager = nullptr;
+                }
             }
-            for (auto i : this->selectedItems())
+            if (!manager)
             {
-                //卸载的时候关闭编辑状态
-                _parent->ClearCurrentLevelSelection();
+                for (auto& i : GetSelectionLevels())
+                {
+                    i.lock()->UnLoad();
+                }
+                //更换编辑场景
+                if (_parent->_comboBox->GetCurrentSelection().compare(_parent->_currentLevelItem->_level.lock()->GetLevelName().c_str(), Qt::CaseInsensitive))
+                {
+                    _parent->ClearCurrentLevelSelection();
+                    for (auto& i : _parent->_levelItems)
+                    {
+                        if (i->_level.lock()->IsLoaded())
+                        {
+                            _parent->SetCurrentLevelSelection(i);
+                            break;
+                        }
+                    }
+                }
             }
-            _parent->currentWorld.lock()->MarkDirty();
         });
     //
     auto item = (SceneOutlineItem*)itemAt(event->pos());
@@ -386,6 +447,19 @@ void SceneOutlineTree::mouseMoveEvent(QMouseEvent* event)
     QTreeWidget::mouseMoveEvent(event);
 }
 
+void SceneOutlineTree::dragEnterEvent(QDragEnterEvent* e)
+{
+    if (e->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))//如果是来自Item的数据
+    {
+        //QT 的Item，只支持来自ContentBrowser的拖拽
+        QObject* par = e->source();
+        if (par->objectName().contains("SceneOutline", Qt::CaseInsensitive))
+        {
+            e->acceptProposedAction();
+        }
+    }
+}
+
 void SceneOutlineTree::dropEvent(QDropEvent* event)
 {
     QTreeWidget::dropEvent(event);
@@ -408,7 +482,6 @@ void SceneOutlineTree::dropEvent(QDropEvent* event)
                     auto newParent = ((SceneOutlineItem*)(dragItem->parent()))->_gameObject;
                     if (!newParent.expired())
                     {
-
                         //场景不相同,先更换场景
                         if (dragItem->_gameObject.lock()->GetLevel()->GetGUID() != newParent.lock()->GetLevel()->GetGUID())
                         {
@@ -429,8 +502,16 @@ void SceneOutlineTree::dropEvent(QDropEvent* event)
                 auto newLevelItem = ((SceneOutlineItem*)(dragItem->parent()))->_level;
                 if (!newLevelItem.expired())
                 {
-                    dragItem->_gameObject.lock()->ChangeLevel(newLevelItem.lock()->GetLevelName());
-                    ConsoleDebug::printf_endl(GetEditorInternationalization("SceneOutline", "SetGameObjectLevel").toStdString().c_str(), dragItem->_gameObject.lock()->GetObjectName().c_str(), newLevelItem.lock()->GetLevelName().c_str());
+                    if (!newLevelItem.lock()->IsLoaded())
+                    {
+                        ConsoleDebug::printf_endl(GetEditorInternationalization("SceneOutline", "SetGameObjectLevelFailed").toStdString().c_str(), newLevelItem.lock()->GetLevelName().c_str());
+                        event->ignore();
+                    }
+                    else
+                    {
+                        dragItem->_gameObject.lock()->ChangeLevel(newLevelItem.lock()->GetLevelName());
+                        ConsoleDebug::printf_endl(GetEditorInternationalization("SceneOutline", "SetGameObjectLevel").toStdString().c_str(), dragItem->_gameObject.lock()->GetObjectName().c_str(), newLevelItem.lock()->GetLevelName().c_str());
+                    }
                 }
             }
         }
@@ -532,6 +613,7 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                 {
                     _currentLevelItem = i;
                     ConsoleDebug::printf_endl(GetEditorInternationalization("SceneOutline", "CurrentEditLevelLog").toStdString().c_str(), i->_level.lock()->GetLevelName().c_str());
+                    _treeWidget->expandItem(_currentLevelItem);
                     i->_level.lock()->Load();
                     break;
                 }
@@ -574,7 +656,6 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                                 auto iconPath = FileSystem::Append(FileSystem::GetConfigAbsPath() , "Theme/Icons/ICON_SCENE.png");
                                 QIcon icon(iconPath.c_str());
                                 item->setIcon(0, icon);
-
                             }
                             ResetLevelSelectionComboBox();
                     }
@@ -769,7 +850,16 @@ void SceneOutline::paintEvent(QPaintEvent* event)
 void SceneOutline::ClearCurrentLevelSelection()
 {
     _currentLevelItem = nullptr;
-    _comboBox->SetCurrentSelection(" ??? ");
+    _comboBox->SetCurrentSelection("   ");
+}
+
+void SceneOutline::SetCurrentLevelSelection(SceneOutlineItem* item)
+{
+    if (item)
+    {
+        _currentLevelItem = item;
+        _comboBox->SetCurrentSelection(item->_level.lock()->GetLevelName().c_str());
+    }
 }
 
 void SceneOutline::ResetLevelSelectionComboBox()
@@ -780,13 +870,13 @@ void SceneOutline::ResetLevelSelectionComboBox()
     {
         if (!i->_level.expired())
         {
-            _comboBox->AddItem(i->_level.lock()->GetLevelName().c_str());
-            //默认开启第一个level的编辑和加载（如果有
-            if (_currentLevelItem == nullptr && _levelItems.size() > 0)
-            {
-                _currentLevelItem = FindLevel(i->_level.lock()->GetGUID());
-                _comboBox->SetCurrentSelection(i->_level.lock()->GetLevelName().c_str());
-            }
+            _comboBox->AddItem(i->_level.lock()->GetLevelName().c_str() , "   ");
+            ////默认开启第一个level的编辑和加载（如果有
+            //if (_currentLevelItem == nullptr && _levelItems.size() > 0)
+            //{
+            //    _currentLevelItem = FindLevel(i->_level.lock()->GetGUID());
+            //    _comboBox->SetCurrentSelection(i->_level.lock()->GetLevelName().c_str());
+            //}
         }
     }
     if (_currentLevelItem == nullptr && _levelItems.size() <= 0)

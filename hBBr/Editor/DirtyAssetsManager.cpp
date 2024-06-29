@@ -1,7 +1,7 @@
 #include "DirtyAssetsManager.h"
 #include "ContentManager.h"
 #include "World.h"
-
+#include "EditorCommonFunction.h"
 class DurtyAssetItem :public QTreeWidgetItem
 {
 public:
@@ -25,16 +25,21 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 	setWindowFlags(Qt::Tool);
 	//setWindowFlag(Qt::FramelessWindowHint);
 	
+	ui.SaveButton->setText(GetEditorInternationalization("DirtyAssetsManager", "SaveButton"));
+	ui.CancelButton->setText(GetEditorInternationalization("DirtyAssetsManager", "CancelButton"));
+	ui.ClearButton->setText(GetEditorInternationalization("DirtyAssetsManager", "ClearButton"));
+
 	setFocusPolicy(Qt::FocusPolicy::StrongFocus);
-	resize(800, 600);
-	setWindowTitle("Save Assets");
+
+	setWindowTitle(GetEditorInternationalization("DirtyAssetsManager", "BaseTitle0"));
 	ui.treeWidget->setIndentation(2);
 	ui.treeWidget->setColumnCount(3);
 	ui.treeWidget->setHeaderLabels({
-		"Name",
-		"Type",
-		"Virtual Path",
-		"Repository"});
+		GetEditorInternationalization("DirtyAssetsManager", "Name"),
+		GetEditorInternationalization("DirtyAssetsManager", "Type"),
+		GetEditorInternationalization("DirtyAssetsManager", "VirtualPath"),
+		GetEditorInternationalization("DirtyAssetsManager", "Repository") 
+		});
 
 
 	auto dirtyAssets = ContentManager::Get()->GetDirtyAssets();
@@ -163,11 +168,22 @@ DirtyAssetsManager::DirtyAssetsManager(QWidget *parent)
 			{
 				_finishExec[i]();
 			}
-
 			close();
 		});
 	connect(ui.CancelButton, &QPushButton::clicked, this, [this]()
 		{
+			close();
+		});
+
+	connect(ui.ClearButton, &QPushButton::clicked, this, [this]()
+		{
+			ContentManager::Get()->ClearDirtyAssets();
+			World::ClearDirtyWorlds();
+			Level::ClearDirtyLevels();
+			for (int i = 0; i < _finishExec.size(); i++)
+			{
+				_finishExec[i]();
+			}
 			close();
 		});
 
@@ -229,7 +245,38 @@ DirtyAssetsManager::~DirtyAssetsManager()
 
 }
 
+int DirtyAssetsManager::exec()
+{
+	if (_allItems.size() <= 0)
+	{
+		close();
+		return -10;
+	}
+
+	int w = 800, h = 600;
+	int wx = -1, wy = -1;
+	GetEditorInternationalizationInt("DirtyAssetsManager", "WindowWidth", w);
+	GetEditorInternationalizationInt("DirtyAssetsManager", "WindowHeight", h);
+	GetEditorInternationalizationInt("DirtyAssetsManager", "PosX", wx);
+	GetEditorInternationalizationInt("DirtyAssetsManager", "PosY", wy);
+	if (wx < 0)
+		wx = x();
+	if (wy < 0)
+		wy = y();
+	resize(w, h);
+	move(wx, wy);
+	return QDialog::exec();
+}
+
 void DirtyAssetsManager::paintEvent(QPaintEvent* event)
 {
 	QDialog::paintEvent(event);
+}
+
+void DirtyAssetsManager::closeEvent(QCloseEvent* e)
+{
+	SetEditorInternationalizationInt("DirtyAssetsManager", "WindowWidth", this->width());
+	SetEditorInternationalizationInt("DirtyAssetsManager", "WindowHeight", this->height());
+	SetEditorInternationalizationInt("DirtyAssetsManager", "PosX", this->x());
+	SetEditorInternationalizationInt("DirtyAssetsManager", "PosY", this->y());
 }

@@ -124,7 +124,6 @@ void World::ReloadWorldSetting()
 			for (auto& i : levels.items())
 			{
 				HString levelName = i.key();
-				bool bVisibility = i.value()["Visibility"];
 				std::shared_ptr<Level> newLevel;
 
 				auto level_it = std::find_if(_levels.begin(), _levels.end(), [levelName](std::shared_ptr<Level>& l) {
@@ -132,13 +131,11 @@ void World::ReloadWorldSetting()
 				});
 				if (level_it != _levels.end())
 				{
-					level_it->get()->_bInitVisibility = bVisibility;
 					level_it->get()->Rename(levelName);
 				}
 				else
 				{
 					newLevel.reset(new Level(this, levelName));
-					newLevel->_bInitVisibility = bVisibility;
 					_levels.push_back(newLevel);
 				}
 				from_json(i.value()["GUID"], newLevel->_guid);
@@ -238,13 +235,10 @@ void World::Load(class VulkanRenderer* renderer)
 
 	_bLoad = true;
 
-	for (auto& i : _levels)
-	{
-		if (i->_bInitVisibility)
-		{
-			i->Load();
-		}
-	}
+	//for (auto& i : _levels)
+	//{
+	//		i->Load();
+	//}
 
 #if IS_GAME
 	//-----model--camera
@@ -348,7 +342,6 @@ nlohmann::json World::ToJson()
 	for (int i = 0; i < _levels.size(); i++)
 	{
 		nlohmann::json subLevel;
-		subLevel["Visibility"] = _levels[i]->_bLoad;
 		subLevel["GUID"] = _levels[i]->GetGUID();
 		//dep依赖
 		nlohmann::json levelDeps;

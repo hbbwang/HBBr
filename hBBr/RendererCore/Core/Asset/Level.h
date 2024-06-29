@@ -122,7 +122,6 @@ private:
 	std::map<HGUID, AssetType>_dependency;
 
 	bool _isEditorLevel = false;
-	bool _bInitVisibility = false;
 
 	HGUID _guid;
 

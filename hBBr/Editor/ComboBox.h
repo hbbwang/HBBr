@@ -18,7 +18,9 @@ public:
 
 	inline void AddItem(QString newItem , QString oldSelection="") 
 	{ 
+		ui.ComboBox_0->blockSignals(true);
 		ui.ComboBox_0->addItem(newItem);
+		ui.ComboBox_0->blockSignals(false);
 		if (oldSelection.size() > 1)
 		{
 			ui.ComboBox_0->setCurrentText(oldSelection);
@@ -29,7 +31,9 @@ public:
 	{
 		for (auto i : newItems)
 		{
+			ui.ComboBox_0->blockSignals(true);
 			ui.ComboBox_0->addItem(i);
+			ui.ComboBox_0->blockSignals(false);
 		}
 		if (oldSelection.size() > 1)
 		{

@@ -37,6 +37,7 @@ public:
     ~SceneOutlineTree() {}
     virtual void mousePressEvent(QMouseEvent* event)override ;
     virtual void mouseMoveEvent(QMouseEvent* event)override;
+    virtual void dragEnterEvent(class QDragEnterEvent* event) override;
     virtual void dropEvent(class QDropEvent* event) override;
     QList<std::weak_ptr<GameObject>> GetSelectionObjects();
     QList<std::weak_ptr<Level>> GetSelectionLevels();
@@ -92,6 +93,7 @@ public:
     virtual void focusInEvent(QFocusEvent* event);
     virtual void paintEvent(QPaintEvent* event);
     void ClearCurrentLevelSelection();
+    void SetCurrentLevelSelection(SceneOutlineItem* item);
     void ResetLevelSelectionComboBox();
     class  VulkanRenderer* _renderer = nullptr;
     static SceneOutlineTree* _treeWidget;

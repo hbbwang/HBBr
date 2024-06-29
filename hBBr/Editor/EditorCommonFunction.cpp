@@ -410,17 +410,18 @@ bool GetPreviewImage(QString resourceFilePath, QPixmap& pixmap)
     return true;
 }
 
+nlohmann::json _editorInternationalization;
+
 QString GetEditorInternationalization(QString Group, QString name)
 {
-    static nlohmann::json json;
-    if (json.is_null())
+    if (_editorInternationalization.is_null())
     {
-        Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor_localization.json", json);
+        Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor_localization.json", _editorInternationalization);
     }
-    if (!json.is_null())
+    if (!_editorInternationalization.is_null())
     {
-        auto it = json.find(Group.toStdString());
-        if (it != json.end())
+        auto it = _editorInternationalization.find(Group.toStdString());
+        if (it != _editorInternationalization.end())
         {
             auto va_it = it.value().find(name.toStdString());
             if (va_it != it.value().end())
@@ -435,15 +436,14 @@ QString GetEditorInternationalization(QString Group, QString name)
 
 bool GetEditorInternationalizationInt(QString Group, QString name, int& result)
 {
-    static nlohmann::json json;
-    if (json.is_null())
+    if (_editorInternationalization.is_null())
     {
-        Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor_localization.json", json);
+        Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor_localization.json", _editorInternationalization);
     }
-    if (!json.is_null())
+    if (!_editorInternationalization.is_null())
     {
-        auto it = json.find(Group.toStdString());
-        if (it != json.end())
+        auto it = _editorInternationalization.find(Group.toStdString());
+        if (it != _editorInternationalization.end())
         {
             auto va_it = it.value().find(name.toStdString());
             if (va_it != it.value().end())
@@ -456,17 +456,35 @@ bool GetEditorInternationalizationInt(QString Group, QString name, int& result)
     return false;
 }
 
+void SetEditorInternationalizationInt(QString Group, QString name, int newValue)
+{
+    if (_editorInternationalization.is_null())
+    {
+        Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor_localization.json", _editorInternationalization);
+    }
+    if (!_editorInternationalization.is_null())
+    {
+        auto it = _editorInternationalization.find(Group.toStdString());
+        if (it != _editorInternationalization.end())
+        {
+            it.value()[name.toStdString()] = newValue;
+        }
+    }
+    Serializable::SaveJson(_editorInternationalization , FileSystem::GetConfigAbsPath() + "editor_localization.json");
+}
+
+nlohmann::json _editorConfig;
+
 QString GetEditorConfig(QString Group, QString name)
 {
-    static nlohmann::json json;
-    if (json.is_null())
+    if (_editorConfig.is_null())
     {
-        Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor.json", json);
+        Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor.json", _editorConfig);
     }
-    if (!json.is_null())
+    if (!_editorConfig.is_null())
     {
-       auto it =  json.find(Group.toStdString());
-       if (it != json.end())
+       auto it = _editorConfig.find(Group.toStdString());
+       if (it != _editorConfig.end())
        {
            auto va_it = it.value().find(name.toStdString());
            if (va_it != it.value().end())

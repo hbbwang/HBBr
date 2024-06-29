@@ -1,50 +1,71 @@
 {
-    "MainWindow":{
-        "WindowWidth": 1280,
+    "ContentBrowser": {
+        "CreateFolder": "创建新的目录",
+        "CreateMaterialInstance": "创建材质实例",
+        "DeleteFile": "删除文件",
+        "DeleteFolder": "删除目录",
+        "FileRename": "资产重命名",
+        "FolderRename": "目录重命名",
+        "ImportAssets": "导入资产",
+        "RefreshContentBrowser": "刷新内容浏览器",
+        "UpdateFileListPreviewImage": "刷新当前目录的预览图"
+    },
+    "DirtyAssetsManager": {
+        "BaseTitle0": "保存资产",
+        "BaseTitle1": "请先确认资产保存,再进行操作",
+        "CancelButton": "关闭窗口",
+        "ClearButton": "清空(不保存)",
+        "Name": "名字",
+        "PosX": 300,
+        "PosY": 159,
+        "Repository": "仓库",
+        "SaveButton": "保存选中",
+        "Type": "类型",
+        "VirtualPath": "路径",
+        "WindowHeight": 513,
+        "WindowWidth": 745
+    },
+    "MainWindow": {
+        "PosX": -1,
+        "PosY": -1,
         "WindowHeight": 800,
-        "bWindowed":true
+        "WindowWidth": 1280,
+        "bWindowed": true
     },
-    "SceneOutline":{
-        "CreateNewGameObject": "生成新的GameObject",
-        "DeleteGameObject":"删除",
-        "RenameGameObject":"重命名",
-        "CreateBasicGameObject":"预设创建",
-        "CreateCube":"创建Cube",
-        "CreateSphere":"创建Sphere",
-        "CreatePlane":"创建Plane",
-        "CreateNewLevel":"创建新场景",
-        "DeleteLevel":"删除场景",
-        "RenameLevel":"重命名场景",
-        "LoadLevel":"加载场景",
-        "UnloadLevel":"卸载场景",
-        "SetGameObjectParent":"对象[%s]变换Parent[%s]",
-        "SetGameObjectLevel":"对象[%s]移动到新的场景[%s]",
-        "LevelSelection":"编辑场景",
-        "CurrentEditLevelLog":"当前编辑场景: %s"
-    },
-    "ContentBrowser":{
-        "ImportAssets":"导入资产",
-        "CreateFolder":"创建新的目录",
-        "DeleteFolder":"删除目录",
-        "DeleteFile":"删除文件",
-        "Rename":"目录重命名",
-        "CreateMaterialInstance":"创建材质实例",
-        "RefreshContentBrowser":"刷新内容浏览器",
-        "UpdateFileListPreviewImage":"刷新当前目录的预览图"
-    },
-    "RenderView":{
-        "SpawnGameObject":"目前没有场景开启编辑状态!"
-    },
-    "MaterialEditor":{
-        "WindowWidth": 1024,
-        "WindowHeight": 768,
-        "MaterialRendererTitle": "材质预览视口",
+    "MaterialEditor": {
         "MaterialAttrbuteTitle": "材质属性",
         "MaterialParameterTitle": "材质参数",
-        "RefreshShaderButton": "刷新Shader",
-        "RefreshShader": "刷新Shader:[vs:%s][ps:%s]",
-        "MaterialUniformBufferTitle": "Uniform Buffer",
+        "MaterialRendererTitle": "材质预览视口",
         "MaterialTextureTitle": "Texture",
-        "SaveButton":"保存"
+        "MaterialUniformBufferTitle": "Uniform Buffer",
+        "PosX": -1,
+        "PosY": -1,
+        "RefreshShader": "刷新Shader:[vs:%s][ps:%s]",
+        "RefreshShaderButton": "刷新Shader",
+        "SaveButton": "保存",
+        "WindowHeight": 768,
+        "WindowWidth": 1024
+    },
+    "RenderView": {
+        "SpawnGameObject": "目前没有场景开启编辑状态!"
+    },
+    "SceneOutline": {
+        "CreateBasicGameObject": "预设创建",
+        "CreateCube": "创建Cube",
+        "CreateNewGameObject": "生成新的GameObject",
+        "CreateNewLevel": "创建新场景",
+        "CreatePlane": "创建Plane",
+        "CreateSphere": "创建Sphere",
+        "CurrentEditLevelLog": "当前编辑场景: %s",
+        "DeleteGameObject": "删除",
+        "DeleteLevel": "删除场景",
+        "LevelSelection": "编辑场景",
+        "LoadLevel": "加载场景",
+        "RenameGameObject": "重命名",
+        "RenameLevel": "重命名场景",
+        "SetGameObjectLevel": "对象[%s]移动到新的场景[%s]",
+        "SetGameObjectLevelFailed": "目标场景未加载",
+        "SetGameObjectParent": "对象[%s]变换Parent[%s]",
+        "UnloadLevel": "卸载场景"
     }
 }

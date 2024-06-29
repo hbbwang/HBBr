@@ -52,7 +52,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,1">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,1,1">
      <property name="spacing">
       <number>3</number>
      </property>
@@ -77,6 +77,13 @@
       <widget class="QPushButton" name="CancelButton">
        <property name="text">
         <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="ClearButton">
+       <property name="text">
+        <string>Clear</string>
        </property>
       </widget>
      </item>

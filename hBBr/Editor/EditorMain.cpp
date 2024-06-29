@@ -144,20 +144,22 @@ DirtyAssetsManager* EditorMain::ShowDirtyAssetsManager()
     return nullptr;
 }
 
-bool finishSave = false;
 void EditorMain::closeEvent(QCloseEvent* event)
 {
     auto manager = new DirtyAssetsManager(this);
     if (manager)
     {
         auto func = 
-            [this, event]() {
-                finishSave = true;
+            [this, &manager]() {
+                manager = nullptr;
             };
         manager->_finishExec.push_back(func);
-        manager->exec();
+        if (manager->exec() == -10)
+        {
+            manager = nullptr;
+        }
     }
-    if(finishSave)
+    if(!manager)
     {
         _renderTimer->stop();
         if (_inspector)
