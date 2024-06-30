@@ -25,7 +25,10 @@ protected:
 	virtual void PassUpdate() {}
 	virtual void Reset() {}
 	virtual void PassReset() {}
+	//复制并缩放图像
+	virtual void ColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImage dst , VkExtent2D srcSize, VkExtent2D targetSize);
 	std::shared_ptr<Texture2D> GetSceneTexture(uint32_t descIndex);
+	std::shared_ptr<Texture2D> GetSceneTexture(SceneTextureDesc desc);
 	VulkanRenderer* _renderer = nullptr;
 	HString _passName = "PassBase";
 	glm::vec4 _markColor = glm::vec4(1,1,1,0.5);

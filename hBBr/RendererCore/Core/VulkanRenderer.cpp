@@ -71,7 +71,7 @@ void VulkanRenderer::Init()
 	ConsoleDebug::print_endl("hBBr:Start Check Surface Format.");
 	_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
 	ConsoleDebug::print_endl("hBBr:Start Create Swapchain.");
-	_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore ,&_queueSubmitSemaphore);
+	_renderSize =  _surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore ,&_queueSubmitSemaphore);
 
 	//Set renderer map , Add new renderer
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
@@ -276,11 +276,14 @@ void VulkanRenderer::SetupPassUniformBuffer()
 #endif
 	if (mainCamera != nullptr)
 	{
-		auto surfaceSize = _surfaceSize;
+		_renderSize = _surfaceSize;
+		_renderSize.width *= 1;
+		_renderSize.height *= 1;
+		VkExtent2D renderSize = _renderSize;
 
 		_passUniformBuffer.View = mainCamera->GetViewMatrix();
 		_passUniformBuffer.View_Inv = mainCamera->GetInvViewMatrix();
-		float aspect = (float)surfaceSize.width / (float)surfaceSize.height;
+		float aspect = (float)renderSize.width / (float)renderSize.height;
 		//DirectX Left hand 
 		glm::mat4 flipYMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, -1.0f, 0.5f));
 
@@ -289,11 +292,11 @@ void VulkanRenderer::SetupPassUniformBuffer()
 			glm::vec3 rotation_axis = glm::vec3(0.0f, 0.0f, 1.0f);
 			if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR) {
 				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(90.0f), rotation_axis);
-                aspect = (float)surfaceSize.height / (float)surfaceSize.width;
+                aspect = (float)renderSize.height / (float)renderSize.width;
 			}
 			else if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR) {
 				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(270.0f), rotation_axis);
-                aspect = (float)surfaceSize.height / (float)surfaceSize.width;
+                aspect = (float)renderSize.height / (float)renderSize.width;
 			}
 			else if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR) {
 				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(180.0f), rotation_axis);
@@ -307,7 +310,7 @@ void VulkanRenderer::SetupPassUniformBuffer()
 		_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
 
 		_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
-		_passUniformBuffer.ScreenInfo = glm::vec4((float)surfaceSize.width, (float)surfaceSize.height, mainCamera->GetNearClipPlane(), mainCamera->GetFarClipPlane());
+		_passUniformBuffer.ScreenInfo = glm::vec4((float)renderSize.width, (float)renderSize.height, mainCamera->GetNearClipPlane(), mainCamera->GetFarClipPlane());
 		auto trans = mainCamera->GetGameObject()->GetTransform();
 		_passUniformBuffer.CameraPos_GameTime = glm::vec4(trans->GetWorldLocation().x, trans->GetWorldLocation().y, trans->GetWorldLocation().z, (float)VulkanApp::GetGameTime());
 		auto viewDir = glm::normalize(trans->GetForwardVector());
@@ -343,7 +346,7 @@ bool VulkanRenderer::ResizeBuffer()
 			}
 
 			_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
-			_surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore, &_queueSubmitSemaphore
+			_renderSize = _surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore, &_queueSubmitSemaphore
 			,nullptr,false,true);
 			if (_swapchain == VK_NULL_HANDLE)
 			{

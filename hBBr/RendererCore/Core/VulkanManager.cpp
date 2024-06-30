@@ -1080,6 +1080,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	info.imageUsage =
 		VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT	//支持在RenderPass中作为color附件，并且在subpass中进行传递
 		| VK_IMAGE_USAGE_TRANSFER_SRC_BIT				//支持复制到其他图像
+		| VK_IMAGE_USAGE_TRANSFER_DST_BIT				//支持从其他数据复制进来
 		| VK_IMAGE_USAGE_SAMPLED_BIT						//支持被采样
 		;
 	info.preTransform = PreTransform;
@@ -1403,8 +1404,8 @@ void VulkanManager::Transition(
 		dstFlags = VK_PIPELINE_STAGE_TRANSFER_BIT;
 		break;
 	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
-		imageBarrier.srcAccessMask |= VK_ACCESS_TRANSFER_READ_BIT;
 		imageBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		dstFlags = VK_PIPELINE_STAGE_TRANSFER_BIT;
 		break;
 	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
 		imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;

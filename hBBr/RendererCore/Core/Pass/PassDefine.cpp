@@ -22,7 +22,7 @@ BasePass::~BasePass()
 void BasePass::PassInit()
 {
 	//Swapchain
-	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	//SceneDepth
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetFormat() , VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 	AddSubpass({}, { 0 }, 1);
@@ -73,7 +73,7 @@ void BasePass::PassUpdate()
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), _markColor);
 	//Update FrameBuffer
-	ResetFrameBuffer(_renderer->GetSurfaceSize(), { GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetTextureView() });
+	ResetFrameBufferCustom(_renderer->GetRenderSize(), { GetSceneTexture(SceneTextureDesc::FinalColor)->GetTextureView(), GetSceneTexture(SceneTextureDesc::SceneDepth)->GetTextureView() });
 	SetViewport(_currentFrameBufferSize);
 	BeginRenderPass({ 0,0,0,0 });
 	//Opaque Pass
@@ -95,8 +95,7 @@ void BasePass::PassUpdate()
 
 void BasePass::PassReset()
 {
-	//ConsoleDebug::printf_endl_warning("%d, %d", _renderer->GetSurfaceSize().width , _renderer->GetSurfaceSize().height);
-	ResetFrameBuffer(_renderer->GetSurfaceSize(), { GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetTextureView() });
+
 }
 
 void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* obj, DescriptorSet* mat, Buffer* vb, Buffer* ib)

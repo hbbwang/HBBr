@@ -238,6 +238,9 @@
     <ClInclude Include="Core\Pass\ScreenshotPass.h">
       <Filter>Renderer\Core\Pass</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Pass\FinalPass.h">
+      <Filter>Renderer\Core\Pass</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -397,6 +400,9 @@
       <Filter>Renderer\Form</Filter>
     </ClCompile>
     <ClCompile Include="Core\Pass\ScreenshotPass.cpp">
+      <Filter>Renderer\Core\Pass</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Pass\FinalPass.cpp">
       <Filter>Renderer\Core\Pass</Filter>
     </ClCompile>
   </ItemGroup>

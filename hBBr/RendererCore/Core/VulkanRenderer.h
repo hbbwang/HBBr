@@ -73,8 +73,14 @@ public:
 			return VK_NULL_HANDLE;
 	}
 
-	HBBR_API HBBR_INLINE VkExtent2D GetSurfaceSize()const {
+	//窗口分辨率
+	HBBR_API HBBR_INLINE VkExtent2D GetWindowSurfaceSize()const {
 		return _surfaceSize;
+	}
+
+	//渲染分辨率
+	HBBR_API HBBR_INLINE VkExtent2D GetRenderSize()const {
+		return _renderSize;
 	}
 
 	HBBR_INLINE VkSemaphore* GetPresentSemaphore() {
@@ -196,6 +202,8 @@ private:
 	VkSwapchainKHR _swapchain = VK_NULL_HANDLE;
 
 	VkExtent2D _surfaceSize{};
+
+	VkExtent2D _renderSize{};
 
 	VkExtent2D _windowSize{};
 

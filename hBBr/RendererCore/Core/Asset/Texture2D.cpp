@@ -23,7 +23,7 @@ SceneTexture::SceneTexture(VulkanRenderer* renderer)
 	_renderer = renderer;
 	auto sceneColor = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_R16G16B16A16_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneColor");
 	auto sceneDepth = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneDepth");
-	auto finalColor = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "FinalColor");
+	auto finalColor = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, "FinalColor");
 	//Transition
 	VkCommandBuffer cmdbuf;
 	VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), cmdbuf);
@@ -49,7 +49,7 @@ void SceneTexture::UpdateTextures()
 	{
 		return;
 	}
-	auto size = _renderer->GetSurfaceSize();
+	auto size = _renderer->GetRenderSize();
 	auto sceneDepth = _sceneTexture[SceneTextureDesc::SceneDepth];
 	if (sceneDepth->GetImageSize().width != size.width ||
 		sceneDepth->GetImageSize().height != size.height)

@@ -19,7 +19,7 @@ GUIPass::~GUIPass()
 void GUIPass::PassInit()
 {
 	const auto& manager = VulkanManager::GetManager();
-	AddAttachment(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	AddSubpass({}, { 0 }, -1 , 
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
@@ -57,7 +57,8 @@ void GUIPass::PassUpdate()
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.3, 1.0, 0.1, 0.2));
 	//Update FrameBuffer
-	ResetFrameBuffer(_renderer->GetSurfaceSize(), {});
+	ResetFrameBufferCustom(_renderer->GetRenderSize(), { GetSceneTexture(SceneTextureDesc::FinalColor)->GetTextureView() });
+
 	SetViewport(_currentFrameBufferSize);
 	BeginRenderPass({ 0,0,0,0 });
 	//Begin...
@@ -135,6 +136,14 @@ void GUIPass::PassReset()
 
 void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, float w, float h, GUIDrawState state , float fontSize)
 {
+	//换算一下超采样的分辨率：
+	float resScale = ((float)_renderer->GetRenderSize().width) / ((float)_renderer->GetWindowSurfaceSize().width);
+	fontSize *= resScale;
+	x *= resScale;
+	y *= resScale;
+	w *= resScale;
+	h *= resScale;
+
 	auto textLength = wcslen(text);
 	if (textLength <= 0)
 		return;
@@ -184,6 +193,13 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 
 void GUIPass::GUIDrawImage(HString tag, Texture2D* texture, float x, float y, float w, float h, GUIDrawState state)
 {
+	//换算一下超采样的分辨率：
+	float resScale = ((float)_renderer->GetRenderSize().width) / ((float)_renderer->GetWindowSurfaceSize().width);
+	x *= resScale;
+	y *= resScale;
+	w *= resScale;
+	h *= resScale;
+
 	GUIPrimitive* prim = GetPrimitve(tag, state, 1, _guiShaderIndex, x, y, w, h);
 	SetupPanelAnchor(state, x, y, w, h, prim->Data.data());
 	prim->States[0].uniformBuffer.UVSetting = glm::vec4(0, 0, 1, 1);

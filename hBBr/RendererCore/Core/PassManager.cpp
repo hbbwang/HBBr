@@ -5,6 +5,7 @@
 #include "Pass/ImguiPass.h"
 #include "Pass/GUIPass.h"
 #include "Pass/ScreenshotPass.h"
+#include "Pass/FinalPass.h"
 void PassManager::PassesInit(VulkanRenderer* renderer)
 {
 	_renderer = renderer;
@@ -26,6 +27,9 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 		//		std::shared_ptr<ImguiScreenPass> imgui = std::make_shared<ImguiScreenPass>(renderer);
 		//		AddPass(imgui, "Imgui");
 		//#endif
+		//Finial Pass
+		std::shared_ptr<FinalPass> finalPass = std::make_shared<FinalPass>(renderer);
+		AddPass(finalPass, "Final Copy");
 	}
 	for (auto p : _passes)
 	{

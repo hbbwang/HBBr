@@ -8,7 +8,7 @@
 void ImguiScreenPass::PassInit()
 {
 	//Swapchain
-	AddAttachment(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	AddSubpass({}, { 0 }, -1);
 	CreateRenderPass();
 	VulkanManager::GetManager()->InitImgui_SDL(_renderer->GetWindowHandle(), _renderPass);
@@ -33,7 +33,7 @@ void ImguiScreenPass::PassUpdate()
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.1, 0.4, 0.2, 0.2));
 	//Update FrameBuffer
-	ResetFrameBuffer(_renderer->GetSurfaceSize(), {});
+	ResetFrameBuffer(_renderer->GetRenderSize(), {GetSceneTexture(SceneTextureDesc::FinalColor)->GetTextureView()});
 	SetViewport(_currentFrameBufferSize);
 	BeginRenderPass({ 0,0,0,0 });
 	manager->ImguiNewFrame();
