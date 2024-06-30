@@ -243,6 +243,9 @@ void VulkanRenderer::Render()
 				return;
 			}
 
+			//Get valid frame index
+			_lastValidSwapchainIndex = _currentFrameIndex;
+
 			//Get next frame index.
 			uint32_t maxNumSwapchainImages = _vulkanManager->GetSwapchainBufferCount();
 			_currentFrameIndex = (_currentFrameIndex + 1) % maxNumSwapchainImages;
@@ -273,9 +276,11 @@ void VulkanRenderer::SetupPassUniformBuffer()
 #endif
 	if (mainCamera != nullptr)
 	{
+		auto surfaceSize = _surfaceSize;
+
 		_passUniformBuffer.View = mainCamera->GetViewMatrix();
 		_passUniformBuffer.View_Inv = mainCamera->GetInvViewMatrix();
-		float aspect = (float)_surfaceSize.width / (float)_surfaceSize.height;
+		float aspect = (float)surfaceSize.width / (float)surfaceSize.height;
 		//DirectX Left hand 
 		glm::mat4 flipYMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, -1.0f, 0.5f));
 
@@ -284,11 +289,11 @@ void VulkanRenderer::SetupPassUniformBuffer()
 			glm::vec3 rotation_axis = glm::vec3(0.0f, 0.0f, 1.0f);
 			if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR) {
 				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(90.0f), rotation_axis);
-                aspect = (float)_surfaceSize.height / (float)_surfaceSize.width;
+                aspect = (float)surfaceSize.height / (float)surfaceSize.width;
 			}
 			else if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR) {
 				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(270.0f), rotation_axis);
-                aspect = (float)_surfaceSize.height / (float)_surfaceSize.width;
+                aspect = (float)surfaceSize.height / (float)surfaceSize.width;
 			}
 			else if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR) {
 				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(180.0f), rotation_axis);
@@ -302,7 +307,7 @@ void VulkanRenderer::SetupPassUniformBuffer()
 		_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
 
 		_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
-		_passUniformBuffer.ScreenInfo = glm::vec4((float)_surfaceSize.width, (float)_surfaceSize.height, mainCamera->GetNearClipPlane(), mainCamera->GetFarClipPlane());
+		_passUniformBuffer.ScreenInfo = glm::vec4((float)surfaceSize.width, (float)surfaceSize.height, mainCamera->GetNearClipPlane(), mainCamera->GetFarClipPlane());
 		auto trans = mainCamera->GetGameObject()->GetTransform();
 		_passUniformBuffer.CameraPos_GameTime = glm::vec4(trans->GetWorldLocation().x, trans->GetWorldLocation().y, trans->GetWorldLocation().z, (float)VulkanApp::GetGameTime());
 		auto viewDir = glm::normalize(trans->GetForwardVector());
@@ -313,6 +318,7 @@ void VulkanRenderer::SetupPassUniformBuffer()
 
 bool VulkanRenderer::ResizeBuffer()
 {
+	_lastValidSwapchainIndex = -1;
 	if (_windowSize.width<=0 && _windowSize.height <= 0)
 	{
 		_windowSize = VulkanManager::GetManager()->GetSurfaceSize(_windowSize, _surface);

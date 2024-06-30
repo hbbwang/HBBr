@@ -49,6 +49,27 @@ void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> im
 	}
 }
 
+void GraphicsPass::ResetFrameBufferCustom(VkExtent2D size, std::vector<VkImageView> imageViews)
+{
+	if (_currentFrameBufferSize.width != size.width || _currentFrameBufferSize.height != size.height)
+	{
+		_currentFrameBufferSize = size;
+		const auto manager = VulkanManager::GetManager();
+		//const auto frameIndex = VulkanRenderer::GetCurrentFrameIndex();
+		//Insert swapchain imageView to first.
+		if (_framebuffers.size() > 0)
+		{
+			vkQueueWaitIdle(manager->GetGraphicsQueue());
+			manager->DestroyFrameBuffers(_framebuffers);
+		}
+		_framebuffers.resize(manager->GetSwapchainBufferCount());
+		for (int i = 0; i < _framebuffers.size(); i++)
+		{
+			VulkanManager::GetManager()->CreateFrameBuffer(size.width, size.height, _renderPass, imageViews, _framebuffers[i]);
+		}
+	}
+}
+
 void GraphicsPass::PassUpdate()
 {
 	const auto manager = VulkanManager::GetManager();
@@ -171,9 +192,13 @@ void GraphicsPass::AddSubpass(std::vector<uint32_t> inputIndexes, std::vector<ui
 	_subpassDependencys.push_back(depen);
 }
 
-void GraphicsPass::BeginRenderPass(std::array<float, 4> clearColor)
+void GraphicsPass::BeginRenderPass(std::array<float, 4> clearColor, VkExtent2D areaSize)
 {
-	VulkanManager::GetManager()->BeginRenderPass(_renderer->GetCommandBuffer(), GetFrameBuffer(), _renderPass, _currentFrameBufferSize, _attachmentDescs, clearColor);
+	if (areaSize.width <= 0 && areaSize.height <= 0)
+	{
+		areaSize = _currentFrameBufferSize;
+	}
+	VulkanManager::GetManager()->BeginRenderPass(_renderer->GetCommandBuffer(), GetFrameBuffer(), _renderPass, areaSize, _attachmentDescs, clearColor);
 }
 
 void GraphicsPass::EndRenderPass()

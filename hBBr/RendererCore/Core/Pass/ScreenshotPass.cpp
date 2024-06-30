@@ -1,6 +1,6 @@
 ﻿#include "ScreenshotPass.h"
 #include "VulkanRenderer.h"
-
+#include "Texture2D.h"
 //截图Pass单独出来，是为了能做一些特殊处理，比如锐化，或者超级分辨率之类的，不过这都是后话了。
 
 bool ScreenshotPass::bScreenshot = false;
@@ -9,12 +9,13 @@ ScreenshotPass::~ScreenshotPass()
 {
 	auto manager = VulkanManager::GetManager();
 	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout);
+	_screenshotRT.reset();
 }
 
 void ScreenshotPass::PassInit()
 {
 	const auto& manager = VulkanManager::GetManager();
-	AddAttachment(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	AddSubpass({}, { 0 }, -1,
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
@@ -38,26 +39,48 @@ void ScreenshotPass::PassInit()
 
 	//Set Pass Name
 	_passName = "Screenshot Pass";
-	_markColor = glm::vec4(0.3, 0.3, 0.35, 0.5);
+
+	screenshotOutputSize = {1920,1080};
+
+	//init rt
+	_screenshotRT = 
+		Texture2D::CreateTexture2D(
+			screenshotOutputSize.width, screenshotOutputSize.height,
+			VK_FORMAT_R8G8B8A8_UNORM,
+			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, 
+			"Screenshot Texture Output");
 }
 
 void ScreenshotPass::PassUpdate()
 {
+	const auto& manager = VulkanManager::GetManager();
+	const auto cmdBuf = _renderer->GetCommandBuffer();
+	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.5, 0.5, 0.55, 0.5));
+
 	if (!bScreenshot)
 	{
 		return;
 	}
+	
+	if (screenshotOutputSize.width != _screenshotRT->GetImageSize().width
+		|| screenshotOutputSize.height != _screenshotRT->GetImageSize().height)
+	{
+		manager->QueueWaitIdle(manager->GetGraphicsQueue());
+		_screenshotRT->Resize(screenshotOutputSize.width, screenshotOutputSize.height);
+	}
 
-	const auto& manager = VulkanManager::GetManager();
-	const auto cmdBuf = _renderer->GetCommandBuffer();
-	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.3, 1.0, 0.1, 0.2));
+	int swapchainIndex = _renderer->GetCurrentFrameIndex(); 
+	auto swapchainImage = _renderer->GetSwapchainImages()[swapchainIndex]; 
+	auto swapchainView = _renderer->GetSwapchainImageViews()[swapchainIndex];
+	manager->Transition(cmdBuf, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	if (_screenshotRT->GetLayout() == VK_IMAGE_LAYOUT_UNDEFINED)
+	{
+		_screenshotRT->Transition(cmdBuf, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	}
+
 	//Update FrameBuffer
-	ResetFrameBuffer(_renderer->GetSurfaceSize(), {});
-	SetViewport(_currentFrameBufferSize);
-
-	auto sceneColor = GetSceneTexture((uint32_t)SceneTextureDesc::SceneColor).get();
-	sceneColor->Transition(cmdBuf, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
+	ResetFrameBufferCustom(screenshotOutputSize, { _screenshotRT->GetTextureView()});
+	SetViewport(screenshotOutputSize);
 	BeginRenderPass({ 0,0,0,0 });
 	//Begin...
 
@@ -72,17 +95,19 @@ void ScreenshotPass::PassUpdate()
 	//vertex buffer
 	std::vector<ScreenshotVertexData> vertices =
 	{
-		{ glm::vec2(0.0f, 0.0f) , glm::vec2(0.0f, 0.0f) },
-		{ glm::vec2(1.0f, 0.0f) , glm::vec2(1.0f, 0.0f) },
-		{ glm::vec2(0.0f, 1.0f) , glm::vec2(0.0f, 1.0f) },
-		{ glm::vec2(1.0f, 0.0f) , glm::vec2(1.0f, 0.0f) },
+		{ glm::vec2(-1.0f, -1.0f) , glm::vec2(0.0f, 0.0f) },
+		{ glm::vec2(1.0f, -1.0f) , glm::vec2(1.0f, 0.0f) },
+		{ glm::vec2(-1.0f, 1.0f) , glm::vec2(0.0f, 1.0f) },
+		{ glm::vec2(1.0f, -1.0f) , glm::vec2(1.0f, 0.0f) },
 		{ glm::vec2(1.0f, 1.0f) , glm::vec2(1.0f, 1.0f) },
-		{ glm::vec2(0.0f, 1.0f) , glm::vec2(0.0f, 1.0f) }
+		{ glm::vec2(-1.0f, 1.0f) , glm::vec2(0.0f, 1.0f) }
 	};
+
 	//textures
-	_tex_descriptorSet->UpdateTextureDescriptorSet({ sceneColor }, { Texture2D::GetSampler(TextureSampler::TextureSampler_Linear_Wrap) });
-	uint32_t ubSize = (uint32_t)manager->GetMinUboAlignmentSize(sizeof(ScreenshotUniformBuffer));
+	_tex_descriptorSet->NeedUpdate();
+	_tex_descriptorSet->UpdateTextureDescriptorSet({ swapchainView }, { Texture2D::GetSampler(TextureSampler::TextureSampler_Linear_Clamp) });
 	//uniform buffers
+	uint32_t ubSize = (uint32_t)manager->GetMinUboAlignmentSize(sizeof(ScreenshotUniformBuffer));
 	ScreenshotUniformBuffer uniform = {};
 	_ub_descriptorSet->BufferMapping(&uniform, 0, ubSize);
 	//vertex buffer
@@ -108,7 +133,8 @@ void ScreenshotPass::PassUpdate()
 	//End...
 	EndRenderPass();
 
-	sceneColor->Transition(cmdBuf, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	manager->Transition(cmdBuf, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
 }
 
 void ScreenshotPass::PassReset()
@@ -130,13 +156,7 @@ PipelineIndex ScreenshotPass::CreatePipeline(HString shaderName)
 
 	vertexInputLayout.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 	VkGraphicsPipelineCreateInfoCache pipelineCreateInfo = {};
-	PipelineManager::SetColorBlend(pipelineCreateInfo, true,
-		StaticBlendState(
-			1,
-			CW_RGBA,
-			BO_ADD, BF_SRC_ALPHA, BF_ONE_MINUS_SRC_ALPHA,//color
-			BO_ADD, BF_SRC_ALPHA, BF_ONE_MINUS_SRC_ALPHA //alpha
-		));
+	PipelineManager::SetColorBlend(pipelineCreateInfo, false);
 	PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
 	//PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
 	PipelineManager::SetVertexInput(pipelineCreateInfo, vertexInputLayout);

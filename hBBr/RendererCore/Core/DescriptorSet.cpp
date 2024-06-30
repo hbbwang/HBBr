@@ -189,6 +189,36 @@ void DescriptorSet::UpdateTextureDescriptorSet(std::vector<class Texture2D*> tex
 	}
 }
 
+void DescriptorSet::UpdateTextureDescriptorSet(std::vector<VkImageView> images, std::vector<VkSampler> samplers)
+{
+	if (_needUpdates[_renderer->GetCurrentFrameIndex()] == 1)
+	{
+		_needUpdates[_renderer->GetCurrentFrameIndex()] = 0;
+		//
+		const uint32_t count = (uint32_t)images.size();
+		std::vector<VkWriteDescriptorSet> descriptorWrite(count);
+		std::vector<VkDescriptorImageInfo> imageInfo(count);
+		for (uint32_t o = 0; o < count; o++)
+		{
+			imageInfo[o] = {};
+			imageInfo[o].sampler = samplers[o];
+			imageInfo[o].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageInfo[o].imageView = images[o];
+			descriptorWrite[o] = {};
+			descriptorWrite[o].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite[o].dstSet = this->GetDescriptorSet();
+			descriptorWrite[o].dstBinding = o;
+			descriptorWrite[o].dstArrayElement = 0;
+			descriptorWrite[o].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrite[o].descriptorCount = 1;
+			descriptorWrite[o].pBufferInfo = VK_NULL_HANDLE;
+			descriptorWrite[o].pImageInfo = &imageInfo[o]; // Optional
+			descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE; // Optional
+		}
+		vkUpdateDescriptorSets(VulkanManager::GetManager()->GetDevice(), count, descriptorWrite.data(), 0, VK_NULL_HANDLE);
+	}
+}
+
 const VkDescriptorSet& DescriptorSet::GetDescriptorSet()
 {
 	return _descriptorSets[_renderer->GetCurrentFrameIndex()];

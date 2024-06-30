@@ -51,7 +51,11 @@ public:
 		_currentFrameBufferSize = { 1 , 1 };//Force update
 		PassReset();
 	}
+	//该函数不需要指定swapchain image，已经包含在内
 	virtual void ResetFrameBuffer(VkExtent2D size,std::vector<VkImageView> imageViews);
+	//该函数需要手动指定所有images
+	virtual void ResetFrameBufferCustom(VkExtent2D size, std::vector<VkImageView> imageViews);
+
 	void CreateRenderPass();
 	HBBR_INLINE VkRenderPass GetRenderPass()const
 	{
@@ -60,7 +64,7 @@ public:
 	HString _passName = "Graphics Pass" ;
 protected:
 	virtual void PassRender() {}
-	void BeginRenderPass(std::array<float, 4> clearColor = { 0.0f, 0.0f, 0.0f, 0.0f });
+	void BeginRenderPass(std::array<float, 4> clearColor = { 0.0f, 0.0f, 0.0f, 0.0f }, VkExtent2D areaSize = {});
 	void EndRenderPass();
 	void SetViewport(VkExtent2D viewportSize);
 	VkFramebuffer GetFrameBuffer()const;

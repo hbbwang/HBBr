@@ -23,6 +23,7 @@ SceneTexture::SceneTexture(VulkanRenderer* renderer)
 	_renderer = renderer;
 	auto sceneColor = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_R16G16B16A16_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneColor");
 	auto sceneDepth = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneDepth");
+	auto finalColor = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "FinalColor");
 	//Transition
 	VkCommandBuffer cmdbuf;
 	VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), cmdbuf);
@@ -30,6 +31,7 @@ SceneTexture::SceneTexture(VulkanRenderer* renderer)
 	{
 		sceneColor->Transition(cmdbuf, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 		sceneDepth->Transition(cmdbuf, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		finalColor->Transition(cmdbuf, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	}
 	VulkanManager::GetManager()->EndCommandBuffer(cmdbuf);
 	VulkanManager::GetManager()->SubmitQueueImmediate({ cmdbuf });
@@ -38,6 +40,7 @@ SceneTexture::SceneTexture(VulkanRenderer* renderer)
 	//
 	_sceneTexture.insert(std::make_pair(SceneTextureDesc::SceneColor, sceneColor));
 	_sceneTexture.insert(std::make_pair(SceneTextureDesc::SceneDepth, sceneDepth));
+	_sceneTexture.insert(std::make_pair(SceneTextureDesc::FinalColor, finalColor));
 }
 
 void SceneTexture::UpdateTextures()
@@ -46,11 +49,18 @@ void SceneTexture::UpdateTextures()
 	{
 		return;
 	}
+	auto size = _renderer->GetSurfaceSize();
 	auto sceneDepth = _sceneTexture[SceneTextureDesc::SceneDepth];
-	if (sceneDepth->GetImageSize().width != _renderer->GetSurfaceSize().width ||
-		sceneDepth->GetImageSize().height != _renderer->GetSurfaceSize().height)
+	if (sceneDepth->GetImageSize().width != size.width ||
+		sceneDepth->GetImageSize().height != size.height)
 	{
-		_sceneTexture[SceneTextureDesc::SceneDepth]->Resize(_renderer->GetSurfaceSize().width, _renderer->GetSurfaceSize().height);
+		sceneDepth->Resize(size.width, size.height);
+	}
+	auto finalColor = _sceneTexture[SceneTextureDesc::FinalColor];
+	if (finalColor->GetImageSize().width != size.width ||
+		finalColor->GetImageSize().height != size.height)
+	{
+		finalColor->Resize(size.width, size.height);
 	}
 }
 

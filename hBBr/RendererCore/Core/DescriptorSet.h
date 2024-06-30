@@ -29,6 +29,8 @@ public:
 
 	void UpdateTextureDescriptorSet(std::vector<class Texture2D*> textures, std::vector<VkSampler> samplers);
 
+	void UpdateTextureDescriptorSet(std::vector<VkImageView> images, std::vector<VkSampler> samplers);
+
 	HBBR_INLINE Buffer* GetBuffer(int bufferIndex = 0)const { return _buffers[bufferIndex].get(); }
 
 	HBBR_INLINE std::vector<VkDescriptorType> GetTypes()const { return _descriptorTypes; }

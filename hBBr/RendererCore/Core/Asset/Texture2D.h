@@ -43,6 +43,7 @@ enum TextureSampler
 enum class SceneTextureDesc {
 	SceneColor = 0,
 	SceneDepth = 1,
+	FinalColor = 2,
 };
 
 class VulkanRenderer;

@@ -107,6 +107,8 @@ public:
 
 	HBBR_API void DeviceWaitIdle();
 
+	HBBR_API void QueueWaitIdle(VkQueue queue);
+
 	/* 初始化Vulkan */
 
 	void InitInstance(bool bEnableDebug);
@@ -145,9 +147,6 @@ public:
 		bool bIsFullScreen = false,
 		bool bVSync = true
 	);
-
-	/* 创建Swapchain From Texture2D Class */
-	VkExtent2D CreateSwapchainFromTextures(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture2D>>& textures , std::vector<VkImageView>& swapchainImageViews);
 
 	/* 释放Swapchain */
 	void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImageView>& swapchainImageViews);

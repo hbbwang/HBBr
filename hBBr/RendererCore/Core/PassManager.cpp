@@ -22,10 +22,10 @@ void PassManager::PassesInit(VulkanRenderer* renderer)
 		//Screen GUI Pass
 		std::shared_ptr<GUIPass> gui = std::make_shared<GUIPass>(renderer);
 		AddPass(gui, "GUI");
-//#ifdef IS_EDITOR
-//		std::shared_ptr<ImguiScreenPass> imgui = std::make_shared<ImguiScreenPass>(renderer);
-//		AddPass(imgui, "Imgui");
-//#endif
+		//#ifdef IS_EDITOR
+		//		std::shared_ptr<ImguiScreenPass> imgui = std::make_shared<ImguiScreenPass>(renderer);
+		//		AddPass(imgui, "Imgui");
+		//#endif
 	}
 	for (auto p : _passes)
 	{

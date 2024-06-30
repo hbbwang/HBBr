@@ -351,8 +351,8 @@ void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
             if (manager)
             {
                 auto func =
-                    [this,&manager]() {
-                        manager = nullptr;
+                    [this, &manager]() {
+                    manager = nullptr;
                     };
                 manager->_finishExec.push_back(func);
                 if (manager->exec() == -10)
@@ -367,17 +367,24 @@ void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
                     i.lock()->UnLoad();
                 }
                 //¸ü»»±à¼­³¡¾°
-                if (_parent->_comboBox->GetCurrentSelection().compare(_parent->_currentLevelItem->_level.lock()->GetLevelName().c_str(), Qt::CaseInsensitive))
+                if (_parent->_currentLevelItem)
                 {
-                    _parent->ClearCurrentLevelSelection();
-                    for (auto& i : _parent->_levelItems)
+                    if (_parent->_comboBox->GetCurrentSelection().compare(_parent->_currentLevelItem->_level.lock()->GetLevelName().c_str(), Qt::CaseInsensitive))
                     {
-                        if (i->_level.lock()->IsLoaded())
+                        _parent->ClearCurrentLevelSelection();
+                        for (auto& i : _parent->_levelItems)
                         {
-                            _parent->SetCurrentLevelSelection(i);
-                            break;
+                            if (i->_level.lock()->IsLoaded())
+                            {
+                                _parent->SetCurrentLevelSelection(i);
+                                break;
+                            }
                         }
                     }
+                }
+                else
+                {
+                    _parent->ClearCurrentLevelSelection();
                 }
             }
         });

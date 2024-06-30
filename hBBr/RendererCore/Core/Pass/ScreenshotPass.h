@@ -26,6 +26,7 @@ public:
 	static bool bScreenshot;
 
 private:
+
 	std::shared_ptr<class Buffer>_vertexBuffer;
 	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
 	VkDescriptorSetLayout _ubDescriptorSetLayout = VK_NULL_HANDLE;
@@ -34,5 +35,9 @@ private:
 	std::shared_ptr<class DescriptorSet> _ub_descriptorSet;
 	std::shared_ptr<class DescriptorSet> _tex_descriptorSet;
 	PipelineIndex CreatePipeline(HString shaderName);
+
+	std::shared_ptr<class Texture2D> _screenshotRT;
+	VkExtent2D screenshotOutputSize;
+
 };
 

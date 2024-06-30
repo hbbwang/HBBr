@@ -71,6 +71,10 @@ VulkanDebugCallback(
 	title = title + HString("@[") + layer_prefix + "]";
 	//ConsoleDebug::print_endl(title, color);
 	//ConsoleDebug::print_endl(msg, color);
+	if (HString(msg).Contains("loader_get_json:"))
+	{
+		return false;
+	}
 	if (bError)
 	{
 		try {
@@ -81,7 +85,6 @@ VulkanDebugCallback(
 			ConsoleDebug::print_endl(HString("Error: ")+ e.what());
 		}
 	}
-
 	return false;
 }
 
@@ -782,6 +785,11 @@ void VulkanManager::DeviceWaitIdle()
 	vkDeviceWaitIdle(_device);
 }
 
+void VulkanManager::QueueWaitIdle(VkQueue queue)
+{
+	vkQueueWaitIdle(queue);
+}
+
 void VulkanManager::CheckSurfaceFormat(VkSurfaceKHR surface, VkSurfaceFormatKHR& surfaceFormat)
 {
 	//Check Support
@@ -1069,7 +1077,11 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	//info.imageExtent.width = SizeX;
 	//info.imageExtent.height = SizeY;
 	info.imageExtent = surfaceSize;
-	info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+	info.imageUsage =
+		VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT	//支持在RenderPass中作为color附件，并且在subpass中进行传递
+		| VK_IMAGE_USAGE_TRANSFER_SRC_BIT				//支持复制到其他图像
+		| VK_IMAGE_USAGE_SAMPLED_BIT						//支持被采样
+		;
 	info.preTransform = PreTransform;
 	info.imageArrayLayers = 1;
 	info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -1217,96 +1229,6 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	return info.imageExtent;
 }
 
-VkExtent2D VulkanManager::CreateSwapchainFromTextures(VkExtent2D surfaceSize, VkSurfaceKHR surface, VkSurfaceFormatKHR surfaceFormat, VkSwapchainKHR& newSwapchain, std::vector<std::shared_ptr<class Texture2D>>& textures, std::vector<VkImageView>& swapchainImageViews)
-{
-	//ConsoleDebug::print_endl("Create Swapchain KHR.");
-	VkPresentModeKHR present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-	//if (_winInfo.vsync)
-	{
-		uint32_t present_mode_count = 0;
-		vkGetPhysicalDeviceSurfacePresentModesKHR(_gpuDevice, surface, &present_mode_count, VK_NULL_HANDLE);
-		std::vector<VkPresentModeKHR> presentModes(present_mode_count);
-		vkGetPhysicalDeviceSurfacePresentModesKHR(_gpuDevice, surface, &present_mode_count, presentModes.data());
-		for (int i = 0; i < presentModes.size(); i++)
-		{
-			//if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
-			//{
-			//	present_mode = presentModes[i];//这个垂直同步在Nvidia有bug ?
-			//	//break;
-			//}
-			if (presentModes[i] == VK_PRESENT_MODE_FIFO_KHR)
-			{
-				present_mode = presentModes[i];//垂直同步
-				break;
-			}
-		}
-	}
-
-	//Get surface size 
-	VkExtent2D _surfaceSize = GetSurfaceSize(surfaceSize, surface);
-	if (_surfaceSize.width <= 0 && _surfaceSize.height <= 0)
-	{
-		return _surfaceSize;
-	}
-	VkSwapchainCreateInfoKHR info = {};
-	info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	info.surface = surface;
-	info.minImageCount = _swapchainBufferCount;
-	info.imageFormat = surfaceFormat.format;
-	info.imageColorSpace = surfaceFormat.colorSpace;
-	info.imageExtent = _surfaceSize;
-	info.imageArrayLayers = 1;
-	info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT	//支持在RenderPass中作为color附件，并且在subpass中进行传递
-		| VK_IMAGE_USAGE_TRANSFER_SRC_BIT					//支持复制到其他图像
-		;
-	info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	info.queueFamilyIndexCount = 0;
-	info.pQueueFamilyIndices = VK_NULL_HANDLE;
-	info.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
-	info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;//是否半透明，用于组合其他表面,这里我们不需要
-	info.presentMode = present_mode;
-	info.clipped = VK_TRUE;//是否不渲染看不见的位置
-	//替补swapchain,在重置这个swapchain的时候会比较有用，但是事实上我们可以用更暴力的方法重置swapchain，也就是完全重写
-	info.oldSwapchain = VK_NULL_HANDLE;
-	auto result = vkCreateSwapchainKHR(_device, &info, VK_NULL_HANDLE, &newSwapchain);
-	if (result != VK_SUCCESS)
-	{
-		MessageOut((GetInternationalizationText("Renderer", "A000007")+ GetVkResult(result)), false, true);
-	}
-	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, VK_NULL_HANDLE);
-	textures.resize(_swapchainBufferCount);
-	std::vector<VkImage> images(_swapchainBufferCount);
-	vkGetSwapchainImagesKHR(_device, newSwapchain, &_swapchainBufferCount, images.data());
-	//创建ImageView
-	swapchainImageViews.clear();
-	for (int i = 0; i < (int)_swapchainBufferCount; i++)
-	{
-		textures[i].reset(new Texture2D());
-		textures[i]->_image = images[i];
-		textures[i]->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		textures[i]->_imageAspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
-		textures[i]->_format = surfaceFormat.format;
-		textures[i]->_usageFlags = info.imageUsage;
-		textures[i]->_textureName = "Swapchain Image " + HString::FromInt(i);
-		CreateImageView(textures[i]->_image, surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, textures[i]->_imageView);
-		swapchainImageViews.push_back(textures[i]->_imageView);
-	}
-	//Swapchain转换到呈现模式
-	VkCommandBuffer buf;
-	AllocateCommandBuffer(_commandPool, buf);
-	BeginCommandBuffer(buf, 0);
-	for (int i = 0; i < (int)_swapchainBufferCount; i++)
-	{
-		//Transition(buf, swapchainImages[i], VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-		textures[i]->Transition(buf, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-	}
-	EndCommandBuffer(buf);
-	SubmitQueueImmediate({ buf });
-	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
-	FreeCommandBuffers(_commandPool, { buf });
-	return _surfaceSize;
-}
-
 void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImageView>& swapchainImageViews)
 {
 	for (int i = 0; i < (int)swapchainImageViews.size(); i++)
@@ -1450,6 +1372,10 @@ void VulkanManager::Transition(
 		imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 		srcFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		break;
+	case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
+		imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		srcFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		break;
 	case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
 	case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
 		imageBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
@@ -1490,10 +1416,6 @@ void VulkanManager::Transition(
 		dstFlags = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 		break;
 	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-		if (oldLayout != VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)
-		{
-			imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-		}
 		imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 		dstFlags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 		break;
