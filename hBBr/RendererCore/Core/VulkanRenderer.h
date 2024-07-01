@@ -1,11 +1,11 @@
 ﻿#pragma once
 #include "VulkanManager.h"
 #include "FormMain.h"
+#include <map>
 #include <memory>
 #include <mutex>
 #include <thread>
 #include <functional>
-#include <map>
 #include "Pass/PassType.h"
 #include "Asset/HGuid.h"
 #include "HTime.h"
@@ -18,6 +18,7 @@ class VulkanRenderer
 {
 	friend class PassManager;
 	friend class VulkanApp;
+	friend class CameraComponent;
 public:
 	HBBR_API VulkanRenderer(SDL_Window* windowHandle, const char* rendererName);
 
@@ -30,10 +31,6 @@ public:
 
 	HBBR_INLINE bool IsRendererWantRelease() {
 		return _bRendererRelease;
-	}
-
-	HBBR_API HBBR_INLINE class PassManager* GetPassManager() {
-		return _passManager.get();
 	}
 
 	HBBR_API HBBR_INLINE SDL_Window* GetWindowHandle() {
@@ -123,11 +120,6 @@ public:
 		return VulkanApp::IsWindowFocus(_windowHandle);
 	}
 
-	HBBR_INLINE const PassUniformBuffer& GetPassUniformBufferCache()
-	{
-		return _passUniformBuffer;
-	}
-
 	HBBR_API HBBR_INLINE void ExecFunctionOnRenderThread(std::function<void()> func)
 	{
 		_renderThreadFuncsOnce.push_back(func);
@@ -189,8 +181,6 @@ public:
 
 private:
 
-	void SetupPassUniformBuffer();
-
 	bool ResizeBuffer();
 
 	HString _rendererName;
@@ -210,6 +200,8 @@ private:
 	std::vector<VkImage>	_swapchainImages;
 
 	std::vector<VkImageView>_swapchainImageViews;
+
+	std::vector<VkFence> _executeFence;
 
 	std::vector<VkSemaphore> _presentSemaphore;
 
@@ -231,11 +223,8 @@ private:
 
 	SDL_Window* _windowHandle = nullptr;
 
-	//Pass Uniform
-	PassUniformBuffer _passUniformBuffer;
-
-	//Passes
-	std::unique_ptr<class PassManager> _passManager;
+	//Passes，多少个相机，就有多少组passes需要渲染
+	std::map<class CameraComponent*, std::shared_ptr<class PassManager>> _passManagers;
 
 	//World
 	std::shared_ptr<class World> _world;

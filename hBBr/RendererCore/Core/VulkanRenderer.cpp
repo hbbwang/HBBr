@@ -10,6 +10,8 @@
 #include "Asset/World.h"
 #include "Component/GameObject.h"
 #include "Component/CameraComponent.h"
+#include "Pass/PassDefine.h"
+#include "Pass/FinalPass.h"
 
 #if IS_EDITOR
 #include "ShaderCompiler.h"
@@ -42,10 +44,15 @@ void VulkanRenderer::Release()
 	_spwanNewWorld.clear();
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
-	_passManager.reset();
 	_world.reset();
+	for (auto& i : _passManagers)
+	{
+		i.second.reset();
+	}
+	_passManagers.clear();
 	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf);
 	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
+	_vulkanManager->DestroyRenderFences(_executeFence);
 	_vulkanManager->DestroyRenderSemaphores(_presentSemaphore);
 	_vulkanManager->DestroyRenderSemaphores(_queueSubmitSemaphore);
 	//_vulkanManager->DestroyRenderFences(_imageAcquiredFences);
@@ -71,7 +78,7 @@ void VulkanRenderer::Init()
 	ConsoleDebug::print_endl("hBBr:Start Check Surface Format.");
 	_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
 	ConsoleDebug::print_endl("hBBr:Start Create Swapchain.");
-	_renderSize =  _surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore ,&_queueSubmitSemaphore);
+	_renderSize =  _surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore ,&_queueSubmitSemaphore,&_executeFence);
 
 	//Set renderer map , Add new renderer
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
@@ -98,9 +105,6 @@ void VulkanRenderer::Init()
 
 	_renderThreadFuncsOnce.reserve(10);
 	_renderThreadFuncs.reserve(10);
-	 
-	//Init passes
-	_passManager.reset(new PassManager());
 
 }
 
@@ -184,6 +188,7 @@ void VulkanRenderer::CreateEmptyWorld()
 
 void VulkanRenderer::Render()
 {
+	VulkanManager* manager = VulkanManager::GetManager();
 	if (!_bInit) //Render loop Init.
 	{
 		if (_bIsMainRenderer)
@@ -197,7 +202,6 @@ void VulkanRenderer::Render()
 			CreateEmptyWorld();
 		}
 
-		_passManager->PassesInit(this);
 		_bInit = true;
 	}
 	else if (!_bRendererRelease && _bInit)
@@ -205,14 +209,14 @@ void VulkanRenderer::Render()
 		if (bResizeBuffer)
 		{
 			ResizeBuffer();
+			return;
 		}
 		if(_swapchain)
 		{
-			VulkanManager* _vulkanManager = VulkanManager::GetManager();
+			//这个 _swapchainIndex 和 _currentFrameIndex 不是一个东西，前者是有效交换链的index，后者只是帧Index
+			uint32_t swapchainIndex = 0;
 
-			uint32_t _swapchainIndex = 0;
-
-			if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], VK_NULL_HANDLE, &_swapchainIndex))
+			if (!manager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], VK_NULL_HANDLE, &swapchainIndex))
 			{
 				ResizeBuffer();
 				return;
@@ -223,7 +227,6 @@ void VulkanRenderer::Render()
 			{
 				func();
 			}
-
 			for (auto& func : _renderThreadFuncs)
 			{
 				func();
@@ -232,12 +235,36 @@ void VulkanRenderer::Render()
 			if (_world)
 				_world->WorldUpdate();
 
-			SetupPassUniformBuffer();
 
-			_passManager->PassesUpdate();
+			manager->WaitForFences({ _executeFence[_currentFrameIndex] });
+			auto cmdBuf = _cmdBuf[_currentFrameIndex];
+			manager->ResetCommandBuffer(cmdBuf);
+			manager->BeginCommandBuffer(cmdBuf);
+
+			for (auto& p : _passManagers)
+			{
+				p.second->SetupPassUniformBuffer(p.first, _renderSize);
+				p.second->PassesUpdate();
+			}
+
+			//把MainCamera绘制完的图像复制到swapchain
+			if (_world)
+			{
+				VulkanManager* manager = VulkanManager::GetManager();
+				CameraComponent* mainCamera = _world->_mainCamera;
+				#if IS_EDITOR
+				if (mainCamera == nullptr) //编辑器内，主相机无效的情况下,强制切换到编辑器相机
+					mainCamera = _world->_editorCamera;
+				#endif
+				auto& mainPassManager = _passManagers[mainCamera];
+				mainPassManager->CmdCopyFinalColorToSwapchain();
+			}
+
+			manager->EndCommandBuffer(cmdBuf);
+			manager->SubmitQueueForPasses(cmdBuf, GetPresentSemaphore(), GetSubmitSemaphore(), _executeFence[_currentFrameIndex]);
 
 			//Present swapchain.
-			if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], _swapchainIndex))
+			if (!manager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], swapchainIndex))
 			{
 				ResizeBuffer();
 				return;
@@ -247,10 +274,10 @@ void VulkanRenderer::Render()
 			_lastValidSwapchainIndex = _currentFrameIndex;
 
 			//Get next frame index.
-			uint32_t maxNumSwapchainImages = _vulkanManager->GetSwapchainBufferCount();
+			uint32_t maxNumSwapchainImages = manager->GetSwapchainBufferCount();
 			_currentFrameIndex = (_currentFrameIndex + 1) % maxNumSwapchainImages;
 		}
-		}
+	}
 }
 
 void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
@@ -259,64 +286,6 @@ void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
 	_windowSize.height = h;
 	bResizeBuffer = true;
 	ResizeBuffer();
-}
-
-void VulkanRenderer::SetupPassUniformBuffer()
-{
-	const CameraComponent* mainCamera = nullptr;
-	if (!IsWorldValid())
-	{
-		return;
-	}
-	if (_bIsInGame)
-		mainCamera = GetWorld().lock()->_mainCamera;
-#if IS_EDITOR
-	else
-		mainCamera = GetWorld().lock()->_editorCamera;
-#endif
-	if (mainCamera != nullptr)
-	{
-		_renderSize = _surfaceSize;
-		_renderSize.width *= 1;
-		_renderSize.height *= 1;
-		VkExtent2D renderSize = _renderSize;
-
-		_passUniformBuffer.View = mainCamera->GetViewMatrix();
-		_passUniformBuffer.View_Inv = mainCamera->GetInvViewMatrix();
-		float aspect = (float)renderSize.width / (float)renderSize.height;
-		//DirectX Left hand 
-		glm::mat4 flipYMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, -1.0f, 0.5f));
-
-		{//Screen Rotator
-			glm::mat4 pre_rotate_mat = glm::mat4(1);
-			glm::vec3 rotation_axis = glm::vec3(0.0f, 0.0f, 1.0f);
-			if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR) {
-				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(90.0f), rotation_axis);
-                aspect = (float)renderSize.height / (float)renderSize.width;
-			}
-			else if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR) {
-				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(270.0f), rotation_axis);
-                aspect = (float)renderSize.height / (float)renderSize.width;
-			}
-			else if (_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR) {
-				pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(180.0f), rotation_axis);
-			}
-            //DirectX Left hand.
-            _passUniformBuffer.Projection = glm::perspectiveLH(glm::radians(mainCamera->GetFOV()), aspect, mainCamera->GetNearClipPlane(), mainCamera->GetFarClipPlane());
-			_passUniformBuffer.Projection = pre_rotate_mat * flipYMatrix * _passUniformBuffer.Projection;
-		}
-
-		_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
-		_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
-
-		_passUniformBuffer.ViewProj_Inv = glm::inverse(_passUniformBuffer.ViewProj);
-		_passUniformBuffer.ScreenInfo = glm::vec4((float)renderSize.width, (float)renderSize.height, mainCamera->GetNearClipPlane(), mainCamera->GetFarClipPlane());
-		auto trans = mainCamera->GetGameObject()->GetTransform();
-		_passUniformBuffer.CameraPos_GameTime = glm::vec4(trans->GetWorldLocation().x, trans->GetWorldLocation().y, trans->GetWorldLocation().z, (float)VulkanApp::GetGameTime());
-		auto viewDir = glm::normalize(trans->GetForwardVector());
-		_passUniformBuffer.CameraDirection = glm::vec4(viewDir.x, viewDir.y, viewDir.z, 0.0f);
-
-	}
 }
 
 bool VulkanRenderer::ResizeBuffer()
@@ -332,7 +301,6 @@ bool VulkanRenderer::ResizeBuffer()
 		{
 			vkDeviceWaitIdle(_vulkanManager->GetDevice());
 			_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
-
 #if __ANDROID__
 			_Sleep(200);
 #endif
@@ -347,12 +315,16 @@ bool VulkanRenderer::ResizeBuffer()
 
 			_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
 			_renderSize = _surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore, &_queueSubmitSemaphore
-			,nullptr,false,true);
+			, &_executeFence, false, true);
 			if (_swapchain == VK_NULL_HANDLE)
 			{
 				return false;
 			}
-			_passManager->PassesReset();
+
+			for (auto& p : _passManagers)
+			{
+				p.second->PassesReset();
+			}
 			bResizeBuffer = false;
 
 			////重置buffer会导致画面丢失，我们要在这一瞬间重新把buffer绘制回去，缓解黑屏。

@@ -4,6 +4,9 @@
 #include "VulkanRenderer.h"
 #include "HInput.h"
 #include "ConsoleDebug.h"
+#include "PassManager.h"
+#include <map>
+#include <memory>
 CameraComponent::CameraComponent(GameObject* parent)
 	:Component(parent)
 {
@@ -20,6 +23,12 @@ CameraComponent::CameraComponent(GameObject* parent)
 	}
 	EnableKeyInput(true);
 	EnableMouseInput(true);
+
+	//为当前相机生成passes
+	std::shared_ptr<PassManager>newPassManager;
+	newPassManager.reset(new PassManager(_renderer));
+	_renderer->_passManagers.emplace(this, newPassManager);
+
 }
 
 void CameraComponent::OverrideMainCamera()
@@ -151,5 +160,12 @@ void CameraComponent::ExecuteDestroy()
 			scene->_mainCamera = nullptr;
 		}
 	}
+
+	auto pit = _renderer->_passManagers.find(this);
+	if (pit != _renderer->_passManagers.end())
+	{
+		_renderer->_passManagers.erase(pit);
+	}
+
 	Component::ExecuteDestroy();
 }

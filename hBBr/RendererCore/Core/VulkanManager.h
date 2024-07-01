@@ -188,7 +188,9 @@ public:
 
 	void AllocateCommandBuffer(VkCommandPool commandPool , VkCommandBuffer& cmdBuf);
 
-	void FreeCommandBuffers(VkCommandPool commandPool, std::vector<VkCommandBuffer> cmdBufs);
+	void FreeCommandBuffers(VkCommandPool commandPool, std::vector<VkCommandBuffer>& cmdBufs);
+
+	void FreeCommandBuffer(VkCommandPool commandPool, VkCommandBuffer& cmdBuf);
 
 	void ResetCommandBuffer(VkCommandBuffer cmdBuf);
 
@@ -310,7 +312,7 @@ public:
 
 	VkViewport GetViewport(float w,float h);
 
-	void SubmitQueueForPasses(VkCommandBuffer cmdBuf,std::vector<std::shared_ptr<class PassBase>> passes, VkSemaphore* presentSemaphore, VkSemaphore* submitFinishSemaphore, VkFence executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkQueue queue = VK_NULL_HANDLE);
+	void SubmitQueueForPasses(VkCommandBuffer cmdBuf, VkSemaphore* presentSemaphore, VkSemaphore* submitFinishSemaphore, VkFence executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkQueue queue = VK_NULL_HANDLE);
 
 	void UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset , VkDeviceSize Range);
 
@@ -330,6 +332,8 @@ public:
 	void CmdNextSubpass(VkCommandBuffer cmdbuf, VkSubpassContents subpassContents = VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
 
 	void CmdCmdBindPipeline(VkCommandBuffer cmdbuf ,VkPipeline pipelineObject, VkPipelineBindPoint bindPoint = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS);
+
+	void CmdColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D targetSize);
 
 	//RenderDoc debug
 	static void SetObjectName(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name);

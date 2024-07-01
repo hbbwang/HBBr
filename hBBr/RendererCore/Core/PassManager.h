@@ -4,6 +4,7 @@
 #include "Texture2D.h"
 #include <vector>
 #include <map>
+#include <Pass/PassType.h>
 class VulkanRenderer;
 class PassBase;
 
@@ -11,11 +12,11 @@ class PassManager
 {
 	friend class VulkanRenderer;
 public:
+	PassManager(VulkanRenderer* renderer);
 	~PassManager() 
 	{
 		PassesRelease();
 	}
-	void PassesInit(VulkanRenderer* renderer);
 	void PassesUpdate();
 	void PassesRelease();
 	void PassesReset();
@@ -28,15 +29,18 @@ public:
 		return _executePasses;
 	}
 
-	HBBR_INLINE std::vector<VkFence> GetExecuteFences()const {
-		return _executeFence;
-	}
-
 	/* Pass添加,passName必须唯一! */
 	void AddPass(std::shared_ptr<PassBase> newPass, const char* passName);
-private:
+
+	void CmdCopyFinalColorToSwapchain();
 
 	class VulkanRenderer* _renderer;
+
+	void SetupPassUniformBuffer(class CameraComponent* camera , VkExtent2D renderSize);
+
+	PassUniformBuffer GetPassUniformBufferCache()const { return _passUniformBuffer; }
+
+private:
 
 	std::shared_ptr <SceneTexture> _sceneTextures;
 
@@ -44,5 +48,8 @@ private:
 
 	std::vector<std::shared_ptr<PassBase>> _executePasses;
 
-	std::vector<VkFence> _executeFence;
+	//Pass Uniform
+	PassUniformBuffer _passUniformBuffer;
+
+
 };

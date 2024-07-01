@@ -7,6 +7,7 @@
 #include "Pass/PassType.h"
 #include "Texture2D.h"
 #include "ConsoleDebug.h"
+#include "PassManager.h"
 /*
 	Opaque pass
 */
@@ -73,7 +74,10 @@ void BasePass::PassUpdate()
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), _markColor);
 	//Update FrameBuffer
-	ResetFrameBufferCustom(_renderer->GetRenderSize(), { GetSceneTexture(SceneTextureDesc::FinalColor)->GetTextureView(), GetSceneTexture(SceneTextureDesc::SceneDepth)->GetTextureView() });
+
+	auto finalColor = GetSceneTexture(SceneTextureDesc::FinalColor);
+	auto depth = GetSceneTexture(SceneTextureDesc::SceneDepth);
+	ResetFrameBufferCustom(_renderer->GetRenderSize(), { finalColor->GetTextureView(), depth->GetTextureView() });
 	SetViewport(_currentFrameBufferSize);
 	BeginRenderPass({ 0,0,0,0 });
 	//Opaque Pass
@@ -120,7 +124,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 		bool bUpdateObjUb = false;
 		//Update pass uniform buffers
 		{
-			PassUniformBuffer passUniformBuffer = _renderer->GetPassUniformBufferCache();
+			PassUniformBuffer passUniformBuffer = _manager->GetPassUniformBufferCache();
 			pass->BufferMapping(&passUniformBuffer, 0, sizeof(PassUniformBuffer));
 		}
 		uint32_t objectCount = 0;

@@ -26,7 +26,7 @@ void FinalPass::PassUpdate()
 
 	manager->Transition(cmdBuf, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	finalRT->Transition(cmdBuf, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-	ColorBitImage(cmdBuf, finalRT->GetTexture(), swapchainImage, _renderer->GetRenderSize(), _renderer->GetWindowSurfaceSize());
+	manager->CmdColorBitImage(cmdBuf, finalRT->GetTexture(), swapchainImage, _renderer->GetRenderSize(), _renderer->GetWindowSurfaceSize());
 	finalRT->Transition(cmdBuf, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	manager->Transition(cmdBuf, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 }

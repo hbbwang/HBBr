@@ -7,7 +7,7 @@ class BasePass :public GraphicsPass
 {
 public:
 
-	BasePass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
+	BasePass(class PassManager* manager) :GraphicsPass(manager) {}
 	virtual ~BasePass();
 
 	virtual void PassInit()override;
@@ -37,7 +37,7 @@ private:
 class PreCommandPass :public CommandPass
 {
 public:
-	PreCommandPass(VulkanRenderer* renderer) :CommandPass(renderer) {}
+	PreCommandPass(class PassManager* manager) :CommandPass(manager) {} 
 	virtual ~PreCommandPass();
 	virtual void PassInit()override;
 	virtual void PassUpdate()override;

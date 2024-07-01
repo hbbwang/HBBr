@@ -6,9 +6,10 @@
 #include "VertexFactory.h"
 #include "DescriptorSet.h"
 
-PassBase::PassBase(VulkanRenderer* renderer)
+PassBase::PassBase(class PassManager* manager)
 {
-	_renderer = renderer;
+	_manager = manager;
+	_renderer = _manager->_renderer;
 }
 
 PassBase::~PassBase()
@@ -16,43 +17,14 @@ PassBase::~PassBase()
 
 }
 
-void PassBase::ColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D targetSize)
-{
-	VkImageBlit region;
-	region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	region.srcSubresource.mipLevel = 0;
-	region.srcSubresource.baseArrayLayer = 0;
-	region.srcSubresource.layerCount = 1;
-	// 指定要传输的数据所在的三维图像区域
-	region.srcOffsets[0].x = 0;
-	region.srcOffsets[0].y = 0;
-	region.srcOffsets[0].z = 0;
-	// [1] z轴都是1
-	region.srcOffsets[1].x = srcSize.width;
-	region.srcOffsets[1].y = srcSize.height;
-	region.srcOffsets[1].z = 1;
-	region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	region.dstSubresource.mipLevel = 0;
-	region.dstSubresource.baseArrayLayer = 0;
-	region.dstSubresource.layerCount = 1;
-	region.dstOffsets[0].x = 0;
-	region.dstOffsets[0].y = 0;
-	region.dstOffsets[0].z = 0;
-	region.dstOffsets[1].x = targetSize.width;
-	region.dstOffsets[1].y = targetSize.height;
-	region.dstOffsets[1].z = 1;
-	//vkCmdBlitImage(_renderer->GetCommandBuffer(), src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1, &region, VK_FILTER_LINEAR);
-	vkCmdBlitImage(cmdBuf, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region, VK_FILTER_LINEAR);
-}
-
 std::shared_ptr<Texture2D> PassBase::GetSceneTexture(uint32_t descIndex)
 {
-	return _renderer->GetPassManager()->GetSceneTexture()->GetTexture(SceneTextureDesc(descIndex));
+	return _manager->GetSceneTexture()->GetTexture(SceneTextureDesc(descIndex));
 }
 
 std::shared_ptr<Texture2D> PassBase::GetSceneTexture(SceneTextureDesc desc)
 {
-	return _renderer->GetPassManager()->GetSceneTexture()->GetTexture(desc);
+	return _manager->GetSceneTexture()->GetTexture(desc);
 }
 
 void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> imageViews)

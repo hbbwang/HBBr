@@ -20,23 +20,24 @@ uint64_t Texture2D::_maxTextureStreamingSize = (uint64_t)4 * (uint64_t)1024 * (u
 
 SceneTexture::SceneTexture(VulkanRenderer* renderer)
 {
+	auto manager = VulkanManager::GetManager();
 	_renderer = renderer;
 	auto sceneColor = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_R16G16B16A16_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneColor");
 	auto sceneDepth = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneDepth");
 	auto finalColor = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, "FinalColor");
 	//Transition
 	VkCommandBuffer cmdbuf;
-	VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), cmdbuf);
-	VulkanManager::GetManager()->BeginCommandBuffer(cmdbuf);
+	manager->AllocateCommandBuffer(manager ->GetCommandPool(), cmdbuf);
+	manager->BeginCommandBuffer(cmdbuf);
 	{
 		sceneColor->Transition(cmdbuf, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 		sceneDepth->Transition(cmdbuf, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 		finalColor->Transition(cmdbuf, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	}
-	VulkanManager::GetManager()->EndCommandBuffer(cmdbuf);
-	VulkanManager::GetManager()->SubmitQueueImmediate({ cmdbuf });
-	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
-	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), { cmdbuf });
+	manager->EndCommandBuffer(cmdbuf);
+	manager->SubmitQueueImmediate({ cmdbuf });
+	vkQueueWaitIdle(manager->GetGraphicsQueue());
+	manager->FreeCommandBuffer(manager->GetCommandPool(), cmdbuf);
 	//
 	_sceneTexture.insert(std::make_pair(SceneTextureDesc::SceneColor, sceneColor));
 	_sceneTexture.insert(std::make_pair(SceneTextureDesc::SceneDepth, sceneDepth));
@@ -66,13 +67,14 @@ void SceneTexture::UpdateTextures()
 
 Texture2D::~Texture2D()
 {
+	auto manager = VulkanManager::GetManager();
 	if (_imageViewMemory != VK_NULL_HANDLE)
 	{
-		VulkanManager::GetManager()->FreeBufferMemory(_imageViewMemory);
+		manager->FreeBufferMemory(_imageViewMemory);
 		_textureStreamingSize = std::max((uint64_t)0, _textureStreamingSize - _textureMemorySize);
 	}
-	VulkanManager::GetManager()->DestroyImageView(_imageView);
-	VulkanManager::GetManager()->DestroyImage(_image);
+	manager->DestroyImageView(_imageView);
+	manager->DestroyImage(_image);
 	if (_imageData!=nullptr)
 	{
 		delete _imageData;
@@ -88,34 +90,36 @@ void Texture2D::Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, V
 
 void Texture2D::TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin, uint32_t mipLevelCount)
 {
+	auto manager = VulkanManager::GetManager();
 	VkCommandBuffer cmdbuf;
-	VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), cmdbuf);
-	VulkanManager::GetManager()->BeginCommandBuffer(cmdbuf);
+	manager->AllocateCommandBuffer(manager->GetCommandPool(), cmdbuf);
+	manager->BeginCommandBuffer(cmdbuf);
 	{
 		Transition(cmdbuf, oldLayout, newLayout, mipLevelBegin, mipLevelCount);
 	}
-	VulkanManager::GetManager()->EndCommandBuffer(cmdbuf);
-	VulkanManager::GetManager()->SubmitQueueImmediate({ cmdbuf });
-	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
-	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), { cmdbuf });
+	manager->EndCommandBuffer(cmdbuf);
+	manager->SubmitQueueImmediate({ cmdbuf });
+	vkQueueWaitIdle(manager->GetGraphicsQueue());
+	manager->FreeCommandBuffer(manager->GetCommandPool(), cmdbuf);
 }
 
 void Texture2D::Resize(uint32_t width, uint32_t height)
 {
+	auto manager = VulkanManager::GetManager();
 	if (_image == VK_NULL_HANDLE)
 		return;
 
 	if (_imageViewMemory != VK_NULL_HANDLE)
 	{
-		VulkanManager::GetManager()->FreeBufferMemory(_imageViewMemory);
+		manager->FreeBufferMemory(_imageViewMemory);
 		_textureStreamingSize = std::max((uint64_t)0, _textureStreamingSize - _textureMemorySize);
 	}
-	VulkanManager::GetManager()->DestroyImageView(_imageView);
-	VulkanManager::GetManager()->DestroyImage(_image);
+	manager->DestroyImageView(_imageView);
+	manager->DestroyImage(_image);
 	//
-	VulkanManager::GetManager()->CreateImage(width, height, _format, _usageFlags, _image);
+	manager->CreateImage(width, height, _format, _usageFlags, _image);
 
-	_textureMemorySize = VulkanManager::GetManager()->CreateImageMemory(_image, _imageViewMemory);
+	_textureMemorySize = manager->CreateImageMemory(_image, _imageViewMemory);
 	_textureStreamingSize += _textureMemorySize;
 
 	if (_textureStreamingSize > _maxTextureStreamingSize)
@@ -123,18 +127,19 @@ void Texture2D::Resize(uint32_t width, uint32_t height)
 		MessageOut((HString("Max texture streaming size is ") + HString::FromSize_t(_maxTextureStreamingSize) + ", but current texture streaming size is  " + HString::FromSize_t(_textureStreamingSize)), false, false, "255,255,0");
 	}
 
-	VulkanManager::GetManager()->CreateImageView(_image, _format, _imageAspectFlags, _imageView);
+	manager->CreateImageView(_image, _format, _imageAspectFlags, _imageView);
 	//
 	VkCommandBuffer cmdbuf;
-	VulkanManager::GetManager()->AllocateCommandBuffer(VulkanManager::GetManager()->GetCommandPool(), cmdbuf);
-	VulkanManager::GetManager()->BeginCommandBuffer(cmdbuf);
+	manager ->AllocateCommandBuffer(manager ->GetCommandPool(), cmdbuf);
+	manager->BeginCommandBuffer(cmdbuf);
 	{
 		Transition(cmdbuf, VK_IMAGE_LAYOUT_UNDEFINED, _imageLayout);
 	}
-	VulkanManager::GetManager()->EndCommandBuffer(cmdbuf);
-	VulkanManager::GetManager()->SubmitQueueImmediate({ cmdbuf });
-	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
-	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), { cmdbuf });
+	manager->EndCommandBuffer(cmdbuf);
+	manager->SubmitQueueImmediate({ cmdbuf });
+	vkQueueWaitIdle(manager->GetGraphicsQueue());
+	std::vector<VkCommandBuffer> bufs = { cmdbuf };
+	manager->FreeCommandBuffers(manager->GetCommandPool(), bufs);
 
 	_imageSize = { width,height };
 }
@@ -546,7 +551,7 @@ void Texture2D::CopyBufferToTextureImmediate()
 	manager->EndCommandBuffer(buf);
 	manager->SubmitQueueImmediate({ buf });
 	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
-	manager->FreeCommandBuffers(manager->GetCommandPool(), { buf });
+	manager->FreeCommandBuffer(manager->GetCommandPool(), buf);
 	//
 	if (_bUploadToGPU)
 	{

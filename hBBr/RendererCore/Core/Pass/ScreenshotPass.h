@@ -17,7 +17,7 @@ struct ScreenshotUniformBuffer
 class ScreenshotPass :public GraphicsPass
 {
 public:
-	ScreenshotPass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
+	ScreenshotPass(class PassManager* manager) :GraphicsPass(manager) {}
 	virtual ~ScreenshotPass();
 	virtual void PassInit()override;
 	virtual void PassUpdate()override;

@@ -5,7 +5,7 @@
 class ImguiScreenPass :public GraphicsPass
 {
 public:
-	ImguiScreenPass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
+	ImguiScreenPass(class PassManager* manager) :GraphicsPass(manager) {}
 	virtual ~ImguiScreenPass();
 	virtual void PassInit()override;
 	virtual void PassUpdate()override;

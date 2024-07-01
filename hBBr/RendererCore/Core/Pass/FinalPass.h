@@ -5,7 +5,7 @@
 class FinalPass :public CommandPass
 {
 public:
-	FinalPass(VulkanRenderer* renderer) :CommandPass(renderer) {}
+	FinalPass(class PassManager* manager) :CommandPass(manager) {}
 	virtual ~FinalPass();
 	virtual void PassInit()override;
 	virtual void PassUpdate()override;

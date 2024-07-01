@@ -85,7 +85,7 @@ struct GUIPrimitive
 class GUIPass :public GraphicsPass
 {
 public:
-	GUIPass(VulkanRenderer* renderer) :GraphicsPass(renderer) {}
+	GUIPass(class PassManager* manager) :GraphicsPass(manager) {}
 	virtual ~GUIPass();
 	virtual void PassInit()override;
 	virtual void PassUpdate()override;

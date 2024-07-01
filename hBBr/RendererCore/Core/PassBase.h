@@ -17,18 +17,18 @@ class PassBase
 	friend class VulkanManager;
 	friend class PassManager;
 public:
-	PassBase(VulkanRenderer* renderer);
+	PassBase(class PassManager* manager);
 	virtual ~PassBase();
 	HBBR_INLINE HString GetName()const { return _passName; }
+	HBBR_INLINE void SetPassName(HString name) { _passName = name; }
 protected:
 	virtual void PassInit() {}
 	virtual void PassUpdate() {}
 	virtual void Reset() {}
 	virtual void PassReset() {}
-	//复制并缩放图像
-	virtual void ColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImage dst , VkExtent2D srcSize, VkExtent2D targetSize);
 	std::shared_ptr<Texture2D> GetSceneTexture(uint32_t descIndex);
 	std::shared_ptr<Texture2D> GetSceneTexture(SceneTextureDesc desc);
+	class PassManager* _manager = nullptr;
 	VulkanRenderer* _renderer = nullptr;
 	HString _passName = "PassBase";
 	glm::vec4 _markColor = glm::vec4(1,1,1,0.5);
@@ -37,7 +37,7 @@ protected:
 class GraphicsPass : public PassBase
 {
 public:
-	GraphicsPass(VulkanRenderer* renderer) :PassBase(renderer) {}
+	GraphicsPass(class PassManager* manager) :PassBase(manager) {}
 	virtual ~GraphicsPass();
 	//Step 1 , Can add multiple attachments.
 	virtual void AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, VkFormat attachmentFormat, VkImageLayout initLayout, VkImageLayout finalLayout);
@@ -86,12 +86,14 @@ protected:
 class CommandPass : public PassBase
 {
 public:
-	CommandPass(VulkanRenderer* renderer) :PassBase(renderer) {}
+	CommandPass(class PassManager* manager) :PassBase(manager) {}
+	virtual~CommandPass() {}
 };
 
 
 class ComputePass : public PassBase
 {
 public:
-	ComputePass(VulkanRenderer* renderer) :PassBase(renderer) {}
+	ComputePass(class PassManager* manager) :PassBase(manager) {}
+	virtual~ComputePass() {}
 };

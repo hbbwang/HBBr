@@ -1171,12 +1171,12 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	EndCommandBuffer(buf);
 	SubmitQueueImmediate({buf});
 	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
-	FreeCommandBuffers(_commandPool, { buf });
+	FreeCommandBuffer(_commandPool, buf);
 
 	_swapchainBufferCount = numSwapchainImages;
 
 	//init semaphores & fences
-	if (acquireImageSemaphore != nullptr && acquireImageSemaphore->size() != _swapchainBufferCount)
+	if (acquireImageSemaphore != nullptr)
 	{
 		//ConsoleDebug::print_endl("hBBr:Swapchain: Present Semaphore.");
 		for (int i = 0; i < (int)acquireImageSemaphore->size(); i++)
@@ -1189,7 +1189,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 			CreateVkSemaphore(acquireImageSemaphore->at(i));
 		}
 	}
-	if (queueSubmitSemaphore != nullptr && queueSubmitSemaphore->size() != _swapchainBufferCount)
+	if (queueSubmitSemaphore != nullptr)
 	{
 		//ConsoleDebug::print_endl("hBBr:Swapchain: Queue Submit Semaphore.");
 		for (int i = 0; i < (int)queueSubmitSemaphore->size(); i++)
@@ -1202,7 +1202,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 			CreateVkSemaphore(queueSubmitSemaphore->at(i));
 		}
 	}
-	if (fences != nullptr && fences->size() != _swapchainBufferCount)
+	if (fences != nullptr)
 	{
 		//ConsoleDebug::print_endl("hBBr:Swapchain: image acquired fences.");
 		for (int i = 0; i < (int)fences->size(); i++)
@@ -1216,7 +1216,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		}
 	}
 
-	if (cmdBuf != nullptr && cmdBuf->size() != _swapchainBufferCount)
+	if (cmdBuf != nullptr)
 	{
 		//ConsoleDebug::print_endl("hBBr:Swapchain: Allocate Main CommandBuffers.");
 		FreeCommandBuffers(_commandPool, *cmdBuf);
@@ -1535,12 +1535,22 @@ void VulkanManager::AllocateCommandBuffer(VkCommandPool commandPool, VkCommandBu
 	}
 }
 
-void VulkanManager::FreeCommandBuffers(VkCommandPool commandPool, std::vector<VkCommandBuffer> cmdBufs)
+void VulkanManager::FreeCommandBuffers(VkCommandPool commandPool, std::vector<VkCommandBuffer>& cmdBufs)
 {
 	if (cmdBufs.size() > 0)
 	{
 		vkFreeCommandBuffers(_device, commandPool, (uint32_t)cmdBufs.size(), cmdBufs.data());
+		cmdBufs.clear();
 	}
+}
+
+void VulkanManager::FreeCommandBuffer(VkCommandPool commandPool, VkCommandBuffer& cmdBuf)
+{
+	if (cmdBuf != VK_NULL_HANDLE)
+	{
+		vkFreeCommandBuffers(_device, commandPool, 1, &cmdBuf);
+	}
+	cmdBuf = VK_NULL_HANDLE;
 }
 
 void VulkanManager::ResetCommandBuffer(VkCommandBuffer cmdBuf)
@@ -2166,7 +2176,7 @@ void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, u
 	EndCommandBuffer(buf);
 	SubmitQueueImmediate({ buf });
 	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
-	FreeCommandBuffers(_commandPool, { buf });
+	FreeCommandBuffer(_commandPool, buf);
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 #endif
 }
@@ -2206,7 +2216,7 @@ void VulkanManager::ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassInd
 	EndCommandBuffer(buf);
 	SubmitQueueImmediate({ buf });
 	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
-	FreeCommandBuffers(_commandPool, { buf });
+	FreeCommandBuffer(_commandPool, buf);
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 #endif
 }
@@ -2299,7 +2309,7 @@ VkViewport VulkanManager::GetViewport(float w, float h)
 }
 
 #include "PassBase.h"
-void VulkanManager::SubmitQueueForPasses(VkCommandBuffer cmdBuf, std::vector<std::shared_ptr<PassBase>> passes, VkSemaphore* presentSemaphore, VkSemaphore* submitFinishSemaphore, VkFence executeFence, VkPipelineStageFlags waitStageMask, VkQueue queue)
+void VulkanManager::SubmitQueueForPasses(VkCommandBuffer cmdBuf, VkSemaphore* presentSemaphore, VkSemaphore* submitFinishSemaphore, VkFence executeFence, VkPipelineStageFlags waitStageMask, VkQueue queue)
 {
 	VkSubmitInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -2492,6 +2502,35 @@ void VulkanManager::CmdNextSubpass(VkCommandBuffer cmdbuf, VkSubpassContents sub
 void VulkanManager::CmdCmdBindPipeline(VkCommandBuffer cmdbuf, VkPipeline pipelineObject, VkPipelineBindPoint bindPoint)
 {
 	vkCmdBindPipeline(cmdbuf, bindPoint, pipelineObject);
+}
+
+void VulkanManager::CmdColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D targetSize)
+{
+	VkImageBlit region;
+	region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	region.srcSubresource.mipLevel = 0;
+	region.srcSubresource.baseArrayLayer = 0;
+	region.srcSubresource.layerCount = 1;
+	// 指定要传输的数据所在的三维图像区域
+	region.srcOffsets[0].x = 0;
+	region.srcOffsets[0].y = 0;
+	region.srcOffsets[0].z = 0;
+	// [1] z轴都是1
+	region.srcOffsets[1].x = srcSize.width;
+	region.srcOffsets[1].y = srcSize.height;
+	region.srcOffsets[1].z = 1;
+	region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	region.dstSubresource.mipLevel = 0;
+	region.dstSubresource.baseArrayLayer = 0;
+	region.dstSubresource.layerCount = 1;
+	region.dstOffsets[0].x = 0;
+	region.dstOffsets[0].y = 0;
+	region.dstOffsets[0].z = 0;
+	region.dstOffsets[1].x = targetSize.width;
+	region.dstOffsets[1].y = targetSize.height;
+	region.dstOffsets[1].z = 1;
+	//vkCmdBlitImage(_renderer->GetCommandBuffer(), src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1, &region, VK_FILTER_LINEAR);
+	vkCmdBlitImage(cmdBuf, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region, VK_FILTER_LINEAR);
 }
 
 void VulkanManager::SetObjectName(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name)
