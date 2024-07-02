@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,10">
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -35,9 +35,6 @@
       <string>TextLabel</string>
      </property>
     </widget>
-   </item>
-   <item>
-    <widget class="QWidget" name="MaterialDetailEditor_RenderView" native="true"/>
    </item>
   </layout>
  </widget>

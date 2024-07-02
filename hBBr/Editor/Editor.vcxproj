@@ -185,6 +185,7 @@
     <ClCompile Include="PropertyWidget.cpp" />
     <ClCompile Include="RenderView.cpp" />
     <ClCompile Include="SceneOutline.cpp" />
+    <ClCompile Include="SDLWidget.cpp" />
     <ClCompile Include="ToolBox.cpp" />
     <ClCompile Include="VectorSetting.cpp" />
     <ClCompile Include="WorldSelector.cpp" />
@@ -220,6 +221,7 @@
     <QtMoc Include="SceneOutline.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="SDLWidget.h" />
     <QtMoc Include="WorldSelector.h" />
     <QtMoc Include="PropertyWidget.h" />
     <QtMoc Include="MaterialDetailEditor.h" />

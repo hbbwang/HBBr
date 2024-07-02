@@ -21,16 +21,16 @@ protected:
         bool bChangeFocus = false;
         if (event->type() == QEvent::MouseButtonPress) 
         {
-            if (mouseEvent->button() & Qt::MouseButton::LeftButton)
-            {
-                _bLeftButtonPress_ForResize = true;
-            }
+            //if (mouseEvent->button() & Qt::MouseButton::LeftButton)
+            //{
+            //    _bLeftButtonPress_ForResize = true;
+            //}
             QWidget* newCurrentFocusWidget = QApplication::widgetAt(mouseEvent->globalPos());
             auto cursorPos = mouseEvent->globalPos();
             if (newCurrentFocusWidget)
             {
                 //窗口ObjectName包含RenderView才会强制给予焦点
-                if (newCurrentFocusWidget->objectName().contains("RenderView", Qt::CaseInsensitive))
+                if (newCurrentFocusWidget->objectName().contains("SDL", Qt::CaseSensitive))
                 {
                     POINT point = {};
                     point.x = mouseEvent->globalPos().x();
@@ -63,7 +63,7 @@ protected:
                 }
             }
         }
-        else if (event->type() == QEvent::MouseButtonRelease)
+       /* else if (event->type() == QEvent::MouseButtonRelease)
         {
             if (mouseEvent->button() & Qt::MouseButton::LeftButton)
             {
@@ -76,43 +76,43 @@ protected:
                 }
                 _bLeftButtonPress_ForResize = false;
             }      
-        }
+        }*/
         //防止闪屏，只有结束窗口缩放的时候才会恢复渲染
-        else if (event->type() == QEvent::Resize)
-        {
-            static QTimer* revert;
-            if (revert == nullptr)
-            {
-                revert = new QTimer(this);
-            }
-            else
-            {
-                revert->stop();
-            }
-            revert->setSingleShot(true);
-            revert->setInterval(5000);//5秒内没有任何缩放行为，就判断为结束
-            connect(revert, &QTimer::timeout, this, []() 
-                {
-                    if (_bLeftButtonPress_ForResize)
-                    {
-                        for (auto& i : VulkanApp::GetForms())
-                        {
-                            i->bStopRender = false;
-                        }
-                        ConsoleDebug::print_endl("Resize widget focus end.");
-                    }
-                    _bLeftButtonPress_ForResize = false;
-                });
-            revert->start();
+        //else if (event->type() == QEvent::Resize)
+        //{
+        //    static QTimer* revert;
+        //    if (revert == nullptr)
+        //    {
+        //        revert = new QTimer(this);
+        //    }
+        //    else
+        //    {
+        //        revert->stop();
+        //    }
+        //    revert->setSingleShot(true);
+        //    revert->setInterval(5000);//5秒内没有任何缩放行为，就判断为结束
+        //    connect(revert, &QTimer::timeout, this, []() 
+        //        {
+        //            if (_bLeftButtonPress_ForResize)
+        //            {
+        //                for (auto& i : VulkanApp::GetForms())
+        //                {
+        //                    i->bStopRender = false;
+        //                }
+        //                ConsoleDebug::print_endl("Resize widget focus end.");
+        //            }
+        //            _bLeftButtonPress_ForResize = false;
+        //        });
+        //    revert->start();
 
-            if (_bLeftButtonPress_ForResize)
-            {
-                for (auto& i : VulkanApp::GetForms())
-                {
-                    i->bStopRender = true;
-                }
-            }
-        }
+        //    if (_bLeftButtonPress_ForResize)
+        //    {
+        //        for (auto& i : VulkanApp::GetForms())
+        //        {
+        //            i->bStopRender = true;
+        //        }
+        //    }
+        //}
         //if (event->type() == QEvent::MouseMove)
         //    qDebug() << QApplication::widgetAt(mouseEvent->globalPos())->objectName().toStdString().c_str();
         return false; // 事件未被处理，继续传递

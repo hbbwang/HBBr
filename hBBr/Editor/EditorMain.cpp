@@ -34,7 +34,7 @@ EditorMain::EditorMain(QWidget *parent)
     _mainRenderView = new RenderView(this);
     setCentralWidget(_mainRenderView);
 
-    _sceneOutline = new SceneOutline(_mainRenderView->_mainRenderer->renderer, this);
+    _sceneOutline = new SceneOutline(_mainRenderView->_mainRendererWidget->_rendererForm->renderer, this);
     _sceneOutline_dock = new CustomDockWidget(this);
     _sceneOutline_dock->setFeatures(
         QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);

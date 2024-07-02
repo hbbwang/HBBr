@@ -22,6 +22,7 @@
 #include <ComboBox.h>
 #include <QTimer>
 #include <EditorMain.h>
+#include <SDLWidget.h>
 QList<MaterialDetailEditor*>MaterialDetailEditor::_allDetailWindows;
 
 MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget *parent)
@@ -86,13 +87,15 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 		ui_ma.MaterialDetailEditor_MaterialAttributeName->setText(GetEditorInternationalization("MaterialEditor", "MaterialAttrbuteTitle"));
 		//渲染器
 		{
-			_matWindow = VulkanApp::CreateNewWindow(512, 512, _material.lock()->_assetInfo.lock()->guid.str().c_str(), true, (void*)ui_r.MaterialDetailEditor_RenderView->winId());
+			_renderer = new SDLWidget(this, _material.lock()->_assetInfo.lock()->guid.str().c_str());
+			ui_r.verticalLayout_2->addWidget(_renderer);
+			ui_r.verticalLayout_2->setStretch(1,10);
 			//HWND hwnd = (HWND)VulkanApp::GetWindowHandle(_matWindow);
-			auto renderer = _matWindow->renderer;
+			auto renderer = _renderer->_rendererForm->renderer;
 			//渲染器需要一帧时间去创建，所以下一帧执行
 			auto func = [this]()
 			{
-				auto renderer = _matWindow->renderer;
+				auto renderer = _renderer->_rendererForm->renderer;
 				renderer->GetWorld().lock()->SetWorldName("Material Editor Renderer");
 				renderer->GetWorld().lock()->GetMainCamera()->_cameraType = EditorCameraType::TargetRotation;
 				renderer->GetWorld().lock()->GetMainCamera()->GetTransform()->SetWorldLocation(glm::vec3(0, 0, -2.0f));
@@ -290,8 +293,8 @@ void MaterialDetailEditor::resizeEvent(QResizeEvent * event)
 
 void MaterialDetailEditor::closeEvent(QCloseEvent* event)
 {
-	if(_matWindow)
-		VulkanApp::RemoveWindow(_matWindow);
+	if(_renderer && _renderer->_rendererForm)
+		VulkanApp::RemoveWindow(_renderer->_rendererForm);
 	for (int i = 0; i < _allDetailWindows.size(); i++)
 	{
 		if (_allDetailWindows[i]->_material.lock().get() == _material.lock().get())

@@ -26,11 +26,11 @@ WorldSelector::WorldSelector(QWidget *parent)
 
 	connect(_listView, &QListWidget::itemDoubleClicked, this,
 		[](QListWidgetItem* it) {
-			if (EditorMain::_self->_mainRenderView->_mainRenderer)
+			if (EditorMain::_self->_mainRenderView->_mainRendererWidget->_rendererForm)
 			{
-				if (EditorMain::_self->_mainRenderView->_mainRenderer->renderer)
+				if (EditorMain::_self->_mainRenderView->_mainRendererWidget->_rendererForm->renderer)
 				{
-					auto renderer = EditorMain::_self->_mainRenderView->_mainRenderer->renderer;
+					auto renderer = EditorMain::_self->_mainRenderView->_mainRendererWidget->_rendererForm->renderer;
 					auto item = (CustomListItem*)it;
 					//renderer->ReleaseWorld();
 					renderer->LoadWorld(item->_path.toStdString());

@@ -327,11 +327,11 @@ bool VulkanRenderer::ResizeBuffer()
 			}
 			bResizeBuffer = false;
 
-			////重置buffer会导致画面丢失，我们要在这一瞬间重新把buffer绘制回去，缓解黑屏。
-			//_currentFrameIndex = 0;
+			//重置buffer会导致画面丢失，我们要在这一瞬间重新把buffer绘制回去，缓解黑屏。
+			_currentFrameIndex = 0;
 			//for (int i = 0; i < (int)_vulkanManager->GetSwapchainBufferCount(); i++)
 			//{
-			//	Render();
+				Render();
 			//}
 
 			return true;

@@ -17,6 +17,8 @@
 #include "Asset/World.h"
 #include "VulkanRenderer.h"
 #include "EditorCommonFunction.h"
+#include <qdebug.h>
+
 #ifdef _WIN32
 #pragma comment(lib , "RendererCore.lib")
 #endif
@@ -24,43 +26,25 @@
 RenderView::RenderView(QWidget* parent)
 	: QWidget(parent)
 {
-	//若是使用用户自定义绘制，则须要设置WA_PaintOnScreen
-	setAttribute(Qt::WA_PaintOnScreen, true);
-	//不须要默认的Qt背景
-	setAttribute(Qt::WA_NoSystemBackground, true);
-	//重绘时，绘制全部像素
-	//setAttribute(Qt::WA_OpaquePaintEvent, true);
-
 	setObjectName("RenderView");
-
     setAcceptDrops(true);
 
-	//if (_mainRendererWidget == nullptr)
-	{
-		//Enable custom loop
-		// 这个嵌入方法会导致窗口缩放闪黑,这是因为除了QT窗口，SDL自己也单独走了一次窗口缩放逻辑。
-		_mainRenderer = VulkanApp::InitVulkanManager(false, true, (void*)this->winId());
+    setLayout(new QHBoxLayout(this));
+    ((QHBoxLayout*)layout())->setContentsMargins(0,0,0,0);
+    ((QHBoxLayout*)layout())->setSpacing(0);
 
-		//下面这种嵌入方式可以解决上面的问题，但是会导致无法获取SDL的输入问题，这个还在解决，
-		//实在不行就麻烦一点把QEvent解析成SDL的按键传过去...
-		//_mainRenderer = VulkanApp::InitVulkanManager(false, true, nullptr);
-		hwnd = (HWND)VulkanApp::GetWindowHandle(_mainRenderer);
-	}
+    _mainRendererWidget = new SDLWidget(this);
+    layout()->addWidget(_mainRendererWidget);
 }
 
 RenderView::~RenderView()
 {
-
 }
 
 void RenderView::Update()
 {
+    _mainRendererWidget->RendererUpdate();
 	VulkanApp::UpdateForm();
-}
-
-void RenderView::showEvent(QShowEvent* event)
-{
-
 }
 
 void RenderView::resizeEvent(QResizeEvent* event)
@@ -69,32 +53,13 @@ void RenderView::resizeEvent(QResizeEvent* event)
 	//_sleep(1);
 }
 
-bool RenderView::event(QEvent* event)
-{
-	return QWidget::event(event);
-}
-
-
 void RenderView::closeEvent(QCloseEvent* event)
 {
-    if (hwnd)
-    {
-        VulkanApp::DeInitVulkanManager();
-    }
+    VulkanApp::DeInitVulkanManager();
 }
 
 void RenderView::paintEvent(QPaintEvent* event)
 {
-}
-
-void RenderView::keyPressEvent(QKeyEvent* event)
-{
-
-}
-
-void RenderView::keyReleaseEvent(QKeyEvent* event)
-{
-
 }
 
 void RenderView::dragEnterEvent(QDragEnterEvent* e)
@@ -139,7 +104,7 @@ void RenderView::dropEvent(QDropEvent* e)
                         if (Item && !Item->_assetInfo.expired())
                         {
                             const auto info = Item->_assetInfo.lock().get();
-                            auto world = _mainRenderer->renderer->GetWorld();
+                            auto world = _mainRendererWidget->_rendererForm->renderer->GetWorld();
                             HString name = Item->_assetInfo.lock()->displayName;
                             if (info->type == AssetType::Model)
                             {
@@ -150,7 +115,7 @@ void RenderView::dropEvent(QDropEvent* e)
                                 }
                                 if (level)
                                 {
-                                    auto gameObject = _mainRenderer->renderer->GetWorld().lock()->SpawnGameObject(name, level);
+                                    auto gameObject = _mainRendererWidget->_rendererForm->renderer->GetWorld().lock()->SpawnGameObject(name, level);
                                     level->MarkDirty();
                                     if (gameObject)
                                     {
@@ -170,32 +135,6 @@ void RenderView::dropEvent(QDropEvent* e)
 			}
 		}
 	}
-}
-
-void RenderView::focusInEvent(QFocusEvent* event)
-{
-	//if (GetFocus() != hwnd || VulkanApp::GetFocusForm() != _mainRenderer)
-	{
-		//SetFocus(nullptr);
-		//VulkanApp::SetFocusForm(_mainRenderer);
-		//SetFocus(hwnd);
-	}
-}
-
-void RenderView::focusOutEvent(QFocusEvent* event)
-{
-
-}
-
-void RenderView::mousePressEvent(QMouseEvent* event)
-{
-	//VulkanApp::SetFocusForm(_mainRenderer);
-	//SetFocus(hwnd);
-}
-
-void RenderView::mouseReleaseEvent(QMouseEvent* event)
-{
-
 }
 
 SDL_Keycode RenderView::mapQtKeyToSdlKey(int qtKey)

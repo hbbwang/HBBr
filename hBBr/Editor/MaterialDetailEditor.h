@@ -15,7 +15,7 @@ public:
 	~MaterialDetailEditor();
 	class MaterialEditor* _parent = nullptr;
 
-	class VulkanForm* _matWindow = nullptr;
+	class SDLWidget* _renderer = nullptr;
 	class QSplitter* left_right = nullptr;
 
 	std::weak_ptr<Material> _material;
