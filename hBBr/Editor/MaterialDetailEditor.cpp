@@ -177,11 +177,12 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 
 		PropertyWidget* pw_mp = new PropertyWidget(this);
 		ui_mp.scroll_verticalLayout->addWidget(pw_mp);
+		auto prim = _material.lock()->GetPrimitive();
 		//Material parameter
 		//Uniform buffer
 		{
 			auto mp_group = pw_mp->AddGroup(GetEditorInternationalization("MaterialEditor", "MaterialUniformBufferTitle"));
-			for (auto& i : _material.lock()->GetPrimitive()->_paramterInfos)
+			for (auto& i : prim->_paramterInfos)
 			{
 				auto mp_sub_group = pw_mp->AddGroup(i.group.c_str(), mp_group);
 				VectorSetting* vector = nullptr;
@@ -189,56 +190,81 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 				if (i.type == MPType::Float)
 				{
 					vector = new VectorSetting(this, 1, 0.0001f, 8);
-					vector->SetValue(_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index]);
-					vector->_vec4_f[0] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index];
+					vector->SetValue(prim->uniformBuffer[i.arrayIndex][i.vec4Index]);
+					vector->_vec4_f[0] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index];
 				}
 				else if (i.type == MPType::Float2)
 				{
 					vector = new VectorSetting(this, 2, 0.0001f, 8);
 					vecType = 2;
 					vector->SetValue(
-						_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index],
-						_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 1],
+						prim->uniformBuffer[i.arrayIndex][i.vec4Index],
+						prim->uniformBuffer[i.arrayIndex][i.vec4Index + 1],
 						0
 					);
-					vector->_vec4_f[0] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index];
-					vector->_vec4_f[1] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 1];
+					vector->_vec4_f[0] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index];
+					vector->_vec4_f[1] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index + 1];
 				}
 				else if (i.type == MPType::Float3)
 				{
 					vector = new VectorSetting(this, 3, 0.0001f, 8);
 					vecType = 3;
 					vector->SetValue(
-						_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index],
-						_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 1],
-						_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 2]
+						prim->uniformBuffer[i.arrayIndex][i.vec4Index],
+						prim->uniformBuffer[i.arrayIndex][i.vec4Index + 1],
+						prim->uniformBuffer[i.arrayIndex][i.vec4Index + 2]
 					);
-					vector->_vec4_f[0] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index];
-					vector->_vec4_f[1] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 1];
-					vector->_vec4_f[2] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 2];
+					vector->_vec4_f[0] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index];
+					vector->_vec4_f[1] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index + 1];
+					vector->_vec4_f[2] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index + 2];
 				}
 				else if (i.type == MPType::Float4)
 				{
 					vector = new VectorSetting(this, 4, 0.0001f, 8);
 					vecType = 4;
 					vector->SetValue(
-						_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index],
-						_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 1],
-						_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 2],
-						_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 3]
+						prim->uniformBuffer[i.arrayIndex][i.vec4Index],
+						prim->uniformBuffer[i.arrayIndex][i.vec4Index + 1],
+						prim->uniformBuffer[i.arrayIndex][i.vec4Index + 2],
+						prim->uniformBuffer[i.arrayIndex][i.vec4Index + 3]
 					);
-					vector->_vec4_f[0] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index];
-					vector->_vec4_f[1] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 1];
-					vector->_vec4_f[2] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 2];
-					vector->_vec4_f[3] = &_material.lock()->GetPrimitive()->uniformBuffer[i.arrayIndex][i.vec4Index + 3];
+					vector->_vec4_f[0] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index];
+					vector->_vec4_f[1] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index + 1];
+					vector->_vec4_f[2] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index + 2];
+					vector->_vec4_f[3] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index + 3];
 				}
 				pw_mp->AddItem(i.name.c_str(), vector, 30, mp_sub_group);
 			}
 		}
 		//Texture
 		{
-			//mpBox->addPage(GetEditorInternationalization("MaterialEditor", "MaterialTextureTitle"), true);
-
+			auto mt_group = pw_mp->AddGroup(GetEditorInternationalization("MaterialEditor", "MaterialTextureTitle"));
+			for (auto i : prim->_textureInfos)
+			{
+				auto mt_sub_group = pw_mp->AddGroup(i.group.c_str(), mt_group);
+				auto assetInfo = prim->GetTextures()[i.index]->_assetInfo;
+				if (!assetInfo.expired())
+				{
+					AssetLine* line = new AssetLine(this, assetInfo.lock()->virtualFilePath, "dds");
+					//查找按钮
+					line->_bindFindButtonFunc = 
+						[assetInfo](const char* p)
+						{
+							ContentBrowser::FocusToAsset(assetInfo);
+						};
+					//路径发生变化的时候执行
+					line->_bindAssetPath =
+						[this,i](const char* s) 
+						{
+							auto newTexInfo = ContentManager::Get()->GetAssetByVirtualPath(s);
+							if (!newTexInfo.expired())
+							{
+								_material.lock()->GetPrimitive()->SetTexture(i.index, newTexInfo.lock()->GetAssetObject<Texture2D>().lock().get());
+							}
+						};
+					pw_mp->AddItem(i.name.c_str(), line, 30, mt_sub_group);
+				}
+			}
 		}
 		pw_mp->ShowItems();
 		ui_mp.scroll_verticalLayout->addStretch(20);
