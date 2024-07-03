@@ -59,6 +59,7 @@ void SceneOutlineItem::Init(std::weak_ptr<Level> level, std::weak_ptr<GameObject
         _level = level;
         this->setText(0, (_level.lock()->GetLevelName()).c_str());
         setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDropEnabled);
+        this->setData(0, Qt::UserRole, "SceneOutline_LevelItem");
     }
     else if (!gameObject.expired())
     {
@@ -102,7 +103,8 @@ public:
         QStyleOptionViewItem opt = option;
         initStyleOption(&opt, index);
         SceneOutlineItem* item = (SceneOutlineItem*)_tree->itemFromIndex(index);
-        if (item) 
+        auto rect = opt.rect;
+        if (item)
         {
             if (!item->_level.expired())
             {
@@ -116,6 +118,7 @@ public:
                     opt.font.setStrikeOut(true);
                     opt.font.setBold(false);
                 }
+                opt.rect.setX(rect.x() + rect.height());
             }
             else
             {
@@ -124,6 +127,24 @@ public:
             }
         }
         QStyledItemDelegate::paint(painter, opt, index);
+        if (item) 
+        {
+            if (!item->_level.expired())
+            {
+                if (item->_level.lock()->IsLoaded())
+                {
+                    QPixmap eye((FileSystem::GetConfigAbsPath() + "Theme/Icons/ICON_SCENE_SHOW.png").c_str());
+                    eye.scaled(rect.height()-1, rect.height()-1);
+                    painter->drawPixmap(rect.x(), rect.y(), rect.height(), rect.height(), eye);
+                }
+                else
+                {
+                    QPixmap eye((FileSystem::GetConfigAbsPath() + "Theme/Icons/ICON_SCENE_HIDE.png").c_str());
+                    eye.scaled(rect.height()-1, rect.height()-1);
+                    painter->drawPixmap(rect.x(), rect.y(), rect.height(), rect.height(), eye);
+                }
+            }
+        }
     }
 };
 
@@ -152,7 +173,7 @@ SceneOutlineTree::SceneOutlineTree(QWidget* parent)
     //    "",
     //    "Label" });
 
-     //setItemDelegate(new SceneOutlineTreeDelegate(this));
+     setItemDelegate(new SceneOutlineTreeDelegate(this));
 
      _menu = new QMenu(this);
      _menu_createBasic = new QMenu(this);
