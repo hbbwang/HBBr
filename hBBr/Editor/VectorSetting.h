@@ -5,6 +5,7 @@
 #include "PropertyClass.h"
 #include "glm/glm.hpp"
 #include <functional>
+#include <memory>
 class GameObject;
 
 class VectorSetting : public PropertyClass
@@ -19,6 +20,7 @@ public:
 
 	QList<FloatSetting*> floatSetting ;
 	std::function<void(QList<FloatSetting*>)> BindValue = [](QList<FloatSetting*>) {};
+	std::weak_ptr<class GameObject> _gameObject;
 	float* _vec4_f[4] = { nullptr,nullptr,nullptr,nullptr };
 	float _old_vec4_f[4] = { 0,0,0,0 };
 	void SetValue(float x  ,float y  , float z  ,float w = 0);

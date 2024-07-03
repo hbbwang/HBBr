@@ -10,6 +10,8 @@ ScreenshotPass::~ScreenshotPass()
 	auto manager = VulkanManager::GetManager();
 	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout);
 	_screenshotRT.reset();
+	manager->DestroyDescriptorSetLayout(_texDescriptorSetLayout);
+	manager->DestroyDescriptorSetLayout(_ubDescriptorSetLayout);
 }
 
 void ScreenshotPass::PassInit()

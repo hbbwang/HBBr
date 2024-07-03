@@ -114,6 +114,8 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 	std::vector<uint32_t> matBufferSize;
 	uint32_t textureDescriptorCount = 0;
 	pipelineTemps.clear();
+	auto frameIndex = _renderer->GetCurrentFrameIndex();
+	VkDescriptorSet tds = VK_NULL_HANDLE;
 	//Reset buffer
 	{
 		auto matPrim = PrimitiveProxy::GetMaterialPrimitives((uint32_t)p);
@@ -183,9 +185,37 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 				matOffset += m->uniformBufferSize;
 			}
 
-			if (m->GetDescriptorSet() != VK_NULL_HANDLE && m->NeedUpdateTexture())
+
+			if (m->GetTextures().size() > 0)
 			{
-				manager->UpdateTextureDescriptorSet(m->GetDescriptorSet(), m->GetTextures(), m->GetSamplers());
+				auto tex_it = _descriptorSet_tex.find(m);
+				if (tex_it == _descriptorSet_tex.end())
+				{
+					std::vector<TextureDescriptorSet> new_tds;
+					if (new_tds.size() != manager->GetSwapchainBufferCount())
+					{
+						new_tds.resize(manager->GetSwapchainBufferCount());
+						for (auto& i : new_tds)
+						{
+							i.texCache = m->GetTextures();
+							manager->AllocateDescriptorSet(manager->GetDescriptorPool(), manager->GetImageDescriptorSetLayout(), i.descriptorSet_tex);
+							manager->UpdateTextureDescriptorSet(i.descriptorSet_tex, m->GetTextures(), m->GetSamplers());
+						}
+					}	
+					auto pair = _descriptorSet_tex.emplace(m, new_tds);
+					tds = pair.first->second[frameIndex].descriptorSet_tex;
+				}
+				else
+				{
+					auto& tds_obj = tex_it->second[frameIndex];
+					if (tds_obj.texCache != m->GetTextures())
+					{
+						tds_obj.texCache = m->GetTextures();
+						manager->UpdateTextureDescriptorSet(tds_obj.descriptorSet_tex, m->GetTextures(), m->GetSamplers());
+					}
+					tds = tds_obj.descriptorSet_tex;
+				}
+				
 			}
 
 			auto prims = PrimitiveProxy::GetModelPrimitives(m, _renderer);
@@ -274,8 +304,7 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 		//Material texture buffers
 		if (curPipeline->bHasMaterialTexture)
 		{
-			VkDescriptorSet texSet = m->GetDescriptorSet();
-			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &texSet, 0, nullptr);
+			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &tds, 0, nullptr);
 		}
 		//Objects
 		auto prims = PrimitiveProxy::GetModelPrimitives(m, _renderer);

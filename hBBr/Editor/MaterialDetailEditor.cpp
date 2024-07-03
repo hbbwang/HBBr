@@ -242,14 +242,15 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 			for (auto i : prim->_textureInfos)
 			{
 				auto mt_sub_group = pw_mp->AddGroup(i.group.c_str(), mt_group);
-				auto assetInfo = prim->GetTextures()[i.index]->_assetInfo;
+				std::weak_ptr<AssetInfoBase> assetInfo = prim->GetTextures()[i.index]->_assetInfo;
 				if (!assetInfo.expired())
 				{
 					AssetLine* line = new AssetLine(this, assetInfo.lock()->virtualFilePath, "dds");
 					//查找按钮
 					line->_bindFindButtonFunc = 
-						[assetInfo](const char* p)
+						[](const char* p)
 						{
+							std::weak_ptr<AssetInfoBase> assetInfo = ContentManager::Get()->GetAssetByVirtualPath(p);
 							ContentBrowser::FocusToAsset(assetInfo);
 						};
 					//路径发生变化的时候执行

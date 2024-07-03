@@ -97,38 +97,23 @@ public:
 		_textureInfos.clear();
 		textures.clear();
 		_samplers.clear();
-		VkDescriptorSet _descriptorSet_tex = {};
-		_needUpdateDescriptorSet_tex = true;
-	}
-	//Get material instance texture descriptor set.
-	//If material instance number of textures is 0,it will return nullptr.
-	HBBR_API HBBR_INLINE VkDescriptorSet GetDescriptorSet() {
-		auto manager = VulkanManager::GetManager();
-		if (textures.size() > 0)
-		{
-			if (_descriptorSet_tex == VK_NULL_HANDLE)
-			{
-				//Create DescriptorSet
-				manager->AllocateDescriptorSet(manager->GetDescriptorPool(), manager->GetImageDescriptorSetLayout(), _descriptorSet_tex);
-				_needUpdateDescriptorSet_tex = true;
-			}
-			return _descriptorSet_tex;
-		}
-		else
-		{
-			return VK_NULL_HANDLE;
-		}
 	}
 
-	HBBR_API HBBR_INLINE const bool NeedUpdateTexture()
+	/*HBBR_INLINE void Reset()
 	{
-		bool result = _needUpdateDescriptorSet_tex;
-		if (result)
+		auto manager = VulkanManager::GetManager();
+		const int descriptorSetCount = (int)_descriptorSet_tex.size();
+		if (descriptorSetCount != manager->GetSwapchainBufferCount())
 		{
-			_needUpdateDescriptorSet_tex = false;
+			_needUpdateDescriptorSet_tex.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
+			_descriptorSet_tex.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
+			for (int i = 0; i < _descriptorSet_tex.size(); i++)
+			{
+				manager->AllocateDescriptorSet(manager->GetDescriptorPool(), manager->GetImageDescriptorSetLayout(), _descriptorSet_tex[i]);
+				_needUpdateDescriptorSet_tex[i] = 1;
+			}
 		}
-		return result;
-	}
+	}*/
 
 	HBBR_API HBBR_INLINE std::vector<class Texture2D*> GetTextures() {
 		return textures;
@@ -180,12 +165,6 @@ public:
 
 	~MaterialPrimitive()
 	{
-		if (_descriptorSet_tex != VK_NULL_HANDLE)
-		{
-			//std::vector<VkDescriptorSet> sets = { _descriptorSet_tex };
-			//VulkanManager::GetManager()->FreeDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), sets);
-			_descriptorSet_tex = VK_NULL_HANDLE;
-		}
 	}
 
 	//Graphics用的什么vs
@@ -216,6 +195,7 @@ public:
 	std::vector<MaterialParameterInfo> _paramterInfos;
 
 	std::vector<MaterialTextureInfo> _textureInfos;
+
 private:
 
 	//纹理贴图
@@ -223,11 +203,6 @@ private:
 
 	//采样器选择
 	std::vector<VkSampler> _samplers;
-
-	//Image DescriptorSet
-	VkDescriptorSet _descriptorSet_tex;
-
-	bool _needUpdateDescriptorSet_tex;
 
 };
 

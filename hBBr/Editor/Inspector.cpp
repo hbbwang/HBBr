@@ -106,7 +106,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 		return;
 	ClearInspector();
 	_currentGameObject = gameObj.lock()->GetSelfWeekPtr();
-	std::shared_ptr<GameObject> obj = gameObj.lock();
+	auto obj = gameObj.lock().get();
 	_layoutMain->setContentsMargins(1, 1, 1, 1);
 	_layoutMain->setSpacing(1);
 	//---------------------- Active & Title (GameObject Name)
@@ -164,11 +164,11 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 		pos->_vec4_f[0] = &transform->location.x;
 		pos->_vec4_f[1] = &transform->location.y;
 		pos->_vec4_f[2] = &transform->location.z;
-		pos->BindValue = [gameObj](QList<FloatSetting*> v) {
+		pos->BindValue = [obj](QList<FloatSetting*> v) {
 			glm::vec3 newValue = glm::vec3(v[0]->GetValue(), v[1]->GetValue(), v[2]->GetValue());
-			if (GameObject::IsValid(gameObj))
+			//if (GameObject::IsValid(gameObj))
 			{
-				gameObj.lock()->GetTransform()->SetLocation(newValue);
+				obj->GetTransform()->SetLocation(newValue);
 			}
 		};
 
@@ -176,11 +176,11 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 		rot->_vec4_f[0] = &transform->eulerAngle.x;
 		rot->_vec4_f[1] = &transform->eulerAngle.y;
 		rot->_vec4_f[2] = &transform->eulerAngle.z;
-		rot->BindValue = [gameObj](QList<FloatSetting*> v) {
+		rot->BindValue = [obj](QList<FloatSetting*> v) {
 			glm::vec3 newValue = glm::vec3(v[0]->GetValue(), v[1]->GetValue(), v[2]->GetValue());
-			if (GameObject::IsValid(gameObj))
+			//if (GameObject::IsValid(gameObj))
 			{
-				gameObj.lock()->GetTransform()->SetRotation(newValue);
+				obj->GetTransform()->SetRotation(newValue);
 			}
 		};
 
@@ -188,11 +188,11 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 		scale->_vec4_f[0] = &transform->scale3D.x;
 		scale->_vec4_f[1] = &transform->scale3D.y;
 		scale->_vec4_f[2] = &transform->scale3D.z;
-		scale->BindValue = [gameObj](QList<FloatSetting*> v) {
+		scale->BindValue = [obj](QList<FloatSetting*> v) {
 			glm::vec3 newValue = glm::vec3(v[0]->GetValue(), v[1]->GetValue(), v[2]->GetValue());
-			if (GameObject::IsValid(gameObj))
+			//if (GameObject::IsValid(gameObj))
 			{
-				gameObj.lock()->GetTransform()->SetScale3D(newValue);
+				obj->GetTransform()->SetScale3D(newValue);
 			}
 		};
 	}

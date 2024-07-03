@@ -1251,7 +1251,9 @@ void ContentBrowser::FocusToAsset(std::weak_ptr<AssetInfoBase> assetInfo, Conten
 	}
 	if (!assetInfo.expired())
 	{
-		auto treeItems = assetInfo.lock()->virtualPath.Split("/");
+		auto guid = assetInfo.lock()->guid;
+		auto vPath = assetInfo.lock()->virtualPath;
+		auto treeItems = vPath.Split("/");
 		QString path;
 		CustomViewItem* treeItem = nullptr;
 		QModelIndex treeIndex;
@@ -1270,7 +1272,7 @@ void ContentBrowser::FocusToAsset(std::weak_ptr<AssetInfoBase> assetInfo, Conten
 		{
 			cb ->_treeView->selectionModel()->setCurrentIndex(treeIndex, QItemSelectionModel::SelectionFlag::ClearAndSelect);
 		}
-		auto item = cb->_listView->FindAssetItem(assetInfo.lock()->guid);
+		auto item = cb->_listView->FindAssetItem(guid);
 		if (item)
 		{
 			cb->_listView->scrollToItem(item);

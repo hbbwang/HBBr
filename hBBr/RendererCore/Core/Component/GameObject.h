@@ -23,9 +23,11 @@ public:
 
 	void ObjectInit(HString objectName = "NewGameObject", class Level* level = nullptr, bool SceneEditorHide = false);
 
+	//普通的创建一个新的Object
 	HBBR_API static GameObject* CreateGameObject(HString objectName = "NewGameObject", class Level* level = nullptr);
 
-	HBBR_API static GameObject* CreateModelGameObject(HString virtualPath, class Level* level = nullptr);
+	//创建新的Object并且自定义一个固定的GUID
+	HBBR_API static GameObject* CreateGameObjectWithGUID(HString objectName, HString guidStr, class Level* level = nullptr);
 
 	HBBR_API HBBR_INLINE void Destroy() {
 		SetActive(false);

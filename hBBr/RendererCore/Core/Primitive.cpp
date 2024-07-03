@@ -93,7 +93,6 @@ void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive
 void MaterialPrimitive::SetTexture(int index, Texture2D* newTexture)
 {
 	textures[index] = newTexture;
-	_needUpdateDescriptorSet_tex = true;
 }
 
 void MaterialPrimitive::SetTexture(HString textureName, Texture2D* newTexture)
@@ -266,7 +265,6 @@ void MaterialPrimitive::SetVec4Parameter(int arrayIndex, int vec4Index, glm::vec
 void MaterialPrimitive::SetTextureSampler(int index, VkSampler sampler)
 {
 	_samplers[index] = sampler;
-	_needUpdateDescriptorSet_tex = true;
 }
 
 void MaterialPrimitive::SetTextureSampler(HString textureName, VkSampler sampler)

@@ -98,7 +98,9 @@ void Level::Load()
 							name = name_it.value();
 						if (obj_active_it != i.end())
 							obj_active = obj_active_it.value();
-						GameObject* newObject = new GameObject(name, guid.str(), this);
+
+						GameObject* newObject = GameObject::CreateGameObjectWithGUID(name, guid.str(), this);
+
 						newObject->SetActive(obj_active);
 						newObject->_levelNode = i;
 						if (objs.capacity() < objs.size())

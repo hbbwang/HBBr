@@ -209,7 +209,7 @@ void PropertyWidget::ShowItems()
 			int index = -1;
 			for (int i = 0; i < _name_layout->count(); i++)
 			{
-				QString parentGroupName = "";
+				QString parentGroupName = "NULL";
 				if (group->parentGroup != nullptr)
 				{
 					parentGroupName = group->parentGroup->groupName;
@@ -294,19 +294,20 @@ void PropertyWidget::AddGroupButton(std::shared_ptr<SGroup> g)
 
 	((QVBoxLayout*)n_space->layout())->setContentsMargins(0, 0, 0, 0);
 	((QVBoxLayout*)n_space->layout())->setSpacing(0);
-	n_space->setObjectName(g->groupName);
 
-	QWidget* v_space = new QWidget(this);
-	v_space->setMinimumHeight(Height );
-	v_space->setMaximumHeight(Height);
-
-	QString parentGroupName = "";
+	QString parentGroupName = "NULL";
 	if (g->parentGroup != nullptr)
 	{
 		parentGroupName = g->parentGroup->groupName;
 	}
 	parentGroupName = parentGroupName + "_" + g->groupName;
-	v_space->setObjectName(parentGroupName);
+	n_space->setObjectName(parentGroupName);
+
+	QWidget* v_space = new QWidget(this);
+	v_space->setMinimumHeight(Height );
+	v_space->setMaximumHeight(Height);
+
+
 	v_space->setObjectName("PropertyTableWidgetRowGroupButtonValue");
 	v_space->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Preferred);
 

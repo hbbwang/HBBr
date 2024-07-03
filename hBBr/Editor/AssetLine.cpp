@@ -21,6 +21,7 @@ AssetLine::AssetLine(HString name, QWidget *parent, HString text, HString condit
 }
 
 AssetLine::AssetLine(QWidget* parent, HString text, HString condition)
+	: PropertyClass(parent)
 {
 	ui.setupUi(this);
 	Init(parent, text, condition);

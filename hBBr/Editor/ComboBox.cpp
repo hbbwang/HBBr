@@ -11,6 +11,7 @@ ComboBox::ComboBox(QString name, QWidget *parent)
 }
 
 ComboBox::ComboBox(QWidget* parent)
+	: PropertyClass(parent)
 {
 	ui.setupUi(this);
 	ui.Name->setHidden(true);

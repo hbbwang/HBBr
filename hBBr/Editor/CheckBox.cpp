@@ -14,6 +14,7 @@ CheckBox::CheckBox(QWidget* parent , bool bEnbale )
 }
 
 CheckBox::CheckBox(HString name, QWidget* parent, bool bEnbale)
+	: PropertyClass(parent)
 {
 	ui.setupUi(this);
 	ui.Name->setText(name.c_str());

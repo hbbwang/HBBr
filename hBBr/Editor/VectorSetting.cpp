@@ -12,7 +12,8 @@ VectorSetting::VectorSetting(QString name, QWidget *parent,const int demensional
 	Init(parent, demensionality, step, precision);
 }
 
-VectorSetting::VectorSetting(QWidget* parent, const int demensionality, float step, int precision)
+VectorSetting::VectorSetting(QWidget* parent, const int demensionality, float step, int precision) 
+	: PropertyClass(parent)
 {
 	ui.setupUi(this);
 	Init(parent, demensionality, step, precision);
@@ -24,6 +25,7 @@ VectorSetting::VectorSetting(QWidget* parent, const int demensionality, float st
 
 VectorSetting::~VectorSetting()
 {
+	BindValue = [](QList<FloatSetting*>) {};
 	maxUpdatePoint = 0;
 	_vec4_f[0] = nullptr;
 	_vec4_f[1] = nullptr;

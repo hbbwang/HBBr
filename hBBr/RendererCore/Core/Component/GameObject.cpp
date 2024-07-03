@@ -66,7 +66,6 @@ void GameObject::ObjectInit(HString objectName, Level* level, bool SceneEditorHi
 	auto sharedPtr = std::shared_ptr<GameObject>(this);
 	_selfWeak = sharedPtr;
 	_level->AddNewObject(sharedPtr);
-
 }
 
 GameObject* GameObject::CreateGameObject(HString objectName, Level* level)
@@ -74,13 +73,9 @@ GameObject* GameObject::CreateGameObject(HString objectName, Level* level)
 	return new GameObject(objectName, level);
 }
 
-GameObject* GameObject::CreateModelGameObject(HString virtualPath, Level* level)
+GameObject* GameObject::CreateGameObjectWithGUID(HString objectName, HString guidStr, Level* level)
 {
-	GameObject* cube = new GameObject(virtualPath.GetBaseName(), level);
-	auto modelComp = cube->AddComponent<ModelComponent>();
-	cube->GetTransform()->SetLocation(glm::vec3(0, 0.5f, 0));
-	modelComp->SetModelByAssetPath(virtualPath);
-	return cube;
+	return new GameObject(objectName, guidStr, level);
 }
 
 void GameObject::SetActive(bool newActive)

@@ -228,12 +228,6 @@ void World::Load(class VulkanRenderer* renderer)
 
 #else
 
-	//	//Test game camera
-	//	auto backCamera = new GameObject("Camera");
-	//	backCamera->GetTransform()->SetWorldLocation(glm::vec3(0, 2, -3.0));
-	//	auto cameraComp = backCamera->AddComponent<CameraComponent>();
-	//	cameraComp->OverrideMainCamera();
-
 #endif
 
 	_bLoad = true;
