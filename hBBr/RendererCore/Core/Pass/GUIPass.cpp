@@ -1,5 +1,7 @@
 ﻿#include "GUIPass.h"
 #include "VulkanRenderer.h"
+#include "SceneTexture.h"
+#include <stdio.h>
 
 GUIPass::~GUIPass()
 {
@@ -38,17 +40,15 @@ void GUIPass::PassInit()
 	, _pipelineLayout);
 	//Set Pass Name
 	_passName = "GUI Render Pass";
-
+	_drawList.clear();
 }
 
 void GUIPass::ShowPerformance()
 {
-	GUIDrawText("ShowPerf_frame",
-		HString("Frame " + HString::FromFloat(VulkanApp::GetFrameRate(), 2) + " ms\n").c_wstr()
-		, 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1)), 20.0f);
-	GUIDrawText("ShowPerf_fps",
-		HString("FPS " + HString::FromUInt((uint32_t)(1.0f / (float)(VulkanApp::GetFrameRate() / 1000.0)))).c_wstr()
-		, 0, 20.0f, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1)), 20.0f);
+	GUIDrawText(HString(TEXT("帧率 ") + HString::FromFloat(VulkanApp::GetFrameRate(), 2) + " ms\n").c_wstr()
+		, 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1)), 15.0f);
+	GUIDrawText(HString("FPS " + HString::FromUInt((uint32_t)(1.0f / (float)(VulkanApp::GetFrameRate() / 1000.0)))).c_wstr()
+		, 0, 15.0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1)), 15.0f);
 }
 
 void GUIPass::PassUpdate()
@@ -134,7 +134,7 @@ void GUIPass::PassReset()
 {
 }
 
-void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, float w, float h, GUIDrawState state , float fontSize)
+void GUIPass::_GUIDrawText(HString tag, HString h_text, float x, float y, float w, float h, GUIDrawState state , float fontSize)
 {
 	//换算一下超采样的分辨率：
 	float resScale = ((float)_renderer->GetRenderSize().width) / ((float)_renderer->GetWindowSurfaceSize().width);
@@ -144,6 +144,7 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 	w *= resScale;
 	h *= resScale;
 
+	const wchar_t* text = h_text.c_wstr();
 	auto textLength = wcslen(text);
 	if (textLength <= 0)
 		return;
@@ -166,6 +167,7 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 		{
 			tx = 0;
 			ty += fontSize;
+			continue;
 		}
 		prim->fontCharacter[i] = textChar;
 		//文字不存在fixed模式,文字的大小不应该被变形
@@ -173,8 +175,8 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 		//获取文字信息
 		auto info = Texture2D::GetFontInfo(prim->fontCharacter[i]);
 		prim->States[i].uniformBuffer.UVSetting = glm::vec4(info->posX, info->posY, info->sizeX, info->sizeY);
-		prim->States[i].uniformBuffer.TextureSizeX = (float)Texture2D::GetFontTexture()->GetImageSize().width;
-		prim->States[i].uniformBuffer.TextureSizeY = (float)Texture2D::GetFontTexture()->GetImageSize().width;
+		prim->States[i].uniformBuffer.TextureSizeX = (float)Texture2D::GetFontTexture()->GetTextureSize().width;
+		prim->States[i].uniformBuffer.TextureSizeY = (float)Texture2D::GetFontTexture()->GetTextureSize().height;
 		//文字像素大小
 		if (textChar == L' ')
 		{
@@ -191,7 +193,7 @@ void GUIPass::GUIDrawText(HString tag, const wchar_t* text, float x, float y, fl
 	}
 }
 
-void GUIPass::GUIDrawImage(HString tag, Texture2D* texture, float x, float y, float w, float h, GUIDrawState state)
+void GUIPass::_GUIDrawImage(HString tag, Texture2D* texture, float x, float y, float w, float h, GUIDrawState state)
 {
 	//换算一下超采样的分辨率：
 	float resScale = ((float)_renderer->GetRenderSize().width) / ((float)_renderer->GetWindowSurfaceSize().width);

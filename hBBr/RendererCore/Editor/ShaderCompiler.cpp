@@ -356,6 +356,10 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 					{
 						header.flags |= NativeHLSL;
 					}
+					else if (i.IsSame("HideInEditor"))
+					{
+						header.flags |= HideInEditor;
+					}
 				}
 				line[s] = "//" + line[s];
 				if (setting.Contains("}"))

@@ -56,6 +56,12 @@
     <Filter Include="Renderer\Core\World">
       <UniqueIdentifier>{b07b8a36-0ebd-4a4a-8858-b145bf5dbe21}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderer\Core\Pass\GraphicsPass">
+      <UniqueIdentifier>{30822891-32a3-4119-8848-78baf266e16d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\Core\Pass\Other">
+      <UniqueIdentifier>{a7a3c29b-cd5b-4df8-af92-1ec825588d98}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\VulkanManager.h">
@@ -82,16 +88,10 @@
     <ClInclude Include="Core\VulkanRenderer.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\PassManager.h">
-      <Filter>Renderer\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Pipeline.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\RendererConfig.h">
-      <Filter>Renderer\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\PassBase.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\VertexFactory.h">
@@ -139,7 +139,7 @@
     <ClInclude Include="Form\FormMain.h">
       <Filter>Renderer\Form</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Pass\PassDefine.h">
+    <ClInclude Include="Core\Pass\BasePass.h">
       <Filter>Renderer\Core\Pass</Filter>
     </ClInclude>
     <ClInclude Include="Common\HTime.h">
@@ -193,12 +193,6 @@
     <ClInclude Include="Common\AndroidCommon.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Pass\ImguiPass.h">
-      <Filter>Renderer\Core\Pass</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Pass\GUIPass.h">
-      <Filter>Renderer\Core\Pass</Filter>
-    </ClInclude>
     <ClInclude Include="Common\HRect.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -235,10 +229,22 @@
     <ClInclude Include="Core\Asset\Level.h">
       <Filter>Renderer\Core\World</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Pass\ScreenshotPass.h">
+    <ClInclude Include="Core\Pass\PassBase.h">
       <Filter>Renderer\Core\Pass</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Pass\FinalPass.h">
+    <ClInclude Include="Core\Pass\PassManager.h">
+      <Filter>Renderer\Core\Pass</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Pass\GUIPass.h">
+      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Pass\ImguiPass.h">
+      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Pass\PreCommandPass.h">
+      <Filter>Renderer\Core\Pass\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Asset\SceneTexture.h">
       <Filter>Renderer\Core\Pass</Filter>
     </ClInclude>
   </ItemGroup>
@@ -258,9 +264,6 @@
     <ClCompile Include="Core\VulkanRenderer.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\PassManager.cpp">
-      <Filter>Renderer\Core</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Pipeline.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
@@ -269,9 +272,6 @@
     </ClCompile>
     <ClCompile Include="Common\Common.cpp">
       <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\PassBase.cpp">
-      <Filter>Renderer\Core</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Renderer</Filter>
@@ -309,7 +309,7 @@
     <ClCompile Include="Core\Thread.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Pass\PassDefine.cpp">
+    <ClCompile Include="Core\Pass\BasePass.cpp">
       <Filter>Renderer\Core\Pass</Filter>
     </ClCompile>
     <ClCompile Include="Common\HTime.cpp">
@@ -354,12 +354,6 @@
     <ClCompile Include="Common\TypeConversion.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Pass\ImguiPass.cpp">
-      <Filter>Renderer\Core\Pass</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Pass\GUIPass.cpp">
-      <Filter>Renderer\Core\Pass</Filter>
-    </ClCompile>
     <ClCompile Include="Common\HRect.cpp">
       <Filter>Common</Filter>
     </ClCompile>
@@ -399,10 +393,22 @@
     <ClCompile Include="Form\FormMain.cpp">
       <Filter>Renderer\Form</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Pass\ScreenshotPass.cpp">
+    <ClCompile Include="Core\Pass\PassBase.cpp">
       <Filter>Renderer\Core\Pass</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Pass\FinalPass.cpp">
+    <ClCompile Include="Core\Pass\PassManager.cpp">
+      <Filter>Renderer\Core\Pass</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Pass\GUIPass.cpp">
+      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Pass\ImguiPass.cpp">
+      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Pass\PreCommandPass.cpp">
+      <Filter>Renderer\Core\Pass\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Asset\SceneTexture.cpp">
       <Filter>Renderer\Core\Pass</Filter>
     </ClCompile>
   </ItemGroup>

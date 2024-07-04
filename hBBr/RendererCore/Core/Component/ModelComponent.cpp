@@ -132,7 +132,10 @@ void ModelComponent::UpdateData()
 		for (int i = 0; i < count; i++)
 		{
 			auto info = ContentManager::Get()->GetAssetByVirtualPath(_materials[i].path);
-			mats[i] = info.lock()->GetAssetObject<Material>();
+			if (!info.expired())
+			{
+				mats[i] = info.lock()->GetAssetObject<Material>();
+			}
 		}
 		SetModel(_model.assetInfo.lock()->GetAssetObject<Model>(), &mats);
 	}

@@ -7,7 +7,7 @@
 #include "ConsoleDebug.h"
 #include "DDSTool.h"
 #include "ContentManager.h"
-#include "XMLStream.h"
+#include "Serializable.h"
 #include "RendererConfig.h"
 
 std::vector<Texture2D*> Texture2D::_upload_textures;
@@ -17,53 +17,6 @@ std::unordered_map<wchar_t, FontTextureInfo> Texture2D::_fontTextureInfos;
 std::shared_ptr<Texture2D>Texture2D::_fontTexture;
 uint64_t Texture2D::_textureStreamingSize = 0;
 uint64_t Texture2D::_maxTextureStreamingSize = (uint64_t)4 * (uint64_t)1024 * (uint64_t)1024 * (uint64_t)1024; //4 GB
-
-SceneTexture::SceneTexture(VulkanRenderer* renderer)
-{
-	auto manager = VulkanManager::GetManager();
-	_renderer = renderer;
-	auto sceneColor = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_R16G16B16A16_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneColor");
-	auto sceneDepth = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneDepth");
-	auto finalColor = Texture2D::CreateTexture2D(1, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, "FinalColor");
-	//Transition
-	VkCommandBuffer cmdbuf;
-	manager->AllocateCommandBuffer(manager ->GetCommandPool(), cmdbuf);
-	manager->BeginCommandBuffer(cmdbuf);
-	{
-		sceneColor->Transition(cmdbuf, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-		sceneDepth->Transition(cmdbuf, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-		finalColor->Transition(cmdbuf, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	}
-	manager->EndCommandBuffer(cmdbuf);
-	manager->SubmitQueueImmediate({ cmdbuf });
-	vkQueueWaitIdle(manager->GetGraphicsQueue());
-	manager->FreeCommandBuffer(manager->GetCommandPool(), cmdbuf);
-	//
-	_sceneTexture.insert(std::make_pair(SceneTextureDesc::SceneColor, sceneColor));
-	_sceneTexture.insert(std::make_pair(SceneTextureDesc::SceneDepth, sceneDepth));
-	_sceneTexture.insert(std::make_pair(SceneTextureDesc::FinalColor, finalColor));
-}
-
-void SceneTexture::UpdateTextures()
-{
-	if (_sceneTexture.size() <= 0)
-	{
-		return;
-	}
-	auto size = _renderer->GetRenderSize();
-	auto sceneDepth = _sceneTexture[SceneTextureDesc::SceneDepth];
-	if (sceneDepth->GetImageSize().width != size.width ||
-		sceneDepth->GetImageSize().height != size.height)
-	{
-		sceneDepth->Resize(size.width, size.height);
-	}
-	auto finalColor = _sceneTexture[SceneTextureDesc::FinalColor];
-	if (finalColor->GetImageSize().width != size.width ||
-		finalColor->GetImageSize().height != size.height)
-	{
-		finalColor->Resize(size.width, size.height);
-	}
-}
 
 Texture2D::~Texture2D()
 {
@@ -382,22 +335,21 @@ void Texture2D::GlobalInitialize()
 		fontDocPath = FileSystem::GetRelativePath(fontDocPath.c_str());
 		fontDocPath = FileSystem::GetProgramPath() + fontDocPath;
 		FileSystem::CorrectionPath(fontDocPath);
-		pugi::xml_document fontDoc;
-		fontDoc.load_file(fontDocPath.c_wstr());
-		auto root = fontDoc.child(L"root");
-		//auto num = root.attribute(L"num").as_ullong();
-		float tw = (float)root.attribute(L"width").as_ullong();
-		float th = (float)root.attribute(L"height").as_ullong();
-		for (auto i = root.first_child(); i ; i = i.next_sibling())
+		nlohmann::json json;
+		Serializable::LoadJson(fontDocPath.c_str(), json);
+		float tw = json["width"];
+		float th = json["height"];
+		nlohmann::json char_json = json["char"];
+		for (auto &c : char_json.items())
 		{
+			uint64_t id = c.value()["id"];
 			FontTextureInfo info;
-			info.posX = (float)i.attribute(L"x").as_uint();
-			info.posY = (float)i.attribute(L"y").as_uint();
-			info.sizeX = (float)i.attribute(L"w").as_uint();
-			info.sizeY = (float)i.attribute(L"h").as_uint();
-			info.sizeOffsetX = (float)i.attribute(L"xOffset").as_uint();
-			//info.scale = (float)i.attribute(L"scale").as_float();
-			_fontTextureInfos.emplace(std::make_pair(i.attribute(L"id").as_uint(), info));
+			info.posX = (float)c.value()["x"];
+			info.posY = (float)c.value()["y"];
+			info.sizeX = (float)c.value()["w"];
+			info.sizeY = (float)c.value()["h"];
+			info.sizeOffsetX = (float)c.value()["xOffset"];
+			_fontTextureInfos.emplace(std::make_pair((wchar_t)id, info));
 		}
 	}
 }
@@ -993,8 +945,8 @@ void GetFontCharacter(
 		kern = (float)stbtt_GetCodepointKernAdvance(&font, c, c + 1);
 		kern = kern * scale;
 
-		int padding = 2;
-		float sdf_dis = 40;
+		int padding = 1;
+		float sdf_dis = 100;
 
 		int glyph_width, glyph_height, glyph_xoff, glyph_yoff;
 		//unsigned char* glyph_bitmap = stbtt_GetCodepointBitmap(
@@ -1252,31 +1204,33 @@ void Texture2D::CreateFontTexture(HString ttfFontPath, HString outTexturePath, b
 	ConsoleDebug::print_endl(L"Create Font atlas texture finish.Save font info...生成完毕,正在导出文字UV信息...");
 
 	//导出文字UV信息
-	pugi::xml_document doc;
+	nlohmann::json json;
 
-	//把文字信息保存到xml配置
+	//把文字信息保存到json配置
 	HString fontDocPath = GetRendererConfig("Default", "FontConfig") ;
 	fontDocPath = FileSystem::GetRelativePath(fontDocPath.c_str());
 	fontDocPath = FileSystem::GetProgramPath() + fontDocPath;
 	FileSystem::CorrectionPath(fontDocPath);
-	XMLStream::CreateXMLDocument(fontDocPath, doc);
-	auto root = doc.append_child(L"root");
-	root.append_attribute(L"num").set_value(characters.size());
-	root.append_attribute(L"width").set_value(maxTextureSize);
-	root.append_attribute(L"height").set_value(maxTextureSize);
+	json["num"] = characters.size();
+	json["width"] = maxTextureSize;
+	json["height"] = maxTextureSize;
+	nlohmann::json char_json;
 	for (auto i : characters)
 	{
-		auto subNode = root.append_child(L"char");
-		subNode.append_attribute(L"id").set_value((uint64_t)i.font);
-		subNode.append_attribute(L"x").set_value(i.posX);
-		subNode.append_attribute(L"y").set_value(i.posY);
-		//subNode.append_attribute(L"scale").set_value((float)i.scale);
-		subNode.append_attribute(L"w").set_value(i.sizeX);
-		subNode.append_attribute(L"h").set_value(i.sizeY);
-		subNode.append_attribute(L"xOffset").set_value(i.sizeOffsetX);
-		subNode.append_attribute(L"char").set_value(std::wstring(1, i.font).c_str());
+		nlohmann::json fontJson;
+		fontJson["id"] = (uint64_t)i.font;
+		fontJson["x"] = i.posX;
+		fontJson["y"] = i.posY;
+
+		fontJson["w"] = i.sizeX;
+		fontJson["h"] = i.sizeY;
+		fontJson["xOffset"] = i.sizeOffsetX;
+
+		HString key = HString::FromSize_t(i.font);
+		char_json[key.c_str()] = fontJson;
 	}
-	doc.save_file(fontDocPath.c_wstr());
+	json["char"] = char_json;
+	Serializable::SaveJson(json, fontDocPath);
 }
 #else
 

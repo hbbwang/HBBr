@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <memory>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include "PassBase.h"
 #include "HGuid.h"
 #include "HRect.h"
@@ -82,6 +82,16 @@ struct GUIPrimitive
 	std::shared_ptr<class DescriptorSet> tex_descriptorSet;
 };
 
+#define GUIDrawText(text,x,y,w,h,state,fontSize)\
+{\
+	_GUIDrawText(HString(__FUNCTION__)+HString::FromInt(__LINE__) , text, x, y, w, h, state, fontSize);\
+}
+
+#define GUIDrawImage(text,x,y,w,h,state,fontSize)\
+{\
+	_GUIDrawImage(HString(__FUNCTION__)+HString::FromInt(__LINE__) , texture, x, y, w, h, state);\
+}
+
 class GUIPass :public GraphicsPass
 {
 public:
@@ -91,8 +101,13 @@ public:
 	virtual void PassUpdate()override;
 	virtual void PassReset()override;
 
-	void GUIDrawImage(HString tag, Texture2D* texture, float x, float y, float w, float h,GUIDrawState state);
-	void GUIDrawText(HString tag, const wchar_t* text, float x, float y, float w, float h, GUIDrawState state , float fontSize = 20);
+	GUIPrimitive* GetGUIPrimitive(HString tag) { return &_drawList[tag]; }
+
+	//生成纹理图片，自动生成tag
+	void _GUIDrawImage(HString tag, Texture2D* texture, float x, float y, float w, float h, GUIDrawState state);
+	
+	//生成文字，自定义tag
+	void _GUIDrawText(HString tag, HString text, float x, float y, float w, float h, GUIDrawState state , float fontSize = 20);
 
 private:
 	PipelineIndex CreatePipeline(HString shaderName);
@@ -104,8 +119,7 @@ private:
 
 	void SetupPanelAnchor(GUIDrawState state, float x, float y, float w, float h, GUIVertexData* vertexData);
 	std::shared_ptr<class Buffer>_vertexBuffer;
-	std::unordered_map<HString,GUIPrimitive> _drawList;
-	//std::unordered_map<HString, VkPipeline> _guiPipelines;
+	std::map<HString,GUIPrimitive> _drawList;
 	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
 	VkDescriptorSetLayout _ubDescriptorSetLayout = VK_NULL_HANDLE;
 	VkDescriptorSetLayout _texDescriptorSetLayout = VK_NULL_HANDLE;

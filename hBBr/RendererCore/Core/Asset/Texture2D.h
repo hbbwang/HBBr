@@ -40,39 +40,6 @@ enum TextureSampler
 	TextureSampler_Nearest_Border = 7,
 };
 
-enum class SceneTextureDesc {
-	SceneColor = 0,
-	SceneDepth = 1,
-	FinalColor = 2,
-};
-
-class VulkanRenderer;
-class PassBase;
-class Texture2D;
-
-class SceneTexture
-{
-public:
-	SceneTexture(VulkanRenderer* renderer);
-	~SceneTexture()
-	{
-		_sceneTexture.clear();
-	}
-	void UpdateTextures();
-	inline std::shared_ptr<Texture2D> GetTexture(SceneTextureDesc desc)
-	{
-		auto it = _sceneTexture.find(desc);
-		if (it != _sceneTexture.end())
-		{
-			return it->second;
-		}
-		return nullptr;
-	}
-private:
-	std::map<SceneTextureDesc, std::shared_ptr<Texture2D>> _sceneTexture;
-	class VulkanRenderer* _renderer;
-};
-
 class Texture2D : public AssetObject
 {
 	friend class VulkanManager;
@@ -102,7 +69,7 @@ public:
 		return _imageAspectFlags;
 	}
 
-	HBBR_INLINE VkExtent2D GetImageSize()const {
+	HBBR_INLINE VkExtent3D GetTextureSize()const {
 		return _imageSize;
 	}
 
@@ -200,7 +167,7 @@ private:
 	VkImageUsageFlags _usageFlags;
 	VkImageAspectFlags _imageAspectFlags;
 	uint32_t _mipCount = 1;
-	VkExtent2D _imageSize;
+	VkExtent3D _imageSize;
 	uint64_t _textureMemorySize =0;
 	uint8_t _mipBias = 0;
 	VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;

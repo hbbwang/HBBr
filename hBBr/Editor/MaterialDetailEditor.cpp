@@ -143,6 +143,10 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 				std::vector<HString> shaderNames;
 				for (auto& i : Shader::GetPSCaches())
 				{
+					if (i.second->header.flags & HideInEditor)
+					{
+						continue;
+					}
 					HString shader_name = i.second->shaderName;
 					auto it = std::find_if(shaderNames.begin(), shaderNames.end(), [shader_name](HString& s) {
 						return s == shader_name;

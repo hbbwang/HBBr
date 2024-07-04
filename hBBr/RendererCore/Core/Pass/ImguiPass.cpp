@@ -1,6 +1,7 @@
 ﻿#include "ImguiPass.h"
 #include "VulkanRenderer.h"
 #include "imgui.h"
+#include "SceneTexture.h"
 /*
 	Imgui buffer pass 
 */

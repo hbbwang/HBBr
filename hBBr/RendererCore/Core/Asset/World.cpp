@@ -108,6 +108,8 @@ void World::SaveWorld(HString newWorldName)
 	}
 	//World Setting
 	SaveWorldSetting();
+	//生成ScreenShot小图
+
 }
 
 void World::SaveWorldSetting()

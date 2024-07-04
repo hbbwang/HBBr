@@ -334,7 +334,7 @@ protected:
 				return (*value == true) ? "1" : "0";
 			}
 		}
-		else 	if (p.type.IsSame("AssetRef", false))
+		else if (p.type.IsSame("AssetRef", false))
 		{
 			if (p.bArray)
 			{
@@ -343,6 +343,7 @@ protected:
 				for (auto i : *value) {
 					result += i.path + ";";
 				}
+				return result;
 			}
 			else
 			{
@@ -383,7 +384,7 @@ protected:
 				{
 					AssetRef newAssetPath;
 					newAssetPath.path = values[i];
-					valuePtr->push_back(newAssetPath);
+					valuePtr->at(i) = (newAssetPath);
 				}
 			}
 			else

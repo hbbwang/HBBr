@@ -211,13 +211,13 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		{
 			int texCount = 0;
 			//primitive参数的长度以shader为主
-			mat->_primitive->_textureInfos.reserve(psCache->header.shaderTextureCount);
+			mat->_primitive->_textureInfos.resize(psCache->header.shaderTextureCount);
 			mat->_primitive->textures.resize(psCache->header.shaderTextureCount);
 			mat->_primitive->_samplers.resize(psCache->header.shaderTextureCount);
 			//初始化
 			for (int i = 0; i < psCache->header.shaderTextureCount; i++)
 			{
-				mat->_primitive->_textureInfos.push_back(*psCache->ti[i]);
+				mat->_primitive->_textureInfos[i] = (*psCache->ti[i]);
 				mat->_primitive->SetTexture(i, Texture2D::GetSystemTexture(psCache->texs[i].defaultTexture));
 				//Set Sampler
 				if (psCache->texs[i].msFilter == MSFilter::Nearest)

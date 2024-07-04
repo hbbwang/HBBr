@@ -4,7 +4,7 @@
 #include "VulkanRenderer.h"
 #include "HInput.h"
 #include "ConsoleDebug.h"
-#include "PassManager.h"
+#include "Pass/PassManager.h"
 #include <map>
 #include <memory>
 CameraComponent::CameraComponent(GameObject* parent)

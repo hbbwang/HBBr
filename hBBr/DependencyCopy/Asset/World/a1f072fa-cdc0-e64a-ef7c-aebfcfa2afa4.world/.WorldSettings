@@ -1,22 +1,22 @@
 {
     "DefaultCameraPosition": {
-        "x": 1.603470802307129,
-        "y": 4.42876672744751,
-        "z": -1.9878562688827515
+        "x": 1.3468503952026367,
+        "y": 4.4548773765563965,
+        "z": -1.6279560327529907
     },
     "DefaultCameraRotation": {
-        "x": 32.5,
-        "y": -25.25,
+        "x": 40.25,
+        "y": -37.0,
         "z": 0.0
     },
     "Levels": {
         "Main": {
-            "GUID": "7340fb5d-cea2-4090-bc3a-67aadcd4ab92",
-            "Dep":{}
+            "Dep": null,
+            "GUID": "7340fb5d-cea2-4090-bc3a-67aadcd4ab92"
         },
         "TestLevel": {
-            "GUID": "4f7c071c-20f2-44cd-964e-e80935017847",
-            "Dep":{}
+            "Dep": null,
+            "GUID": "4f7c071c-20f2-44cd-964e-e80935017847"
         }
     },
     "WorldName": "TestWorld"

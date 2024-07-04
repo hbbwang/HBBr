@@ -31,11 +31,11 @@
         "ContentBrowserTitle": "内容浏览器",
         "Inspector": "细节编辑器",
         "MainTitle": "HBB渲染编辑器",
-        "PosX": 386,
-        "PosY": 227,
+        "PosX": 568,
+        "PosY": 397,
         "SceneOutlineTitle": "场景大纲",
         "WindowHeight": 800,
-        "WindowWidth": 1280,
+        "WindowWidth": 1276,
         "bWindowed": true
     },
     "MaterialEditor": {

@@ -10,6 +10,7 @@
 #include "Shader.h"
 #include "DescriptorSet.h"
 #include "Primitive.h"
+#include "Pass/PassBase.h"
 
 #ifdef IS_EDITOR
 // --------- IMGUI
@@ -2308,7 +2309,6 @@ VkViewport VulkanManager::GetViewport(float w, float h)
 	return viewport;
 }
 
-#include "PassBase.h"
 void VulkanManager::SubmitQueueForPasses(VkCommandBuffer cmdBuf, VkSemaphore* presentSemaphore, VkSemaphore* submitFinishSemaphore, VkFence executeFence, VkPipelineStageFlags waitStageMask, VkQueue queue)
 {
 	VkSubmitInfo info = {};

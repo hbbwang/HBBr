@@ -144,7 +144,8 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	outFontTexturePath = FileSystem::GetRelativePath(outFontTexturePath.c_str());
 	outFontTexturePath = FileSystem::GetProgramPath() + outFontTexturePath;
 	FileSystem::CorrectionPath(outFontTexturePath);
-	//Texture2D::CreateFontTexture(ttfFontPath, outFontTexturePath, true, 16U, 4096U);
+	
+	//Texture2D::CreateFontTexture(ttfFontPath, outFontTexturePath, true, 20U, 2800U);
 
 	Texture2D::GlobalInitialize();
 
@@ -377,8 +378,11 @@ bool VulkanApp::UpdateForm()
 		auto allMaterials = ContentManager::Get()->GetAssets(AssetType::Material);
 		for (auto& i : allMaterials)
 		{
-			i.second->NeedToReload();
-			Material::LoadAsset(i.second->guid);
+			if (i.second->IsAssetLoad())
+			{
+				i.second->NeedToReload();
+				Material::LoadAsset(i.second->guid);
+			}
 		}
 	}
 	else if (!bStopRender)

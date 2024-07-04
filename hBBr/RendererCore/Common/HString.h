@@ -462,7 +462,9 @@ public:
 
 	HBBR_INLINE const char* c_str() { return _str; }
 
-	HBBR_INLINE const wchar_t* c_wstr() { return ps2ws(_str); }
+	HBBR_INLINE const wchar_t* c_wstr() { 
+		return ps2ws(_str); 
+	}
 
 	HBBR_INLINE const char* c_strC()const { return _str; }
 
@@ -931,16 +933,23 @@ public:
 		return std::all_of(stdstr.begin(), stdstr.end(), ::isdigit);
 	}
 
-#ifdef _WIN32
-
+//#ifdef _WIN32
+#if 0
 	//char 到 wchar_t的 转换
 	wchar_t* ps2ws(const char* s)
 	{
+		//ReleaseCache();
+		//size_t len = MultiByteToWideChar(CP_ACP, 0, s, (int)strlen(s), nullptr, 0);
+		//m_wchar = new wchar_t[len + 1];
+		//MultiByteToWideChar(CP_ACP, 0, s, (int)strlen(s), m_wchar, (int)len);
+		//m_wchar[len] = '\0';
+		//return m_wchar;
 		ReleaseCache();
-		size_t len = MultiByteToWideChar(CP_ACP, 0, s, (int)strlen(s), nullptr, 0);
-		m_wchar = new wchar_t[len + 1];
-		MultiByteToWideChar(CP_ACP, 0, s, (int)strlen(s), m_wchar, (int)len);
-		m_wchar[len] = '\0';
+		size_t nc = strlen(s);
+		size_t n = (size_t)MultiByteToWideChar(CP_ACP, 0, (const char*)s, (int)nc, NULL, 0);
+		m_wchar = new wchar_t[n + 1];
+		MultiByteToWideChar(CP_ACP, 0, (const char*)s, (int)nc, m_wchar, (int)n);
+		m_wchar[n] = '\0';
 		return m_wchar;
 	}
 
@@ -966,8 +975,8 @@ public:
 			exit(0);
 		}
 		m_wchar = new wchar_t[wstr_size + 1];
-		m_wchar[wstr_size] = '\0';
 		std::mbsrtowcs(m_wchar, &src, wstr_size + 1, nullptr);
+		m_wchar[wstr_size] = L'\0';
 		return m_wchar;
 	}
 
@@ -982,8 +991,8 @@ public:
 			exit(0);
 		}
 		m_char = new char[str_size + 1];
-		m_char[str_size] = '\0';
 		std::wcsrtombs(m_char, &src, str_size + 1, nullptr);
+		m_char[str_size] = L'\0';
 		return m_char;
 	}
 

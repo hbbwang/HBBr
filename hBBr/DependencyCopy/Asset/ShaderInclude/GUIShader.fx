@@ -2,6 +2,7 @@
 {
     NativeHLSL; //原生HLSL,不进行拓展编译,需遵循HLSL代码规范编写
     EnableShaderDebug;
+    HideInEditor;//不希望显示在编辑器(例如材质编辑器)
 };
 
 //GUI Flags
@@ -55,7 +56,7 @@ float4 PSMain(VSToPS IN) :SV_Target0
     if(Flags & IsFont)
     {
         result = baseTexture.r;
-        result = saturate(smoothstep(0.3f , 1.0f , result) * 2.5f);
+        result = saturate(smoothstep(0.1f , 1.0f , result));
         if(! (Flags & FontShadow) )
         {
             result.rgb = 1.0f;
