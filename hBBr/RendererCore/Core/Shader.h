@@ -62,8 +62,8 @@ struct ShaderCacheHeader
 {
 	ShaderFlags flags;
 	//Vertex input layout type,vs only
-	//{ pos,nor,tan,col,uv01,uv23 }
-	uint8_t vertexInput[6] = {0,0,0,0,0,0};
+	//{ pos,nor,tan,col,uv01,uv23,uv45} //第一个pos必须有
+	uint8_t vertexInput[7] = {3,0,0,0,0,0,0};
 	//Shader parameter count
 	uint8_t shaderParameterCount = 0;
 	//Shader texture count
@@ -100,6 +100,8 @@ struct ShaderCache
 	//
 	ShaderType shaderType;
 	//<varients,VkShaderModule>
+	//vs和ps
+	VkShaderModule vs_shaderModule;
 	VkShaderModule shaderModule;
 	HString shaderName;
 	HString shaderFullName;

@@ -149,5 +149,6 @@ public:
 	glm::vec3					boundingBox_max = glm::vec3(0, 0, 0);
 	glm::vec4					uv_0_1_abs_max = glm::vec4(0, 0, 0, 0);
 	glm::vec4					uv_2_3_abs_max = glm::vec4(0, 0, 0, 0);
+	glm::vec4					uv_4_5_abs_max = glm::vec4(0, 0, 0, 0);
 	//
 };

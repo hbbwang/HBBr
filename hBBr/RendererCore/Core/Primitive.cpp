@@ -20,8 +20,8 @@ void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, HStri
 	if (vsFullName.Length() <= 1 || psFullName.Length() <= 1)
 	{
 		prim->graphicsIndex = PipelineIndex::GetPipelineIndex(
-			Shader::_vsShader[prim->vsShader + "@" + HString::FromUInt(prim->graphicsIndex.GetVSVarient())],
-			Shader::_psShader[prim->psShader + "@" + HString::FromUInt(prim->graphicsIndex.GetPSVarient())]);
+			Shader::_vsShader[prim->graphicsIndex.GetVSShaderName() + "@" + HString::FromUInt(prim->graphicsIndex.GetVSVarient())],
+			Shader::_psShader[prim->graphicsIndex.GetPSShaderName() + "@" + HString::FromUInt(prim->graphicsIndex.GetPSVarient())]);
 	}
 	else
 	{

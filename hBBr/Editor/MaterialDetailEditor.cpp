@@ -99,8 +99,14 @@ MaterialDetailEditor* MaterialDetailEditor::RefreshMaterialEditor(std::weak_ptr<
 	if (editor != nullptr)
 	{
 		deleteWidget(editor->mp);
+		deleteWidget(editor->ma);
 		//重新生成面板
 		editor->InitMP();
+		editor->InitMA();
+		editor->left_right->setStretchFactor(0, 1);
+		editor->left_right->setStretchFactor(1, 2);
+		editor->up_bottom->setStretchFactor(0, 1);
+		editor->up_bottom->setStretchFactor(1, 4);
 	}
 	return editor;
 }
@@ -138,7 +144,6 @@ void MaterialDetailEditor::closeEvent(QCloseEvent* event)
 			break;
 		}
 	}
-
 	SaveEditorWindowSetting(this, "MaterialEditor");
 }
 
@@ -148,7 +153,9 @@ void MaterialDetailEditor::Init()
 	t->setSingleShot(true);
 	t->setInterval(100);
 
-	connect(t, &QTimer::timeout, this, [this]() {
+	connect(t, &QTimer::timeout, this, 
+	[this]() 
+	{
 		for (int i = 0; i < _allDetailWindows.size(); i++)
 		{
 			if (_allDetailWindows[i]->_material.lock().get() == _material.lock().get())
@@ -163,14 +170,9 @@ void MaterialDetailEditor::Init()
 		_allDetailWindows.append(this);
 		LoadEditorWindowSetting(this, "MaterialEditor");
 
-
 		r = new QWidget(this);
-		ma = new QWidget(this);
-
 		r->setObjectName("MaterialDetailEditor");
-		ma->setObjectName("MaterialDetailEditor");
 		ui_r.setupUi(r);
-		ui_ma.setupUi(ma);
 
 		left_right = new QSplitter(this);
 		left_right->setOrientation(Qt::Orientation::Horizontal);
@@ -180,17 +182,16 @@ void MaterialDetailEditor::Init()
 		((QVBoxLayout*)widget->layout())->setSpacing(0);
 		left_right->addWidget(widget);
 		//
-		QSplitter* up_bottom = new QSplitter(this);
+		up_bottom = new QSplitter(this);
 		up_bottom->setOrientation(Qt::Orientation::Vertical);
 		widget->layout()->addWidget(up_bottom);
 		up_bottom->addWidget(r);
-		up_bottom->addWidget(ma);
 
+		InitMA();
 		InitMP();
 
 		//小标题
 		ui_r.MaterialDetailEditor_RendererName->setText(GetEditorInternationalization("MaterialEditor", "MaterialRendererTitle"));
-		ui_ma.MaterialDetailEditor_MaterialAttributeName->setText(GetEditorInternationalization("MaterialEditor", "MaterialAttrbuteTitle"));
 		//渲染器
 		{
 			_renderer = new SDLWidget(this, _material.lock()->_assetInfo.lock()->guid.str().c_str());
@@ -199,94 +200,30 @@ void MaterialDetailEditor::Init()
 			//HWND hwnd = (HWND)VulkanApp::GetWindowHandle(_matWindow);
 			auto renderer = _renderer->_rendererForm->renderer;
 			//渲染器需要一帧时间去创建，所以下一帧执行
-			auto func = [this]()
-				{
-					auto renderer = _renderer->_rendererForm->renderer;
-					renderer->GetWorld().lock()->SetWorldName("Material Editor Renderer");
-					renderer->GetWorld().lock()->GetMainCamera()->_cameraType = EditorCameraType::TargetRotation;
-					renderer->GetWorld().lock()->GetMainCamera()->GetTransform()->SetWorldLocation(glm::vec3(0, 0, -2.0f));
+			auto func = 
+			[this]()
+			{
+				auto renderer = _renderer->_rendererForm->renderer;
+				renderer->GetWorld().lock()->SetWorldName("Material Editor Renderer");
+				renderer->GetWorld().lock()->GetMainCamera()->_cameraType = EditorCameraType::TargetRotation;
+				renderer->GetWorld().lock()->GetMainCamera()->GetTransform()->SetWorldLocation(glm::vec3(0, 0, -2.0f));
 
-					_gameObject = renderer->GetWorld().lock()->SpawnGameObject("PreviewObject", renderer->GetWorld().lock()->_editorLevel.get());
-					auto modelComp = _gameObject->AddComponent<ModelComponent>();
-					modelComp->SetModel(HGUID("6146e15a-0632-b197-b6f9-b12fc8a16b05"));
-					for (int i = 0; i < modelComp->GetMaterialNum(); i++)
-					{
-						modelComp->SetMaterial(_material, i);
-					}
-				};
+				_gameObject = renderer->GetWorld().lock()->SpawnGameObject("PreviewObject", renderer->GetWorld().lock()->_editorLevel.get());
+				auto modelComp = _gameObject->AddComponent<ModelComponent>();
+				modelComp->SetModel(HGUID("6146e15a-0632-b197-b6f9-b12fc8a16b05"));
+				for (int i = 0; i < modelComp->GetMaterialNum(); i++)
+				{
+					modelComp->SetMaterial(_material, i);
+				}
+			};
 			renderer->ExecFunctionOnRenderThread(func);
 		}
-		//Material attribute
-		PropertyWidget* pw_ma = new PropertyWidget(this);
-		ui_ma.scroll_verticalLayout->addWidget(pw_ma);
-		{
-			//ui_ma.scroll_verticalLayout
-			//material path text
-			{
-				AssetLine* path = new AssetLine(this, "");
-				pw_ma->AddItem("Virtual Path", path);
-				path->ui.LineEdit->setReadOnly(true);
-				path->ui.LineEdit->setText(_material.lock()->_assetInfo.lock()->virtualFilePath.c_str());
-				path->ui.pushButton->setHidden(true);
-				path->_bindFindButtonFunc = [this](const char* p) {
-					auto assetInfo = _material.lock()->_assetInfo;
-					ContentBrowser::FocusToAsset(assetInfo);
-					};
-			}
-			//Save
-			{
-				QToolButton* saveButton = new QToolButton(this);
-				pw_ma->AddItem("", saveButton);
-				saveButton->setText(GetEditorInternationalization("MaterialEditor", "SaveButton"));
-				connect(saveButton, &QAbstractButton::clicked, this, [this]() {
-					_material.lock()->SaveAsset(_material.lock()->_assetInfo.lock()->absFilePath);
-					});
-			}
-			// Shader Selection
-			{
-				ComboBox* comboBox = new ComboBox(this);
-				pw_ma->AddItem("Shader", comboBox);
-				std::vector<HString> shaderNames;
-				for (auto& i : Shader::GetPSCaches())
-				{
-					if (i.second->header.flags & HideInEditor)
-					{
-						continue;
-					}
-					HString shader_name = i.second->shaderName;
-					auto it = std::find_if(shaderNames.begin(), shaderNames.end(), [shader_name](HString& s) {
-						return s == shader_name;
-						});
-					if (it == shaderNames.end())
-					{
-						shaderNames.push_back(shader_name);
-						comboBox->AddItem(shader_name.c_str());
-					}
-				}
-				comboBox->SetCurrentSelection(_material.lock()->GetPrimitive()->psShader.c_str());
-			}
-			//Refresh shader button
-			{
-				QToolButton* refreshButton = new QToolButton(this);
-				pw_ma->AddItem("", refreshButton);
-				refreshButton->setText(GetEditorInternationalization("MaterialEditor", "RefreshShaderButton"));
-				connect(refreshButton, &QAbstractButton::clicked, this, [this]()
-					{
-						ConsoleDebug::printf_endl(
-							HString(GetEditorInternationalization("MaterialEditor", "RefreshShader").toStdString()),
-							_material.lock()->GetPrimitive()->vsShader.c_str(),
-							_material.lock()->GetPrimitive()->psShader.c_str());
-						Shader::ReloadMaterialShaderCacheAndPipelineObject(_material);
-						//重新打开，主要为了重新加载参数页面
-						RefreshMaterialEditor(_material);
-					});
-			}
-			ui_ma.scroll_verticalLayout->addStretch(20);
-			pw_ma->ShowItems();
-		}
-
 		show();
-		});
+		left_right->setStretchFactor(0, 1);
+		left_right->setStretchFactor(1, 2);
+		up_bottom->setStretchFactor(0, 1);
+		up_bottom->setStretchFactor(1, 4);
+	});
 	t->start();
 }
 
@@ -394,4 +331,94 @@ void MaterialDetailEditor::InitMP()
 	}
 	pw_mp->ShowItems();
 	ui_mp.scroll_verticalLayout->addStretch(20);
+}
+
+void MaterialDetailEditor::InitMA()
+{
+	ma = new QWidget(this);
+	ma->setObjectName("MaterialDetailEditor");
+	ui_ma.setupUi(ma);
+	up_bottom->addWidget(ma);
+	ui_ma.MaterialDetailEditor_MaterialAttributeName->setText(GetEditorInternationalization("MaterialEditor", "MaterialAttrbuteTitle"));
+	//Material attribute
+	PropertyWidget* pw_ma = new PropertyWidget(this);
+	ui_ma.scroll_verticalLayout->addWidget(pw_ma);
+	{
+		//ui_ma.scroll_verticalLayout
+		//material path text
+		{
+			AssetLine* path = new AssetLine(this, "");
+			pw_ma->AddItem("Virtual Path", path);
+			path->ui.LineEdit->setReadOnly(true);
+			path->ui.LineEdit->setText(_material.lock()->_assetInfo.lock()->virtualFilePath.c_str());
+			path->ui.pushButton->setHidden(true);
+			path->_bindFindButtonFunc = 
+			[this](const char* p)
+			{
+				auto assetInfo = _material.lock()->_assetInfo;
+				ContentBrowser::FocusToAsset(assetInfo);
+			};
+		}
+		//Save
+		{
+			QToolButton* saveButton = new QToolButton(this);
+			pw_ma->AddItem("", saveButton);
+			saveButton->setText(GetEditorInternationalization("MaterialEditor", "SaveButton"));
+			connect(saveButton, &QAbstractButton::clicked, this,
+			[this]() {
+				_material.lock()->SaveAsset(_material.lock()->_assetInfo.lock()->absFilePath);
+			});
+		}
+		// Shader Selection
+		{
+			ComboBox* comboBox = new ComboBox(this);
+			pw_ma->AddItem("Shader", comboBox);
+			std::vector<HString> shaderNames;
+			for (auto& i : Shader::GetPSCaches())
+			{
+				if (i.second->header.flags & HideInEditor)
+				{
+					continue;
+				}
+				HString shader_name = i.second->shaderName;
+				auto it = std::find_if(shaderNames.begin(), shaderNames.end(), 
+				[shader_name](HString& s) {
+					return s == shader_name;
+				});
+				if (it == shaderNames.end())
+				{
+					shaderNames.push_back(shader_name);
+					comboBox->AddItem(shader_name.c_str());
+				}
+			}
+			comboBox->SetCurrentSelection(_material.lock()->GetPrimitive()->graphicsIndex.GetPSShaderName().c_str());
+			comboBox->_bindCurrentTextChanged = 
+				[](int index, const char* s) 
+				{
+					//切换shader的时候，所有变体都使用默认的
+					auto vs_cache_it = Shader::GetVSCache(HString(s) + "@0");
+					auto ps_cache_it = Shader::GetPSCache(HString(s) + "@0");
+					//if(vs_cache_it)
+				};
+		}
+		//Refresh shader button
+		{
+			QToolButton* refreshButton = new QToolButton(this);
+			pw_ma->AddItem("", refreshButton);
+			refreshButton->setText(GetEditorInternationalization("MaterialEditor", "RefreshShaderButton"));
+			connect(refreshButton, &QAbstractButton::clicked, this, 
+			[this]()
+			{
+				ConsoleDebug::printf_endl(
+					HString(GetEditorInternationalization("MaterialEditor", "RefreshShader").toStdString()),
+					_material.lock()->GetPrimitive()->graphicsIndex.GetVSShaderName().c_str(),
+					_material.lock()->GetPrimitive()->graphicsIndex.GetPSShaderName().c_str());
+				Shader::ReloadMaterialShaderCacheAndPipelineObject(_material);
+				//重新打开，主要为了重新加载参数页面
+				RefreshMaterialEditor(_material);
+			});
+		}
+		ui_ma.scroll_verticalLayout->addStretch(20);
+		pw_ma->ShowItems();
+	}
 }

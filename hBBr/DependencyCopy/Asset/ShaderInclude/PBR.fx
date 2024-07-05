@@ -33,6 +33,7 @@ struct VSInput
     float4 Color        : COLOR;
     float4 Texcoord01   : TEXCOORD0;
     float4 Texcoord23   : TEXCOORD1;
+    float4 Texcoord45   : TEXCOORD2;
 };
 
 // //顶点着色器补充

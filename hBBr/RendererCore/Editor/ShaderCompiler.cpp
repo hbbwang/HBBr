@@ -134,7 +134,7 @@ HString GetTextureNameFromShaderCodeLine(HString line)
 }
 
 void ExecCompileShader(HString& _shaderSrcCode, HString& fileName, const char* entryPoint, CompileShaderType shaderType
-	, ShaderCacheHeader& header, std::vector<ShaderParameterInfo>& shaderParamInfos, std::vector<ShaderTextureInfo>& shaderTextureInfos, const char* srcShaderFileFullPath, std::vector<ShaderVarientGroup>&varients)
+	, ShaderCacheHeader& header, std::vector<ShaderParameterInfo>& shaderParamInfos, std::vector<ShaderTextureInfo>& shaderTextureInfos, const char* srcShaderFileFullPath, std::vector<ShaderVarientGroup>&varients, std::vector<HString>& macroDefines)
 {
 	shaderc::Compiler compiler;
 	shaderc::CompileOptions options;
@@ -149,6 +149,12 @@ void ExecCompileShader(HString& _shaderSrcCode, HString& fileName, const char* e
 	options.SetHlslIoMapping(true);
 	options.SetIncluder(std::make_unique<ShaderIncluder>());
 	//options.SetTargetSpirv(shaderc_spirv_version_1_3);
+
+	//Pre macro defines
+	for (auto& m: macroDefines)
+	{
+		options.AddMacroDefinition(m.c_str(), "1");
+	}
 
 	//Platform
 	if (VulkanManager::GetManager()->GetPlatform() == EPlatform::Windows)//Default
@@ -267,7 +273,7 @@ void ExecCompileShader(HString& _shaderSrcCode, HString& fileName, const char* e
 void ProcessCombination(uint32_t bits, int count,
 	HString& _shaderSrcCode, HString& fileName, const char* entryPoint, CompileShaderType shaderType
 	, ShaderCacheHeader& header, std::vector<ShaderParameterInfo>& shaderParamInfos,
-	std::vector<ShaderTextureInfo>& shaderTextureInfos, const char* srcShaderFileFullPath, std::vector<ShaderVarientGroup>& varients)
+	std::vector<ShaderTextureInfo>& shaderTextureInfos, const char* srcShaderFileFullPath, std::vector<ShaderVarientGroup>& varients, std::vector<HString>& macroDefines)
 {
 	std::string out = "Bit ";
 	if (count == 0)
@@ -288,25 +294,25 @@ void ProcessCombination(uint32_t bits, int count,
 		MessageOut(varientMsg, false, false, "50,125,80");
 	}
 	MessageOut(out, false, false);
-	ExecCompileShader(_shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
+	ExecCompileShader(_shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients, macroDefines);
 }
 
 void GenerateCombinations(int count, uint32_t bits, int bitIndex, 
 	HString& _shaderSrcCode, HString& fileName, const char* entryPoint, CompileShaderType shaderType
 	, ShaderCacheHeader& header, std::vector<ShaderParameterInfo>& shaderParamInfos, 
-	std::vector<ShaderTextureInfo>& shaderTextureInfos, const char* srcShaderFileFullPath, std::vector<ShaderVarientGroup>& varients)
+	std::vector<ShaderTextureInfo>& shaderTextureInfos, const char* srcShaderFileFullPath, std::vector<ShaderVarientGroup>& varients, std::vector<HString>&macroDefines )
 {
 	if (bitIndex >= count)
 		ProcessCombination(bits, count,
-			_shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
+			_shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients, macroDefines);
 	else
 	{
 		// 将当前位设置为 0 并递归
 		GenerateCombinations(count, bits & ~(1 << bitIndex), bitIndex + 1,
-			_shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
+			_shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients, macroDefines);
 		// 将当前位设置为 1 并递归
 		GenerateCombinations(count, bits | (1 << bitIndex), bitIndex + 1,
-			_shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
+			_shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients, macroDefines);
 	}
 }
 
@@ -320,6 +326,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 	ShaderCacheHeader header = {} ;
 	std::vector<ShaderParameterInfo> shaderParamInfos;
 	std::vector<ShaderTextureInfo> shaderTextureInfos;
+	std::vector<HString> macroDefines;
 	//
 	std::vector<ShaderVarientGroup>varients;
 	//自定义的信息进去
@@ -448,18 +455,44 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 					auto sem = line[s].Split(":");
 					if (sem.size() > 1)
 					{
-						if (sem[1].Contains("POSITION"))
-							header.vertexInput[0] = size;
-						else if (sem[1].Contains("NORMAL"))
-							header.vertexInput[1] = size;
+						HString sem_clearSpace = sem[0].ClearSpace();
+						if (sem_clearSpace[0] == '/' && sem_clearSpace[1] == '/')
+							continue;
+						//if (sem[1].Contains("POSITION"))
+						//{
+						//	macroDefines.push_back("USE_VERTEX_INPUT_POSITION");
+						//	header.vertexInput[0] = size;
+						//}
+						if (sem[1].Contains("NORMAL"))
+						{
+							macroDefines.push_back("USE_VERTEX_INPUT_NORMAL");
+							header.vertexInput[1] = 3;
+						}
 						else if (sem[1].Contains("TANGENT"))
-							header.vertexInput[2] = size;
+						{
+							macroDefines.push_back("USE_VERTEX_INPUT_TANGENT");
+							header.vertexInput[2] = 3;
+						}
 						else if (sem[1].Contains("COLOR"))
-							header.vertexInput[3] = size;
+						{
+							macroDefines.push_back("USE_VERTEX_INPUT_COLOR");
+							header.vertexInput[3] = 4;
+						}
 						else if (sem[1].Contains("TEXCOORD0"))
-							header.vertexInput[4] = size;
+						{
+							macroDefines.push_back("USE_VERTEX_INPUT_TEXCOORD0");
+							header.vertexInput[4] = 4;
+						}
 						else if (sem[1].Contains("TEXCOORD1"))
-							header.vertexInput[5] = size;
+						{
+							macroDefines.push_back("USE_VERTEX_INPUT_TEXCOORD1");
+							header.vertexInput[5] = 4;
+						}
+						else if (sem[1].Contains("TEXCOORD2"))
+						{
+							macroDefines.push_back("USE_VERTEX_INPUT_TEXCOORD2");
+							header.vertexInput[6] = 4;
+						}
 					}
 				}
 				//结构体结束
@@ -696,7 +729,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 		shaderTypeStr = ("Compute");
 	}
 	MessageOut((HString("-Start Compile ") + shaderTypeStr + " Shader Permutation--"), false, false);
-	GenerateCombinations((int)varients.size(), 0, 0, _shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
+	GenerateCombinations((int)varients.size(), 0, 0, _shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients, macroDefines);
 	//for (int i = 0; i < varients.size(); i++)
 	//{
 	//	//Bool开和关  分别编一次

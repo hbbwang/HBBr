@@ -185,6 +185,23 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 				model->uv_2_3_abs_max.w = glm::fmax(model->uv_2_3_abs_max.w, glm::abs(vec4.w));
 			}
 			vertex.uv23.push_back(vec4);
+			//UV 45
+			vec4 = glm::vec4(0);
+			if (mesh->HasTextureCoords(4))
+			{
+				vec4.x = mesh->mTextureCoords[4][i].x;
+				vec4.y = mesh->mTextureCoords[4][i].y;
+				model->uv_4_5_abs_max.x = glm::fmax(model->uv_4_5_abs_max.x, glm::abs(vec4.x));
+				model->uv_4_5_abs_max.y = glm::fmax(model->uv_4_5_abs_max.y, glm::abs(vec4.y));
+			}
+			if (mesh->HasTextureCoords(5))
+			{
+				vec4.z = mesh->mTextureCoords[5][i].x;
+				vec4.w = mesh->mTextureCoords[5][i].y;
+				model->uv_4_5_abs_max.z = glm::fmax(model->uv_4_5_abs_max.z, glm::abs(vec4.z));
+				model->uv_4_5_abs_max.w = glm::fmax(model->uv_4_5_abs_max.w, glm::abs(vec4.w));
+			}
+			vertex.uv45.push_back(vec4);
 		}
 		newData.vertexData = vertex;
 		//indices

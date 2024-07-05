@@ -30,12 +30,35 @@ cbuffer Pass :register(b0 ,space1)
 struct VSToPS
 {
     float4 SVPosition       : SV_POSITION;
+
+    #if USE_VERTEX_INPUT_COLOR
     float4 Color            : COLOR;
+    #endif
+
+    #if USE_VERTEX_INPUT_TEXCOORD0
     float4 Texcoord01       : TEXCOORD0;
+    #endif
+
+    #if USE_VERTEX_INPUT_TEXCOORD1
     float4 Texcoord23       : TEXCOORD1;
+    #endif
+
+    #if USE_VERTEX_INPUT_TEXCOORD2
+    float4 Texcoord45       : TEXCOORD2;
+    #endif
+
+    #if USE_VERTEX_INPUT_NORMAL
     float3 WorldNormal      : NORMAL;
+    #endif
+
+    #if USE_VERTEX_INPUT_TANGENT
     float3 WorldTangent     : TANGENT;
+    #endif
+
+    #if USE_VERTEX_INPUT_NORMAL || USE_VERTEX_INPUT_TANGENT
     float3 WorldBitangent   : BINORMAL;
+    #endif
+    
     float3 LocalPosition    : TEXCOORD2;
     float3 WorldPosition    : TEXCOORD3;
     float3 CameraVector     : TEXCOORD4;
@@ -53,7 +76,9 @@ struct PixelShaderParameter
     float   AO;
     float   Specular;
     float   InShadow;
+    float4  VertexColor;
     uint    ShadingModelID;
+    float2  UV[6];
     //
     float3  LocalPosition;
     float3  WorldPosition;
@@ -65,9 +90,43 @@ struct PixelShaderParameter
 void InitPSParameter(in VSToPS IN , PixelShaderParameter Params)
 {
     Params.BaseColor = float3(0,0,0);
+
+    #if USE_VERTEX_INPUT_NORMAL
     Params.WorldNormal = normalize(IN.WorldNormal);
+    #endif
+
+    #if USE_VERTEX_INPUT_TANGENT
     Params.WorldTangent = normalize(IN.WorldTangent);
+    #endif
+
+    #if USE_VERTEX_INPUT_NORMAL || USE_VERTEX_INPUT_TANGENT
     Params.WorldBitangent = normalize(IN.WorldBitangent);
+    Params.TangentToWorld = float3x3(
+        float3(Params.WorldTangent.x,Params.WorldBitangent.x , Params.WorldNormal.x),
+        float3(Params.WorldTangent.y,Params.WorldBitangent.y , Params.WorldNormal.y),
+        float3(Params.WorldTangent.z,Params.WorldBitangent.z , Params.WorldNormal.z)  
+    );
+    #endif
+
+    #if USE_VERTEX_INPUT_COLOR
+    Params.VertexColor = IN.Color;
+    #endif
+
+    #if USE_VERTEX_INPUT_TEXCOORD0
+    Params.UV[0] = IN.Texcoord01.xy;
+    Params.UV[1] = IN.Texcoord01.zw;
+    #endif
+
+    #if USE_VERTEX_INPUT_TEXCOORD1
+    Params.UV[2] = IN.Texcoord23.xy;
+    Params.UV[3] = IN.Texcoord23.zw;
+    #endif
+
+    #if USE_VERTEX_INPUT_TEXCOORD2
+    Params.UV[4] = IN.Texcoord45.xy;
+    Params.UV[5] = IN.Texcoord45.zw;
+    #endif
+
     Params.Emissive = float3(0,0,0);
     Params.Roughness = 1.0f;
     Params.Metallic = 0.0f;
@@ -78,22 +137,40 @@ void InitPSParameter(in VSToPS IN , PixelShaderParameter Params)
     Params.LocalPosition = IN.LocalPosition;
     Params.WorldPosition = IN.WorldPosition;
     Params.CameraVector = normalize(IN.CameraVector);
-    Params.TangentToWorld = float3x3(
-        float3(Params.WorldTangent.x,Params.WorldBitangent.x , Params.WorldNormal.x),
-        float3(Params.WorldTangent.y,Params.WorldBitangent.y , Params.WorldNormal.y),
-        float3(Params.WorldTangent.z,Params.WorldBitangent.z, Params.WorldNormal.z)
-    );
 }
 
 void InitVSToPS(inout VSToPS vs2ps)
 {
     vs2ps.SVPosition = float4(0,0,0,1);
-    vs2ps.Color = float4(0,0,0,1);
-    vs2ps.Texcoord01 = float4(0,0,0,1);
-    vs2ps.Texcoord23 = float4(0,0,0,1);
+
+    #if USE_VERTEX_INPUT_COLOR
+    vs2ps.Color = float4(0,0,0,0);
+    #endif
+
+    #if USE_VERTEX_INPUT_TEXCOORD0
+    vs2ps.Texcoord01 = float4(0,0,0,0);
+    #endif
+    
+    #if USE_VERTEX_INPUT_TEXCOORD1
+    vs2ps.Texcoord23 = float4(0,0,0,0);
+    #endif
+
+    #if USE_VERTEX_INPUT_TEXCOORD2
+    vs2ps.Texcoord45 = float4(0,0,0,0);
+    #endif
+
+    #if USE_VERTEX_INPUT_NORMAL
     vs2ps.WorldNormal = float3(0,0,0);
+    #endif
+
+    #if USE_VERTEX_INPUT_TANGENT
     vs2ps.WorldTangent = float3(0,0,0);
+    #endif
+
+    #if USE_VERTEX_INPUT_NORMAL || USE_VERTEX_INPUT_TANGENT
     vs2ps.WorldBitangent= float3(0,0,0);
+    #endif
+
     vs2ps.WorldPosition = float3(0,0,0);
     vs2ps.CameraVector = float3(0,0,0);
 }

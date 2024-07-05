@@ -17,9 +17,9 @@ public:
 	~MaterialDetailEditor();
 	class MaterialEditor* _parent = nullptr;
 
-
 	class SDLWidget* _renderer = nullptr;
 	class QSplitter* left_right = nullptr;
+	class QSplitter* up_bottom = nullptr;
 
 	QWidget* r = new QWidget(this);
 	QWidget* ma = new QWidget(this);
@@ -44,6 +44,7 @@ protected:
 private:
 	void Init();
 	void InitMP();
+	void InitMA();
 	Ui::MaterialDetailEditor_MaterialAttribute ui_ma;
 	Ui::MaterialDetailEditor_MaterialParameter ui_mp;
 	Ui::MaterialDetailEditor_Renderer ui_r;

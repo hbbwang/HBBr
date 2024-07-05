@@ -93,10 +93,10 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		uint32_t ps_varient = 0;
 		vs_varient = json["vsVarient"];
 		ps_varient = json["psVarient"];
-		mat->_primitive->vsShader = json["vsShader"];
-		mat->_primitive->psShader = json["psShader"];
-		vsFullName = mat->_primitive->vsShader + "@" + HString::FromUInt(vs_varient);
-		psFullName = mat->_primitive->psShader + "@" + HString::FromUInt(ps_varient);
+		HString vsShaderName = json["vsShader"];
+		HString psShaderName = json["psShader"];
+		vsFullName = vsShaderName + "@" + HString::FromUInt(vs_varient);
+		psFullName = psShaderName + "@" + HString::FromUInt(ps_varient);
 
 		//根据变体查找ShaderCache
 		std::shared_ptr<ShaderCache> vsCache;
@@ -108,7 +108,6 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 			else
 			{
 				ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000023"), vsFullName.c_str());
-				mat->_primitive->vsShader ="Error";
 				vsCache = Shader::_vsShader["Error@0"];
 			}
 		}
@@ -119,7 +118,6 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 			else
 			{
 				ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000023"), psFullName.c_str());
-				mat->_primitive->psShader = "Error";
 				psCache = Shader::_psShader["Error@0"];
 			}
 		}
@@ -366,8 +364,8 @@ std::weak_ptr<AssetInfoBase> Material::CreateMaterial(HString repository, HStrin
 nlohmann::json Material::ToJson()
 {
 	//Base
-	_json["vsShader"] = GetPrimitive()->vsShader;
-	_json["psShader"] = GetPrimitive()->psShader;
+	_json["vsShader"] = GetPrimitive()->graphicsIndex.GetVSShaderName();
+	_json["psShader"] = GetPrimitive()->graphicsIndex.GetPSShaderName();
 	_json["blendMode"] = (int)GetPrimitive()->graphicsIndex.blendMode;
 	_json["vsVarient"] = GetPrimitive()->graphicsIndex.vs_varients;
 	_json["psVarient"] = GetPrimitive()->graphicsIndex.ps_varients;

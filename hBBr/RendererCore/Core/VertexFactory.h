@@ -12,7 +12,7 @@ namespace VertexFactory
 		std::vector<glm::vec4> col;
 		std::vector<glm::vec4> uv01;
 		std::vector<glm::vec4> uv23;
-
+		std::vector<glm::vec4> uv45;
 		std::vector<uint32_t> vertexIndices;
 
 		std::vector<float> GetData()
@@ -23,7 +23,8 @@ namespace VertexFactory
 				3 * tan.size() +
 				4 * col.size() +
 				4 * uv01.size() +
-				4 * uv23.size()
+				4 * uv23.size() +
+				4 * uv45.size()
 			);
 			uint32_t dataIndex = 0;
 			for (int i = 0; i < result.size(); i++ )
@@ -72,20 +73,29 @@ namespace VertexFactory
 					result[++i] = uv23[dataIndex].z;
 					result[++i] = uv23[dataIndex].w;
 				}
+				//
+				if (uv45.size() > dataIndex)
+				{
+					result[++i] = uv45[dataIndex].x;
+					result[++i] = uv45[dataIndex].y;
+					result[++i] = uv45[dataIndex].z;
+					result[++i] = uv45[dataIndex].w;
+				}
 				dataIndex++;
 			}
 			return result;
 		}
 
-		std::vector<float> GetData(uint8_t inputType[6])
+		std::vector<float> GetData(uint8_t inputType[7])
 		{
-			int mul[6]{
+			int mul[7]{
 				inputType[0] > 0 ? 1 : 0,
 				inputType[1] > 0 ? 1 : 0,
 				inputType[2] > 0 ? 1 : 0,
 				inputType[3] > 0 ? 1 : 0,
 				inputType[4] > 0 ? 1 : 0, 
-				inputType[5] > 0 ? 1 : 0
+				inputType[5] > 0 ? 1 : 0,
+				inputType[6] > 0 ? 1 : 0
 			};
 
 			if (nor.size() <= 0)
@@ -98,7 +108,8 @@ namespace VertexFactory
 				uv01.resize(pos.size());
 			if (uv23.size() <= 0)
 				uv23.resize(pos.size());
-
+			if (uv45.size() <= 0)
+				uv45.resize(pos.size());
 
 			std::vector<float> result(
 				3 * pos.size() * mul[0] +
@@ -106,7 +117,8 @@ namespace VertexFactory
 				3 * tan.size() * mul[2] +
 				4 * col.size() * mul[3] +
 				4 * uv01.size() * mul[4] +
-				4 * uv23.size() * mul[5]
+				4 * uv23.size() * mul[5] +
+				4 * uv45.size() * mul[6]
 			);
 			uint32_t dataIndex = 0;
 			const size_t count = result.size();
@@ -156,6 +168,14 @@ namespace VertexFactory
 					result[++i] = uv23[dataIndex].z;
 					result[++i] = uv23[dataIndex].w;
 				}
+				//
+				if (uv45.size() > dataIndex && mul[6] > 0)
+				{
+					result[++i] = uv45[dataIndex].x;
+					result[++i] = uv45[dataIndex].y;
+					result[++i] = uv45[dataIndex].z;
+					result[++i] = uv45[dataIndex].w;
+				}
 				dataIndex++;
 			}
 			return result;
@@ -196,15 +216,20 @@ namespace VertexFactory
 				result.inputLayouts.push_back(VK_FORMAT_R32G32B32A32_SFLOAT);
 				result.inputSize += sizeof(glm::vec4);
 			}
+			if (uv45.size() > 0)
+			{
+				result.inputLayouts.push_back(VK_FORMAT_R32G32B32A32_SFLOAT);
+				result.inputSize += sizeof(glm::vec4);
+			}
 			result.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 			return result;
 		}
 
-		static VertexInputLayout BuildLayout(uint8_t inputType[6])
+		static VertexInputLayout BuildLayout(uint8_t inputType[7])
 		{
 			VertexInputLayout result = {};
 			result.inputSize = 0;
-			for (int i = 0; i < 6; i++)
+			for (int i = 0; i < 7; i++)
 			{
 				if (inputType[i] == 0)
 					continue;
@@ -234,77 +259,4 @@ namespace VertexFactory
 		}
 	};
 
-	struct ScreenTriangleVertexInput : public VertexInput
-	{
-		ScreenTriangleVertexInput() 
-		{
-			if (vertexInputData.size() <= 0)
-			{
-				pos =
-				{
-					glm::vec3(-1,1,0) ,
-					glm::vec3(0,-1,0),
-					glm::vec3(1,1,0)
-				};
-				col =
-				{
-					glm::vec4(1,0,0,1),
-					glm::vec4(0,1,0,1),
-					glm::vec4(0,0,1,1)
-				};
-				vertexInputData = GetData();
-				vertexIndices = {0,1,2};
-				vertexInputLayout = BuildLayout();
-			}
-		}
-		std::vector<float> vertexInputData;
-		std::vector<uint32_t> vertexIndices;
-		VertexInputLayout vertexInputLayout;
-	};
-
-	struct CubeVertexInput : public VertexInput
-	{
-		CubeVertexInput()
-		{
-			if (vertexInputData.size() <= 0)
-			{
-				pos =
-				{
-					glm::vec3(1.0f,1.0f,-1.0f) ,
-					glm::vec3(1.0f,-1.0f,-1.0f),
-					glm::vec3(-1.0f,-1.0f,-1.0f),
-					glm::vec3(-1.0f,1.0f,-1.0f),
-					glm::vec3(-1.0f,1.0f,1.0f),
-					glm::vec3(-1.0f,-1.0f,1.0f),
-					glm::vec3(1.0f,-1.0f,1.0f),
-					glm::vec3(1.0f,1.0f,1.0f),
-				};
-				col =
-				{
-					glm::vec4(1,0,0,1),
-					glm::vec4(0,1,0,1),
-					glm::vec4(0,0,1,1),
-					glm::vec4(1,0,1,1),
-					glm::vec4(1,1,1,1),
-					glm::vec4(0,1,1,1),
-					glm::vec4(1,1,0,1),
-					glm::vec4(1,0,1,1),
-				};
-				vertexInputData = GetData();
-				vertexIndices = 
-				{
-					0,1,2,0,2,3,
-					0,3,4,0,4,7,
-					4,5,6,4,6,7,
-					1,6,5,1,5,2,
-					3,2,5,3,5,4,
-					7,6,1,7,1,0
-				};
-				vertexInputLayout = BuildLayout();
-			}
-		}
-		std::vector<float> vertexInputData;
-		std::vector<uint32_t> vertexIndices;
-		VertexInputLayout vertexInputLayout;
-	};
 };
