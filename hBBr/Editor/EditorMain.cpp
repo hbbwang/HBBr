@@ -18,6 +18,7 @@
 #include "ConsoleDebug.h"
 #include <QCloseEvent>
 #include <WorldSelector.h>
+#include <MaterialDetailEditor.h>
 EditorMain* EditorMain::_self = nullptr;
 
 CustomDockWidget::CustomDockWidget(QWidget* parent) :QDockWidget(parent)
@@ -77,7 +78,7 @@ EditorMain::EditorMain(QWidget *parent)
     });
     connect(ui.CompileAllShader, &QAction::triggered, this, [this](bool bChecked) {
         VulkanApp::RecompileAllShader();
-
+        MaterialDetailEditor::RefreshAllMaterialEditor();
     });
     connect(ui.SaveWorld, &QAction::triggered, this, [this](bool bChecked) {
         VulkanApp::GetMainForm()->renderer->GetWorld().lock()->SaveWorld();
