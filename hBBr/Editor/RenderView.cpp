@@ -18,7 +18,7 @@
 #include "VulkanRenderer.h"
 #include "EditorCommonFunction.h"
 #include <qdebug.h>
-
+#include "ShaderCompiler.h"
 #ifdef _WIN32
 #pragma comment(lib , "RendererCore.lib")
 #endif

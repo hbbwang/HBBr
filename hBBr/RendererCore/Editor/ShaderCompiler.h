@@ -21,12 +21,18 @@ namespace Shaderc
 {
 	class ShaderCompiler
 	{
-	public:
+		public:
 		/* Auto find all fx shaders for compile in the path. */
 		HBBR_API static void CompileAllShaders(const char* srcShaderPath);
 
 		/* Compile single shader. */
 		HBBR_API static void CompileShader(const char* srcShaderFileFullPath,const char* entryPoint, CompileShaderType shaderType);
+
+		static int _bEnableShaderDebug;
+		HBBR_API static void SetEnableShaderDebug(bool bEnable) {
+			_bEnableShaderDebug = bEnable ? 1 : 0;
+		}
+
 	};
 };
 #endif

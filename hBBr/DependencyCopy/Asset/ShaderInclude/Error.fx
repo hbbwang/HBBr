@@ -1,6 +1,5 @@
 [Flag]//Shader flags
 {
-    EnableShaderDebug;
 };
 
 #define MATERIAL_SHADINGMODEL_UNLIT   1

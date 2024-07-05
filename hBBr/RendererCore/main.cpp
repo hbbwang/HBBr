@@ -28,6 +28,7 @@
 //#pragma comment(lib ,"vld.lib")
 //#endif
 
+std::function<void()>VulkanApp::_editorVulkanInit = []() {};
 std::vector<VulkanForm*> VulkanApp::_forms;
 VulkanForm* VulkanApp::_mainForm = nullptr;
 VulkanForm* VulkanApp::_focusForm = nullptr;
@@ -151,6 +152,8 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 
 	//Create Main Window
 	auto win = CreateNewWindow(128, 128, "MainRenderer", false, parent);
+
+	VulkanApp::_editorVulkanInit();
 
 #if IS_EDITOR
 	Shaderc::ShaderCompiler::CompileAllShaders(FileSystem::GetShaderIncludeAbsPath().c_str());

@@ -1,4 +1,6 @@
 #include "SDLWidget.h"
+#include "ShaderCompiler.h"
+#include "EditorCommonFunction.h"
 
 VulkanForm* SDLWidget::_mainRenderer = nullptr;
 SDLWidget::SDLWidget(QWidget* parent)
@@ -10,6 +12,15 @@ SDLWidget::SDLWidget(QWidget* parent)
 	//务必关闭QT5的更新，不然在刷新窗口的时候会有一瞬间顶在SDL的上面，造成闪烁。
 	setUpdatesEnabled(false);
 	setObjectName("SDLRenderer_Main");
+
+	//Global setting
+	VulkanApp::SetEditorVulkanInit(
+		[]() {
+			Shaderc::ShaderCompiler::SetEnableShaderDebug(GetEditorConfigInt("Default", "EnableShaderDebug"));
+	
+		
+		});
+	//
 	_rendererForm = VulkanApp::InitVulkanManager(false, true, (void*)this->winId());
 	_hwnd = (HWND)VulkanApp::GetWindowHandle(_rendererForm);
 }

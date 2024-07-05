@@ -497,6 +497,28 @@ QString GetEditorConfig(QString Group, QString name)
     return "????";
 }
 
+int GetEditorConfigInt(QString Group, QString name)
+{
+    if (_editorConfig.is_null())
+    {
+        Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor.json", _editorConfig);
+    }
+    if (!_editorConfig.is_null())
+    {
+        auto it = _editorConfig.find(Group.toStdString());
+        if (it != _editorConfig.end())
+        {
+            auto va_it = it.value().find(name.toStdString());
+            if (va_it != it.value().end())
+            {
+                int result = va_it.value();
+                return result;
+            }
+        }
+    }
+    return 0;
+}
+
 void SetWindowCenterPos(QWidget* widget)
 {
     auto rect = widget->windowHandle()->screen()->geometry();

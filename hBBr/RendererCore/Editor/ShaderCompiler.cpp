@@ -12,6 +12,8 @@
 
 #pragma comment(lib,"shaderc/shaderc_shared.lib")
 
+int Shaderc::ShaderCompiler::_bEnableShaderDebug = 0;
+
 void Shaderc::ShaderCompiler::CompileAllShaders(const char* srcShaderPath)
 {
 	auto allFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath , "fx");
@@ -729,6 +731,14 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 		shaderTypeStr = ("Compute");
 	}
 	MessageOut((HString("-Start Compile ") + shaderTypeStr + " Shader Permutation--"), false, false);
+	
+	//Global setting
+	if (_bEnableShaderDebug == 1)
+	{
+		header.flags |= EnableShaderDebug;
+	}
+	//
+
 	GenerateCombinations((int)varients.size(), 0, 0, _shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients, macroDefines);
 	//for (int i = 0; i < varients.size(); i++)
 	//{

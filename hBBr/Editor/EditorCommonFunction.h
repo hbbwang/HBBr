@@ -31,6 +31,8 @@ void SetEditorInternationalizationInt(QString Group, QString name, int newValue)
 
 QString GetEditorConfig(QString Group, QString name);
 
+int GetEditorConfigInt(QString Group, QString name);
+
 void SetWindowCenterPos(QWidget* widget);
 
 void SaveEditorWindowSetting(QWidget* widget, QString Group);
