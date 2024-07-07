@@ -106,160 +106,316 @@ void MaterialPrimitive::SetTexture(HString textureName, Texture2D* newTexture)
 	}
 }
 
-float MaterialPrimitive::GetScalarParameter(HString name, int* arrayIndex, int* vec4Index)
+float MaterialPrimitive::GetScalarParameter_VS(HString name, int* arrayIndex, int* vec4Index)
 {
-	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(), 
+	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
 		[name](MaterialParameterInfo& info) {
 			return info.name == name;
 		});
-	if (it != _paramterInfos.end())
+	if (it != _paramterInfos_vs.end())
 	{
 		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
 		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
-		return uniformBuffer[it->arrayIndex][it->vec4Index];
+		return uniformBuffer_vs[it->arrayIndex][it->vec4Index];
 	}
 	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
 	return 0;
 }
 
-glm::vec2 MaterialPrimitive::GetVector2Parameter(HString name, int* arrayIndex, int* vec4Index)
+glm::vec2 MaterialPrimitive::GetVector2Parameter_VS(HString name, int* arrayIndex, int* vec4Index)
 {
 	glm::vec2 result = glm::vec2(0);
-	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(),
+	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
 		[name](MaterialParameterInfo& info) {
 			return info.name == name;
 		});
-	if (it != _paramterInfos.end())
+	if (it != _paramterInfos_vs.end())
 	{
 		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
 		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
-		result.x = uniformBuffer[it->arrayIndex][it->vec4Index];
-		result.y = uniformBuffer[it->arrayIndex][it->vec4Index + 1];
+		result.x = uniformBuffer_vs[it->arrayIndex][it->vec4Index];
+		result.y = uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1];
 		return result;
 	}
 	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
 	return result;
 }
 
-glm::vec3 MaterialPrimitive::GetVector3Parameter(HString name, int* arrayIndex, int* vec4Index)
+glm::vec3 MaterialPrimitive::GetVector3Parameter_VS(HString name, int* arrayIndex, int* vec4Index)
 {
 	glm::vec3 result = glm::vec3(0);
-	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(),
+	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
 		[name](MaterialParameterInfo& info) {
 			return info.name == name;
 		});
-	if (it != _paramterInfos.end())
+	if (it != _paramterInfos_vs.end())
 	{
 		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
 		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
-		result.x = uniformBuffer[it->arrayIndex][it->vec4Index];
-		result.y = uniformBuffer[it->arrayIndex][it->vec4Index + 1];
-		result.z = uniformBuffer[it->arrayIndex][it->vec4Index + 2];
+		result.x = uniformBuffer_vs[it->arrayIndex][it->vec4Index];
+		result.y = uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1];
+		result.z = uniformBuffer_vs[it->arrayIndex][it->vec4Index + 2];
 		return result;
 	}
 	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
 	return result;
 }
 
-glm::vec4 MaterialPrimitive::GetVector4Parameter(HString name, int* arrayIndex, int* vec4Index)
+glm::vec4 MaterialPrimitive::GetVector4Parameter_VS(HString name, int* arrayIndex, int* vec4Index)
 {
 	glm::vec4 result = glm::vec4(0);
-	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(),
+	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
 		[name](MaterialParameterInfo& info) {
 			return info.name == name;
 		});
-	if (it != _paramterInfos.end())
+	if (it != _paramterInfos_vs.end())
 	{
 		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
 		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
-		result.x = uniformBuffer[it->arrayIndex][it->vec4Index];
-		result.y = uniformBuffer[it->arrayIndex][it->vec4Index + 1];
-		result.z = uniformBuffer[it->arrayIndex][it->vec4Index + 2];
-		result.w = uniformBuffer[it->arrayIndex][it->vec4Index + 3];
+		result.x = uniformBuffer_vs[it->arrayIndex][it->vec4Index];
+		result.y = uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1];
+		result.z = uniformBuffer_vs[it->arrayIndex][it->vec4Index + 2];
+		result.w = uniformBuffer_vs[it->arrayIndex][it->vec4Index + 3];
 		return result;
 	}
 	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
 	return result;
 }
 
-void MaterialPrimitive::SetScalarParameter(HString name, float value)
+float MaterialPrimitive::GetScalarParameter_PS(HString name, int* arrayIndex, int* vec4Index)
 {
-	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(),
+	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
 		[name](MaterialParameterInfo& info) {
 			return info.name == name;
 		});
-	if (it != _paramterInfos.end())
+	if (it != _paramterInfos_ps.end())
 	{
-		uniformBuffer[it->arrayIndex][it->vec4Index] = value;
+		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
+		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
+		return uniformBuffer_ps[it->arrayIndex][it->vec4Index];
 	}
+	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
+	return 0;
 }
 
-void MaterialPrimitive::SetVec2Parameter(HString name, glm::vec2 value)
+glm::vec2 MaterialPrimitive::GetVector2Parameter_PS(HString name, int* arrayIndex, int* vec4Index)
 {
-	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(),
+	glm::vec2 result = glm::vec2(0);
+	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
 		[name](MaterialParameterInfo& info) {
 			return info.name == name;
 		});
-	if (it != _paramterInfos.end())
+	if (it != _paramterInfos_ps.end())
 	{
-		uniformBuffer[it->arrayIndex][it->vec4Index] = value.x;
-		uniformBuffer[it->arrayIndex][it->vec4Index + 1] = value.y;
+		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
+		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
+		result.x = uniformBuffer_ps[it->arrayIndex][it->vec4Index];
+		result.y = uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1];
+		return result;
 	}
+	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
+	return result;
 }
 
-void MaterialPrimitive::SetVec3Parameter(HString name, glm::vec3 value)
+glm::vec3 MaterialPrimitive::GetVector3Parameter_PS(HString name, int* arrayIndex, int* vec4Index)
 {
-	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(),
+	glm::vec3 result = glm::vec3(0);
+	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
 		[name](MaterialParameterInfo& info) {
 			return info.name == name;
 		});
-	if (it != _paramterInfos.end())
+	if (it != _paramterInfos_ps.end())
 	{
-		uniformBuffer[it->arrayIndex][it->vec4Index] = value.x;
-		uniformBuffer[it->arrayIndex][it->vec4Index + 1] = value.y;
-		uniformBuffer[it->arrayIndex][it->vec4Index + 2] = value.z;
+		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
+		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
+		result.x = uniformBuffer_ps[it->arrayIndex][it->vec4Index];
+		result.y = uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1];
+		result.z = uniformBuffer_ps[it->arrayIndex][it->vec4Index + 2];
+		return result;
 	}
+	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
+	return result;
 }
 
-void MaterialPrimitive::SetVec4Parameter(HString name, glm::vec4 value)
+glm::vec4 MaterialPrimitive::GetVector4Parameter_PS(HString name, int* arrayIndex, int* vec4Index)
 {
-	auto it = std::find_if(_paramterInfos.begin(), _paramterInfos.end(),
+	glm::vec4 result = glm::vec4(0);
+	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
 		[name](MaterialParameterInfo& info) {
 			return info.name == name;
 		});
-	if (it != _paramterInfos.end())
+	if (it != _paramterInfos_ps.end())
 	{
-		uniformBuffer[it->arrayIndex][it->vec4Index] = value.x;
-		uniformBuffer[it->arrayIndex][it->vec4Index + 1] = value.y;
-		uniformBuffer[it->arrayIndex][it->vec4Index + 2] = value.z;
-		uniformBuffer[it->arrayIndex][it->vec4Index + 3] = value.w;
+		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
+		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
+		result.x = uniformBuffer_ps[it->arrayIndex][it->vec4Index];
+		result.y = uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1];
+		result.z = uniformBuffer_ps[it->arrayIndex][it->vec4Index + 2];
+		result.w = uniformBuffer_ps[it->arrayIndex][it->vec4Index + 3];
+		return result;
+	}
+	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
+	return result;
+}
+
+void MaterialPrimitive::SetScalarParameter_PS(HString name, float value)
+{
+	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos_ps.end())
+	{
+		uniformBuffer_ps[it->arrayIndex][it->vec4Index] = value;
 	}
 }
 
-void MaterialPrimitive::SetScalarParameter(int arrayIndex, int vec4Index, float value)
+void MaterialPrimitive::SetVec2Parameter_PS(HString name, glm::vec2 value)
 {
-	uniformBuffer[arrayIndex][vec4Index] = value;
+	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos_ps.end())
+	{
+		uniformBuffer_ps[it->arrayIndex][it->vec4Index] = value.x;
+		uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1] = value.y;
+	}
 }
 
-void MaterialPrimitive::SetVec2Parameter(int arrayIndex, int vec4Index, glm::vec2 value)
+void MaterialPrimitive::SetVec3Parameter_PS(HString name, glm::vec3 value)
 {
-	uniformBuffer[arrayIndex][vec4Index] = value.x;
-	uniformBuffer[arrayIndex][vec4Index + 1] = value.y;
+	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos_ps.end())
+	{
+		uniformBuffer_ps[it->arrayIndex][it->vec4Index] = value.x;
+		uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1] = value.y;
+		uniformBuffer_ps[it->arrayIndex][it->vec4Index + 2] = value.z;
+	}
 }
 
-void MaterialPrimitive::SetVec3Parameter(int arrayIndex, int vec4Index, glm::vec3 value)
+void MaterialPrimitive::SetVec4Parameter_PS(HString name, glm::vec4 value)
 {
-	uniformBuffer[arrayIndex][vec4Index] = value.x;
-	uniformBuffer[arrayIndex][vec4Index + 1] = value.y;
-	uniformBuffer[arrayIndex][vec4Index + 2] = value.z;
+	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos_ps.end())
+	{
+		uniformBuffer_ps[it->arrayIndex][it->vec4Index] = value.x;
+		uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1] = value.y;
+		uniformBuffer_ps[it->arrayIndex][it->vec4Index + 2] = value.z;
+		uniformBuffer_ps[it->arrayIndex][it->vec4Index + 3] = value.w;
+	}
 }
 
-void MaterialPrimitive::SetVec4Parameter(int arrayIndex, int vec4Index, glm::vec4 value)
+void MaterialPrimitive::SetScalarParameter_PS(int arrayIndex, int vec4Index, float value)
 {
-	uniformBuffer[arrayIndex][vec4Index] = value.x;
-	uniformBuffer[arrayIndex][vec4Index + 1] = value.y;
-	uniformBuffer[arrayIndex][vec4Index + 2] = value.z;
-	uniformBuffer[arrayIndex][vec4Index + 3] = value.w;
+	uniformBuffer_ps[arrayIndex][vec4Index] = value;
+}
+
+void MaterialPrimitive::SetVec2Parameter_PS(int arrayIndex, int vec4Index, glm::vec2 value)
+{
+	uniformBuffer_ps[arrayIndex][vec4Index] = value.x;
+	uniformBuffer_ps[arrayIndex][vec4Index + 1] = value.y;
+}
+
+void MaterialPrimitive::SetVec3Parameter_PS(int arrayIndex, int vec4Index, glm::vec3 value)
+{
+	uniformBuffer_ps[arrayIndex][vec4Index] = value.x;
+	uniformBuffer_ps[arrayIndex][vec4Index + 1] = value.y;
+	uniformBuffer_ps[arrayIndex][vec4Index + 2] = value.z;
+}
+
+void MaterialPrimitive::SetVec4Parameter_PS(int arrayIndex, int vec4Index, glm::vec4 value)
+{
+	uniformBuffer_ps[arrayIndex][vec4Index] = value.x;
+	uniformBuffer_ps[arrayIndex][vec4Index + 1] = value.y;
+	uniformBuffer_ps[arrayIndex][vec4Index + 2] = value.z;
+	uniformBuffer_ps[arrayIndex][vec4Index + 3] = value.w;
+}
+
+void MaterialPrimitive::SetScalarParameter_VS(HString name, float value)
+{
+	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos_vs.end())
+	{
+		uniformBuffer_vs[it->arrayIndex][it->vec4Index] = value;
+	}
+}
+
+void MaterialPrimitive::SetVec2Parameter_VS(HString name, glm::vec2 value)
+{
+	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos_vs.end())
+	{
+		uniformBuffer_vs[it->arrayIndex][it->vec4Index] = value.x;
+		uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1] = value.y;
+	}
+}
+
+void MaterialPrimitive::SetVec3Parameter_VS(HString name, glm::vec3 value)
+{
+	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos_vs.end())
+	{
+		uniformBuffer_vs[it->arrayIndex][it->vec4Index] = value.x;
+		uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1] = value.y;
+		uniformBuffer_vs[it->arrayIndex][it->vec4Index + 2] = value.z;
+	}
+}
+
+void MaterialPrimitive::SetVec4Parameter_VS(HString name, glm::vec4 value)
+{
+	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
+		[name](MaterialParameterInfo& info) {
+			return info.name == name;
+		});
+	if (it != _paramterInfos_vs.end())
+	{
+		uniformBuffer_vs[it->arrayIndex][it->vec4Index] = value.x;
+		uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1] = value.y;
+		uniformBuffer_vs[it->arrayIndex][it->vec4Index + 2] = value.z;
+		uniformBuffer_vs[it->arrayIndex][it->vec4Index + 3] = value.w;
+	}
+}
+
+void MaterialPrimitive::SetScalarParameter_VS(int arrayIndex, int vec4Index, float value)
+{
+	uniformBuffer_vs[arrayIndex][vec4Index] = value;
+}
+
+void MaterialPrimitive::SetVec2Parameter_VS(int arrayIndex, int vec4Index, glm::vec2 value)
+{
+	uniformBuffer_vs[arrayIndex][vec4Index] = value.x;
+	uniformBuffer_vs[arrayIndex][vec4Index + 1] = value.y;
+}
+
+void MaterialPrimitive::SetVec3Parameter_VS(int arrayIndex, int vec4Index, glm::vec3 value)
+{
+	uniformBuffer_vs[arrayIndex][vec4Index] = value.x;
+	uniformBuffer_vs[arrayIndex][vec4Index + 1] = value.y;
+	uniformBuffer_vs[arrayIndex][vec4Index + 2] = value.z;
+}
+
+void MaterialPrimitive::SetVec4Parameter_VS(int arrayIndex, int vec4Index, glm::vec4 value)
+{
+	uniformBuffer_vs[arrayIndex][vec4Index] = value.x;
+	uniformBuffer_vs[arrayIndex][vec4Index + 1] = value.y;
+	uniformBuffer_vs[arrayIndex][vec4Index + 2] = value.z;
+	uniformBuffer_vs[arrayIndex][vec4Index + 3] = value.w;
 }
 
 void MaterialPrimitive::SetTextureSampler(int index, VkSampler sampler)

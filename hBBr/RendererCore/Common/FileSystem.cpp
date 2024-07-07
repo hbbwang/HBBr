@@ -206,7 +206,8 @@ bool FileSystem::CreateDir(const char* path)
     {
         if (!result)
         {
-            MessageOut(GetInternationalizationText("Renderer","A000014"), false, false, "255,255,0");
+            auto msg = GetInternationalizationText("Renderer", "A000014");
+            MessageOut(msg, false, false, "255,255,0");
         }
     }
     return result;

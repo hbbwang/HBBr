@@ -126,83 +126,165 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		mat->_primitive->inputLayout = VertexFactory::VertexInput::BuildLayout(vsCache->header.vertexInput);
 
 		//一旦应用了错误shader cache，就不会再去读取参数和纹理了，直到Material重新编译成功。
-		//Parameters
-		auto params_it = json.find("parameters");
-		if (params_it != json.end())
+		
+		//Parameters VS
 		{
 			//primitive参数的长度以shader为主
-			mat->_primitive->_paramterInfos.resize(psCache->header.shaderParameterCount);
-			mat->_primitive->uniformBuffer.reserve(psCache->header.shaderParameterCount);
 			//初始化
-			for (int i = 0; i < psCache->header.shaderParameterCount; i++)
+			mat->_primitive->_paramterInfos_vs.resize(psCache->header.shaderParameterCount_vs);
+			mat->_primitive->uniformBuffer_vs.resize(psCache->header.shaderParameterCount_vs);
+			for (int i = 0; i < psCache->header.shaderParameterCount_vs; i++)
 			{
-				mat->_primitive->_paramterInfos[i] = *psCache->pi[i];
-				for (int p = 0; p < psCache->pi[i]->value.size();p++)
+				mat->_primitive->_paramterInfos_vs[i] = *psCache->pi_vs[i];
+				for (int p = 0; p < psCache->pi_vs[i]->value.size(); p++)
 				{
-					if (mat->_primitive->uniformBuffer.size() <= psCache->pi[i]->arrayIndex)
-					{
-						mat->_primitive->uniformBuffer.push_back(glm::vec4());
-					}
-					mat->_primitive->uniformBuffer[psCache->pi[i]->arrayIndex][psCache->pi[i]->vec4Index + p] = psCache->pi[i]->value[p];				
+					//if (mat->_primitive->uniformBuffer_vs.size() <= psCache->pi_vs[i]->arrayIndex)
+					//{
+					//	continue;
+					//}
+					mat->_primitive->uniformBuffer_vs[psCache->pi_vs[i]->arrayIndex][psCache->pi_vs[i]->vec4Index + p] = psCache->pi_vs[i]->value[p];
 				}
 			}
-			int paramIndex = 0;
-			for (auto& i : params_it.value().items())
+			auto anlignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(sizeof(glm::vec4) * mat->_primitive->uniformBuffer_vs.size());
+			mat->_primitive->uniformBufferSize_vs = anlignmentSize;
+			auto params_it = json.find("parameters_vs");
+			if (params_it != json.end())
 			{
-				HString matParamName = i.key();
-				int type = i.value()["type"];
-				//从shader中查找是否存在相同参数(名字&类型)
-				auto it = std::find_if(mat->_primitive->_paramterInfos.begin(), mat->_primitive->_paramterInfos.end(), [type , matParamName](MaterialParameterInfo& info) {
-					return matParamName == info.name && type == (int)info.type;
-				});
-				if (it != mat->_primitive->_paramterInfos.end())
+				int paramIndex = 0;
+				for (auto& i : params_it.value().items())
 				{
-					auto& info = *it;
-					//value
-					std::vector<float> value;
-					value.reserve(4*4);
-					if (info.type == MPType::Float)
+					HString matParamName = i.key();
+					int type = i.value()["type"];
+					//从shader中查找是否存在相同参数(名字&类型)
+					auto it = std::find_if(mat->_primitive->_paramterInfos_vs.begin(), mat->_primitive->_paramterInfos_vs.end(), [type, matParamName](MaterialParameterInfo& info) {
+						return matParamName == info.name && type == (int)info.type;
+						});
+					if (it != mat->_primitive->_paramterInfos_vs.end())
 					{
-						float vf = 0;
-						from_json(i.value()["value"], vf);
-						value.push_back(vf);
-					}
-					else if (info.type == MPType::Float2)
-					{
-						glm::vec2 v2;
-						from_json(i.value()["value"], v2);
-						value.push_back(v2.x);
-						value.push_back(v2.y);
-					}
-					else if (info.type == MPType::Float3)
-					{
-						glm::vec3 v3;
-						from_json(i.value()["value"], v3);
-						value.push_back(v3.x);
-						value.push_back(v3.y);
-						value.push_back(v3.z);
-					}
-					else if (info.type == MPType::Float4)
-					{
-						glm::vec4 v4;
-						from_json(i.value()["value"], v4);
-						value.push_back(v4.x);
-						value.push_back(v4.y);
-						value.push_back(v4.z);
-						value.push_back(v4.w);
-					}
+						auto& info = *it;
+						//value
+						std::vector<float> value;
+						value.reserve(4 * 4);
+						if (info.type == MPType::VSFloat)
+						{
+							float vf = 0;
+							from_json(i.value()["value"], vf);
+							value.push_back(vf);
+						}
+						else if (info.type == MPType::VSFloat2)
+						{
+							glm::vec2 v2;
+							from_json(i.value()["value"], v2);
+							value.push_back(v2.x);
+							value.push_back(v2.y);
+						}
+						else if (info.type == MPType::VSFloat3)
+						{
+							glm::vec3 v3;
+							from_json(i.value()["value"], v3);
+							value.push_back(v3.x);
+							value.push_back(v3.y);
+							value.push_back(v3.z);
+						}
+						else if (info.type == MPType::VSFloat4)
+						{
+							glm::vec4 v4;
+							from_json(i.value()["value"], v4);
+							value.push_back(v4.x);
+							value.push_back(v4.y);
+							value.push_back(v4.z);
+							value.push_back(v4.w);
+						}
 
-					for (uint32_t pi = 0; pi < info.value.size(); pi++)
-					{
-						mat->_primitive->uniformBuffer[info.arrayIndex][info.vec4Index + pi] = value[pi];
+						for (uint32_t pi = 0; pi < info.value.size(); pi++)
+						{
+							mat->_primitive->uniformBuffer_vs[info.arrayIndex][info.vec4Index + pi] = value[pi];
+						}
+						paramIndex++;
 					}
-					paramIndex++;
 				}
 			}
-			auto anlignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(sizeof(glm::vec4) * mat->_primitive->uniformBuffer.size());
-			mat->_primitive->uniformBufferSize = anlignmentSize;
 		}
-		
+
+		//Parameters PS
+		{
+			//primitive参数的长度以shader为主
+			//初始化
+			mat->_primitive->_paramterInfos_ps.resize(psCache->header.shaderParameterCount_ps);
+			mat->_primitive->uniformBuffer_ps.resize(psCache->header.shaderParameterCount_ps);
+			for (int i = 0; i < psCache->header.shaderParameterCount_ps; i++)
+			{
+				mat->_primitive->_paramterInfos_ps[i] = *psCache->pi_ps[i];
+				for (int p = 0; p < psCache->pi_ps[i]->value.size(); p++)
+				{
+					//if (mat->_primitive->uniformBuffer_ps.size() <= psCache->pi_ps[i]->arrayIndex)
+					//{
+					//	continue;
+					//}
+					mat->_primitive->uniformBuffer_ps[psCache->pi_ps[i]->arrayIndex][psCache->pi_ps[i]->vec4Index + p] = psCache->pi_ps[i]->value[p];
+				}
+			}
+			auto anlignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(sizeof(glm::vec4) * mat->_primitive->uniformBuffer_ps.size());
+			mat->_primitive->uniformBufferSize_ps = anlignmentSize;
+			auto params_it = json.find("parameters_ps");
+			if (params_it != json.end())
+			{
+				int paramIndex = 0;
+				for (auto& i : params_it.value().items())
+				{
+					HString matParamName = i.key();
+					int type = i.value()["type"];
+					//从shader中查找是否存在相同参数(名字&类型)
+					auto it = std::find_if(mat->_primitive->_paramterInfos_ps.begin(), mat->_primitive->_paramterInfos_ps.end(), [type, matParamName](MaterialParameterInfo& info) {
+						return matParamName == info.name && type == (int)info.type;
+						});
+					if (it != mat->_primitive->_paramterInfos_ps.end())
+					{
+						auto& info = *it;
+						//value
+						std::vector<float> value;
+						value.reserve(4 * 4);
+						if (info.type == MPType::PSFloat)
+						{
+							float vf = 0;
+							from_json(i.value()["value"], vf);
+							value.push_back(vf);
+						}
+						else if (info.type == MPType::PSFloat2)
+						{
+							glm::vec2 v2;
+							from_json(i.value()["value"], v2);
+							value.push_back(v2.x);
+							value.push_back(v2.y);
+						}
+						else if (info.type == MPType::PSFloat3)
+						{
+							glm::vec3 v3;
+							from_json(i.value()["value"], v3);
+							value.push_back(v3.x);
+							value.push_back(v3.y);
+							value.push_back(v3.z);
+						}
+						else if (info.type == MPType::PSFloat4)
+						{
+							glm::vec4 v4;
+							from_json(i.value()["value"], v4);
+							value.push_back(v4.x);
+							value.push_back(v4.y);
+							value.push_back(v4.z);
+							value.push_back(v4.w);
+						}
+
+						for (uint32_t pi = 0; pi < info.value.size(); pi++)
+						{
+							mat->_primitive->uniformBuffer_ps[info.arrayIndex][info.vec4Index + pi] = value[pi];
+						}
+						paramIndex++;
+					}
+				}
+			}
+		}
+
 		//Textures
 		auto texs_it = json.find("textures");
 		if (texs_it != json.end())
@@ -369,43 +451,82 @@ nlohmann::json Material::ToJson()
 	_json["blendMode"] = (int)GetPrimitive()->graphicsIndex.blendMode;
 	_json["vsVarient"] = GetPrimitive()->graphicsIndex.vs_varients;
 	_json["psVarient"] = GetPrimitive()->graphicsIndex.ps_varients;
-	//Parameters
+	//Parameters PS
 	{
 		nlohmann::json p;
-		for (int i = 0; i < _primitive->_paramterInfos.size(); i++)
+		for (int i = 0; i < _primitive->_paramterInfos_ps.size(); i++)
 		{
-			auto& info = _primitive->_paramterInfos[i];
-			if (info.type == MPType::Float)
+			auto& info = _primitive->_paramterInfos_ps[i];
+			if (info.type == MPType::PSFloat)
 			{
-				p[info.name.c_str()]["value"] = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index];
+				p[info.name.c_str()]["value"] = _primitive->uniformBuffer_ps[info.arrayIndex][info.vec4Index];
 			}
-			else if (info.type == MPType::Float2)
+			else if (info.type == MPType::PSFloat2)
 			{
 				glm::vec2 v2;
-				v2.x = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index];
-				v2.y = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index+1];
+				v2.x = _primitive->uniformBuffer_ps[info.arrayIndex][info.vec4Index];
+				v2.y = _primitive->uniformBuffer_ps[info.arrayIndex][info.vec4Index+1];
 				to_json(p[info.name.c_str()]["value"], v2);
 			}
-			else if (info.type == MPType::Float3)
+			else if (info.type == MPType::PSFloat3)
 			{
 				glm::vec3 v3;
-				v3.x = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index];
-				v3.y = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index + 1];
-				v3.z = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index + 2];
+				v3.x = _primitive->uniformBuffer_ps[info.arrayIndex][info.vec4Index];
+				v3.y = _primitive->uniformBuffer_ps[info.arrayIndex][info.vec4Index + 1];
+				v3.z = _primitive->uniformBuffer_ps[info.arrayIndex][info.vec4Index + 2];
 				to_json(p[info.name.c_str()]["value"], v3);
 			}
-			else if (info.type == MPType::Float4)
+			else if (info.type == MPType::PSFloat4)
 			{
 				glm::vec4 v4;
-				v4.x = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index];
-				v4.y = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index + 1];
-				v4.z = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index + 2];
-				v4.w = _primitive->uniformBuffer[info.arrayIndex][info.vec4Index + 3];
+				v4.x = _primitive->uniformBuffer_ps[info.arrayIndex][info.vec4Index];
+				v4.y = _primitive->uniformBuffer_ps[info.arrayIndex][info.vec4Index + 1];
+				v4.z = _primitive->uniformBuffer_ps[info.arrayIndex][info.vec4Index + 2];
+				v4.w = _primitive->uniformBuffer_ps[info.arrayIndex][info.vec4Index + 3];
 				to_json(p[info.name.c_str()]["value"], v4);
 			}
-			p[info.name.c_str()]["type"] = (int)_primitive->_paramterInfos[i].type;
+			p[info.name.c_str()]["type"] = (int)_primitive->_paramterInfos_ps[i].type;
 		}
-		_json["parameters"] = p;
+		_json["parameters_ps"] = p;
+	}
+
+	//Parameters VS
+	{
+		nlohmann::json p;
+		for (int i = 0; i < _primitive->_paramterInfos_vs.size(); i++)
+		{
+			auto& info = _primitive->_paramterInfos_vs[i];
+			if (info.type == MPType::VSFloat)
+			{
+				p[info.name.c_str()]["value"] = _primitive->uniformBuffer_vs[info.arrayIndex][info.vec4Index];
+			}
+			else if (info.type == MPType::VSFloat2)
+			{
+				glm::vec2 v2;
+				v2.x = _primitive->uniformBuffer_vs[info.arrayIndex][info.vec4Index];
+				v2.y = _primitive->uniformBuffer_vs[info.arrayIndex][info.vec4Index + 1];
+				to_json(p[info.name.c_str()]["value"], v2);
+			}
+			else if (info.type == MPType::VSFloat3)
+			{
+				glm::vec3 v3;
+				v3.x = _primitive->uniformBuffer_vs[info.arrayIndex][info.vec4Index];
+				v3.y = _primitive->uniformBuffer_vs[info.arrayIndex][info.vec4Index + 1];
+				v3.z = _primitive->uniformBuffer_vs[info.arrayIndex][info.vec4Index + 2];
+				to_json(p[info.name.c_str()]["value"], v3);
+			}
+			else if (info.type == MPType::VSFloat4)
+			{
+				glm::vec4 v4;
+				v4.x = _primitive->uniformBuffer_vs[info.arrayIndex][info.vec4Index];
+				v4.y = _primitive->uniformBuffer_vs[info.arrayIndex][info.vec4Index + 1];
+				v4.z = _primitive->uniformBuffer_vs[info.arrayIndex][info.vec4Index + 2];
+				v4.w = _primitive->uniformBuffer_vs[info.arrayIndex][info.vec4Index + 3];
+				to_json(p[info.name.c_str()]["value"], v4);
+			}
+			p[info.name.c_str()]["type"] = (int)_primitive->_paramterInfos_vs[i].type;
+		}
+		_json["parameters_vs"] = p;
 	}
 
 	//Textures

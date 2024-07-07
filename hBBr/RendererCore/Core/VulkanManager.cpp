@@ -1764,6 +1764,29 @@ void VulkanManager::CreateDescripotrSetLayout(std::vector<VkDescriptorType> type
 	}
 }
 
+void VulkanManager::CreateDescripotrSetLayout(std::vector<VkDescriptorType> types, std::vector<VkShaderStageFlags> shaderStageFlags, VkDescriptorSetLayout& descriptorSetLayout)
+{
+	std::vector<VkDescriptorSetLayoutBinding> bindings(types.size());
+	for (uint32_t i = 0; i < types.size(); i++)
+	{
+		bindings[i] = {};
+		bindings[i].descriptorType = types[i];
+		bindings[i].descriptorCount = 1;
+		bindings[i].stageFlags = shaderStageFlags[i];
+		bindings[i].binding = i;
+		bindings[i].pImmutableSamplers = VK_NULL_HANDLE;
+	}
+	VkDescriptorSetLayoutCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	info.bindingCount = (uint32_t)bindings.size();
+	info.pBindings = bindings.data();
+	auto result = vkCreateDescriptorSetLayout(_device, &info, VK_NULL_HANDLE, &descriptorSetLayout);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut("Create Descriptor Set Layout Error!!", false, true);
+	}
+}
+
 void VulkanManager::DestroyDescriptorSetLayout(VkDescriptorSetLayout& descriptorSetLayout)
 {
 	if (descriptorSetLayout != VK_NULL_HANDLE)

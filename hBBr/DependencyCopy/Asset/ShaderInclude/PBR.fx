@@ -12,8 +12,15 @@
 #include "Include/Common.hlsl"
 #include "Include/ShadingModel.hlsl"
 
-[MaterialParameter]
-cbuffer Material
+//顶点着色器专用 
+cbuffer MaterialVS
+{
+    [Default=1;Group=Default]
+    float UVSize;
+};
+
+//像素着色器专用
+cbuffer MaterialPS
 {
     [Name=Tint;Default=1,1,1,1;Group=Default]
     float4 Tint;
@@ -23,7 +30,7 @@ cbuffer Material
     float Roughness;
 };
 
-[InputLayout]
+//顶点着色器的输入布局必须要有，且结构名字也必须是VSInput
 struct VSInput
 {
     float3 Position     : POSITION;
@@ -35,11 +42,12 @@ struct VSInput
     // float4 Texcoord45   : TEXCOORD2;
 };
 
-// //顶点着色器补充
-// #define DefineVert
-// void vert(in VSInput IN , inout VSToPS vs2ps)
-// {
-// }
+//顶点着色器补充
+#define DefineVert
+void vert(in VSInput IN , inout VSToPS vs2ps)
+{
+    vs2ps.Texcoord01 *= UVSize;
+}
 
 Texture2D BaseTexture
 {

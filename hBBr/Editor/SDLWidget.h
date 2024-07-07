@@ -1,5 +1,6 @@
 #pragma once
 #include <qwidget.h>
+#include <qframe.h>
 #include "FormMain.h"
 class SDLWidget : public QWidget
 {

@@ -33,7 +33,8 @@ PipelineObject* PipelineManager::CreatePipelineObject(VkGraphicsPipelineCreateIn
 	std::unique_ptr<PipelineObject> newPSO = std::make_unique<PipelineObject>();
 	newPSO->pipelineType = pipelineType;
 	newPSO->layout = layout;
-	newPSO->bHasMaterialParameter = createInfo.bHasMaterialParameter;
+	newPSO->bHasMaterialParameterVS = createInfo.bHasMaterialParameterVS;
+	newPSO->bHasMaterialParameterPS = createInfo.bHasMaterialParameterPS;
 	newPSO->bHasMaterialTexture = createInfo.bHasMaterialTexture;
 	SetPipelineLayout(createInfo, layout);
 	if (pipelineType == PipelineType::Graphics)
@@ -213,7 +214,8 @@ void PipelineManager::SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfo
 	createInfo.CreateInfo.stageCount = (uint32_t)createInfo.stages.size();
 	createInfo.CreateInfo.pStages = createInfo.stages.data();
 
-	createInfo.bHasMaterialParameter = vs->params.size() > 0 && ps->params.size() > 0;
+	createInfo.bHasMaterialParameterVS = vs->params.size() > 0;
+	createInfo.bHasMaterialParameterPS = ps->params.size() > 0;
 	createInfo.bHasMaterialTexture = vs->texs.size() > 0 && ps->texs.size() > 0;
 }
 
@@ -268,7 +270,8 @@ PipelineIndex PipelineManager::AddPipelineObject(std::weak_ptr<ShaderCache>vs, s
 	std::unique_ptr<PipelineObject> newPSO = std::make_unique<PipelineObject>();
 	newPSO->pipeline = pipeline;
 	newPSO->bHasMaterialTexture = vs.lock()->texs.size() > 0;
-	newPSO->bHasMaterialParameter = vs.lock()->params.size() > 0;
+	newPSO->bHasMaterialParameterVS = vs.lock()->params.size() > 0;
+	newPSO->bHasMaterialParameterPS = ps.lock()->params.size() > 0;
 	newPSO->layout = pipelineLayout;
 	newPSO->pipelineType = PipelineType::Graphics;
 	_graphicsPipelines.emplace(std::make_pair(index, std::move(newPSO)));

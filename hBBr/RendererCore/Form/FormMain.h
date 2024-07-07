@@ -63,10 +63,7 @@ public:
 
 #if IS_EDITOR
 	static std::function<void()> _editorVulkanInit;
-	HBBR_API HBBR_INLINE static void SetEditorVulkanInit(std::function<void()> func)
-	{
-		_editorVulkanInit = func;
-	}
+	HBBR_API static void SetEditorVulkanInit(std::function<void()> func);
 #endif
 
 	static std::vector<FormDropFun>& GetDropCallbacks() { return _dropFuns; }

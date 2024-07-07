@@ -7,9 +7,9 @@
 class DescriptorSet
 {
 public:
-	DescriptorSet(class VulkanRenderer* renderer, VkDescriptorType type, uint32_t bindingCount, VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
-	DescriptorSet(class VulkanRenderer* renderer, VkDescriptorType type,VkDescriptorSetLayout setLayout, uint32_t bindingCount, VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
-	DescriptorSet(class VulkanRenderer* renderer, std::vector<VkDescriptorType> types, uint32_t bindingCount, VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+	DescriptorSet(class VulkanRenderer* renderer, VkDescriptorType type, VkDeviceSize bufferSizeInit = BufferSizeRange, std::vector<VkShaderStageFlags> shaderStageFlags = { VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT });
+	DescriptorSet(class VulkanRenderer* renderer, VkDescriptorType type,VkDescriptorSetLayout setLayout, VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+	DescriptorSet(class VulkanRenderer* renderer, std::vector<VkDescriptorType> types, VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 	~DescriptorSet();
 
 	HBBR_INLINE VkDescriptorSetLayout GetDescriptorSetLayout()const { return _descriptorSetLayout; }
@@ -19,11 +19,11 @@ public:
 
 	bool ResizeDescriptorBuffer(VkDeviceSize newSize , int bufferIndex = 0);
 
-	void UpdateDescriptorSet(std::vector<uint32_t> bufferRanges, std::vector<uint32_t> offsets);
+	void UpdateDescriptorSet(std::vector<uint32_t> bufferRanges, std::vector<uint32_t> offsets, uint32_t dstBinding = 0);
 
-	void UpdateDescriptorSet(uint32_t bufferSize , uint32_t offset = 0);
+	void UpdateDescriptorSet(uint32_t bufferSize , uint32_t offset = 0, uint32_t dstBinding = 0);
 
-	void UpdateDescriptorSet(uint32_t sameBufferSize, std::vector<uint32_t> offsets);
+	void UpdateDescriptorSet(uint32_t sameBufferSize, std::vector<uint32_t> offsets, uint32_t dstBinding = 0);
 
 	void UpdateDescriptorSetAll(uint32_t sameBufferSize);
 
@@ -54,7 +54,7 @@ private:
 
 	VkDescriptorSetLayout			_descriptorSetLayout = VK_NULL_HANDLE;
 
-	VkShaderStageFlags				_shaderStageFlags;
+	std::vector<VkShaderStageFlags>	_shaderStageFlags;
 
 	std::vector<std::unique_ptr<Buffer>> _buffers;
 

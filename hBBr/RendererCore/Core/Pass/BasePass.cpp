@@ -14,8 +14,12 @@
 #pragma region BasePass
 BasePass::~BasePass()
 {
-	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_m_t);
-	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_m);
+	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_vsm_t);
+	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_vsm);
+	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_psm_t);
+	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_psm);
+	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_vspsm_t);
+	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_vspsm);
 	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_t);
 	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o);
 }
@@ -30,26 +34,59 @@ void BasePass::PassInit()
 	CreateRenderPass();
 	//Texture2D DescriptorSet
 	auto manager = VulkanManager::GetManager();
-	_opaque_descriptorSet_pass.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1, sizeof(PassUniformBuffer)));
-	_opaque_descriptorSet_obj.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1));
-	_opaque_descriptorSet_mat.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1));
+	_opaque_descriptorSet_pass.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, sizeof(PassUniformBuffer)));
+	_opaque_descriptorSet_obj.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, BufferSizeRange));
+	_opaque_descriptorSet_mat_vs.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, BufferSizeRange, { VK_SHADER_STAGE_VERTEX_BIT }));
+	_opaque_descriptorSet_mat_ps.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, BufferSizeRange, { VK_SHADER_STAGE_FRAGMENT_BIT }));
 	_opaque_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
 	_opaque_indexBuffer.reset(new Buffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT));
 	manager->CreatePipelineLayout(
 		{
 			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
 			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
-			_opaque_descriptorSet_mat->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_mat_vs->GetDescriptorSetLayout(),
 			manager->GetImageDescriptorSetLayout()
 		}
-	, _pipelineLayout_p_o_m_t);
+	, _pipelineLayout_p_o_vsm_t);
 	manager->CreatePipelineLayout(
 		{
 			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
 			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
-			_opaque_descriptorSet_mat->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_mat_ps->GetDescriptorSetLayout(),
+			manager->GetImageDescriptorSetLayout()
 		}
-	, _pipelineLayout_p_o_m);
+	, _pipelineLayout_p_o_psm_t);
+	manager->CreatePipelineLayout(
+		{
+			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_mat_vs->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_mat_ps->GetDescriptorSetLayout(),
+			manager->GetImageDescriptorSetLayout()
+		}
+	, _pipelineLayout_p_o_vspsm_t);
+	manager->CreatePipelineLayout(
+		{
+			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_mat_vs->GetDescriptorSetLayout(),
+		}
+	, _pipelineLayout_p_o_vsm);
+	manager->CreatePipelineLayout(
+		{
+			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_mat_ps->GetDescriptorSetLayout(),
+		}
+	, _pipelineLayout_p_o_psm);
+	manager->CreatePipelineLayout(
+		{
+			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_mat_vs->GetDescriptorSetLayout(),
+			_opaque_descriptorSet_mat_ps->GetDescriptorSetLayout(),
+		}
+	, _pipelineLayout_p_o_vspsm);
 	manager->CreatePipelineLayout(
 		{
 			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
@@ -81,14 +118,7 @@ void BasePass::PassUpdate()
 	SetViewport(_currentFrameBufferSize);
 	BeginRenderPass({ 0,0,0,0 });
 	//Opaque Pass
-	SetupBasePassAndDraw(
-		Pass::OpaquePass,
-		_opaque_descriptorSet_pass.get(),
-		_opaque_descriptorSet_obj.get(),
-		_opaque_descriptorSet_mat.get(),
-		_opaque_vertexBuffer.get(),
-		_opaque_indexBuffer.get()
-	);
+	SetupBasePassAndDraw(Pass::OpaquePass);
 	
 	//manager->CmdNextSubpass(cmdBuf);
 	//Translucent pass
@@ -102,16 +132,26 @@ void BasePass::PassReset()
 
 }
 
-void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* obj, DescriptorSet* mat, Buffer* vb, Buffer* ib)
+void BasePass::SetupBasePassAndDraw(Pass p)
 {
+	auto& pass = _opaque_descriptorSet_pass;
+	auto& obj = _opaque_descriptorSet_obj;
+	auto& mat_vs = _opaque_descriptorSet_mat_vs;
+	auto& mat_ps = _opaque_descriptorSet_mat_ps;
+	auto &vb = _opaque_vertexBuffer;
+	auto &ib = _opaque_indexBuffer;
+
 	const auto manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	VkDeviceSize vbOffset = 0;
 	VkDeviceSize ibOffset = 0;
-	VkDeviceSize matOffset = 0;
+	VkDeviceSize matOffset_vs = 0;
+	VkDeviceSize matOffset_ps = 0;
+	std::vector<uint32_t> matBufferOffset_vs;
+	std::vector<uint32_t> matBufferSize_vs;
+	std::vector<uint32_t> matBufferOffset_ps;
+	std::vector<uint32_t> matBufferSize_ps;
 	uint32_t objectUboOffset = 0;
-	std::vector<uint32_t> matBufferOffset;
-	std::vector<uint32_t> matBufferSize;
 	uint32_t textureDescriptorCount = 0;
 	pipelineTemps.clear();
 	auto frameIndex = _renderer->GetCurrentFrameIndex();
@@ -155,15 +195,23 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 				VkPipelineLayout pipelineLayout;
 				if (pipelineCreateInfo.bHasMaterialTexture)
 				{
-					if (pipelineCreateInfo.bHasMaterialParameter)
-						pipelineLayout = _pipelineLayout_p_o_m_t;
+					if (pipelineCreateInfo.bHasMaterialParameterVS && !pipelineCreateInfo.bHasMaterialParameterPS)
+						pipelineLayout = _pipelineLayout_p_o_vsm_t;
+					else if (pipelineCreateInfo.bHasMaterialParameterPS && !pipelineCreateInfo.bHasMaterialParameterVS)
+						pipelineLayout = _pipelineLayout_p_o_psm_t;
+					else if (pipelineCreateInfo.bHasMaterialParameterPS && pipelineCreateInfo.bHasMaterialParameterVS)
+						pipelineLayout = _pipelineLayout_p_o_vspsm_t;
 					else
 						pipelineLayout = _pipelineLayout_p_o_t;
 				}
 				else
 				{
-					if (pipelineCreateInfo.bHasMaterialParameter)
-						pipelineLayout = _pipelineLayout_p_o_m;
+					if (pipelineCreateInfo.bHasMaterialParameterVS && !pipelineCreateInfo.bHasMaterialParameterPS)
+						pipelineLayout = _pipelineLayout_p_o_vsm;
+					else if (pipelineCreateInfo.bHasMaterialParameterPS && !pipelineCreateInfo.bHasMaterialParameterVS)
+						pipelineLayout = _pipelineLayout_p_o_psm;
+					else if (pipelineCreateInfo.bHasMaterialParameterPS && pipelineCreateInfo.bHasMaterialParameterVS)
+						pipelineLayout = _pipelineLayout_p_o_vspsm;
 					else
 						pipelineLayout = _pipelineLayout_p_o;
 				}
@@ -175,14 +223,19 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 				pipelineTemps.reserve(( pipelineTemps.size() + 1 ) * 2);
 			pipelineTemps.push_back(pipelineObj);
 
-			if (m->uniformBufferSize != 0)
+			if (m->uniformBufferSize_vs != 0)
 			{
-				////Test
-				//m->uniformBuffer[2] = glm::vec4(1,0,0,1);
-				mat->BufferMapping(m->uniformBuffer.data(), 0, m->uniformBufferSize);
-				matBufferOffset.push_back((uint32_t)matOffset);
-				matBufferSize.push_back((uint32_t)m->uniformBufferSize);
-				matOffset += m->uniformBufferSize;
+				mat_vs->BufferMapping(m->uniformBuffer_vs.data(), 0, m->uniformBufferSize_vs);
+				matBufferOffset_vs.push_back((uint32_t)matOffset_vs);
+				matBufferSize_vs.push_back((uint32_t)m->uniformBufferSize_vs);
+				matOffset_vs += m->uniformBufferSize_vs;
+			}
+			if (m->uniformBufferSize_ps != 0)
+			{
+				mat_ps->BufferMapping(m->uniformBuffer_ps.data(), 0, m->uniformBufferSize_ps);
+				matBufferOffset_ps.push_back((uint32_t)matOffset_ps);
+				matBufferSize_ps.push_back((uint32_t)m->uniformBufferSize_ps);
+				matOffset_ps += m->uniformBufferSize_ps;
 			}
 
 
@@ -278,8 +331,10 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 			obj->ResizeDescriptorBuffer(sizeof(ObjectUniformBuffer) * (objectCount + 1));
 		}
 		obj->UpdateDescriptorSet(sizeof(ObjectUniformBuffer));
-		mat->ResizeDescriptorBuffer(matOffset);
-		mat->UpdateDescriptorSet(matBufferSize, matBufferOffset);
+		mat_vs->ResizeDescriptorBuffer(matOffset_vs);
+		mat_vs->UpdateDescriptorSet(matBufferSize_vs, matBufferOffset_vs);
+		mat_ps->ResizeDescriptorBuffer(matOffset_ps);
+		mat_ps->UpdateDescriptorSet(matBufferSize_ps, matBufferOffset_ps);
 	}
 
 	//Update Render
@@ -297,16 +352,37 @@ void BasePass::SetupBasePassAndDraw(Pass p, DescriptorSet* pass, DescriptorSet* 
 			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 0, 1, &pass->GetDescriptorSet(), 1, dynamicOffset);
 		}
 		manager->CmdCmdBindPipeline(cmdBuf, curPipeline->pipeline);
-		//Material uniform buffers
-		if (curPipeline->bHasMaterialParameter)
+		//Material uniform buffers & Textures
+		if (curPipeline->bHasMaterialParameterVS && curPipeline->bHasMaterialParameterPS && curPipeline->bHasMaterialTexture)
 		{
-			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat->GetDescriptorSet(), 1, &matBufferOffset[matIndex]);
+			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat_vs->GetDescriptorSet(), 1, &matBufferOffset_vs[matIndex]);
+			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &mat_ps->GetDescriptorSet(), 1, &matBufferOffset_ps[matIndex]);
+			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 4, 1, &tds, 0, nullptr);
 		}
-		//Material texture buffers
-		if (curPipeline->bHasMaterialTexture)
+		else if (curPipeline->bHasMaterialParameterVS && curPipeline->bHasMaterialParameterPS && !curPipeline->bHasMaterialTexture)
 		{
+			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat_vs->GetDescriptorSet(), 1, &matBufferOffset_vs[matIndex]);
+			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &mat_ps->GetDescriptorSet(), 1, &matBufferOffset_ps[matIndex]);
+		}
+		else if (curPipeline->bHasMaterialParameterVS && !curPipeline->bHasMaterialParameterPS && !curPipeline->bHasMaterialTexture)
+		{
+			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat_vs->GetDescriptorSet(), 1, &matBufferOffset_vs[matIndex]);
+		}
+		else if (!curPipeline->bHasMaterialParameterVS && curPipeline->bHasMaterialParameterPS && !curPipeline->bHasMaterialTexture)
+		{
+			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat_ps->GetDescriptorSet(), 1, &matBufferOffset_ps[matIndex]);
+		}
+		else if (!curPipeline->bHasMaterialParameterVS && curPipeline->bHasMaterialParameterPS && curPipeline->bHasMaterialTexture)
+		{
+			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat_ps->GetDescriptorSet(), 1, &matBufferOffset_ps[matIndex]);
 			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &tds, 0, nullptr);
 		}
+		else if (curPipeline->bHasMaterialParameterVS && !curPipeline->bHasMaterialParameterPS && curPipeline->bHasMaterialTexture)
+		{
+			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat_vs->GetDescriptorSet(), 1, &matBufferOffset_ps[matIndex]);
+			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &tds, 0, nullptr);
+		}
+
 		//Objects
 		auto prims = PrimitiveProxy::GetModelPrimitives(m, _renderer);
 		if (prims)

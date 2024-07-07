@@ -545,6 +545,11 @@ void VulkanApp::RecompileAllShader()
 	_bRecompilerShaders = true;
 }
 
+void VulkanApp::SetEditorVulkanInit(std::function<void()> func)
+{
+	_editorVulkanInit = func;
+}
+
 #if defined(IS_GAME)
 
 int main(int argc, char* argv[])

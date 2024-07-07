@@ -1,6 +1,7 @@
 {
     "blendMode": 0,
-    "parameters": null,
+    "parameters_vs": null,
+    "parameters_ps": null,
     "psShader": "Error",
     "psVarient": 0,
     "textures": null,

@@ -6,6 +6,9 @@
 #include <QRegularExpression>
 #include "HString.h"
 #include "FileSystem.h"
+
+#define ParagraphLength 24
+
 PropertyWidget::PropertyWidget(QWidget* parent)
 	: QWidget(parent)
 {
@@ -52,7 +55,7 @@ void PropertyWidget::AddItem(QString name, QWidget* widget, int Height, SGroup* 
 
 	if (group)
 	{
-		p_name->setContentsMargins(group->depth * 16, 0, 0, 0);
+		p_name->setContentsMargins(group->depth * ParagraphLength, 0, 0, 0);
 	}
 
 	//Widget
@@ -229,7 +232,6 @@ void PropertyWidget::ShowItems()
 				{
 					if (i.name)
 					{
-						//i.name->setContentsMargins(g.first->depth * 16, 0, 0, 0);
 						_name_layout->insertWidget(index + 1 + g.first->count, i.name);
 					}
 					if (i.value)
@@ -263,7 +265,7 @@ void PropertyWidget::ShowItems()
 
 void PropertyWidget::AddGroupButton(std::shared_ptr<SGroup> g)
 {
-	int Height = 26;
+	int Height = 28;
 	//Name
 
 	QToolButton* button = new QToolButton(this);
@@ -311,7 +313,7 @@ void PropertyWidget::AddGroupButton(std::shared_ptr<SGroup> g)
 	v_space->setObjectName("PropertyTableWidgetRowGroupButtonValue");
 	v_space->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Preferred);
 
-	n_space->setContentsMargins(g->depth * 16, 0, 0, 0);
+	n_space->setContentsMargins(g->depth * ParagraphLength, 0, 0, 0);
 	image->move(4, Height / 4 );
 
 	if (g->depth <= 6)

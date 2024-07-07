@@ -971,8 +971,7 @@ public:
 		size_t wstr_size = std::mbsrtowcs(nullptr, &src, 0, nullptr);
 		if (wstr_size == static_cast<size_t>(-1)) {
 			//throw std::runtime_error("Invalid multibyte character sequence.");
-			printf("Invalid multibyte character sequence.");
-			exit(0);
+			SDL_Log("Invalid multibyte character sequence.");
 		}
 		m_wchar = new wchar_t[wstr_size + 1];
 		std::mbsrtowcs(m_wchar, &src, wstr_size + 1, nullptr);
@@ -987,8 +986,7 @@ public:
 		size_t str_size = std::wcsrtombs(nullptr, &src, 0, nullptr);
 		if (str_size == static_cast<size_t>(-1)) {
 			//throw std::runtime_error("Invalid wide character sequence.");
-			printf("Invalid wide character sequence.");
-			exit(0);
+			SDL_Log("Invalid wide character sequence.");
 		}
 		m_char = new char[str_size + 1];
 		std::wcsrtombs(m_char, &src, str_size + 1, nullptr);

@@ -8,7 +8,6 @@
 #include "Include/Common.hlsl"
 #include "Include/ShadingModel.hlsl"
 
-[InputLayout]
 struct VSInput
 {
     float3 Position     : POSITION;

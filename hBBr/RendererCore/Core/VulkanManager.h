@@ -219,6 +219,8 @@ public:
 
 	void CreateDescripotrSetLayout(std::vector<VkDescriptorType> types, VkDescriptorSetLayout& descriptorSetLayout, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 
+	void CreateDescripotrSetLayout(std::vector<VkDescriptorType> types, std::vector<VkShaderStageFlags> shaderStageFlags, VkDescriptorSetLayout& descriptorSetLayout);
+
 	void DestroyDescriptorSetLayout(VkDescriptorSetLayout& descriptorSetLayout);
 
 	/* width and height must be same as attachments(ImageViews) size. */

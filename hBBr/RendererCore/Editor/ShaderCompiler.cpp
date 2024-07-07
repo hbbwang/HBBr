@@ -326,7 +326,8 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 	HString _shaderSrcCode = shaderSrcCode.c_str();
 	//
 	ShaderCacheHeader header = {} ;
-	std::vector<ShaderParameterInfo> shaderParamInfos;
+	std::vector<ShaderParameterInfo> shaderParamInfosPS;
+	std::vector<ShaderParameterInfo> shaderParamInfosVS;
 	std::vector<ShaderTextureInfo> shaderTextureInfos;
 	std::vector<HString> macroDefines;
 	//
@@ -336,11 +337,13 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 	{
 		bool bSearchVertexInputLayout = false;
 		bool bCollectMaterialParameter = false;
+		bool bCollectMaterialParameterVS = false;
 		bool bCollectMaterialTexture = false;
 		bool bCollectMaterialFlags = false;
 		bool bCollectMaterialVarients = false;
 		int CollectMaterialParameterIndex = 0;
-		int cBufferMaterialRegisterLineIndex = -1;
+		int cBufferMaterialRegisterLineIndexPS = -1;
+		int cBufferMaterialRegisterLineIndexVS = -1;
 		std::vector<int> textureRegisterLineIndex;
 		for (int s = 0; s < line.size(); s++)
 		{
@@ -424,11 +427,14 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 				}
 			}
 			//InputLayout
-			else if (setting[0] == '[' && setting[1] == 'I' && setting[2] == 'n' && setting[3] == 'p'
-				&& setting[4] == 'u' && setting[5] == 't' && setting[6] == 'L' && setting[7] == 'a' 
-				&& setting[8] == 'y' && setting[9] == 'o' && setting[10] == 'u' && setting[11] == 't' && setting[12] == ']')
+			//else if (setting[0] == '[' && setting[1] == 'I' && setting[2] == 'n' && setting[3] == 'p'
+			//	&& setting[4] == 'u' && setting[5] == 't' && setting[6] == 'L' && setting[7] == 'a' 
+			//	&& setting[8] == 'y' && setting[9] == 'o' && setting[10] == 'u' && setting[11] == 't' && setting[12] == ']')
+			else if (setting[0] == 's' && setting[1] == 't' && setting[2] == 'r' && setting[3] == 'u'
+				&& setting[4] == 'c' && setting[5] == 't' && setting[6] == 'V' && setting[7] == 'S'
+				&& setting[8] == 'I' && setting[9] == 'n' && setting[10] == 'p' && setting[11] == 'u' && setting[12] == 't')
 			{
-				line[s] = "//" + line[s];
+				//line[s] = "//" + line[s];
 				bSearchVertexInputLayout = true;
 			}
 			else if (bSearchVertexInputLayout)
@@ -503,64 +509,65 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 					bSearchVertexInputLayout = false;
 				}
 			}
-			//MaterialParameter
-			else if (setting[0] == '[' && setting[1] == 'M' && setting[2] == 'a' && setting[3] == 't'
-				&& setting[4] == 'e' && setting[5] == 'r' && setting[6] == 'i' && setting[7] == 'a' 
-				&& setting[8] == 'l' && setting[9] == 'P' && setting[10] == 'a' && setting[11] == 'r'
-				&& setting[12] == 'a' && setting[13] == 'm' && setting[14] == 'e' && setting[15] == 't' && setting[16] == 'e' && setting[17] == 'r' && setting[18] == ']')
-			{
-				bCollectMaterialParameter = true;
-				//下一行必须是  cbuffer 的register
-				cBufferMaterialRegisterLineIndex = s + 1;
-				line[s] = "//" + line[s];
+			//VS MaterialParameter
+			else if (setting[0] == 'c' && setting[1] == 'b' && setting[2] == 'u' && setting[3] == 'f'
+				&& setting[4] == 'f' && setting[5] == 'e' && setting[6] == 'r' && setting[7] == 'M'
+				&& setting[8] == 'a' && setting[9] == 't' && setting[10] == 'e' && setting[11] == 'r'
+				&& setting[12] == 'i' && setting[13] == 'a' && setting[14] == 'l' && setting[15] == 'V' && setting[16] == 'S')
+				{
+					bCollectMaterialParameterVS = true;
+					//下一行必须是  cbuffer 的register
+					//cBufferMaterialRegisterLineIndex = s + 1;
+					//line[s] = "//" + line[s];
+					cBufferMaterialRegisterLineIndexVS = s;
 			}
-			else if (bCollectMaterialParameter)
+			else if (bCollectMaterialParameterVS)
 			{
 				if (setting.Contains("}"))
 				{
-					bCollectMaterialParameter = false;
+					bCollectMaterialParameterVS = false;
 				}
 				if (setting[0] == 'f' && setting[1] == 'l' && setting[2] == 'o' && setting[3] == 'a' && setting[4] == 't')
 				{
-					shaderParamInfos.push_back(ShaderParameterInfo({}));
+					shaderParamInfosVS.push_back(ShaderParameterInfo({}));
 					//提取param
 					std::stringstream param(line[s].c_str());
 					std::string type, name;
 					param >> type >> name;
-					size_t shaderParamSize = shaderParamInfos.size();
+					size_t shaderParamSize = shaderParamInfosVS.size();
 					if (name[name.size() - 1] == ';')
 					{
 						name.erase(name.begin() + name.size() - 1);
 					}
-					name.copy(shaderParamInfos[shaderParamSize - 1].name, sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1);
-					shaderParamInfos[shaderParamSize - 1].name[sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1] = '\0';
+					name.copy(shaderParamInfosVS[shaderParamSize - 1].name, sizeof(shaderParamInfosVS[shaderParamSize - 1].name) - 1);
+					shaderParamInfosVS[shaderParamSize - 1].name[sizeof(shaderParamInfosVS[shaderParamSize - 1].name) - 1] = '\0';
 					//
 					if (type.compare("float4") == 0)
 					{
-						shaderParamInfos[shaderParamSize - 1].type = MPType::Float4;
-						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						shaderParamInfosVS[shaderParamSize - 1].type = MPType::VSFloat4;
+						shaderParamInfosVS[shaderParamSize - 1].index = CollectMaterialParameterIndex;
 						CollectMaterialParameterIndex += 4;
 					}
 
 					else if (type.compare("float3") == 0)
 					{
-						shaderParamInfos[shaderParamSize - 1].type = MPType::Float3;
-						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						shaderParamInfosVS[shaderParamSize - 1].type = MPType::VSFloat3;
+						shaderParamInfosVS[shaderParamSize - 1].index = CollectMaterialParameterIndex;
 						CollectMaterialParameterIndex += 3;
 					}
 					else if (type.compare("float2") == 0)
 					{
-						shaderParamInfos[shaderParamSize - 1].type = MPType::Float2;
-						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						shaderParamInfosVS[shaderParamSize - 1].type = MPType::VSFloat2;
+						shaderParamInfosVS[shaderParamSize - 1].index = CollectMaterialParameterIndex;
 						CollectMaterialParameterIndex += 2;
 					}
 					else if (type.compare("float") == 0)
 					{
-						shaderParamInfos[shaderParamSize - 1].type = MPType::Float;
-						shaderParamInfos[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						shaderParamInfosVS[shaderParamSize - 1].type = MPType::VSFloat;
+						shaderParamInfosVS[shaderParamSize - 1].index = CollectMaterialParameterIndex;
 						CollectMaterialParameterIndex += 1;
 					}
-					header.shaderParameterCount++;
+					header.shaderParameterCount_vs++;
 					auto lastLineStr = line[s - 1].ClearSpace();
 					if (lastLineStr[0] == '[')
 					{
@@ -580,21 +587,124 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 									auto p_values = value[1].Split(",");
 									auto maxCount = std::min((int)p_values.size(), 4);
 									for (int vv = 0; vv < maxCount; vv++)
-										shaderParamInfos[shaderParamSize - 1].defaultValue[vv] = (float)HString::ToDouble(p_values[vv]);
+										shaderParamInfosVS[shaderParamSize - 1].defaultValue[vv] = (float)HString::ToDouble(p_values[vv]);
 								}
 								else if (value[0].Contains("Name", false))
 								{
 									std::string p_name = value[1].c_str();
-									size_t numCharsToCopy = std::min(p_name.size(), sizeof(shaderParamInfos[shaderParamSize - 1].name) - 1);
-									p_name.copy(shaderParamInfos[shaderParamSize - 1].name, numCharsToCopy);
-									shaderParamInfos[shaderParamSize - 1].name[numCharsToCopy] = '\0';
+									size_t numCharsToCopy = std::min(p_name.size(), sizeof(shaderParamInfosVS[shaderParamSize - 1].name) - 1);
+									p_name.copy(shaderParamInfosVS[shaderParamSize - 1].name, numCharsToCopy);
+									shaderParamInfosVS[shaderParamSize - 1].name[numCharsToCopy] = '\0';
 								}
 								else if (value[0].Contains("Group", false))
 								{
 									std::string p_group = value[1].c_str();
-									size_t numCharsToCopy = std::min(p_group.size(), sizeof(shaderParamInfos[shaderParamSize - 1].group) - 1);
-									p_group.copy(shaderParamInfos[shaderParamSize - 1].group, numCharsToCopy);
-									shaderParamInfos[shaderParamSize - 1].group[numCharsToCopy] = '\0';
+									size_t numCharsToCopy = std::min(p_group.size(), sizeof(shaderParamInfosVS[shaderParamSize - 1].group) - 1);
+									p_group.copy(shaderParamInfosVS[shaderParamSize - 1].group, numCharsToCopy);
+									shaderParamInfosVS[shaderParamSize - 1].group[numCharsToCopy] = '\0';
+								}
+							}
+						}
+					}
+				}
+			}
+			//MaterialParameter PS
+			//else if (setting[0] == '[' && setting[1] == 'M' && setting[2] == 'a' && setting[3] == 't'
+			//	&& setting[4] == 'e' && setting[5] == 'r' && setting[6] == 'i' && setting[7] == 'a' 
+			//	&& setting[8] == 'l' && setting[9] == 'P' && setting[10] == 'a' && setting[11] == 'r'
+			//	&& setting[12] == 'a' && setting[13] == 'm' && setting[14] == 'e' && setting[15] == 't' && setting[16] == 'e' && setting[17] == 'r' && setting[18] == ']')
+			else if (setting[0] == 'c' && setting[1] == 'b' && setting[2] == 'u' && setting[3] == 'f'
+				&& setting[4] == 'f' && setting[5] == 'e' && setting[6] == 'r' && setting[7] == 'M'
+				&& setting[8] == 'a' && setting[9] == 't' && setting[10] == 'e' && setting[11] == 'r'
+				&& setting[12] == 'i' && setting[13] == 'a' && setting[14] == 'l' && setting[15] == 'P' && setting[16] == 'S')
+			{
+				bCollectMaterialParameter = true;
+				//下一行必须是  cbuffer 的register
+				//cBufferMaterialRegisterLineIndex = s + 1;
+				//line[s] = "//" + line[s];
+				cBufferMaterialRegisterLineIndexPS = s;
+			}
+			else if (bCollectMaterialParameter)
+			{
+				if (setting.Contains("}"))
+				{
+					bCollectMaterialParameter = false;
+				}
+				if (setting[0] == 'f' && setting[1] == 'l' && setting[2] == 'o' && setting[3] == 'a' && setting[4] == 't')
+				{
+					shaderParamInfosPS.push_back(ShaderParameterInfo({}));
+					//提取param
+					std::stringstream param(line[s].c_str());
+					std::string type, name;
+					param >> type >> name;
+					size_t shaderParamSize = shaderParamInfosPS.size();
+					if (name[name.size() - 1] == ';')
+					{
+						name.erase(name.begin() + name.size() - 1);
+					}
+					name.copy(shaderParamInfosPS[shaderParamSize - 1].name, sizeof(shaderParamInfosPS[shaderParamSize - 1].name) - 1);
+					shaderParamInfosPS[shaderParamSize - 1].name[sizeof(shaderParamInfosPS[shaderParamSize - 1].name) - 1] = '\0';
+					//
+					if (type.compare("float4") == 0)
+					{
+						shaderParamInfosPS[shaderParamSize - 1].type = MPType::PSFloat4;
+						shaderParamInfosPS[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						CollectMaterialParameterIndex += 4;
+					}
+
+					else if (type.compare("float3") == 0)
+					{
+						shaderParamInfosPS[shaderParamSize - 1].type = MPType::PSFloat3;
+						shaderParamInfosPS[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						CollectMaterialParameterIndex += 3;
+					}
+					else if (type.compare("float2") == 0)
+					{
+						shaderParamInfosPS[shaderParamSize - 1].type = MPType::PSFloat2;
+						shaderParamInfosPS[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						CollectMaterialParameterIndex += 2;
+					}
+					else if (type.compare("float") == 0)
+					{
+						shaderParamInfosPS[shaderParamSize - 1].type = MPType::PSFloat;
+						shaderParamInfosPS[shaderParamSize - 1].index = CollectMaterialParameterIndex;
+						CollectMaterialParameterIndex += 1;
+					}
+					header.shaderParameterCount_ps++;
+					auto lastLineStr = line[s - 1].ClearSpace();
+					if (lastLineStr[0] == '[')
+					{
+						//提取每个属性的拓展信息
+						lastLineStr.Replace("[", "");
+						lastLineStr.Replace("]", "");
+						auto paramProperty = lastLineStr.Split(";");//获取上一行的代码
+						line[s - 1] = "//" + line[s - 1];//拓展信息非着色器正式代码,填充注释防止编译错误
+						for (auto i : paramProperty)
+						{
+							//提取属性里的值
+							auto value = i.Split("=");
+							if (value.size() > 1)
+							{
+								if (value[0].Contains("Default", false))
+								{
+									auto p_values = value[1].Split(",");
+									auto maxCount = std::min((int)p_values.size(), 4);
+									for (int vv = 0; vv < maxCount; vv++)
+										shaderParamInfosPS[shaderParamSize - 1].defaultValue[vv] = (float)HString::ToDouble(p_values[vv]);
+								}
+								else if (value[0].Contains("Name", false))
+								{
+									std::string p_name = value[1].c_str();
+									size_t numCharsToCopy = std::min(p_name.size(), sizeof(shaderParamInfosPS[shaderParamSize - 1].name) - 1);
+									p_name.copy(shaderParamInfosPS[shaderParamSize - 1].name, numCharsToCopy);
+									shaderParamInfosPS[shaderParamSize - 1].name[numCharsToCopy] = '\0';
+								}
+								else if (value[0].Contains("Group", false))
+								{
+									std::string p_group = value[1].c_str();
+									size_t numCharsToCopy = std::min(p_group.size(), sizeof(shaderParamInfosPS[shaderParamSize - 1].group) - 1);
+									p_group.copy(shaderParamInfosPS[shaderParamSize - 1].group, numCharsToCopy);
+									shaderParamInfosPS[shaderParamSize - 1].group[numCharsToCopy] = '\0';
 								}
 							}
 						}
@@ -676,21 +786,56 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 								shaderTextureInfos[infoSize - 1].msAddress = MSAddress::Border;
 						}
 					}
+					//独立属性
+					else
+					{
+						if (i.IsSame("vs", false))//顶点着色器专用
+						{
+
+						}
+						else if (i.IsSame("ps", false))//像素着色器专用
+						{
+
+						}
+						else if (i.IsSame("vsps", false))//顶点/像素着色器共用
+						{
+
+						}
+					}
 				}
 			}
 		}
 		if (!(header.flags & NativeHLSL))//原生HLSL,不进行拓展处理
 		{
 			//补充
-			if (cBufferMaterialRegisterLineIndex != -1)
+			//Parameter
+			if (cBufferMaterialRegisterLineIndexPS != -1 && cBufferMaterialRegisterLineIndexVS == -1)
 			{
-				line[cBufferMaterialRegisterLineIndex] += ":register(b0, space2)";
+				line[cBufferMaterialRegisterLineIndexPS] += ":register(b0, space2)";
 			}
+			else if (cBufferMaterialRegisterLineIndexPS == -1 && cBufferMaterialRegisterLineIndexVS != -1)
+			{
+				line[cBufferMaterialRegisterLineIndexVS] += ":register(b0, space2)";
+			}
+			else if(cBufferMaterialRegisterLineIndexPS != -1 && cBufferMaterialRegisterLineIndexVS != -1)
+			{
+				line[cBufferMaterialRegisterLineIndexVS] += ":register(b0, space2)";
+				line[cBufferMaterialRegisterLineIndexPS] += ":register(b0, space3)";
+			}
+			//Texture
 			for (int i = 0; i < textureRegisterLineIndex.size(); i++)
 			{
 				HString texName = GetTextureNameFromShaderCodeLine(line[textureRegisterLineIndex[i]]);
 				line[textureRegisterLineIndex[i]] = line[textureRegisterLineIndex[i]].Split(";")[0];//移除分号
-				if (cBufferMaterialRegisterLineIndex != -1)
+				if (cBufferMaterialRegisterLineIndexVS != -1 && cBufferMaterialRegisterLineIndexPS != 1)
+				{
+					line[textureRegisterLineIndex[i]] += HString(":register(t") + HString::FromInt(i) + ",space4);";
+					//给Texture2D补充一个SamplerState
+					line[textureRegisterLineIndex[i]] += "   SamplerState " + texName + "Sampler:register(s" + HString::FromInt(i) + ",space4);";
+				}
+				else if (cBufferMaterialRegisterLineIndexVS == -1 && cBufferMaterialRegisterLineIndexPS != 1||
+						cBufferMaterialRegisterLineIndexVS != -1 && cBufferMaterialRegisterLineIndexPS == 1
+					)
 				{
 					line[textureRegisterLineIndex[i]] += HString(":register(t") + HString::FromInt(i) + ",space3);";
 					//给Texture2D补充一个SamplerState
@@ -738,7 +883,8 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 		header.flags |= EnableShaderDebug;
 	}
 	//
-
+	std::vector<ShaderParameterInfo> shaderParamInfos = shaderParamInfosVS;
+	shaderParamInfos.insert(shaderParamInfos.end(), shaderParamInfosPS.begin(), shaderParamInfosPS.end());
 	GenerateCombinations((int)varients.size(), 0, 0, _shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients, macroDefines);
 	//for (int i = 0; i < varients.size(); i++)
 	//{

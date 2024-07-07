@@ -29,36 +29,64 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 {
 	_material = mat;
 	_parent = (MaterialEditor*)parent;
-	this->setAttribute(Qt::WA_DeleteOnClose, true);
+	//this->setAttribute(Qt::WA_DeleteOnClose, true);
+
+	_left_right_sizes = QList<int>() << this->width() * (2.0f / 5.0f) << this->width() * (3.0f / 5.0f);
+	_up_bottom_sizes = QList<int>() << this->width() * (2.0f / 5.0f) << this->width() * (3.0f / 5.0f);
+
+	for (int i = 0; i < _allDetailWindows.size(); i++)
+	{
+		if (_allDetailWindows[i]->_material.lock().get() == _material.lock().get())
+		{
+			this->close();
+			return;
+		}
+	}
+	setObjectName("MaterialDetailEditor");
+	setWindowTitle(_material.lock()->_assetInfo.lock()->displayName.c_str());
+	setWindowFlag(Qt::Window, true);
+	_allDetailWindows.append(this);
+	LoadEditorWindowSetting(this, "MaterialEditor");
+
+
+	//setLayout(new QHBoxLayout(this));
+	//((QHBoxLayout*)layout())->setContentsMargins(0, 0, 0, 0);
+	//((QHBoxLayout*)layout())->setSpacing(0);
+
+
 	Init();
+
+	show();
 }
 
 MaterialDetailEditor::~MaterialDetailEditor()
 {
 }
 
-void deleteWidget(QWidget* widget)
+void deleteItem(QLayout* layout)
 {
-	QLayout* layout = widget->layout();
-	if (layout)
+	if (layout == NULL)
+		return;
+	QLayoutItem* child;
+	while ((child = layout->takeAt(0)) != nullptr)
 	{
-		// 删除布局中的所有控件
-		QLayoutItem* item;
-		while ((item = layout->takeAt(0)) != nullptr)
+		//setParent为NULL，防止删除之后界面不消失
+		if (child->widget())
 		{
-			if (QWidget* widget = item->widget())
-			{
-				widget->deleteLater();
-			}
-			delete item;
+			child->widget()->setParent(nullptr);
+			delete child->widget();
 		}
-		// 删除布局本身
-		delete layout;
+		else if (child->layout())
+		{
+			deleteItem(child->layout());
+			delete child->layout();
+		}
+		delete child;
 	}
-	widget->setParent(nullptr);
-	widget->close();
-	widget->deleteLater();
-
+	if (layout->widget())
+	{
+		layout->widget()->setLayout(nullptr);
+	}
 }
 
 MaterialDetailEditor* MaterialDetailEditor::OpenMaterialEditor(std::weak_ptr<Material> mat)
@@ -98,15 +126,10 @@ MaterialDetailEditor* MaterialDetailEditor::RefreshMaterialEditor(std::weak_ptr<
 	}
 	if (editor != nullptr)
 	{
-		deleteWidget(editor->mp);
-		deleteWidget(editor->ma);
-		//重新生成面板
-		editor->InitMP();
-		editor->InitMA();
-		editor->left_right->setStretchFactor(0, 1);
-		editor->left_right->setStretchFactor(1, 2);
-		editor->up_bottom->setStretchFactor(0, 1);
-		editor->up_bottom->setStretchFactor(1, 4);
+		delete editor->mp;
+		delete editor->ma;
+
+		editor->Init();
 	}
 	return editor;
 }
@@ -127,15 +150,17 @@ void MaterialDetailEditor::RefreshAllMaterialEditor()
 	}
 }
 
-void MaterialDetailEditor::resizeEvent(QResizeEvent * event)
+void MaterialDetailEditor::paintEvent(QPaintEvent* event)
 {
-	left_right->resize(width(), height());
 }
 
 void MaterialDetailEditor::closeEvent(QCloseEvent* event)
 {
-	if(_renderer && _renderer->_rendererForm)
+	if (_renderer && _renderer->_rendererForm)
+	{
 		VulkanApp::RemoveWindow(_renderer->_rendererForm);
+		_renderer->_rendererForm = nullptr;
+	}
 	for (int i = 0; i < _allDetailWindows.size(); i++)
 	{
 		if (_allDetailWindows[i]->_material.lock().get() == _material.lock().get())
@@ -149,58 +174,42 @@ void MaterialDetailEditor::closeEvent(QCloseEvent* event)
 
 void MaterialDetailEditor::Init()
 {
-	QTimer* t = new QTimer(this);
-	t->setSingleShot(true);
-	t->setInterval(100);
+	/*_inspector = new Inspector(this);
+	_inspector_dock = new CustomDockWidget(this);
+	_inspector_dock->setFeatures(
+		QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+	_inspector_dock->setWidget(_inspector);
+	_inspector->setObjectName("Inspector");
+	_inspector_dock->setWindowTitle(GetEditorInternationalization("MainWindow", "Inspector"));
+	addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, _inspector_dock);*/
 
-	connect(t, &QTimer::timeout, this, 
-	[this]() 
+	//left_right = new QSplitter(this);
+	//left_right->setChildrenCollapsible(false);
+	//left_right->setOrientation(Qt::Orientation::Horizontal);
+
+	up_bottom = new QSplitter(this);
+	up_bottom->setOrientation(Qt::Orientation::Vertical);
+	setCentralWidget(up_bottom);
+
+	r = new QWidget(this);
+	r->setObjectName("MaterialDetailEditor");
+	ui_r.setupUi(r);
+	up_bottom->addWidget(r);
+
+	InitMA();
+	InitMP();
+
+	//小标题
+	ui_r.MaterialDetailEditor_RendererName->setText(GetEditorInternationalization("MaterialEditor", "MaterialRendererTitle"));
+	//渲染器
 	{
-		for (int i = 0; i < _allDetailWindows.size(); i++)
-		{
-			if (_allDetailWindows[i]->_material.lock().get() == _material.lock().get())
-			{
-				this->close();
-				return;
-			}
-		}
-		setObjectName("MaterialDetailEditor");
-		setWindowTitle(_material.lock()->_assetInfo.lock()->displayName.c_str());
-		setWindowFlag(Qt::Window, true);
-		_allDetailWindows.append(this);
-		LoadEditorWindowSetting(this, "MaterialEditor");
-
-		r = new QWidget(this);
-		r->setObjectName("MaterialDetailEditor");
-		ui_r.setupUi(r);
-
-		left_right = new QSplitter(this);
-		left_right->setOrientation(Qt::Orientation::Horizontal);
-		QWidget* widget = new QWidget(this);
-		widget->setLayout(new QVBoxLayout(widget));
-		((QVBoxLayout*)widget->layout())->setContentsMargins(0, 0, 0, 0);
-		((QVBoxLayout*)widget->layout())->setSpacing(0);
-		left_right->addWidget(widget);
-		//
-		up_bottom = new QSplitter(this);
-		up_bottom->setOrientation(Qt::Orientation::Vertical);
-		widget->layout()->addWidget(up_bottom);
-		up_bottom->addWidget(r);
-
-		InitMA();
-		InitMP();
-
-		//小标题
-		ui_r.MaterialDetailEditor_RendererName->setText(GetEditorInternationalization("MaterialEditor", "MaterialRendererTitle"));
-		//渲染器
-		{
-			_renderer = new SDLWidget(this, _material.lock()->_assetInfo.lock()->guid.str().c_str());
-			ui_r.verticalLayout_2->addWidget(_renderer);
-			ui_r.verticalLayout_2->setStretch(1, 10);
-			//HWND hwnd = (HWND)VulkanApp::GetWindowHandle(_matWindow);
-			auto renderer = _renderer->_rendererForm->renderer;
-			//渲染器需要一帧时间去创建，所以下一帧执行
-			auto func = 
+		_renderer = new SDLWidget(this, _material.lock()->_assetInfo.lock()->guid.str().c_str());
+		//HWND hwnd = (HWND)VulkanApp::GetWindowHandle(_matWindow);
+		ui_r.verticalLayout_2->addWidget(_renderer);
+		ui_r.verticalLayout_2->setStretch(1, 10);
+		auto renderer = _renderer->_rendererForm->renderer;
+		//渲染器需要一帧时间去创建，所以下一帧执行
+		auto func =
 			[this]()
 			{
 				auto renderer = _renderer->_rendererForm->renderer;
@@ -216,84 +225,142 @@ void MaterialDetailEditor::Init()
 					modelComp->SetMaterial(_material, i);
 				}
 			};
-			renderer->ExecFunctionOnRenderThread(func);
-		}
-		show();
-		left_right->setStretchFactor(0, 1);
-		left_right->setStretchFactor(1, 2);
-		up_bottom->setStretchFactor(0, 1);
-		up_bottom->setStretchFactor(1, 4);
-	});
-	t->start();
+		renderer->ExecFunctionOnRenderThread(func);
+	}
+	up_bottom->setSizes(_up_bottom_sizes);
 }
 
 void MaterialDetailEditor::InitMP()
 {
-	mp = new QWidget(this);
+	mp = new QDockWidget(this);
 	mp->setObjectName("MaterialDetailEditor");
-	left_right->addWidget(mp);
+	mp->setFeatures(QDockWidget::NoDockWidgetFeatures);
 
-	ui_mp.setupUi(mp);
-	//小标题
-	ui_mp.MaterialDetailEditor_MaterialParameterName->setText(GetEditorInternationalization("MaterialEditor", "MaterialParameterTitle"));
+	QWidget* widget = new QWidget(mp);
+	mp->setWidget(widget);
+	ui_mp.setupUi(widget);
+	mp->setWindowTitle(GetEditorInternationalization("MaterialEditor", "MaterialParameterTitle"));
+	//ui_mp.MaterialDetailEditor_MaterialParameterName->setText(GetEditorInternationalization("MaterialEditor", "MaterialParameterTitle"));
+	ui_mp.MaterialDetailEditor_MaterialParameterName->setHidden(true);
+	addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, mp);
 	//
 	PropertyWidget* pw_mp = new PropertyWidget(this);
 	ui_mp.scroll_verticalLayout->addWidget(pw_mp);
 	auto prim = _material.lock()->GetPrimitive();
 	//Material parameter
-	//Uniform buffer
+	auto mp_main_group = pw_mp->AddGroup(GetEditorInternationalization("MaterialEditor", "MaterialUniformBufferTitle"));
+	//Uniform buffer VS
 	{
-		auto mp_group = pw_mp->AddGroup(GetEditorInternationalization("MaterialEditor", "MaterialUniformBufferTitle"));
-		for (auto& i : prim->_paramterInfos)
+		QString shaderGroupName = GetEditorInternationalization("MaterialEditor", "VertexUniformBuffer");
+		auto mp_shader = pw_mp->AddGroup(shaderGroupName, mp_main_group);
+		for (auto& i : prim->_paramterInfos_vs)
 		{
-			auto mp_sub_group = pw_mp->AddGroup(i.group.c_str(), mp_group);
+			auto mp_sub_group = pw_mp->AddGroup(i.group.c_str(), mp_shader);
 			VectorSetting* vector = nullptr;
 			int vecType = 1;
-			if (i.type == MPType::Float)
+			if (i.type == MPType::VSFloat)
 			{
 				vector = new VectorSetting(this, 1, 0.0001f, 8);
-				vector->SetValue(prim->uniformBuffer[i.arrayIndex][i.vec4Index]);
-				vector->_vec4_f[0] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index];
+				vector->SetValue(prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index]);
+				vector->_vec4_f[0] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index];
 			}
-			else if (i.type == MPType::Float2)
+			else if (i.type == MPType::VSFloat2)
 			{
 				vector = new VectorSetting(this, 2, 0.0001f, 8);
 				vecType = 2;
 				vector->SetValue(
-					prim->uniformBuffer[i.arrayIndex][i.vec4Index],
-					prim->uniformBuffer[i.arrayIndex][i.vec4Index + 1],
+					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index],
+					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1],
 					0
 				);
-				vector->_vec4_f[0] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index];
-				vector->_vec4_f[1] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index + 1];
+				vector->_vec4_f[0] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1];
 			}
-			else if (i.type == MPType::Float3)
+			else if (i.type == MPType::VSFloat3)
 			{
 				vector = new VectorSetting(this, 3, 0.0001f, 8);
 				vecType = 3;
 				vector->SetValue(
-					prim->uniformBuffer[i.arrayIndex][i.vec4Index],
-					prim->uniformBuffer[i.arrayIndex][i.vec4Index + 1],
-					prim->uniformBuffer[i.arrayIndex][i.vec4Index + 2]
+					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index],
+					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1],
+					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 2]
 				);
-				vector->_vec4_f[0] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index];
-				vector->_vec4_f[1] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index + 1];
-				vector->_vec4_f[2] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index + 2];
+				vector->_vec4_f[0] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1];
+				vector->_vec4_f[2] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 2];
 			}
-			else if (i.type == MPType::Float4)
+			else if (i.type == MPType::VSFloat4)
 			{
 				vector = new VectorSetting(this, 4, 0.0001f, 8);
 				vecType = 4;
 				vector->SetValue(
-					prim->uniformBuffer[i.arrayIndex][i.vec4Index],
-					prim->uniformBuffer[i.arrayIndex][i.vec4Index + 1],
-					prim->uniformBuffer[i.arrayIndex][i.vec4Index + 2],
-					prim->uniformBuffer[i.arrayIndex][i.vec4Index + 3]
+					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index],
+					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1],
+					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 2],
+					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 3]
 				);
-				vector->_vec4_f[0] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index];
-				vector->_vec4_f[1] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index + 1];
-				vector->_vec4_f[2] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index + 2];
-				vector->_vec4_f[3] = &prim->uniformBuffer[i.arrayIndex][i.vec4Index + 3];
+				vector->_vec4_f[0] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1];
+				vector->_vec4_f[2] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 2];
+				vector->_vec4_f[3] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 3];
+			}
+			pw_mp->AddItem(i.name.c_str(), vector, 30, mp_sub_group);
+		}
+	}
+	//Uniform buffer PS
+	{
+		QString shaderGroupName = GetEditorInternationalization("MaterialEditor", "PixelUniformBuffer");
+		auto mp_shader = pw_mp->AddGroup(shaderGroupName, mp_main_group);
+		for (auto& i : prim->_paramterInfos_ps)
+		{
+			auto mp_sub_group = pw_mp->AddGroup(i.group.c_str(), mp_shader);
+			VectorSetting* vector = nullptr;
+			int vecType = 1;
+			if (i.type == MPType::PSFloat)
+			{
+				vector = new VectorSetting(this, 1, 0.0001f, 8);
+				vector->SetValue(prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index]);
+				vector->_vec4_f[0] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index];
+			}
+			else if (i.type == MPType::PSFloat2)
+			{
+				vector = new VectorSetting(this, 2, 0.0001f, 8);
+				vecType = 2;
+				vector->SetValue(
+					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index],
+					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1],
+					0
+				);
+				vector->_vec4_f[0] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1];
+			}
+			else if (i.type == MPType::PSFloat3)
+			{
+				vector = new VectorSetting(this, 3, 0.0001f, 8);
+				vecType = 3;
+				vector->SetValue(
+					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index],
+					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1],
+					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 2]
+				);
+				vector->_vec4_f[0] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1];
+				vector->_vec4_f[2] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 2];
+			}
+			else if (i.type == MPType::PSFloat4)
+			{
+				vector = new VectorSetting(this, 4, 0.0001f, 8);
+				vecType = 4;
+				vector->SetValue(
+					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index],
+					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1],
+					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 2],
+					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 3]
+				);
+				vector->_vec4_f[0] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1];
+				vector->_vec4_f[2] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 2];
+				vector->_vec4_f[3] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 3];
 			}
 			pw_mp->AddItem(i.name.c_str(), vector, 30, mp_sub_group);
 		}
@@ -336,13 +403,15 @@ void MaterialDetailEditor::InitMP()
 void MaterialDetailEditor::InitMA()
 {
 	ma = new QWidget(this);
-	ma->setObjectName("MaterialDetailEditor");
 	ui_ma.setupUi(ma);
-	up_bottom->addWidget(ma);
 	ui_ma.MaterialDetailEditor_MaterialAttributeName->setText(GetEditorInternationalization("MaterialEditor", "MaterialAttrbuteTitle"));
-	//Material attribute
-	PropertyWidget* pw_ma = new PropertyWidget(this);
+	ma->setWindowTitle(GetEditorInternationalization("MaterialEditor", "MaterialAttrbuteTitle"));
+
+	up_bottom->addWidget(ma);
+
+	pw_ma = new PropertyWidget(this);
 	ui_ma.scroll_verticalLayout->addWidget(pw_ma);
+	ui_ma.scroll_verticalLayout->addStretch(20);
 	{
 		//ui_ma.scroll_verticalLayout
 		//material path text
@@ -418,7 +487,6 @@ void MaterialDetailEditor::InitMA()
 				RefreshMaterialEditor(_material);
 			});
 		}
-		ui_ma.scroll_verticalLayout->addStretch(20);
 		pw_ma->ShowItems();
 	}
 }

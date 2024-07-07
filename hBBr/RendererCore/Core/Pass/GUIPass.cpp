@@ -308,11 +308,11 @@ GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateC
 
 	if (!prim->ub_descriptorSet)
 	{
-		prim->ub_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, _ubDescriptorSetLayout, stateCount, BufferSizeRange, VK_SHADER_STAGE_FRAGMENT_BIT));
+		prim->ub_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, _ubDescriptorSetLayout, BufferSizeRange, VK_SHADER_STAGE_FRAGMENT_BIT));
 	}
 	if (!prim->tex_descriptorSet)
 	{
-		prim->tex_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _texDescriptorSetLayout, 1, 0, VK_SHADER_STAGE_FRAGMENT_BIT));
+		prim->tex_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _texDescriptorSetLayout, 0, VK_SHADER_STAGE_FRAGMENT_BIT));
 	}
 	prim->viewport = { (int)x,(int)y,(uint32_t)w,(uint32_t)h };
 	prim->Data.resize(6 * stateCount);

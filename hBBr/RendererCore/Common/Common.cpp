@@ -6,16 +6,16 @@
 #include "VulkanManager.h"
 void MessageOut(HString msg, bool bExit, bool bMessageBox, const char* textColor)
 {
-	HString msgStr = msg.c_wstr();
+	//HString msgStr = msg.c_wstr(); 
 	//msgStr = "[hBBr]:" + msgStr;
     if (bMessageBox && VulkanManager::_bDebugEnable)
     {
 #if defined(_WIN32)
 		//MessageBoxA(nullptr, msg, "message", MB_ICONERROR);
 		#if NDEBUG
-		MessageBoxA(0, msgStr.c_str(), "HBBr msg", 0);
+		MessageBoxA(0, msg.c_str(), "HBBr msg", 0);
 		#else
-		DE_ASSERT(0, msgStr.c_str());
+		DE_ASSERT(0, msg.c_str());
 		#endif
 #else
 	SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_INFORMATION, "HBBr msg", msg, nullptr);
@@ -24,7 +24,7 @@ void MessageOut(HString msg, bool bExit, bool bMessageBox, const char* textColor
     }
 	else
 	{
-		ConsoleDebug::print_endl(msgStr, textColor);
+		ConsoleDebug::print_endl(msg, textColor);
 	}
 	if (bExit)
 	{

@@ -5,6 +5,7 @@
 #include <map>
 #include <qsplitter.h>
 #include <HGuid.h>
+#include <qdockwidget.h>
 #include "ui_MaterialDetailEditor_MaterialAttribute.h"
 #include "ui_MaterialDetailEditor_MaterialParameter.h"
 #include "ui_MaterialDetailEditor_Renderer.h"
@@ -18,12 +19,13 @@ public:
 	class MaterialEditor* _parent = nullptr;
 
 	class SDLWidget* _renderer = nullptr;
-	class QSplitter* left_right = nullptr;
+	//class QSplitter* left_right = nullptr;
 	class QSplitter* up_bottom = nullptr;
 
-	QWidget* r = new QWidget(this);
-	QWidget* ma = new QWidget(this);
-	QWidget* mp = new QWidget(this);
+	QWidget* r;
+	QWidget* ma = nullptr;
+	QDockWidget* mp = nullptr;
+	class PropertyWidget* pw_ma ;
 
 	std::weak_ptr<Material> _material;
 	class GameObject* _gameObject = nullptr;
@@ -38,8 +40,11 @@ public:
 
 	static void RefreshAllMaterialEditor();
 
+	QList<int> _left_right_sizes;
+	QList<int> _up_bottom_sizes;
+
 protected:
-	virtual void resizeEvent(QResizeEvent* event);
+	virtual void paintEvent(QPaintEvent* event)override;
 	virtual void closeEvent(QCloseEvent* event);
 private:
 	void Init();

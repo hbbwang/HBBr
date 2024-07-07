@@ -6,10 +6,14 @@
 #include "./Asset/HGuid.h"
 enum class MPType : uint8_t
 {
-	Float = 0,
-	Float2 = 1,
-	Float3 = 2,
-	Float4 = 3
+	VSFloat = 0,
+	VSFloat2 = 1,
+	VSFloat3 = 2,
+	VSFloat4 = 3,
+	PSFloat = 4,
+	PSFloat2 = 5,
+	PSFloat3 = 6,
+	PSFloat4 = 7
 };
 
 enum class MTType : uint8_t
@@ -65,7 +69,8 @@ struct ShaderCacheHeader
 	//{ pos,nor,tan,col,uv01,uv23,uv45} //第一个pos必须有
 	uint8_t vertexInput[7] = {3,0,0,0,0,0,0};
 	//Shader parameter count
-	uint8_t shaderParameterCount = 0;
+	uint8_t shaderParameterCount_vs = 0;
+	uint8_t shaderParameterCount_ps = 0;
 	//Shader texture count
 	uint8_t shaderTextureCount = 0;
 	//Shader varients
@@ -100,8 +105,8 @@ struct ShaderCache
 	//
 	ShaderType shaderType;
 	//<varients,VkShaderModule>
-	//vs和ps
-	VkShaderModule vs_shaderModule;
+	//同名顶点着色器
+	std::weak_ptr<ShaderCache> vsShader;
 	VkShaderModule shaderModule;
 	HString shaderName;
 	HString shaderFullName;
@@ -113,7 +118,8 @@ struct ShaderCache
 	//Default 默认参数模板
 	std::vector<ShaderVarientGroup> vi;
 	uint32_t varients;
-	std::vector<std::shared_ptr<struct MaterialParameterInfo>>  pi;
+	std::vector<std::shared_ptr<struct MaterialParameterInfo>> pi_vs;
+	std::vector<std::shared_ptr<struct MaterialParameterInfo>> pi_ps;
 	std::vector<std::shared_ptr<struct MaterialTextureInfo>> ti;
 };
 
@@ -161,7 +167,6 @@ public:
 		}
 		return std::weak_ptr<ShaderCache>();
 	}
-
 	static std::map<HString, std::shared_ptr<ShaderCache>> _vsShader;
 	static std::map<HString, std::shared_ptr<ShaderCache>> _psShader;
 	static std::map<HString, std::shared_ptr<ShaderCache>> _csShader;

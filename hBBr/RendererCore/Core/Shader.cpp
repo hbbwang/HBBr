@@ -73,7 +73,7 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 			cache.vi.push_back(newVarient);
 		}
 		//shader parameter infos
-		for (int i = 0; i < cache.header.shaderParameterCount; i++)
+		for (int i = 0; i < cache.header.shaderParameterCount_vs + cache.header.shaderParameterCount_ps; i++)
 		{
 			ShaderParameterInfo newInfo;
 			file.read((char*)&newInfo, sizeof(ShaderParameterInfo));
@@ -91,7 +91,7 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 			fileSize
 			- sizeof(ShaderCacheHeader)
 			- (sizeof(ShaderVarientGroup) * cache.header.varientCount)
-			- (sizeof(ShaderParameterInfo) * cache.header.shaderParameterCount)
+			- (sizeof(ShaderParameterInfo) * (cache.header.shaderParameterCount_vs + cache.header.shaderParameterCount_ps))
 			- (sizeof(ShaderTextureInfo) * cache.header.shaderTextureCount)
 			;
 		std::vector<char> shaderData(shaderCodeSize);
@@ -121,71 +121,168 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 		//创建模板
 		//ParameterInfo
 		{
-			int alignmentFloat4 = 0; // float4 对齐
-			uint32_t arrayIndex = 0;
-			for (auto i = 0; i < cache.params.size(); i++)
+
+			//拆分vs ps
+			std::vector<ShaderParameterInfo> vsParamInfo;
+			std::vector<ShaderParameterInfo> psParamInfo;
+			vsParamInfo.reserve(cache.params.size());
+			psParamInfo.reserve(cache.params.size());
+			for (auto& i : cache.params)
 			{
-				std::shared_ptr<MaterialParameterInfo> info;
-				info.reset(new MaterialParameterInfo);
-				info->name = cache.params[i].name;
-				info->type = (MPType)cache.params[i].type;
-				info->group = cache.params[i].group;
-				if (info->type == MPType::Float)
+				if (i.type == MPType::VSFloat ||
+					i.type == MPType::VSFloat2 ||
+					i.type == MPType::VSFloat3 ||
+					i.type == MPType::VSFloat4)
 				{
-					if (alignmentFloat4 + 1 > 4)
-					{
-						alignmentFloat4 = 0;
-						arrayIndex++;
-					}
-					info->arrayIndex = arrayIndex;
-					info->vec4Index = alignmentFloat4;
-					info->value.push_back((float)cache.params[i].defaultValue.x);
-					alignmentFloat4 += 1;
+					vsParamInfo.push_back(i);
 				}
-				else if (info->type == MPType::Float2)
+				else if (i.type == MPType::PSFloat ||
+					i.type == MPType::PSFloat2 ||
+					i.type == MPType::PSFloat3 ||
+					i.type == MPType::PSFloat4)
 				{
-					if (alignmentFloat4 + 2 > 4)
-					{
-						alignmentFloat4 = 0;
-						arrayIndex++;
-					}
-					info->arrayIndex = arrayIndex;
-					info->vec4Index = alignmentFloat4;
-					info->value.push_back((float)cache.params[i].defaultValue.x);
-					info->value.push_back((float)cache.params[i].defaultValue.y);
-					alignmentFloat4 += 2;
+					psParamInfo.push_back(i);
 				}
-				else if (info->type == MPType::Float3)
-				{
-					if (alignmentFloat4 + 3 > 4)
-					{
-						alignmentFloat4 = 0;
-						arrayIndex++;
-					}
-					info->arrayIndex = arrayIndex;
-					info->vec4Index = alignmentFloat4;
-					info->value.push_back((float)cache.params[i].defaultValue.x);
-					info->value.push_back((float)cache.params[i].defaultValue.y);
-					info->value.push_back((float)cache.params[i].defaultValue.z);
-					alignmentFloat4 += 3;
-				}
-				else if (info->type == MPType::Float4)
-				{
-					if (alignmentFloat4 + 4 > 4)
-					{
-						alignmentFloat4 = 0;
-						arrayIndex++;
-					}
-					info->arrayIndex = arrayIndex;
-					info->vec4Index = alignmentFloat4;
-					info->value.push_back((float)cache.params[i].defaultValue.x);
-					info->value.push_back((float)cache.params[i].defaultValue.y);
-					info->value.push_back((float)cache.params[i].defaultValue.z);
-					info->value.push_back((float)cache.params[i].defaultValue.w);
-					alignmentFloat4 += 4;
-				}
-				cache.pi.push_back(info);
 			}
+			//vs
+			{
+				int alignmentFloat4 = 0; // float4 对齐
+				uint32_t arrayIndex = 0;
+				for (auto i = 0; i < vsParamInfo.size(); i++)
+				{
+					std::shared_ptr<MaterialParameterInfo> info;
+					info.reset(new MaterialParameterInfo);
+					info->name = vsParamInfo[i].name;
+					info->type = vsParamInfo[i].type;
+					info->group = vsParamInfo[i].group;
+					if (info->type == MPType::VSFloat)
+					{
+						if (alignmentFloat4 + 1 > 4)
+						{
+							alignmentFloat4 = 0;
+							arrayIndex++;
+						}
+						info->arrayIndex = arrayIndex;
+						info->vec4Index = alignmentFloat4;
+						info->value.push_back((float)vsParamInfo[i].defaultValue.x);
+						alignmentFloat4 += 1;
+					}
+					else if (info->type == MPType::VSFloat2)
+					{
+						if (alignmentFloat4 + 2 > 4)
+						{
+							alignmentFloat4 = 0;
+							arrayIndex++;
+						}
+						info->arrayIndex = arrayIndex;
+						info->vec4Index = alignmentFloat4;
+						info->value.push_back((float)vsParamInfo[i].defaultValue.x);
+						info->value.push_back((float)vsParamInfo[i].defaultValue.y);
+						alignmentFloat4 += 2;
+					}
+					else if (info->type == MPType::VSFloat3)
+					{
+						if (alignmentFloat4 + 3 > 4)
+						{
+							alignmentFloat4 = 0;
+							arrayIndex++;
+						}
+						info->arrayIndex = arrayIndex;
+						info->vec4Index = alignmentFloat4;
+						info->value.push_back((float)vsParamInfo[i].defaultValue.x);
+						info->value.push_back((float)vsParamInfo[i].defaultValue.y);
+						info->value.push_back((float)vsParamInfo[i].defaultValue.z);
+						alignmentFloat4 += 3;
+					}
+					else if (info->type == MPType::VSFloat4)
+					{
+						if (alignmentFloat4 + 4 > 4)
+						{
+							alignmentFloat4 = 0;
+							arrayIndex++;
+						}
+						info->arrayIndex = arrayIndex;
+						info->vec4Index = alignmentFloat4;
+						info->value.push_back((float)vsParamInfo[i].defaultValue.x);
+						info->value.push_back((float)vsParamInfo[i].defaultValue.y);
+						info->value.push_back((float)vsParamInfo[i].defaultValue.z);
+						info->value.push_back((float)vsParamInfo[i].defaultValue.w);
+						alignmentFloat4 += 4;
+					}
+					cache.pi_vs.push_back(info);
+				}
+
+			}
+			//ps
+			{
+				int alignmentFloat4 = 0; // float4 对齐
+				uint32_t arrayIndex = 0;
+				for (auto i = 0; i < psParamInfo.size(); i++)
+				{
+					std::shared_ptr<MaterialParameterInfo> info;
+					info.reset(new MaterialParameterInfo);
+					info->name = psParamInfo[i].name;
+					info->type = psParamInfo[i].type;
+					info->group = psParamInfo[i].group;
+					if (info->type == MPType::PSFloat)
+					{
+						if (alignmentFloat4 + 1 > 4)
+						{
+							alignmentFloat4 = 0;
+							arrayIndex++;
+						}
+						info->arrayIndex = arrayIndex;
+						info->vec4Index = alignmentFloat4;
+						info->value.push_back((float)psParamInfo[i].defaultValue.x);
+						alignmentFloat4 += 1;
+					}
+					else if (info->type == MPType::PSFloat2)
+					{
+						if (alignmentFloat4 + 2 > 4)
+						{
+							alignmentFloat4 = 0;
+							arrayIndex++;
+						}
+						info->arrayIndex = arrayIndex;
+						info->vec4Index = alignmentFloat4;
+						info->value.push_back((float)psParamInfo[i].defaultValue.x);
+						info->value.push_back((float)psParamInfo[i].defaultValue.y);
+						alignmentFloat4 += 2;
+					}
+					else if (info->type == MPType::PSFloat3)
+					{
+						if (alignmentFloat4 + 3 > 4)
+						{
+							alignmentFloat4 = 0;
+							arrayIndex++;
+						}
+						info->arrayIndex = arrayIndex;
+						info->vec4Index = alignmentFloat4;
+						info->value.push_back((float)psParamInfo[i].defaultValue.x);
+						info->value.push_back((float)psParamInfo[i].defaultValue.y);
+						info->value.push_back((float)psParamInfo[i].defaultValue.z);
+						alignmentFloat4 += 3;
+					}
+					else if (info->type == MPType::PSFloat4)
+					{
+						if (alignmentFloat4 + 4 > 4)
+						{
+							alignmentFloat4 = 0;
+							arrayIndex++;
+						}
+						info->arrayIndex = arrayIndex;
+						info->vec4Index = alignmentFloat4;
+						info->value.push_back((float)psParamInfo[i].defaultValue.x);
+						info->value.push_back((float)psParamInfo[i].defaultValue.y);
+						info->value.push_back((float)psParamInfo[i].defaultValue.z);
+						info->value.push_back((float)psParamInfo[i].defaultValue.w);
+						alignmentFloat4 += 4;
+					}
+					cache.pi_ps.push_back(info);
+				}
+
+			}
+
 		}
 		//TextureInfo
 		{
@@ -230,6 +327,14 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 					_vsShader.emplace(std::make_pair(cache.shaderFullName, newCache));
 				}
 			}
+			//vs->ps
+			{
+				auto ps_it = _psShader.find(cache.shaderFullName);
+				if (ps_it != _psShader.end())
+				{
+					ps_it->second->vsShader = newCache;
+				}
+			}
 		}
 		else if (split[1] == "ps")
 		{
@@ -240,15 +345,22 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 			std::shared_ptr<ShaderCache>newCache;
 			newCache.reset(new ShaderCache);
 			*newCache = cache;
-
+			//vs
+			{
+				auto vs_it = _vsShader.find(cache.shaderFullName);
+				if (vs_it != _vsShader.end())
+				{
+					newCache->vsShader = vs_it->second;
+				}
+			}
 			//Set new
 			{
-				auto vs_it = _psShader.find(cache.shaderFullName);
-				if (vs_it != _psShader.end())
+				auto ps_it = _psShader.find(cache.shaderFullName);
+				if (ps_it != _psShader.end())
 				{
-					vkDestroyShaderModule(manager->GetDevice(), vs_it->second->shaderModule, VK_NULL_HANDLE);
-					vs_it->second->shaderModule = VK_NULL_HANDLE;
-					vs_it->second = newCache;
+					vkDestroyShaderModule(manager->GetDevice(), ps_it->second->shaderModule, VK_NULL_HANDLE);
+					ps_it->second->shaderModule = VK_NULL_HANDLE;
+					ps_it->second = newCache;
 				}
 				else
 				{
@@ -268,12 +380,12 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 
 			//Set new
 			{
-				auto vs_it = _csShader.find(cache.shaderFullName);
-				if (vs_it != _csShader.end())
+				auto cs_it = _csShader.find(cache.shaderFullName);
+				if (cs_it != _csShader.end())
 				{
-					vkDestroyShaderModule(manager->GetDevice(), vs_it->second->shaderModule, VK_NULL_HANDLE);
-					vs_it->second->shaderModule = VK_NULL_HANDLE;
-					vs_it->second = newCache;
+					vkDestroyShaderModule(manager->GetDevice(), cs_it->second->shaderModule, VK_NULL_HANDLE);
+					cs_it->second->shaderModule = VK_NULL_HANDLE;
+					cs_it->second = newCache;
 				}
 				else
 				{

@@ -725,6 +725,9 @@ QSplitter::handle
 #scrollAreaWidgetContents
 {
     background-color: BackgroundColor;
+    border: none;
+    border-top: 1px solid rgb(100,100,100);
+    border-bottom: 1px solid rgb(100,100,100);
 }
 #MaterialDetailEditor QSplitter::handle
 {
@@ -757,6 +760,19 @@ QSplitter::handle
     border:none;
     border-bottom: 1px solid rgb(100,100,100);
 }
+#PropertyTableWidgetRowValue QToolButton
+{
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    background-color: rgb(41, 41, 41);
+    border-radius: 5px;
+}
+#PropertyTableWidgetRowValue QToolButton:hover
+{
+    background-color: rgb(64, 67, 71);
+}
 #PropertyTableWidgetRow:hover
 {
     background-color: transparent;
@@ -782,7 +798,7 @@ QSplitter::handle
 }
 #PropertyTableWidgetRowGroupButton
 {
-    border-bottom: 1px solid rgb(100,100,100);
+
 }
 #PropertyTableWidgetRowGroupButtonValue
 {
@@ -796,11 +812,28 @@ QSplitter::handle
 #PropertyTableGroup_5,
 #PropertyTableGroup_6
 {
-    background-color: rgba(90, 90, 90, 0.5);
-    border: 1px solid rgb(118, 118, 118);
-    border-radius: 0%;
-    margin: 0px;
+    font-size: 14px;
+    color: #bbbbbb;
+    border: none;
+    background-color: rgb(44, 47, 51);
+    border: 1px solid rgb(123, 145, 136);
+    border-top: none;
+    border-radius: 4px;
+    margin: 1px;
     padding: 0px;
+}
+#PropertyTableGroup_0:hover,
+#PropertyTableGroup_1:hover,
+#PropertyTableGroup_2:hover,
+#PropertyTableGroup_3:hover,
+#PropertyTableGroup_4:hover,
+#PropertyTableGroup_5:hover,
+#PropertyTableGroup_6:hover
+{
+    background-color: rgba(50, 89, 100, 0.5);
+    border: 1px solid rgb(163, 196, 157);
+    border-top: none;
+    color: #FFFFFF;
 }
 
 

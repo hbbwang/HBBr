@@ -1,22 +1,28 @@
 {
     "blendMode": 0,
-    "parameters": {
+    "parameters_ps": {
         "Metallic": {
-            "type": 0,
+            "type": 4,
             "value": 0.0
         },
         "Roughness": {
-            "type": 0,
+            "type": 4,
             "value": 0.30000001192092896
         },
         "Tint": {
-            "type": 3,
+            "type": 7,
             "value": {
                 "w": 1.0,
                 "x": 1.0,
                 "y": 1.0,
                 "z": 1.0
             }
+        }
+    },
+    "parameters_vs": {
+        "UVSize": {
+            "type": 0,
+            "value": 1.0
         }
     },
     "psShader": "PBR",

@@ -38,7 +38,6 @@ VulkanRenderer::~VulkanRenderer()
 
 void VulkanRenderer::Release()
 {
-	//
 	_bRendererRelease = true;
 	_spwanNewWorld.clear();
 	VulkanManager* _vulkanManager = VulkanManager::GetManager();
@@ -57,6 +56,7 @@ void VulkanRenderer::Release()
 	//_vulkanManager->DestroyRenderFences(_imageAcquiredFences);
 	_vulkanManager->DestroySurface(_surface);
 	VulkanRenderer::_renderers.erase(GetName());
+	ConsoleDebug::print_endl(HString("Release Renderer : ") + _rendererName);
 	delete this;
 }
 
@@ -101,7 +101,7 @@ void VulkanRenderer::Init()
 			MessageOut((HString("Has the same name of renderer.Random a new name is [") + _rendererName + "]"), false, false);
 		}
 	}
-
+	ConsoleDebug::print_endl(HString("Create Renderer : ") + _rendererName);
 	_renderThreadFuncsOnce.reserve(10);
 	_renderThreadFuncs.reserve(10);
 

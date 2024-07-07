@@ -172,7 +172,7 @@ void Level::UnLoad()
 void Level::SaveLevel()
 {
 	//我们不在乎编辑器相关的内容
-	if (_isEditorLevel)
+	if (_isEditorLevel || !_bLoad)
 	{
 		return;
 	}
