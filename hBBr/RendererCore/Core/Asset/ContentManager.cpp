@@ -150,8 +150,19 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				HString savePath = FileSystem::Append(repositoryPath, assetTypeName);
 				savePath = FileSystem::Append(savePath, guidStr + ".dds" );
 				suffix = "dds" ;
-				//使用nvtt插件导入dds
+				//使用nvtt插件导入image
 				Texture2D::CompressionImage2D(i.absAssetFilePath.c_str(), savePath.c_str(),true,nvtt::Format_BC7,false);
+			}
+			//----------------------------------------TextureCube
+			else if (suffix.IsSame("hdr", false))
+			{
+				type = AssetType::TextureCube;
+				assetTypeName = GetAssetTypeString(type);
+				HString savePath = FileSystem::Append(repositoryPath, assetTypeName);
+				savePath = FileSystem::Append(savePath, guidStr + ".cubedds");
+				suffix = "cubedds";
+				//使用nvtt插件导入hdr,转为cubedds(dds)
+				Texture2D::CompressionImage2D(i.absAssetFilePath.c_str(), savePath.c_str(), true, nvtt::Format_BC7, false);
 			}
 			//----------------------------------------Material
 			else if (suffix.IsSame("mat", false))
