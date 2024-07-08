@@ -1298,6 +1298,10 @@ void VulkanManager::CreateImageView(VkImage inImage, VkFormat format, VkImageAsp
 	image_view_create_info.flags = 0;
 	image_view_create_info.image = inImage;
 	image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	if (layerCount == 6)
+	{
+		image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
+	}
 	image_view_create_info.format = format;
 	image_view_create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 	image_view_create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
