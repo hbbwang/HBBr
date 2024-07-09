@@ -7,6 +7,7 @@
 #include "Asset/Level.h"
 #include "Asset/World.h"
 #include "RendererConfig.h"
+#include "Pass/HDRI2Cube.h"
 std::unique_ptr<ContentManager> ContentManager::_ptr;
 std::vector<std::weak_ptr<AssetInfoBase>> ContentManager::_dirtyAssets;
 ContentManager::ContentManager()
@@ -162,7 +163,10 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				savePath = FileSystem::Append(savePath, guidStr + ".cubedds");
 				suffix = "cubedds";
 				//使用nvtt插件导入hdr,转为cubedds(dds)
-				Texture2D::CompressionImage2D(i.absAssetFilePath.c_str(), savePath.c_str(), true, nvtt::Format_BC7, false);
+				HDRI2Cube hdriToCube(i.absAssetFilePath);
+				hdriToCube.PassInit();
+				hdriToCube.PassExecute();
+				//Texture2D::CompressionImage2D(i.absAssetFilePath.c_str(), savePath.c_str(), true, nvtt::Format_BC7, false);
 			}
 			//----------------------------------------Material
 			else if (suffix.IsSame("mat", false))

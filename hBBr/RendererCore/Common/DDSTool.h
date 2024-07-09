@@ -2,7 +2,6 @@
 #include "Common.h"
 #include "ImageTool.h"
 #include "HString.h"
-
 #pragma region DirectXFormat
 
 typedef enum EDXGI_FORMAT
@@ -245,7 +244,7 @@ class DDSLoader
 public:
 	HBBR_API DDSLoader(const char* filePath);
     HBBR_API DDSLoader(std::vector<char> buffer);
-    HBBR_API ImageData* LoadDDSToImage();
+    HBBR_API std::shared_ptr<ImageData> LoadDDSToImage();
     HBBR_API bool IsValid2DTexture() const;
 	bool IsValid() const {
 		return DDSHeader != 0 && DDSBuffer.size() > sizeof(FDDSFileHeader);

@@ -24,7 +24,7 @@ struct HDRI2CubeUniformBuffer
 class HDRI2Cube :public GraphicsPass
 {
 public:
-	HDRI2Cube(std::weak_ptr<Texture2D> hdriTexture, uint32_t cubeMapSize, class PassManager* manager);
+	HDRI2Cube(HString imagePath);
 	virtual ~HDRI2Cube();
 	virtual void PassInit()override;
 	void PassExecute();
@@ -41,5 +41,5 @@ private:
 	std::shared_ptr<class DescriptorSet> tex_descriptorSet[6];
 
 	std::shared_ptr<class Texture2D>_outputFace[6];
-	std::weak_ptr<Texture2D> _hdriTexture;
+	std::shared_ptr<Texture2D> _hdriTexture;
 };

@@ -105,7 +105,14 @@ void PassManager::SetupPassUniformBuffer(CameraComponent* camera, VkExtent2D ren
 		_passUniformBuffer.View = camera->GetViewMatrix();
 		_passUniformBuffer.View_Inv = camera->GetInvViewMatrix();
 
-		_passUniformBuffer.Projection = GetPerspectiveProjectionMatrix(camera->GetFOV(), renderSize.width, renderSize.height, camera->GetNearClipPlane(), camera->GetFarClipPlane());
+		_passUniformBuffer.Projection = GetPerspectiveProjectionMatrix(
+			camera->GetFOV(), 
+			renderSize.width, 
+			renderSize.height, 
+			camera->GetNearClipPlane(), 
+			camera->GetFarClipPlane(), 
+			_renderer->_surfaceCapabilities.currentTransform
+		);
 
 		_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);
 		_passUniformBuffer.ViewProj = _passUniformBuffer.Projection * _passUniformBuffer.View;
@@ -120,22 +127,22 @@ void PassManager::SetupPassUniformBuffer(CameraComponent* camera, VkExtent2D ren
 	}
 }
 
-glm::mat4 PassManager::GetPerspectiveProjectionMatrix(float FOV, float w, float h, float nearPlane, float  farPlane)
+glm::mat4 PassManager::GetPerspectiveProjectionMatrix(float FOV, float w, float h, float nearPlane, float  farPlane, VkSurfaceTransformFlagBitsKHR surfaceTransform)
 {		
 	//DirectX Left hand 
 	glm::mat4 flipYMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, -1.0f, 0.5f));
 	glm::mat4 pre_rotate_mat = glm::mat4(1);
 	float aspect = (float)w / (float)h;
 	glm::vec3 rotation_axis = glm::vec3(0.0f, 0.0f, 1.0f);
-	if (_renderer->_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR) {
+	if (surfaceTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR) {
 		pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(90.0f), rotation_axis);
 		aspect = (float)h / (float)w;
 	}
-	else if (_renderer->_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR) {
+	else if (surfaceTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR) {
 		pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(270.0f), rotation_axis);
 		aspect = (float)h / (float)w;
 	}
-	else if (_renderer->_surfaceCapabilities.currentTransform & VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR) {
+	else if (surfaceTransform & VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR) {
 		pre_rotate_mat = glm::rotate(pre_rotate_mat, glm::radians(180.0f), rotation_axis);
 	}
 	//DirectX Left hand.

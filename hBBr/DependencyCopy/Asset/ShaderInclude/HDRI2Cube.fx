@@ -16,7 +16,6 @@ cbuffer Pass :register(b0,space0)
 struct VSInput
 {
     float3 Position : POSITION;
-    float3 Normal : POSITION;
 };
 
 struct VSToPS

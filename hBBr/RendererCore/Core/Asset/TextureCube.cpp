@@ -69,7 +69,7 @@ std::weak_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags 
 #endif
 	//Load dds
 	DDSLoader loader(filePath.c_str());
-	ImageData* out = loader.LoadDDSToImage();
+	auto out = loader.LoadDDSToImage();
 	if (out == nullptr)
 	{
 		return std::weak_ptr<TextureCube>();
@@ -95,9 +95,9 @@ std::weak_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags 
 	newTexture->_textureName = dataPtr->displayName;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = { w, h };
-	newTexture->_imageData = out;
+	newTexture->_imageData = *out;
 	uint32_t arrayLevel = 6;
-	VulkanManager::GetManager()->CreateImage(w, h, format, usageFlags, newTexture->_image, newTexture->_imageData->mipLevel, arrayLevel);
+	VulkanManager::GetManager()->CreateImage(w, h, format, usageFlags, newTexture->_image, newTexture->_imageData.mipLevel, arrayLevel);
 	if (format == VK_FORMAT_R32_SFLOAT || format == VK_FORMAT_D32_SFLOAT)
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
 	else if (format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM_S8_UINT)
@@ -108,7 +108,7 @@ std::weak_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags 
 	newTexture->_textureMemorySize = VulkanManager::GetManager()->CreateImageMemory(newTexture->_image, newTexture->_imageViewMemory);
 	_textureStreamingSize += newTexture->_textureMemorySize;
 
-	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView, newTexture->_imageData->mipLevel, arrayLevel);
+	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView, newTexture->_imageData.mipLevel, arrayLevel);
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
 

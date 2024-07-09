@@ -1,20 +1,25 @@
 ﻿#include "ImageTool.h"
 #include <fstream>
 #include <istream>
+
 #ifdef _WIN32
 #include <direct.h>
 #endif
+
+#define STB_IMAGE_IMPLEMENTATION
 #include "ConsoleDebug.h"
 #include "DDSTool.h"
+#include "stb/stb_image.h"
 
 #ifdef _WIN32
 #else
 #define memcpy_s(dst,dstSize,src,srcSize) memcpy(dst,src,dstSize)
 #endif
 
-ImageData* ImageTool::ReadTgaImage(const char* filename)
+std::shared_ptr<ImageData> ImageTool::ReadTgaImage(const char* filename)
 {
-	ImageData* out = nullptr;
+	std::shared_ptr<ImageData> out;
+
 	//open TGA file
 	FILE* file = nullptr;
 #ifdef _WIN32
@@ -46,7 +51,7 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 		fread(&data_header.imageDescriptor, sizeof(uint8_t), 1, file);
 	}
 
-	out = new ImageData;
+	out.reset(new ImageData);
 	out->data_header = data_header;
 
 	unsigned int pixelSize = data_header.height * data_header.width;
@@ -65,9 +70,9 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 	{
 		ConsoleDebug::print_endl("Read TGA image color error.all pixel size is not equal the image size.", "255,255,0");
 		if (out)
-			delete out;
+			out.reset();
 		if (tgaData)
-			delete[] out;
+			delete[] tgaData;
 		return nullptr;
 	}
 #ifdef _WIN32
@@ -84,9 +89,9 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 				if (memcpy_s(out->imageData.data(), imageSize, tgaData, imageSize) != 0)
 				{
 					if (out)
-						delete out;
+						out.reset();
 					if (tgaData)
-						delete[] out;
+						delete[] tgaData;
 					return nullptr;
 				}
 			}
@@ -99,9 +104,9 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 			if (memcpy_s(out->imageData.data(), imageSize, tgaData, imageSize) != 0)
 			{
 				if (out)
-					delete out;
+					out.reset();
 				if (tgaData)
-					delete[] out;
+					delete[] tgaData;
 				return nullptr;
 			}
 		}
@@ -136,18 +141,18 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 			if (memcpy_s(out->imageData.data(), imageSize, tgaData, imageSize) != 0)
 			{
 				if (out)
-					delete out;
+					out.reset();
 				if (tgaData)
-					delete[] out;
+					delete[] tgaData;
 				return nullptr;
 			}
 			break;
 		default:
 			ConsoleDebug::print_endl("Read TGA image file header failed.Image depth is " + HString::FromInt(data_header.bitsPerPixel) + ".that is unuseful depth.", "255,255,0");
 			if (out)
-				delete out;
+				out.reset();
 			if (tgaData)
-				delete[] out;
+				delete[] tgaData;
 			return nullptr;
 		}
 #ifdef _WIN32
@@ -181,9 +186,10 @@ ImageData* ImageTool::ReadTgaImage(const char* filename)
 	return out;
 }
 
-ImageData* ImageTool::ReadDDSImage(const char* filename)
+std::shared_ptr<ImageData> ImageTool::ReadDDSImage(const char* filename)
 {
-	ImageData* out = nullptr;
+	std::shared_ptr<ImageData> out;
+	out.reset(new ImageData);
 	DDSLoader loader(filename);
 	out = loader.LoadDDSToImage();
 	return out;
@@ -328,7 +334,7 @@ HBBR_API bool ImageTool::SavePngImageRGB8(const char* filename, uint16_t w, uint
 	return true;
 }
 
-ImageData* ImageTool::ReadPngImage(const char* filename)
+std::shared_ptr<ImageData> ImageTool::ReadPngImage(const char* filename)
 {
 	HString FileName = filename;
 	bool ignore_checksums = false;
@@ -362,7 +368,9 @@ ImageData* ImageTool::ReadPngImage(const char* filename)
 
 	const LodePNGColorMode& color = state.info_png.color;
 
-	ImageData* out = new ImageData;
+	std::shared_ptr<ImageData> out;
+	out.reset(new ImageData);
+
 	out->data_header.width = w;
 	out->data_header.height = h;
 	out->imageData = std::move(imageData);
@@ -386,7 +394,7 @@ ImageData* ImageTool::ReadPngImage(const char* filename)
 		ClannelNum = 1;
 		break;
 	default:
-		delete out;
+		out.reset();
 		ConsoleDebug::print_endl("It is not support this png format.", "255,55,0");
 		return nullptr;
 		break;
@@ -414,68 +422,100 @@ void GetHeaderLine(const char*& BufferPos, char Line[256])
 	Line[i] = 0;
 }
 
-ImageData* ImageTool::ReadHDRImage(const char* filename)
+std::shared_ptr<ImageData> ImageTool::ReadHDRImage(const char* filename)
 {
-	HString fileName = filename;
-	if (!fileName.GetSuffix().IsSame("hdr", false))
+	//HString fileName = filename;
+	//if (!fileName.GetSuffix().IsSame("hdr", false))
+	//{
+	//	ConsoleDebug::print_endl("open hdr image file failed.It is not a hdr file.", "255,255,0");
+	//	return nullptr;
+	//}
+	//std::ifstream file(filename, std::ios::ate | std::ios::binary);
+	//if (!file.is_open())
+	//{
+	//	//throw std::runtime_error((HString("failed to open file : ") + filePath).c_str());
+	//	ConsoleDebug::print_endl((HString("failed to open file : ") + filename).c_str(), "255,20,0");
+	//}
+	//size_t fileSize = static_cast<size_t>(file.tellg());
+	//std::vector<char> buffer(fileSize);
+	//file.seekg(0);
+	//file.read(buffer.data(), fileSize);
+	//file.close();
+	////
+
+	//if (buffer.size() < 11)
+	//{
+	//	ConsoleDebug::print_endl("open hdr image file failed.It is not a hdr file or file corruption.", "255,255,0");
+	//	return nullptr;
+	//}
+
+	//const char* FileDataPtr = buffer.data();
+	//char Line[256];
+	//GetHeaderLine(FileDataPtr, Line);
+
+	//if (std::strcmp(Line, "#?RADIANCE") != 0 )
+	//{
+	//	ConsoleDebug::print_endl("open hdr image file failed.It is not a hdr file or file corruption.", "255,255,0");
+	//	return nullptr;
+	//}
+
+	//std::shared_ptr<ImageData> out;
+	//out.reset(new ImageData);
+
+	//const char* RGBDataStart;
+	//for (;;)
+	//{
+	//	GetHeaderLine(FileDataPtr, Line);
+
+	//	char* HeightStr = std::strstr(Line, "-Y ");
+	//	char* WidthStr = std::strstr(Line, "+X ");
+
+	//	if (HeightStr != nullptr && WidthStr != nullptr)
+	//	{
+	//		// insert a /0 after the height value
+	//		*(WidthStr - 1) = 0;
+
+	//		out->data_header.height = std::atoi(HeightStr + 3);
+	//		out->data_header.width = std::atoi(WidthStr + 3);
+
+	//		RGBDataStart = FileDataPtr;
+	//	}
+	//}
+	//return out;
+	int width, height, channels;
+	float* data = stbi_loadf(filename, &width, &height, &channels, 0);
+	if (data)
 	{
-		ConsoleDebug::print_endl("open hdr image file failed.It is not a hdr file.", "255,255,0");
-		return nullptr;
-	}
-	std::ifstream file(filename, std::ios::ate | std::ios::binary);
-	if (!file.is_open())
-	{
-		//throw std::runtime_error((HString("failed to open file : ") + filePath).c_str());
-		ConsoleDebug::print_endl((HString("failed to open file : ") + filename).c_str(), "255,20,0");
-	}
-	size_t fileSize = static_cast<size_t>(file.tellg());
-	std::vector<char> buffer(fileSize);
-	file.seekg(0);
-	file.read(buffer.data(), fileSize);
-	file.close();
-	//
-
-	if (buffer.size() < 11)
-	{
-		ConsoleDebug::print_endl("open hdr image file failed.It is not a hdr file or file corruption.", "255,255,0");
-		return nullptr;
-	}
-
-	const char* FileDataPtr = buffer.data();
-	char Line[256];
-	GetHeaderLine(FileDataPtr, Line);
-
-	if (std::strcmp(Line, "#?RADIANCE") != 0 )
-	{
-		ConsoleDebug::print_endl("open hdr image file failed.It is not a hdr file or file corruption.", "255,255,0");
-		return nullptr;
-	}
-
-	ImageData* out = new ImageData;
-	const char* RGBDataStart;
-	for (;;)
-	{
-		GetHeaderLine(FileDataPtr, Line);
-
-		char* HeightStr = std::strstr(Line, "-Y ");
-		char* WidthStr = std::strstr(Line, "+X ");
-
-		if (HeightStr != nullptr && WidthStr != nullptr)
+		std::vector<float>imageData;
+		imageData.resize(width * height * 8);
+		for (int c = 0; c < 3; c++)
 		{
-			// insert a /0 after the height value
-			*(WidthStr - 1) = 0;
-
-			out->data_header.height = std::atoi(HeightStr + 3);
-			out->data_header.width = std::atoi(WidthStr + 3);
-
-			RGBDataStart = FileDataPtr;
+			for (int h = 0; h < height; h++)
+			{
+				for (int w = 0; w < width; w++)
+				{
+					int index = (c * (h * w)) + (h * w + w);
+					imageData[index] = data[index];
+				}
+			}
 		}
+
+		std::shared_ptr<ImageData> out;
+		out.reset(new ImageData);
+		out->data_header.width = width;
+		out->data_header.height = height;
+		out->imageDataF = std::move(imageData);
+		out->data_header.bitsPerPixel = 4 * 16;
+		out->fileName = HString(filename).GetBaseName();
+		out->filePath = filename;
+		int ClannelNum = 1;
+
+		out->texFormat = VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT;
+
+		out->imageSize = width * height * 8;
+		return out;
 	}
-
-
-
-
-	return out;
+	return nullptr;
 }
 
 void ImageTool::ImageFlipY(uint32_t w, uint32_t h, uint32_t d,void *data)

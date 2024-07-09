@@ -9,7 +9,10 @@
 PassBase::PassBase(class PassManager* manager)
 {
 	_manager = manager;
-	_renderer = _manager->_renderer;
+	if (_manager)
+	{
+		_renderer = _manager->_renderer;
+	}
 }
 
 PassBase::~PassBase()

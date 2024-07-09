@@ -28,11 +28,6 @@ Texture2D::~Texture2D()
 	}
 	manager->DestroyImageView(_imageView);
 	manager->DestroyImage(_image);
-	if (_imageData!=nullptr)
-	{
-		delete _imageData;
-		_imageData = nullptr;
-	}
 }
 
 void Texture2D::Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin, uint32_t mipLevelCount, uint32_t baseArrayLayer, uint32_t layerCount)
@@ -100,7 +95,7 @@ void Texture2D::Resize(uint32_t width, uint32_t height)
 std::shared_ptr<Texture2D> Texture2D::CreateTexture2D(
 	uint32_t width, uint32_t height, VkFormat format, 
 	VkImageUsageFlags usageFlags, HString textureName,
-	uint32_t miplevel, uint32_t layerCount)
+	uint32_t miplevel, uint32_t layerCount, VkMemoryPropertyFlags memoryPropertyFlag)
 {
 	std::shared_ptr<Texture2D> newTexture = std::make_shared<Texture2D>();
 	newTexture->_textureName = textureName;
@@ -113,7 +108,7 @@ std::shared_ptr<Texture2D> Texture2D::CreateTexture2D(
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
 	else
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
-	newTexture->_textureMemorySize = VulkanManager::GetManager()->CreateImageMemory(newTexture->_image, newTexture->_imageViewMemory);
+	newTexture->_textureMemorySize = VulkanManager::GetManager()->CreateImageMemory(newTexture->_image, newTexture->_imageViewMemory, memoryPropertyFlag);
 	_textureStreamingSize += newTexture->_textureMemorySize;
 	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView, miplevel, layerCount);
 	newTexture->_format = format;
@@ -158,7 +153,7 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 #endif
 	//Load dds
 	DDSLoader loader(filePath.c_str());
-	ImageData* out = loader.LoadDDSToImage();
+	auto out = loader.LoadDDSToImage();
 	if (out == nullptr)
 	{
 		return std::weak_ptr<Texture2D>();
@@ -184,9 +179,9 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 	newTexture->_textureName = dataPtr->displayName;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = { w, h };
-	newTexture->_imageData = out;
-	uint32_t arrayLevel = (newTexture->_imageData->isCubeMap) ? 6 : 1;
-	VulkanManager::GetManager()->CreateImage(w, h, format, usageFlags, newTexture->_image, newTexture->_imageData->mipLevel, arrayLevel);
+	newTexture->_imageData = *out;
+	uint32_t arrayLevel = (newTexture->_imageData.isCubeMap) ? 6 : 1;
+	VulkanManager::GetManager()->CreateImage(w, h, format, usageFlags, newTexture->_image, newTexture->_imageData.mipLevel, arrayLevel);
 	if (format == VK_FORMAT_R32_SFLOAT || format == VK_FORMAT_D32_SFLOAT)
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
 	else if (format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM_S8_UINT)
@@ -197,7 +192,7 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 	newTexture->_textureMemorySize = VulkanManager::GetManager()->CreateImageMemory(newTexture->_image, newTexture->_imageViewMemory);
 	_textureStreamingSize += newTexture->_textureMemorySize;
 
-	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView, newTexture->_imageData->mipLevel, arrayLevel);
+	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView, newTexture->_imageData.mipLevel, arrayLevel);
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
 
@@ -302,7 +297,9 @@ void Texture2D::GlobalInitialize()
 		fontTexturePath = FileSystem::GetRelativePath(fontTexturePath.c_str());
 		fontTexturePath = FileSystem::GetProgramPath() + fontTexturePath;
 		FileSystem::CorrectionPath(fontTexturePath);
-		ImageData* imageData = nullptr;
+
+		std::shared_ptr<ImageData> imageData;
+
 		if (fontTexturePath.GetSuffix().IsSame("png", false))
 		{
 			imageData = ImageTool::ReadPngImage(fontTexturePath.c_str());
@@ -324,7 +321,7 @@ void Texture2D::GlobalInitialize()
 			MessageOut("Load Font Texture2D Failed!!Font image data is null.", false, true, "255,0,0");
 		}
 		_fontTexture = CreateTexture2D(imageData->data_header.width, imageData->data_header.height, imageData->texFormat, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, "FontTexture");
-		_fontTexture->_imageData = imageData;
+		_fontTexture->_imageData = *imageData;
 		//上传到GPU,并储存一份指针到System Texture2D
 		AddSystemTexture("Font", _fontTexture.get());
 	}
@@ -394,7 +391,6 @@ Texture2D* Texture2D::GetSystemTexture(HString tag)
 bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 {
 	const auto& manager = VulkanManager::GetManager();
-	if (_imageData)
 	{
 		//上一帧已经复制完成了,可以删除Upload buffer 和Memory了
 		if (_bUploadToGPU)
@@ -411,14 +407,14 @@ bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 			}
 			return true;
 		}
-		else if (_imageData->imageData.size() > 0)
+		else if (_imageData.imageData.size() > 0 || _imageData.imageDataF.size() > 0)
 		{
 			//Copy image data to upload memory
-			uint64_t imageSize = _imageData->imageSize;
+			uint64_t imageSize = _imageData.imageSize;
 
 			//Cube 有6面
 			uint32_t faceNum = 1;
-			if (_imageData->isCubeMap)
+			if (_imageData.isCubeMap)
 			{
 				faceNum = 6;
 			}
@@ -433,25 +429,32 @@ bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 				_uploadBufferMemory);
 			void* data = nullptr;
 			vkMapMemory(manager->GetDevice(), _uploadBufferMemory, 0, imageSize, 0, &data);
-			memcpy(data, _imageData->imageData.data(), (size_t)imageSize);
+			if (_imageData.imageData.size() > 0)
+			{
+				memcpy(data, _imageData.imageData.data(), (size_t)imageSize);
+			}
+			else if (_imageData.imageDataF.size() > 0)
+			{
+				memcpy(data, _imageData.imageDataF.data(), (size_t)imageSize);
+			}
 			vkUnmapMemory(manager->GetDevice(), _uploadBufferMemory);
 
 			//从Buffer copy到Vkimage
 			//if (_imageData->blockSize > 0)
 			{
-				if (_imageData->isCubeMap)
-					Transition(cmdbuf, _imageLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, _imageData->mipLevel, 0, 6);
+				if (_imageData.isCubeMap)
+					Transition(cmdbuf, _imageLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, _imageData.mipLevel, 0, 6);
 				else
-					Transition(cmdbuf, _imageLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, _imageData->mipLevel);
+					Transition(cmdbuf, _imageLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, _imageData.mipLevel);
 
-				std::vector<VkBufferImageCopy>region(_imageData->mipLevel * faceNum);
+				std::vector<VkBufferImageCopy>region(_imageData.mipLevel * faceNum);
 				int regionIndex = 0;
 				uint32_t bufferOffset = 0;
 				for (uint32_t face = 0; face < faceNum; face++)
 				{
-					uint32_t mipWidth = _imageData->data_header.width;
-					uint32_t mipHeight = _imageData->data_header.height;
-					for (uint32_t i = 0; i < _imageData->mipLevel; i++)
+					uint32_t mipWidth = _imageData.data_header.width;
+					uint32_t mipHeight = _imageData.data_header.height;
+					for (uint32_t i = 0; i < _imageData.mipLevel; i++)
 					{
 						region[regionIndex] = {};
 						region[regionIndex].bufferOffset = bufferOffset;
@@ -463,8 +466,8 @@ bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 						region[regionIndex].imageSubresource.layerCount = 1;
 						region[regionIndex].imageOffset = { 0,0,0 };
 						region[regionIndex].imageExtent = { mipWidth ,mipHeight,1 };
-						if (_imageData->blockSize > 0)
-							bufferOffset += SIZE_OF_BC((int32_t)mipWidth, (int32_t)mipHeight, _imageData->blockSize);
+						if (_imageData.blockSize > 0)
+							bufferOffset += SIZE_OF_BC((int32_t)mipWidth, (int32_t)mipHeight, _imageData.blockSize);
 						else
 							bufferOffset += mipWidth * mipHeight;
 						if (mipWidth > 1) mipWidth /= 2;
@@ -475,16 +478,17 @@ bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 				vkCmdCopyBufferToImage(cmdbuf, _uploadBuffer, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, (uint32_t)region.size(), region.data());
 
 				//复制完成后,把Layout转换到Shader read only,给shader采样使用
-				if (_imageData->isCubeMap)
-					Transition(cmdbuf, _imageLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, _imageData->mipLevel, 0, 6);
+				if (_imageData.isCubeMap)
+					Transition(cmdbuf, _imageLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, _imageData.mipLevel, 0, 6);
 				else
-					Transition(cmdbuf, _imageLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, _imageData->mipLevel);
+					Transition(cmdbuf, _imageLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, _imageData.mipLevel);
 			}
 
 			//上传完成,标记
 			_bUploadToGPU = true;
 			//上传完成,清除图像的CPU数据
-			_imageData->imageData.clear();
+			_imageData.imageData.clear();
+			_imageData.imageDataF.clear();
 			return false;
 		}
 	}
@@ -523,6 +527,35 @@ void Texture2D::CopyBufferToTextureImmediate()
 	{
 		_upload_textures.erase(it);
 	}
+}
+
+bool Texture2D::CopyTextureToBuffer(VkCommandBuffer cmdbuf, Buffer* buffer)
+{
+	VkBufferImageCopy copy = {};
+	copy.bufferOffset = 0;
+	copy.bufferRowLength = 0;
+	copy.bufferImageHeight = 0;
+	copy.imageSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
+	copy.imageOffset = { 0, 0, 0 };
+	copy.imageExtent = _imageSize;
+	copy.imageExtent.depth = 1;
+	vkCmdCopyImageToBuffer(cmdbuf, _image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, buffer->GetBuffer(), 1, &copy);
+	return true;
+}
+
+void Texture2D::CopyBufferToTextureImmediate(Buffer* buffer)
+{
+	const auto& manager = VulkanManager::GetManager();
+	VkCommandBuffer buf;
+	manager->AllocateCommandBuffer(manager->GetCommandPool(), buf);
+	manager->BeginCommandBuffer(buf, 0);
+	{
+		CopyTextureToBuffer(buf, buffer);
+	}
+	manager->EndCommandBuffer(buf);
+	manager->SubmitQueueImmediate({ buf });
+	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
+	manager->FreeCommandBuffer(manager->GetCommandPool(), buf);
 }
 
 #ifdef IS_EDITOR
@@ -882,7 +915,8 @@ void Texture2D::OutputImage(const char* outputPath, int w, int h, nvtt::Format f
 	}
 	if (!image.save(outputPath))
 	{
-		ConsoleDebug::print_endl("Save output image failed.", "255,255,0");
+		
+		ConsoleDebug::print_endl("Save output image failed", "255,255,0");
 	}
 }
 

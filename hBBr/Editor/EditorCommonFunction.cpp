@@ -374,7 +374,7 @@ QImage GetImageFromTGA(QString path)
 
     QImage image(tgaImage->imageData.data(), tgaImage->data_header.width, tgaImage->data_header.height, format);
     image = image.mirrored(0, !(tgaImage->data_header.imageDescriptor & 16));
-    delete tgaImage;
+    tgaImage.reset();
 
     return image;
 }

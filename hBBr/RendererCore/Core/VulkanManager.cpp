@@ -716,15 +716,25 @@ void VulkanManager::InitDebug()
 
 uint32_t VulkanManager::FindMemoryTypeIndex(const VkMemoryRequirements* memory_requirements, const VkMemoryPropertyFlags required_properties)
 {
-	for (uint32_t i = 0; i < _gpuMemoryProperties.memoryTypeCount; ++i) {
-		if (memory_requirements->memoryTypeBits & (1 << i)) {
-			if ((_gpuMemoryProperties.memoryTypes[i].propertyFlags & required_properties) == required_properties) {
-				return i;
-			}
+	//for (uint32_t i = 0; i < _gpuMemoryProperties.memoryTypeCount; ++i) {
+	//	if (memory_requirements->memoryTypeBits & (1 << i)) {
+	//		if ((_gpuMemoryProperties.memoryTypes[i].propertyFlags & required_properties) == required_properties) {
+	//			return i;
+	//		}
+	//	}
+	//}
+	//MessageOut("Cound not find memory type.");
+	//return UINT32_MAX;
+
+	for (uint32_t i = 0; i < _gpuMemoryProperties.memoryTypeCount; i++)
+	{
+		if ((_gpuMemoryProperties.memoryTypes[i].propertyFlags & required_properties) == required_properties && memory_requirements->memoryTypeBits & (1 << i))
+		{
+			return i;
 		}
 	}
-	MessageOut("Cound not find memory type.");
-	return UINT32_MAX;
+	return 0xFFFFFFFF; // Unable to find memoryType
+
 }
 
 bool VulkanManager::IsGPUDeviceSuitable(VkPhysicalDevice device)

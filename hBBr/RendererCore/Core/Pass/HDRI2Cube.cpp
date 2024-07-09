@@ -2,12 +2,30 @@
 #include "VulkanRenderer.h"
 #include "Model.h"
 #include "PassManager.h"
+#include "ImageTool.h"
+#include "FormMain.h"
 
-HDRI2Cube::HDRI2Cube(std::weak_ptr<Texture2D>  hdriTexture, uint32_t cubeMapSize, PassManager* manager)
-	:GraphicsPass(manager)
+#define OUTPUT_FORMAT VK_FORMAT_R16G16B16A16_SFLOAT
+
+HDRI2Cube::HDRI2Cube(HString imagePath)
+	:GraphicsPass(nullptr)
 {
-	_cubeMapFaceSize = cubeMapSize;
-	_hdriTexture = hdriTexture;
+	_renderer = VulkanApp::GetMainForm()->renderer;
+
+	auto imageData = ImageTool::ReadHDRImage(imagePath.c_str());
+	uint32_t w = imageData->data_header.width;
+	uint32_t h = imageData->data_header.height;
+
+	_hdriTexture = Texture2D::CreateTexture2D(
+		w, h,
+		imageData->texFormat,
+		VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+		HString("Provisional HDRI Texture")
+	); 
+
+	_hdriTexture->_imageData = *imageData;
+	_cubeMapFaceSize = h/2;
+	_hdriTexture->CopyBufferToTextureImmediate();
 }
 
 HDRI2Cube::~HDRI2Cube()
@@ -17,6 +35,7 @@ HDRI2Cube::~HDRI2Cube()
 	manager->DestroyPipelineLayout(_pipelineLayout);
 	manager->DestroyDescriptorSetLayout(_texDescriptorSetLayout);
 	manager->DestroyDescriptorSetLayout(_ubDescriptorSetLayout);
+	_hdriTexture.reset();
 }
 
 void HDRI2Cube::PassInit()
@@ -25,7 +44,7 @@ void HDRI2Cube::PassInit()
 	AddAttachment(
 		VK_ATTACHMENT_LOAD_OP_CLEAR, 
 		VK_ATTACHMENT_STORE_OP_STORE, 
-		VK_FORMAT_R32G32B32A32_SFLOAT, 
+		OUTPUT_FORMAT,
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 	);
@@ -39,7 +58,7 @@ void HDRI2Cube::PassInit()
 	CreateRenderPass();
 
 	//DescriptorSet
-	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, _ubDescriptorSetLayout, VK_SHADER_STAGE_FRAGMENT_BIT);
+	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, _ubDescriptorSetLayout);
 	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }, _texDescriptorSetLayout, VK_SHADER_STAGE_FRAGMENT_BIT);
 	_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
 	manager->CreatePipelineLayout(
@@ -59,9 +78,9 @@ void HDRI2Cube::PassInit()
 		_outputFace[i] = 
 			Texture2D::CreateTexture2D(
 				_cubeMapFaceSize, _cubeMapFaceSize,
-				VK_FORMAT_R16G16B16A16_UNORM, 
-				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 
-				HString("Cube Map Face") + HString::FromInt(i) 
+				OUTPUT_FORMAT,
+				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+				HString("Cube Map Face") + HString::FromInt(i),1,1, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 			);
 	}
 }
@@ -69,11 +88,6 @@ void HDRI2Cube::PassInit()
 void HDRI2Cube::PassExecute()
 {
 	const auto& manager = VulkanManager::GetManager();
-
-	manager->DeviceWaitIdle();
-	VkCommandBuffer cmdBuf;
-	manager->AllocateCommandBuffer(manager->GetCommandPool(), cmdBuf);
-	manager->BeginCommandBuffer(cmdBuf);
 	{
 		//收集顶点数据一次性使用
 		std::vector<ModelPrimitive*> model_prims;
@@ -98,19 +112,25 @@ void HDRI2Cube::PassExecute()
 
 		for (int f = 0; f < 6; f++)
 		{
+			manager->DeviceWaitIdle();
+			VkCommandBuffer cmdBuf;
+			manager->AllocateCommandBuffer(manager->GetCommandPool(), cmdBuf);
+			manager->BeginCommandBuffer(cmdBuf);
 			//Transition
 			if (_outputFace[f]->GetLayout() == VK_IMAGE_LAYOUT_UNDEFINED)
 			{
 				_outputFace[f]->Transition(cmdBuf, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 			}
 
-			//Update FrameBuffer
-			ResetFrameBufferCustom({ _cubeMapFaceSize ,_cubeMapFaceSize },
+			manager->DestroyFrameBuffers(_framebuffers);
+			_framebuffers.resize(manager->GetSwapchainBufferCount());
+			for (int i = 0; i < _framebuffers.size(); i++)
 			{
-				_outputFace[f]->GetTextureView()
-			});
-			SetViewport({ _cubeMapFaceSize , _cubeMapFaceSize });
-			BeginRenderPass({ 0,0,0,0 });
+				VulkanManager::GetManager()->CreateFrameBuffer(_cubeMapFaceSize, _cubeMapFaceSize, _renderPass, { _outputFace[f]->GetTextureView() }, _framebuffers[i]);
+			}
+			VulkanManager::GetManager()->CmdSetViewport(cmdBuf, { {_cubeMapFaceSize , _cubeMapFaceSize} });
+			VulkanManager::GetManager()->BeginRenderPass(cmdBuf, GetFrameBuffer(), _renderPass, { _cubeMapFaceSize , _cubeMapFaceSize }, _attachmentDescs, { 0,0,0,0 });
+
 			//Begin...
 			// 
 			//设置管线
@@ -130,7 +150,7 @@ void HDRI2Cube::PassExecute()
 						0.0f, 1.0f, 0.0f, 0.0f,
 						0.0f, 0.0f, 1.0f, 0.0f,
 						0.0f, 0.0f, 0.0f, 1.0f);
-					glm::mat4 proj = _manager->GetPerspectiveProjectionMatrix(90, _cubeMapFaceSize, _cubeMapFaceSize, 0.01, 10000.0f);
+					glm::mat4 proj = PassManager::GetPerspectiveProjectionMatrix(90, _cubeMapFaceSize, _cubeMapFaceSize, 0.01, 10000.0f);
 					glm::mat4 view;
 					if (f == 0)
 						glm::mat4 view = glm::lookAtLH(glm::vec3(0), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
@@ -151,7 +171,7 @@ void HDRI2Cube::PassExecute()
 					_uniformBuffer[f].ZDegree = 0;
 				}
 				//textures
-				tex_descriptorSet[f]->UpdateTextureDescriptorSet({ _hdriTexture.lock().get() }, { Texture2D::GetSampler(TextureSampler::TextureSampler_Linear_Wrap) });
+				tex_descriptorSet[f]->UpdateTextureDescriptorSet({ _hdriTexture.get() }, { Texture2D::GetSampler(TextureSampler::TextureSampler_Linear_Wrap) });
 				uint32_t ubSize = (uint32_t)manager->GetMinUboAlignmentSize(sizeof(HDRI2CubeUniformBuffer));
 				ub_descriptorSet[f]->ResizeDescriptorBuffer(ubSize);
 				ub_descriptorSet[f]->UpdateDescriptorSet(ubSize);
@@ -183,24 +203,29 @@ void HDRI2Cube::PassExecute()
 				vkCmdDraw(cmdBuf, 6, 1, 0, 0);
 			}
 			//End...
-			EndRenderPass();
+			VulkanManager::GetManager()->EndRenderPass(cmdBuf);
 
+
+			if (_outputFace[f]->GetLayout() == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)
+			{
+				_outputFace[f]->Transition(cmdBuf, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+			}
+
+			manager->EndCommandBuffer(cmdBuf);
+			manager->SubmitQueueImmediate({ cmdBuf });
+			vkQueueWaitIdle(manager->GetGraphicsQueue());
+			manager->FreeCommandBuffer(manager->GetCommandPool(), cmdBuf);
 		}
 	}
 
-	manager->EndCommandBuffer(cmdBuf);
-	manager->SubmitQueueImmediate({ cmdBuf });
-	vkQueueWaitIdle(manager->GetGraphicsQueue());
-	manager->FreeCommandBuffer(manager->GetCommandPool(), cmdBuf);
-
-	//输出纹理
 	for (int f = 0; f < 6; f++)
 	{
-		void* data;
-		vkMapMemory(manager->GetDevice(), _outputFace[f]->GetTextureMemory(), 0, _outputFace[f]->GetTextureMemorySize(), 0, &data);
-		// 保存为图像文件
-		Texture2D::OutputImage((HString("D:/sss")+HString::FromInt(f) + ".dds").c_str(), _cubeMapFaceSize, _cubeMapFaceSize, nvtt::Format_BC6U, data);
-		vkUnmapMemory(manager->GetDevice(), _outputFace[f]->GetTextureMemory());
+		std::shared_ptr<Buffer> buffer;
+		buffer.reset(new Buffer(VK_BUFFER_USAGE_TRANSFER_DST_BIT, _outputFace[f]->GetTextureMemorySize()));
+		_outputFace[f]->CopyBufferToTextureImmediate(buffer.get());
+		buffer->MapMemory();
+		Texture2D::OutputImage((HString("D:/sss") + HString::FromInt(f) + ".dds").c_str(), _cubeMapFaceSize, _cubeMapFaceSize, nvtt::Format_BC6S, buffer->GetBufferMemory());
+		buffer->UnMapMemory();
 	}
 }
 
@@ -210,11 +235,9 @@ PipelineIndex HDRI2Cube::CreatePipeline()
 	auto vsCache = Shader::_vsShader["HDRI2Cube@0"];
 	auto psCache = Shader::_psShader["HDRI2Cube@0"];
 	VertexInputLayout vertexInputLayout = {};
-	vertexInputLayout.inputLayouts.resize(3);
-	vertexInputLayout.inputLayouts[0] = VK_FORMAT_R32G32_SFLOAT;//Pos
-	vertexInputLayout.inputLayouts[1] = VK_FORMAT_R32G32_SFLOAT;//UV
-	vertexInputLayout.inputLayouts[2] = VK_FORMAT_R32G32B32A32_SFLOAT;//Color
-	vertexInputLayout.inputSize = sizeof(float) * 8;
+	vertexInputLayout.inputLayouts.resize(1);
+	vertexInputLayout.inputLayouts[0] = VK_FORMAT_R32G32B32_SFLOAT;
+	vertexInputLayout.inputSize = sizeof(float) * 3;
 	vertexInputLayout.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 	VkGraphicsPipelineCreateInfoCache pipelineCreateInfo = {};
 	PipelineManager::SetColorBlend(pipelineCreateInfo, true,

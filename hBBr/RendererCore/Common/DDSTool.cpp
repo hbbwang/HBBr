@@ -1,5 +1,4 @@
 ﻿#include "DDSTool.h"
-#include "ImageTool.h"
 #include "Texture2D.h"
 #include "ConsoleDebug.h"
 #define ISBITMASK(r, g, b, a) (ddpf.dwRBitMask == r && ddpf.dwGBitMask == g && ddpf.dwBBitMask == b && ddpf.dwABitMask == a)
@@ -414,7 +413,7 @@ DDSLoader::DDSLoader(std::vector<char> buffer) : DDSHeader(0), DDS10Header(0)
 	DDSBuffer = buffer;
 }
 
-ImageData* DDSLoader::LoadDDSToImage()
+std::shared_ptr<ImageData>  DDSLoader::LoadDDSToImage()
 {
 	arraySize = 1;
 	if (DDSBuffer.size() <= sizeof(FDDSFileHeader))
@@ -475,7 +474,8 @@ ImageData* DDSLoader::LoadDDSToImage()
 		return nullptr;
 	}
 
-	ImageData* out = new ImageData;
+	std::shared_ptr<ImageData> out;
+	out.reset(new ImageData);
 
 	//获取BC block 大小,只有压缩纹理才会有
 	blockSize = GetCnumBytesPerBlock(dxgiTextureFormat);

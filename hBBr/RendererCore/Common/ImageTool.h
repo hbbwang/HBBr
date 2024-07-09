@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "Asset/HGuid.h"
 #include "VulkanManager.h"
+#include <memory>
 
 inline const char* GetTGAImageTypeString(uint8_t imageType)
 {
@@ -50,10 +51,10 @@ typedef struct tagImageData
 	HString fileName;
 	HString filePath;
 	std::vector<unsigned char> imageData;
+	std::vector<float> imageDataF;
 	VkFormat texFormat;
 	unsigned int imageSize = 0;
 	unsigned int mipLevel = 1;
-	HGUID	guid;
 	uint8_t blockSize = 0;
 	bool	isCubeMap = false;
 }ImageData, * LPImage;
@@ -72,13 +73,13 @@ public:
 
 	HBBR_API static bool SavePngImageRGB8(const char* filename, uint16_t w, uint16_t h, void* imageData);
 
-	HBBR_API static ImageData* ReadDDSImage(const char* filename);
+	HBBR_API static std::shared_ptr<ImageData> ReadDDSImage(const char* filename);
 
-	HBBR_API static ImageData* ReadTgaImage(const char* filename);
+	HBBR_API static std::shared_ptr<ImageData> ReadTgaImage(const char* filename);
 
-	HBBR_API static ImageData* ReadPngImage(const char* filename);
+	HBBR_API static std::shared_ptr<ImageData> ReadPngImage(const char* filename);
 
-	HBBR_API static ImageData* ReadHDRImage(const char* filename);
+	HBBR_API static std::shared_ptr<ImageData> ReadHDRImage(const char* filename);
 
 	HBBR_API static void ImageFlipY(uint32_t w,uint32_t h,uint32_t d, void* data);
 
