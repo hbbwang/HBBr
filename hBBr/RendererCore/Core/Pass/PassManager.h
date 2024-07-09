@@ -39,6 +39,8 @@ public:
 
 	void SetupPassUniformBuffer(class CameraComponent* camera , VkExtent2D renderSize);
 
+	glm::mat4 GetPerspectiveProjectionMatrix(float FOV, float w, float h, float nearPlane = 0.001, float farPlane = 100.0f);
+
 	PassUniformBuffer GetPassUniformBufferCache()const { return _passUniformBuffer; }
 
 private:

@@ -247,6 +247,12 @@
     <ClInclude Include="Core\Asset\SceneTexture.h">
       <Filter>Renderer\Core\Pass</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Asset\TextureCube.h">
+      <Filter>Renderer\Core\Asset\AssetType</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Pass\HDRI2Cube.h">
+      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -410,6 +416,12 @@
     </ClCompile>
     <ClCompile Include="Core\Asset\SceneTexture.cpp">
       <Filter>Renderer\Core\Pass</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Asset\TextureCube.cpp">
+      <Filter>Renderer\Core\Asset\AssetType</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Pass\HDRI2Cube.cpp">
+      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

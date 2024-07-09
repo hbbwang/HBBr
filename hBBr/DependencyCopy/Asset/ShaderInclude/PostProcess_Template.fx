@@ -1,7 +1,6 @@
 [Flag]
 {
     NativeHLSL; //原生HLSL,不进行拓展编译,需遵循HLSL代码规范编写
-    EnableShaderDebug;
     HideInEditor;//不希望显示在编辑器(例如材质编辑器)
 };
 

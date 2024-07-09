@@ -47,41 +47,44 @@ class Texture2D : public AssetObject
 public:
 	Texture2D() {}
 	~Texture2D();
-	HBBR_INLINE VkImage GetTexture()const {
+	
+	HBBR_API HBBR_INLINE uint64_t GetTextureMemorySize()const {
+		return _textureMemorySize;
+	}
+	HBBR_API HBBR_INLINE VkDeviceMemory GetTextureMemory()const {
+		return _imageViewMemory;
+	}
+	HBBR_API HBBR_INLINE VkImage GetTexture()const {
 		return _image;
 	}
-	HBBR_INLINE VkImageView GetTextureView()const {
+	HBBR_API HBBR_INLINE VkImageView GetTextureView()const {
 		return _imageView;
 	}
-	HBBR_INLINE VkFormat GetFormat()const {
+	HBBR_API HBBR_INLINE VkFormat GetFormat()const {
 		return _format;
 	}
-	HBBR_INLINE VkImageLayout GetLayout ()const {
+	HBBR_API HBBR_INLINE VkImageLayout GetLayout ()const {
 		return _imageLayout;
 	}
-	HBBR_INLINE VkImageUsageFlags GetUsageFlags()const {
+	HBBR_API HBBR_INLINE VkImageUsageFlags GetUsageFlags()const {
 		return _usageFlags;
 	}
-	HBBR_INLINE uint32_t GetMipCount()const {
+	HBBR_API HBBR_INLINE uint32_t GetMipCount()const {
 		return _mipCount;
 	}
-	HBBR_INLINE VkImageAspectFlags GetAspectFlags()const {
+	HBBR_API HBBR_INLINE VkImageAspectFlags GetAspectFlags()const {
 		return _imageAspectFlags;
 	}
-
-	HBBR_INLINE VkExtent3D GetTextureSize()const {
+	HBBR_API HBBR_INLINE VkExtent3D GetTextureSize()const {
 		return _imageSize;
 	}
-
-	HBBR_INLINE static std::vector<Texture2D*>& GetUploadTextures(){
+	HBBR_API HBBR_INLINE static std::vector<Texture2D*>& GetUploadTextures(){
 		return _upload_textures;
 	}
-
-	HBBR_INLINE static Texture2D* GetFontTexture() {
+	HBBR_API HBBR_INLINE static Texture2D* GetFontTexture() {
 		return _fontTexture.get();
 	}
-
-	HBBR_INLINE static VkSampler GetSampler(TextureSampler sampler , int mipBias = -1) {
+	HBBR_API HBBR_INLINE static VkSampler GetSampler(TextureSampler sampler , int mipBias = -1) {
 		auto samplers = _samplers[sampler];
 		if (mipBias <0 || (int)samplers.size() <= mipBias)
 		{
@@ -89,8 +92,7 @@ public:
 		}
 		return samplers[mipBias];
 	}
-
-	HBBR_INLINE static FontTextureInfo* GetFontInfo(wchar_t c) {
+	HBBR_API HBBR_INLINE static FontTextureInfo* GetFontInfo(wchar_t c) {
 		auto it = _fontTextureInfos.find(c);
 		if (it != _fontTextureInfos.end())
 		{
@@ -101,14 +103,13 @@ public:
 			return &_fontTextureInfos[32];
 		}
 	}
-
-	HBBR_INLINE static uint64_t GetTextureStreamingSize() {
+	HBBR_API HBBR_INLINE static uint64_t GetTextureStreamingSize() {
 		return _textureStreamingSize;
 	}
 
 	HBBR_API void Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
 
-	HBBR_API void TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1);
+	 HBBR_API void TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1);
 
 	HBBR_API bool CopyBufferToTexture(VkCommandBuffer cmdbuf);
 
@@ -116,7 +117,7 @@ public:
 
 	HBBR_API void Resize(uint32_t width, uint32_t height);
 
-	HBBR_INLINE bool IsValid()const {
+	HBBR_API HBBR_INLINE bool IsValid()const {
 		return _bUploadToGPU;
 	}
 
