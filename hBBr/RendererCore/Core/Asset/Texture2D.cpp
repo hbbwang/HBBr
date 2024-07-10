@@ -422,7 +422,7 @@ bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 
 			//创建Buffer储存Image data
 			manager->CreateBufferAndAllocateMemory(
-				imageSize,
+				_textureMemorySize,
 				VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 				_uploadBuffer,
@@ -498,6 +498,7 @@ bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 void Texture2D::CopyBufferToTextureImmediate()
 {
 	const auto& manager = VulkanManager::GetManager();
+	manager->DeviceWaitIdle();
 	VkCommandBuffer buf;
 	manager->AllocateCommandBuffer(manager->GetCommandPool(), buf);
 	manager->BeginCommandBuffer(buf, 0);
@@ -506,7 +507,7 @@ void Texture2D::CopyBufferToTextureImmediate()
 	}
 	manager->EndCommandBuffer(buf);
 	manager->SubmitQueueImmediate({ buf });
-	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
+	manager->DeviceWaitIdle();
 	manager->FreeCommandBuffer(manager->GetCommandPool(), buf);
 	//
 	if (_bUploadToGPU)

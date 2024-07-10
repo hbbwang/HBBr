@@ -2069,6 +2069,15 @@ void VulkanManager::CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info, V
 	}
 }
 
+void VulkanManager::CreateComputePipeline(VkComputePipelineCreateInfo& info, VkPipeline& pipeline)
+{
+	auto result = vkCreateComputePipelines(_device, nullptr, 1, &info, nullptr, &pipeline);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut(GetInternationalizationText("Renderer", "A000012"), false, true);
+	}
+}
+
 void VulkanManager::DestroyPipeline(VkPipeline& pipeline)
 {
 	if (pipeline != VK_NULL_HANDLE)

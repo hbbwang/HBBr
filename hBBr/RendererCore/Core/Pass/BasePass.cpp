@@ -351,7 +351,7 @@ void BasePass::SetupBasePassAndDraw(Pass p)
 		{
 			vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 0, 1, &pass->GetDescriptorSet(), 1, dynamicOffset);
 		}
-		manager->CmdCmdBindPipeline(cmdBuf, curPipeline->pipeline);
+		manager->CmdCmdBindPipeline(cmdBuf, curPipeline->pipeline, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS);
 		//Material uniform buffers & Textures
 		if (curPipeline->bHasMaterialParameterVS && curPipeline->bHasMaterialParameterPS && curPipeline->bHasMaterialTexture)
 		{

@@ -110,7 +110,7 @@ void GUIPass::PassUpdate()
 		if (currentPipeline != pipeline)
 		{
 			pipeline = currentPipeline;
-			manager->CmdCmdBindPipeline(cmdBuf, pipeline);
+			manager->CmdCmdBindPipeline(cmdBuf, pipeline, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS);
 		}
 		//textures
 		vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 1, 1, &i.second.tex_descriptorSet->GetDescriptorSet(), 0, 0);

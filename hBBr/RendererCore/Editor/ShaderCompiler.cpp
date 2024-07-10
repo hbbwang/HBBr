@@ -19,7 +19,7 @@ void Shaderc::ShaderCompiler::CompileAllShaders(const char* srcShaderPath)
 	auto allFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath , "fx");
 	auto allvFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath, "vfx");
 	auto allpFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath, "pfx");
-	auto allcFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath, "cfx");
+	auto allcFxShaders = FileSystem::GetFilesBySuffix(srcShaderPath, "cs");
 	//fx
 	if (allFxShaders.size() > 0)
 	{
@@ -45,7 +45,7 @@ void Shaderc::ShaderCompiler::CompileAllShaders(const char* srcShaderPath)
 			CompileShader(i.absPath.c_str(), "PSMain", CompileShaderType::PixelShader);
 		}
 	}
-	//cfx
+	//cs
 	if (allcFxShaders.size() > 0)
 	{
 		for (auto i : allcFxShaders)

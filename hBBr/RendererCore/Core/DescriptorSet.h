@@ -27,7 +27,9 @@ public:
 
 	void UpdateDescriptorSetAll(uint32_t sameBufferSize);
 
-	void UpdateTextureDescriptorSet(std::vector<class Texture2D*> textures, std::vector<VkSampler> samplers);
+	void UpdateTextureDescriptorSet(std::vector<class Texture2D*> textures, std::vector<VkSampler> samplers, int beginBindingIndex = 0);
+
+	void UpdateStoreTextureDescriptorSet(std::vector<class Texture2D*> textures, int beginBindingIndex = 0);
 
 	void UpdateTextureDescriptorSet(std::vector<VkImageView> images, std::vector<VkSampler> samplers);
 

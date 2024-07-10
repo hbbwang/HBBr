@@ -60,6 +60,16 @@ PipelineObject* PipelineManager::GetGraphicsPipelineMap(PipelineIndex index)
 	return nullptr;
 }
 
+PipelineObject* PipelineManager::GetComputePipelineMap(PipelineIndex index)
+{
+	auto it = _computePipelines.find(index);
+	if (it != _computePipelines.end())
+	{
+		return it->second.get();
+	}
+	return nullptr;
+}
+
 void PipelineManager::ClearPipelineObjects()
 {
 	_graphicsPipelines.clear();
@@ -203,6 +213,11 @@ void PipelineManager::SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& creat
 	createInfo.CreateInfo.layout = pipelineLayout;
 }
 
+void PipelineManager::SetPipelineLayout(VkComputePipelineCreateInfoCache& createInfo, VkPipelineLayout pipelineLayout)
+{
+	createInfo.createInfo.layout = pipelineLayout;
+}
+
 void PipelineManager::SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache *vs, ShaderCache *ps)
 {
 	//vs.shaderStageInfo.module = vs.shaderModule[varient];
@@ -217,6 +232,11 @@ void PipelineManager::SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfo
 	createInfo.bHasMaterialParameterVS = vs->params.size() > 0;
 	createInfo.bHasMaterialParameterPS = ps->params.size() > 0;
 	createInfo.bHasMaterialTexture = vs->texs.size() > 0 && ps->texs.size() > 0;
+}
+
+void PipelineManager::SetComputeShader(VkComputePipelineCreateInfoCache& createInfo, ShaderCache* cs)
+{
+	createInfo.createInfo.stage = (cs->shaderStageInfo);
 }
 
 void PipelineManager::BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCache& createInfo, VkRenderPass renderPass, uint32_t subpassIndex, VkPipeline& pipelineObj)
@@ -259,6 +279,13 @@ void PipelineManager::BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCac
 	VulkanManager::GetManager()->CreateGraphicsPipeline(createInfo.CreateInfo, pipelineObj);
 }
 
+void PipelineManager::BuildComputePipelineState(VkComputePipelineCreateInfoCache& createInfo, VkPipeline& pipelineObj)
+{
+	createInfo.createInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+	createInfo.createInfo.flags = 0;
+	VulkanManager::GetManager()->CreateComputePipeline(createInfo.createInfo, pipelineObj);
+}
+
 void PipelineManager::ClearCreateInfo(VkGraphicsPipelineCreateInfoCache& createInfo)
 {
 	createInfo = VkGraphicsPipelineCreateInfoCache();
@@ -275,5 +302,17 @@ PipelineIndex PipelineManager::AddPipelineObject(std::weak_ptr<ShaderCache>vs, s
 	newPSO->layout = pipelineLayout;
 	newPSO->pipelineType = PipelineType::Graphics;
 	_graphicsPipelines.emplace(std::make_pair(index, std::move(newPSO)));
+	return index;
+}
+
+PipelineIndex PipelineManager::AddPipelineObject(std::weak_ptr<ShaderCache> cs, VkPipeline pipeline, VkPipelineLayout pipelineLayout)
+{
+	PipelineIndex index = PipelineIndex::GetPipelineIndex(cs);
+	std::unique_ptr<PipelineObject> newPSO = std::make_unique<PipelineObject>();
+	newPSO->pipeline = pipeline;
+	//newPSO->bHasStoreTexture = vs.lock()->texs.size() > 0;
+	newPSO->layout = pipelineLayout;
+	newPSO->pipelineType = PipelineType::Compute;
+	_computePipelines.emplace(std::make_pair(index, std::move(newPSO)));
 	return index;
 }

@@ -6,9 +6,9 @@
 #include "Pass/PassType.h"
 #include "ConsoleDebug.h"
 #include "RendererConfig.h"
+
 struct VkGraphicsPipelineCreateInfoCache
 {
-	HString graphicsName;//ps or cs name
 	//------------------------State
 	VkGraphicsPipelineCreateInfo					CreateInfo{};
 	//------------------------Rasterizer
@@ -36,9 +36,15 @@ struct VkGraphicsPipelineCreateInfoCache
 
 	bool bHasMaterialParameterVS = false;
 	bool bHasMaterialParameterPS = false;
-
 	bool bHasMaterialTexture = false;
 	
+};
+
+struct VkComputePipelineCreateInfoCache
+{
+	VkComputePipelineCreateInfo			createInfo{};
+	bool bHasParameter = false;
+	bool bHasStoreTexture = false;
 };
 
 enum ColorWriteMask
@@ -243,7 +249,7 @@ struct PipelineObject
 	bool bHasMaterialParameterVS = false;
 	bool bHasMaterialParameterPS = false;
 	bool bHasMaterialTexture = false;
-
+	bool bHasStoreTexture = false;
 	~PipelineObject();
 };
 
@@ -305,6 +311,11 @@ public:
 		return blendMode;
 	}
 
+	HBBR_INLINE PipelineType GetPipelineType()const
+	{
+		return type;
+	}
+
 	static PipelineIndex GetPipelineIndex(
 		std::weak_ptr<ShaderCache> vs,
 		std::weak_ptr<ShaderCache> ps)
@@ -313,6 +324,7 @@ public:
 		index.vs_varients = vs.lock()->varients;
 		index.ps_varients = ps.lock()->varients;
 		index.blendMode = BlendMode::Opaque;
+		index.type = PipelineType::Graphics;
 		index.vsShaderCacheFullName = vs.lock()->shaderFullName;
 		index.psShaderCacheFullName = ps.lock()->shaderFullName;
 		index.vsShaderName = vs.lock()->shaderName;
@@ -320,10 +332,25 @@ public:
 		return index;
 	}
 
+	static PipelineIndex GetPipelineIndex(
+		std::weak_ptr<ShaderCache> cs)
+	{
+		PipelineIndex index;
+		index.vs_varients = cs.lock()->varients;
+		index.ps_varients = cs.lock()->varients;
+		index.type = PipelineType::Compute;
+		index.vsShaderCacheFullName = cs.lock()->shaderFullName;
+		index.psShaderCacheFullName = cs.lock()->shaderFullName;
+		index.vsShaderName = cs.lock()->shaderName;
+		index.psShaderName = cs.lock()->shaderName;
+		return index;
+	}
+
 	bool operator<(const PipelineIndex& id) const {
 		return (vs_varients < id.vs_varients)
 			|| (ps_varients < id.ps_varients)
 			|| (blendMode < id.blendMode)
+			|| (type < id.type)
 			|| vsShaderCacheFullName< id.vsShaderCacheFullName
 			|| psShaderCacheFullName < id.psShaderCacheFullName;
 	}
@@ -332,12 +359,14 @@ public:
 		return  (vs_varients == id.vs_varients)
 			&& (ps_varients == id.ps_varients)
 			&& (blendMode == id.blendMode)
+			&& (type == id.type)
 			&& (vsShaderCacheFullName == id.vsShaderCacheFullName)
 			&& (psShaderCacheFullName == id.psShaderCacheFullName);
 	}
 
 private:
 	BlendMode blendMode = BlendMode::Opaque;
+	PipelineType type = PipelineType::Graphics;
 	uint32_t vs_varients = 0;//变体 32bit 相当于32个bool
 	uint32_t ps_varients = 0;
 	HString vsShaderCacheFullName = "";
@@ -372,6 +401,8 @@ public:
 	//Graphics pipeline setting step 6
 	HBBR_API static void SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfoCache& createInfo, ShaderCache* vs, ShaderCache* ps);
 
+	HBBR_API static void SetComputeShader(VkComputePipelineCreateInfoCache& createInfo, ShaderCache* cs);
+
 	//Graphics pipeline setting the last step
 	HBBR_API static PipelineObject* CreatePipelineObject(
 		VkGraphicsPipelineCreateInfoCache& createInfo,VkPipelineLayout layout, 
@@ -380,17 +411,25 @@ public:
 
 	HBBR_API static PipelineObject* GetGraphicsPipelineMap(PipelineIndex index);
 
+	HBBR_API static PipelineObject* GetComputePipelineMap(PipelineIndex index);
+
 	HBBR_API static void ClearPipelineObjects();
 
 	HBBR_API static void RemovePipelineObjects(PipelineIndex& index);
 
 	HBBR_API static void BuildGraphicsPipelineState(VkGraphicsPipelineCreateInfoCache& createInfo, VkRenderPass renderPass, uint32_t subpassIndex, VkPipeline& pipelineObj);
 
+	HBBR_API static void BuildComputePipelineState(VkComputePipelineCreateInfoCache& createInfo,  VkPipeline& pipelineObj);
+
 	HBBR_API static void SetPipelineLayout(VkGraphicsPipelineCreateInfoCache& createInfo, VkPipelineLayout pipelineLayout);
+
+	HBBR_API static void SetPipelineLayout(VkComputePipelineCreateInfoCache& createInfo, VkPipelineLayout pipelineLayout);
 
 	HBBR_API static void ClearCreateInfo(VkGraphicsPipelineCreateInfoCache& createInfo);
 
 	HBBR_API static PipelineIndex AddPipelineObject(std::weak_ptr<ShaderCache> vs, std::weak_ptr<ShaderCache> ps,VkPipeline pipeline,VkPipelineLayout pipelineLayout);
+
+	HBBR_API static PipelineIndex AddPipelineObject(std::weak_ptr<ShaderCache> cs, VkPipeline pipeline, VkPipelineLayout pipelineLayout);
 private:
 	static std::map<PipelineIndex, std::unique_ptr<PipelineObject>> _graphicsPipelines;
 	static std::map<PipelineIndex, std::unique_ptr<PipelineObject>> _computePipelines;

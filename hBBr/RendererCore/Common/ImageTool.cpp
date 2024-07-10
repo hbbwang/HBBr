@@ -487,8 +487,8 @@ std::shared_ptr<ImageData> ImageTool::ReadHDRImage(const char* filename)
 	if (data)
 	{
 		std::vector<float>imageData;
-		imageData.resize(width * height * 8);
-		for (int c = 0; c < 3; c++)
+		imageData.resize(width * height * channels);
+		for (int c = 0; c < channels; c++)
 		{
 			for (int h = 0; h < height; h++)
 			{
@@ -505,14 +505,11 @@ std::shared_ptr<ImageData> ImageTool::ReadHDRImage(const char* filename)
 		out->data_header.width = width;
 		out->data_header.height = height;
 		out->imageDataF = std::move(imageData);
-		out->data_header.bitsPerPixel = 4 * 16;
+		out->data_header.bitsPerPixel = channels * 32;
 		out->fileName = HString(filename).GetBaseName();
 		out->filePath = filename;
-		int ClannelNum = 1;
-
-		out->texFormat = VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT;
-
-		out->imageSize = width * height * 8;
+		out->texFormat = VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT;
+		out->imageSize = width * height * channels;
 		return out;
 	}
 	return nullptr;

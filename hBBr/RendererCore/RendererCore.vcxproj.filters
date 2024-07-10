@@ -62,6 +62,9 @@
     <Filter Include="Renderer\Core\Pass\Other">
       <UniqueIdentifier>{a7a3c29b-cd5b-4df8-af92-1ec825588d98}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderer\Core\Pass\ComputePass">
+      <UniqueIdentifier>{fcdb0014-75c7-4719-b5f6-a81cc0eb85a6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\VulkanManager.h">
@@ -251,7 +254,7 @@
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClInclude>
     <ClInclude Include="Core\Pass\HDRI2Cube.h">
-      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+      <Filter>Renderer\Core\Pass\ComputePass</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -421,7 +424,7 @@
       <Filter>Renderer\Core\Asset\AssetType</Filter>
     </ClCompile>
     <ClCompile Include="Core\Pass\HDRI2Cube.cpp">
-      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+      <Filter>Renderer\Core\Pass\ComputePass</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

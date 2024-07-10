@@ -13,7 +13,7 @@
         "A000009":"获取下一个可呈现的Swapchain image失败,交换链过时了!",
         "A000010":"获取下一个可呈现的Swapchain image失败!",     
         "A000011":"呈现(Present)失败!,详情请开启Vulkan Debug查看。",
-        "A000012":"创建渲染管线(Graphics pipeline)失败!,程序即将退出。",
+        "A000012":"创建管线(Pipeline)失败!,程序即将退出。",
         "A000013":"你正准备提交了一个数量为0的Queue,渲染器禁止这种操作,程序即将退出。",
         "A000014":"[CreateDir(path)] 目录创建失败,因为该目录已存在。",
         "A000015":"[GetFilesBySuffix(path,suffix)] 获取文件后缀失败,因为该路径Path没有后缀",

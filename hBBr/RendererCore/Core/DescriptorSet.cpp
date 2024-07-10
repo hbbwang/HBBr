@@ -164,7 +164,7 @@ void DescriptorSet::UpdateDescriptorSetAll(uint32_t sameBufferSize)
 	VulkanManager::GetManager()->UpdateBufferDescriptorSetAll(this, 0, 0, alignmentSize);
 }
 
-void DescriptorSet::UpdateTextureDescriptorSet(std::vector<class Texture2D*> textures, std::vector<VkSampler> samplers)
+void DescriptorSet::UpdateTextureDescriptorSet(std::vector<class Texture2D*> textures, std::vector<VkSampler> samplers, int beginBindingIndex)
 {
 	if (_needUpdates[_renderer->GetCurrentFrameIndex()] == 1)
 	{
@@ -182,9 +182,39 @@ void DescriptorSet::UpdateTextureDescriptorSet(std::vector<class Texture2D*> tex
 			descriptorWrite[o] = {};
 			descriptorWrite[o].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			descriptorWrite[o].dstSet = this->GetDescriptorSet();
-			descriptorWrite[o].dstBinding = o;
+			descriptorWrite[o].dstBinding = o + beginBindingIndex;
 			descriptorWrite[o].dstArrayElement = 0;
 			descriptorWrite[o].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrite[o].descriptorCount = 1;
+			descriptorWrite[o].pBufferInfo = VK_NULL_HANDLE;
+			descriptorWrite[o].pImageInfo = &imageInfo[o]; // Optional
+			descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE; // Optional
+		}
+		vkUpdateDescriptorSets(VulkanManager::GetManager()->GetDevice(), count, descriptorWrite.data(), 0, VK_NULL_HANDLE);
+	}
+}
+
+void DescriptorSet::UpdateStoreTextureDescriptorSet(std::vector<class Texture2D*> textures, int beginBindingIndex)
+{
+	if (_needUpdates[_renderer->GetCurrentFrameIndex()] == 1)
+	{
+		_needUpdates[_renderer->GetCurrentFrameIndex()] = 0;
+		//
+		const uint32_t count = (uint32_t)textures.size();
+		std::vector<VkWriteDescriptorSet> descriptorWrite(count);
+		std::vector<VkDescriptorImageInfo> imageInfo(count);
+		for (uint32_t o = 0; o < count; o++)
+		{
+			imageInfo[o] = {};
+			imageInfo[o].sampler = nullptr;
+			imageInfo[o].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			imageInfo[o].imageView = textures[o]->GetTextureView();
+			descriptorWrite[o] = {};
+			descriptorWrite[o].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite[o].dstSet = this->GetDescriptorSet();
+			descriptorWrite[o].dstBinding = o + beginBindingIndex;
+			descriptorWrite[o].dstArrayElement = 0;
+			descriptorWrite[o].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 			descriptorWrite[o].descriptorCount = 1;
 			descriptorWrite[o].pBufferInfo = VK_NULL_HANDLE;
 			descriptorWrite[o].pImageInfo = &imageInfo[o]; // Optional
