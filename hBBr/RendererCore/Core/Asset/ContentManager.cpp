@@ -166,6 +166,7 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				HDRI2Cube hdriToCube(i.absAssetFilePath);
 				hdriToCube.PassInit();
 				hdriToCube.PassExecute();
+				return false;
 				//Texture2D::CompressionImage2D(i.absAssetFilePath.c_str(), savePath.c_str(), true, nvtt::Format_BC7, false);
 			}
 			//----------------------------------------Material

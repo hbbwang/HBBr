@@ -486,30 +486,24 @@ std::shared_ptr<ImageData> ImageTool::ReadHDRImage(const char* filename)
 	float* data = stbi_loadf(filename, &width, &height, &channels, 0);
 	if (data)
 	{
-		std::vector<float>imageData;
-		imageData.resize(width * height * channels);
-		for (int c = 0; c < channels; c++)
-		{
-			for (int h = 0; h < height; h++)
-			{
-				for (int w = 0; w < width; w++)
-				{
-					int index = (c * (h * w)) + (h * w + w);
-					imageData[index] = data[index];
-				}
-			}
-		}
+		size_t size = width * height * channels;
+		std::vector<float> imageData(size);
+		std::copy(data, data + size, imageData.begin());
 
 		std::shared_ptr<ImageData> out;
 		out.reset(new ImageData);
 		out->data_header.width = width;
 		out->data_header.height = height;
 		out->imageDataF = std::move(imageData);
+		//out->imageDataF = data;
 		out->data_header.bitsPerPixel = channels * 32;
 		out->fileName = HString(filename).GetBaseName();
 		out->filePath = filename;
 		out->texFormat = VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT;
-		out->imageSize = width * height * channels;
+		out->imageSize = size * sizeof(float);
+
+		stbi_image_free(data);
+
 		return out;
 	}
 	return nullptr;

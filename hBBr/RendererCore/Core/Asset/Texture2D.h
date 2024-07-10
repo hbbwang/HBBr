@@ -118,7 +118,7 @@ public:
 
 	HBBR_API bool CopyTextureToBuffer(VkCommandBuffer cmdbuf, Buffer* buffer);
 
-	HBBR_API void CopyBufferToTextureImmediate(Buffer* buffer);
+	HBBR_API void CopyTextureToBufferImmediate(Buffer* buffer);
 
 	HBBR_API void Resize(uint32_t width, uint32_t height);
 

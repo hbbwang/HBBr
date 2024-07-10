@@ -71,6 +71,8 @@ public:
 
 	VkBuffer GetBuffer();
 
+	VkDeviceMemory GetMemory();
+
 private:
 
 	VkBuffer						_buffer = VK_NULL_HANDLE;

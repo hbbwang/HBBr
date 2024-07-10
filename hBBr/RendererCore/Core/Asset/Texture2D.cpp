@@ -419,23 +419,26 @@ bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 				faceNum = 6;
 			}
 			imageSize *= faceNum;
-
-			//创建Buffer储存Image data
 			manager->CreateBufferAndAllocateMemory(
 				_textureMemorySize,
 				VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 				_uploadBuffer,
 				_uploadBufferMemory);
-			void* data = nullptr;
-			vkMapMemory(manager->GetDevice(), _uploadBufferMemory, 0, imageSize, 0, &data);
+			//创建Buffer储存Image data
 			if (_imageData.imageData.size() > 0)
 			{
-				memcpy(data, _imageData.imageData.data(), (size_t)imageSize);
+				//char 只有一个字节，所以数组大小和imageSize一致
+				void* data = nullptr;
+				vkMapMemory(manager->GetDevice(), _uploadBufferMemory, 0, _textureMemorySize, 0, &data);
+				memcpy(data, _imageData.imageData.data(), _imageData.imageData.size());
 			}
 			else if (_imageData.imageDataF.size() > 0)
 			{
-				memcpy(data, _imageData.imageDataF.data(), (size_t)imageSize);
+				//float 有4个字节，所以size = 数组大小 * sizeof(float)
+				void* data = nullptr;
+				vkMapMemory(manager->GetDevice(), _uploadBufferMemory, 0, _textureMemorySize, 0, &data);
+				memcpy(data, _imageData.imageDataF.data(), (size_t)_imageData.imageSize);
 			}
 			vkUnmapMemory(manager->GetDevice(), _uploadBufferMemory);
 
@@ -544,7 +547,7 @@ bool Texture2D::CopyTextureToBuffer(VkCommandBuffer cmdbuf, Buffer* buffer)
 	return true;
 }
 
-void Texture2D::CopyBufferToTextureImmediate(Buffer* buffer)
+void Texture2D::CopyTextureToBufferImmediate(Buffer* buffer)
 {
 	const auto& manager = VulkanManager::GetManager();
 	VkCommandBuffer buf;
@@ -915,8 +918,7 @@ void Texture2D::OutputImage(const char* outputPath, int w, int h, nvtt::Format f
 		ConsoleDebug::print_endl("set image 2d failed.", "255,255,0");
 	}
 	if (!image.save(outputPath))
-	{
-		
+	{	
 		ConsoleDebug::print_endl("Save output image failed", "255,255,0");
 	}
 }

@@ -4,8 +4,8 @@
 #include "PassManager.h"
 #include "ImageTool.h"
 #include "FormMain.h"
-
-#define OUTPUT_FORMAT VK_FORMAT_R16G16B16A16_SFLOAT
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb/stb_image_write.h"
 
 HDRI2Cube::HDRI2Cube(HString imagePath)
 	:ComputePass(nullptr)
@@ -16,20 +16,21 @@ HDRI2Cube::HDRI2Cube(HString imagePath)
 	uint32_t w = imageData->data_header.width;
 	uint32_t h = imageData->data_header.height;
 
+	_cubeMapFaceSize = { w,h };
+
 	_hdriTexture = Texture2D::CreateTexture2D(
-		w, h,
-		imageData->texFormat,
+		_cubeMapFaceSize.width, _cubeMapFaceSize.height,
+		VK_FORMAT_R32G32B32A32_SFLOAT,
 		VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
 		HString("Provisional HDRI Texture")
 	); 
 	_hdriTexture->_imageData = *imageData;
-	_cubeMapFaceSize = h/2;
 	_hdriTexture->CopyBufferToTextureImmediate();
 	//
 	_storeTexture = Texture2D::CreateTexture2D(
-		_cubeMapFaceSize, _cubeMapFaceSize * 6,
-		OUTPUT_FORMAT,
-		VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+		_cubeMapFaceSize.width, _cubeMapFaceSize.height,
+		VK_FORMAT_R32G32B32A32_SFLOAT,
+		VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
 		HString("Cube Map Store Texture")
 	);
 	_storeTexture->TransitionImmediate(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
@@ -83,7 +84,6 @@ void HDRI2Cube::PassExecute()
 			}
 			{
 				//textures
-				std::vector<class Texture2D*> textures = { _storeTexture.get() , _hdriTexture.get() };
 				store_descriptorSet->NeedUpdate();
 				store_descriptorSet->UpdateStoreTextureDescriptorSet({ _storeTexture.get() });
 				store_descriptorSet->NeedUpdate();
@@ -100,10 +100,11 @@ void HDRI2Cube::PassExecute()
 				//textures
 				vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_COMPUTE, _pipelineLayout, 0, 1, &store_descriptorSet->GetDescriptorSet(), 0, 0);
 				//vkCmdSetScissor(cmdBuf, 0, 1, &i.second.viewport);
-				vkCmdDispatch(cmdBuf, _cubeMapFaceSize / 8, _cubeMapFaceSize * 6 / 8, 1);
+				vkCmdDispatch(cmdBuf, _cubeMapFaceSize.width / 8, _cubeMapFaceSize.height / 8, 1);
 			}
 			//End...
 			_storeTexture->Transition(cmdBuf, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+
 			manager->EndCommandBuffer(cmdBuf);
 			manager->SubmitQueueImmediate({ cmdBuf });
 			vkQueueWaitIdle(manager->GetGraphicsQueue());
@@ -111,11 +112,14 @@ void HDRI2Cube::PassExecute()
 		}
 	}
 
+	//导出图像
 	std::shared_ptr<Buffer> buffer;
 	buffer.reset(new Buffer(VK_BUFFER_USAGE_TRANSFER_DST_BIT, _storeTexture->GetTextureMemorySize()));
-	_storeTexture->CopyBufferToTextureImmediate(buffer.get());
-	buffer->MapMemory();
-	Texture2D::OutputImage((HString("D:/sss")+ ".dds").c_str(), _cubeMapFaceSize, _cubeMapFaceSize, nvtt::Format_BC6S, buffer->GetBufferMemory());
+	_storeTexture->CopyTextureToBufferImmediate(buffer.get());
+	if (!stbi_write_hdr((HString("D:/sss") + ".hdr").c_str(), _cubeMapFaceSize.width, _cubeMapFaceSize.height, 3, (float*)buffer->GetBufferMemory()))
+	{
+		ConsoleDebug::print_endl("Save output image failed", "255,255,0");
+	}
 	buffer->UnMapMemory();
 
 }

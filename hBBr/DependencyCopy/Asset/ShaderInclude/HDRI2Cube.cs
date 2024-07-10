@@ -14,5 +14,5 @@ Texture2D<float4>   HDRITexture: register(t1,space0);
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
     float4 hdriColor = HDRITexture.Load(uint3(id.xy, 0));
-	DstTexture[id.xy] = float4(hdriColor.rgb,1);
+	DstTexture[id.xy] = hdriColor;
 }

@@ -81,3 +81,8 @@ VkBuffer Buffer::GetBuffer()
 	}
 	return _buffer;
 }
+
+VkDeviceMemory Buffer::GetMemory()
+{
+	return _bufferMemory;
+}

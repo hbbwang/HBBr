@@ -13,7 +13,7 @@ public:
 	virtual ~HDRI2Cube();
 	virtual void PassInit()override;
 	void PassExecute();
-	uint32_t _cubeMapFaceSize = 1024;
+	VkExtent2D _cubeMapFaceSize = { 1024 ,1024 };
 private:
 	PipelineIndex CreatePipeline();
 	PipelineIndex _pipelineIndex;

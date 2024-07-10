@@ -52,8 +52,9 @@ typedef struct tagImageData
 	HString filePath;
 	std::vector<unsigned char> imageData;
 	std::vector<float> imageDataF;
+	//float* imageDataF = nullptr;
 	VkFormat texFormat;
-	unsigned int imageSize = 0;
+	VkDeviceSize imageSize = 0;
 	unsigned int mipLevel = 1;
 	uint8_t blockSize = 0;
 	bool	isCubeMap = false;
