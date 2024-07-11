@@ -486,9 +486,29 @@ std::shared_ptr<ImageData> ImageTool::ReadHDRImage(const char* filename)
 	float* data = stbi_loadf(filename, &width, &height, &channels, 0);
 	if (data)
 	{
-		size_t size = width * height * channels;
+		size_t size = width * height * 4;
 		std::vector<float> imageData(size);
-		std::copy(data, data + size, imageData.begin());
+
+		//3通道转4通道
+		if (channels == 3)
+		{
+			for (int i = 0; i < width * height; ++i) {
+				imageData[i * 4 + 0] = data[i * 3 + 0]; // R
+				imageData[i * 4 + 1] = data[i * 3 + 1]; // G
+				imageData[i * 4 + 2] = data[i * 3 + 2]; // B
+				imageData[i * 4 + 3] = 1.0f;                 // A
+			}
+		}
+		else if(channels == 4)
+		{
+			std::copy(data, data + size, imageData.begin());
+		}
+		else
+		{
+			stbi_image_free(data);
+			ConsoleDebug::printf_endl_error("[ReadHDRImage] hdr image channels < 3");
+			return nullptr;
+		} 
 
 		std::shared_ptr<ImageData> out;
 		out.reset(new ImageData);

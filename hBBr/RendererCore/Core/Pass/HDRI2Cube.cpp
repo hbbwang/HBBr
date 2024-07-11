@@ -116,7 +116,7 @@ void HDRI2Cube::PassExecute()
 	std::shared_ptr<Buffer> buffer;
 	buffer.reset(new Buffer(VK_BUFFER_USAGE_TRANSFER_DST_BIT, _storeTexture->GetTextureMemorySize()));
 	_storeTexture->CopyTextureToBufferImmediate(buffer.get());
-	if (!stbi_write_hdr((HString("D:/sss") + ".hdr").c_str(), _cubeMapFaceSize.width, _cubeMapFaceSize.height, 3, (float*)buffer->GetBufferMemory()))
+	if (!stbi_write_hdr((HString("D:/sss") + ".hdr").c_str(), _cubeMapFaceSize.width, _cubeMapFaceSize.height, 4, (float*)buffer->GetBufferMemory()))
 	{
 		ConsoleDebug::print_endl("Save output image failed", "255,255,0");
 	}
