@@ -5,14 +5,113 @@
 };
 
 //RW =read & write
-RWTexture2D<float4> DstTexture : register(u0,space0);
-Texture2D<float4>   HDRITexture: register(t1,space0);
+RWTexture2D<float4> DstTexture0 : register(u0,space0);
+RWTexture2D<float4> DstTexture1 : register(u1,space0);
+RWTexture2D<float4> DstTexture2 : register(u2,space0);
+RWTexture2D<float4> DstTexture3 : register(u3,space0);
+RWTexture2D<float4> DstTexture4 : register(u4,space0);
+RWTexture2D<float4> DstTexture5 : register(u5,space0);
+Texture2D<float4>   HDRITexture: register(t6,space0);
 
-// numthreads：创建线程组的大小，也就是一个线程组包含多少个线程，下面的指令表示：指定每个线程组包含64个线程
-// id：该线程所在的总的线程结构中的索引
+#define PI 3.14159265358979323846
+
+cbuffer Pass :register(b7,space0)
+{
+    float2 HDRITextureSize;
+};
+
+// 根据CubeMap的面索引和UV坐标计算3D方向向量
+float3 ComputeDirectionVector(uint face, float2 uv)
+{
+    float3 direction;
+
+    // 将UV坐标映射到[-1, 1]范围
+    float2 coord = uv * 2.0 - 1.0;
+
+    // 根据面的索引计算方向向量
+    if (face == 0) // 右
+        direction = float3(1.0, -coord.y, -coord.x);
+    else if (face == 1) // 左
+        direction = float3(-1.0, -coord.y, coord.x);
+    else if (face == 2) // 上
+        direction = float3(coord.x, 1.0, coord.y);
+    else if (face == 3) // 下
+        direction = float3(coord.x, -1.0, -coord.y);
+    else if (face == 4) // 前
+        direction = float3(coord.x, -coord.y, 1.0);
+    else if (face == 5) // 后
+        direction = float3(-coord.x, -coord.y, -1.0);
+
+    return normalize(direction);
+}
+
+// 将3D方向向量转换为经纬度坐标
+float2 DirectionToLatLong(float3 direction)
+{
+    float longitude = atan2(direction.z, direction.x);
+    float latitude = asin(direction.y);
+
+    return float2(longitude, latitude);
+}
+
+// 将经纬度坐标映射到HDRI图像的UV坐标
+float2 LatLongToEquirectangularUV(float2 latLong)
+{
+    float u = (latLong.x + PI) / (2.0 * PI);
+    float v = (latLong.y + PI / 2.0) / PI;
+
+    return float2(u, v);
+}
+
 [numthreads( 8, 8, 1 )]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
-    float4 hdriColor = HDRITexture.Load(uint3(id.xy, 0));
-	DstTexture[id.xy] = hdriColor;
-}
+    // 计算CubeMap面和mipmap级别
+    uint face = id.z;
+
+    // 计算UV坐标
+    float2 uv = (float2(id.xy) + 0.5) / HDRITextureSize;
+    {
+        float3 direction = ComputeDirectionVector(face, uv);
+        float2 latLong = DirectionToLatLong(direction);
+        float2 equirectangularUV = LatLongToEquirectangularUV(latLong);
+        float4 hdriColor = HDRITexture.Load(uint3(equirectangularUV * HDRITextureSize, 0));
+	    DstTexture0[id.xy] = float4(hdriColor.rgb,1);
+    }
+    {
+        float3 direction = ComputeDirectionVector(face, uv);
+        float2 latLong = DirectionToLatLong(direction);
+        float2 equirectangularUV = LatLongToEquirectangularUV(latLong);
+        float4 hdriColor = HDRITexture.Load(uint3(equirectangularUV * HDRITextureSize, 0));
+	    DstTexture1[id.xy] = float4(hdriColor.rgb,1);
+    }
+    {
+        float3 direction = ComputeDirectionVector(face, uv);
+        float2 latLong = DirectionToLatLong(direction);
+        float2 equirectangularUV = LatLongToEquirectangularUV(latLong);
+        float4 hdriColor = HDRITexture.Load(uint3(equirectangularUV * HDRITextureSize, 0));
+	    DstTexture2[id.xy] = float4(hdriColor.rgb,1);
+    }
+    {
+        float3 direction = ComputeDirectionVector(face, uv);
+        float2 latLong = DirectionToLatLong(direction);
+        float2 equirectangularUV = LatLongToEquirectangularUV(latLong);
+        float4 hdriColor = HDRITexture.Load(uint3(equirectangularUV * HDRITextureSize, 0));
+	    DstTexture3[id.xy] = float4(hdriColor.rgb,1);
+    }
+    {
+        float3 direction = ComputeDirectionVector(face, uv);
+        float2 latLong = DirectionToLatLong(direction);
+        float2 equirectangularUV = LatLongToEquirectangularUV(latLong);
+        float4 hdriColor = HDRITexture.Load(uint3(equirectangularUV * HDRITextureSize, 0));
+	    DstTexture4[id.xy] = float4(hdriColor.rgb,1);
+    }
+    {
+        float3 direction = ComputeDirectionVector(face, uv);
+        float2 latLong = DirectionToLatLong(direction);
+        float2 equirectangularUV = LatLongToEquirectangularUV(latLong);
+        float4 hdriColor = HDRITexture.Load(uint3(equirectangularUV * HDRITextureSize, 0));
+	    DstTexture5[id.xy] = float4(hdriColor.rgb,1);
+    }
+    
+} 

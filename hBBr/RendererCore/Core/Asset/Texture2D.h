@@ -110,15 +110,15 @@ public:
 
 	HBBR_API void Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
 
-	HBBR_API void TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1);
+	HBBR_API void TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
 
 	HBBR_API bool CopyBufferToTexture(VkCommandBuffer cmdbuf);
 
 	HBBR_API void CopyBufferToTextureImmediate();
 
-	HBBR_API bool CopyTextureToBuffer(VkCommandBuffer cmdbuf, Buffer* buffer);
+	HBBR_API bool CopyTextureToBuffer(VkCommandBuffer cmdbuf, Buffer* buffer, VkDeviceSize offset = 0);
 
-	HBBR_API void CopyTextureToBufferImmediate(Buffer* buffer);
+	HBBR_API void CopyTextureToBufferImmediate(Buffer* buffer, VkDeviceSize offset = 0);
 
 	HBBR_API void Resize(uint32_t width, uint32_t height);
 

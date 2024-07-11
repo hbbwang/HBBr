@@ -2375,6 +2375,25 @@ void VulkanManager::SubmitQueueForPasses(VkCommandBuffer cmdBuf, VkSemaphore* pr
 		MessageOut((HString("[Submit Queue]vkQueueSubmit error : ") + GetVkResult(result)), false, true);
 }
 
+void VulkanManager::UpdateBufferDescriptorSet(VkBuffer buffer, VkDescriptorSet descriptorSet, VkDescriptorType type, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range)
+{
+	VkDescriptorBufferInfo bufferInfo = {};
+	bufferInfo.buffer = buffer;
+	bufferInfo.offset = offset;
+	bufferInfo.range = Range;
+	VkWriteDescriptorSet descriptorWrite = {};
+	descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	descriptorWrite.dstSet = descriptorSet;
+	descriptorWrite.dstBinding = dstBinding;
+	descriptorWrite.dstArrayElement = 0;
+	descriptorWrite.descriptorType = type;
+	descriptorWrite.descriptorCount = 1;
+	descriptorWrite.pBufferInfo = &bufferInfo;
+	descriptorWrite.pImageInfo = VK_NULL_HANDLE;
+	descriptorWrite.pTexelBufferView = VK_NULL_HANDLE;
+	vkUpdateDescriptorSets(_device, 1, &descriptorWrite, 0, VK_NULL_HANDLE);
+}
+
 void VulkanManager::UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range)
 {
 	for (int i = 0; i < descriptorSet->GetTypes().size(); i++)

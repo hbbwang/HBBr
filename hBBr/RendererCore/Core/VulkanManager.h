@@ -318,6 +318,8 @@ public:
 
 	void SubmitQueueForPasses(VkCommandBuffer cmdBuf, VkSemaphore* presentSemaphore, VkSemaphore* submitFinishSemaphore, VkFence executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkQueue queue = VK_NULL_HANDLE);
 
+	void UpdateBufferDescriptorSet(VkBuffer buffer, VkDescriptorSet descriptorSet, VkDescriptorType type,  uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
+
 	void UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset , VkDeviceSize Range);
 
 	void UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, uint32_t sameBufferSize, std::vector<uint32_t> offsets);

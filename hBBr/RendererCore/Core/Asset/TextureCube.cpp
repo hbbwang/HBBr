@@ -17,6 +17,9 @@ std::shared_ptr<TextureCube> TextureCube::CreateTextureCube(uint32_t width, uint
 	newTexture->_textureName = textureName;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = { width,height };
+	newTexture->_imageData.isCubeMap = true;
+	newTexture->_imageData.data_header.width = width;
+	newTexture->_imageData.data_header.height = height;
 	VulkanManager::GetManager()->CreateImage(width, height, format, usageFlags, newTexture->_image, miplevel, 6);
 	if (format == VK_FORMAT_R32_SFLOAT || format == VK_FORMAT_D32_SFLOAT)
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;

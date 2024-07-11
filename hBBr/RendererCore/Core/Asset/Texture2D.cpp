@@ -36,14 +36,14 @@ void Texture2D::Transition(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, V
 	_imageLayout = newLayout;
 }
 
-void Texture2D::TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin, uint32_t mipLevelCount)
+void Texture2D::TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin, uint32_t mipLevelCount, uint32_t baseArrayLayer, uint32_t layerCount)
 {
 	auto manager = VulkanManager::GetManager();
 	VkCommandBuffer cmdbuf;
 	manager->AllocateCommandBuffer(manager->GetCommandPool(), cmdbuf);
 	manager->BeginCommandBuffer(cmdbuf);
 	{
-		Transition(cmdbuf, oldLayout, newLayout, mipLevelBegin, mipLevelCount);
+		Transition(cmdbuf, oldLayout, newLayout, mipLevelBegin, mipLevelCount, baseArrayLayer, layerCount);
 	}
 	manager->EndCommandBuffer(cmdbuf);
 	manager->SubmitQueueImmediate({ cmdbuf });
@@ -533,10 +533,10 @@ void Texture2D::CopyBufferToTextureImmediate()
 	}
 }
 
-bool Texture2D::CopyTextureToBuffer(VkCommandBuffer cmdbuf, Buffer* buffer)
+bool Texture2D::CopyTextureToBuffer(VkCommandBuffer cmdbuf, Buffer* buffer, VkDeviceSize offset)
 {
 	VkBufferImageCopy copy = {};
-	copy.bufferOffset = 0;
+	copy.bufferOffset = offset;
 	copy.bufferRowLength = 0;
 	copy.bufferImageHeight = 0;
 	copy.imageSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
@@ -547,14 +547,14 @@ bool Texture2D::CopyTextureToBuffer(VkCommandBuffer cmdbuf, Buffer* buffer)
 	return true;
 }
 
-void Texture2D::CopyTextureToBufferImmediate(Buffer* buffer)
+void Texture2D::CopyTextureToBufferImmediate(Buffer* buffer, VkDeviceSize offset)
 {
 	const auto& manager = VulkanManager::GetManager();
 	VkCommandBuffer buf;
 	manager->AllocateCommandBuffer(manager->GetCommandPool(), buf);
 	manager->BeginCommandBuffer(buf, 0);
 	{
-		CopyTextureToBuffer(buf, buffer);
+		CopyTextureToBuffer(buf, buffer, offset);
 	}
 	manager->EndCommandBuffer(buf);
 	manager->SubmitQueueImmediate({ buf });
@@ -569,6 +569,7 @@ void Texture2D::CopyTextureToBufferImmediate(Buffer* buffer)
 
 using namespace cv;
 #define M_PI  3.14159265358979323846
+
 // Define our six cube faces.
 // 0 - 3 are side faces, clockwise order
 // 4 and 5 are top and bottom, respectively
@@ -581,9 +582,11 @@ long double faceTransform[6][2] =
 	{-M_PI / 2, 0},
 	{M_PI / 2, 0},
 };
+
 // Map a part of the equirectangular panorama (in) to a cube face
 // (face). The ID of the face is given by faceId. The desired
 // width and height are given by width and height.
+
 inline void createCubeMapFace(const Mat& in, Mat& face,
 	int faceId = 0, const int width = -1,
 	const int height = -1) {
