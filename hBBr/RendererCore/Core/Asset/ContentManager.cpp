@@ -163,9 +163,7 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				savePath = FileSystem::Append(savePath, guidStr + ".cubedds");
 				suffix = "cubedds";
 				//使用nvtt插件导入hdr,转为cubedds(dds)
-				HDRI2Cube hdriToCube(i.absAssetFilePath);
-				hdriToCube.PassInit();
-				hdriToCube.PassExecute();
+				HDRI2Cube hdriToCube(i.absAssetFilePath, "D:/ABC.dds", true);
 				return false;
 				//Texture2D::CompressionImage2D(i.absAssetFilePath.c_str(), savePath.c_str(), true, nvtt::Format_BC7, false);
 			}
