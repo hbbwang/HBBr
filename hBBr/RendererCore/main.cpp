@@ -8,6 +8,7 @@
 #include "./Asset/World.h"
 #include "./Core/RendererConfig.h"
 #include "./Asset/Material.h"
+#include "FontTextureFactory.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #include "Imgui/backends/imgui_impl_sdl3.h"
@@ -146,9 +147,14 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	outFontTexturePath = FileSystem::GetProgramPath() + outFontTexturePath;
 	FileSystem::CorrectionPath(outFontTexturePath);
 	
-	//Texture2D::CreateFontTexture(ttfFontPath, outFontTexturePath, true, 20U, 2800U);
+#if IS_EDITOR
+	//生成字体纹理
+	//FontTextureFactory::CreateFontTexture(ttfFontPath, outFontTexturePath, true, 20U, 2800U);
+#endif
 
 	Texture2D::GlobalInitialize();
+
+	FontTextureFactory::LoadFontTexture();
 
 	//Create Main Window
 	auto win = CreateNewWindow(128, 128, "MainRenderer", false, parent);
@@ -210,6 +216,7 @@ void VulkanApp::DeInitVulkanManager()
 	PipelineManager::ClearPipelineObjects();
 	ContentManager::Get()->Release();
 	Texture2D::GlobalRelease();
+	FontTextureFactory::ReleaseFontTexture();
 	VulkanManager::ReleaseManager();
 	//保存配置文件
 	SaveRendererConfig();

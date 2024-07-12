@@ -3,6 +3,6 @@
         "DefaultWorld": "a1f072fa-cdc0-e64a-ef7c-aebfcfa2afa4",
         "Font": "C:/Windows/Fonts/msyh.ttc",
         "FontConfig": "Asset/Font/Font.json",
-        "FontTexture": "Asset/Font/font.png"
+        "FontTexture": "Asset/Font/font.dds"
     }
 }

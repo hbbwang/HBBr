@@ -1,6 +1,7 @@
 ﻿#include "GUIPass.h"
 #include "VulkanRenderer.h"
 #include "SceneTexture.h"
+#include "FontTextureFactory.h"
 #include <stdio.h>
 
 GUIPass::~GUIPass()
@@ -151,9 +152,9 @@ void GUIPass::_GUIDrawText(HString tag, HString h_text, float x, float y, float 
 	state.uniformBuffer.Color = glm::vec4(1,1,1,2);
 	state.uniformBuffer.Flags = IsFont;
 	GUIPrimitive* prim = GetPrimitve(tag, state, (int)textLength, _guiShaderIndex, x, y, w, h);
-	if (prim->BaseTexture != Texture2D::GetFontTexture())
+	if (prim->BaseTexture != FontTextureFactory::GetFontTexture())
 	{
-		prim->BaseTexture = Texture2D::GetFontTexture();
+		prim->BaseTexture = FontTextureFactory::GetFontTexture();
 		prim->tex_descriptorSet->NeedUpdate();
 	}
 	//计算每个文字面片位置
@@ -173,10 +174,10 @@ void GUIPass::_GUIDrawText(HString tag, HString h_text, float x, float y, float 
 		//文字不存在fixed模式,文字的大小不应该被变形
 		prim->States[i].bFixed = false;
 		//获取文字信息
-		auto info = Texture2D::GetFontInfo(prim->fontCharacter[i]);
+		auto info = FontTextureFactory::GetFontInfo(prim->fontCharacter[i]);
 		prim->States[i].uniformBuffer.UVSetting = glm::vec4(info->posX, info->posY, info->sizeX, info->sizeY);
-		prim->States[i].uniformBuffer.TextureSizeX = (float)Texture2D::GetFontTexture()->GetTextureSize().width;
-		prim->States[i].uniformBuffer.TextureSizeY = (float)Texture2D::GetFontTexture()->GetTextureSize().height;
+		prim->States[i].uniformBuffer.TextureSizeX = (float)FontTextureFactory::GetFontTexture()->GetTextureSize().width;
+		prim->States[i].uniformBuffer.TextureSizeY = (float)FontTextureFactory::GetFontTexture()->GetTextureSize().height;
 		//文字像素大小
 		if (textChar == L' ')
 		{

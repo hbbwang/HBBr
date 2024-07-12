@@ -1,0 +1,79 @@
+{
+    "ContentBrowser": {
+        "CreateFolder": "创建新的目录",
+        "CreateMaterialInstance": "创建材质实例",
+        "DeleteFile": "删除文件",
+        "DeleteFolder": "删除目录",
+        "FileRename": "资产重命名",
+        "FolderRename": "目录重命名",
+        "ImportAssets": "导入资产",
+        "ImportButton": "导入资产",
+        "RefreshContentBrowser": "刷新内容浏览器",
+        "SaveButton": "保存所有",
+        "UpdateFileListPreviewImage": "刷新当前目录的预览图"
+    },
+    "DirtyAssetsManager": {
+        "BaseTitle0": "保存资产",
+        "BaseTitle1": "请先确认资产保存,再进行操作",
+        "CancelButton": "关闭窗口",
+        "ClearButton": "清空(不保存)",
+        "Name": "名字",
+        "PosX": 0,
+        "PosY": 0,
+        "Repository": "仓库",
+        "SaveButton": "保存选中",
+        "Type": "类型",
+        "VirtualPath": "路径",
+        "WindowHeight": 247,
+        "WindowWidth": 367
+    },
+    "MainWindow": {
+        "ContentBrowserTitle": "内容浏览器",
+        "Inspector": "细节编辑器",
+        "MainTitle": "HBB渲染编辑器",
+        "PosX": 1431,
+        "PosY": 605,
+        "SceneOutlineTitle": "场景大纲",
+        "WindowHeight": 800,
+        "WindowWidth": 1276,
+        "bWindowed": true
+    },
+    "MaterialEditor": {
+        "MaterialAttrbuteTitle": "材质属性",
+        "MaterialParameterTitle": "材质参数",
+        "MaterialRendererTitle": "材质预览视口",
+        "MaterialTextureTitle": "Texture",
+        "MaterialUniformBufferTitle": "Uniform Buffer",
+        "PixelUniformBuffer": "像素着色器",
+        "PosX": 506,
+        "PosY": 488,
+        "RefreshShader": "刷新Shader:[vs:%s][ps:%s]",
+        "RefreshShaderButton": "刷新Shader",
+        "SaveButton": "保存",
+        "VertexUniformBuffer": "顶点着色器",
+        "WindowHeight": 768,
+        "WindowWidth": 1024
+    },
+    "RenderView": {
+        "SpawnGameObject": "目前没有场景开启编辑状态!"
+    },
+    "SceneOutline": {
+        "CreateBasicGameObject": "预设创建",
+        "CreateCube": "创建Cube",
+        "CreateNewGameObject": "生成新的GameObject",
+        "CreateNewLevel": "创建新场景",
+        "CreatePlane": "创建Plane",
+        "CreateSphere": "创建Sphere",
+        "CurrentEditLevelLog": "当前编辑场景: %s",
+        "DeleteGameObject": "删除",
+        "DeleteLevel": "删除场景",
+        "LevelSelection": "编辑场景",
+        "LoadLevel": "加载场景",
+        "RenameGameObject": "重命名",
+        "RenameLevel": "重命名场景",
+        "SetGameObjectLevel": "对象[%s]移动到新的场景[%s]",
+        "SetGameObjectLevelFailed": "目标场景未加载",
+        "SetGameObjectParent": "对象[%s]变换Parent[%s]",
+        "UnloadLevel": "卸载场景"
+    }
+}

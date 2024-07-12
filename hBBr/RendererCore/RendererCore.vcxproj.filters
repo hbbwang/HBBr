@@ -256,6 +256,12 @@
     <ClInclude Include="Core\Pass\HDRI2Cube.h">
       <Filter>Renderer\Core\Pass\ComputePass</Filter>
     </ClInclude>
+    <ClInclude Include="Editor\NvidiaTextureTools.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\FontTextureFactory.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -425,6 +431,12 @@
     </ClCompile>
     <ClCompile Include="Core\Pass\HDRI2Cube.cpp">
       <Filter>Renderer\Core\Pass\ComputePass</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\NvidiaTextureTools.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\FontTextureFactory.cpp">
+      <Filter>Editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

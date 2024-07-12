@@ -1,0 +1,848 @@
+VariableDefine {
+    BackgroundColor: rgb(31, 31, 31) ;
+    FontFamily:  Arial, Helvetica, sans-serif;
+    SplitterHandleColor : rgb(125,125,125);
+    SplitterWidth : 2px;
+}
+#EditorMain
+{
+    /* background-image: url(./Config/Theme/Images/MainWindowBackgroundImage.jpg) repeat ; */
+    /* background-position:center top; */
+    /* image: url(./Config/Theme/Images/MainWindowBackgroundImage.jpg); */
+    font-family:  FontFamily;
+    background-color: BackgroundColor;
+}
+#RenderView
+{
+    background-color: rgb(0,0,0);
+}
+QWidget
+{
+    font-family:  FontFamily;
+    color: rgb(190, 190, 190);
+    selection-color:rgb(125,125,125);
+    selection-background-color: rgb(80,80,80);
+}
+QMainWindow::separator
+{
+    background-color:SplitterHandleColor;
+    width: SplitterWidth;
+    border: 1px solid rgb(0,0,0);
+}
+QTabWidget
+{
+
+}
+QTabWidget::pane
+{
+
+}
+QTabBar::tab 
+{
+    height: 25px;
+    font-size: 16px ;
+    background-color: rgb(25,25,25);
+    color:rgb(150,150,150);
+    font-family:  FontFamily;
+    border-bottom:1px solid  rgb(65, 65, 65);
+}
+QTabBar::tab:selected
+{
+    height: 25px;
+    color:rgb(230,230,230);
+    background-color: rgb(62, 66, 71);
+    border: 1px solid rgb(99, 197, 143);
+}
+QTabBar::tab:!selected:hover 
+{
+    background-color: rgb(50,50,50);
+    color:rgb(230,230,230);
+}
+QTabBar::tab::label 
+{
+    width: 120px;
+}
+QCheckBox{
+    font-family:  FontFamily;
+    background-color:transparent;
+}
+QLabel
+{    
+    font-family:  FontFamily;
+    color:rgb(130,130,130);
+}
+QComboBox
+{    
+    font-family:  FontFamily;
+    background-color: rgba(25,25,25,0.9);
+    color:rgb(180,180,180);
+    border:1px solid  rgb(80,80,80);
+    height: 50;
+    border-radius: 2px;
+}
+QComboBox QAbstractItemView
+{    
+    font-family:  FontFamily;
+    background-color: rgba(25,25,25,0.1);
+    color:rgb(150,150,150);
+    border: 1.5px solid rgb(179, 171, 171);
+    selection-background-color: rgb(82, 82, 82);
+    selection-color: rgb(255,255,255);
+}
+QLineEdit
+{
+    background-color: rgba(25,25,25,0.9);
+    color:rgb(160,160,160);
+    border:1px solid  rgb(80,80,80);
+    font-family:  FontFamily;
+}
+QLineEdit:focus
+{
+    background-color: rgb(25,25,25);
+    color:rgb(200,200,200);
+    border: 1px solid rgb(100,100,100);
+}
+QLineEdit:hover
+{
+    background-color: rgb(25,20,20);
+    color:rgb(200,200,200);
+    border: 1px solid rgb(200,180,180);
+}
+QMessageBox 
+{ 
+    background-color: rgb(40,40,40);
+    border: 2px solid rgb(140, 140, 140);
+    color:#ffffff;
+}
+QMessageBox .QLabel
+{ 
+    background-color: rgb(40,40,40);
+    color:#ffffff;
+}
+QMenuBar
+{
+    font-family:  FontFamily;
+    background-color: rgb(40,40,40);
+    border-bottom: 2px solid rgb(125, 125, 125);
+    Color:rgb(160,160,160);
+    padding-top: 4px;
+    padding-bottom: 4px;
+    font-size: 14px;
+}
+QMenu
+{
+    background-color: rgb(40,40,40);
+    border: 1px solid rgb(125, 125, 125);
+    Color:rgb(160,160,160);
+    padding: 5px;
+}
+QMenu::item
+{
+    font-size: 14px;
+}
+QMenu::item:selected
+{
+    background-color: rgb(81, 81, 81);
+    /* border: 1px solid rgb(200, 200, 200); */
+    Color:rgb(255,255,255);
+}
+QMenu::separator
+{
+    height:1px;
+    background-color:rgb(118, 118, 118);
+    /* margin-left:5px;
+    margin-right:5px; */
+}
+QStatusBar
+{
+    color: #bababa;
+    background-color: rgba(20,20,20,0.9);
+    border: 1px solid rgb(138, 138, 138);
+    margin-left: 1px;
+    margin-right: 1px;
+}
+QToolTip
+{
+    background-color: rgba(20,20,20,0.9);
+    border: 2px solid rgb(137, 137, 137);
+    color:rgb(200,200,210);
+}
+/* ScrollBar */
+QScrollArea QWidget
+{
+    background-color: BackgroundColor;
+}
+QScrollBar:vertical
+{ 
+    width: 16px;
+    background-color: rgba(0,0,0,0);
+}
+QScrollBar::handle:vertical
+{
+    background-color: rgba(40,40,40,1.0);
+    border: 1.2px solid rgb(160, 108, 125);
+    margin-left: 1px;
+    margin-right: 1px;
+    margin-top: 22px;
+    margin-bottom: 22px;
+}
+QScrollBar::handle:vertical:hover
+{
+    background-color: rgb(160, 108, 125);
+    border: 1.2px solid rgb(160, 160, 160);
+}
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical
+{
+    background: rgba(0,0,0,0.5);
+    margin-top: -22px;
+    margin-bottom: -22px;
+    border: 1px solid rgb(85, 70, 75);
+}
+QScrollBar::add-line:vertical
+{    
+    height: 20px;
+    background-color: rgba(70,70,70,1);
+    border: 1.2px solid rgb(180, 150, 68);
+    subcontrol-position: bottom;
+    margin-bottom: -15px;
+}
+QScrollBar::sub-line:vertical
+{    
+    height: 20px;
+    background-color: rgba(70,70,70,1);
+    border: 1.2px solid rgb(180, 150, 68);
+    subcontrol-position: top;
+    margin-top: -15px;
+}
+/*Horizontal ScrollBar*/
+QScrollBar:horizontal
+{ 
+    height: 16px;
+    background-color: rgba(0,0,0,0);
+}
+QScrollBar::handle:horizontal
+{
+    background-color: rgba(40,40,40,1.0);
+    border: 1.2px solid rgb(160, 108, 125);
+    margin-left: 22px;
+    margin-right: 22px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+QScrollBar::handle:horizontal:hover
+{
+    background-color: rgb(160, 108, 125);
+    border: 1.2px solid rgb(160, 160, 160);
+}
+QScrollBar::add-page:horizontal, 
+QScrollBar::sub-page:horizontal
+{
+    background: rgba(0,0,0,0.5);
+    margin-left: -22px;
+    margin-right: -22px;
+    border: 1px solid rgb(85, 70, 75);
+}
+QScrollBar::add-line:horizontal
+{    
+    width: 20px;
+    background-color: rgba(70,70,70,1);
+    border: 1.2px solid rgb(180, 150, 68);
+    subcontrol-position: right;
+    margin-right: -15px;
+}
+QScrollBar::sub-line:horizontal
+{    
+    width: 20px;
+    background-color: rgba(70,70,70,1);
+    border: 1.2px solid rgb(180, 150, 68);
+    subcontrol-position: left;
+    margin-left: -15px;
+}
+QToolButton
+{
+    font-size: 17px;
+    font-family: FontFamily;
+    min-width: 25px;
+    height: 25%;
+    border-radius: 2px;
+    border: 1px solid rgb(70, 70, 70);
+}
+QToolButton:hover
+{
+    color:#fff ;
+    background-color: #353132;
+}
+QHeaderView::section
+{
+    background-color: rgb(41, 50, 32);
+    border: 1px solid rgb(189, 169, 158);
+    color:rgb(218, 211, 192);
+}
+/* PushButton */
+QPushButton
+{
+    background-color: rgb(50, 50, 50);
+    color:rgb(202, 202, 202);
+    font-family:  FontFamily;
+    border-radius: 4px;
+    width: 100%;
+    height: 25px;
+}
+QPushButton:hover
+{
+    background-color: rgb(102, 86, 86);
+    color:#FFFFFF;
+    font-family: FontFamily;
+    border-radius: 4px;
+    width:100%;
+    height: 25px;
+}
+QPushButton:pressed
+{
+    background-color: rgb(115, 89, 89);
+    color:#FFFFFF;
+    font-family:  FontFamily;
+    border: 1.5px solid rgb(210, 210, 210);
+    border-radius: 4px;
+    width:100%;
+    height: 25px;
+}
+QDockWidget
+{
+    font-family: FontFamily;
+    color:rgb(235, 235, 235);
+    background-color: BackgroundColor; 
+}
+QDockWidget::title
+{
+    background-color: rgb(51, 51, 51);
+    padding-left: 1px;
+    padding-top: 7px;
+    border-bottom: 2px solid rgb(100, 100, 100);
+}
+QDockWidget::close-button,
+QDockWidget::float-button
+{
+    color:rgb(200, 200, 200);
+    border: 1px;
+}
+QDockWidget::float-button:hover,
+QDockWidget::close-button:hover
+{
+    color:rgb(200, 200, 200);
+    background-color: rgb(151, 115, 115);
+}
+QTreeView 
+{
+    font-family: FontFamily;
+    background-color: BackgroundColor;
+    color: antiquewhite;
+    outline: 0;
+    font-weight:400;
+    font-size: 16px;
+}
+QTreeView::item 
+{
+    height: 20px;
+    border: none;
+    color: rgb(184, 184, 184);
+    margin: 1px;
+}
+QTreeView::item:hover 
+{
+    color :rgb(209, 209, 209);
+    background-color: rgba(66, 66, 66, 0.8);
+    outline: 0;
+}
+QTreeView::item:selected
+{
+    color :rgb(255, 255, 255);
+    background-color: rgb(59, 61, 65);
+    border: 1px solid rgb(120, 120, 120);
+    border-radius: 2px;
+    outline: 0;
+}
+QTreeView::branch:selected 
+{
+}
+QTreeView::branch:closed:has-children
+{
+    image: url(./Config/Theme/Icons/TreeWidget_Close.png);
+}
+QTreeView::branch:open:has-children
+{
+    image: url(./Config/Theme/Icons/TreeWidget_Open.png);
+}
+QTreeView::indicator:unchecked
+{
+
+}
+QTreeView::indicator:checked
+{
+
+}
+QListView
+{
+    outline: 0; 
+    background-color:BackgroundColor;
+}
+QListView::item:hover
+{
+
+}
+QListView::item:selected
+{
+
+}
+QSplitter
+{
+    background-color:BackgroundColor;
+}
+QSplitter::handle
+{
+    background-color:SplitterHandleColor;
+    height: SplitterWidth;
+    /* border: 1px solid rgb(110,110,110); */
+}
+#ToolBox
+{
+
+}
+#ToolPage QPushButton
+{
+    background-color: rgb(53, 53, 53);
+    border: none;
+}
+#SceneOutline
+{
+    background-color: BackgroundColor;
+}
+#SceneOutline_ComboBox_Main
+{
+}
+#SceneOutline_ComboBox
+{
+    height: 25px;
+    font-family: FontFamily;
+    font-weight: 400;
+}
+#SceneOutline_Name
+{
+    color: #adadad;
+    height: 25px;
+    font-family: FontFamily;
+    font-weight: 400;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+/* All Property Name */
+#PropertyName
+{
+    font-family: FontFamily;
+    color:rgb(200,200,200);
+    background-color: transparent;
+    font-size: 14px;
+    min-width: 60%;
+}
+/* Property SpinBox */
+#PropertySpinBox_X
+{
+    margin-left: 2px;
+    margin-right: 2px;
+    border:1px solid rgb(105, 105, 105);
+    /* border-radius:4px; */
+    color:rgb(255,255,255);
+    background:qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb(155, 50, 25), stop:0.19 rgb(155, 50, 25), stop:0.2 rgb(75, 75, 75));
+}
+#PropertySpinBox_Y
+{
+    margin-left: 2px;
+    margin-right: 2px;
+    border:1px solid rgb(105, 105, 105);
+    /* border-radius:4px; */
+    color:rgb(255,255,255);
+    background:qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb(25, 155, 50), stop:0.19 rgb(25, 155, 50), stop:0.2 rgb(75, 75, 75));
+}
+#PropertySpinBox_Z
+{
+    margin-left: 2px;
+    margin-right: 2px;
+    border:1px solid rgb(105, 105, 105);
+    /* border-radius:4px; */
+    color:rgb(255,255,255);
+    background:qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb(25, 50, 155), stop:0.19 rgb(25, 50, 155), stop:0.2 rgb(75, 75, 75));
+}
+#PropertySpinBox_W
+{
+    margin-left: 2px;
+    margin-right: 2px;
+    border:1px solid rgb(105, 105, 105);
+    /* border-radius:4px; */
+    color:rgb(255,255,255);
+    background:qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb(155, 155, 155),stop:0.19 rgb(155, 155, 155), stop:0.2 rgb(75, 75, 75));
+}
+/* Property  Check Box */
+#PropertyCheckBox
+{ 
+    background:transparent;
+}
+#PropertyCheckBox::indicator 
+{
+    width: 10px; 
+    height: 10px; 
+    border:4px double rgb(20,20,20);
+}
+#PropertyCheckBox::indicator:checked
+{   
+    background:rgb(105, 255, 50);
+
+    border-radius:2px;		
+}
+#PropertyCheckBox::indicator:unchecked  
+{     
+    background:rgb(200,50,20);
+    border-radius:	2px;		
+}
+/* Property AssetLine */
+#PropertyAssetLine
+{
+}
+#PropertyAssetLine_LineEdit
+{
+    border:1px solid rgb(10,10,10);
+    border-radius:2px;
+    background-color:rgb(75,75,75);
+    color:rgb(200,200,200);
+}
+#PropertyAssetLine_Button
+{  
+    border: 1px solid;
+    background-color:rgb(75,75,75);
+    color:rgb(220,220,220);
+    border-radius: 2px; 
+}
+#PropertyAssetLine_Button:hover
+{  
+    border: 1px solid;
+    background-color:rgb(150, 61, 55);
+    color:rgb(255,255,255);
+    border-radius:2px;
+}
+#PropertyAssetLine_Button:pressed
+{  
+    border: 1px solid;
+    background-color:rgb(230, 165, 149);
+    color:rgb(255,255,255);
+    border-radius:2px;
+    font:35 16pt;
+}
+/* SearchLine */
+#SearchLine
+{
+    border: 1px solid rgb(125, 125, 125);
+}
+#SearchLine_LineEdit
+{
+    margin: 1px;
+    border-radius: 2px;
+}
+#SearchLine_ComboBox
+{
+
+}
+#SearchLine_ComboBoxViewport
+{
+    
+}
+#SearchLine .QLabel
+{
+    border-image: url(./Config/Theme/Icons/ICON_SEARCH.png);
+}
+#CustomTreeView
+{
+    font-family: FontFamily;
+}
+#CustomListView_ToolTip
+{
+    font-family: FontFamily;
+    background-color: rgb(20,20,20);
+    color : rgb(235,235,235);
+    border:2px solid rgb(63, 117, 124);
+}
+#CustomListView_Text
+{
+    font-family: FontFamily;
+}
+#CustomTreeView_VirtualFolderTreeView
+{
+    font-family: FontFamily;
+    color: rgb(140, 140, 140) ;
+    font-weight:100;
+    font-size: 16px;
+    icon-size: 32px;
+}
+#CustomTreeView_VirtualFolderTreeView::item 
+{
+    color: rgb(195, 195, 195) ;
+    height: 20px;
+}
+#CustomTreeView_VirtualFolderTreeView::item:selected
+{
+    color: rgb(208, 223, 255) ;
+}
+#CustomTreeView_VirtualFolderTreeView::branch
+{
+
+}
+#CustomTreeView_VirtualFolderTreeView::branch:closed:has-children:!has-siblings,  
+#CustomTreeView_VirtualFolderTreeView::branch:closed:has-children:has-siblings
+{
+    image: url(./Config/Theme/Icons/ContentBrowser_FolderClose.png);
+}
+#CustomTreeView_VirtualFolderTreeView::branch:open:has-children:!has-siblings,  
+#CustomTreeView_VirtualFolderTreeView::branch:open:has-children:has-siblings
+{
+    image: url(./Config/Theme/Icons/ContentBrowser_FolderOpen.png);
+}
+#CustomListView_VirtualFileListView 
+{
+    background-color:transparent;
+    font-size: 15px;
+}
+#CustomListView_VirtualFileListView::item
+{
+    color:rgb(184, 184, 184);
+    text-align:left;
+    border:1px dashed rgb(107, 103, 103);
+    border-radius:6px;
+    margin: 2;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    /* padding: 10px; */
+}
+#CustomListView_VirtualFileListView::item:selected
+{
+    background: #2a303a;
+    color:rgb(227, 255, 250);
+    border:1px solid rgb(103, 134, 154);
+    font-weight: 400;
+}
+/* ContentBrowser */
+#ContentBrowser
+{
+    background-color: rgba(25,25,25,0.95);
+    font-family: FontFamily;
+}
+#ContentBrowser_RepositorySelection
+{
+    font-family: FontFamily;
+    background-color: rgb(20,30,20);
+    color : rgb(255, 255, 255);
+    border:3px solid rgb(67, 137, 113);
+    border-radius:12px;
+}
+#ContentBrowser_RepositorySelection QLabel
+{
+    font-weight: 400;
+    font-size: 20px;
+}
+#ContentBrowser_PathLabel
+{
+    /* border: 1px solid rgb(140, 90, 100); */
+    background-color:transparent;
+    color:rgb(175,175,175);
+    margin-left: 6px
+}
+#DirtyAssetsManager
+{
+    font-family:  FontFamily;
+    background-color: BackgroundColor;
+    border-left: 2px solid rgb(77, 79, 76);
+    border-right: 2px solid rgb(77, 79, 76);
+    border-bottom: 2px solid rgb(77, 79, 76);
+    color:rgb(240,240,240);
+}
+#DirtyAssetsManager .QTreeWidget::item
+{
+    font-family:  FontFamily;
+    height: 30px;
+    color:rgb(170, 170, 170);
+    border:none;
+    border: 1px solid rgb(86, 86, 86);
+    background-color: rgb(15, 15, 15);
+}
+#DirtyAssetsManager .QTreeWidget::item:hover
+{
+    color:rgb(190, 190, 190);
+    border:none;
+    border: 1px solid rgb(90, 90, 90);
+    background-color: rgb(35, 35, 35);
+}
+#DirtyAssetsManager .QTreeWidget::item:selected
+{
+    color:rgb(240,240,240);
+    border:none;
+    border: 1px solid rgb(100, 100, 100);
+    background-color: rgb(46, 48, 44);
+}
+#DirtyAssetsManager .QPushButton
+{
+    height: 35px ;
+    border: 1px solid rgb(102, 116, 112);
+    border-radius: 0px;
+    margin-top: 5px;
+}
+/* Inspector */
+#Inspector
+{
+    background-color: BackgroundColor;
+    font-family:  FontFamily;
+}
+#Inspector_Active::indicator 
+{
+    width: 14px; 
+    height: 14px; 
+    border:4px double rgb(20,20,20);
+    font-size: 0;
+}
+#Inspector_Active::indicator:checked
+{   
+    background:rgb(105, 255, 50);
+    border-radius:2px;		
+}
+#Inspector_Active::indicator:unchecked  
+{     
+    background:rgb(200,50,20);
+    border-radius:	2px;
+}
+#Inspector_ObjectName
+{
+    background-color: rgb(10,10,10);
+    border-radius:	2px;
+}
+#MaterialDetailEditor,
+#MaterialDetailEditor_MaterialAttributeScroll,
+#scrollAreaWidgetContents
+{
+    background-color: BackgroundColor;
+    border: none;
+    border-top: 1px solid rgb(100,100,100);
+    border-bottom: 1px solid rgb(100,100,100);
+}
+#MaterialDetailEditor QSplitter::handle
+{
+    height: 2px;
+}
+#MaterialDetailEditor_RendererName,
+#MaterialDetailEditor_MaterialParameterName,
+#MaterialDetailEditor_MaterialAttributeName
+{
+    font-family:  FontFamily;
+    color:rgb(230, 230, 230);
+    border-bottom: 1px solid rgb(100,100,100);
+    min-height: 25px;
+}
+
+#PropertyTableWidgetRow,
+#PropertyTableWidgetRowValue
+{
+    color: #cccccc;
+    font-family:  FontFamily;
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+    border:none;
+    border-bottom: 1px solid rgb(100,100,100);
+    border-left: 1px solid rgb(100,100,100);
+}
+#PropertyTableWidgetRowValue
+{
+    border:none;
+    border-bottom: 1px solid rgb(100,100,100);
+}
+#PropertyTableWidgetRowValue QToolButton
+{
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    background-color: rgb(41, 41, 41);
+    border-radius: 5px;
+}
+#PropertyTableWidgetRowValue QToolButton:hover
+{
+    background-color: rgb(64, 67, 71);
+}
+#PropertyTableWidgetRow:hover
+{
+    background-color: transparent;
+}
+#PropertyTableWidgetRowName
+{
+    color: #cccccc;
+    font-family:  FontFamily;
+    font-size: 14px;
+    border: none;
+    background-color: transparent;
+    margin: 0;
+    padding: 0;
+}
+#PropertyTableWidget QSplitter::handle
+{
+    height: 2px;
+    background-color: rgba(100,100,100,0.75);
+}
+#PropertyTableWidgetRowButtonImage
+{
+    background-color: transparent;
+}
+#PropertyTableWidgetRowGroupButton
+{
+
+}
+#PropertyTableWidgetRowGroupButtonValue
+{
+    border-bottom: 1px solid rgb(100,100,100);
+}
+#PropertyTableGroup_0,
+#PropertyTableGroup_1,
+#PropertyTableGroup_2,
+#PropertyTableGroup_3,
+#PropertyTableGroup_4,
+#PropertyTableGroup_5,
+#PropertyTableGroup_6
+{
+    font-size: 14px;
+    color: #bbbbbb;
+    border: none;
+    background-color: rgb(44, 47, 51);
+    border: 1px solid rgb(123, 145, 136);
+    border-top: none;
+    border-radius: 4px;
+    margin: 1px;
+    padding: 0px;
+}
+#PropertyTableGroup_0:hover,
+#PropertyTableGroup_1:hover,
+#PropertyTableGroup_2:hover,
+#PropertyTableGroup_3:hover,
+#PropertyTableGroup_4:hover,
+#PropertyTableGroup_5:hover,
+#PropertyTableGroup_6:hover
+{
+    background-color: rgba(50, 89, 100, 0.5);
+    border: 1px solid rgb(163, 196, 157);
+    border-top: none;
+    color: #FFFFFF;
+}
+
+
+
+
+
+
+
+
+
+
+#End{};

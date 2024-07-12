@@ -30,6 +30,7 @@
 #include "EditorMain.h"
 #include "ConsoleDebug.h"
 #include "MaterialDetailEditor.h"
+#include "NvidiaTextureTools.h"
 //--------------------------------------VirtualFolderTreeView-------------------
 #pragma region VirtualFolderTreeView
 void GetAllFolderChildItems(CustomViewItem* parentItem , QList<CustomViewItem*> & out)
@@ -795,7 +796,7 @@ void VirtualFileListView::SpawnAssetPreviewImage(std::weak_ptr<struct AssetInfoB
 	if (assetInfo.lock()->type == AssetType::Texture2D)
 	{
 		HString previewPath = (FileSystem::Append(FileSystem::GetAssetAbsPath(), "Saved/PreviewImage/Content/" + assetInfo.lock()->repository + "/Texture2D/" + assetInfo.lock()->guid.str() + ".jpg"));
-		Texture2D::DecompressionImage2D(
+		NVTT::DecompressionImage2D(
 			assetInfo.lock()->absFilePath.c_str(),
 			previewPath.c_str(),
 			nullptr, 64, 64);

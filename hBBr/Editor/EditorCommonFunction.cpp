@@ -357,7 +357,7 @@ QImage GetImageFromTGA(QString path)
         return result;
     }
 
-    auto tgaImage = ImageTool::ReadTgaImage(info.filePath().toStdString().c_str());
+    auto tgaImage = ImageTool::LoadImage8Bit(info.filePath().toStdString().c_str());
     if (tgaImage == nullptr)
     {
         return result;

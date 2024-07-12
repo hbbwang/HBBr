@@ -68,13 +68,19 @@ std::weak_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags 
 		return std::weak_ptr<TextureCube>();
 	}
 #if _DEBUG
-	ConsoleDebug::print_endl("Import dds texture :" + filePath, "255,255,255");
+	ConsoleDebug::print_endl("Import cubemap(dds) texture :" + filePath, "255,255,255");
 #endif
 	//Load dds
 	DDSLoader loader(filePath.c_str());
 	auto out = loader.LoadDDSToImage();
 	if (out == nullptr)
 	{
+		return std::weak_ptr<TextureCube>();
+	}
+
+	if (!out->isCubeMap)
+	{
+		ConsoleDebug::printf_endl_warning("The texture asset is not a cube map.");
 		return std::weak_ptr<TextureCube>();
 	}
 
@@ -100,6 +106,7 @@ std::weak_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags 
 	newTexture->_imageSize = { w, h };
 	newTexture->_imageData = *out;
 	uint32_t arrayLevel = 6;
+
 	VulkanManager::GetManager()->CreateImage(w, h, format, usageFlags, newTexture->_image, newTexture->_imageData.mipLevel, arrayLevel);
 	if (format == VK_FORMAT_R32_SFLOAT || format == VK_FORMAT_D32_SFLOAT)
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;

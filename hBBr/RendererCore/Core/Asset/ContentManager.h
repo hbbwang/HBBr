@@ -22,8 +22,8 @@ enum class AssetType : uint32_t
 	Unknow = 0,
 	Model = 1,			//.fbx
 	Material = 2,		//.mat
-	Texture2D = 3,		//.tex2D
-	TextureCube = 4,
+	Texture2D = 3,		//.dds
+	TextureCube = 4,//.dds
 
 	MaxNum = 5,
 };

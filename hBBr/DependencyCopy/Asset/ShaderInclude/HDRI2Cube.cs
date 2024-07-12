@@ -1,21 +1,23 @@
 [Flag]
 {
-    NativeHLSL; //原生HLSL,不进行拓展编译,需遵循HLSL代码规范编写
-    HideInEditor;//不希望显示在编辑器(例如材质编辑器)
+    NativeHLSL; // 原生HLSL,不进行拓展编译,需遵循HLSL代码规范编写
+    HideInEditor;// 不希望显示在编辑器(例如材质编辑器)
 };
 
-//RW =read & write
+// 输出Cube map 的6个面
 RWTexture2D<float4> DstTexture0 : register(u0,space0);
 RWTexture2D<float4> DstTexture1 : register(u1,space0);
 RWTexture2D<float4> DstTexture2 : register(u2,space0);
 RWTexture2D<float4> DstTexture3 : register(u3,space0);
 RWTexture2D<float4> DstTexture4 : register(u4,space0);
 RWTexture2D<float4> DstTexture5 : register(u5,space0);
+// HDRI Texture2D
 Texture2D HDRITexture: register(t6,space0);
 SamplerState HDRITextureSampler: register(s6,space0);
 
 #define PI 3.14159265358979323846
 
+// 传递一下CubeMap的期望输出大小
 cbuffer Pass :register(b7,space0)
 {
     float CubeMapSize;

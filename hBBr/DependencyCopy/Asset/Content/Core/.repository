@@ -13,6 +13,15 @@
         "Type": 1,
         "VPath": "/Content/Core/Model"
     },
+    "226b51cd-a9d8-40dd-8055-153cd780dafc": {
+        "Dep": [],
+        "Format": "dds",
+        "Name": "T_CubeMap_White",
+        "RPath": "TextureCube/",
+        "Ref": [],
+        "Type": 4,
+        "VPath": "/Content/Core/CubeMap"
+    },
     "22d44cd6-68c3-4997-ad5f-3d52c45ef8fe": {
         "Dep": [],
         "Format": "mat",
@@ -147,6 +156,15 @@
         "Ref": [],
         "Type": 3,
         "VPath": "Content/Core/Texture"
+    },
+    "f1490ebb-c873-4baa-b4bf-e8292af28cf5": {
+        "Dep": [],
+        "Format": "dds",
+        "Name": "T_CubeMap_Black",
+        "RPath": "TextureCube/",
+        "Ref": [],
+        "Type": 4,
+        "VPath": "/Content/Core/CubeMap"
     },
     "fa3e3e63-872f-99e3-a126-6ce5b8fedfae": {
         "Dep": [],

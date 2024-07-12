@@ -309,6 +309,8 @@
     <ClInclude Include="Core\VertexFactory.h" />
     <ClInclude Include="Core\VulkanManager.h" />
     <ClInclude Include="Core\VulkanRenderer.h" />
+    <ClInclude Include="Editor\FontTextureFactory.h" />
+    <ClInclude Include="Editor\NvidiaTextureTools.h" />
     <ClInclude Include="Editor\ShaderCompiler.h" />
     <ClInclude Include="Form\FormMain.h" />
     <ClInclude Include="Form\GLFWInclude.h" />
@@ -368,6 +370,8 @@
     <ClCompile Include="Core\VertexFactory.cpp" />
     <ClCompile Include="Core\VulkanManager.cpp" />
     <ClCompile Include="Core\VulkanRenderer.cpp" />
+    <ClCompile Include="Editor\FontTextureFactory.cpp" />
+    <ClCompile Include="Editor\NvidiaTextureTools.cpp" />
     <ClCompile Include="Editor\ShaderCompiler.cpp" />
     <ClCompile Include="Form\FormMain.cpp" />
     <ClCompile Include="main.cpp" />

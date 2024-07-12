@@ -1,5 +1,4 @@
 ﻿#pragma once
-//基层HObject,管理对象
 #include "Common.h"
 #include <memory>
 #include <vector>
@@ -13,21 +12,6 @@
 #include "Buffer.h"
 //Vulkan api
 #include "VulkanManager.h"
-
-#ifdef IS_EDITOR
-#include "nvtt/include/nvtt/nvtt.h"
-#pragma comment(lib,"nvtt/lib/x64-v142/nvtt30106.lib")
-#endif
-
-struct FontTextureInfo
-{
-	//Font data
-	float posX;
-	float posY;
-	float sizeX;
-	float sizeY;
-	float sizeOffsetX;
-};
 
 enum TextureSampler
 {
@@ -82,9 +66,6 @@ public:
 	HBBR_API HBBR_INLINE static std::vector<Texture2D*>& GetUploadTextures(){
 		return _upload_textures;
 	}
-	HBBR_API HBBR_INLINE static Texture2D* GetFontTexture() {
-		return _fontTexture.get();
-	}
 	HBBR_API HBBR_INLINE static VkSampler GetSampler(TextureSampler sampler , int mipBias = -1) {
 		auto samplers = _samplers[sampler];
 		if (mipBias <0 || (int)samplers.size() <= mipBias)
@@ -92,17 +73,6 @@ public:
 			mipBias = 0;
 		}
 		return samplers[mipBias];
-	}
-	HBBR_API HBBR_INLINE static FontTextureInfo* GetFontInfo(wchar_t c) {
-		auto it = _fontTextureInfos.find(c);
-		if (it != _fontTextureInfos.end())
-		{
-			return &it->second;
-		}
-		else
-		{
-			return &_fontTextureInfos[32];
-		}
 	}
 	HBBR_API HBBR_INLINE static uint64_t GetTextureStreamingSize() {
 		return _textureStreamingSize;
@@ -143,22 +113,7 @@ public:
 	//获取渲染系统纹理,如果查找失败则返回第一张
 	HBBR_API static Texture2D* GetSystemTexture(HString tag);
 
-	//通过ttf生成dds纹理
-	static void CreateFontTexture(HString ttfFontPath, HString outTexturePath,bool bOverwrite = true,uint32_t fontSize = 48 , uint32_t maxTextureSize = 256);
-
 	HString _textureName;
-
-#ifdef IS_EDITOR
-
-#pragma region NVTT
-	HBBR_API static void CompressionImage2D(const char* imagePath, const char* outputDDS, bool bGenerateMips, nvtt::Format format, bool bGenerateNormalMap, bool bAutoFormat = false);
-	HBBR_API static void DecompressionImage2D(const char* ddsPath, const char* outputPath, nvtt::Surface* outData = nullptr, int32_t newWidth = -1, int32_t newHeight = -1, int32_t newDepth = -1);
-	HBBR_API static void DecompressionImageCube(const char* ddsPath, const char* outputPath, nvtt::Surface* outData = nullptr, int32_t newWidth = -1, int32_t newHeight = -1, int32_t newDepth = -1);
-	HBBR_API static void OutputImage(const char* outputPath, int w, int h, nvtt::Format format , void* outData);
-	HBBR_API static void GetImageDataFromCompressionData(const char* ddsPath, nvtt::Surface* outData);
-#pragma endregion NVTT
-
-#endif
 
 	//Image data, Read only
 	ImageData _imageData;
@@ -189,10 +144,6 @@ protected:
 	static std::unordered_map<HString, Texture2D*> _system_textures;
 	//<mipLod,sampler>
 	static std::unordered_map<TextureSampler, std::vector<VkSampler>> _samplers;
-	
-	// vector<RGBA channel<wchar_t , FontTextureInfo>>
-	static std::unordered_map<wchar_t, FontTextureInfo> _fontTextureInfos;
-	static std::shared_ptr<Texture2D> _fontTexture;
 
 	//Texture2D streaming
 	static uint64_t _textureStreamingSize;

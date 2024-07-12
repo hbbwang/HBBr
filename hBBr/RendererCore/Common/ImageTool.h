@@ -64,24 +64,17 @@ typedef struct tagImageData
 class ImageTool
 {
 public:
-	HBBR_API static bool SaveTgaImage(const char* filename, ImageData* tgaData);
 
-	HBBR_API static bool SaveTgaImage(const char* filename, uint16_t w , uint16_t h ,  uint16_t d ,  void* imageData);
+	HBBR_API static bool SaveImage(const char* filename, int w, int h, int channels, const void* data, int jpgQuality = 80);
 
-	HBBR_API static bool SavePngImageGrey(const char* filename, uint16_t w, uint16_t h, void* imageData);
+	HBBR_API static std::shared_ptr<ImageData> LoadDDSTexture(const char* filename);
 
-	HBBR_API static bool SavePngImageRGBA8(const char* filename, uint16_t w, uint16_t h, void* imageData);
+	//加载非高动态范围图像，例如:png，tga，bmp，jpg等...
+	HBBR_API static std::shared_ptr<ImageData> LoadImage8Bit(const char* filename, bool bsRGB = true);
 
-	HBBR_API static bool SavePngImageRGB8(const char* filename, uint16_t w, uint16_t h, void* imageData);
+	//加载高动态范围图像，例如:hdr
+	HBBR_API static std::shared_ptr<ImageData> LoadImage32Bit(const char* filename);
 
-	HBBR_API static std::shared_ptr<ImageData> ReadDDSImage(const char* filename);
-
-	HBBR_API static std::shared_ptr<ImageData> ReadTgaImage(const char* filename);
-
-	HBBR_API static std::shared_ptr<ImageData> ReadPngImage(const char* filename);
-
-	HBBR_API static std::shared_ptr<ImageData> ReadHDRImage(const char* filename);
-
-	HBBR_API static void ImageFlipY(uint32_t w,uint32_t h,uint32_t d, void* data);
+	HBBR_API static void ImageFlipY(uint32_t w,uint32_t h, uint32_t d, void* data);
 
 };

@@ -1,9 +1,12 @@
 ﻿#include "ContentManager.h"
 #include "FileSystem.h"
+
 #include "Asset/AssetObject.h"
 #include "Asset/Model.h"
 #include "Asset/Material.h"
 #include "Asset/Texture2D.h"
+#include "Asset/TextureCube.h"
+#include "NvidiaTextureTools.h"
 #include "Asset/Level.h"
 #include "Asset/World.h"
 #include "RendererConfig.h"
@@ -152,7 +155,7 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				savePath = FileSystem::Append(savePath, guidStr + ".dds" );
 				suffix = "dds" ;
 				//使用nvtt插件导入image
-				Texture2D::CompressionImage2D(i.absAssetFilePath.c_str(), savePath.c_str(),true,nvtt::Format_BC7,false);
+				NVTT::CompressionImage2D(i.absAssetFilePath.c_str(), savePath.c_str(),true,nvtt::Format_BC7,false);
 			}
 			//----------------------------------------TextureCube
 			else if (suffix.IsSame("hdr", false))
@@ -160,12 +163,10 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				type = AssetType::TextureCube;
 				assetTypeName = GetAssetTypeString(type);
 				HString savePath = FileSystem::Append(repositoryPath, assetTypeName);
-				savePath = FileSystem::Append(savePath, guidStr + ".cubedds");
-				suffix = "cubedds";
+				savePath = FileSystem::Append(savePath, guidStr + ".dds");
+				suffix = "dds";
 				//使用nvtt插件导入hdr,转为cubedds(dds)
-				HDRI2Cube hdriToCube(i.absAssetFilePath, "D:/ABC.dds", true);
-				return false;
-				//Texture2D::CompressionImage2D(i.absAssetFilePath.c_str(), savePath.c_str(), true, nvtt::Format_BC7, false);
+				HDRI2Cube hdriToCube(i.absAssetFilePath, savePath, false, 1);
 			}
 			//----------------------------------------Material
 			else if (suffix.IsSame("mat", false))
@@ -591,6 +592,9 @@ std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)
 			break;
 		case AssetType::Texture2D:
 			result.reset(new AssetInfo<Texture2D>()); 
+			break;
+		case AssetType::TextureCube:
+			result.reset(new AssetInfo<TextureCube>());
 			break;
 		default:break;
 	}
