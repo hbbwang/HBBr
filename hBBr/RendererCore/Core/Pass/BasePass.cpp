@@ -14,18 +14,32 @@
 #pragma region BasePass
 BasePass::~BasePass()
 {
-	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_vsm_t);
+
 	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_vsm);
-	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_psm_t);
 	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_psm);
-	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_vspsm_t);
 	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_vspsm);
-	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_t);
 	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o);
+	for (int i = 0; i < _maxTextureBinding; i++)
+	{
+		VulkanManager::GetManager()->DestroyDescriptorSetLayout(_descriptorSetLayout_tex[i]);
+		VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_vsm_t[i]);
+		VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_psm_t[i]);
+		VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_vspsm_t[i]);
+		VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_t[i]);
+	}
+	_descriptorSetLayout_tex.clear();
 }
 
 void BasePass::PassInit()
 {
+	//一个shader，最高可以绑定16张纹理和采样器
+	_maxTextureBinding = 16;
+	_descriptorSetLayout_tex.resize(16);
+	_pipelineLayout_p_o_vsm_t.resize(16);
+	_pipelineLayout_p_o_psm_t.resize(16);
+	_pipelineLayout_p_o_vspsm_t.resize(16);
+	_pipelineLayout_p_o_t.resize(16);
+
 	//Swapchain
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	//SceneDepth
@@ -40,31 +54,43 @@ void BasePass::PassInit()
 	_opaque_descriptorSet_mat_ps.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, BufferSizeRange, { VK_SHADER_STAGE_FRAGMENT_BIT }));
 	_opaque_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
 	_opaque_indexBuffer.reset(new Buffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT));
-	manager->CreatePipelineLayout(
-		{
-			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
-			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
-			_opaque_descriptorSet_mat_vs->GetDescriptorSetLayout(),
-			manager->GetImageDescriptorSetLayout()
-		}
-	, _pipelineLayout_p_o_vsm_t);
-	manager->CreatePipelineLayout(
-		{
-			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
-			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
-			_opaque_descriptorSet_mat_ps->GetDescriptorSetLayout(),
-			manager->GetImageDescriptorSetLayout()
-		}
-	, _pipelineLayout_p_o_psm_t);
-	manager->CreatePipelineLayout(
-		{
-			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
-			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
-			_opaque_descriptorSet_mat_vs->GetDescriptorSetLayout(),
-			_opaque_descriptorSet_mat_ps->GetDescriptorSetLayout(),
-			manager->GetImageDescriptorSetLayout()
-		}
-	, _pipelineLayout_p_o_vspsm_t);
+	for (int i = 0; i < _maxTextureBinding; i++)
+	{
+		manager->CreateDescripotrSetLayout(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, i + 1, _descriptorSetLayout_tex[i]);
+		manager->CreatePipelineLayout(
+			{
+				_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
+				_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
+				_opaque_descriptorSet_mat_vs->GetDescriptorSetLayout(), 
+				_descriptorSetLayout_tex[i]
+			}
+		, _pipelineLayout_p_o_vsm_t[i]); 
+		manager->CreatePipelineLayout(
+			{
+				_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
+				_opaque_descriptorSet_obj->GetDescriptorSetLayout(), 
+				_opaque_descriptorSet_mat_ps->GetDescriptorSetLayout(), 
+				_descriptorSetLayout_tex[i] 
+			}
+		, _pipelineLayout_p_o_psm_t[i]); 
+		manager->CreatePipelineLayout(
+			{
+				_opaque_descriptorSet_pass->GetDescriptorSetLayout(), 
+				_opaque_descriptorSet_obj->GetDescriptorSetLayout(), 
+				_opaque_descriptorSet_mat_vs->GetDescriptorSetLayout(),
+				_opaque_descriptorSet_mat_ps->GetDescriptorSetLayout(),
+				_descriptorSetLayout_tex[i]
+			}
+		, _pipelineLayout_p_o_vspsm_t[i]);
+		manager->CreatePipelineLayout(
+			{
+				_opaque_descriptorSet_pass->GetDescriptorSetLayout(), 
+				_opaque_descriptorSet_obj->GetDescriptorSetLayout(), 
+				_descriptorSetLayout_tex[i] 
+			}
+		, _pipelineLayout_p_o_t[i]); 
+	}
+
 	manager->CreatePipelineLayout(
 		{
 			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
@@ -93,13 +119,7 @@ void BasePass::PassInit()
 			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
 		}
 	, _pipelineLayout_p_o);
-	manager->CreatePipelineLayout(
-		{
-			_opaque_descriptorSet_pass->GetDescriptorSetLayout(),
-			_opaque_descriptorSet_obj->GetDescriptorSetLayout(),
-			manager->GetImageDescriptorSetLayout()
-		}
-	, _pipelineLayout_p_o_t);
+
 	//Pass Uniform总是一尘不变的,并且我们用的是Dynamic uniform buffer ,所以只需要更新一次所有的DescriptorSet即可。
 	_opaque_descriptorSet_pass->UpdateDescriptorSetAll(sizeof(PassUniformBuffer));
 	_passName = "Opaque Render Pass";
@@ -176,6 +196,13 @@ void BasePass::SetupBasePassAndDraw(Pass p)
  			auto pipelineObj = PipelineManager::GetGraphicsPipelineMap(m->graphicsIndex);
 			if (pipelineObj == nullptr)
 			{
+				//清空纹理描述符集
+				auto m_dst_it = _descriptorSet_tex.find(m);
+				if (m_dst_it != _descriptorSet_tex.end())
+				{
+					_descriptorSet_tex.erase(m_dst_it);
+				}
+
 				HString vsShaderFullName = m->graphicsIndex.GetVSShaderFullName();
 				HString psShaderFullName = m->graphicsIndex.GetPSShaderFullName();
 				//auto vsCacheIt = Shader::_vsShader.find(vsShaderFullName);
@@ -196,13 +223,13 @@ void BasePass::SetupBasePassAndDraw(Pass p)
 				if (pipelineCreateInfo.bHasMaterialTexture)
 				{
 					if (pipelineCreateInfo.bHasMaterialParameterVS && !pipelineCreateInfo.bHasMaterialParameterPS)
-						pipelineLayout = _pipelineLayout_p_o_vsm_t;
+						pipelineLayout = _pipelineLayout_p_o_vsm_t[psCache->header.shaderTextureCount];
 					else if (pipelineCreateInfo.bHasMaterialParameterPS && !pipelineCreateInfo.bHasMaterialParameterVS)
-						pipelineLayout = _pipelineLayout_p_o_psm_t;
+						pipelineLayout = _pipelineLayout_p_o_psm_t[psCache->header.shaderTextureCount];
 					else if (pipelineCreateInfo.bHasMaterialParameterPS && pipelineCreateInfo.bHasMaterialParameterVS)
-						pipelineLayout = _pipelineLayout_p_o_vspsm_t;
+						pipelineLayout = _pipelineLayout_p_o_vspsm_t[psCache->header.shaderTextureCount];
 					else
-						pipelineLayout = _pipelineLayout_p_o_t;
+						pipelineLayout = _pipelineLayout_p_o_t[psCache->header.shaderTextureCount];
 				}
 				else
 				{
@@ -238,7 +265,6 @@ void BasePass::SetupBasePassAndDraw(Pass p)
 				matOffset_ps += m->uniformBufferSize_ps;
 			}
 
-
 			if (m->GetTextures().size() > 0)
 			{
 				auto tex_it = _descriptorSet_tex.find(m);
@@ -251,7 +277,7 @@ void BasePass::SetupBasePassAndDraw(Pass p)
 						for (auto& i : new_tds)
 						{
 							i.texCache = m->GetTextures();
-							manager->AllocateDescriptorSet(manager->GetDescriptorPool(), manager->GetImageDescriptorSetLayout(), i.descriptorSet_tex);
+							manager->AllocateDescriptorSet(manager->GetDescriptorPool(), _descriptorSetLayout_tex[m->GetTextures().size()], i.descriptorSet_tex);
 							manager->UpdateTextureDescriptorSet(i.descriptorSet_tex, m->GetTextures(), m->GetSamplers());
 						}
 					}	

@@ -142,9 +142,6 @@
     <ClInclude Include="Form\FormMain.h">
       <Filter>Renderer\Form</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Pass\BasePass.h">
-      <Filter>Renderer\Core\Pass</Filter>
-    </ClInclude>
     <ClInclude Include="Common\HTime.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -262,6 +259,9 @@
     <ClInclude Include="Editor\FontTextureFactory.h">
       <Filter>Editor</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Pass\BasePass.h">
+      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -323,9 +323,6 @@
     </ClCompile>
     <ClCompile Include="Core\Thread.cpp">
       <Filter>Renderer\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Pass\BasePass.cpp">
-      <Filter>Renderer\Core\Pass</Filter>
     </ClCompile>
     <ClCompile Include="Common\HTime.cpp">
       <Filter>Common</Filter>
@@ -437,6 +434,9 @@
     </ClCompile>
     <ClCompile Include="Editor\FontTextureFactory.cpp">
       <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Pass\BasePass.cpp">
+      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

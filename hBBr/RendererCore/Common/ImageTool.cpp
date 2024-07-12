@@ -17,7 +17,7 @@
 #define memcpy_s(dst,dstSize,src,srcSize) memcpy(dst,src,dstSize)
 #endif
 
-HBBR_API bool ImageTool::SaveImage(const char* filename, int w, int h, int channels, const void* data, int jpgQuality)
+HBBR_API bool ImageTool::SaveImage8Bit(const char* filename, int w, int h, int channels, const void* data, int jpgQuality)
 {
 	HString savePath = filename;
 	HString suffix = savePath.GetSuffix();
@@ -37,6 +37,17 @@ HBBR_API bool ImageTool::SaveImage(const char* filename, int w, int h, int chann
 	else if (suffix.IsSame("bmp", false))
 	{
 		return stbi_write_bmp(filename, w, h, channels, data);
+	}
+	return false;
+}
+
+bool ImageTool::SaveImage32Bit(const char* filename, int w, int h, int channels, const float* data)
+{
+	HString savePath = filename;
+	HString suffix = savePath.GetSuffix();
+	if (suffix.IsSame("hdr", false))
+	{
+		return stbi_write_hdr(filename, w, h, channels, data);
 	}
 	return false;
 }

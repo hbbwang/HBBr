@@ -217,14 +217,17 @@ public:
 
 	//参数
 	//Shader参数
+	//PS
 	std::vector<glm::vec4> uniformBuffer_ps;
 	uint64_t uniformBufferSize_ps = 0;
 	std::vector<MaterialParameterInfo> _paramterInfos_ps;
 
+	//VS
 	std::vector<glm::vec4> uniformBuffer_vs;
 	uint64_t uniformBufferSize_vs = 0;
 	std::vector<MaterialParameterInfo> _paramterInfos_vs;
 
+	//Texs
 	std::vector<MaterialTextureInfo> _textureInfos;
 
 private:

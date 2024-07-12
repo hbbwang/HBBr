@@ -65,7 +65,9 @@ class ImageTool
 {
 public:
 
-	HBBR_API static bool SaveImage(const char* filename, int w, int h, int channels, const void* data, int jpgQuality = 80);
+	HBBR_API static bool SaveImage8Bit(const char* filename, int w, int h, int channels, const void* data, int jpgQuality = 80);
+
+	HBBR_API static bool SaveImage32Bit(const char* filename, int w, int h, int channels, const float* data);
 
 	HBBR_API static std::shared_ptr<ImageData> LoadDDSTexture(const char* filename);
 

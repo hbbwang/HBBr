@@ -9,6 +9,7 @@
 #include "ContentManager.h"
 #include "Serializable.h"
 #include "RendererConfig.h"
+#include "TextureCube.h"
 
 std::vector<Texture2D*> Texture2D::_upload_textures;
 std::unordered_map<HString, Texture2D*> Texture2D::_system_textures;
@@ -284,6 +285,7 @@ void Texture2D::GlobalInitialize()
 	auto normalTex = ContentManager::Get()->LoadAsset<Texture2D>(HGUID("fa3e3e63-872f-99e3-a126-6ce5b8fedfae"));
 	auto whiteTex = ContentManager::Get()->LoadAsset<Texture2D>(HGUID("38c42242-404c-b372-fac8-d0441f2100f8"));
 	auto testTex = ContentManager::Get()->LoadAsset<Texture2D>(HGUID("eb8ac147-e469-f5a3-c48a-5daec8880f1f"));
+	auto blackCubeMapTex = ContentManager::Get()->LoadAsset<TextureCube>(HGUID("f1490ebb-c873-4baa-b4bf-e8292af28cf5"));
 
 	if(!uvGridTex.expired())
 		Texture2D::AddSystemTexture("UVGrid", uvGridTex.lock().get());
@@ -295,6 +297,8 @@ void Texture2D::GlobalInitialize()
 		Texture2D::AddSystemTexture("Normal", normalTex.lock().get());
 	if (!testTex.expired())
 		Texture2D::AddSystemTexture("TestTex", testTex.lock().get());
+	if (!blackCubeMapTex.expired())
+		Texture2D::AddSystemTexture("CubeMapBalck", blackCubeMapTex.lock().get());
 }
 
 void Texture2D::GlobalUpdate()
@@ -338,7 +342,7 @@ bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 	const auto& manager = VulkanManager::GetManager();
 	{
 		//上一帧已经复制完成了,可以删除Upload buffer 和Memory了
-		if (_bUploadToGPU)
+		if (IsValid())
 		{
 			if (_uploadBuffer != VK_NULL_HANDLE)
 			{
@@ -431,22 +435,20 @@ bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 				else
 					Transition(cmdbuf, _imageLayout, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, _imageData.mipLevel);
 			}
-
-			//上传完成,标记
-			_bUploadToGPU = true;
 			//上传完成,清除图像的CPU数据
 			_imageData.imageData.clear();
 			_imageData.imageDataF.clear();
 			return false;
 		}
 	}
+	//上传完成,标记
+	_bUploadToGPU++;
 	return false;
 }
 
 void Texture2D::CopyBufferToTextureImmediate()
 {
 	const auto& manager = VulkanManager::GetManager();
-	manager->DeviceWaitIdle();
 	VkCommandBuffer buf;
 	manager->AllocateCommandBuffer(manager->GetCommandPool(), buf);
 	manager->BeginCommandBuffer(buf, 0);
@@ -455,10 +457,9 @@ void Texture2D::CopyBufferToTextureImmediate()
 	}
 	manager->EndCommandBuffer(buf);
 	manager->SubmitQueueImmediate({ buf });
-	manager->DeviceWaitIdle();
 	manager->FreeCommandBuffer(manager->GetCommandPool(), buf);
 	//
-	if (_bUploadToGPU)
+	//if (IsValid())
 	{
 		if (_uploadBuffer != VK_NULL_HANDLE)
 		{
@@ -475,6 +476,21 @@ void Texture2D::CopyBufferToTextureImmediate()
 	if (it != _upload_textures.end())
 	{
 		_upload_textures.erase(it);
+	}
+}
+
+void Texture2D::DestoryUploadBuffer()
+{
+	const auto& manager = VulkanManager::GetManager();
+	if (_uploadBuffer != VK_NULL_HANDLE)
+	{
+		vkDestroyBuffer(manager->GetDevice(), _uploadBuffer, nullptr);
+		_uploadBuffer = VK_NULL_HANDLE;
+	}
+	if (_uploadBufferMemory != VK_NULL_HANDLE)
+	{
+		vkFreeMemory(manager->GetDevice(), _uploadBufferMemory, nullptr);
+		_uploadBufferMemory = VK_NULL_HANDLE;
 	}
 }
 

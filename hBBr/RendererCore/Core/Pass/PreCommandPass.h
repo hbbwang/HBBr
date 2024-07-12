@@ -10,4 +10,6 @@ public:
 	virtual ~PreCommandPass();
 	virtual void PassInit()override;
 	virtual void PassUpdate()override;
+
+	VkCommandBuffer _cmdBuf;
 };

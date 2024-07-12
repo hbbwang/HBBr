@@ -18,11 +18,11 @@ struct HDRI2CubeUnifrom
 class HDRI2Cube :public ComputePass
 {
 public:
-	HDRI2Cube(HString hdrImagePath, HString ddsOutputPath,bool bGenerateMips, int cubeMapSize = -1);
+	HDRI2Cube(HString hdrImagePath);
 
 	virtual ~HDRI2Cube();
 
-	void PassReExecute(HString ddsOutputPath, bool bGenerateMips, int cubeMapSize = -1);
+	bool PassExecute(HString ddsOutputPath, bool bGenerateMips, int cubeMapSize = -1);
 
 	void ReleasePass();
 

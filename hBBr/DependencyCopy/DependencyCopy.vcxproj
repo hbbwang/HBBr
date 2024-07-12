@@ -179,8 +179,7 @@
       <Command>xcopy  /s /y /e /i $(solutiondir)DependencyCopy\Config\* $(solutiondir)$(Platform)\$(Configuration)\Config\
 xcopy  /s /y /e /i $(solutiondir)DependencyCopy\Asset\* $(solutiondir)$(Platform)\$(Configuration)\Asset\
 xcopy  /y /i $(solutiondir)ThirdParty\shaderc\*.dll $(solutiondir)$(Platform)\$(Configuration)\
-xcopy  /y  /i $(solutiondir)ThirdParty\assimp\lib\Debug\*.dll $(solutiondir)$(Platform)\$(Configuration)\
-xcopy  /s /y /e /i $(solutiondir)Editor\Config\* $(solutiondir)$(Platform)\$(Configuration)\Config\</Command>
+xcopy  /y  /i $(solutiondir)ThirdParty\assimp\lib\Debug\*.dll $(solutiondir)$(Platform)\$(Configuration)\</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>

@@ -86,6 +86,8 @@ public:
 
 	HBBR_API void CopyBufferToTextureImmediate();
 
+	void DestoryUploadBuffer();
+
 	HBBR_API bool CopyTextureToBuffer(VkCommandBuffer cmdbuf, Buffer* buffer, VkDeviceSize offset = 0);
 
 	HBBR_API void CopyTextureToBufferImmediate(Buffer* buffer, VkDeviceSize offset = 0);
@@ -93,7 +95,7 @@ public:
 	HBBR_API void Resize(uint32_t width, uint32_t height);
 
 	HBBR_API HBBR_INLINE bool IsValid()const {
-		return _bUploadToGPU;
+		return _bUploadToGPU > VulkanManager::GetManager()->GetSwapchainBufferCount();
 	}
 
 	HBBR_API static std::shared_ptr<Texture2D> CreateTexture2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, HString textureName = "Texture2D", uint32_t miplevel = 1, uint32_t layerCount = 1, VkMemoryPropertyFlags memoryPropertyFlag = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -120,7 +122,7 @@ public:
 
 protected:
 
-	bool _bUploadToGPU = false;
+	uint32_t _bUploadToGPU = 0;
 
 	//Vulkan object
 	VkImage _image;

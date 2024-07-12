@@ -162,7 +162,6 @@ VulkanManager::~VulkanManager()
 #ifdef IS_EDITOR
 	ImGui::DestroyContext();
 #endif
-	DestroyDescriptorSetLayout(_descriptorSetLayout_tex);
 	DestroyDescriptorPool(_descriptorPool);
 	DestroyCommandPool();
 	if (_bDebugEnable)
@@ -1280,6 +1279,10 @@ void VulkanManager::CreateImage(uint32_t width , uint32_t height, VkFormat forma
 	VkImageCreateInfo	create_info{};
 	create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	create_info.flags = 0;
+	if (layerCount == 6)
+	{
+		create_info.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+	}
 	create_info.format = format;
 	create_info.imageType = VK_IMAGE_TYPE_2D;
 	create_info.usage = usageFlags;
@@ -1964,11 +1967,11 @@ void VulkanManager::DestroyRenderSemaphores(std::vector<VkSemaphore>& semaphore)
 	semaphore.clear();
 }
 
-void VulkanManager::CreateFence(VkFence& fence)
+void VulkanManager::CreateFence(VkFence& fence, VkFenceCreateFlags createFlags)
 {
 	VkFenceCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	info.flags = VK_FENCE_CREATE_SIGNALED_BIT;//default signaled
+	info.flags = createFlags;//default signaled
 	VkResult result = vkCreateFence(_device, &info, VK_NULL_HANDLE, &fence);
 	if (result != VK_SUCCESS) {
 		MessageOut("Create Fence Failed.", false, true);
@@ -2222,7 +2225,6 @@ void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, u
 	ImGui_ImplVulkan_CreateFontsTexture(buf);
 	EndCommandBuffer(buf);
 	SubmitQueueImmediate({ buf });
-	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
 	FreeCommandBuffer(_commandPool, buf);
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 #endif
@@ -2296,6 +2298,9 @@ void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf)
 
 void VulkanManager::SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask, VkQueue queue)
 {
+	VkFence fence;
+	CreateFence(fence, 0);
+
 	if (cmdBufs.size() <= 0)
 	{
 		MessageOut(GetInternationalizationText("Renderer","A000013"), false, true);
@@ -2311,12 +2316,15 @@ void VulkanManager::SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, V
 	info.pCommandBuffers = cmdBufs.data();
 	VkResult result;
 	if (queue == VK_NULL_HANDLE)
-		result = vkQueueSubmit(_graphicsQueue, 1, &info, VK_NULL_HANDLE);
+		result = vkQueueSubmit(_graphicsQueue, 1, &info, fence);
 	else
-		result = vkQueueSubmit(queue, 1, &info, VK_NULL_HANDLE);
+		result = vkQueueSubmit(queue, 1, &info, fence);
 	if(result != VK_SUCCESS)
 		MessageOut(("[Submit Queue Immediate]vkQueueSubmit error: " + GetVkResult(result)), false, false);
-	vkQueueWaitIdle(_graphicsQueue);
+
+	vkWaitForFences(_device, 1, &fence, VK_TRUE, UINT64_MAX);
+
+	DestroyFence(fence);
 }
 
 void VulkanManager::SubmitQueue(std::vector<VkCommandBuffer> cmdBufs, std::vector <VkSemaphore> lastSemaphore, std::vector <VkSemaphore> newSemaphore, VkPipelineStageFlags waitStageMask, VkQueue queue)

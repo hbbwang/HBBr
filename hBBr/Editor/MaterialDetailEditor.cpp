@@ -23,6 +23,8 @@
 #include <QTimer>
 #include <EditorMain.h>
 #include <SDLWidget.h>
+#include "Asset/Texture2D.h"
+#include "Asset/TextureCube.h"
 QList<MaterialDetailEditor*>MaterialDetailEditor::_allDetailWindows;
 MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget *parent)
 	: QMainWindow(parent)
@@ -384,12 +386,25 @@ void MaterialDetailEditor::InitMP()
 					};
 				//路径发生变化的时候执行
 				line->_bindAssetPath =
-					[this, i](const char* s)
+					[this, i, line](const char* s)
 					{
 						auto newTexInfo = ContentManager::Get()->GetAssetByVirtualPath(s);
 						if (!newTexInfo.expired())
 						{
-							_material.lock()->GetPrimitive()->SetTexture(i.index, newTexInfo.lock()->GetAssetObject<Texture2D>().lock().get());
+							std::weak_ptr<Texture2D> getTex; 
+							if (newTexInfo.lock()->type == AssetType::Texture2D)
+							{
+								getTex = newTexInfo.lock()->GetAssetObject<Texture2D>();
+							}
+							else if (newTexInfo.lock()->type == AssetType::TextureCube)
+							{
+								getTex = newTexInfo.lock()->GetAssetObject<TextureCube>();
+							}
+							if (!getTex.expired())
+							{
+								line->ui.LineEdit->setText(s);
+								_material.lock()->GetPrimitive()->SetTexture(i.index, getTex.lock().get());
+							}
 						}
 					};
 				pw_mp->AddItem(i.name.c_str(), line, 30, mt_sub_group);

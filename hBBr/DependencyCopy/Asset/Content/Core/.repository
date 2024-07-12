@@ -1,4 +1,11 @@
 {
+    "0126deb5-71a2-40e4-a415-32652ce099cf": {
+        "Format": "dds",
+        "Name": "HDRI-Skies-Sky_0043_2k",
+        "RPath": "TextureCube/",
+        "Type": 4,
+        "VPath": "/Content/Core/CubeMap"
+    },
     "0a13c94b-ff3a-4786-bc1b-10e420a23bf4": {
         "Format": "fbx",
         "Name": "UnknowMesh",
@@ -12,15 +19,6 @@
         "RPath": "Model/",
         "Type": 1,
         "VPath": "/Content/Core/Model"
-    },
-    "226b51cd-a9d8-40dd-8055-153cd780dafc": {
-        "Dep": [],
-        "Format": "dds",
-        "Name": "T_CubeMap_White",
-        "RPath": "TextureCube/",
-        "Ref": [],
-        "Type": 4,
-        "VPath": "/Content/Core/CubeMap"
     },
     "22d44cd6-68c3-4997-ad5f-3d52c45ef8fe": {
         "Dep": [],

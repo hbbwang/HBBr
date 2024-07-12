@@ -16,12 +16,16 @@ public:
 private:
 
 	void SetupBasePassAndDraw(Pass p);
+
 	//Contain uniform buffers {pass,obj,vsmat,tex} and textures
-	VkPipelineLayout _pipelineLayout_p_o_vsm_t = VK_NULL_HANDLE;
+	std::vector<VkPipelineLayout> _pipelineLayout_p_o_vsm_t;
 	//Contain uniform buffers {pass,obj,psmat,tex} and textures
-	VkPipelineLayout _pipelineLayout_p_o_psm_t = VK_NULL_HANDLE;
+	std::vector<VkPipelineLayout> _pipelineLayout_p_o_psm_t;
 	//Contain uniform buffers {pass,obj,vspsmat,tex} and textures
-	VkPipelineLayout _pipelineLayout_p_o_vspsm_t = VK_NULL_HANDLE;
+	std::vector<VkPipelineLayout> _pipelineLayout_p_o_vspsm_t;
+	//Contain uniform buffers {pass,obj,tex} and textures
+	std::vector<VkPipelineLayout> _pipelineLayout_p_o_t;
+
 	//Contain uniform buffers {pass,obj,vsmat}
 	VkPipelineLayout _pipelineLayout_p_o_vsm = VK_NULL_HANDLE;
 	//Contain uniform buffers {pass,obj,psmat}
@@ -30,8 +34,6 @@ private:
 	VkPipelineLayout _pipelineLayout_p_o_vspsm = VK_NULL_HANDLE;
 	//Contain uniform buffers {pass,obj}
 	VkPipelineLayout _pipelineLayout_p_o = VK_NULL_HANDLE;
-	//Contain uniform buffers {pass,obj,tex} and textures
-	VkPipelineLayout _pipelineLayout_p_o_t = VK_NULL_HANDLE;
 
 	std::vector<PipelineObject*> pipelineTemps;
 
@@ -39,6 +41,10 @@ private:
 	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_obj;
 	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_mat_vs;
 	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_mat_ps;
+	
+	int _maxTextureBinding;
+	std::vector<VkDescriptorSetLayout> _descriptorSetLayout_tex;
+
 	std::map<class MaterialPrimitive*,std::vector<TextureDescriptorSet>> _descriptorSet_tex;
 	std::shared_ptr<class Buffer>_opaque_vertexBuffer;
 	std::shared_ptr<class Buffer>_opaque_indexBuffer;

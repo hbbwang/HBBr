@@ -711,7 +711,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 					}
 				}
 			}
-			//Texture2D
+			//Texture
 			else if (setting[0] == 'T' && setting[1] == 'e' && setting[2] == 'x' && setting[3] == 't'
 				&& setting[4] == 'u' && setting[5] == 'r' && setting[6] == 'e')
 			{
@@ -727,6 +727,18 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 				std::string name = GetTextureNameFromShaderCodeLine(line[s]).c_str();
 				name.copy(shaderTextureInfos[infoIndex].name, sizeof(shaderTextureInfos[infoIndex].name) - 1);
 				shaderTextureInfos[infoIndex].name[sizeof(shaderTextureInfos[infoIndex].name) - 1] = '\0';
+				//GetType
+				shaderTextureInfos[infoIndex].type = MTType::Texture2D;
+				if (setting[0] == 'T' && setting[1] == 'e' && setting[2] == 'x' && setting[3] == 't'
+					&& setting[4] == 'u' && setting[5] == 'r' && setting[6] == 'e' && setting[7] == 'C' && setting[8] == 'u' && setting[9] == 'b' && setting[10] == 'e')
+				{
+					shaderTextureInfos[infoIndex].type = MTType::TextureCube;
+				}
+				else if (setting[0] == 'T' && setting[1] == 'e' && setting[2] == 'x' && setting[3] == 't'
+					&& setting[4] == 'u' && setting[5] == 'r' && setting[6] == 'e' && setting[7] == '2' && setting[8] == 'D' && setting[9] == 'A' && setting[10] == 'r' && setting[11] == 'r' && setting[12] == 'a' && setting[13] == 'y')
+				{
+					shaderTextureInfos[infoIndex].type = MTType::TextureArray;
+				}
 			}
 			else if (bCollectMaterialTexture)
 			{
@@ -784,22 +796,6 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 								shaderTextureInfos[infoSize - 1].msAddress = MSAddress::Mirror;
 							else if (valueStr.IsSame("Border", false))
 								shaderTextureInfos[infoSize - 1].msAddress = MSAddress::Border;
-						}
-					}
-					//独立属性
-					else
-					{
-						if (i.IsSame("vs", false))//顶点着色器专用
-						{
-
-						}
-						else if (i.IsSame("ps", false))//像素着色器专用
-						{
-
-						}
-						else if (i.IsSame("vsps", false))//顶点/像素着色器共用
-						{
-
 						}
 					}
 				}

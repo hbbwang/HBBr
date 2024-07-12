@@ -249,7 +249,7 @@ public:
 
 	void DestroyRenderSemaphores(std::vector<VkSemaphore>& semaphore);
 
-	void CreateFence(VkFence& fence);
+	void CreateFence(VkFence& fence, VkFenceCreateFlags createFlags = VK_FENCE_CREATE_SIGNALED_BIT);
 
 	void RecreateFences(std::vector<VkFence>& fences , uint32_t number);
 
@@ -383,14 +383,6 @@ public:
 		return _gpuFeatures;
 	}
 
-	HBBR_INLINE VkDescriptorSetLayout GetImageDescriptorSetLayout() {
-		if (_descriptorSetLayout_tex == VK_NULL_HANDLE)
-		{
-			CreateDescripotrSetLayout(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, _descriptorSetLayout_tex);
-		}
-		return _descriptorSetLayout_tex;
-	}
-
 	//忽略vkGetSwapchainImagesKHR里获取到的Images数量，坚持使用我们设定的数量
 	bool _bIsIgnoreVulkanSwapChainExtraImages = false;
 
@@ -427,8 +419,6 @@ private:
 	VkPhysicalDeviceFeatures			_gpuFeatures{};
 
 	VkPhysicalDeviceVulkan12Features	_gpuVk12Features{};
-
-	VkDescriptorSetLayout				_descriptorSetLayout_tex = VK_NULL_HANDLE;
 
 	VkQueue	_graphicsQueue;
 

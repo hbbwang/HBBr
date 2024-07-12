@@ -58,6 +58,15 @@ Texture2D BaseTexture
     Address = Wrap;
 };
 
+TextureCube EnvironmentTexture
+{
+    Name = EnvironmentTexture;
+    Default = Black;
+    Group = Default;
+    Filter = Linear;
+    Address = Wrap;
+};
+
 //像素着色器补充
 void frag(in VSToPS IN , inout PixelShaderParameter Parameters)
 {
@@ -68,11 +77,14 @@ void frag(in VSToPS IN , inout PixelShaderParameter Parameters)
     Parameters.Emissive         = 0.0f;
     //
     half4 BaseSample = BaseTexture.SampleBias(BaseTextureSampler,IN.Texcoord01.xy , 0);
+    half4 IBL = EnvironmentTexture.SampleLevel(EnvironmentTextureSampler, Parameters.WorldNormal.xyz, 0);
+
     BaseSample *= Tint;
-    Parameters.BaseColor = BaseSample;
+    BaseSample += IBL;
+    Parameters.BaseColor = BaseSample.rgb;
     Parameters.Metallic = Metallic;
     Parameters.Roughness = Roughness;
-    Parameters.Emissive = BaseSample;
+    Parameters.Emissive = BaseSample.rgb;
 }
 
 #include "Include/BasePassVertexShader.hlsl"

@@ -27,7 +27,8 @@
         "A000023":"[Material::LoadAsset] 没有找到对应的ShaderCache:%s ,将应用Error Cache...",
         "A000024":"[VulkanRenderer::ResizeBuffer] 重置Swapchain失败，Sufrace丢失",
         "A000025":"[Shader::LoadShaderCacheFile] 导入ShaderCache失败:%s",
-        "A000026":"[MaterialPrimitive] 获取参数失败,找不到该参数:%s,将返回0"
+        "A000026":"[MaterialPrimitive] 获取参数失败,找不到该参数:%s,将返回0",
+        "A000027":"[AssetImport] 导入资产(HDR图像)CubeMap失败"
     },
     "ModelComponent":{
         "SetMaterialIndexError": "[ModelComponent::SetMaterial]SetMaterial失败,Index错误."

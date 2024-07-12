@@ -87,7 +87,7 @@ struct PixelShaderParameter
     float3x3 TangentToWorld;
 };
 
-void InitPSParameter(in VSToPS IN , PixelShaderParameter Params)
+void InitPSParameter(in VSToPS IN , inout PixelShaderParameter Params)
 {
     Params.BaseColor = float3(0,0,0);
 

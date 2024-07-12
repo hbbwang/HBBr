@@ -7,6 +7,9 @@
 #include "ContentManager.h"
 #include "RendererConfig.h"
 #include "ConsoleDebug.h"
+#include "Texture2D.h"
+#include "TextureCube.h"
+
 Material::Material()
 {
 }
@@ -298,7 +301,16 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 			for (int i = 0; i < psCache->header.shaderTextureCount; i++)
 			{
 				mat->_primitive->_textureInfos[i] = (*psCache->ti[i]);
-				mat->_primitive->SetTexture(i, Texture2D::GetSystemTexture(psCache->texs[i].defaultTexture));
+				auto defaultTex = Texture2D::GetSystemTexture(psCache->texs[i].defaultTexture);
+				if (mat->_primitive->_textureInfos[i].type == MTType::TextureCube)
+				{
+					if (!defaultTex->_imageData.isCubeMap)
+					{
+						mat->_primitive->_textureInfos[i].value = "CubeMapBalck";
+						defaultTex = Texture2D::GetSystemTexture("CubeMapBalck");
+					}
+				}
+				mat->_primitive->SetTexture(i, defaultTex);
 				//Set Sampler
 				if (psCache->texs[i].msFilter == MSFilter::Nearest)
 				{
@@ -341,8 +353,17 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 					StringToGUID(value.c_str(), &guid);
 					if (!guid.isValid())
 					{
-						MessageOut((GetInternationalizationText("Renderer","A000020") + value), false, false, "255,0,0");
+						//MessageOut((GetInternationalizationText("Renderer","A000020") + value), false, false, "255,0,0");
 						auto tex = Texture2D::GetSystemTexture(info.value);
+						if (info.type == MTType::Texture2D && tex->_imageData.isCubeMap)
+						{
+							tex = Texture2D::GetSystemTexture("Black");
+						}
+						else if ( (info.type == MTType::TextureCube && !tex->_imageData.isCubeMap) || (info.type == MTType::TextureCube && info.value.IsSame("Black", false)))
+						{
+							tex = Texture2D::GetSystemTexture("CubeMapBalck");
+						}
+						
 						mat->_primitive->SetTexture(it->index, tex);
 					}
 					else
@@ -350,8 +371,15 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 						if (info.type == MTType::Texture2D)
 						{
 							auto asset = ContentManager::Get()->GetAsset<Texture2D>(guid, AssetType::Texture2D);
-							mat->_primitive->SetTexture(it->index, asset.lock().get());
-						}					
+							if(!asset.expired())
+								mat->_primitive->SetTexture(it->index, asset.lock().get());
+						}
+						else if (info.type == MTType::TextureCube)
+						{
+							auto asset = ContentManager::Get()->GetAsset<TextureCube>(guid, AssetType::Texture2D);
+							if (!asset.expired())
+								mat->_primitive->SetTexture(it->index, asset.lock().get());
+						}
 					}
 					texCount++;
 				}
@@ -361,6 +389,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 				}
 			}
 		}
+
 		//创建Material Primitive
 		PrimitiveProxy::GetNewMaterialPrimitiveIndex(mat->_primitive.get(), vsCache, psCache);
 

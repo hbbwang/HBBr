@@ -88,7 +88,7 @@ struct ShaderParameterInfo
 
 struct ShaderTextureInfo
 {
-	MPType type;
+	MTType type;
 	char name[32] = "\0";
 	char group[16] = "Default\0";
 	char defaultTexture[16];//systemTexture

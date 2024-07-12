@@ -107,8 +107,8 @@ void PassManager::SetupPassUniformBuffer(CameraComponent* camera, VkExtent2D ren
 
 		_passUniformBuffer.Projection = GetPerspectiveProjectionMatrix(
 			camera->GetFOV(), 
-			renderSize.width, 
-			renderSize.height, 
+			(float)renderSize.width, 
+			(float)renderSize.height,
 			camera->GetNearClipPlane(), 
 			camera->GetFarClipPlane(), 
 			_renderer->_surfaceCapabilities.currentTransform

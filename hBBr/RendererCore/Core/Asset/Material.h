@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "Common.h"
-#include "Texture2D.h"
 #include "Pass/PassType.h"
 #include "Primitive.h"
 #include "Asset/HGuid.h"

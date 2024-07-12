@@ -6,7 +6,7 @@
 #include "FormMain.h"
 #include "NvidiaTextureTools.h"
 
-HDRI2Cube::HDRI2Cube(HString hdrImagePath, HString ddsOutputPath, bool bGenerateMips, int cubeMapSize)
+HDRI2Cube::HDRI2Cube(HString hdrImagePath)
 	:ComputePass(nullptr)
 {
 	//Init
@@ -16,11 +16,6 @@ HDRI2Cube::HDRI2Cube(HString hdrImagePath, HString ddsOutputPath, bool bGenerate
 	auto imageData = ImageTool::LoadImage32Bit(hdrImagePath.c_str());
 	uint32_t w = imageData->data_header.width;
 	uint32_t h = imageData->data_header.height;
-	//Set cube map output size
-	if (cubeMapSize < 1)
-	{
-		cubeMapSize = h;
-	}
 	//Load HDRI image
 	_hdriTexture = Texture2D::CreateTexture2D(
 		w, h,
@@ -55,8 +50,6 @@ HDRI2Cube::HDRI2Cube(HString hdrImagePath, HString ddsOutputPath, bool bGenerate
 	//Create uniform buffer
 	auto alignmentSize = manager->GetMinUboAlignmentSize(sizeof(HDRI2CubeUnifrom));
 	_uniformBuffer.reset(new Buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, alignmentSize));
-	//Execute
-	PassReExecute(ddsOutputPath, bGenerateMips, cubeMapSize);
 }
 
 HDRI2Cube::~HDRI2Cube()
@@ -68,8 +61,14 @@ HDRI2Cube::~HDRI2Cube()
 	manager->DestroyDescriptorSetLayout(_storeDescriptorSetLayout);
 }
 
-void HDRI2Cube::PassReExecute(HString ddsOutputPath, bool bGenerateMips, int cubeMapSize)
+bool HDRI2Cube::PassExecute(HString ddsOutputPath, bool bGenerateMips, int cubeMapSize)
 {
+	//Set cube map output size
+	if (cubeMapSize < 1)
+	{
+		cubeMapSize = _hdriTexture->_imageData.data_header.height;
+	}
+
 	std::shared_ptr<Buffer>cubeBuffer;
 	const auto& manager = VulkanManager::GetManager();
 	//Pass Execute
@@ -174,10 +173,10 @@ void HDRI2Cube::PassReExecute(HString ddsOutputPath, bool bGenerateMips, int cub
 	{
 		//生成临时HDR图
 		//if (!stbi_write_hdr(hdrCubeMapCachePath.c_str(), cubeMapSize, cubeMapSize * 6, 4, (float*)cubeBuffer->GetBufferMemory()))
-		if (!ImageTool::SaveImage(hdrCubeMapCachePath.c_str(), cubeMapSize, cubeMapSize * 6, 4, (float*)cubeBuffer->GetBufferMemory()))
+		if (!ImageTool::SaveImage32Bit(hdrCubeMapCachePath.c_str(), cubeMapSize, cubeMapSize * 6, 4, (float*)cubeBuffer->GetBufferMemory()))
 		{
 			ConsoleDebug::print_endl("Save output image failed", "255,255,0");
-			return;
+			return false;
 		}
 		cubeBuffer->UnMapMemory();
 	}
@@ -197,7 +196,7 @@ void HDRI2Cube::PassReExecute(HString ddsOutputPath, bool bGenerateMips, int cub
 			ConsoleDebug::print("Compression Image Cube Failed.Image load failed.", "255,255,0");
 			//删除缓存图。
 			FileSystem::FileRemove(hdrCubeMapCachePath.c_str());
-			return;
+			return false;
 		}
 
 		//cube map 需要把HDR图拆出6份，必须保证不能小于6
@@ -206,7 +205,7 @@ void HDRI2Cube::PassReExecute(HString ddsOutputPath, bool bGenerateMips, int cub
 			ConsoleDebug::print("Compression Image Cube Failed.Because HDR image height small than 6.", "255,255,0");
 			//删除缓存图。
 			FileSystem::FileRemove(hdrCubeMapCachePath.c_str());
-			return;
+			return false;
 		}
 
 		//转线性颜色(HDR图像一般就是非sRGB所以可以不做这个操作)
@@ -253,6 +252,7 @@ void HDRI2Cube::PassReExecute(HString ddsOutputPath, bool bGenerateMips, int cub
 #endif
 
 	ReleasePass();
+	return  true;
 }
 
 void HDRI2Cube::ReleasePass()
