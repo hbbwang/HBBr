@@ -12,6 +12,8 @@
 #include "FileSystem.h"
 #include "AssetObject.h"
 #include "ContentBrowser.h"
+
+
 AssetLine::AssetLine(HString name, QWidget *parent, HString text, HString condition)
 	: PropertyClass(parent)
 {
@@ -25,6 +27,22 @@ AssetLine::AssetLine(QWidget* parent, HString text, HString condition)
 {
 	ui.setupUi(this);
 	Init(parent, text, condition);
+	ui.horizontalLayout->removeItem(ui.horizontalSpacer);
+	ui.Name->setHidden(true);
+	ui.horizontalLayout->setStretch(0, 0);
+	ui.horizontalLayout->setStretch(1, 0);
+	ui.horizontalLayout->setStretch(2, 0);
+	ui.horizontalLayout->setStretch(3, 0);
+	ui.horizontalLayout->setStretch(4, 10);
+	ui.horizontalLayout->setStretch(5, 0);
+}
+
+AssetLine::AssetLine(QWidget* parent, HString text, AssetType assetType)
+	: PropertyClass(parent)
+{
+	ui.setupUi(this);
+	Init(parent, text, "?");
+	_assetType = assetType;
 	ui.horizontalLayout->removeItem(ui.horizontalSpacer);
 	ui.Name->setHidden(true);
 	ui.horizontalLayout->setStretch(0, 0);
@@ -71,19 +89,25 @@ AssetLine::~AssetLine()
 {
 }
 
-void AssetLine::dragEnterEvent(QDragEnterEvent* event)
+bool AssetLine::CheckDragItem(CustomListItem* item)
 {
 	bool bOK = false;
 	auto condition = mCondition.split(";");
-	if (event->mimeData()->hasUrls())
+	for (auto cc : condition)
 	{
-		QFileInfo fileinfo(event->mimeData()->urls().at(0).toLocalFile());
-		for (auto cc : condition)
-		{
-			bOK = bOK || fileinfo.suffix().compare(cc, Qt::CaseInsensitive) == 0;
-		}
+		bOK = item->_assetInfo.lock()->suffix.IsSame(cc.toStdString().c_str(), false);
 	}
-	else if(event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))
+	if (!item->_assetInfo.expired())
+	{
+		bOK = bOK || item->_assetInfo.lock()->type == _assetType;
+	}
+	return bOK;
+}
+
+void AssetLine::dragEnterEvent(QDragEnterEvent* event)
+{
+	bool bOK = false;
+	if(event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))
 	{
 		QByteArray encoded = event->mimeData()->data("application/x-qabstractitemmodeldatalist");
 		auto cb = ContentBrowser::GetContentBrowsers();
@@ -101,14 +125,8 @@ void AssetLine::dragEnterEvent(QDragEnterEvent* event)
 					//收集拖拽的AssetInfos
 					if (event->source()->objectName().compare(source->objectName()) == 0)//List View
 					{
-						CustomListItem* Item = (CustomListItem*)source->item(row);
-						for (auto cc : condition)
-						{
-							HString suffix = Item->_fullPath.toStdString().c_str();
-							suffix = suffix.GetSuffix();
-							bOK = bOK || suffix.IsSame(cc.toStdString().c_str() , false);
-						}
-						event->acceptProposedAction();
+						CustomListItem* item = (CustomListItem*)source->item(row);
+						bOK = CheckDragItem(item);
 					}
 				}
 			}
@@ -117,20 +135,20 @@ void AssetLine::dragEnterEvent(QDragEnterEvent* event)
 	else
 	{
 		event->ignore();
+		return;
 	}
 
 	if (bOK)
 	{
 		highLight->setStyleSheet("background-color:rgba(10,255,55,0.25);border:3px dashed rgb(10,255,55);border-radius:4px;");
 		highLight->show();
-		event->acceptProposedAction();
 	}
 	else
 	{
 		highLight->setStyleSheet("background-color:rgba(255,75,25,0.25);border:3px dashed rgb(255,55,10);border-radius:4px;");
 		highLight->show();
 	}
-
+	event->acceptProposedAction();
 }
 
 void AssetLine::dragLeaveEvent(QDragLeaveEvent* event)
@@ -161,44 +179,14 @@ void AssetLine::dropEvent(QDropEvent* event)
 				//收集拖拽的AssetInfos
 				if (event->source()->objectName().compare(source->objectName()) == 0)//List View
 				{
-					CustomListItem* Item = (CustomListItem*)source->item(row);
-					if (Item && !Item->_assetInfo.expired())
+					CustomListItem* item = (CustomListItem*)source->item(row);
+					bool bOK = CheckDragItem(item);
+					if (bOK && item && !item->_assetInfo.expired())
 					{
-						_bindAssetPath(Item->_assetInfo.lock()->virtualFilePath.c_str());
+						_bindAssetPath(item->_assetInfo.lock()->virtualFilePath.c_str());
 					}
 				}
 			}
-		}
-	}
-	else
-	{
-		highLight->hide();
-		QFileInfo fileinfo(event->mimeData()->urls().at(0).toLocalFile());
-		auto condition = mCondition.split(";");
-		bool bOK = false;
-		for (auto cc : condition)
-		{
-			bOK = bOK || fileinfo.suffix().compare(cc, Qt::CaseInsensitive) == 0;
-		}
-		if (bOK)
-		{
-			//QMessageBox::information(0,0,0,0);
-			const QMimeData* mimeData = event->mimeData();
-			if (!mimeData->hasUrls())
-			{
-				return;
-			}
-			QList<QUrl> urlList = mimeData->urls();
-			//���ͬʱ�����˶����Դ��ֻѡ��һ��
-			QString fileName = urlList.at(0).toLocalFile();
-			if (fileName.isEmpty())
-			{
-				return;
-			}
-			HString path = fileName.toStdString().c_str();
-			path = FileSystem::GetRelativePath(path.c_str());
-			ui.LineEdit->setText(path.c_str());
-			UpdateSetting();
 		}
 	}
 
@@ -214,10 +202,6 @@ void AssetLine::lineChanged(QString newStr)
 		ui.LineEdit->setText(_stringBind->c_str());
 	}
 	_bindStringFunc(this, newStr.toStdString().c_str());
-	if (_objectBind )
-	{
-		ui.LineEdit->setText((_objectBind->_assetInfo.lock()->assetFilePath + _objectBind->_assetInfo.lock()->displayName).c_str());
-	}
 	if (_stringArrayBind)
 		_stringArrayBind->at(_stringArrayBindIndex) = newStr.toStdString().c_str();
 }

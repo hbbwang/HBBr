@@ -2128,7 +2128,6 @@ void VulkanManager::CreateBuffer(VkBufferUsageFlags usage, VkDeviceSize bufferSi
 	}
 }
 
-
 void VulkanManager::DestroyBuffer(VkBuffer& buffer)
 {
 	if (buffer != VK_NULL_HANDLE)

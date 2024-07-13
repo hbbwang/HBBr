@@ -28,7 +28,9 @@ public:
 
 	class  ContentBrowser* _contentBrowser;
 
-	bool _bSaveSelectionItem;
+	bool _bAddSelectionItem;
+
+	bool _bSubSelectionItem;
 
 private:
 	CustomViewItem* _ediingItem = nullptr;

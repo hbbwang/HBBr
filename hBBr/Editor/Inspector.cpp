@@ -273,7 +273,6 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 									treeItem = ContentBrowser::GetCurrentBrowser()->_treeView->FindItem(path);
 									if (treeItem)
 									{
-										ContentBrowser::GetCurrentBrowser()->_treeView->_bSaveSelectionItem = true;
 										treeIndex = ((QStandardItemModel*)ContentBrowser::GetCurrentBrowser()->_treeView->model())->indexFromItem(treeItem);
 										ContentBrowser::GetCurrentBrowser()->_treeView->expand(treeIndex);
 									}
@@ -333,7 +332,6 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 								treeItem = ContentBrowser::GetCurrentBrowser()->_treeView->FindItem(path);
 								if (treeItem)
 								{
-									ContentBrowser::GetCurrentBrowser()->_treeView->_bSaveSelectionItem = true;
 									treeIndex = ((QStandardItemModel*)ContentBrowser::GetCurrentBrowser()->_treeView->model())->indexFromItem(treeItem);
 									ContentBrowser::GetCurrentBrowser()->_treeView->expand(treeIndex);
 								}

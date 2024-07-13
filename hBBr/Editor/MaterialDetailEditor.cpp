@@ -376,7 +376,7 @@ void MaterialDetailEditor::InitMP()
 			std::weak_ptr<AssetInfoBase> assetInfo = prim->GetTextures()[i.index]->_assetInfo;
 			if (!assetInfo.expired())
 			{
-				AssetLine* line = new AssetLine(this, assetInfo.lock()->virtualFilePath, "dds");
+				AssetLine* line = new AssetLine(this, assetInfo.lock()->virtualFilePath, assetInfo.lock()->type);
 				//²éÕÒ°´Å¥
 				line->_bindFindButtonFunc =
 					[](const char* p)

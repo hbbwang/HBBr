@@ -4,6 +4,7 @@
 #include <qlabel.h>
 #include "PropertyClass.h"
 #include "HString.h"
+#include "ContentManager.h"
 
 class AssetLine : public PropertyClass 
 {
@@ -12,15 +13,15 @@ class AssetLine : public PropertyClass
 public:
 	AssetLine(HString name , QWidget *parent, HString text, HString condition = "");
 	AssetLine(QWidget* parent, HString text, HString condition = "");
+	AssetLine(QWidget* parent, HString text, AssetType assetType);
 	~AssetLine();
 
 	QString mCondition;
+	AssetType _assetType;
 
 	QLabel* highLight;
 
 	HString* _stringBind = nullptr;
-
-	class AssetObject* _objectBind = nullptr;
 
 	std::vector<HString>* _stringArrayBind = nullptr;
 
@@ -33,6 +34,8 @@ public:
 	void ShowClearButton(bool bShow);
 
 protected:
+
+	bool CheckDragItem(class CustomListItem* item);
 
 	void Init(QWidget* parent, HString text, HString condition = "");
 
