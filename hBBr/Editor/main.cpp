@@ -124,6 +124,8 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    QString rootPath = QCoreApplication::applicationDirPath();
+
     MyEventFilter filter;
     a.installEventFilter(&filter); // 安装事件过滤器
 

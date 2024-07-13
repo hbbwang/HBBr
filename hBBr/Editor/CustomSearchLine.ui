@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>372</width>
-    <height>167</height>
+    <height>72</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,19 +32,19 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,5,1">
      <property name="spacing">
-      <number>1</number>
+      <number>0</number>
      </property>
      <property name="leftMargin">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="topMargin">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="rightMargin">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="bottomMargin">
-      <number>2</number>
+      <number>0</number>
      </property>
      <item>
       <widget class="QLabel" name="label">

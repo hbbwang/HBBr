@@ -31,6 +31,9 @@
 #include "ConsoleDebug.h"
 #include "MaterialDetailEditor.h"
 #include "NvidiaTextureTools.h"
+#include <QStyledItemDelegate>
+#include <QStyledItemDelegate>
+
 //--------------------------------------VirtualFolderTreeView-------------------
 #pragma region VirtualFolderTreeView
 void GetAllFolderChildItems(CustomViewItem* parentItem , QList<CustomViewItem*> & out)
@@ -53,6 +56,39 @@ void GetAllFolderChildItems(CustomViewItem* parentItem , QList<CustomViewItem*> 
 	}
 }
 
+class VirtualFolderTreeViewDelegate : public QStyledItemDelegate
+{
+public:
+	class VirtualFolderTreeView* _tree;
+	VirtualFolderTreeViewDelegate(VirtualFolderTreeView* parent) :QStyledItemDelegate(parent)
+	{
+		_tree = parent;
+	}
+	void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
+	{
+		QStyleOptionViewItem opt = option;
+		initStyleOption(&opt, index);
+		//CustomViewItem* item = (CustomViewItem*)((QStandardItemModel*)_tree->model())->itemFromIndex(index);
+		auto rect = opt.rect;
+		QStyledItemDelegate::paint(painter, opt, index);
+		if (index.isValid())
+		{
+			if (_tree->isExpanded(index))
+			{
+				QPixmap eye((FileSystem::GetConfigAbsPath() + "Theme/Icons/ContentBrowser_FolderOpen.png").c_str());
+				eye.scaled(rect.height() - 1, rect.height() - 1);
+				painter->drawPixmap(rect.x() - rect.height() - 1, rect.y(), rect.height(), rect.height(), eye);
+			}
+			else
+			{
+				QPixmap eye((FileSystem::GetConfigAbsPath() + "Theme/Icons/ContentBrowser_FolderClose.png").c_str());
+				eye.scaled(rect.height() - 1, rect.height() - 1);
+				painter->drawPixmap(rect.x() - rect.height() - 1, rect.y(), rect.height(), rect.height(), eye);
+			}
+		}
+	}
+};
+
 VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrowser, QWidget* parent)
 	:CustomTreeView(parent)
 {
@@ -64,6 +100,8 @@ VirtualFolderTreeView::VirtualFolderTreeView(class  ContentBrowser* contentBrows
 	_newSelectionItems.reserve(50);
 	_currentSelectionItem = 0;
 	_bAddSelectionItem = _bSubSelectionItem = false;
+
+	setItemDelegate(new VirtualFolderTreeViewDelegate(this));
 
 	setDragEnabled(true);
 	setAcceptDrops(true);

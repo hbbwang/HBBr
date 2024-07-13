@@ -106,7 +106,7 @@ QLineEdit:hover
 {
     background-color: rgb(25,20,20);
     color:rgb(200,200,200);
-    border: 1px solid rgb(200,180,180);
+    border: 1px solid rgb(180, 186, 200);
 }
 QMessageBox 
 { 
@@ -157,7 +157,7 @@ QStatusBar
 {
     color: #bababa;
     background-color: rgba(20,20,20,0.9);
-    border: 1px solid rgb(138, 138, 138);
+    /* border: 1px solid rgb(138, 138, 138); */
     margin-left: 1px;
     margin-right: 1px;
 }
@@ -175,88 +175,7 @@ QScrollArea QWidget
 QScrollBar:vertical
 { 
     width: 16px;
-    background-color: rgba(0,0,0,0);
-}
-QScrollBar::handle:vertical
-{
-    background-color: rgba(40,40,40,1.0);
-    border: 1.2px solid rgb(160, 108, 125);
-    margin-left: 1px;
-    margin-right: 1px;
-    margin-top: 22px;
-    margin-bottom: 22px;
-}
-QScrollBar::handle:vertical:hover
-{
-    background-color: rgb(160, 108, 125);
-    border: 1.2px solid rgb(160, 160, 160);
-}
-QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical
-{
-    background: rgba(0,0,0,0.5);
-    margin-top: -22px;
-    margin-bottom: -22px;
-    border: 1px solid rgb(85, 70, 75);
-}
-QScrollBar::add-line:vertical
-{    
-    height: 20px;
-    background-color: rgba(70,70,70,1);
-    border: 1.2px solid rgb(180, 150, 68);
-    subcontrol-position: bottom;
-    margin-bottom: -15px;
-}
-QScrollBar::sub-line:vertical
-{    
-    height: 20px;
-    background-color: rgba(70,70,70,1);
-    border: 1.2px solid rgb(180, 150, 68);
-    subcontrol-position: top;
-    margin-top: -15px;
-}
-/*Horizontal ScrollBar*/
-QScrollBar:horizontal
-{ 
-    height: 16px;
-    background-color: rgba(0,0,0,0);
-}
-QScrollBar::handle:horizontal
-{
-    background-color: rgba(40,40,40,1.0);
-    border: 1.2px solid rgb(160, 108, 125);
-    margin-left: 22px;
-    margin-right: 22px;
-    margin-top: 1px;
-    margin-bottom: 1px;
-}
-QScrollBar::handle:horizontal:hover
-{
-    background-color: rgb(160, 108, 125);
-    border: 1.2px solid rgb(160, 160, 160);
-}
-QScrollBar::add-page:horizontal, 
-QScrollBar::sub-page:horizontal
-{
-    background: rgba(0,0,0,0.5);
-    margin-left: -22px;
-    margin-right: -22px;
-    border: 1px solid rgb(85, 70, 75);
-}
-QScrollBar::add-line:horizontal
-{    
-    width: 20px;
-    background-color: rgba(70,70,70,1);
-    border: 1.2px solid rgb(180, 150, 68);
-    subcontrol-position: right;
-    margin-right: -15px;
-}
-QScrollBar::sub-line:horizontal
-{    
-    width: 20px;
-    background-color: rgba(70,70,70,1);
-    border: 1.2px solid rgb(180, 150, 68);
-    subcontrol-position: left;
-    margin-left: -15px;
+    background-color: rgb(40, 40, 40);
 }
 QToolButton
 {
@@ -290,7 +209,7 @@ QPushButton
 }
 QPushButton:hover
 {
-    background-color: rgb(102, 86, 86);
+    background-color: rgb(86, 91, 102);
     color:#FFFFFF;
     font-family: FontFamily;
     border-radius: 4px;
@@ -299,7 +218,7 @@ QPushButton:hover
 }
 QPushButton:pressed
 {
-    background-color: rgb(115, 89, 89);
+    background-color: rgb(89, 95, 115);
     color:#FFFFFF;
     font-family:  FontFamily;
     border: 1.5px solid rgb(210, 210, 210);
@@ -315,10 +234,10 @@ QDockWidget
 }
 QDockWidget::title
 {
-    background-color: rgb(51, 51, 51);
+    background-color: rgb(30, 30, 35);
     padding-left: 1px;
     padding-top: 7px;
-    border-bottom: 2px solid rgb(100, 100, 100);
+    border-bottom: 1px solid rgb(80, 80, 80);
 }
 QDockWidget::close-button,
 QDockWidget::float-button
@@ -330,9 +249,9 @@ QDockWidget::float-button:hover,
 QDockWidget::close-button:hover
 {
     color:rgb(200, 200, 200);
-    background-color: rgb(151, 115, 115);
+    background-color: rgb(115, 129, 151);
 }
-QTreeView 
+QTreeView
 {
     font-family: FontFamily;
     background-color: BackgroundColor;
@@ -416,6 +335,9 @@ QSplitter::handle
 #SceneOutline
 {
     background-color: BackgroundColor;
+    border:none;
+    border-bottom: 1px solid rgb(80, 80, 80);
+    /* border-radius: 4px; */
 }
 #SceneOutline_ComboBox_Main
 {
@@ -539,11 +461,11 @@ QSplitter::handle
 /* SearchLine */
 #SearchLine
 {
-    border: 1px solid rgb(125, 125, 125);
+    /* border-top: 1px solid rgb(80, 80, 80); */
+    border-bottom: 1px solid rgb(80, 80, 80);
 }
 #SearchLine_LineEdit
 {
-    margin: 1px;
     border-radius: 2px;
 }
 #SearchLine_ComboBox
@@ -567,7 +489,7 @@ QSplitter::handle
     font-family: FontFamily;
     background-color: rgb(20,20,20);
     color : rgb(235,235,235);
-    border:2px solid rgb(63, 117, 124);
+    border: 1px solid rgb(63, 117, 124);
 }
 #CustomListView_Text
 {
@@ -578,6 +500,10 @@ QSplitter::handle
     color: rgb(140, 140, 140) ;
     font-weight:100;
     font-size: 16px;
+    border:none;
+    border-top: 1px solid rgb(80, 80, 80);
+    border-bottom: 1px solid rgb(80, 80, 80);
+    /* border-radius: 4px; */
 }
 #CustomTreeView_VirtualFolderTreeView::item 
 {
@@ -592,27 +518,37 @@ QSplitter::handle
 {
 
 }
-#CustomTreeView_VirtualFolderTreeView::branch:closed:has-children:!has-siblings,  
-#CustomTreeView_VirtualFolderTreeView::branch:closed:has-children:has-siblings
+/* #CustomTreeView_VirtualFolderTreeView::branch:closed:has-children
 {
     image: url(./Config/Theme/Icons/ContentBrowser_FolderClose.png);
 }
-#CustomTreeView_VirtualFolderTreeView::branch:open:has-children:!has-siblings,  
-#CustomTreeView_VirtualFolderTreeView::branch:open:has-children:has-siblings
+#CustomTreeView_VirtualFolderTreeView::branch:open:has-children
 {
     image: url(./Config/Theme/Icons/ContentBrowser_FolderOpen.png);
+} */
+#CustomTreeView_VirtualFolderTreeView::branch:closed:has-children
+{
+    image: none;
+}
+#CustomTreeView_VirtualFolderTreeView::branch:open:has-children
+{
+    image: none;
 }
 #CustomListView_VirtualFileListView 
 {
     background-color:transparent;
     font-size: 15px;
+    border:none;
+    border-top: 1px solid rgb(80, 80, 80);
+    border-bottom: 1px solid rgb(80, 80, 80);
+    /* border-radius: 4px; */
 }
 #CustomListView_VirtualFileListView::item
 {
     color:rgb(184, 184, 184);
     text-align:left;
-    border:1px dashed rgb(107, 103, 103);
-    border-radius:6px;
+    border:1px dashed rgb(109, 110, 112);
+    border-radius:4px;
     margin: 2;
     padding-top: 4px;
     padding-bottom: 4px;
@@ -636,7 +572,7 @@ QSplitter::handle
     font-family: FontFamily;
     background-color: rgb(20,30,20);
     color : rgb(255, 255, 255);
-    border:3px solid rgb(67, 137, 113);
+    border:2px solid rgb(67, 137, 113);
     border-radius:12px;
 }
 #ContentBrowser_RepositorySelection QLabel
@@ -646,7 +582,6 @@ QSplitter::handle
 }
 #ContentBrowser_PathLabel
 {
-    /* border: 1px solid rgb(140, 90, 100); */
     background-color:transparent;
     color:rgb(175,175,175);
     margin-left: 6px
@@ -695,6 +630,10 @@ QSplitter::handle
 {
     background-color: BackgroundColor;
     font-family:  FontFamily;
+    border:none;
+    border-top: 1px solid rgb(80, 80, 80);
+    border-bottom: 1px solid rgb(80, 80, 80);
+    /* border-radius: 4px; */
 }
 #Inspector_Active::indicator 
 {
@@ -840,7 +779,3 @@ QSplitter::handle
 
 
 
-
-
-
-#End{};
