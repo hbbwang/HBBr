@@ -67,7 +67,9 @@ void SceneOutlineItem::Init(std::weak_ptr<Level> level, std::weak_ptr<GameObject
         _gameObject.lock()->_editorObject = this;
         this->setText(0, _gameObject.lock()->GetObjectName().c_str());
         setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
-    }  
+    }
+    _tree = tree;    
+    _tree->_allItems.append(this);
 }
 
 void SceneOutlineItem::Destroy()
@@ -77,6 +79,7 @@ void SceneOutlineItem::Destroy()
         _gameObject.lock()->_editorObject = nullptr;
         _gameObject.lock()->Destroy();
     }
+    _tree->_allItems.removeOne(this);
     delete this;
 }
 
@@ -619,8 +622,45 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
     _search = new CustomSearchLine(this);
     _search->setMaximumHeight(30);
     _search->ui.comboBox->setHidden(true);
+    _search->SetLabel(QPixmap((FileSystem::GetConfigAbsPath() + "Theme/Icons/ICON_SEARCH.png").c_str()));
     mainLayout->addWidget(_search);
-    connect(_search->ui.lineEdit, SIGNAL(returnPressed()), this, SLOT(TreeSearch()));
+    //connect(_search->ui.lineEdit, SIGNAL(returnPressed()), this, SLOT(TreeSearch()));
+
+    //ËÑË÷¹¦ÄÜ
+    _search->_enterSearchCallback = 
+        [this](QLineEdit* lineEdit)
+        {
+            auto searchText = lineEdit->text();
+            if (searchText.isEmpty())
+            {
+                for (auto& i : this->_treeWidget->_allItems)
+                {
+                    i->setHidden(false);
+                }
+            }
+            else
+            {
+                for (auto& i : this->_treeWidget->_allItems)
+                {
+                    auto itemText = i->text(0);
+                    if (itemText.contains(searchText, Qt::CaseInsensitive))
+                    {
+                        i->setHidden(false);
+                        auto itemParent = i->parent();
+                        while (itemParent)
+                        {
+                            itemParent->setHidden(false);
+                            itemParent = itemParent->parent();
+                        }
+                    }
+                    else
+                    {
+                        i->setHidden(true);
+                    }
+                }
+            }
+        };
+
 
     _treeWidget = new SceneOutlineTree(this);
     mainLayout->addWidget(_treeWidget);
@@ -862,26 +902,26 @@ bool searchTraverse(QTreeWidgetItem* item, QList<QTreeWidgetItem*>& list, QStrin
     return bHide;
 }
 
-void SceneOutline::TreeSearch()
-{
-    //_treeWidget->collapseAll();
-    QList<QTreeWidgetItem*> searchList;
-    _treeWidget->selectionModel()->clearSelection();
-    if (_search->ui.lineEdit->text().isEmpty())
-    {
-        for (int i = 0; i < _treeWidget->topLevelItemCount(); ++i) {
-            traverse(_treeWidget->topLevelItem(i), searchList, false);
-        }
-        return;
-    }
-    QString input = _search->ui.lineEdit->text();
-    _treeWidget->expandAll();
-    //auto searchList = _treeWidget->findItems(input, Qt::MatchExactly)
-    for (int i = 0; i < _treeWidget->topLevelItemCount(); ++i) {
-        bool bHide = searchTraverse(_treeWidget->topLevelItem(i) , searchList , input);
-        _treeWidget->topLevelItem(i)->setHidden(bHide);       
-    }
-}
+//void SceneOutline::TreeSearch()
+//{
+//    //_treeWidget->collapseAll();
+//    QList<QTreeWidgetItem*> searchList;
+//    _treeWidget->selectionModel()->clearSelection();
+//    if (_search->ui.lineEdit->text().isEmpty())
+//    {
+//        for (int i = 0; i < _treeWidget->topLevelItemCount(); ++i) {
+//            traverse(_treeWidget->topLevelItem(i), searchList, false);
+//        }
+//        return;
+//    }
+//    QString input = _search->ui.lineEdit->text();
+//    _treeWidget->expandAll();
+//    //auto searchList = _treeWidget->findItems(input, Qt::MatchExactly)
+//    for (int i = 0; i < _treeWidget->topLevelItemCount(); ++i) {
+//        bool bHide = searchTraverse(_treeWidget->topLevelItem(i) , searchList , input);
+//        _treeWidget->topLevelItem(i)->setHidden(bHide);       
+//    }
+//}
 
 void SceneOutline::focusInEvent(QFocusEvent* event)
 {

@@ -44,6 +44,7 @@ public:
     class SceneOutline* _parent = nullptr;
     SceneOutlineItem* _mouse_select_item = nullptr;
     SceneOutlineItem* IndexToItem(QModelIndex index);
+    QList<SceneOutlineItem*> _allItems;
 protected:
 
     virtual void commitData(QWidget* editor)
@@ -111,6 +112,6 @@ public:
         return QSize(EditorMain::_self->width() / 5, EditorMain::_self->height() / 2);//这里定义dockwidget的初始大小
     }
 private slots:
-    void TreeSearch();
+   // void TreeSearch();
 };
 
