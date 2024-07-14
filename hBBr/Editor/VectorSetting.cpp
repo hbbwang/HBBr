@@ -35,6 +35,9 @@ VectorSetting::~VectorSetting()
 	_old_vec4_f[1] = 0;
 	_old_vec4_f[2] = 0;
 	_old_vec4_f[3] = 0;
+	_vec2_glm = nullptr;
+	_vec3_glm = nullptr;
+	_vec4_glm = nullptr;
 }
 
 void VectorSetting::Init(QWidget* parent, const int demensionality, float step, int precision)
@@ -47,6 +50,9 @@ void VectorSetting::Init(QWidget* parent, const int demensionality, float step, 
 	_vec4_f[1] = nullptr;
 	_vec4_f[2] = nullptr;
 	_vec4_f[3] = nullptr;
+	_vec2_glm = nullptr;
+	_vec3_glm = nullptr;
+	_vec4_glm = nullptr;
 	for (int i = 0; i < demensionality; i++)
 	{
 		FloatSetting* f = new FloatSetting(this, 0, step, precision);
@@ -126,21 +132,69 @@ void VectorSetting::Update()
 	if (updatePoint > maxUpdatePoint)
 	{
 		updatePoint = 0;
-		if (Demensionality >= 1 && !floatSetting[0]->hasFocus() && _vec4_f[0] != nullptr && *_vec4_f[0] != _old_vec4_f[0])
+		if (Demensionality >= 1 && !floatSetting[0]->hasFocus())
 		{
-			floatSetting[0]->setValue(*_vec4_f[0]);
+			if (_vec4_f[0] != nullptr && *_vec4_f[0] != _old_vec4_f[0])
+			{
+				floatSetting[0]->setValue(*_vec4_f[0]);
+			}
+			if (_vec2_glm != nullptr)
+			{
+				floatSetting[0]->setValue(_vec2_glm->x);
+			}
+			if (_vec3_glm != nullptr)
+			{
+				floatSetting[0]->setValue(_vec3_glm->x);
+			}
+			if (_vec4_glm != nullptr)
+			{
+				floatSetting[0]->setValue(_vec4_glm->x);
+			}
 		}
-		if (Demensionality >= 2 && !floatSetting[1]->hasFocus() && _vec4_f[1] != nullptr && *_vec4_f[1] != _old_vec4_f[1])
+		if (Demensionality >= 2 && !floatSetting[1]->hasFocus())
 		{
-			floatSetting[1]->setValue(*_vec4_f[1]);
+			if (_vec4_f[1] != nullptr && *_vec4_f[1] != _old_vec4_f[1])
+			{
+				floatSetting[1]->setValue(*_vec4_f[1]);
+			}
+			if (_vec2_glm != nullptr)
+			{
+				floatSetting[1]->setValue(_vec2_glm->y);
+			}
+			if (_vec3_glm != nullptr)
+			{
+				floatSetting[1]->setValue(_vec3_glm->y);
+			}
+			if (_vec4_glm != nullptr)
+			{
+				floatSetting[1]->setValue(_vec4_glm->y);
+			}
 		}
-		if (Demensionality >= 3 && !floatSetting[2]->hasFocus() && _vec4_f[2] != nullptr && *_vec4_f[2] != _old_vec4_f[2])
+		if (Demensionality >= 3 && !floatSetting[2]->hasFocus())
 		{
-			floatSetting[2]->setValue(*_vec4_f[2]);
+			if (_vec4_f[2] != nullptr && *_vec4_f[2] != _old_vec4_f[2])
+			{
+				floatSetting[2]->setValue(*_vec4_f[2]);
+			}
+			if (_vec3_glm != nullptr)
+			{
+				floatSetting[3]->setValue(_vec3_glm->z);
+			}
+			if (_vec4_glm != nullptr)
+			{
+				floatSetting[3]->setValue(_vec4_glm->z);
+			}
 		}
-		if (Demensionality >= 4 && !floatSetting[3]->hasFocus() && _vec4_f[3] != nullptr && *_vec4_f[3] != _old_vec4_f[3])
+		if (Demensionality >= 4 && !floatSetting[3]->hasFocus())
 		{
-			floatSetting[3]->setValue(*_vec4_f[3]);
+			if (_vec4_f[3] != nullptr && *_vec4_f[3] != _old_vec4_f[3])
+			{
+				floatSetting[3]->setValue(*_vec4_f[3]);
+			}	
+			if (_vec4_glm != nullptr)
+			{
+				floatSetting[3]->setValue(_vec4_glm->w);
+			}
 		}
 	}
 	else
@@ -189,10 +243,25 @@ void VectorSetting::setX(double val)
 	if (Demensionality >= 1)
 		floatSetting[0]->setValue(val);
 	BindValue(floatSetting);
-	if (_vec4_f[0] != nullptr && Demensionality >= 1 )
+	if (Demensionality >= 1)
 	{
-		*_vec4_f[0] = floatSetting[0]->value();
-		_old_vec4_f[0] = *_vec4_f[0];
+		if (_vec4_f[0] != nullptr)
+		{
+			*_vec4_f[0] = floatSetting[0]->value();
+			_old_vec4_f[0] = *_vec4_f[0];
+		}
+		if (_vec2_glm != nullptr)
+		{
+			_vec2_glm->x = floatSetting[0]->value();
+		}
+		if (_vec3_glm != nullptr)
+		{
+			_vec3_glm->x = floatSetting[0]->value();
+		}
+		if (_vec4_glm != nullptr)
+		{
+			_vec4_glm->x = floatSetting[0]->value();
+		}
 	}
 }
 
@@ -201,10 +270,25 @@ void VectorSetting::setY(double val)
 	if(Demensionality>=2)
 		floatSetting[1]->setValue(val);
 	BindValue(floatSetting);
-	if (_vec4_f[1] != nullptr && Demensionality >= 2 )
+	if (Demensionality >= 2)
 	{
-		*_vec4_f[1] = floatSetting[1]->value();
-		_old_vec4_f[1] = *_vec4_f[1];
+		if (_vec4_f[1] != nullptr)
+		{
+			*_vec4_f[1] = floatSetting[1]->value();
+			_old_vec4_f[1] = *_vec4_f[1];
+		}
+		if (_vec2_glm != nullptr)
+		{
+			_vec2_glm->y = floatSetting[1]->value();
+		}
+		if (_vec3_glm != nullptr)
+		{
+			_vec3_glm->y = floatSetting[1]->value();
+		}
+		if (_vec4_glm != nullptr)
+		{
+			_vec4_glm->y = floatSetting[1]->value();
+		}
 	}
 }
 
@@ -213,10 +297,21 @@ void VectorSetting::setZ(double val)
 	if (Demensionality >= 3)
 		floatSetting[2]->setValue(val);
 	BindValue(floatSetting);
-	if (_vec4_f[2] != nullptr && Demensionality >= 3 )
+	if (Demensionality >= 3)
 	{
-		*_vec4_f[2] = floatSetting[2]->value();
-		_old_vec4_f[2] = *_vec4_f[2];
+		if (_vec4_f[2] != nullptr)
+		{
+			*_vec4_f[2] = floatSetting[2]->value();
+			_old_vec4_f[2] = *_vec4_f[2];
+		}
+		if (_vec3_glm != nullptr)
+		{
+			_vec3_glm->z = floatSetting[2]->value();
+		}
+		if (_vec4_glm != nullptr)
+		{
+			_vec4_glm->z = floatSetting[2]->value();
+		}
 	}
 }
 
@@ -225,9 +320,16 @@ void VectorSetting::setW(double val)
 	if (Demensionality >= 4)
 		floatSetting[3]->setValue(val);
 	BindValue(floatSetting);
-	if (_vec4_f[3] != nullptr && Demensionality >= 4 )
+	if (Demensionality >= 4)
 	{
-		*_vec4_f[3] = floatSetting[3]->value();
-		_old_vec4_f[3] = *_vec4_f[3];
+		if (_vec4_f[3] != nullptr)
+		{
+			*_vec4_f[3] = floatSetting[3]->value();
+			_old_vec4_f[3] = *_vec4_f[3];
+		}
+		if (_vec4_glm != nullptr)
+		{
+			_vec4_glm->w = floatSetting[3]->value();
+		}
 	}
 }

@@ -315,85 +315,9 @@ protected:
 	class World* _world = nullptr;
 
 
-	static HString PropertyValueToString(ComponentProperty& p)
-	{
-		if (p.type.IsSame("bool", false))
-		{
-			if (p.bArray)
-			{
-				auto value = (std::vector<bool>*)p.value;
-				HString result;
-				for (auto i : *value) {
-					result += (i == true) ? "1;" : "0;";
-				}
-				return result;
-			}
-			else
-			{
-				auto value = (bool*)p.value;
-				return (*value == true) ? "1" : "0";
-			}
-		}
-		else if (p.type.IsSame("AssetRef", false))
-		{
-			if (p.bArray)
-			{
-				auto value = (std::vector<AssetRef>*)p.value;
-				HString result;
-				for (auto i : *value) {
-					result += i.path + ";";
-				}
-				return result;
-			}
-			else
-			{
-				auto value = (AssetRef*)p.value;
-				return value->path;
-			}
-		}
-		return "";
-	}
+	static HString PropertyValueToString(ComponentProperty& p);
 
-	static void StringToPropertyValue(ComponentProperty& p , HString& valueStr)
-	{
-		if (p.type.IsSame("bool", false))
-		{
-			if (p.bArray)
-			{
-				auto bools = valueStr.Split(";");
-				auto valuePtr = ((std::vector<bool>*)p.value);
-				valuePtr->resize(bools.size());
-				for (int i = 0; i < bools.size(); i++)
-				{
-					valuePtr->push_back(HString::ToInt(bools[i]) == 1 ? true : false);
-				}
-			}
-			else
-			{
-				*((bool*)p.value) = HString::ToInt(valueStr) == 1 ? true : false;
-			}
-		}
-		else 	if (p.type.IsSame("AssetRef", false))
-		{
-			if (p.bArray)
-			{
-				auto values = valueStr.Split(";");
-				auto valuePtr = ((std::vector<AssetRef>*)p.value);
-				valuePtr->resize(values.size());
-				for (int i = 0; i < values.size(); i++)
-				{
-					AssetRef newAssetPath;
-					newAssetPath.path = values[i];
-					valuePtr->at(i) = (newAssetPath);
-				}
-			}
-			else
-			{
-				((AssetRef*)p.value)->path = valueStr;
-			}
-		}
-
-	}
+	static void StringToPropertyValue(ComponentProperty& p, HString& valueStr);
 
 	private:
 		void CompUpdate();

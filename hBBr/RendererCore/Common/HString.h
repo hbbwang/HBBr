@@ -770,16 +770,29 @@ public:
 		return out;
 	}
 
-	static HBBR_INLINE HString	FromVec2(glm::vec2 f, int precise = 6)
+	static HBBR_INLINE HString	FromVec2(glm::vec2 f)
 	{
 		HString out;
-		HString format = "%.";
-		format += HString::FromInt(precise);
-		format += "f , %.";
-		format += HString::FromInt(precise);
-		format += "f";
 		char str[128];
-		sprintf_s(str, 128, format.c_str(), f.x , f.y);
+		sprintf_s(str, 128, "%f,%f", f.x, f.y);
+		out = str;
+		return out;
+	}
+
+	static HBBR_INLINE HString	FromVec3(glm::vec3 f)
+	{
+		HString out;
+		char str[128];
+		sprintf_s(str, 128, "%f,%f,%f" , f.x, f.y, f.z);
+		out = str;
+		return out;
+	}
+
+	static HBBR_INLINE HString	FromVec4(glm::vec4 f)
+	{
+		HString out;
+		char str[128];
+		sprintf_s(str, 128, "%f,%f,%f,%f", f.x, f.y, f.z, f.w);
 		out = str;
 		return out;
 	}
@@ -913,6 +926,42 @@ public:
 	static HBBR_INLINE long long ToLongLong(HString str)
 	{
 		return atoll(str.c_str());
+	}
+
+	static HBBR_INLINE glm::vec2 ToVec2(HString str)
+	{
+		auto vecStr = str.Split(",");
+		if (vecStr.size() == 2)
+			return glm::vec2(atof(vecStr[0].c_str()), atof(vecStr[1].c_str()));
+		else if (vecStr.size() == 1)
+			return glm::vec2(atof(vecStr[0].c_str()), 0);
+		return glm::vec2(0, 0);
+	}
+
+	static HBBR_INLINE glm::vec3 ToVec3(HString str)
+	{
+		auto vecStr = str.Split(",");
+		if (vecStr.size() == 3)
+			return glm::vec3(atof(vecStr[0].c_str()), atof(vecStr[1].c_str()), atof(vecStr[2].c_str()));
+		else if (vecStr.size() == 2)
+			return glm::vec3(atof(vecStr[0].c_str()), atof(vecStr[1].c_str()), 0);
+		else if (vecStr.size() == 1)
+			return glm::vec3(atof(vecStr[0].c_str()), 0, 0);
+		return glm::vec3(0,0,0);
+	}
+
+	static HBBR_INLINE glm::vec4 ToVec4(HString str)
+	{
+		auto vecStr = str.Split(",");
+		if (vecStr.size() == 4)
+			return glm::vec4(atof(vecStr[0].c_str()), atof(vecStr[1].c_str()), atof(vecStr[2].c_str()), atof(vecStr[3].c_str()));
+		if (vecStr.size() == 3)
+			return glm::vec4(atof(vecStr[0].c_str()), atof(vecStr[1].c_str()), atof(vecStr[2].c_str()), 0);
+		else if (vecStr.size() == 2)
+			return glm::vec4(atof(vecStr[0].c_str()), atof(vecStr[1].c_str()), 0, 0);
+		else if (vecStr.size() == 1)
+			return glm::vec4(atof(vecStr[0].c_str()), 0, 0, 0);
+		return glm::vec4(0, 0, 0, 0);
 	}
 
 	static HBBR_INLINE const bool IsNumber(const char* str)

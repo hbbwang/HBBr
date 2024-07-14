@@ -28,13 +28,9 @@ public:
 	}
 
 	virtual void Deserialization(nlohmann::json input)override;
-
 	virtual nlohmann::json Serialization()override;
-
 	virtual void GameObjectActiveChanged(bool objActive)override;
-
 	virtual void ExecuteDestroy()override;
-
 	virtual void Update()override;
 
 	virtual void ClearPrimitves();
@@ -42,12 +38,10 @@ public:
 protected:
 	//不是每帧执行,一般用于编辑器的对象数据刷新
 	virtual void UpdateData()override;
-
 	//Component Property Reflection Add.
 	HBBR_INLINE virtual void OnConstruction()override;
 
 	void UpdateMaterial();
-
 private:
 
 	AssetRef  _model;

@@ -2,6 +2,7 @@
 #include "VulkanRenderer.h"
 #include "PassBase.h"
 #include "Pass/BasePass.h"
+#include "Pass/DeferredLightingPass.h"
 #include "Pass/ImguiPass.h"
 #include "Pass/GUIPass.h"
 #include "Pass/PreCommandPass.h"
@@ -9,6 +10,8 @@
 PassManager::PassManager(VulkanRenderer* renderer)
 {
 	_renderer = renderer;
+	_lightings.reserve(MaxLightingNum);
+	_lightUniformBuffer = {};
 	_sceneTextures.reset(new SceneTexture(renderer));
 	{
 		//Precommand Pass
@@ -17,6 +20,9 @@ PassManager::PassManager(VulkanRenderer* renderer)
 		//Opaque Pass
 		std::shared_ptr<BasePass> opaque = std::make_shared<BasePass>(this);
 		AddPass(opaque, "Opaque");
+		//Deferred Lighting Pass
+		std::shared_ptr<DeferredLightingPass> deferredLighting = std::make_shared<DeferredLightingPass>(this);
+		AddPass(deferredLighting, "Deferred Lighting");
 		//Screen GUI Pass
 		std::shared_ptr<GUIPass> gui = std::make_shared<GUIPass>(this);
 		AddPass(gui, "GUI");
@@ -37,6 +43,24 @@ void PassManager::PassesUpdate()
 
 	_sceneTextures->UpdateTextures();
 
+	//Update Lighting
+	_lightUniformBuffer.validLightCount = _lightings.size();
+	int lightIndex = 0;
+	for (auto& i : _lightings)
+	{
+		_lightUniformBuffer.lightParams[lightIndex].LightColor = i->GetLightColor();
+		_lightUniformBuffer.lightParams[lightIndex].LightStrength = i->GetLightIntensity();
+		_lightUniformBuffer.lightParams[lightIndex].LightDirection = -(i->GetTransform()->GetForwardVector());
+		_lightUniformBuffer.lightParams[lightIndex].LightPosition = i->GetTransform()->GetWorldLocation();
+		_lightUniformBuffer.lightParams[lightIndex].LightType = i->GetLightType();
+		_lightUniformBuffer.lightParams[lightIndex].LightSpecular = i->GetLightSpecular();
+		//Flags
+		if (i->IsCastShadow())
+		{
+			_lightUniformBuffer.lightParams[lightIndex].LightFlags |= LightingFlagBits::LightingFlag_CastShadow;
+		}
+		lightIndex++;
+	}
 	//Collect render setting (Commandbuffer record)
 	_executePasses.clear();
 	for (auto p : _passes)

@@ -37,6 +37,10 @@ public:
 		return _windowHandle;
 	}
 
+	HBBR_API HBBR_INLINE std::map<class CameraComponent*, std::shared_ptr<class PassManager>> GetPassManagers() {
+		return _passManagers;
+	}
+
 	HBBR_INLINE VkSurfaceFormatKHR GetSurfaceFormat()const {
 		return _surfaceFormat;
 	}

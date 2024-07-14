@@ -3,6 +3,7 @@
 #include "Asset/World.h"
 #include "Asset/Level.h"
 #include "Component/GameObject.h"
+#include "Component/DirectionalLightComponent.h"
 #include <qheaderview.h>
 #include <qaction.h>
 #include <QDragEnterEvent>
@@ -180,6 +181,7 @@ SceneOutlineTree::SceneOutlineTree(QWidget* parent)
 
      _menu = new QMenu(this);
      _menu_createBasic = new QMenu(this);
+     _menu_createLighting = new QMenu(this);
 
     //setRootIsDecorated(false);
     connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),this,SLOT(ItemDoubleClicked(QTreeWidgetItem*, int)));
@@ -202,21 +204,28 @@ void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
 {
     _menu->clear();
     _menu_createBasic->clear();
+    _menu_createLighting->clear();
 
     _createNewGameObject = new QAction(GetEditorInternationalization("SceneOutline", "CreateNewGameObject"), _menu);
     _deleteGameObject = new QAction(GetEditorInternationalization("SceneOutline", "DeleteGameObject"), _menu);
     _renameGameObject = new QAction(GetEditorInternationalization("SceneOutline", "RenameGameObject"), _menu);
 
+    //
+    _menu_createLighting->setTitle(GetEditorInternationalization("SceneOutline", "CreateLightingObject"));
+    _createDirectionalLighting = new QAction(GetEditorInternationalization("SceneOutline", "CreateDirectionalLighting"), _menu_createLighting);
+
+    //
     _menu_createBasic->setTitle(GetEditorInternationalization("SceneOutline", "CreateBasicGameObject"));
     _createCube = new QAction(GetEditorInternationalization("SceneOutline", "CreateCube"), _menu_createBasic);
     _createSphere = new QAction(GetEditorInternationalization("SceneOutline", "CreateSphere"), _menu_createBasic);
     _createPlane = new QAction(GetEditorInternationalization("SceneOutline", "CreatePlane"), _menu_createBasic);
 
-    _createNewLevel = new QAction(GetEditorInternationalization("SceneOutline", "CreateNewLevel"), _menu_createBasic);
-    _deleteLevel = new QAction(GetEditorInternationalization("SceneOutline", "DeleteLevel"), _menu_createBasic);
-    _renameLevel = new QAction(GetEditorInternationalization("SceneOutline", "RenameLevel"), _menu_createBasic);
-    _loadLevel = new QAction(GetEditorInternationalization("SceneOutline", "LoadLevel"), _menu_createBasic);
-    _unloadLevel = new QAction(GetEditorInternationalization("SceneOutline", "UnloadLevel"), _menu_createBasic);
+    //
+    _createNewLevel = new QAction(GetEditorInternationalization("SceneOutline", "CreateNewLevel"), _menu);
+    _deleteLevel = new QAction(GetEditorInternationalization("SceneOutline", "DeleteLevel"), _menu);
+    _renameLevel = new QAction(GetEditorInternationalization("SceneOutline", "RenameLevel"), _menu);
+    _loadLevel = new QAction(GetEditorInternationalization("SceneOutline", "LoadLevel"), _menu);
+    _unloadLevel = new QAction(GetEditorInternationalization("SceneOutline", "UnloadLevel"), _menu);
     //
     connect(_createNewGameObject, &QAction::triggered, this, [this](bool bChecked)
         {
@@ -412,18 +421,34 @@ void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
                 }
             }
         });
-    //
+    //创建平行光
+    connect(_createDirectionalLighting, &QAction::triggered, this, [this](bool bChecked)
+        {
+            if (VulkanApp::GetMainForm()->renderer)
+            {
+                VulkanApp::GetMainForm()->renderer->ExecFunctionOnRenderThread([]()
+                    {
+                        auto obj = GameObject::CreateGameObject("NewDirectionalLight");
+                        auto dirLight = obj->AddComponent<DirectionalLightComponent>();
+                    });
+            }
+            ((SceneOutlineItem*)this->currentItem())->_gameObject.lock()->GetLevel()->MarkDirty();
+        });
     auto item = (SceneOutlineItem*)itemAt(event->pos());
     if (item)
     {
         if (!item->_gameObject.expired())
         {
+            _menu->addAction(_createNewGameObject);
+            //
+            _menu_createLighting->addAction(_createDirectionalLighting);
+            _menu->addMenu(_menu_createLighting);
+            //
             _menu_createBasic->addAction(_createCube);
             _menu_createBasic->addAction(_createSphere);
             _menu_createBasic->addAction(_createPlane);
-
-            _menu->addAction(_createNewGameObject);
             _menu->addMenu(_menu_createBasic);
+            //
             _menu->addAction(_renameGameObject);
             _menu->addSeparator();
             _menu->addAction(_deleteGameObject);

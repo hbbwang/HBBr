@@ -22,6 +22,9 @@ public:
 	std::function<void(QList<FloatSetting*>)> BindValue = [](QList<FloatSetting*>) {};
 	std::weak_ptr<class GameObject> _gameObject;
 	float* _vec4_f[4] = { nullptr,nullptr,nullptr,nullptr };
+	glm::vec2* _vec2_glm = nullptr;
+	glm::vec3* _vec3_glm = nullptr;
+	glm::vec4* _vec4_glm = nullptr;
 	float _old_vec4_f[4] = { 0,0,0,0 };
 	void SetValue(float x  ,float y  , float z  ,float w = 0);
 	void SetValue(glm::vec4 v4 = glm::vec4(0));

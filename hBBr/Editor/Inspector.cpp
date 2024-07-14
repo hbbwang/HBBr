@@ -147,9 +147,9 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 	auto group_transform = pw->AddGroup("Transform");
 	{
 		auto transform = obj->_transform;
-		VectorSetting* pos =	new VectorSetting(this, 3, 0.001f, 4);
-		VectorSetting* rot =	new VectorSetting(this, 3, 0.01f, 4);
-		VectorSetting* scale =	new VectorSetting(this, 3, 0.001f, 4);
+		VectorSetting* pos =	new VectorSetting(this, 3, 0.001f, 6);
+		VectorSetting* rot =	new VectorSetting(this, 3, 0.01f, 6);
+		VectorSetting* scale =	new VectorSetting(this, 3, 0.001f, 6);
 		_property_needUpdate.append(pos);
 		_property_needUpdate.append(rot);
 		_property_needUpdate.append(scale);
@@ -220,6 +220,103 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 					};
 					checkBox->_boolBind = value;
 					pw->AddItem(p.name.c_str(), checkBox, 30, group_comp);
+				}
+				continue;
+			}
+			else if (IsType("float"))
+			{
+				if (p.bArray)
+				{
+					std::vector<float>* value = (std::vector<float>*)p.value;
+					auto group_comp_sub = pw->AddGroup(p.name.c_str(), group_comp);
+					for (int i = 0; i < value->size(); i++)
+					{
+						VectorSetting* vecSetting = new VectorSetting(this, 1, 0.001f, 6);
+						vecSetting->SetValue(value->at(i));
+						vecSetting->_vec4_f[0] = &value->at(i);
+						pw->AddItem(HString::FromInt(i).c_str(), vecSetting, 30, group_comp_sub);
+					}
+				}
+				else
+				{
+					auto value = (float*)p.value;
+					VectorSetting* vecSetting = new VectorSetting(this, 1, 0.001f, 6);
+					vecSetting->SetValue(*value);
+					vecSetting->_vec4_f[0] = (float*)p.value;
+					pw->AddItem(p.name.c_str(), vecSetting, 30, group_comp);
+				}
+				continue;
+			}
+			else if (IsType("Vector2"))
+			{
+				if (p.bArray)
+				{
+					std::vector<glm::vec2>* value = (std::vector<glm::vec2>*)p.value;
+					auto group_comp_sub = pw->AddGroup(p.name.c_str(), group_comp);
+					for (int i = 0; i < value->size(); i++)
+					{
+						VectorSetting* vecSetting = new VectorSetting(this, 2, 0.001f, 6);
+						vecSetting->SetValue(value->at(i));
+						vecSetting->_vec4_f[0] = &value->at(i).x;
+						vecSetting->_vec4_f[1] = &value->at(i).y;
+						pw->AddItem(HString::FromInt(i).c_str(), vecSetting, 30, group_comp_sub);
+					}
+				}
+				else
+				{
+					auto value = (glm::vec2*)p.value;
+					VectorSetting* vecSetting = new VectorSetting(this, 2, 0.001f, 6);
+					vecSetting->SetValue(*value);
+					vecSetting->_vec2_glm = value;
+					pw->AddItem(p.name.c_str(), vecSetting, 30, group_comp);
+				}
+				continue;
+			}
+			else if (IsType("Vector3"))
+			{
+				if (p.bArray)
+				{
+					std::vector<glm::vec3>* value = (std::vector<glm::vec3>*)p.value;
+					auto group_comp_sub = pw->AddGroup(p.name.c_str(), group_comp);
+					for (int i = 0; i < value->size(); i++)
+					{
+						VectorSetting* vecSetting = new VectorSetting(this, 3, 0.001f, 6);
+						vecSetting->SetValue(value->at(i));
+						vecSetting->_vec3_glm = &value->at(i);
+						pw->AddItem(HString::FromInt(i).c_str(), vecSetting, 30, group_comp_sub);
+					}
+				}
+				else
+				{
+					auto value = (glm::vec3*)p.value;
+					VectorSetting* vecSetting = new VectorSetting(this, 3, 0.001f, 6);
+					vecSetting->SetValue(*value);
+					vecSetting->_vec3_glm = value;
+					pw->AddItem(p.name.c_str(), vecSetting, 30, group_comp);
+				}
+				continue;
+			}
+			else if (IsType("Vector4"))
+			{
+				if (p.bArray)
+				{
+					std::vector<glm::vec4>* value = (std::vector<glm::vec4>*)p.value;
+					auto group_comp_sub = pw->AddGroup(p.name.c_str(), group_comp);
+					for (int i = 0; i < value->size(); i++)
+					{
+						VectorSetting* vecSetting = new VectorSetting(this, 4, 0.001f, 6);
+						vecSetting->SetValue(value->at(i));
+						vecSetting->_vec4_glm = &value->at(i);
+						pw->AddItem(HString::FromInt(i).c_str(), vecSetting, 30, group_comp_sub);
+					}
+				}
+				else
+				{
+					auto value = (glm::vec4*)p.value;
+					VectorSetting* vecSetting = new VectorSetting(this, 4, 0.001f, 6);
+					vecSetting->SetValue(*value);
+					vecSetting->_vec4_glm = value;
+					pw->AddItem(p.name.c_str(), vecSetting, 30, group_comp);
 				}
 				continue;
 			}

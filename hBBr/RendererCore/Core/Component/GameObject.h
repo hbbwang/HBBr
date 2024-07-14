@@ -87,6 +87,7 @@ public:
 	}
 
 	HBBR_INLINE static std::map<HString, std::function<class Component* (class GameObject*)>>& GetCompSpawnMap()	{
+		static std::map<HString, std::function<class Component* (class GameObject*)>> _componentSpawnFunctions;
 		return _componentSpawnFunctions;
 	}
 
@@ -100,8 +101,8 @@ public:
 
 	HBBR_API class Component* AddComponent(HString className)
 	{
-		auto it = _componentSpawnFunctions.find(className);
-		if (it != _componentSpawnFunctions.end())
+		auto it = GetCompSpawnMap().find(className);
+		if (it != GetCompSpawnMap().end())
 		{
 			auto newComp = it->second(this);
 			return newComp;
@@ -155,6 +156,4 @@ private:
 	//记录场景文件里对应guid的属性,默认为空节点
 	nlohmann::json _levelNode;
 
-	//Component spawn by name <class name , spawn function>
-	static std::map<HString, std::function<class Component*(class GameObject*)>> _componentSpawnFunctions;
 };

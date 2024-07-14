@@ -1,86 +1,6 @@
 #ifndef _BRDF_HLSL
 #define _BRDF_HLSL
 
-#define POW_CLAMP (0.000001f)
-
-#define PI (3.1415926535897932384626433832795)
-
-struct BxDFContext
-{
-	float NoV;
-	float NoL;
-	float VoL;
-	float NoH;
-	float VoH;
-	float XoV;
-	float XoL;
-	float XoH;
-	float YoV;
-	float YoL;
-	float YoH;
-	float LoH;
-};
-
-void InitBxDFContext(inout BxDFContext Context)
-{
-    Context.NoV = 0;
-	Context.NoL = 0; 
-	Context.VoL = 0;
-	Context.NoH = 0;
-	Context.VoH = 0;
-	Context.XoV = 0;
-	Context.XoL = 0;
-	Context.XoH = 0;
-	Context.YoV = 0;
-	Context.YoL = 0;
-	Context.YoH = 0;
-	Context.LoH = 0;
-}
-
-
-inline half Pow4 (half x)
-{
-    return x*x*x*x;
-}
-
-inline float2 Pow4 (float2 x)
-{
-    return x*x*x*x;
-}
-
-inline half3 Pow4 (half3 x)
-{
-    return x*x*x*x;
-}
-
-inline half4 Pow4 (half4 x)
-{
-    return x*x*x*x;
-}
-
-// Pow5 uses the same amount of instructions as generic pow(), but has 2 advantages:
-// 1) better instruction pipelining
-// 2) no need to worry about NaNs
-inline half Pow5 (half x)
-{
-    return x*x * x*x * x;
-}
-
-inline half2 Pow5 (half2 x)
-{
-    return x*x * x*x * x;
-}
-
-inline half3 Pow5 (half3 x)
-{
-    return x*x * x*x * x;
-}
-
-inline half4 Pow5 (half4 x)
-{
-    return x*x * x*x * x;
-}
-
 inline half3 FresnelTerm (half3 F0, half cosA)
 {
     half t = Pow5 (1 - cosA);   // ala Schlick interpoliation
@@ -133,6 +53,14 @@ inline float SmithJointGGXVisibilityTerm (float NdotL, float NdotV, float roughn
     return 0.5f / (lambdaV + lambdaL + 1e-5f);
 
 #endif
+}
+
+// GGX / Trowbridge-Reitz
+// [Walter et al. 2007, "Microfacet models for refraction through rough surfaces"]
+float D_GGX( float a2, float NoH )
+{
+	float d = ( NoH * a2 - NoH ) * NoH + 1;	// 2 mad
+	return a2 / ( PI*d*d );					// 4 mul, 1 rcp
 }
 
 inline float GGXTerm (float NdotH, float roughness)
@@ -243,5 +171,15 @@ float3 Diffuse_OrenNayar( float3 DiffuseColor, float Roughness, float NoV, float
 	float C2 = 0.45 * s2 / (s2 + 0.09) * Cosri * ( Cosri >= 0 ? rcp( max( NoL, NoV ) ) : 1 );
 	return DiffuseColor / PI * ( C1 + C2 ) * ( 1 + Roughness * 0.5 );
 }
+
+float3 SpecularGGX( float Roughness, float3 SpecularColor, half NoL, half NoV, half VoH, half NoH)
+{
+	float a2 = Pow4( Roughness );
+	float D = D_GGX( a2, NoH );
+	float Vis = Vis_SmithJointApprox( a2, NoV, NoL );
+	float3 F = F_Schlick( SpecularColor, VoH );
+	return (D * Vis) * F;
+}
+
 
 #endif

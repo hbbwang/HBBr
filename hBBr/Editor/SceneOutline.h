@@ -67,6 +67,9 @@ protected:
     QAction* _createSphere = nullptr;
     QAction* _createPlane = nullptr;
 
+    QMenu* _menu_createLighting = nullptr;
+    QAction* _createDirectionalLighting = nullptr;
+
     QAction* _createNewLevel = nullptr;
     QAction* _deleteLevel = nullptr;
     QAction* _renameLevel = nullptr;

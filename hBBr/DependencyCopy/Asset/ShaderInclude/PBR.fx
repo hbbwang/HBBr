@@ -10,7 +10,7 @@
 
 #include "Include/Config.hlsl"
 #include "Include/Common.hlsl"
-#include "Include/ShadingModel.hlsl"
+#include "Include/BasePassCommon.hlsl"
 
 //顶点着色器专用 
 cbuffer MaterialVS
@@ -70,21 +70,13 @@ TextureCube EnvironmentTexture
 //像素着色器补充
 void frag(in VSToPS IN , inout PixelShaderParameter Parameters)
 {
-    //Init
-    Parameters.BaseColor        = 0.0f;
-    Parameters.Metallic         = 0.0f;
-    Parameters.Roughness        = 1.0f;
-    Parameters.Emissive         = 0.0f;
-    //
     half4 BaseSample = BaseTexture.SampleBias(BaseTextureSampler,IN.Texcoord01.xy , 0);
     half4 IBL = EnvironmentTexture.SampleLevel(EnvironmentTextureSampler, Parameters.WorldNormal.xyz, 0);
 
-    BaseSample *= Tint;
-    BaseSample += IBL;
-    Parameters.BaseColor = BaseSample.rgb;
+    half3 BaseColor = BaseSample.rgb * Tint.rgb;
+    Parameters.BaseColor = BaseColor;
     Parameters.Metallic = Metallic;
     Parameters.Roughness = Roughness;
-    Parameters.Emissive = BaseSample.rgb;
 }
 
 #include "Include/BasePassVertexShader.hlsl"

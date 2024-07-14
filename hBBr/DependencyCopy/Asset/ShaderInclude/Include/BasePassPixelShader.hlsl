@@ -1,6 +1,8 @@
 #ifndef _BASE_PASS_PIXEL_SHADER_HLSL
 #define _BASE_PASS_PIXEL_SHADER_HLSL
 
+#include "Include/ShadingModel.hlsl"
+
 struct PSOutput
 {
     //Emissive
@@ -22,7 +24,7 @@ void InitPSOut(inout PSOutput psInout)
     psInout.GBuffer2 = 0;
 }
 
-void SetShadingModelID(PixelShaderParameter Parameters)
+void SetShadingModelID(inout PixelShaderParameter Parameters)
 {
     #if MATERIAL_SHADINGMODEL_DEFAULT_LIT
         Parameters.ShadingModelID = SHADINGMODELID_DEFAULT_LIT;
@@ -52,7 +54,7 @@ PSOutput PSMain(VSToPS IN)
 
     OUT.GBuffer0 = float4( Parameters.BaseColor , Parameters.Roughness );
     OUT.GBuffer1 = float4( Parameters.WorldNormal * 0.5f + 0.5f , 0.0f );
-    OUT.GBuffer2 = float4( Parameters.Metallic , Parameters.Specular , Parameters.AO , EncodeShadingModelID(Parameters.ShadingModelID) );
+    OUT.GBuffer2 = float4( Parameters.Metallic , Parameters.Specular , Parameters.AO , EncodeShadingModelID(Parameters.ShadingModelID));
     OUT.SceneColor = float3( Parameters.Emissive);
 
     return OUT;

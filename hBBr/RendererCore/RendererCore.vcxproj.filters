@@ -262,6 +262,12 @@
     <ClInclude Include="Core\Pass\BasePass.h">
       <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Pass\DeferredLightingPass.h">
+      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Component\DirectionalLightComponent.h">
+      <Filter>Renderer\Core\Object\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -437,6 +443,12 @@
     </ClCompile>
     <ClCompile Include="Core\Pass\BasePass.cpp">
       <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Pass\DeferredLightingPass.cpp">
+      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Component\DirectionalLightComponent.cpp">
+      <Filter>Renderer\Core\Object\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

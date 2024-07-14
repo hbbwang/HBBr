@@ -14,6 +14,13 @@
 #define SHADINGMODELID_DEFAULT_LIT			1
 #define SHADINGMODELID_MASK					0xFF		// 8 bits reserved for ShadingModelID
 
+float3 GetShadingModelColor(uint ShadingModelID)
+{
+         if (ShadingModelID == SHADINGMODELID_UNLIT) return float3(0.1f, 0.1f, 0.2f); // Dark Blue
+	else if (ShadingModelID == SHADINGMODELID_DEFAULT_LIT) return float3(0.1f, 1.0f, 0.1f); // Green
+    
+}
+
 float EncodeShadingModelID( uint ShadingModelId )
 {
     uint Value = (ShadingModelId & SHADINGMODELID_MASK);
@@ -24,6 +31,15 @@ uint DecodeShadingModelID( float InPackedChannel )
 {
     return ((uint)round(InPackedChannel * (float)0xFF)) & SHADINGMODELID_MASK;
 }
+
+
+
+
+
+
+
+
+
 
 
 #endif

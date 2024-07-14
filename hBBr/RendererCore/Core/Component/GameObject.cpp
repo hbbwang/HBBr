@@ -7,8 +7,6 @@
 #include "ConsoleDebug.h"
 #include "Component/ModelComponent.h"
 
-std::map<HString, std::function<class Component* (class GameObject*)>> GameObject::_componentSpawnFunctions;
-
 GameObject::GameObject(HString objectName, Level* level, bool SceneEditorHide)
 {
 	ObjectInit(objectName, level, SceneEditorHide);

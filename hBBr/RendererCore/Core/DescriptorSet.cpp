@@ -224,7 +224,7 @@ void DescriptorSet::UpdateStoreTextureDescriptorSet(std::vector<class Texture2D*
 	}
 }
 
-void DescriptorSet::UpdateTextureDescriptorSet(std::vector<VkImageView> images, std::vector<VkSampler> samplers)
+void DescriptorSet::UpdateTextureViewDescriptorSet(std::vector<VkImageView> images, std::vector<VkSampler> samplers)
 {
 	if (_needUpdates[_renderer->GetCurrentFrameIndex()] == 1)
 	{

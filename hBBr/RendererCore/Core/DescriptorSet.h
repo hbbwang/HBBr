@@ -31,7 +31,7 @@ public:
 
 	void UpdateStoreTextureDescriptorSet(std::vector<class Texture2D*> textures, int beginBindingIndex = 0);
 
-	void UpdateTextureDescriptorSet(std::vector<VkImageView> images, std::vector<VkSampler> samplers);
+	void UpdateTextureViewDescriptorSet(std::vector<VkImageView> images, std::vector<VkSampler> samplers);
 
 	HBBR_INLINE Buffer* GetBuffer(int bufferIndex = 0)const { return _buffers[bufferIndex].get(); }
 

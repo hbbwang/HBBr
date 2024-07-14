@@ -84,7 +84,6 @@ void Texture2D::Resize(uint32_t width, uint32_t height)
 	}
 	manager->EndCommandBuffer(cmdbuf);
 	manager->SubmitQueueImmediate({ cmdbuf });
-	vkQueueWaitIdle(manager->GetGraphicsQueue());
 	std::vector<VkCommandBuffer> bufs = { cmdbuf };
 	manager->FreeCommandBuffers(manager->GetCommandPool(), bufs);
 
@@ -101,7 +100,7 @@ std::shared_ptr<Texture2D> Texture2D::CreateTexture2D(
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = {width,height};
 	VulkanManager::GetManager()->CreateImage(width, height, format, usageFlags, newTexture->_image, miplevel, layerCount);
-	if (format == VK_FORMAT_R32_SFLOAT || format == VK_FORMAT_D32_SFLOAT)
+	if (format == VK_FORMAT_R32_SFLOAT || format == VK_FORMAT_D32_SFLOAT || format == VK_FORMAT_D24_UNORM_S8_UINT)
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
 	else if (format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM_S8_UINT)
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;

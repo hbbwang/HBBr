@@ -33,3 +33,34 @@ struct ObjectUniformBuffer
 {
 	glm::mat4 WorldMatrix;
 };
+
+enum LightType : uint32_t
+{
+	LightType_DirectionalLight = 0,
+	LightType_PointLight = 1,
+	LightType_SpotLight = 2
+};
+
+enum LightingFlagBits : uint32_t
+{
+	LightingFlag_CastShadow = 0x00000001,
+};
+
+struct LightingParameters
+{
+	//LightPos
+	glm::vec3 LightPosition = glm::vec3(0, 0, 0);
+	float LightStrength = 1.0f;
+	glm::vec3 LightColor = glm::vec3(1, 1, 1);
+	float LightSpecular = 1.0f;
+	glm::vec3 LightDirection = glm::vec3(0, 1, 0);
+	uint32_t LightType = 0;
+	uint32_t LightFlags = 0;
+};
+
+struct LightingUniformBuffer
+{
+	PassUniformBuffer passUniform;
+	int validLightCount;
+	LightingParameters lightParams[64];
+};

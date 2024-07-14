@@ -6,7 +6,7 @@
 
 #include "Include/Config.hlsl"
 #include "Include/Common.hlsl"
-#include "Include/ShadingModel.hlsl"
+#include "Include/BasePassCommon.hlsl"
 
 struct VSInput
 {
