@@ -15,7 +15,7 @@ public:
 	virtual void PassReset()override;
 private:
 
-	void SetupBasePassAndDraw(Pass p);
+	void SetupPassAndDraw(Pass p);
 
 	//Contain uniform buffers {pass,obj,vsmat,tex} and textures
 	std::vector<VkPipelineLayout> _pipelineLayout_p_o_vsm_t;
@@ -48,4 +48,5 @@ private:
 	std::map<class MaterialPrimitive*,std::vector<TextureDescriptorSet>> _descriptorSet_tex;
 	std::shared_ptr<class Buffer>_opaque_vertexBuffer;
 	std::shared_ptr<class Buffer>_opaque_indexBuffer;
+
 };

@@ -1355,6 +1355,36 @@ VkDeviceSize VulkanManager::CreateImageMemory(VkImage inImage, VkDeviceMemory& i
 	return 0;
 }
 
+bool VulkanManager::CheckImageProperties(VkFormat format, VkImageType type, VkImageTiling tiling, VkImageUsageFlags usages, VkImageCreateFlags flags, VkImageFormatProperties* out)
+{
+	bool result = true;
+	VkImageFormatProperties formatProperties = {};
+	vkGetPhysicalDeviceImageFormatProperties(
+		_gpuDevice,
+		format,
+		type, tiling,
+		usages,
+		flags,
+		&formatProperties);
+	if (
+		formatProperties.maxArrayLayers <= 0
+		&& formatProperties.maxExtent.width <= 0
+		&& formatProperties.maxExtent.height <= 0
+		&& formatProperties.maxExtent.depth <= 0
+		&& formatProperties.maxMipLevels <= 0
+		&& formatProperties.maxResourceSize <= 0
+		&& formatProperties.sampleCounts <= 0
+		)
+	{
+		result = false;
+	}
+	if (out != nullptr)
+	{
+		*out = formatProperties;
+	}
+	return result;
+}
+
 void VulkanManager::Transition(
 	VkCommandBuffer cmdBuffer, 
 	VkImage image, 

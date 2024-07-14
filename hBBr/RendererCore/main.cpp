@@ -163,6 +163,7 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 
 #if IS_EDITOR
 	Shaderc::ShaderCompiler::CompileAllShaders(FileSystem::GetShaderIncludeAbsPath().c_str());
+	Shaderc::ShaderCompiler::PostProcessShaderCache();
 #endif
 	Shader::LoadShaderCache(FileSystem::GetShaderCacheAbsPath().c_str());
 	//Init Content Manager

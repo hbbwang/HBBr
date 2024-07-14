@@ -12,6 +12,27 @@
 
 #pragma comment(lib,"shaderc/shaderc_shared.lib")
 
+#ifdef _DEBUG
+#include "spirv_cross/spirv_reflect.hpp"
+#pragma comment(lib,"vulkan/Debug/spirv-cross-cd.lib")
+#pragma comment(lib,"vulkan/Debug/spirv-cross-cored.lib")
+#pragma comment(lib,"vulkan/Debug/spirv-cross-cppd.lib")
+#pragma comment(lib,"vulkan/Debug/spirv-cross-glsld.lib")
+#pragma comment(lib,"vulkan/Debug/spirv-cross-hlsld.lib")
+#pragma comment(lib,"vulkan/Debug/spirv-cross-reflectd.lib")
+
+#else
+
+#include "spirv_cross/spirv_reflect.hpp"
+#pragma comment(lib,"vulkan/Release/spirv-cross-c.lib")
+#pragma comment(lib,"vulkan/Release/spirv-cross-core.lib")
+#pragma comment(lib,"vulkan/Release/spirv-cross-cpp.lib")
+#pragma comment(lib,"vulkan/Release/spirv-cross-glsl.lib")
+#pragma comment(lib,"vulkan/Release/spirv-cross-hlsl.lib")
+#pragma comment(lib,"vulkan/Release/spirv-cross-reflect.lib")
+
+#endif
+
 int Shaderc::ShaderCompiler::_bEnableShaderDebug = 0;
 
 void Shaderc::ShaderCompiler::CompileAllShaders(const char* srcShaderPath)
@@ -427,9 +448,6 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 				}
 			}
 			//InputLayout
-			//else if (setting[0] == '[' && setting[1] == 'I' && setting[2] == 'n' && setting[3] == 'p'
-			//	&& setting[4] == 'u' && setting[5] == 't' && setting[6] == 'L' && setting[7] == 'a' 
-			//	&& setting[8] == 'y' && setting[9] == 'o' && setting[10] == 'u' && setting[11] == 't' && setting[12] == ']')
 			else if (setting[0] == 's' && setting[1] == 't' && setting[2] == 'r' && setting[3] == 'u'
 				&& setting[4] == 'c' && setting[5] == 't' && setting[6] == 'V' && setting[7] == 'S'
 				&& setting[8] == 'I' && setting[9] == 'n' && setting[10] == 'p' && setting[11] == 'u' && setting[12] == 't')
@@ -882,27 +900,151 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 	std::vector<ShaderParameterInfo> shaderParamInfos = shaderParamInfosVS;
 	shaderParamInfos.insert(shaderParamInfos.end(), shaderParamInfosPS.begin(), shaderParamInfosPS.end());
 	GenerateCombinations((int)varients.size(), 0, 0, _shaderSrcCode, fileName, entryPoint, shaderType, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients, macroDefines);
-	//for (int i = 0; i < varients.size(); i++)
-	//{
-	//	//Bool开和关  分别编一次
-	//	if (varients[i].type == ShaderVarientType::Bool)
-	//	{
-	//		for (int m = 0; m < 2; m++)
-	//		{
-	//			std::string value = HString::FromInt(m).c_str();
-	//			options.AddMacroDefinition(varients[i].name, value);
-	//			ExecCompileShader(options, _shaderSrcCode, fileName, entryPoint, shaderType
-	//				, header, shaderParamInfos, shaderTextureInfos, srcShaderFileFullPath, varients);
-	//		}
-	//	}
-	//	//Int 只会编译一次
-	//	else if (varients[i].type == ShaderVarientType::Int)
-	//	{
-	//		options.AddMacroDefinition(varients[i].name, varients[i].defaultValue);
 
-	//	}
-	//}
 }
 
+void Shaderc::ShaderCompiler::PostProcessShaderCache()
+{
+	auto allCacheFiles = FileSystem::GetFilesBySuffix(FileSystem::GetShaderCacheAbsPath().c_str(), "spv");
+	for (auto i : allCacheFiles)
+	{
+		HString fileName = i.baseName;
+		auto split = fileName.Split("@");
+		ShaderCache cache = {};
+		//
+		std::ifstream file(i.absPath.c_str(), std::ios::ate | std::ios::binary);
+		size_t fileSize = static_cast<size_t>(file.tellg());
+		if (fileSize <= 1)
+		{
+			MessageOut((HString("Load shader cache failed : ") + i.fileName + " : Small size."), false, false, "255,255,0");
+			return;
+		}
+		file.seekg(0);
+		//header
+		file.read((char*)&cache.header, sizeof(ShaderCacheHeader));
+		//shader varients
+		for (int v = 0; v < cache.header.varientCount; v++)
+		{
+			ShaderVarientGroup newVarient;
+			file.read((char*)&newVarient, sizeof(ShaderVarientGroup));
+			cache.vi.push_back(newVarient);
+		}
+		//shader parameter infos
+		for (int i = 0; i < cache.header.shaderParameterCount_vs + cache.header.shaderParameterCount_ps; i++)
+		{
+			ShaderParameterInfo newInfo;
+			file.read((char*)&newInfo, sizeof(ShaderParameterInfo));
+			cache.params.push_back(newInfo);
+		}
+		//shader textures infos
+		for (int i = 0; i < cache.header.shaderTextureCount; i++)
+		{
+			ShaderTextureInfo newInfo;
+			file.read((char*)&newInfo, sizeof(ShaderTextureInfo));
+			cache.texs.push_back(newInfo);
+		}
+		//cache
+		size_t shaderCodeSize =
+			fileSize
+			- sizeof(ShaderCacheHeader)
+			- (sizeof(ShaderVarientGroup) * cache.header.varientCount)
+			- (sizeof(ShaderParameterInfo) * (cache.header.shaderParameterCount_vs + cache.header.shaderParameterCount_ps))
+			- (sizeof(ShaderTextureInfo) * cache.header.shaderTextureCount)
+			;
+		std::vector<uint32_t> shaderData(shaderCodeSize / (sizeof(uint32_t) / sizeof(char)));
+		file.read((char*)shaderData.data(), shaderCodeSize);
+		file.close();
+
+		//二次处理shader cache
+		int SV_TargetCount = 0;
+
+		spirv_cross::CompilerReflection reflector(shaderData);
+		uint32_t numRenderTargets = 0;
+		auto executionModel = reflector.get_execution_model();
+		switch (executionModel)
+		{
+		case spv::ExecutionModelVertex:	//Vertex Shader
+
+			break;
+		case spv::ExecutionModelTessellationControl:
+			ConsoleDebug::print_endl("PostProcess Shader type: Tessellation Control");
+			break;
+		case spv::ExecutionModelTessellationEvaluation:
+			ConsoleDebug::print_endl("PostProcess Shader type: Tessellation Evaluation");
+			break;
+		case spv::ExecutionModelGeometry:
+			ConsoleDebug::print_endl("PostProcess Shader type: Geometry");
+			break;
+		case spv::ExecutionModelFragment: //Pixel Shader
+			ConsoleDebug::print_endl("PostProcess Shader type: Fragment");
+			{
+				for (const auto& entry : reflector.get_shader_resources().stage_outputs)
+				{
+					HString outputEntryName = entry.name;
+					const spirv_cross::SPIRType& type = reflector.get_type(entry.base_type_id);
+					if (type.vecsize > 1)//输出格式大于float的都认为是ColorAttachment
+					{
+						cache.header.colorAttachmentCount++;
+					}
+				}
+			}
+			break;
+		case spv::ExecutionModelGLCompute:
+			ConsoleDebug::print_endl("PostProcess Shader type: Compute");
+			break;
+		case spv::ExecutionModelRayGenerationNV:
+			ConsoleDebug::print_endl("PostProcess Shader type: Ray Generation");
+			break;
+		case spv::ExecutionModelIntersectionNV:
+			ConsoleDebug::print_endl("PostProcess Shader type: Intersection");
+			break;
+		case spv::ExecutionModelAnyHitNV:
+			ConsoleDebug::print_endl("PostProcess Shader type: Any Hit");
+			break;
+		case spv::ExecutionModelClosestHitNV:
+			ConsoleDebug::print_endl("PostProcess Shader type:  Closest Hit");
+			break;
+		case spv::ExecutionModelMissNV:
+			ConsoleDebug::print_endl("PostProcess Shader type: Miss");
+			break;
+		case spv::ExecutionModelCallableNV:
+			ConsoleDebug::print_endl("PostProcess Shader type: Callable");
+			break;
+		case spv::ExecutionModelTaskNV:
+			ConsoleDebug::print_endl("PostProcess Shader type: Task");
+			break;
+		case spv::ExecutionModelMeshNV:
+			ConsoleDebug::print_endl("PostProcess Shader type: Mesh");
+			break;
+		default:
+			std::cout << "Unknown shader type" << std::endl;
+		}
+
+		//重新输出
+		std::ofstream out(i.absPath.c_str(), std::ios::binary);
+		if (out.is_open())
+		{
+			//Header 存入
+			out.write((char*)&cache.header, sizeof(ShaderCacheHeader));
+			//保存变体名
+			for (int v = 0; v < cache.header.varientCount; v++)
+			{
+				out.write((char*)&cache.vi[v], sizeof(ShaderVarientGroup));
+			}
+			//Shader 参数信息存入
+			for (int v = 0; v < cache.header.shaderParameterCount_ps + cache.header.shaderParameterCount_vs; v++)
+			{
+				out.write((char*)&cache.params[v], sizeof(ShaderParameterInfo));
+			}
+			for (int v = 0; v < cache.header.shaderTextureCount; v++)
+			{
+				out.write((char*)&cache.texs[v], sizeof(ShaderTextureInfo));
+			}
+			//ShaderCache
+			out.write((char*)shaderData.data(), shaderCodeSize);
+			out.close();
+		}
+	}
+}
 
 #endif

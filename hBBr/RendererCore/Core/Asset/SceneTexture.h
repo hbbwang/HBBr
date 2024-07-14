@@ -6,6 +6,9 @@ enum class SceneTextureDesc {
 	SceneColor = 0,
 	SceneDepth = 1,
 	FinalColor = 2,
+	GBuffer0 = 3,
+	GBuffer1 = 4,
+	GBuffer2 = 5,
 };
 
 class VulkanRenderer;

@@ -75,6 +75,8 @@ struct ShaderCacheHeader
 	uint8_t shaderTextureCount = 0;
 	//Shader varients
 	uint8_t varientCount = 0;
+	//Shader SV_Target Count
+	uint8_t colorAttachmentCount = 0;
 };
 
 struct ShaderParameterInfo

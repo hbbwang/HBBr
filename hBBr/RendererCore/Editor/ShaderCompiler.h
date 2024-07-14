@@ -28,6 +28,8 @@ namespace Shaderc
 		/* Compile single shader. */
 		HBBR_API static void CompileShader(const char* srcShaderFileFullPath,const char* entryPoint, CompileShaderType shaderType);
 
+		HBBR_API static void PostProcessShaderCache();
+
 		static int _bEnableShaderDebug;
 		HBBR_API static void SetEnableShaderDebug(bool bEnable) {
 			_bEnableShaderDebug = bEnable ? 1 : 0;

@@ -40,11 +40,18 @@ void BasePass::PassInit()
 	_pipelineLayout_p_o_vspsm_t.resize(16);
 	_pipelineLayout_p_o_t.resize(16);
 
-	//Swapchain
-	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	//SceneDepth
-	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetFormat() , VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-	AddSubpass({}, { 0 }, 1);
+	//SceneDepth	: 0
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, GetSceneTexture(SceneTextureDesc::SceneDepth)->GetFormat(), VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+	//FinalColor	: 1
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, GetSceneTexture(SceneTextureDesc::SceneColor)->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	//GBuffer0		: 2
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, GetSceneTexture(SceneTextureDesc::GBuffer0)->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	//GBuffer1		: 3
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, GetSceneTexture(SceneTextureDesc::GBuffer1)->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	//GBuffer2		: 4
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, GetSceneTexture(SceneTextureDesc::GBuffer2)->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	//改了ColorAttachment的话，记得改一下下面的 blendState.outputAttachmentCount 数量
+	AddSubpass({}, { 1,2,3,4 }, 0);
 	CreateRenderPass();
 	//Texture2D DescriptorSet
 	auto manager = VulkanManager::GetManager();
@@ -134,11 +141,19 @@ void BasePass::PassUpdate()
 
 	auto finalColor = GetSceneTexture(SceneTextureDesc::FinalColor);
 	auto depth = GetSceneTexture(SceneTextureDesc::SceneDepth);
-	ResetFrameBufferCustom(_renderer->GetRenderSize(), { finalColor->GetTextureView(), depth->GetTextureView() });
+	ResetFrameBufferCustom(_renderer->GetRenderSize(), 
+		{ 
+			GetSceneTexture(SceneTextureDesc::SceneDepth)->GetTextureView(),
+			GetSceneTexture(SceneTextureDesc::SceneColor)->GetTextureView(),
+			GetSceneTexture(SceneTextureDesc::GBuffer0)->GetTextureView(),
+			GetSceneTexture(SceneTextureDesc::GBuffer1)->GetTextureView(),
+			GetSceneTexture(SceneTextureDesc::GBuffer2)->GetTextureView(),
+		});
 	SetViewport(_currentFrameBufferSize);
 	BeginRenderPass({ 0,0,0,0 });
-	//Opaque Pass
-	SetupBasePassAndDraw(Pass::OpaquePass);
+
+	//Opaque Base Pass
+	SetupPassAndDraw(Pass::OpaquePass);
 	
 	//manager->CmdNextSubpass(cmdBuf);
 	//Translucent pass
@@ -152,7 +167,7 @@ void BasePass::PassReset()
 
 }
 
-void BasePass::SetupBasePassAndDraw(Pass p)
+void BasePass::SetupPassAndDraw(Pass p)
 {
 	auto& pass = _opaque_descriptorSet_pass;
 	auto& obj = _opaque_descriptorSet_obj;
@@ -212,8 +227,9 @@ void BasePass::SetupBasePassAndDraw(Pass p)
 				auto psCache = Shader::_psShader[psShaderFullName];
 
 				VkGraphicsPipelineCreateInfoCache pipelineCreateInfo = {};
-				PipelineManager::SetColorBlend(pipelineCreateInfo, false);
-				PipelineManager::SetColorBlend(pipelineCreateInfo, false);
+				StaticBlendState blendState = {};
+				blendState.outputAttachmentCount = psCache->header.colorAttachmentCount;
+				PipelineManager::SetColorBlend(pipelineCreateInfo, false, blendState);
 				PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
 				PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
 				PipelineManager::SetVertexInput(pipelineCreateInfo, m->inputLayout);

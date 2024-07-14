@@ -163,6 +163,8 @@ public:
 	/* 创建Vulkan image view memory*/
 	VkDeviceSize CreateImageMemory(VkImage image, VkDeviceMemory& imageViewMemory, VkMemoryPropertyFlags memoryPropertyFlag = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
+	bool CheckImageProperties(VkFormat format, VkImageType type, VkImageTiling tiling, VkImageUsageFlags usages ,VkImageCreateFlags flags, VkImageFormatProperties* out = nullptr);
+
 	void DestroyImage(VkImage& inImage);
 
 	void DestroyImageView(VkImageView& imageView);

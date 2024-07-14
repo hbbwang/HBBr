@@ -58,6 +58,7 @@ typedef struct tagImageData
 	unsigned int mipLevel = 1;
 	uint8_t blockSize = 0;
 	bool	isCubeMap = false;
+	bool	isArray = false;
 }ImageData, * LPImage;
 
 
