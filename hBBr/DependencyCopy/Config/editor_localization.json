@@ -60,6 +60,8 @@
     "SceneOutline": {
         "CreateBasicGameObject": "预设创建",
         "CreateCube": "创建Cube",
+        "CreateDirectionalLighting": "平行光",
+        "CreateLightingObject": "光照预设创建",
         "CreateNewGameObject": "生成新的GameObject",
         "CreateNewLevel": "创建新场景",
         "CreatePlane": "创建Plane",

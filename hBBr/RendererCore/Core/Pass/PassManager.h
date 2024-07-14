@@ -11,8 +11,6 @@
 class VulkanRenderer;
 class PassBase;
 
-#define MaxLightingNum  64
-
 class PassManager
 {
 	friend class VulkanRenderer;

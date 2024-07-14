@@ -31,7 +31,7 @@ void SetShadingModelID(inout PixelShaderParameter Parameters)
     #elif MATERIAL_SHADINGMODEL_UNLIT
         Parameters.ShadingModelID = SHADINGMODELID_UNLIT;
     #endif
-}
+} 
 
 //Pixel shader
 PSOutput PSMain(VSToPS IN)

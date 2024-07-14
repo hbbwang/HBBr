@@ -81,6 +81,55 @@
         },
         "bActive": true
     },
+    "9e89226c-d430-4d76-95d6-641782b2a140": {
+        "Components": [
+            {
+                "Class": "DirectionalLightComponent",
+                "Properties": {
+                    "Cast Shadow": {
+                        "Type": "bool",
+                        "Value": "1"
+                    },
+                    "Light Color": {
+                        "Type": "Vector3",
+                        "Value": "1.000000,1.000000,1.000000"
+                    },
+                    "Light Specular": {
+                        "Type": "float",
+                        "Value": "1.000000"
+                    },
+                    "Light Strength": {
+                        "Type": "float",
+                        "Value": "1.000000"
+                    },
+                    "bActive": {
+                        "Type": "bool",
+                        "Value": "1"
+                    }
+                }
+            }
+        ],
+        "Name": "NewDirectionalLight",
+        "Parent": "00000000-0000-0000-0000-000000000000",
+        "Transform": {
+            "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "Rotation": {
+                "x": 30.550090789794922,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            }
+        },
+        "bActive": true
+    },
     "a983a360-f3e3-4320-85c1-2e0b2e016317": {
         "Components": [
             {
@@ -105,7 +154,7 @@
         "Parent": "59de3f33-b840-4532-b58d-f7af2be98165",
         "Transform": {
             "Position": {
-                "x": -0.9723625183105469,
+                "x": -0.9723623991012573,
                 "y": 1.9140000343322754,
                 "z": 2.67154598236084
             },

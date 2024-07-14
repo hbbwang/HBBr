@@ -18,14 +18,14 @@ struct LightingParameter
 	float3  LightColor;
 	float   LightSpecular;
 	float3  LightDirection;
-	int     LightType;
-	int     LightFlags;
+	uint    LightType;
+	uint    LightFlags;
 };
 
 cbuffer Pass :register(b0,space0)
 {
     PassUniformBuffer Pass;
-    int ValidLightCount;//有效灯光数量
+    uint ValidLightCount;//有效灯光数量
     LightingParameter LightingParams[MaxLightingNum];
 };
 
