@@ -135,7 +135,7 @@ void BasePass::PassUpdate()
 {
 	const auto manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
-	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), _markColor);
+	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.15, 0.16, 0.18, 0.8));
 	//Transition
 	auto sceneDepth = GetSceneTexture(SceneTextureDesc::SceneDepth);
 	auto sceneColor = GetSceneTexture(SceneTextureDesc::SceneColor);

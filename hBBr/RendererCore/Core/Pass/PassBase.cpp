@@ -83,7 +83,7 @@ void GraphicsPass::PassUpdate()
 {
 	const auto manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
-	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.3, 1.0, 0.1, 0.2));
+	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.3, 1.0, 0.1, 0.7));
 	//Update FrameBuffer
 	ResetFrameBuffer(_renderer->GetRenderSize(), { GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetTextureView() });
 	SetViewport(_currentFrameBufferSize);
