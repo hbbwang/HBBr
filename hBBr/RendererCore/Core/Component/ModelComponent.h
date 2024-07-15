@@ -3,7 +3,6 @@
 #include <vector>
 #include "Component.h"
 #include "HString.h"
-#include "Pass/PassType.h"
 #include "Material.h"
 
 class ModelComponent :public Component

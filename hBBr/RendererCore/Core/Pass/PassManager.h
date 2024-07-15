@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <Pass/PassType.h>
+#include <Pass/UniformBuffer.h>
 #include "Component/DirectionalLightComponent.h"
 
 class VulkanRenderer;
@@ -35,6 +36,10 @@ public:
 
 	HBBR_INLINE LightingUniformBuffer* GetLightingUniformBuffer(){
 		return &_lightUniformBuffer;
+	}
+
+	HBBR_INLINE PostProcessUniformBuffer* GetPostProcessUniformBuffer() {
+		return &_postProcessUniformBuffer;
 	}
 
 	HBBR_INLINE void BindLightingParameter(DirectionalLightComponent* lightComp) {
@@ -76,5 +81,7 @@ private:
 	LightingUniformBuffer _lightUniformBuffer;
 
 	std::vector<DirectionalLightComponent*> _lightings;
+
+	PostProcessUniformBuffer _postProcessUniformBuffer;
 
 };

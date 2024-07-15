@@ -236,7 +236,8 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 #ifdef _WIN32
 			if (strcmp(availableExts[i].extensionName, VK_KHR_DISPLAY_EXTENSION_NAME) == 0)
 			{
-				layers.push_back(availableLaters[i].layerName);
+				//这个层会自动添加RenderDoc Layer，会报错
+				//layers.push_back(availableLaters[i].layerName);
 				extensions.push_back(VK_KHR_DISPLAY_EXTENSION_NAME);
 				_enable_VK_KHR_display = true;
 			}
@@ -315,6 +316,20 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	createInfo.pNext = nullptr;
 	createInfo.pApplicationInfo = &appInfo;
+
+	ConsoleDebug::print_endl("hBBr:Enable Vulkan instance layer---------");
+	for (auto& i : layers)
+	{
+		ConsoleDebug::print_endl(i);
+	}
+	ConsoleDebug::print_endl("hBBr:-------------------------------------");
+
+	ConsoleDebug::print_endl("hBBr:Enable Vulkan instance layer extension---");
+	for (auto& i : extensions)
+	{
+		ConsoleDebug::print_endl(i);
+	}
+	ConsoleDebug::print_endl("hBBr:-------------------------------------");
 
 	if (_bDebugEnable)
 	{

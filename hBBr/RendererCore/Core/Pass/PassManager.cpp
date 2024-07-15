@@ -6,6 +6,7 @@
 #include "Pass/ImguiPass.h"
 #include "Pass/GUIPass.h"
 #include "Pass/PreCommandPass.h"
+#include "Pass/PostProcessPass.h"
 #include "Component/CameraComponent.h"
 PassManager::PassManager(VulkanRenderer* renderer)
 {
@@ -18,11 +19,14 @@ PassManager::PassManager(VulkanRenderer* renderer)
 		std::shared_ptr<PreCommandPass> precommand = std::make_shared<PreCommandPass>(this);
 		AddPass(precommand, "PreCommand");
 		//Opaque Pass
-		std::shared_ptr<BasePass> opaque = std::make_shared<BasePass>(this);
-		AddPass(opaque, "Opaque");
+		std::shared_ptr<BasePass> basePass = std::make_shared<BasePass>(this);
+		AddPass(basePass, "Base Pass");
 		//Deferred Lighting Pass
 		std::shared_ptr<DeferredLightingPass> deferredLighting = std::make_shared<DeferredLightingPass>(this);
 		AddPass(deferredLighting, "Deferred Lighting");
+		//Post Process Pass
+		std::shared_ptr<PostProcessPass> postProcess = std::make_shared<PostProcessPass>(this);
+		AddPass(postProcess, "Post Process");
 		//Screen GUI Pass
 		std::shared_ptr<GUIPass> gui = std::make_shared<GUIPass>(this);
 		AddPass(gui, "GUI");
@@ -43,11 +47,12 @@ void PassManager::PassesUpdate()
 
 	_sceneTextures->UpdateTextures();
 
-	//Update Lighting
-	_lightUniformBuffer.validLightCount = _lightings.size();
+	//Update lighting uniform buffer
+	_lightUniformBuffer.validLightCount = (uint32_t)_lightings.size();
 	int lightIndex = 0;
 	for (auto& i : _lightings)
 	{
+		_lightUniformBuffer.passUniform = _passUniformBuffer;
 		_lightUniformBuffer.lightParams[lightIndex].LightColor = i->GetLightColor();
 		_lightUniformBuffer.lightParams[lightIndex].LightStrength = i->GetLightIntensity();
 		_lightUniformBuffer.lightParams[lightIndex].LightDirection = -(i->GetTransform()->GetForwardVector());
@@ -61,6 +66,11 @@ void PassManager::PassesUpdate()
 		}
 		lightIndex++;
 	}
+
+	//Update post process uniform buffer
+	_postProcessUniformBuffer.passUniform = _passUniformBuffer;
+	_postProcessUniformBuffer.debugMode = 0;
+
 	//Collect render setting (Commandbuffer record)
 	_executePasses.clear();
 	for (auto p : _passes)

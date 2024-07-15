@@ -3,6 +3,7 @@
 #include "Common.h"
 #include "Component/Component.h"
 #include "Pass/PassType.h"
+#include "Pass/UniformBuffer.h"
 
 class DirectionalLightComponent :public Component
 {
@@ -14,7 +15,7 @@ protected:
 	//不是每帧执行,一般用于编辑器的对象数据刷新
 	virtual void UpdateData()override;
 
-public:
+public: 
 	virtual void Update()override;
 
 	virtual LightType GetLightType()const {

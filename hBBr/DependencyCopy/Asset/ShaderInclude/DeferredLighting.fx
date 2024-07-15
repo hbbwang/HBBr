@@ -61,7 +61,7 @@ float4 PSMain(VSToPS IN) :SV_Target0
     DecodeGBufferData(IN.UV, GBuffer);
     if (GBuffer.ShadingModelID == SHADINGMODELID_UNLIT)
     {
-        return float4(GBuffer.Emissive.rgb, 1.0);
+        return 0;
     }
     //Diffuse Color
     half3 DiffuseColor = GBuffer.BaseColor * (1 - GBuffer.Metallic);
@@ -92,8 +92,6 @@ float4 PSMain(VSToPS IN) :SV_Target0
         //Light Result
         Result.rgb += (DiffuseLightColor + spec) * LightParam.LightStrength * LightParam.LightColor;
     } 
-    //Emissive
-    Result.rgb += GBuffer.Emissive.rgb;
     return Result;
     //return GBuffer.ShadingModelID;
 }

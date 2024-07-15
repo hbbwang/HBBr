@@ -302,7 +302,9 @@
     <ClInclude Include="Core\Pass\BasePass.h" />
     <ClInclude Include="Core\Pass\PassManager.h" />
     <ClInclude Include="Core\Pass\PassType.h" />
+    <ClInclude Include="Core\Pass\PostProcessPass.h" />
     <ClInclude Include="Core\Pass\PreCommandPass.h" />
+    <ClInclude Include="Core\Pass\UniformBuffer.h" />
     <ClInclude Include="Core\Pipeline.h" />
     <ClInclude Include="Core\Primitive.h" />
     <ClInclude Include="Core\RendererConfig.h" />
@@ -365,6 +367,7 @@
     <ClCompile Include="Core\Pass\PassBase.cpp" />
     <ClCompile Include="Core\Pass\BasePass.cpp" />
     <ClCompile Include="Core\Pass\PassManager.cpp" />
+    <ClCompile Include="Core\Pass\PostProcessPass.cpp" />
     <ClCompile Include="Core\Pass\PreCommandPass.cpp" />
     <ClCompile Include="Core\Pipeline.cpp" />
     <ClCompile Include="Core\Primitive.cpp" />

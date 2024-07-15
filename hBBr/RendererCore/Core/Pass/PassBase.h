@@ -35,7 +35,7 @@ protected:
 	virtual void Reset() {}
 	virtual void PassReset() {}
 	std::shared_ptr<Texture2D> GetSceneTexture(uint32_t descIndex);
-	std::shared_ptr<Texture2D> GetSceneTexture(SceneTextureDesc desc);
+	std::shared_ptr<Texture2D> GetSceneTexture(SceneTextureDesc desc); 
 	class PassManager* _manager = nullptr;
 	VulkanRenderer* _renderer = nullptr;
 	HString _passName = "PassBase";
@@ -57,7 +57,7 @@ public:
 	//Step the last,custom.
 	virtual void PassInit()override {}
 	virtual void PassUpdate()override;
-	virtual void PassReset()override {}
+	virtual void PassReset()override {} 
 	void Reset() override {
 		_currentFrameBufferSize = { 1 , 1 };//Force update
 		PassReset();
@@ -72,7 +72,6 @@ public:
 	{
 		return _renderPass;
 	}
-	HString _passName = "Graphics Pass" ;
 protected:
 	virtual void PassRender() {}
 	void BeginRenderPass(std::array<float, 4> clearColor = { 0.0f, 0.0f, 0.0f, 0.0f }, VkExtent2D areaSize = {});
