@@ -189,6 +189,35 @@ float3 ACESToneMapping(float3 color, float adapted_lum)
 	return (color * (A * color + B)) / (color * (C * color + D) + E);
 }
 
+#if 1
+	float3 sRGBToLinear(float3 color) 
+	{
+		color = max(6.10352e-5, color);
+		return pow(color, float3(2.4,2.4,2.4));
+	}
+	float3 linearToSRGB(float3 color) 
+	{
+		color = max(6.10352e-5, color);
+		float f = 1.0 / 2.4;
+		return pow(color, float3(f,f,f));
+	}
+#else
+	float3 sRGBToLinear(float3 color) 
+	{
+		color = max(6.10352e-5, color);
+		float3 colorLinear = color / 12.92;
+		float3 colorExponential = pow((color + 0.055) / 1.055, float3(2.4,2.4,2.4));
+		return mix(colorLinear, colorExponential, step(0.04045, color));
+	}
+	float3 linearToSRGB(float3 color) 
+	{
+		color = max(6.10352e-5, color);
+		float f = 1.0 / 2.4;
+		float3 colorCompressed = (color <= 0.0031308) ? color * 12.92 : pow(color, float3(f,f,f)) * 1.055 - 0.055;
+		return colorCompressed * (1.0 / 12.92);
+	}
+#endif
+
 float4x4 Inverse(float4x4 m)
 {
 	float n11 = m[0][0], n12 = m[1][0], n13 = m[2][0], n14 = m[3][0];
