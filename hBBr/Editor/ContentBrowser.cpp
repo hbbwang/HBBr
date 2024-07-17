@@ -29,10 +29,13 @@
 #include "ComboBox.h"
 #include "EditorMain.h"
 #include "ConsoleDebug.h"
-#include "MaterialDetailEditor.h"
+
 #include "NvidiaTextureTools.h"
 #include <QStyledItemDelegate>
 #include <QStyledItemDelegate>
+
+#include "MaterialDetailEditor.h"
+#include "TextureDetailEditor.h"
 
 //--------------------------------------VirtualFolderTreeView-------------------
 #pragma region VirtualFolderTreeView
@@ -756,14 +759,20 @@ void VirtualFileListView::ItemDoubleClicked(QListWidgetItem* input_item)
 	{
 		switch (item->_assetInfo.lock()->type)
 		{
-		case AssetType::Material:
-		{
-			/*MaterialEditor::OpenMaterialEditor(item->_assetInfo.lock()->GetAssetObject<Material>(), true);*/
-			auto mat = item->_assetInfo.lock()->GetAssetObject<Material>();
-			MaterialDetailEditor::OpenMaterialEditor(mat);
-			break;
-		}
-
+			case AssetType::Material:
+			{
+				/*MaterialEditor::OpenMaterialEditor(item->_assetInfo.lock()->GetAssetObject<Material>(), true);*/
+				auto mat = item->_assetInfo.lock()->GetAssetObject<Material>();
+				MaterialDetailEditor::OpenEditor(mat);
+				break;
+			}
+			case AssetType::Texture2D:
+			case AssetType::TextureCube:
+			{
+				auto tex = item->_assetInfo.lock()->GetAssetObject<Texture2D>();
+				TextureDetailEditor::OpenEditor(tex);
+				break;
+			}
 		default:
 			break;
 		}

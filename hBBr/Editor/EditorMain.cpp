@@ -78,7 +78,7 @@ EditorMain::EditorMain(QWidget *parent)
     });
     connect(ui.CompileAllShader, &QAction::triggered, this, [this](bool bChecked) {
         VulkanApp::RecompileAllShader();
-        MaterialDetailEditor::RefreshAllMaterialEditor();
+        MaterialDetailEditor::RefreshAllEditor();
     });
     connect(ui.SaveWorld, &QAction::triggered, this, [this](bool bChecked) {
         VulkanApp::GetMainForm()->renderer->GetWorld().lock()->SaveWorld();

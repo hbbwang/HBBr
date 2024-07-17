@@ -657,8 +657,8 @@ QSplitter::handle
     background-color: rgb(10,10,10);
     border-radius:	2px;
 }
-#MaterialDetailEditor,
-#MaterialDetailEditor_MaterialAttributeScroll,
+#DetailEditor,
+#DetailEditor_AttributeScroll,
 #scrollAreaWidgetContents
 {
     background-color: BackgroundColor;
@@ -666,13 +666,13 @@ QSplitter::handle
     border-top: 1px solid rgb(100,100,100);
     border-bottom: 1px solid rgb(100,100,100);
 }
-#MaterialDetailEditor QSplitter::handle
+#DetailEditor QSplitter::handle
 {
     height: 2px;
 }
-#MaterialDetailEditor_RendererName,
-#MaterialDetailEditor_MaterialParameterName,
-#MaterialDetailEditor_MaterialAttributeName
+#DetailEditor_RendererName,
+#DetailEditor_ParameterName,
+#DetailEditor_AttributeName
 {
     font-family:  FontFamily;
     color:rgb(230, 230, 230);

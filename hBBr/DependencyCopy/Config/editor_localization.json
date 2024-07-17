@@ -54,6 +54,12 @@
         "WindowHeight": 768,
         "WindowWidth": 1024
     },
+    "TextureEditor":{
+        "PosX": 200,
+        "PosY": 550,
+        "WindowHeight": 768,
+        "WindowWidth": 1024
+    },
     "RenderView": {
         "SpawnGameObject": "目前没有场景开启编辑状态!"
     },

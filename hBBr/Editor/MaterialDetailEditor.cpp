@@ -30,9 +30,7 @@ MaterialDetailEditor::MaterialDetailEditor(std::weak_ptr<Material> mat, QWidget 
 	: QMainWindow(parent)
 {
 	_material = mat;
-	_parent = (MaterialEditor*)parent;
 	//this->setAttribute(Qt::WA_DeleteOnClose, true);
-
 	_left_right_sizes = QList<int>() << this->width() * (2.0f / 5.0f) << this->width() * (3.0f / 5.0f);
 	_up_bottom_sizes = QList<int>() << this->width() * (2.0f / 5.0f) << this->width() * (3.0f / 5.0f);
 
@@ -65,7 +63,7 @@ MaterialDetailEditor::~MaterialDetailEditor()
 {
 }
 
-void deleteItem(QLayout* layout)
+void MaterialDetailEditor::deleteItem(QLayout* layout)
 {
 	if (layout == NULL)
 		return;
@@ -91,12 +89,12 @@ void deleteItem(QLayout* layout)
 	}
 }
 
-MaterialDetailEditor* MaterialDetailEditor::OpenMaterialEditor(std::weak_ptr<Material> mat)
+MaterialDetailEditor* MaterialDetailEditor::OpenEditor(std::weak_ptr<Material> mat)
 {
 	return new MaterialDetailEditor(mat, EditorMain::_self);
 }
 
-void MaterialDetailEditor::CloseMaterialEditor(std::weak_ptr<Material> mat)
+void MaterialDetailEditor::CloseEditor(std::weak_ptr<Material> mat)
 {
 	MaterialDetailEditor* editor = nullptr;
 	for (int i = 0; i < _allDetailWindows.size(); i++)
@@ -113,7 +111,7 @@ void MaterialDetailEditor::CloseMaterialEditor(std::weak_ptr<Material> mat)
 	}
 }
 
-MaterialDetailEditor* MaterialDetailEditor::RefreshMaterialEditor(std::weak_ptr<Material> mat)
+MaterialDetailEditor* MaterialDetailEditor::RefreshEditor(std::weak_ptr<Material> mat)
 {
 	//CloseMaterialEditor(mat);
 	//return OpenMaterialEditor(mat);
@@ -136,7 +134,7 @@ MaterialDetailEditor* MaterialDetailEditor::RefreshMaterialEditor(std::weak_ptr<
 	return editor;
 }
 
-void MaterialDetailEditor::RefreshAllMaterialEditor()
+void MaterialDetailEditor::RefreshAllEditor()
 {
 	std::vector<std::weak_ptr<Material>> _allMat;
 	auto allEditorCache = _allDetailWindows;
@@ -148,7 +146,7 @@ void MaterialDetailEditor::RefreshAllMaterialEditor()
 
 	for (auto& i : _allMat)
 	{
-		RefreshMaterialEditor(i);
+		RefreshEditor(i);
 	}
 }
 
@@ -202,7 +200,7 @@ void MaterialDetailEditor::Init()
 	InitMP();
 
 	//小标题
-	ui_r.MaterialDetailEditor_RendererName->setText(GetEditorInternationalization("MaterialEditor", "MaterialRendererTitle"));
+	ui_r.DetailEditor_RendererName->setText(GetEditorInternationalization("MaterialEditor", "MaterialRendererTitle"));
 	//渲染器
 	{
 		_renderer = new SDLWidget(this, _material.lock()->_assetInfo.lock()->guid.str().c_str());
@@ -243,7 +241,7 @@ void MaterialDetailEditor::InitMP()
 	ui_mp.setupUi(widget);
 	mp->setWindowTitle(GetEditorInternationalization("MaterialEditor", "MaterialParameterTitle"));
 	//ui_mp.MaterialDetailEditor_MaterialParameterName->setText(GetEditorInternationalization("MaterialEditor", "MaterialParameterTitle"));
-	ui_mp.MaterialDetailEditor_MaterialParameterName->setHidden(true);
+	ui_mp.DetailEditor_ParameterName->setHidden(true);
 	addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, mp);
 	//
 	PropertyWidget* pw_mp = new PropertyWidget(this);
@@ -419,7 +417,7 @@ void MaterialDetailEditor::InitMA()
 {
 	ma = new QWidget(this);
 	ui_ma.setupUi(ma);
-	ui_ma.MaterialDetailEditor_MaterialAttributeName->setText(GetEditorInternationalization("MaterialEditor", "MaterialAttrbuteTitle"));
+	ui_ma.DetailEditor_AttributeName->setText(GetEditorInternationalization("MaterialEditor", "MaterialAttrbuteTitle"));
 	ma->setWindowTitle(GetEditorInternationalization("MaterialEditor", "MaterialAttrbuteTitle"));
 
 	up_bottom->addWidget(ma);
@@ -499,7 +497,7 @@ void MaterialDetailEditor::InitMA()
 					_material.lock()->GetPrimitive()->graphicsIndex.GetPSShaderName().c_str());
 				Shader::ReloadMaterialShaderCacheAndPipelineObject(_material);
 				//重新打开，主要为了重新加载参数页面
-				RefreshMaterialEditor(_material);
+				RefreshEditor(_material);
 			});
 		}
 		pw_ma->ShowItems();

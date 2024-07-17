@@ -186,6 +186,7 @@
     <ClCompile Include="RenderView.cpp" />
     <ClCompile Include="SceneOutline.cpp" />
     <ClCompile Include="SDLWidget.cpp" />
+    <ClCompile Include="TextureDetailEditor.cpp" />
     <ClCompile Include="ToolBox.cpp" />
     <ClCompile Include="VectorSetting.cpp" />
     <ClCompile Include="WorldSelector.cpp" />
@@ -206,9 +207,9 @@
     <ClCompile Include="main.cpp" />
     <QtUic Include="Inspector.ui" />
     <QtUic Include="LineEditDialog.ui" />
-    <QtUic Include="MaterialDetailEditor_MaterialAttribute.ui" />
-    <QtUic Include="MaterialDetailEditor_MaterialParameter.ui" />
-    <QtUic Include="MaterialDetailEditor_Renderer.ui" />
+    <QtUic Include="DetailEditor_Attribute.ui" />
+    <QtUic Include="DetailEditor_Parameter.ui" />
+    <QtUic Include="DetailEditor_Renderer.ui" />
     <QtUic Include="ToolBox.ui" />
     <QtUic Include="ToolPage.ui" />
     <QtUic Include="VectorSetting.ui" />
@@ -221,6 +222,7 @@
     <QtMoc Include="SceneOutline.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="TextureDetailEditor.h" />
     <QtMoc Include="SDLWidget.h" />
     <QtMoc Include="WorldSelector.h" />
     <QtMoc Include="PropertyWidget.h" />

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MaterialDetailEditor_MaterialAttribute</class>
- <widget class="QWidget" name="MaterialDetailEditor_MaterialAttribute">
+ <class>DetailEditor_Parameter</class>
+ <widget class="QWidget" name="DetailEditor_Parameter">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>383</width>
-    <height>275</height>
+    <width>400</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,10">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -30,14 +30,14 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLabel" name="MaterialDetailEditor_MaterialAttributeName">
+    <widget class="QLabel" name="DetailEditor_ParameterName">
      <property name="text">
       <string>TextLabel</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QScrollArea" name="MaterialDetailEditor_MaterialAttributeScroll">
+    <widget class="QScrollArea" name="DetailEditor_ParameterScroll">
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
@@ -46,8 +46,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>381</width>
-        <height>261</height>
+        <width>398</width>
+        <height>286</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="scroll_verticalLayout">

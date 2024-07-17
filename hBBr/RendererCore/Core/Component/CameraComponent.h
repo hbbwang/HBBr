@@ -6,7 +6,8 @@
 enum class EditorCameraType
 {
 	Free,
-	TargetRotation
+	TargetRotation,
+	Texture2D,
 };
 
 class CameraComponent :public Component

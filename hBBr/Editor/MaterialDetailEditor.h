@@ -6,9 +6,9 @@
 #include <qsplitter.h>
 #include <HGuid.h>
 #include <qdockwidget.h>
-#include "ui_MaterialDetailEditor_MaterialAttribute.h"
-#include "ui_MaterialDetailEditor_MaterialParameter.h"
-#include "ui_MaterialDetailEditor_Renderer.h"
+#include "ui_DetailEditor_Attribute.h"
+#include "ui_DetailEditor_Parameter.h"
+#include "ui_DetailEditor_Renderer.h"
 class MaterialDetailEditor : public QMainWindow
 {
 	Q_OBJECT
@@ -16,7 +16,6 @@ class MaterialDetailEditor : public QMainWindow
 public:
 	MaterialDetailEditor(std::weak_ptr<Material> mat ,QWidget *parent = nullptr);
 	~MaterialDetailEditor();
-	class MaterialEditor* _parent = nullptr;
 
 	class SDLWidget* _renderer = nullptr;
 	//class QSplitter* left_right = nullptr;
@@ -32,16 +31,18 @@ public:
 
 	static 	QList<MaterialDetailEditor*> _allDetailWindows;
 
-	static MaterialDetailEditor* OpenMaterialEditor(std::weak_ptr<Material> mat);
+	static MaterialDetailEditor* OpenEditor(std::weak_ptr<Material> mat);
 
-	static void CloseMaterialEditor(std::weak_ptr<Material> mat);
+	static void CloseEditor(std::weak_ptr<Material> mat);
 
-	static MaterialDetailEditor* RefreshMaterialEditor(std::weak_ptr<Material> mat);
+	static MaterialDetailEditor* RefreshEditor(std::weak_ptr<Material> mat);
 
-	static void RefreshAllMaterialEditor();
+	static void RefreshAllEditor();
 
 	QList<int> _left_right_sizes;
 	QList<int> _up_bottom_sizes;
+
+	void deleteItem(QLayout* layout);
 
 protected:
 	virtual void paintEvent(QPaintEvent* event)override;
@@ -50,8 +51,8 @@ private:
 	void Init();
 	void InitMP();
 	void InitMA();
-	Ui::MaterialDetailEditor_MaterialAttribute ui_ma;
-	Ui::MaterialDetailEditor_MaterialParameter ui_mp;
-	Ui::MaterialDetailEditor_Renderer ui_r;
+	Ui::DetailEditor_Attribute ui_ma;
+	Ui::DetailEditor_Parameter ui_mp;
+	Ui::DetailEditor_Renderer ui_r;
 
 };

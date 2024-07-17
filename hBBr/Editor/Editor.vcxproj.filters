@@ -124,6 +124,9 @@
     <ClCompile Include="SDLWidget.cpp">
       <Filter>Widgets\Custom</Filter>
     </ClCompile>
+    <ClCompile Include="TextureDetailEditor.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="EditorMain.h">
@@ -198,6 +201,9 @@
     <QtMoc Include="SDLWidget.h">
       <Filter>Widgets\Custom</Filter>
     </QtMoc>
+    <QtMoc Include="TextureDetailEditor.h">
+      <Filter>Widgets</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditorCommonFunction.h">
@@ -256,13 +262,13 @@
     <QtUic Include="DirtyAssetsManager.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="MaterialDetailEditor_Renderer.ui">
+    <QtUic Include="DetailEditor_Renderer.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="MaterialDetailEditor_MaterialAttribute.ui">
+    <QtUic Include="DetailEditor_Attribute.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="MaterialDetailEditor_MaterialParameter.ui">
+    <QtUic Include="DetailEditor_Parameter.ui">
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="WorldSelector.ui">
