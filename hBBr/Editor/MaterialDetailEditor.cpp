@@ -13,6 +13,7 @@
 #include <Level.h>
 #include <GameObject.h>
 #include <ModelComponent.h>
+#include <DirectionalLightComponent.h>
 #include "PropertyWidget.h"
 #include <CameraComponent.h>
 #include <ToolBox.h>
@@ -174,19 +175,6 @@ void MaterialDetailEditor::closeEvent(QCloseEvent* event)
 
 void MaterialDetailEditor::Init()
 {
-	/*_inspector = new Inspector(this);
-	_inspector_dock = new CustomDockWidget(this);
-	_inspector_dock->setFeatures(
-		QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
-	_inspector_dock->setWidget(_inspector);
-	_inspector->setObjectName("Inspector");
-	_inspector_dock->setWindowTitle(GetEditorInternationalization("MainWindow", "Inspector"));
-	addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, _inspector_dock);*/
-
-	//left_right = new QSplitter(this);
-	//left_right->setChildrenCollapsible(false);
-	//left_right->setOrientation(Qt::Orientation::Horizontal);
-
 	up_bottom = new QSplitter(this);
 	up_bottom->setOrientation(Qt::Orientation::Vertical);
 	setCentralWidget(up_bottom);
@@ -217,6 +205,7 @@ void MaterialDetailEditor::Init()
 				renderer->GetWorld().lock()->GetMainCamera()->_cameraType = EditorCameraType::TargetRotation;
 				renderer->GetWorld().lock()->GetMainCamera()->GetTransform()->SetWorldLocation(glm::vec3(0, 0, -2.0f));
 
+				//Object
 				_gameObject = renderer->GetWorld().lock()->SpawnGameObject("PreviewObject", renderer->GetWorld().lock()->_editorLevel.get());
 				auto modelComp = _gameObject->AddComponent<ModelComponent>();
 				modelComp->SetModel(HGUID("6146e15a-0632-b197-b6f9-b12fc8a16b05"));
@@ -224,6 +213,13 @@ void MaterialDetailEditor::Init()
 				{
 					modelComp->SetMaterial(_material, i);
 				}
+				//Directional light
+				_directionalLight = renderer->GetWorld().lock()->SpawnGameObject("PreviewLight", renderer->GetWorld().lock()->_editorLevel.get());
+				auto lightComp = _directionalLight->AddComponent<DirectionalLightComponent>();
+				lightComp->SetLightColor(glm::vec3(1,1,1));
+				lightComp->SetLightIntensity(1.0);
+				_directionalLight->GetTransform()->SetWorldRotation(glm::vec3(30, 0, 0));
+
 			};
 		renderer->ExecFunctionOnRenderThread(func);
 	}

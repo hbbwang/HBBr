@@ -3,43 +3,12 @@
 #include "VulkanRenderer.h"
 #include "Texture2D.h"
 #include <vector>
-DescriptorSet::DescriptorSet(class VulkanRenderer* renderer , VkDescriptorType type, VkDeviceSize bufferSizeInit, std::vector<VkShaderStageFlags>shaderStageFlags)
-{
-	_renderer = renderer;
-	const int dsCount = (int)shaderStageFlags.size();
-	_descriptorTypes.resize(dsCount);
-	for (int i = 0; i < dsCount; i++)
-	{
-		_descriptorTypes[i] = type;
-	}
-	_shaderStageFlags = shaderStageFlags;
-	VulkanManager::GetManager()->CreateDescripotrSetLayout({ type }, _shaderStageFlags, _descriptorSetLayout);
-	if (_descriptorSetLayout != VK_NULL_HANDLE)
-	{
-		_descriptorSets.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
-		for (int i = 0; i < (int)VulkanManager::GetManager()->GetSwapchainBufferCount(); i++)
-		{
-			VulkanManager::GetManager()->AllocateDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), _descriptorSetLayout, _descriptorSets[i]);
-		}
-	}
-	if (type & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || type & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
-	{
-		auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSizeInit);
-		std::unique_ptr<Buffer> buffer;
-		buffer.reset(new Buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, alignmentSize ));
-		_buffers.push_back(std::move(buffer));
-	}
-	_needUpdates.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
-	NeedUpdate();
-}
 
 DescriptorSet::DescriptorSet(VulkanRenderer* renderer, VkDescriptorType type, VkDescriptorSetLayout setLayout, VkDeviceSize bufferSizeInit, VkShaderStageFlags shaderStageFlags)
 {
 	_renderer = renderer;
 	_descriptorTypes.push_back(type);
 	_shaderStageFlags.push_back(shaderStageFlags);
-	//外部传递进来的有效DescriptorSetLayout，不需要储存
-	//_descriptorSetLayout = setLayout;
 	if (setLayout != VK_NULL_HANDLE)
 	{
 		_descriptorSets.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
@@ -59,18 +28,17 @@ DescriptorSet::DescriptorSet(VulkanRenderer* renderer, VkDescriptorType type, Vk
 	NeedUpdate();
 }
 
-DescriptorSet::DescriptorSet(VulkanRenderer* renderer, std::vector<VkDescriptorType> types, VkDeviceSize bufferSizeInit, VkShaderStageFlags shaderStageFlags)
+DescriptorSet::DescriptorSet(VulkanRenderer* renderer, std::vector<VkDescriptorType> types, VkDescriptorSetLayout setLayout, VkDeviceSize bufferSizeInit, std::vector<VkShaderStageFlags> shaderStageFlags)
 {
 	_renderer = renderer;
 	_descriptorTypes = types;
-	_shaderStageFlags.push_back(shaderStageFlags);
-	VulkanManager::GetManager()->CreateDescripotrSetLayout(types, _descriptorSetLayout, _shaderStageFlags[0]);
-	if (_descriptorSetLayout != VK_NULL_HANDLE)
+	_shaderStageFlags = std::move(shaderStageFlags);
+	if (setLayout != VK_NULL_HANDLE)
 	{
 		_descriptorSets.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
 		for (int i = 0; i < (int)VulkanManager::GetManager()->GetSwapchainBufferCount(); i++)
 		{
-			VulkanManager::GetManager()->AllocateDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), _descriptorSetLayout, _descriptorSets[i]);
+			VulkanManager::GetManager()->AllocateDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), setLayout, _descriptorSets[i]);
 		}
 	}
 	for (int i = 0; i < types.size(); i++)
@@ -92,12 +60,6 @@ DescriptorSet::DescriptorSet(VulkanRenderer* renderer, std::vector<VkDescriptorT
 
 DescriptorSet::~DescriptorSet()
 {
-	//for (auto& i : _descriptorSets)
-	//{
-	//	  VulkanManager::GetManager()->FreeDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), i);
-	//}
-	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
-	VulkanManager::GetManager()->DestroyDescriptorSetLayout(_descriptorSetLayout);
 }
 
 void DescriptorSet::BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize, int bufferIndex)

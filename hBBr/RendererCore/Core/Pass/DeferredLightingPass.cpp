@@ -7,7 +7,8 @@
 DeferredLightingPass::~DeferredLightingPass()
 {
 	auto manager = VulkanManager::GetManager();
-	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout);
+	manager->DestroyPipelineLayout(_pipelineLayout);
+	manager->DestroyDescriptorSetLayout(_texDescriptorSetLayout);
 }
 
 void DeferredLightingPass::PassInit()
@@ -21,12 +22,11 @@ void DeferredLightingPass::PassInit()
 		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
 	CreateRenderPass();
 	//DescriptorSet
-	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, _ubDescriptorSetLayout, VK_SHADER_STAGE_FRAGMENT_BIT);
 	//SceneDepth,GBuffer0,GBuffer1,GBuffer2
-	manager->CreateDescripotrSetLayout(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4, _texDescriptorSetLayout);
+	manager->CreateDescripotrSetLayout(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4, _texDescriptorSetLayout, VK_SHADER_STAGE_FRAGMENT_BIT);
 	manager->CreatePipelineLayout(
 		{
-			_ubDescriptorSetLayout,
+			PipelineManager::GetUniformBufferDynamicLayoutPS(),
 			_texDescriptorSetLayout,
 		}
 	, _pipelineLayout);
@@ -44,7 +44,7 @@ void DeferredLightingPass::PassInit()
 	_vertexBuffer->UnMapMemory();
 	//DescriptorSet
 	auto bufferSize = sizeof(LightingUniformBuffer);
-	_ub_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, _ubDescriptorSetLayout, bufferSize, VK_SHADER_STAGE_FRAGMENT_BIT));
+	_ub_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetUniformBufferDynamicLayoutPS(), bufferSize, VK_SHADER_STAGE_FRAGMENT_BIT));
 	_tex_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _texDescriptorSetLayout, 0, VK_SHADER_STAGE_FRAGMENT_BIT));
 	_ub_descriptorSet->UpdateDescriptorSetAll((uint32_t)bufferSize);
 	//Set Pass Name

@@ -54,12 +54,6 @@
         "WindowHeight": 768,
         "WindowWidth": 1024
     },
-    "TextureEditor":{
-        "PosX": 200,
-        "PosY": 550,
-        "WindowHeight": 768,
-        "WindowWidth": 1024
-    },
     "RenderView": {
         "SpawnGameObject": "目前没有场景开启编辑状态!"
     },
@@ -83,5 +77,13 @@
         "SetGameObjectLevelFailed": "目标场景未加载",
         "SetGameObjectParent": "对象[%s]变换Parent[%s]",
         "UnloadLevel": "卸载场景"
+    },
+    "TextureEditor": {
+        "ParameterTitle": "细节面板",
+        "PosX": 350,
+        "PosY": 404,
+        "RendererTitle": "纹理预览视口",
+        "WindowHeight": 768,
+        "WindowWidth": 1024
     }
 }

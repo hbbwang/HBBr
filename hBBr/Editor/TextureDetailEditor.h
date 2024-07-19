@@ -15,9 +15,12 @@ class TextureDetailEditor : public QMainWindow
 public:
 	TextureDetailEditor(std::weak_ptr<Texture2D> tex ,QWidget *parent = nullptr);
 	~TextureDetailEditor();
+
 	class SDLWidget* _renderer = nullptr;
 	class QSplitter* left_right = nullptr;
+	QWidget* _r = nullptr;
 	class QWidget* _mp = nullptr;
+	QList<int> _left_right_sizes;
 
 	std::weak_ptr<Texture2D> _texture;
 	class GameObject* _gameObject = nullptr;
@@ -31,8 +34,6 @@ public:
 	static TextureDetailEditor* RefreshEditor(std::weak_ptr<Texture2D> mat);
 
 	static void RefreshAllEditor();
-
-	QList<int> _left_right_sizes;
 
 	void deleteItem(QLayout* layout);
 

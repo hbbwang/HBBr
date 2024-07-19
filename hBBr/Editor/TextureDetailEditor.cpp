@@ -163,5 +163,46 @@ void TextureDetailEditor::closeEvent(QCloseEvent* event)
 
 void TextureDetailEditor::Init()
 {
-	
+	left_right = new QSplitter(this);
+	left_right->setOrientation(Qt::Orientation::Horizontal);
+	setCentralWidget(left_right);
+
+	//渲染器
+	{
+		_r = new QWidget(this);
+		left_right->addWidget(_r);
+		ui_r.setupUi(_r);
+		//小标题
+		ui_r.DetailEditor_RendererName->setText(GetEditorInternationalization("TextureEditor", "RendererTitle"));
+
+		_renderer = new SDLWidget(this, _texture.lock()->_assetInfo.lock()->guid.str().c_str());
+		ui_r.verticalLayout_2->addWidget(_renderer);
+		ui_r.verticalLayout_2->setStretch(1, 10);
+		auto renderer = _renderer->_rendererForm->renderer;
+		//渲染器需要一帧时间去创建，所以下一帧执行
+		auto func =
+			[this]()
+			{
+				auto renderer = _renderer->_rendererForm->renderer;
+				renderer->GetWorld().lock()->SetWorldName("Texture Editor Renderer");
+				renderer->GetWorld().lock()->GetMainCamera()->_cameraType = EditorCameraType::TargetRotation;
+				renderer->GetWorld().lock()->GetMainCamera()->GetTransform()->SetWorldLocation(glm::vec3(0, 0, -2.0f));
+
+				_gameObject = renderer->GetWorld().lock()->SpawnGameObject("PreviewObject", renderer->GetWorld().lock()->_editorLevel.get());
+				auto modelComp = _gameObject->AddComponent<ModelComponent>();
+				modelComp->SetModel(HGUID("8b5fc385-2f6e-611e-415e-d5fa39875e50"));//Plane
+			};
+		renderer->ExecFunctionOnRenderThread(func);
+	}
+	//参数设置
+	{
+		_mp = new QWidget(this);
+		left_right->addWidget(_mp);
+		ui_mp.setupUi(_mp);
+		//小标题
+		ui_mp.DetailEditor_ParameterName->setText(GetEditorInternationalization("TextureEditor", "ParameterTitle"));
+	}
+
+	left_right->setSizes(_left_right_sizes);
+
 }

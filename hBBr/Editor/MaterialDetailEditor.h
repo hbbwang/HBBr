@@ -28,6 +28,7 @@ public:
 
 	std::weak_ptr<Material> _material;
 	class GameObject* _gameObject = nullptr;
+	class GameObject* _directionalLight = nullptr;
 
 	static 	QList<MaterialDetailEditor*> _allDetailWindows;
 

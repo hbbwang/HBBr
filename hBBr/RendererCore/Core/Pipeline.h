@@ -377,6 +377,7 @@ private:
 
 class PipelineManager
 {
+	friend class VulkanApp;
 public:
 
 	PipelineManager();
@@ -434,4 +435,24 @@ private:
 	static std::map<PipelineIndex, std::unique_ptr<PipelineObject>> _graphicsPipelines;
 	static std::map<PipelineIndex, std::unique_ptr<PipelineObject>> _computePipelines;
 
+	static void GlobalInit();
+	static void GlobalRelease();
+
+	//Layout布局模板，可直接调用
+	static VkDescriptorSetLayout _descriptorSetLayout_vs_ubd;
+	static VkDescriptorSetLayout _descriptorSetLayout_ps_ubd;
+	static VkDescriptorSetLayout _descriptorSetLayout_vsps_ubd;
+
+public:
+	static const VkDescriptorSetLayout GetUniformBufferDynamicLayoutVS() {
+		return _descriptorSetLayout_vs_ubd;
+	}
+
+	static const VkDescriptorSetLayout GetUniformBufferDynamicLayoutPS() {
+		return _descriptorSetLayout_ps_ubd;
+	}
+
+	static const VkDescriptorSetLayout GetUniformBufferDynamicLayoutVSPS() {
+		return _descriptorSetLayout_vsps_ubd;
+	}
 };

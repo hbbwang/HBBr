@@ -7,12 +7,9 @@
 class DescriptorSet
 {
 public:
-	DescriptorSet(class VulkanRenderer* renderer, VkDescriptorType type, VkDeviceSize bufferSizeInit = BufferSizeRange, std::vector<VkShaderStageFlags> shaderStageFlags = { VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT });
 	DescriptorSet(class VulkanRenderer* renderer, VkDescriptorType type,VkDescriptorSetLayout setLayout, VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
-	DescriptorSet(class VulkanRenderer* renderer, std::vector<VkDescriptorType> types, VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+	DescriptorSet(class VulkanRenderer* renderer, std::vector<VkDescriptorType> types, VkDescriptorSetLayout setLayout, VkDeviceSize bufferSizeInit = BufferSizeRange, std::vector<VkShaderStageFlags> shaderStageFlags = { VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT });
 	~DescriptorSet();
-
-	HBBR_INLINE VkDescriptorSetLayout GetDescriptorSetLayout()const { return _descriptorSetLayout; }
 
 	//初始化的时候会根据bindingCount创建相同数量的VkBuffer(数组),bufferIndex是为了识别该数组,如果是1，则保持0即可
 	void BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize, int bufferIndex = 0);
@@ -53,8 +50,6 @@ private:
 	std::vector<VkDescriptorSet>	_descriptorSets;
 
 	std::vector<uint8_t>	_needUpdates;
-
-	VkDescriptorSetLayout			_descriptorSetLayout = VK_NULL_HANDLE;
 
 	std::vector<VkShaderStageFlags>	_shaderStageFlags;
 

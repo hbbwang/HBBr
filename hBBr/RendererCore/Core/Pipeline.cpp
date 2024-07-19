@@ -70,12 +70,6 @@ PipelineObject* PipelineManager::GetComputePipelineMap(PipelineIndex index)
 	return nullptr;
 }
 
-void PipelineManager::ClearPipelineObjects()
-{
-	_graphicsPipelines.clear();
-	_computePipelines.clear();
-}
-
 void PipelineManager::RemovePipelineObjects(PipelineIndex& index)
 {
 	{
@@ -315,4 +309,30 @@ PipelineIndex PipelineManager::AddPipelineObject(std::weak_ptr<ShaderCache> cs, 
 	newPSO->pipelineType = PipelineType::Compute;
 	_computePipelines.emplace(std::make_pair(index, std::move(newPSO)));
 	return index;
+}
+
+VkDescriptorSetLayout PipelineManager::_descriptorSetLayout_vs_ubd = VK_NULL_HANDLE;
+VkDescriptorSetLayout PipelineManager::_descriptorSetLayout_ps_ubd = VK_NULL_HANDLE;
+VkDescriptorSetLayout PipelineManager::_descriptorSetLayout_vsps_ubd = VK_NULL_HANDLE;
+
+void PipelineManager::GlobalInit()
+{
+	const auto& manager = VulkanManager::GetManager();
+	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, { VK_SHADER_STAGE_VERTEX_BIT }, _descriptorSetLayout_vs_ubd);
+	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, { VK_SHADER_STAGE_FRAGMENT_BIT }, _descriptorSetLayout_ps_ubd);
+	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, { VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT }, _descriptorSetLayout_vsps_ubd);
+}
+
+void PipelineManager::GlobalRelease()
+{
+	const auto& manager = VulkanManager::GetManager();
+	manager->DestroyDescriptorSetLayout(_descriptorSetLayout_vs_ubd);
+	manager->DestroyDescriptorSetLayout(_descriptorSetLayout_ps_ubd);
+	manager->DestroyDescriptorSetLayout(_descriptorSetLayout_vsps_ubd);
+}
+
+void PipelineManager::ClearPipelineObjects()
+{
+	_graphicsPipelines.clear();
+	_computePipelines.clear();
 }

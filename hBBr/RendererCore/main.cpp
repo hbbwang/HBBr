@@ -165,8 +165,12 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	Shaderc::ShaderCompiler::CompileAllShaders(FileSystem::GetShaderIncludeAbsPath().c_str());
 #endif
 	Shader::LoadShaderCache(FileSystem::GetShaderCacheAbsPath().c_str());
+	
 	//Init Content Manager
 	ContentManager::Get();
+
+	//Init Pipeline Common Objects
+	PipelineManager::GlobalInit();
 
 #if __ANDROID__
 	_Sleep(200);//延迟一点创建
@@ -214,6 +218,7 @@ void VulkanApp::DeInitVulkanManager()
 	}
 	Shader::DestroyAllShaderCache();
 	PipelineManager::ClearPipelineObjects();
+	PipelineManager::GlobalRelease();
 	ContentManager::Get()->Release();
 	Texture2D::GlobalRelease();
 	FontTextureFactory::ReleaseFontTexture();
