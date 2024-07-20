@@ -17,8 +17,7 @@ CustomDockPanelTitleBar::CustomDockPanelTitleBar(QWidget *parent)
 	ui.Title->setObjectName("DockWidgetTitleText");
 	ui.closeButton->setObjectName("DockWidgetTitleCloseButton");
 
-
-	connect(this,SIGNAL(windowTitleChanged(const QString&)),this ,SLOT(TitleChange(const QString&)));
+	connect(this->parentWidget(),SIGNAL(windowTitleChanged(const QString&)),this ,SLOT(TitleChange(const QString&)));
 	connect(ui.closeButton, &QToolButton::clicked, this, [this]() {
 		if(_parent)
 			_parent->close();
@@ -32,6 +31,11 @@ CustomDockPanelTitleBar::~CustomDockPanelTitleBar()
 void CustomDockPanelTitleBar::TitleChange(const QString&  newTitle)
 {
 	ui.Title->setText(newTitle);
+}
+
+void CustomDockPanelTitleBar::CloseButtonVisiable(bool bVisiable)
+{
+	ui.closeButton->setHidden(!bVisiable);
 }
 
 void CustomDockPanelTitleBar::paintEvent(QPaintEvent* event)

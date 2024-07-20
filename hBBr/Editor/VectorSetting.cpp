@@ -45,7 +45,6 @@ void VectorSetting::Init(QWidget* parent, const int demensionality, float step, 
 	Demensionality = demensionality;
 	ui.horizontalLayout->setStretch(0, 1);
 	ui.horizontalLayout->setStretch(1, 1);
-	setAttribute(Qt::WA_DeleteOnClose);
 	_vec4_f[0] = nullptr;
 	_vec4_f[1] = nullptr;
 	_vec4_f[2] = nullptr;

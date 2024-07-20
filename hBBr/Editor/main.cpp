@@ -9,8 +9,10 @@
 #include "ConsoleDebug.h"
 #include "EditorCommonFunction.h"
 #include <Windows.h> //为了支持SetFocus(nullptr);
+#include "CustomTitleBar.h"
 
 bool _bLeftButtonPress_ForResize = false;
+CustomTitleBar* _titleBar;
 
 class MyEventFilter : public QObject
 {
@@ -19,13 +21,10 @@ protected:
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         bool bChangeFocus = false;
-        if (event->type() == QEvent::MouseButtonPress) 
+        if (event->type() == QEvent::MouseButtonPress && watched->isWidgetType())
         {
-            //if (mouseEvent->button() & Qt::MouseButton::LeftButton)
-            //{
-            //    _bLeftButtonPress_ForResize = true;
-            //}
-            QWidget* newCurrentFocusWidget = QApplication::widgetAt(mouseEvent->globalPos());
+            //QWidget* newCurrentFocusWidget = QApplication::widgetAt(mouseEvent->globalPos());
+            QWidget* newCurrentFocusWidget = (QWidget*)watched;
             auto cursorPos = mouseEvent->globalPos();
             if (newCurrentFocusWidget)
             {
@@ -63,58 +62,19 @@ protected:
                 }
             }
         }
-       /* else if (event->type() == QEvent::MouseButtonRelease)
+        if (event->type() == QEvent::MouseMove)
         {
-            if (mouseEvent->button() & Qt::MouseButton::LeftButton)
+            if (watched == _titleBar)
             {
-                if (_bLeftButtonPress_ForResize)
-                {
-                    for (auto& i : VulkanApp::GetForms())
-                    {
-                        i->bStopRender = false;
-                    }
-                }
-                _bLeftButtonPress_ForResize = false;
-            }      
-        }*/
-        //防止闪屏，只有结束窗口缩放的时候才会恢复渲染
-        //else if (event->type() == QEvent::Resize)
-        //{
-        //    static QTimer* revert;
-        //    if (revert == nullptr)
-        //    {
-        //        revert = new QTimer(this);
-        //    }
-        //    else
-        //    {
-        //        revert->stop();
-        //    }
-        //    revert->setSingleShot(true);
-        //    revert->setInterval(5000);//5秒内没有任何缩放行为，就判断为结束
-        //    connect(revert, &QTimer::timeout, this, []() 
-        //        {
-        //            if (_bLeftButtonPress_ForResize)
-        //            {
-        //                for (auto& i : VulkanApp::GetForms())
-        //                {
-        //                    i->bStopRender = false;
-        //                }
-        //                ConsoleDebug::print_endl("Resize widget focus end.");
-        //            }
-        //            _bLeftButtonPress_ForResize = false;
-        //        });
-        //    revert->start();
-
-        //    if (_bLeftButtonPress_ForResize)
-        //    {
-        //        for (auto& i : VulkanApp::GetForms())
-        //        {
-        //            i->bStopRender = true;
-        //        }
-        //    }
-        //}
-        //if (event->type() == QEvent::MouseMove)
-        //    qDebug() << QApplication::widgetAt(mouseEvent->globalPos())->objectName().toStdString().c_str();
+                _titleBar->MouseMoveUpdate();
+            }
+            else if (watched->isWidgetType())
+            {
+                QWidget* widget = (QWidget*)watched;
+                if (widget->cursor() != Qt::ArrowCursor)
+                    widget->setCursor(Qt::ArrowCursor);
+            }
+        }
         return false; // 事件未被处理，继续传递
     }
 
@@ -156,17 +116,17 @@ int main(int argc, char *argv[])
         }
     }
 
+    //自定义标题栏
+    CustomTitleBar titleBar;
+    _titleBar = &titleBar;
+    titleBar.bEnableCustomClose = true;
+    titleBar.SetChildWidget(&w);
+    w._customTitleBar = &titleBar;
+    LoadEditorWindowSetting(&titleBar, "MainWindow");
+    titleBar.show();
+
     //刷新一下样式
-    w.setStyleSheet(GetWidgetStyleSheetFromFile("EditorMain"));
-
-    int width = 1024, height = 768;
-    GetEditorInternationalizationInt("MainWindow", "WindowWidth", width);
-    GetEditorInternationalizationInt("MainWindow", "WindowHeight", height);
-    w.resize(width, height);
-    //SetWindowCenterPos(&w);
-
-    //显示窗口
-    w.show();
+    titleBar.setStyleSheet(GetWidgetStyleSheetFromFile("EditorMain"));
 
     return a.exec();
 }

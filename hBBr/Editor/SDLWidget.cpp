@@ -10,7 +10,6 @@ SDLWidget::SDLWidget(QWidget* parent)
 {
 	//若是使用用户自定义绘制，则须要设置WA_PaintOnScreen
 	setAttribute(Qt::WA_ForceUpdatesDisabled, true);
-	setAttribute(Qt::WA_DeleteOnClose, true);
 	setAttribute(Qt::WA_StaticContents, true);
 	setAttribute(Qt::WA_PaintOnScreen, true);
 	setAttribute(Qt::WA_NoSystemBackground, true);
@@ -37,7 +36,6 @@ SDLWidget::SDLWidget(QWidget* parent, QString titleName)
 	:QWidget(parent)
 {
 	setAttribute(Qt::WA_ForceUpdatesDisabled, true);
-	setAttribute(Qt::WA_DeleteOnClose, true);
 	setAttribute(Qt::WA_StaticContents, true);
 	setAttribute(Qt::WA_PaintOnScreen, true);
 	setAttribute(Qt::WA_NoSystemBackground, true);

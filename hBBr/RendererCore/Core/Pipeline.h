@@ -438,21 +438,135 @@ private:
 	static void GlobalInit();
 	static void GlobalRelease();
 
-	//Layout布局模板，可直接调用
+	// 公共Layout布局模板，可直接调用
+	
+	//
 	static VkDescriptorSetLayout _descriptorSetLayout_vs_ubd;
 	static VkDescriptorSetLayout _descriptorSetLayout_ps_ubd;
 	static VkDescriptorSetLayout _descriptorSetLayout_vsps_ubd;
 
+	static uint8_t _maxTextureBinding;
+	//Texture DescriptorSetLayout
+	static std::vector<VkDescriptorSetLayout> _descriptorSetLayout_tex;
+
+	//Contain uniform buffers {pass,obj,vsmat,tex} and textures
+	static std::vector<VkPipelineLayout> _pipelineLayout_p_o_vsm_t;
+	//Contain uniform buffers {pass,obj,psmat,tex} and textures
+	static std::vector<VkPipelineLayout> _pipelineLayout_p_o_psm_t;
+	//Contain uniform buffers {pass,obj,vspsmat,tex} and textures
+	static std::vector<VkPipelineLayout> _pipelineLayout_p_o_vspsm_t;
+	//Contain uniform buffers {pass,obj,tex} and textures
+	static std::vector<VkPipelineLayout> _pipelineLayout_p_o_t;
+
+	//Contain uniform buffers {pass,obj,vsmat}
+	static VkPipelineLayout _pipelineLayout_p_o_vsm;
+	//Contain uniform buffers {pass,obj,psmat}
+	static VkPipelineLayout _pipelineLayout_p_o_psm;
+	//Contain uniform buffers {pass,obj,vspsmat}
+	static VkPipelineLayout _pipelineLayout_p_o_vspsm;
+	//Contain uniform buffers {pass,obj}
+	static VkPipelineLayout _pipelineLayout_p_o;
+
 public:
-	static const VkDescriptorSetLayout GetUniformBufferDynamicLayoutVS() {
+
+	// VkDescriptorSetLayout: 
+	// Type = UNIFORM_BUFFER_DYNAMIC 
+	// Stage = VertexShader
+	static const HBBR_INLINE VkDescriptorSetLayout GetDescriptorSetLayout_UniformBufferDynamicVS() {
 		return _descriptorSetLayout_vs_ubd;
 	}
-
-	static const VkDescriptorSetLayout GetUniformBufferDynamicLayoutPS() {
+	// VkDescriptorSetLayout: 
+	// Type = UNIFORM_BUFFER_DYNAMIC 
+	// Stage = PixelShader
+	static const HBBR_INLINE VkDescriptorSetLayout GetDescriptorSetLayout_UniformBufferDynamicPS() {
 		return _descriptorSetLayout_ps_ubd;
 	}
-
-	static const VkDescriptorSetLayout GetUniformBufferDynamicLayoutVSPS() {
+	// VkDescriptorSetLayout: 
+	// Type = UNIFORM_BUFFER_DYNAMIC 
+	// Stage = VertexShader and PixelShader
+	static const HBBR_INLINE VkDescriptorSetLayout GetDescriptorSetLayout_UniformBufferDynamicVSPS() {
 		return _descriptorSetLayout_vsps_ubd;
+	}
+	// VkDescriptorSetLayout: 
+	// Type = COMBINED_IMAGE_SAMPLER 
+	// Stage = VertexShader and PixelShader
+	// bindingCount = How many textures want to bind.
+	static const HBBR_INLINE VkDescriptorSetLayout GetDescriptorSetLayout_TextureSamplerVSPS(uint8_t bindingCount) {
+		return _descriptorSetLayout_tex[bindingCount];
+	}
+
+	// VkPipelineLayout: 
+	// DescriptorSetLayoutTypes =  { 
+	//		UniformBufferDynamicVSPS (Pass UniformBuffer) , 
+	//		UniformBufferDynamicVSPS (Object UniformBuffer) , 
+	//		UniformBufferDynamicVS (MaterialVS UniformBuffer)
+	// } 
+	static const HBBR_INLINE VkPipelineLayout GetPipelineLayout_P_O_VSM() {
+		return _pipelineLayout_p_o_vsm;
+	}
+	// VkPipelineLayout: 
+	// DescriptorSetLayoutTypes =  { 
+	//		UniformBufferDynamicVSPS (Pass UniformBuffer) , 
+	//		UniformBufferDynamicVSPS (Object UniformBuffer) , 
+	//		UniformBufferDynamicVS (MaterialPS UniformBuffer)
+	// } 
+	static const HBBR_INLINE VkPipelineLayout GetPipelineLayout_P_O_PSM() {
+		return _pipelineLayout_p_o_psm;
+	}
+	// VkPipelineLayout: 
+	// DescriptorSetLayoutTypes =  { 
+	//		UniformBufferDynamicVSPS (Pass UniformBuffer) , 
+	//		UniformBufferDynamicVSPS (Object UniformBuffer) , 
+	//		UniformBufferDynamicVSPS (MaterialVSPS UniformBuffer)
+	// } 
+	static const HBBR_INLINE VkPipelineLayout GetPipelineLayout_P_O_VSPSM() {
+		return _pipelineLayout_p_o_vspsm;
+	}
+	// VkPipelineLayout: 
+	// DescriptorSetLayoutTypes =  { 
+	//		UniformBufferDynamicVSPS (Pass UniformBuffer) , 
+	//		UniformBufferDynamicVSPS (Object UniformBuffer) , 
+	// } 
+	static const HBBR_INLINE VkPipelineLayout GetPipelineLayout_P_O() {
+		return _pipelineLayout_p_o;
+	}
+	// VkPipelineLayout: 
+	// DescriptorSetLayoutTypes =  { 
+	//		UniformBufferDynamicVSPS (Pass UniformBuffer) , 
+	//		UniformBufferDynamicVSPS (Object UniformBuffer) , 
+	//		UniformBufferDynamicVS (MaterialVS UniformBuffer)
+	//		TextureSamplerVSPS (Material Textures and Samplers)
+	// } 
+	static const HBBR_INLINE VkPipelineLayout GetPipelineLayout_P_O_VSM_T(uint8_t bindingCount) {
+		return _pipelineLayout_p_o_vsm_t[bindingCount];
+	}
+	// VkPipelineLayout: 
+	// DescriptorSetLayoutTypes =  { 
+	//		UniformBufferDynamicVSPS (Pass UniformBuffer) , 
+	//		UniformBufferDynamicVSPS (Object UniformBuffer) , 
+	//		UniformBufferDynamicPS (MaterialPS UniformBuffer)
+	//		TextureSamplerVSPS (Material Textures and Samplers)
+	// } 
+	static const HBBR_INLINE VkPipelineLayout GetPipelineLayout_P_O_PSM_T(uint8_t bindingCount) {
+		return _pipelineLayout_p_o_psm_t[bindingCount];
+	}
+	// VkPipelineLayout: 
+	// DescriptorSetLayoutTypes =  { 
+	//		UniformBufferDynamicVSPS (Pass UniformBuffer) , 
+	//		UniformBufferDynamicVSPS (Object UniformBuffer) , 
+	//		UniformBufferDynamicVSPS (MaterialVSPS UniformBuffer)
+	//		TextureSamplerVSPS (Material Textures and Samplers)
+	// } 
+	static const HBBR_INLINE VkPipelineLayout GetPipelineLayout_P_O_VSPSM_T(uint8_t bindingCount) {
+		return _pipelineLayout_p_o_vspsm_t[bindingCount];
+	}
+	// VkPipelineLayout: 
+	// DescriptorSetLayoutTypes =  { 
+	//		UniformBufferDynamicVSPS (Pass UniformBuffer) , 
+	//		UniformBufferDynamicVSPS (Object UniformBuffer) , 
+	//		TextureSamplerVSPS (Material Textures and Samplers)
+	// } 
+	static const HBBR_INLINE VkPipelineLayout GetPipelineLayout_P_O_T(uint8_t bindingCount) {
+		return _pipelineLayout_p_o_t[bindingCount];
 	}
 };

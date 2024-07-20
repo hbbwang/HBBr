@@ -19,11 +19,15 @@
 #include <QCloseEvent>
 #include <WorldSelector.h>
 #include <MaterialDetailEditor.h>
+#include "CustomDockPanelTitleBar.h"
+#include "CustomTitleBar.h"
 EditorMain* EditorMain::_self = nullptr;
 
 CustomDockWidget::CustomDockWidget(QWidget* parent) :QDockWidget(parent)
 {
-
+    auto titleBar = new CustomDockPanelTitleBar(this);
+    this->setTitleBarWidget(titleBar);
+    titleBar->CloseButtonVisiable(false);
 }
 
 EditorMain::EditorMain(QWidget *parent)
@@ -66,7 +70,11 @@ EditorMain::EditorMain(QWidget *parent)
     //setStyleSheet(GetWidgetStyleSheetFromFile("EditorMain"));
 
     connect(ui.ResetWindowStyle, &QAction::triggered, this, [this](bool bChecked) {
-        setStyleSheet(GetWidgetStyleSheetFromFile("EditorMain"));
+        if (this->parentWidget() != nullptr)
+        {
+            this->parentWidget()->setStyleSheet(GetWidgetStyleSheetFromFile("BEGIN"));
+        }
+        setStyleSheet(GetWidgetStyleSheetFromFile("BEGIN"));
     });
     connect(ui.OpenProgramDir, &QAction::triggered, this, [this](bool bChecked) {
         //QDir dir(FileSystem::GetProgramPath().c_str());
@@ -107,12 +115,9 @@ EditorMain::EditorMain(QWidget *parent)
     ActionConnect(ui.OpenWorld, [this]()
         {
             WorldSelector* ws = new WorldSelector(this);
-
             ws->exec();
         });
-
     LoadEditorWindowSetting(this, "MainWindow");
-
 }
 
 EditorMain::~EditorMain()
@@ -147,7 +152,6 @@ DirtyAssetsManager* EditorMain::ShowDirtyAssetsManager()
     if (ContentManager::Get()->GetDirtyAssets().size() + World::GetDirtyWorlds().size() + Level::GetDirtyLevels().size() > 0)
     {
         auto dirtyAssetsManager = new DirtyAssetsManager(this);
-        //if (ContentManager::Get()->GetDirtyAssets().size > 0)
         {
             dirtyAssetsManager->exec();
             return dirtyAssetsManager;
@@ -158,7 +162,6 @@ DirtyAssetsManager* EditorMain::ShowDirtyAssetsManager()
 
 void EditorMain::closeEvent(QCloseEvent* event)
 {
-
     auto manager = new DirtyAssetsManager(this);
     if (manager)
     {
@@ -174,7 +177,6 @@ void EditorMain::closeEvent(QCloseEvent* event)
     }
     if(!manager)
     {
-        SaveEditorWindowSetting(this, "MainWindow");
         _renderTimer->stop();
         if (_inspector)
             _inspector->close();
@@ -183,6 +185,16 @@ void EditorMain::closeEvent(QCloseEvent* event)
         if (_mainRenderView)
             _mainRenderView->close();
         event->accept();
+        if (_customTitleBar)
+        {
+            this->setParent(nullptr);//·ÀÖ¹Ñ­»·close
+            _customTitleBar->close();
+            SaveEditorWindowSetting(_customTitleBar, "MainWindow");
+        }
+        else
+        {
+            SaveEditorWindowSetting(this, "MainWindow");
+        }
     }
     else
     {

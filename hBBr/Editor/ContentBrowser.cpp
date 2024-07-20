@@ -916,7 +916,6 @@ RepositorySelection::RepositorySelection(QWidget* parent) :QDialog(parent)
 	setWindowFlags(Qt::Window);
 	setWindowFlags(Qt::Tool);
 	setWindowFlag(Qt::FramelessWindowHint);
-	//setAttribute(Qt::WidgetAttribute::WA_DeleteOnClose);
 	setFocusPolicy(Qt::FocusPolicy::StrongFocus);
 	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setContentsMargins(8,8, 10, 8);

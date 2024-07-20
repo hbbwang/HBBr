@@ -13,6 +13,8 @@ public:
 
 	QWidget* _parent = nullptr;
 
+	void CloseButtonVisiable(bool bVisiable);
+
 protected:
 	virtual void paintEvent(QPaintEvent* event);
 private:

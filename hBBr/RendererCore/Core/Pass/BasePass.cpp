@@ -14,44 +14,10 @@
 #pragma region BasePass
 BasePass::~BasePass()
 {
-	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_vsm);
-	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_psm);
-	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_vspsm);
-	VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o);
-	_pipelineLayout_p_o_vsm = VK_NULL_HANDLE;
-	_pipelineLayout_p_o_psm = VK_NULL_HANDLE;
-	_pipelineLayout_p_o_vspsm = VK_NULL_HANDLE;
-	_pipelineLayout_p_o = VK_NULL_HANDLE;
-	for (int i = 0; i < _maxTextureBinding; i++)
-	{
-		VulkanManager::GetManager()->DestroyDescriptorSetLayout(_descriptorSetLayout_tex[i]);
-		VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_vsm_t[i]);
-		VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_psm_t[i]);
-		VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_vspsm_t[i]);
-		VulkanManager::GetManager()->DestroyPipelineLayout(_pipelineLayout_p_o_t[i]);
-		_descriptorSetLayout_tex[i] = VK_NULL_HANDLE;
-		_pipelineLayout_p_o_vsm_t[i] = VK_NULL_HANDLE;
-		_pipelineLayout_p_o_psm_t[i] = VK_NULL_HANDLE;
-		_pipelineLayout_p_o_vspsm_t[i] = VK_NULL_HANDLE;
-		_pipelineLayout_p_o_t[i] = VK_NULL_HANDLE;
-	}
-	_descriptorSetLayout_tex.clear();
-	_pipelineLayout_p_o_vsm_t.clear();
-	_pipelineLayout_p_o_psm_t.clear();
-	_pipelineLayout_p_o_vspsm_t.clear();
-	_pipelineLayout_p_o_t.clear();
-
 }
 
 void BasePass::PassInit()
 {
-	//一个shader，最高可以绑定16张纹理和采样器
-	_maxTextureBinding = 16;
-	_descriptorSetLayout_tex.resize(16);
-	_pipelineLayout_p_o_vsm_t.resize(16);
-	_pipelineLayout_p_o_psm_t.resize(16);
-	_pipelineLayout_p_o_vspsm_t.resize(16);
-	_pipelineLayout_p_o_t.resize(16);
 
 	//SceneDepth	: 0
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, GetSceneTexture(SceneTextureDesc::SceneDepth)->GetFormat(), VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
@@ -69,78 +35,12 @@ void BasePass::PassInit()
 
 	auto manager = VulkanManager::GetManager();
 	//Texture2D DescriptorSet
-	_opaque_descriptorSet_pass.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetUniformBufferDynamicLayoutVSPS(), sizeof(PassUniformBuffer)));
-	_opaque_descriptorSet_obj.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetUniformBufferDynamicLayoutVSPS(), BufferSizeRange));
-	_opaque_descriptorSet_mat_vs.reset(new DescriptorSet(_renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, PipelineManager::GetUniformBufferDynamicLayoutVS(), BufferSizeRange, { VK_SHADER_STAGE_VERTEX_BIT }));
-	_opaque_descriptorSet_mat_ps.reset(new DescriptorSet(_renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, PipelineManager::GetUniformBufferDynamicLayoutPS(), BufferSizeRange, { VK_SHADER_STAGE_FRAGMENT_BIT }));
+	_opaque_descriptorSet_pass.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVSPS(), sizeof(PassUniformBuffer)));
+	_opaque_descriptorSet_obj.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVSPS(), BufferSizeRange));
+	_opaque_descriptorSet_mat_vs.reset(new DescriptorSet(_renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVS(), BufferSizeRange, { VK_SHADER_STAGE_VERTEX_BIT }));
+	_opaque_descriptorSet_mat_ps.reset(new DescriptorSet(_renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(), BufferSizeRange, { VK_SHADER_STAGE_FRAGMENT_BIT }));
 	_opaque_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
 	_opaque_indexBuffer.reset(new Buffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT));
-
-	for (int i = 0; i < _maxTextureBinding; i++)
-	{
-		manager->CreateDescripotrSetLayout(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, i + 1, _descriptorSetLayout_tex[i], VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
-		manager->CreatePipelineLayout(
-			{
-				PipelineManager::GetUniformBufferDynamicLayoutVSPS(),
-				PipelineManager::GetUniformBufferDynamicLayoutVSPS(),
-				PipelineManager::GetUniformBufferDynamicLayoutVS(), 
-				_descriptorSetLayout_tex[i]
-			}
-		, _pipelineLayout_p_o_vsm_t[i]); 
-		manager->CreatePipelineLayout(
-			{
-				PipelineManager::GetUniformBufferDynamicLayoutVSPS(),
-				PipelineManager::GetUniformBufferDynamicLayoutVSPS(), 
-				 PipelineManager::GetUniformBufferDynamicLayoutPS(), 
-				_descriptorSetLayout_tex[i] 
-			}
-		, _pipelineLayout_p_o_psm_t[i]); 
-		manager->CreatePipelineLayout(
-			{
-				PipelineManager::GetUniformBufferDynamicLayoutVSPS(), 
-				PipelineManager::GetUniformBufferDynamicLayoutVSPS(), 
-				PipelineManager::GetUniformBufferDynamicLayoutVS(),
-				 PipelineManager::GetUniformBufferDynamicLayoutPS(),
-				_descriptorSetLayout_tex[i]
-			}
-		, _pipelineLayout_p_o_vspsm_t[i]);
-		manager->CreatePipelineLayout(
-			{
-				PipelineManager::GetUniformBufferDynamicLayoutVSPS(), 
-				PipelineManager::GetUniformBufferDynamicLayoutVSPS(), 
-				_descriptorSetLayout_tex[i] 
-			}
-		, _pipelineLayout_p_o_t[i]); 
-	}
-
-	manager->CreatePipelineLayout(
-		{
-			PipelineManager::GetUniformBufferDynamicLayoutVSPS(),
-			PipelineManager::GetUniformBufferDynamicLayoutVSPS(),
-			PipelineManager::GetUniformBufferDynamicLayoutVS(),
-		}
-	, _pipelineLayout_p_o_vsm);
-	manager->CreatePipelineLayout(
-		{
-			PipelineManager::GetUniformBufferDynamicLayoutVSPS(),
-			PipelineManager::GetUniformBufferDynamicLayoutVSPS(),
-			 PipelineManager::GetUniformBufferDynamicLayoutPS(),
-		}
-	, _pipelineLayout_p_o_psm);
-	manager->CreatePipelineLayout(
-		{
-			PipelineManager::GetUniformBufferDynamicLayoutVSPS(),
-			PipelineManager::GetUniformBufferDynamicLayoutVSPS(),
-			PipelineManager::GetUniformBufferDynamicLayoutVS(),
-			 PipelineManager::GetUniformBufferDynamicLayoutPS(),
-		}
-	, _pipelineLayout_p_o_vspsm);
-	manager->CreatePipelineLayout(
-		{
-			PipelineManager::GetUniformBufferDynamicLayoutVSPS(),
-			PipelineManager::GetUniformBufferDynamicLayoutVSPS(),
-		}
-	, _pipelineLayout_p_o);
 
 	//Pass Uniform总是一尘不变的,并且我们用的是Dynamic uniform buffer ,所以只需要更新一次所有的DescriptorSet即可。
 	_opaque_descriptorSet_pass->UpdateDescriptorSetAll(sizeof(PassUniformBuffer));
@@ -273,24 +173,24 @@ void BasePass::SetupPassAndDraw(Pass p)
 				if (pipelineCreateInfo.bHasMaterialTexture)
 				{
 					if (pipelineCreateInfo.bHasMaterialParameterVS && !pipelineCreateInfo.bHasMaterialParameterPS)
-						pipelineLayout = _pipelineLayout_p_o_vsm_t[psCache->header.shaderTextureCount];
+						pipelineLayout = PipelineManager::GetPipelineLayout_P_O_VSM_T(psCache->header.shaderTextureCount);
 					else if (pipelineCreateInfo.bHasMaterialParameterPS && !pipelineCreateInfo.bHasMaterialParameterVS)
-						pipelineLayout = _pipelineLayout_p_o_psm_t[psCache->header.shaderTextureCount];
+						pipelineLayout = PipelineManager::GetPipelineLayout_P_O_PSM_T(psCache->header.shaderTextureCount);
 					else if (pipelineCreateInfo.bHasMaterialParameterPS && pipelineCreateInfo.bHasMaterialParameterVS)
-						pipelineLayout = _pipelineLayout_p_o_vspsm_t[psCache->header.shaderTextureCount];
+						pipelineLayout = PipelineManager::GetPipelineLayout_P_O_VSPSM_T(psCache->header.shaderTextureCount);
 					else
-						pipelineLayout = _pipelineLayout_p_o_t[psCache->header.shaderTextureCount];
+						pipelineLayout = PipelineManager::GetPipelineLayout_P_O_T(psCache->header.shaderTextureCount);
 				}
 				else
 				{
 					if (pipelineCreateInfo.bHasMaterialParameterVS && !pipelineCreateInfo.bHasMaterialParameterPS)
-						pipelineLayout = _pipelineLayout_p_o_vsm;
+						pipelineLayout = PipelineManager::GetPipelineLayout_P_O_VSM();
 					else if (pipelineCreateInfo.bHasMaterialParameterPS && !pipelineCreateInfo.bHasMaterialParameterVS)
-						pipelineLayout = _pipelineLayout_p_o_psm;
+						pipelineLayout = PipelineManager::GetPipelineLayout_P_O_PSM();
 					else if (pipelineCreateInfo.bHasMaterialParameterPS && pipelineCreateInfo.bHasMaterialParameterVS)
-						pipelineLayout = _pipelineLayout_p_o_vspsm;
+						pipelineLayout = PipelineManager::GetPipelineLayout_P_O_VSPSM();
 					else
-						pipelineLayout = _pipelineLayout_p_o;
+						pipelineLayout = PipelineManager::GetPipelineLayout_P_O();
 				}
 				pipelineObj = PipelineManager::CreatePipelineObject(pipelineCreateInfo, pipelineLayout,
 					_renderPass, m->graphicsIndex, (uint32_t)_subpassDescs.size());
@@ -327,7 +227,7 @@ void BasePass::SetupPassAndDraw(Pass p)
 						for (auto& i : new_tds)
 						{
 							i.texCache = m->GetTextures();
-							manager->AllocateDescriptorSet(manager->GetDescriptorPool(), _descriptorSetLayout_tex[m->GetTextures().size()], i.descriptorSet_tex);
+							manager->AllocateDescriptorSet(manager->GetDescriptorPool(), PipelineManager::GetDescriptorSetLayout_TextureSamplerVSPS(m->GetTextures().size()), i.descriptorSet_tex);
 							manager->UpdateTextureDescriptorSet(i.descriptorSet_tex, m->GetTextures(), m->GetSamplers());
 						}
 					}	

@@ -314,13 +314,96 @@ PipelineIndex PipelineManager::AddPipelineObject(std::weak_ptr<ShaderCache> cs, 
 VkDescriptorSetLayout PipelineManager::_descriptorSetLayout_vs_ubd = VK_NULL_HANDLE;
 VkDescriptorSetLayout PipelineManager::_descriptorSetLayout_ps_ubd = VK_NULL_HANDLE;
 VkDescriptorSetLayout PipelineManager::_descriptorSetLayout_vsps_ubd = VK_NULL_HANDLE;
+//最高可绑定的纹理数量
+uint8_t PipelineManager::_maxTextureBinding = 16;
+std::vector<VkPipelineLayout> PipelineManager::_pipelineLayout_p_o_vsm_t;
+std::vector<VkPipelineLayout> PipelineManager::_pipelineLayout_p_o_psm_t;
+std::vector<VkPipelineLayout> PipelineManager::_pipelineLayout_p_o_vspsm_t;
+std::vector<VkPipelineLayout> PipelineManager::_pipelineLayout_p_o_t;
+VkPipelineLayout PipelineManager::_pipelineLayout_p_o_vsm = VK_NULL_HANDLE;
+VkPipelineLayout PipelineManager::_pipelineLayout_p_o_psm = VK_NULL_HANDLE;
+VkPipelineLayout PipelineManager::_pipelineLayout_p_o_vspsm = VK_NULL_HANDLE;
+VkPipelineLayout PipelineManager::_pipelineLayout_p_o = VK_NULL_HANDLE;
+std::vector<VkDescriptorSetLayout> PipelineManager::_descriptorSetLayout_tex;
 
 void PipelineManager::GlobalInit()
 {
+	_maxTextureBinding = 16;
 	const auto& manager = VulkanManager::GetManager();
 	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, { VK_SHADER_STAGE_VERTEX_BIT }, _descriptorSetLayout_vs_ubd);
 	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, { VK_SHADER_STAGE_FRAGMENT_BIT }, _descriptorSetLayout_ps_ubd);
 	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, { VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT }, _descriptorSetLayout_vsps_ubd);
+	_descriptorSetLayout_tex.resize(_maxTextureBinding);
+	_pipelineLayout_p_o_vsm_t.resize(_maxTextureBinding);
+	_pipelineLayout_p_o_psm_t.resize(_maxTextureBinding);
+	_pipelineLayout_p_o_vspsm_t.resize(_maxTextureBinding);
+	_pipelineLayout_p_o_t.resize(_maxTextureBinding);
+	//不带纹理的PipelineLayout
+	manager->CreatePipelineLayout(
+		{
+			_descriptorSetLayout_vsps_ubd,
+			_descriptorSetLayout_vsps_ubd,
+			_descriptorSetLayout_vs_ubd,
+		}
+	, _pipelineLayout_p_o_vsm);
+	manager->CreatePipelineLayout(
+		{
+			_descriptorSetLayout_vsps_ubd,
+			_descriptorSetLayout_vsps_ubd,
+			 _descriptorSetLayout_ps_ubd,
+		}
+	, _pipelineLayout_p_o_psm);
+	manager->CreatePipelineLayout(
+		{
+			_descriptorSetLayout_vsps_ubd,
+			_descriptorSetLayout_vsps_ubd,
+			_descriptorSetLayout_vs_ubd,
+			 _descriptorSetLayout_ps_ubd,
+		}
+	, _pipelineLayout_p_o_vspsm);
+	manager->CreatePipelineLayout(
+		{
+			_descriptorSetLayout_vsps_ubd,
+			_descriptorSetLayout_vsps_ubd,
+		}
+	, _pipelineLayout_p_o);
+	//带纹理的PipelineLayout
+	for (int i = 0; i < _maxTextureBinding; i++)
+	{
+		manager->CreateDescripotrSetLayout(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, i + 1, _descriptorSetLayout_tex[i], VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+		manager->CreatePipelineLayout(
+			{
+				_descriptorSetLayout_vsps_ubd,
+				_descriptorSetLayout_vsps_ubd,
+				_descriptorSetLayout_vs_ubd,
+				_descriptorSetLayout_tex[i]
+			}
+		, _pipelineLayout_p_o_vsm_t[i]);
+		manager->CreatePipelineLayout(
+			{
+				_descriptorSetLayout_vsps_ubd,
+				_descriptorSetLayout_vsps_ubd,
+				 _descriptorSetLayout_ps_ubd,
+				_descriptorSetLayout_tex[i]
+			}
+		, _pipelineLayout_p_o_psm_t[i]);
+		manager->CreatePipelineLayout(
+			{
+				_descriptorSetLayout_vsps_ubd,
+				_descriptorSetLayout_vsps_ubd,
+				_descriptorSetLayout_vs_ubd,
+				 _descriptorSetLayout_ps_ubd,
+				_descriptorSetLayout_tex[i]
+			}
+		, _pipelineLayout_p_o_vspsm_t[i]);
+		manager->CreatePipelineLayout(
+			{
+				_descriptorSetLayout_vsps_ubd,
+				_descriptorSetLayout_vsps_ubd,
+				_descriptorSetLayout_tex[i]
+			}
+		, _pipelineLayout_p_o_t[i]);
+	}
 }
 
 void PipelineManager::GlobalRelease()
@@ -329,6 +412,23 @@ void PipelineManager::GlobalRelease()
 	manager->DestroyDescriptorSetLayout(_descriptorSetLayout_vs_ubd);
 	manager->DestroyDescriptorSetLayout(_descriptorSetLayout_ps_ubd);
 	manager->DestroyDescriptorSetLayout(_descriptorSetLayout_vsps_ubd);
+	manager->DestroyPipelineLayout(_pipelineLayout_p_o_vsm);
+	manager->DestroyPipelineLayout(_pipelineLayout_p_o_psm);
+	manager->DestroyPipelineLayout(_pipelineLayout_p_o_vspsm);
+	manager->DestroyPipelineLayout(_pipelineLayout_p_o);
+	for (int i = 0; i < _maxTextureBinding; i++)
+	{
+		manager->DestroyDescriptorSetLayout(_descriptorSetLayout_tex[i]);
+		manager->DestroyPipelineLayout(_pipelineLayout_p_o_vsm_t[i]);
+		manager->DestroyPipelineLayout(_pipelineLayout_p_o_psm_t[i]);
+		manager->DestroyPipelineLayout(_pipelineLayout_p_o_vspsm_t[i]);
+		manager->DestroyPipelineLayout(_pipelineLayout_p_o_t[i]);
+	}
+	_descriptorSetLayout_tex.clear();
+	_pipelineLayout_p_o_vsm_t.clear();
+	_pipelineLayout_p_o_psm_t.clear();
+	_pipelineLayout_p_o_vspsm_t.clear();
+	_pipelineLayout_p_o_t.clear();
 }
 
 void PipelineManager::ClearPipelineObjects()

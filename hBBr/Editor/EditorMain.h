@@ -52,7 +52,7 @@ public:
     virtual void focusOutEvent(QFocusEvent* event);
 
     //virtual void timerEvent(QTimerEvent* event)override;
-
+    class CustomTitleBar* _customTitleBar = nullptr;
 private:
 
     Ui::EditorMainClass ui;

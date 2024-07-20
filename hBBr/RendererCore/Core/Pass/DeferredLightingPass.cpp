@@ -26,7 +26,7 @@ void DeferredLightingPass::PassInit()
 	manager->CreateDescripotrSetLayout(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4, _texDescriptorSetLayout, VK_SHADER_STAGE_FRAGMENT_BIT);
 	manager->CreatePipelineLayout(
 		{
-			PipelineManager::GetUniformBufferDynamicLayoutPS(),
+			PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(),
 			_texDescriptorSetLayout,
 		}
 	, _pipelineLayout);
@@ -44,7 +44,7 @@ void DeferredLightingPass::PassInit()
 	_vertexBuffer->UnMapMemory();
 	//DescriptorSet
 	auto bufferSize = sizeof(LightingUniformBuffer);
-	_ub_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetUniformBufferDynamicLayoutPS(), bufferSize, VK_SHADER_STAGE_FRAGMENT_BIT));
+	_ub_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(), bufferSize, VK_SHADER_STAGE_FRAGMENT_BIT));
 	_tex_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _texDescriptorSetLayout, 0, VK_SHADER_STAGE_FRAGMENT_BIT));
 	_ub_descriptorSet->UpdateDescriptorSetAll((uint32_t)bufferSize);
 	//Set Pass Name

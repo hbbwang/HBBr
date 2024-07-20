@@ -127,6 +127,9 @@
     <ClCompile Include="TextureDetailEditor.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="CustomTitleBar.cpp">
+      <Filter>Widgets\Extension</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="EditorMain.h">
@@ -203,6 +206,9 @@
     </QtMoc>
     <QtMoc Include="TextureDetailEditor.h">
       <Filter>Widgets</Filter>
+    </QtMoc>
+    <QtMoc Include="CustomTitleBar.h">
+      <Filter>Widgets\Extension</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
