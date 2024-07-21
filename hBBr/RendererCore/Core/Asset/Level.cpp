@@ -103,8 +103,17 @@ void Level::Load()
 
 						newObject->SetActive(obj_active);
 						newObject->_levelNode = i;
-						if (objs.capacity() < objs.size())
-							objs.reserve(objs.capacity() + 25);
+						if (objs.capacity() <= objs.size())
+						{
+							if (objs.capacity() < 100)
+							{
+								objs.reserve(objs.capacity() + 50);
+							}
+							else
+							{
+								objs.reserve(objs.capacity() * 2);
+							}
+						}
 						PickObject newPick;
 						newPick.obj = newObject;
 						newPick.item = i;
@@ -217,6 +226,13 @@ void Level::LevelUpdate()
 
 void Level::AddNewObject(std::shared_ptr<GameObject> newObject, bool bSkipWorldCallback)
 {
+	if (_gameObjects.capacity() <= _gameObjects.size())
+	{
+		if (_gameObjects.capacity() < 200)
+			_gameObjects.reserve(_gameObjects.capacity() + 25);
+		else
+			_gameObjects.reserve(_gameObjects.capacity() * 1.4);
+	}
 	_gameObjects.push_back(newObject);
 	if (!bSkipWorldCallback)
 	{
@@ -234,6 +250,13 @@ void Level::RemoveObject(GameObject* object, bool bNotDestoryObject)
 	{
 		if (!bNotDestoryObject)
 		{
+			if (_gameObjectNeedDestroy.capacity() <= _gameObjectNeedDestroy.size())
+			{
+				if (_gameObjectNeedDestroy.capacity() < 200)
+					_gameObjectNeedDestroy.reserve(_gameObjectNeedDestroy.capacity() + 20);
+				else
+					_gameObjectNeedDestroy.reserve(_gameObjectNeedDestroy.capacity() * 1.2);
+			}
 			//延迟到下一帧再销毁
 			_gameObjectNeedDestroy.push_back(*it);
 			_world->RemoveObject(*it);

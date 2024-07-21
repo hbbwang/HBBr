@@ -31,7 +31,7 @@ DescriptorSet::DescriptorSet(VulkanRenderer* renderer, VkDescriptorType type, Vk
 DescriptorSet::DescriptorSet(VulkanRenderer* renderer, std::vector<VkDescriptorType> types, VkDescriptorSetLayout setLayout, VkDeviceSize bufferSizeInit, std::vector<VkShaderStageFlags> shaderStageFlags)
 {
 	_renderer = renderer;
-	_descriptorTypes = types;
+	_descriptorTypes = std::move(types);
 	_shaderStageFlags = std::move(shaderStageFlags);
 	if (setLayout != VK_NULL_HANDLE)
 	{

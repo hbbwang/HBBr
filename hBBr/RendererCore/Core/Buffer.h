@@ -5,8 +5,8 @@
 #include <thread>
 
 //每次顶点Buffer最大增加的大小 :
-//(UINT32_MAX/64)等于64M
-#define BufferSizeRange (UINT32_MAX/1024)
+//(UINT32_MAX/256)约等于16M
+#define BufferSizeRange (UINT32_MAX/256)
 
 struct BufferWaitToRelease
 {

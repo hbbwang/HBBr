@@ -549,12 +549,15 @@ public:
 		char* tmpStr = strtok_s(strc, pattern, &temp);
 		while (tmpStr != nullptr)
 		{
+			const size_t vecSize = resultVec.size();
+			if (vecSize >= resultVec.capacity())
+			{
+				resultVec.reserve(vecSize + 5);
+			}
 			resultVec.push_back(tmpStr);
 			tmpStr = strtok_s(nullptr, pattern, &temp);
 		}
-
 		delete[] strc;
-
 		return resultVec;
 	}
 

@@ -118,6 +118,10 @@ void GameObject::SetParent(GameObject* newParent)
 			}
 		}
 		_parent = newParent;
+		if (_parent->_children.capacity() <= _parent->_children.size())
+		{
+			_parent->_children.reserve(_parent->_children.capacity() + 10);
+		}
 		_parent->_children.push_back(this);
 		if (_transform)
 			_transform->ResetTransformForAttachment();

@@ -122,11 +122,10 @@ std::weak_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags 
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
 
-	dataPtr->SetData(std::move(newTexture));
-
 	//标记为需要CopyBufferToImage
-	_upload_textures.push_back(dataPtr->GetData().lock().get());
+	newTexture->UploadToGPU();
 
+	dataPtr->SetData(std::move(newTexture));
 	return dataPtr->GetData();
 }
 

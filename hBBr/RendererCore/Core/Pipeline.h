@@ -31,7 +31,7 @@ struct VkGraphicsPipelineCreateInfoCache
 	VkPipelineMultisampleStateCreateInfo			msInfo{};
 	//------------------------Depth Stencil
 	VkPipelineDepthStencilStateCreateInfo			depthStencilInfo{};
-	//Stages
+	//Shader Stages
 	std::vector<VkPipelineShaderStageCreateInfo>	stages;
 
 	bool bHasMaterialParameterVS = false;

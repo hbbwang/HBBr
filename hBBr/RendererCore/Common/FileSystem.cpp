@@ -371,6 +371,11 @@ std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char
                 en.suffix = entry.path().extension().c_str();
                 en.baseName = entry.path().stem().c_str();
                 en.type = FileEntryType::File;
+                const size_t vecSize = result.size();
+                if (vecSize >= result.capacity())
+                {
+                    result.reserve(vecSize + 5);
+                }
                 result.push_back(en);
             }
         }
@@ -409,6 +414,11 @@ std::vector<FileEntry> FileSystem::GetAllFilesExceptFolders(const char* path)
                 en.suffix = entry.path().extension().c_str();
                 en.baseName = entry.path().stem().c_str();
                 en.type = FileEntryType::File;
+                const size_t vecSize = result.size();
+                if (vecSize >= result.capacity())
+                {
+                    result.reserve(vecSize + 5);
+                }
                 result.push_back(en);
             }
         }
@@ -447,6 +457,11 @@ std::vector<FileEntry> FileSystem::GetAllFolders(const char* path, bool currentD
                 en.suffix = entry.path().extension().c_str();
                 en.baseName = entry.path().stem().c_str();
                 en.type = FileEntryType::Dir;
+                const size_t vecSize = result.size();
+                if (vecSize >= result.capacity())
+                {
+                    result.reserve(vecSize + 5);
+                }
                 result.push_back(en);
             }
             //

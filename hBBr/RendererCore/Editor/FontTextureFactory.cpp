@@ -155,7 +155,16 @@ void FontTextureFactory::ReleaseFontTexture()
 			newChar.posX = std::max(x - 1, 0);
 			newChar.posY = y;
 			newChar.sizeOffsetX = ilen;
+
+			if (characters.capacity() <= characters.size())
+			{
+				if (characters.capacity() < 200)
+					characters.reserve(characters.capacity() + 100);
+				else
+					characters.reserve(characters.capacity() * 2);
+			}
 			characters.push_back(newChar);
+
 			/* 调整x */
 			x += (int)fontWidth;
 

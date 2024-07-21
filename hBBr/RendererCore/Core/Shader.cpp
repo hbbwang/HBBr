@@ -66,6 +66,7 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 		//header
 		file.read((char*)&cache.header, sizeof(ShaderCacheHeader));
 		//shader varients
+		cache.vi.reserve(cache.header.varientCount);
 		for (int v = 0; v < cache.header.varientCount; v++)
 		{
 			ShaderVarientGroup newVarient;
@@ -73,6 +74,7 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 			cache.vi.push_back(newVarient);
 		}
 		//shader parameter infos
+		cache.params.reserve(cache.header.shaderParameterCount_vs + cache.header.shaderParameterCount_ps);
 		for (int i = 0; i < cache.header.shaderParameterCount_vs + cache.header.shaderParameterCount_ps; i++)
 		{
 			ShaderParameterInfo newInfo;
@@ -80,6 +82,7 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 			cache.params.push_back(newInfo);
 		}
 		//shader textures infos
+		cache.texs.reserve(cache.header.shaderTextureCount);
 		for (int i = 0; i < cache.header.shaderTextureCount; i++)
 		{
 			ShaderTextureInfo newInfo;
@@ -148,7 +151,9 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 			{
 				int alignmentFloat4 = 0; // float4 对齐
 				uint32_t arrayIndex = 0;
-				for (auto i = 0; i < vsParamInfo.size(); i++)
+				const auto numVsParams = vsParamInfo.size();
+				cache.pi_vs.reserve(numVsParams);
+				for (auto i = 0; i < numVsParams; i++)
 				{
 					std::shared_ptr<MaterialParameterInfo> info;
 					info.reset(new MaterialParameterInfo);
@@ -176,6 +181,7 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 						}
 						info->arrayIndex = arrayIndex;
 						info->vec4Index = alignmentFloat4;
+						info->value.reserve(2);
 						info->value.push_back((float)vsParamInfo[i].defaultValue.x);
 						info->value.push_back((float)vsParamInfo[i].defaultValue.y);
 						alignmentFloat4 += 2;
@@ -189,6 +195,7 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 						}
 						info->arrayIndex = arrayIndex;
 						info->vec4Index = alignmentFloat4;
+						info->value.reserve(3);
 						info->value.push_back((float)vsParamInfo[i].defaultValue.x);
 						info->value.push_back((float)vsParamInfo[i].defaultValue.y);
 						info->value.push_back((float)vsParamInfo[i].defaultValue.z);
@@ -203,6 +210,7 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 						}
 						info->arrayIndex = arrayIndex;
 						info->vec4Index = alignmentFloat4;
+						info->value.reserve(4);
 						info->value.push_back((float)vsParamInfo[i].defaultValue.x);
 						info->value.push_back((float)vsParamInfo[i].defaultValue.y);
 						info->value.push_back((float)vsParamInfo[i].defaultValue.z);
@@ -217,7 +225,9 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 			{
 				int alignmentFloat4 = 0; // float4 对齐
 				uint32_t arrayIndex = 0;
-				for (auto i = 0; i < psParamInfo.size(); i++)
+				const auto numPsParams = psParamInfo.size();
+				cache.pi_ps.reserve(numPsParams);
+				for (auto i = 0; i < numPsParams; i++)
 				{
 					std::shared_ptr<MaterialParameterInfo> info;
 					info.reset(new MaterialParameterInfo);
@@ -245,6 +255,7 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 						}
 						info->arrayIndex = arrayIndex;
 						info->vec4Index = alignmentFloat4;
+						info->value.reserve(2);
 						info->value.push_back((float)psParamInfo[i].defaultValue.x);
 						info->value.push_back((float)psParamInfo[i].defaultValue.y);
 						alignmentFloat4 += 2;
@@ -258,6 +269,7 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 						}
 						info->arrayIndex = arrayIndex;
 						info->vec4Index = alignmentFloat4;
+						info->value.reserve(3);
 						info->value.push_back((float)psParamInfo[i].defaultValue.x);
 						info->value.push_back((float)psParamInfo[i].defaultValue.y);
 						info->value.push_back((float)psParamInfo[i].defaultValue.z);
@@ -272,6 +284,7 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 						}
 						info->arrayIndex = arrayIndex;
 						info->vec4Index = alignmentFloat4;
+						info->value.reserve(4);
 						info->value.push_back((float)psParamInfo[i].defaultValue.x);
 						info->value.push_back((float)psParamInfo[i].defaultValue.y);
 						info->value.push_back((float)psParamInfo[i].defaultValue.z);
@@ -286,7 +299,9 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 		}
 		//TextureInfo
 		{
-			for (auto i = 0; i < cache.texs.size(); i++)
+			const auto numTexs = cache.texs.size();
+			cache.ti.reserve(numTexs);
+			for (auto i = 0; i < numTexs; i++)
 			{
 				std::shared_ptr<MaterialTextureInfo> info;
 				info.reset(new MaterialTextureInfo);

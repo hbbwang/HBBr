@@ -12,7 +12,15 @@ void PrimitiveProxy::AddMaterialPrimitive(MaterialPrimitive* prim)
 	{
 		_allGraphicsPrimitives.resize((uint32_t)Pass::MaxNum);
 	}
-	_allGraphicsPrimitives[(uint32_t)prim->passUsing].push_back(prim);
+	auto& graphicsPrimitive = _allGraphicsPrimitives[(uint32_t)prim->passUsing];
+	if (graphicsPrimitive.capacity() <= graphicsPrimitive.size())
+	{
+		if (graphicsPrimitive.capacity() < 200)
+			graphicsPrimitive.reserve(graphicsPrimitive.capacity() + 20);
+		else
+			graphicsPrimitive.reserve(graphicsPrimitive.capacity() * 1.4);
+	}
+	graphicsPrimitive.push_back(prim);
 }
 
 void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, HString vsFullName, HString psFullName)
@@ -67,6 +75,16 @@ void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* p
 	{
 		_allModelPrimitives[mat].emplace(renderer, std::vector<ModelPrimitive*>());
 	}
+
+	auto& modelPrim = _allModelPrimitives[mat][renderer];
+	if (modelPrim.capacity() <= modelPrim.size())
+	{
+		if (modelPrim.capacity() < 200)
+			modelPrim.reserve(modelPrim.capacity() + 20);
+		else
+			modelPrim.reserve(modelPrim.capacity() * 1.4);
+	}
+
 	_allModelPrimitives[mat][renderer].push_back(prim);
 }
 

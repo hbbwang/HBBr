@@ -96,6 +96,8 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 	model->_assetInfo = dataPtr;
 	glm::vec3 boundingBox_min = glm::vec3(0, 0, 0);
 	glm::vec3 boundingBox_max = glm::vec3(0, 0, 0);
+	//FBX会把不同材质分为多个Meshes,我们以此作为"面"
+	model->faces.reserve(scene->mNumMeshes);
 	for (unsigned int nm = 0; nm < scene->mNumMeshes; nm++)
 	{
 		aiMesh* mesh = scene->mMeshes[nm];
@@ -106,14 +108,19 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 		FaceData newData = {};
 		newData.vertexNum = mesh->mNumVertices;
 		model->faceNum += 1;
-		//
 		VertexFactory::VertexInput vertex{};
+		//
+		vertex.pos.reserve(mesh->mNumVertices);
+		vertex.nor.reserve(mesh->mNumVertices);
+		vertex.tan.reserve(mesh->mNumVertices);
+		vertex.col.reserve(mesh->mNumVertices);
+		vertex.uv01.reserve(mesh->mNumVertices);
+		vertex.uv23.reserve(mesh->mNumVertices);
+		vertex.uv45.reserve(mesh->mNumVertices);
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
-			//VertexData vertex{};
 			glm::vec3 vec3 = glm::vec3(0);
 			glm::vec4 vec4 = glm::vec4(0);
-			//
 			vec3.x = mesh->mVertices[i].x;
 			vec3.y = mesh->mVertices[i].y;
 			vec3.z = mesh->mVertices[i].z;
@@ -205,6 +212,8 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 		}
 		newData.vertexData = vertex;
 		//indices
+		//默认它是三角面，所以每个面3个Index
+		vertex.vertexIndices.reserve(mesh->mNumFaces * 3);
 		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 		{
 			if (mesh->mFaces[i].mNumIndices != 3)
@@ -229,14 +238,11 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 		{
 
 		}
-
 		model->faces.push_back(newData);
 	}
 	//----------------------
 	//_modelCache.emplace(std::make_pair(fbxPath, std::move(Model)));
-
 	dataPtr->SetData(std::move(model));
-
 	return dataPtr->GetData();
 }
 

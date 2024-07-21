@@ -1656,15 +1656,18 @@ void VulkanManager::EndCommandBuffer(VkCommandBuffer cmdBuf)
 
 void VulkanManager::BeginRenderPass(VkCommandBuffer cmdBuf, VkFramebuffer framebuffer, VkRenderPass renderPass, VkExtent2D areaSize, std::vector<VkAttachmentDescription>_attachmentDescs, std::array<float, 4> clearColor)
 {
+	const auto clearValueCount = _attachmentDescs.size();
+
 	VkRenderPassBeginInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	info.framebuffer = framebuffer;
 	info.renderPass = renderPass;
 	info.renderArea.offset = { 0, 0 };
 	info.renderArea.extent = areaSize;
-	info.clearValueCount = (uint32_t)_attachmentDescs.size();
+	info.clearValueCount = (uint32_t)clearValueCount;
 	std::vector < VkClearValue > clearValues;
-	for (int i = 0; i < (int)_attachmentDescs.size(); i++)
+	clearValues.reserve(clearValueCount);
+	for (int i = 0; i < (int)clearValueCount; i++)
 	{
 		VkClearValue clearValue = {};
 		if (_attachmentDescs[i].finalLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL || _attachmentDescs[i].finalLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
@@ -1681,9 +1684,7 @@ void VulkanManager::BeginRenderPass(VkCommandBuffer cmdBuf, VkFramebuffer frameb
 		}
 		clearValues.push_back(clearValue);
 	}
-
 	info.pClearValues = clearValues.data();
-
 	vkCmdBeginRenderPass(cmdBuf, &info, VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
 }
 

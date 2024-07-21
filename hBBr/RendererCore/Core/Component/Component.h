@@ -46,6 +46,13 @@ ComponentClassName  _component_construct_##ComponentClassName;
 	pro.bArray = _bArray;\
 	pro.sort = _sort;\
 	pro.bReadOnly = _readOnly;\
+	if (_compProperties.capacity() <= _compProperties.size())\
+	{\
+		if (_compProperties.capacity() < 200)\
+			_compProperties.reserve(_compProperties.capacity() + 20);\
+		else\
+			_compProperties.reserve(_compProperties.capacity() * 1.2);\
+	}\
 	_compProperties.push_back(pro);\
 	auto valueCompare = [](const ComponentProperty& p1, const ComponentProperty& p2)->bool {\
 		return p1.sort < p2.sort;\

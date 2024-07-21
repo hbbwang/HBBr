@@ -80,8 +80,8 @@ private:
 	class QVBoxLayout* mainLayout;
 	class QHBoxLayout* titleLayout;
 
-	int titleHeight = 40;
-	int titleBottonWidth = 35;
+	int titleHeight = 30;
+	int titleBottonWidth = 30;
 
 	QWidget* p_child = NULL;			//嵌套的子窗口
 	QPoint		mousePosition;			//局部鼠标位置

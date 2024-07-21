@@ -181,54 +181,11 @@ namespace VertexFactory
 			return result;
 		}
 
-
-		VertexInputLayout BuildLayout()
-		{
-			VertexInputLayout result = {};
-			result.inputSize = 0;
-			if (pos.size() > 0)
-			{
-				result.inputLayouts.push_back(VK_FORMAT_R32G32B32_SFLOAT);
-				result.inputSize += sizeof(glm::vec3);
-			}
-			if (nor.size() > 0)
-			{
-				result.inputLayouts.push_back(VK_FORMAT_R32G32B32_SFLOAT);
-				result.inputSize += sizeof(glm::vec3);
-			}
-			if (tan.size() > 0)
-			{
-				result.inputLayouts.push_back(VK_FORMAT_R32G32B32_SFLOAT);
-				result.inputSize += sizeof(glm::vec3);
-			}
-			if (col.size() > 0)
-			{
-				result.inputLayouts.push_back(VK_FORMAT_R32G32B32A32_SFLOAT);
-				result.inputSize += sizeof(glm::vec4);
-			}
-			if (uv01.size() > 0)
-			{
-				result.inputLayouts.push_back(VK_FORMAT_R32G32B32A32_SFLOAT);
-				result.inputSize += sizeof(glm::vec4);
-			}
-			if (uv23.size() > 0)
-			{
-				result.inputLayouts.push_back(VK_FORMAT_R32G32B32A32_SFLOAT);
-				result.inputSize += sizeof(glm::vec4);
-			}
-			if (uv45.size() > 0)
-			{
-				result.inputLayouts.push_back(VK_FORMAT_R32G32B32A32_SFLOAT);
-				result.inputSize += sizeof(glm::vec4);
-			}
-			result.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-			return result;
-		}
-
 		static VertexInputLayout BuildLayout(uint8_t inputType[7])
 		{
 			VertexInputLayout result = {};
 			result.inputSize = 0;
+			result.inputLayouts.reserve(7);
 			for (int i = 0; i < 7; i++)
 			{
 				if (inputType[i] == 0)

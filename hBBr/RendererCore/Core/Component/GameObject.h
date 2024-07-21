@@ -95,6 +95,10 @@ public:
 	T* AddComponent(Args... args)
 	{
 		T* result = new T(this, args...);
+		if (_comps.capacity() <= _comps.size())
+		{
+			_comps.reserve(_comps.capacity() + 5);
+		}
 		_comps.push_back(result);
 		return result;
 	}

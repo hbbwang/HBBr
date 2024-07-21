@@ -23,6 +23,8 @@ enum TextureSampler
 	TextureSampler_Nearest_Mirror = 5,
 	TextureSampler_Nearest_Clamp = 6,
 	TextureSampler_Nearest_Border = 7,
+
+	TextureSampler_Max = 8,
 };
 
 class Texture2D : public AssetObject
@@ -66,13 +68,8 @@ public:
 	HBBR_API HBBR_INLINE static std::vector<Texture2D*>& GetUploadTextures(){
 		return _upload_textures;
 	}
-	HBBR_API HBBR_INLINE static VkSampler GetSampler(TextureSampler sampler , int mipBias = -1) {
-		auto samplers = _samplers[sampler];
-		if (mipBias <0 || (int)samplers.size() <= mipBias)
-		{
-			mipBias = 0;
-		}
-		return samplers[mipBias];
+	HBBR_API HBBR_INLINE static VkSampler GetSampler(TextureSampler sampler) {
+		return _samplers[(uint32_t)sampler];
 	}
 	HBBR_API HBBR_INLINE static uint64_t GetTextureStreamingSize() {
 		return _textureStreamingSize;
@@ -103,6 +100,8 @@ public:
 	HBBR_API static std::weak_ptr<Texture2D> LoadAsset(HGUID guid , VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
 	HBBR_API virtual void SaveAsset(HString path)override;
+
+	void UploadToGPU();
 
 	static void GlobalInitialize();
 
@@ -144,8 +143,8 @@ protected:
 
 	//Global variable
 	static std::unordered_map<HString, Texture2D*> _system_textures;
-	//<mipLod,sampler>
-	static std::unordered_map<TextureSampler, std::vector<VkSampler>> _samplers;
+	//<sampler>
+	static std::vector<VkSampler> _samplers;
 
 	//Texture2D streaming
 	static uint64_t _textureStreamingSize;

@@ -9,7 +9,7 @@
 std::vector<std::weak_ptr<World>>World::_dirtyWorlds;
 World::World()
 {
-
+	_cameras.reserve(8);
 }
 
 World::~World()
@@ -126,6 +126,7 @@ void World::ReloadWorldSetting()
 		{
 			_worldName = _json["WorldName"];
 			nlohmann::json levels = _json["Levels"];
+			_levels.reserve(levels.size());
 			for (auto& i : levels.items())
 			{
 				HString levelName = i.key();

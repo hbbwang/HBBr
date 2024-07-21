@@ -84,16 +84,17 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 		HString VirtualPath;
 	};
 	std::vector<resultFind> guids;
+	const auto importFilesSize = importFiles.size();
 	if (out != nullptr)
 	{
-		guids.reserve(importFiles.size());
-		out->reserve(importFiles.size());
+		guids.reserve(importFilesSize);
+		out->reserve(importFilesSize);
 	}
 	nlohmann::json json;
 	if(Serializable::LoadJson(repositoryFilePath, json))
 	{
 		std::vector<nlohmann::json>newItems;
-		newItems.reserve(importFiles.size());
+		newItems.reserve(importFilesSize);
 		for (auto& i : importFiles)
 		{
 			HString suffix = FileSystem::GetFileExt(i.absAssetFilePath);
@@ -199,7 +200,6 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				newFind.guid = guid;
 				newFind.VirtualPath = i.virtualPath;
 				guids.push_back(newFind);
-
 				nlohmann::json newItem_cache;
 				newItem_cache[guid] = newItem;
 				newItems.push_back(newItem_cache);
@@ -522,6 +522,10 @@ HString ContentManager::SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo, 
 void ContentManager::MarkAssetDirty(std::weak_ptr<AssetInfoBase> asset)
 {
 	asset.lock()->bDirty = true;
+	if (_dirtyAssets.size() >= _dirtyAssets.capacity())
+	{
+		_dirtyAssets.reserve(_dirtyAssets.size() + 5);
+	}
 	_dirtyAssets.push_back(asset);
 }
 
@@ -681,6 +685,7 @@ std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(nlohmann::json&input, H
 		if (ref_it != i.end())
 		{
 			refJsons = ref_it.value();
+			info->refTemps.reserve(refJsons.capacity());
 			for (auto& j : refJsons)
 			{
 				uint32_t typeIndex = j["Type"];
@@ -698,6 +703,7 @@ std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(nlohmann::json&input, H
 		if (dep_it != i.end())
 		{
 			depJsons = dep_it.value();
+			info->depTemps.reserve(depJsons.capacity());
 			for (auto& j : depJsons)
 			{
 				uint32_t typeIndex = j["Type"];
@@ -806,6 +812,12 @@ void ContentManager::UpdateAssetReference(std::weak_ptr<AssetInfoBase> info)
 	{
 		info.lock()->refs.clear();
 		info.lock()->deps.clear();
+
+		if(info.lock()->refTemps.capacity() != info.lock()->refs.capacity())
+			info.lock()->refs.reserve(info.lock()->refTemps.capacity());
+		if (info.lock()->depTemps.capacity() != info.lock()->deps.capacity())
+			info.lock()->deps.reserve(info.lock()->depTemps.capacity());
+
 		for (auto i : info.lock()->refTemps)
 		{
 			auto it = _assets[(uint32_t)i.type].find(i.guid);

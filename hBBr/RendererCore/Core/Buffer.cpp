@@ -21,6 +21,12 @@ void Buffer::Resize(uint64_t newSize)
 	BufferWaitToRelease oldBuffer;
 	oldBuffer.old_buffer = std::move(_buffer);
 	oldBuffer.old_bufferMemory = std::move(_bufferMemory);
+
+	if (_oldBuffer.capacity() == 0)
+	{
+		_oldBuffer.reserve(4);
+	}
+
 	_oldBuffer.push_back(oldBuffer);
 	//创建新Buffer
 	VulkanManager::GetManager()->CreateBuffer(_bufferUsage, newSize, _buffer);

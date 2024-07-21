@@ -17,7 +17,7 @@ private:
 
 	void SetupPassAndDraw(Pass p);
 
-	std::vector<PipelineObject*> pipelineTemps;
+	std::vector<PipelineObject*> _pipelineTemps;
 
 	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_pass;
 	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_obj;

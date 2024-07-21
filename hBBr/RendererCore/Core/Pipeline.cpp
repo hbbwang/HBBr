@@ -217,6 +217,11 @@ void PipelineManager::SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfo
 	//vs.shaderStageInfo.module = vs.shaderModule[varient];
 	//ps.shaderStageInfo.module = ps.shaderModule[varient];
 
+	if (createInfo.stages.capacity() == 0)
+	{
+		createInfo.stages.reserve(6);
+	}
+
 	createInfo.stages.push_back(vs->shaderStageInfo);
 	createInfo.stages.push_back(ps->shaderStageInfo);
 

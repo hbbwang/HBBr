@@ -45,8 +45,12 @@ void Component::GameObjectActiveChanged(bool gameObjectActive)
 void Component::Init()
 {
 	_bInit = true;
+	//注册使用按键输入
 	if (_bEnableKeyInput)
 	{
+		//正常情况下不会出现超过10个按键同时按下吧？
+		_keys.reserve(10);
+		_keys_repeat.reserve(10);
 		auto func = [this](VulkanRenderer* ptr, KeyCode key, KeyMod mod, Action action)
 			{		
 				if (VulkanApp::GetFocusForm() == nullptr ||  VulkanApp::GetFocusForm()->renderer != ptr)
@@ -94,6 +98,8 @@ void Component::Init()
 	}
 	if (_bEnableMouseInput)
 	{
+		_mouses.reserve(5);
+		_mouses_repeat.reserve(5);
 		auto func = [this](VulkanRenderer* ptr, MouseButton mouse, Action action)
 			{
 				if (VulkanApp::GetFocusForm() == nullptr || VulkanApp::GetFocusForm()->renderer != ptr)

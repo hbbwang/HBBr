@@ -126,6 +126,10 @@ public:
 
 	HBBR_API HBBR_INLINE void ExecFunctionOnRenderThread(std::function<void()> func)
 	{
+		if (_renderThreadFuncsOnce.capacity() <= _renderThreadFuncsOnce.size())
+		{
+			_renderThreadFuncsOnce.reserve(_renderThreadFuncsOnce.capacity() + 4);
+		}
 		_renderThreadFuncsOnce.push_back(func);
 	}
 

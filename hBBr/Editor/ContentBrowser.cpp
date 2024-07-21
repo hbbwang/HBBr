@@ -392,7 +392,7 @@ void VirtualFolderTreeView::dropEvent(QDropEvent* e)
 			QDataStream stream(&encoded, QIODevice::ReadOnly);
 			while (!stream.atEnd())
 			{
-				if (assets.capacity() < assets.size())
+				if (assets.capacity() <= assets.size())
 				{
 					assets.reserve(assets.capacity() + 25);
 					newVirtualFolderPaths.reserve(assets.capacity() + 25);
@@ -727,7 +727,7 @@ void VirtualFileListView::dropEvent(QDropEvent* e)
 			QDataStream stream(&encoded, QIODevice::ReadOnly);
 			while (!stream.atEnd())
 			{
-				if (assets.capacity() < assets.size())
+				if (assets.capacity() <= assets.size())
 				{
 					assets.reserve(assets.capacity() + 25);
 				}

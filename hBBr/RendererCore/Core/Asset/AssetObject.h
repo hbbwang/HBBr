@@ -28,7 +28,6 @@ public:
 	virtual void SetToolTip() {
 		if (!_assetInfo.expired())
 		{
-			//_assetInfo->toolTips.push_back(HString::printf("资产类型:%s", GetAssetTypeString(_assetInfo->type)));
 		}
 	}
 #endif

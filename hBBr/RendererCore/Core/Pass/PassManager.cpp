@@ -39,6 +39,7 @@ PassManager::PassManager(VulkanRenderer* renderer)
 	{
 		p->PassInit();
 	}
+	_executePasses.reserve(_passes.size());
 }
 
 void PassManager::PassesUpdate()

@@ -13,7 +13,7 @@
 
 std::vector<Texture2D*> Texture2D::_upload_textures;
 std::unordered_map<HString, Texture2D*> Texture2D::_system_textures;
-std::unordered_map<TextureSampler, std::vector<VkSampler>>Texture2D::_samplers;
+std::vector<VkSampler>Texture2D::_samplers;
 uint64_t Texture2D::_textureStreamingSize = 0;
 uint64_t Texture2D::_maxTextureStreamingSize = (uint64_t)4 * (uint64_t)1024 * (uint64_t)1024 * (uint64_t)1024; //4 GB
 
@@ -200,16 +200,28 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
 
-	dataPtr->SetData(std::move(newTexture));
-
 	//标记为需要CopyBufferToImage
-	_upload_textures.push_back(dataPtr->GetData().lock().get());
+	newTexture->UploadToGPU();
+
+	dataPtr->SetData(std::move(newTexture));
 
 	return dataPtr->GetData();
 }
 
 void Texture2D::SaveAsset(HString path)
 {
+}
+
+void Texture2D::UploadToGPU()
+{
+	if (_upload_textures.capacity() <= _upload_textures.size())
+	{
+		if (_upload_textures.capacity() < 200)
+			_upload_textures.reserve(_upload_textures.capacity() + 20);
+		else
+			_upload_textures.reserve(_upload_textures.capacity() * 1.2);
+	}
+	_upload_textures.push_back(this);
 }
 
 void Texture2D::GlobalInitialize()
@@ -243,39 +255,38 @@ void Texture2D::GlobalInitialize()
 		info.maxAnisotropy = 1.0f;
 	}
 
-	_samplers.emplace(TextureSampler_Linear_Wrap, std::vector<VkSampler>());
-	_samplers.emplace(TextureSampler_Linear_Mirror, std::vector<VkSampler>());
-	_samplers.emplace(TextureSampler_Linear_Clamp, std::vector<VkSampler>());
-	_samplers.emplace(TextureSampler_Linear_Border, std::vector<VkSampler>());
-	_samplers.emplace(TextureSampler_Nearest_Wrap, std::vector<VkSampler>());
-	_samplers.emplace(TextureSampler_Nearest_Mirror, std::vector<VkSampler>());
-	_samplers.emplace(TextureSampler_Nearest_Clamp, std::vector<VkSampler>());
-	_samplers.emplace(TextureSampler_Nearest_Border, std::vector<VkSampler>());
-
-	//mip level
-	for (int t = 0; t < 8; t++)
+	_samplers.reserve((uint32_t)TextureSampler_Max);
 	{
-		_samplers.emplace((TextureSampler)t, std::vector<VkSampler>());
-		for (int i = 0; i < 16; i++)
-		{
-			if ((TextureSampler)t == TextureSampler_Linear_Wrap)
-				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, (float)i, 16);
-			else if ((TextureSampler)t == TextureSampler_Linear_Mirror)
-				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, (float)i, 16);
-			else if ((TextureSampler)t == TextureSampler_Linear_Clamp)
-				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, (float)i, 16);
-			else if ((TextureSampler)t == TextureSampler_Linear_Border)
-				manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, (float)i, 16);
-			else if ((TextureSampler)t == TextureSampler_Nearest_Wrap)
-				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_REPEAT, (float)i, 16);
-			else if ((TextureSampler)t == TextureSampler_Nearest_Mirror)
-				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, (float)i, 16);
-			else if ((TextureSampler)t == TextureSampler_Nearest_Clamp)
-				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, (float)i, 16);
-			else if ((TextureSampler)t == TextureSampler_Nearest_Border)
-				manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, (float)i, 16);
-			_samplers[(TextureSampler)t].push_back(std::move(sampler));
-		}
+		manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 16);
+		_samplers.push_back(std::move(sampler));
+	}
+	{
+		manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0, 16);
+		_samplers.push_back(std::move(sampler));
+	}
+	{
+		manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 16);
+		_samplers.push_back(std::move(sampler));
+	}
+	{
+		manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, 0, 16);
+		_samplers.push_back(std::move(sampler));
+	}
+	{
+		manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 16);
+		_samplers.push_back(std::move(sampler));
+	}
+	{
+		manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0, 16);
+		_samplers.push_back(std::move(sampler));
+	}
+	{
+		manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 16);
+		_samplers.push_back(std::move(sampler));
+	}
+	{
+		manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, 0, 16);
+		_samplers.push_back(std::move(sampler));
 	}
 
 	//Create BaseTexture
@@ -309,11 +320,7 @@ void Texture2D::GlobalRelease()
 	const auto& manager = VulkanManager::GetManager();
 	for (auto i : _samplers)
 	{
-		for (auto& t : i.second)
-		{
-			vkDestroySampler(manager->GetDevice(), t, nullptr);
-		}
-		i.second.clear();
+		vkDestroySampler(manager->GetDevice(), i, nullptr);
 	}
 	_samplers.clear();
 }

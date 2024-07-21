@@ -167,9 +167,9 @@ void AssetLine::dropEvent(QDropEvent* event)
 		QDataStream stream(&encoded, QIODevice::ReadOnly);
 		while (!stream.atEnd())
 		{
-			if (assets.capacity() < assets.size())
+			if (assets.capacity() <= assets.size())
 			{
-				assets.reserve(assets.capacity() + 25);
+				assets.reserve(assets.capacity() + 5);
 			}
 			int row, col;
 			QMap<int, QVariant> roleDataMap;

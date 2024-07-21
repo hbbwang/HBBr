@@ -213,7 +213,6 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 							auto& info = *it;
 							//value
 							std::vector<float> value;
-							value.reserve(4 * 4);
 							if (info.type == MPType::VSFloat)
 							{
 								float vf = 0;
@@ -224,6 +223,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 							{
 								glm::vec2 v2;
 								from_json(i.value()["value"], v2);
+								value.reserve(2);
 								value.push_back(v2.x);
 								value.push_back(v2.y);
 							}
@@ -231,6 +231,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 							{
 								glm::vec3 v3;
 								from_json(i.value()["value"], v3);
+								value.reserve(3);
 								value.push_back(v3.x);
 								value.push_back(v3.y);
 								value.push_back(v3.z);
@@ -239,6 +240,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 							{
 								glm::vec4 v4;
 								from_json(i.value()["value"], v4);
+								value.reserve(4);
 								value.push_back(v4.x);
 								value.push_back(v4.y);
 								value.push_back(v4.z);
@@ -341,7 +343,6 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 							auto& info = *it;
 							//value
 							std::vector<float> value;
-							value.reserve(4 * 4);
 							if (info.type == MPType::PSFloat)
 							{
 								float vf = 0;
@@ -352,6 +353,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 							{
 								glm::vec2 v2;
 								from_json(i.value()["value"], v2);
+								value.reserve(2);
 								value.push_back(v2.x);
 								value.push_back(v2.y);
 							}
@@ -359,6 +361,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 							{
 								glm::vec3 v3;
 								from_json(i.value()["value"], v3);
+								value.reserve(3);
 								value.push_back(v3.x);
 								value.push_back(v3.y);
 								value.push_back(v3.z);
@@ -367,6 +370,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 							{
 								glm::vec4 v4;
 								from_json(i.value()["value"], v4);
+								value.reserve(4);
 								value.push_back(v4.x);
 								value.push_back(v4.y);
 								value.push_back(v4.z);
