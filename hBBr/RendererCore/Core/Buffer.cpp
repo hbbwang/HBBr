@@ -47,7 +47,7 @@ bool Buffer::Resize(uint64_t newSize, bool bForceResize)
 	_bufferMemory = VulkanObjectManager::Get()->AllocateVkDeviceMemory(*_buffer);
 
 #if IS_EDITOR
-	ConsoleDebug::printf_endl_succeed(GetInternationalizationText("Renderer", "ResizeBuffer"), _bufferCapacity);
+	ConsoleDebug::printf_endl_succeed(GetInternationalizationText("Renderer", "ResizeBuffer"), _bufferCapacity , (double)_bufferCapacity/ (double)1024.0/ (double)1024.0);
 #endif
 
 	MapMemory();
@@ -68,6 +68,11 @@ void Buffer::CreateBuffer(VkBufferUsageFlags usageFlags, uint64_t bufferSize)
 	_bufferCapacity = bufferSize;
 	_buffer = VulkanObjectManager::Get()->CreateVkBuffer(usageFlags, bufferSize);
 	_bufferMemory = VulkanObjectManager::Get()->AllocateVkDeviceMemory(*_buffer);
+
+#if IS_EDITOR
+	ConsoleDebug::printf_endl_succeed(GetInternationalizationText("Renderer", "CreateBuffer"), _bufferCapacity, (double)_bufferCapacity / (double)1024.0 / (double)1024.0);
+#endif
+
 	MapMemory();
 }
 
