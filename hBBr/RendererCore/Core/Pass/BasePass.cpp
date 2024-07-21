@@ -117,8 +117,6 @@ void BasePass::SetupPassAndDraw(Pass p)
 	std::vector<uint32_t> matBufferSize_vs;
 	std::vector<uint32_t> matBufferOffset_ps;
 	std::vector<uint32_t> matBufferSize_ps;
-	std::vector<uint32_t> objBufferOffset;
-	std::vector<uint32_t> objBufferSize;
 	uint32_t objectUboOffset = 0;
 	uint32_t textureDescriptorCount = 0;
 	_pipelineTemps.clear();
@@ -142,6 +140,9 @@ void BasePass::SetupPassAndDraw(Pass p)
 		uint64_t ibPos = 0;
 		uint64_t vbWholeSize = 0;
 		uint64_t ibWholeSize = 0;
+		bool bNeedUpdateObjUniform = false;
+		bool bNeedUpdateVbIb = false;
+		bool bBeginUpdate = false;
 		for (auto m : *matPrim)
 		{
 			auto prims = PrimitiveProxy::GetModelPrimitives(m, _renderer);
@@ -152,13 +153,12 @@ void BasePass::SetupPassAndDraw(Pass p)
 		//尝试重置VertexBuffer和IndedxBuffer重置大小
 		{
 			//尝试 重置 ObjectUniformBuffer大小
-			obj->ResizeDescriptorBuffer(sizeof(ObjectUniformBuffer) * (objectCount));
+			size_t objUbNeedSize = (sizeof(ObjectUniformBuffer) * (objectCount)+ (VkDeviceSize)BufferSizeRange - 1) & ~((VkDeviceSize)BufferSizeRange - 1);
 			size_t vbNeedSize = (vbWholeSize + (VkDeviceSize)BufferSizeRange - 1) & ~((VkDeviceSize)BufferSizeRange - 1);
 			size_t ibNeedSize = (ibWholeSize + (VkDeviceSize)BufferSizeRange - 1) & ~((VkDeviceSize)BufferSizeRange - 1);
-			vb->Resize(vbNeedSize);
-			ib->Resize(ibNeedSize);
-			objBufferOffset.reserve(objectCount);
-			objBufferSize.reserve(objectCount);
+			bNeedUpdateObjUniform = obj->ResizeDescriptorBuffer(objUbNeedSize);
+			bNeedUpdateVbIb |= vb->Resize(vbNeedSize);
+			bNeedUpdateVbIb |= ib->Resize(ibNeedSize);
 		}
 		//更新缓冲区
 		for (auto m : *matPrim)
@@ -302,24 +302,24 @@ void BasePass::SetupPassAndDraw(Pass p)
 			if (prims)
 			{
 				//更新Primitives
-				
 				for (auto& prim : (prims->prims))
-				{	
-					if (prim->transform->NeedUpdateUb())
+				{
+					if (prim->bNeedUpdate)
+					{
+						prim->bNeedUpdate = false;
+						bBeginUpdate = true;
+					}
+					if (bBeginUpdate || prim->transform->NeedUpdateUb() || bNeedUpdateObjUniform)
 					{
 						ObjectUniformBuffer objectUniformBuffer = {};
 						objectUniformBuffer.WorldMatrix = prim->transform->GetWorldMatrix();
 						obj->BufferMapping(&objectUniformBuffer, (uint64_t)objectUboOffset, sizeof(ObjectUniformBuffer));
 					}
-					if (prim->bNeedUpdate)
+					if (bBeginUpdate || bNeedUpdateVbIb)
 					{
-						prim->bNeedUpdate = false;
 						vb->BufferMapping(prim->vertexData.data(),		vbPos, prim->vbSize);
 						ib->BufferMapping(prim->vertexIndices.data(),	ibPos, prim->ibSize);
 					}
-
-					objBufferOffset.push_back(objectUboOffset);
-					objBufferSize.push_back(sizeof(ObjectUniformBuffer));
 
 					//更新buffer起始位置
 					vbPos += prim->vbSize;
@@ -390,9 +390,10 @@ void BasePass::SetupPassAndDraw(Pass p)
 			}
 			for (auto& prim : prims->prims)
 			{
-				if (prim->renderer == this->_renderer && prim->bActive)
+				if (prim->renderer == this->_renderer)
 				{
-					vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 1, 1, &obj->GetDescriptorSet(), 1, &objBufferOffset[primIndex]);
+					vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 1, 1, &obj->GetDescriptorSet(), 1, &objectUboOffset);
+					objectUboOffset += sizeof(ObjectUniformBuffer);
 					VkBuffer verBuf[] = { vb->GetBuffer() };
 					vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, &vbOffset);
 					vkCmdBindIndexBuffer(cmdBuf, ib->GetBuffer(), ibOffset, VK_INDEX_TYPE_UINT32);

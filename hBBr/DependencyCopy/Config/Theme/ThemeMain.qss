@@ -4,7 +4,6 @@
 VariableDefine {
     BackgroundColor: rgb(31, 31, 31) ;
     FontFamily:  Arial, Helvetica, sans-serif;
-    BaseFontFamily: Arial, Helvetica, sans-serif;
     SplitterHandleColor : rgb(125,125,125);
     SplitterWidth : 2px;
 }
@@ -115,33 +114,21 @@ QMessageBox .QLabel
     background-color: rgb(40,40,40);
     color:#ffffff;
 }
-
 QMenuBar
 {
     font-family:  FontFamily;
-    background-color: rgb(70, 70, 70);
+    background-color: rgb(67, 67, 67);
     Color:rgb(210, 210, 210);
-}
-QMenuBar::item
-{
-    font-family:  FontFamily;
-    background-color: transparent;
-    padding-left: 12px;
-    padding-right: 12px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    font-size: 18px;
-}
-QMenuBar::item:selected
-{
-    color:#fff;
-    background-color: rgb(124, 124, 124);
+    border-bottom: 2 solid rgb(26, 26, 26);
+    padding-top: 4px;
+    padding-bottom: 4px;
+    font-size: 16px;
 }
 QMenu
 {
     background-color: rgb(40,40,40);
     Color:rgb(160,160,160);
-    border: 1 solid rgb(90, 90, 90);
+    padding: 5px;
 }
 QMenu::item
 {
@@ -232,6 +219,21 @@ QPushButton:pressed
     border-radius: 4px;
     width:100%;
     height: 25px;
+}
+#DockWidgetTitle
+{
+    /* background-color: rgb(30, 30, 30); */
+    border: 1px solid rgb(121, 121, 121);
+    background-image: url(./Config/Theme/Images/TitleImage.jpg) repeat ;
+    background-position:left top;
+    margin-bottom: 3px;
+}
+#DockWidgetTitleText
+{    
+    font-family:  FontFamily;
+    font-size: 16px;
+    font-weight: 100;
+    color: rgb(189, 189, 189);
 }
 QDockWidget
 {
@@ -330,33 +332,16 @@ QSplitter::handle
     height: SplitterWidth;
     /* border: 1px solid rgb(110,110,110); */
 }
-
-#DockWidgetTitle
-{
-    /* background-color: rgb(30, 30, 30); */
-    
-    background-image: url(./Config/Theme/Images/TitleImage.jpg) repeat ;
-    background-position:left top;
-    margin-bottom: 3px;
-}
-#DockWidgetTitleText
-{    
-    font-family: BaseFontFamily;
-    font-size: 16px;
-    font-weight: 100;
-    color: rgb(189, 189, 189);
-}
-
 #CustomTitleBar
 {
-    background-color :rgb(40, 40, 40);
+    background-color :rgb(55, 55, 55);
     border: 1px solid rgb(100, 100, 100);
 }
 #CustomTitleBar_Title
 {
+    border-bottom: 1px solid rgb(130, 130, 130);
     background-image: url(./Config/Theme/Images/TitleImage.jpg) repeat ;
     background-position:left top;
-    border: 1px solid rgb(100, 100, 100);
 }
 #CustomTitleBar_TitleMinButton
 {

@@ -39,7 +39,7 @@ struct ModelPrimitive
 {
 	uint8_t						bNeedUpdate = true;
 
-	uint8_t						bActive = true;
+	//uint8_t						bActive = true;
 
 	HString						modelPrimitiveName;
 
@@ -68,12 +68,12 @@ struct ModelPrimitive
 
 	class VulkanRenderer* renderer = nullptr;
 
-	void SetActive(bool newActive)
-	{
-		if ((uint8_t)newActive != bActive)
-			bNeedUpdate = 1;
-		bActive = (uint8_t)newActive;
-	}
+	//void SetActive(bool newActive)
+	//{
+	//	if ((uint8_t)newActive != bActive)
+	//		bNeedUpdate = 1;
+	//	bActive = (uint8_t)newActive;
+	//}
 };
 
 class MaterialPrimitive

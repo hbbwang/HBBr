@@ -108,15 +108,22 @@ void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive
 				if (pit != rit->second.prims.end())
 				{
 					//是否是最后一个对象,如果不是，需要标记下一个对象需要更新Buffer
+					bool isTheLastItem = false;
 					if (rit->second.prims.back() != *pit)
 					{
 						(*(pit + 1))->bNeedUpdate = true;
+					}
+					else
+					{
+						isTheLastItem = true;
 					}
 
 					rit->second.vbWholeSize -= (*pit)->vbSize;
 					rit->second.ibWholeSize -= (*pit)->ibSize;
 
 					rit->second.prims.erase(pit);
+					if (rit->second.prims.size() > 0 && isTheLastItem)
+						rit->second.prims.back()->bNeedUpdate = true;
 				}
 			}
 		}
