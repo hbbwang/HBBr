@@ -8,19 +8,19 @@
 //(UINT32_MAX/256)约等于16M
 #define BufferSizeRange (UINT32_MAX/256)
 
-struct BufferWaitToRelease
-{
-	int				safeDestoryOldBuffer = -1;
-	VkBuffer		old_buffer = VK_NULL_HANDLE;
-	VkDeviceMemory	old_bufferMemory = VK_NULL_HANDLE;
-};
+//struct BufferWaitToRelease
+//{
+//	int				safeDestoryOldBuffer = -1;
+//	VkBuffer		old_buffer = VK_NULL_HANDLE;
+//	VkDeviceMemory	old_bufferMemory = VK_NULL_HANDLE;
+//};
 
 class Buffer
 {
 public:
 	Buffer(VkBufferUsageFlags usageFlags, uint64_t bufferSize = BufferSizeRange);
 	~Buffer();
-	void Resize(uint64_t newSize);
+	bool Resize(uint64_t newSize, bool bForceResize = false);
 
 	void AddSize(uint64_t newSize);
 
@@ -75,11 +75,15 @@ public:
 
 private:
 
-	VkBuffer						_buffer = VK_NULL_HANDLE;
+	//VkBuffer						_buffer = VK_NULL_HANDLE;
 
-	VkDeviceMemory					_bufferMemory = VK_NULL_HANDLE;
+	//VkDeviceMemory					_bufferMemory = VK_NULL_HANDLE;
 
-	std::vector<BufferWaitToRelease>_oldBuffer;
+	std::shared_ptr<VkBuffer>			_buffer;
+
+	std::shared_ptr<VkDeviceMemory>		_bufferMemory;
+
+	//std::vector<BufferWaitToRelease>	_oldBuffer;
 
 	uint64_t						_bufferCapacity;
 

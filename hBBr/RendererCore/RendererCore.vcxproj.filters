@@ -274,6 +274,9 @@
     <ClInclude Include="Core\Pass\UniformBuffer.h">
       <Filter>Renderer\Core\Pass</Filter>
     </ClInclude>
+    <ClInclude Include="Core\VulkanObjectManager.h">
+      <Filter>Renderer\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -458,6 +461,9 @@
     </ClCompile>
     <ClCompile Include="Core\Pass\PostProcessPass.cpp">
       <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\VulkanObjectManager.cpp">
+      <Filter>Renderer\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

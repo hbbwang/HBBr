@@ -12,8 +12,12 @@
 class HTime
 {
 public:
-	/* 起始时间点 */
+	/* 开始计时，起始时间点 */
 	void Start();
+
+	inline bool IsStart() {
+		return _bStart;
+	}
 
 	/* 结束时间点,返回经过的时长(纳秒)*/
 	long long End_ns();
@@ -35,5 +39,7 @@ public:
 private:
 
 	std::chrono::time_point<std::chrono::steady_clock> _start;
+
+	bool _bStart = false;
 
 };

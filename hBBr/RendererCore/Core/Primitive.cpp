@@ -3,7 +3,7 @@
 
 std::vector<std::vector<MaterialPrimitive*>> PrimitiveProxy::_allGraphicsPrimitives;
 
-std::map<MaterialPrimitive*, std::map<class VulkanRenderer*, std::vector<ModelPrimitive*>>>  PrimitiveProxy::_allModelPrimitives;
+std::map<MaterialPrimitive*, std::map<class VulkanRenderer*, ModelPrimitiveGroup>>  PrimitiveProxy::_allModelPrimitives;
 
 
 void PrimitiveProxy::AddMaterialPrimitive(MaterialPrimitive* prim)
@@ -18,7 +18,7 @@ void PrimitiveProxy::AddMaterialPrimitive(MaterialPrimitive* prim)
 		if (graphicsPrimitive.capacity() < 200)
 			graphicsPrimitive.reserve(graphicsPrimitive.capacity() + 20);
 		else
-			graphicsPrimitive.reserve(graphicsPrimitive.capacity() * 1.4);
+			graphicsPrimitive.reserve(graphicsPrimitive.capacity() * 2);
 	}
 	graphicsPrimitive.push_back(prim);
 }
@@ -64,28 +64,34 @@ void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* p
 {
 	prim->vertexData = prim->vertexInput.GetData(Shader::_vsShader[mat->graphicsIndex.GetVSShaderFullName()]->header.vertexInput);
 	prim->vertexIndices = prim->vertexInput.vertexIndices;
-	prim->vbSize = prim->vertexData.size() * sizeof(float);
-	prim->ibSize = prim->vertexIndices.size() * sizeof(uint32_t);
-
-	//顶点数据生成完毕，就把源数据卸载掉
-	prim->vertexInput = VertexFactory::VertexInput(); 
 
 	auto it = _allModelPrimitives[mat].find(renderer);
 	if (it == _allModelPrimitives[mat].end())
 	{
-		_allModelPrimitives[mat].emplace(renderer, std::vector<ModelPrimitive*>());
+		ModelPrimitiveGroup newGroup = {};
+		newGroup.prims = std::vector<ModelPrimitive*>();
+		_allModelPrimitives[mat].emplace(renderer, newGroup);
 	}
 
 	auto& modelPrim = _allModelPrimitives[mat][renderer];
-	if (modelPrim.capacity() <= modelPrim.size())
+	if (modelPrim.prims.capacity() <= modelPrim.prims.size())
 	{
-		if (modelPrim.capacity() < 200)
-			modelPrim.reserve(modelPrim.capacity() + 20);
+		if (modelPrim.prims.capacity() < 200)
+			modelPrim.prims.reserve(modelPrim.prims.capacity() + 20);
 		else
-			modelPrim.reserve(modelPrim.capacity() * 1.4);
+			modelPrim.prims.reserve(modelPrim.prims.capacity() * 2);
 	}
 
-	_allModelPrimitives[mat][renderer].push_back(prim);
+	prim->bNeedUpdate = true;
+	prim->vbSize = prim->vertexData.size()	* sizeof(float);
+	prim->ibSize = prim->vertexIndices.size()	* sizeof(uint32_t);
+	modelPrim.prims.push_back(prim);
+	modelPrim.vbWholeSize += prim->vbSize;
+	modelPrim.ibWholeSize += prim->ibSize;
+	//modelPrim.vbUpdatePos = std::min(modelPrim.vbUpdatePos, prim->vbPos);
+	//modelPrim.ibUpdatePos = std::min(modelPrim.ibUpdatePos, prim->ibPos);
+	//顶点数据生成完毕，就把源数据卸载掉
+	prim->vertexInput = VertexFactory::VertexInput();
 }
 
 void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim, class VulkanRenderer* renderer)
@@ -98,10 +104,19 @@ void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive
 			auto rit = it->second.find(renderer);
 			if (rit != it->second.end())
 			{
-				auto pit = std::find(rit->second.begin(), rit->second.end(), prim);
-				if (pit != rit->second.end())
+				auto pit = std::find(rit->second.prims.begin(), rit->second.prims.end(), prim);
+				if (pit != rit->second.prims.end())
 				{
-					rit->second.erase(pit);
+					//是否是最后一个对象,如果不是，需要标记下一个对象需要更新Buffer
+					if (rit->second.prims.back() != *pit)
+					{
+						(*(pit + 1))->bNeedUpdate = true;
+					}
+
+					rit->second.vbWholeSize -= (*pit)->vbSize;
+					rit->second.ibWholeSize -= (*pit)->ibSize;
+
+					rit->second.prims.erase(pit);
 				}
 			}
 		}

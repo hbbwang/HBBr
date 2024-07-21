@@ -2,6 +2,7 @@
 #include "VulkanRenderer.h"
 #include "SceneTexture.h"
 #include "FontTextureFactory.h"
+#include "VulkanObjectManager.h"
 #include <stdio.h>
 
 GUIPass::~GUIPass()
@@ -50,6 +51,8 @@ void GUIPass::ShowPerformance()
 		, 0, 0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1)), 15.0f);
 	GUIDrawText(HString("FPS " + HString::FromUInt((uint32_t)(1.0f / (float)(VulkanApp::GetFrameRate() / 1000.0)))).c_wstr()
 		, 0, 15.0, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1)), 15.0f);
+	GUIDrawText(HString("GC " + HString::FromFloat(VulkanObjectManager::Get()->GetGCTime(), 2)).c_wstr()
+		, 0, 30, 200, 200, GUIDrawState(GUIAnchor_TopLeft, false, glm::vec4(1)), 15.0f);
 }
 
 void GUIPass::PassUpdate()

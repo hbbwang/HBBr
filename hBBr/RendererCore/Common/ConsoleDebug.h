@@ -74,6 +74,13 @@ namespace ConsoleDebug
         SDL_asprintf(&formattedString, in.c_str(), args...);
         print_endl(formattedString, "255,0,0");
     }
+    template<typename ...Arg>
+    extern void printf_endl_succeed(HString in, Arg...args)
+    {
+        char* formattedString = nullptr;
+        SDL_asprintf(&formattedString, in.c_str(), args...);
+        print_endl(formattedString, "0,255,0");
+    }
 
     extern std::thread socketAcceptThread;
 

@@ -8,6 +8,7 @@
 void HTime::Start()
 {
 	_start = std::chrono::high_resolution_clock::now();
+	_bStart = true;
 }
 
 long long HTime::End_ns()

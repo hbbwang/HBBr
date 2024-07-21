@@ -9,6 +9,7 @@
 #include "./Core/RendererConfig.h"
 #include "./Asset/Material.h"
 #include "FontTextureFactory.h"
+#include "VulkanObjectManager.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #include "Imgui/backends/imgui_impl_sdl3.h"
@@ -222,6 +223,7 @@ void VulkanApp::DeInitVulkanManager()
 	ContentManager::Get()->Release();
 	Texture2D::GlobalRelease();
 	FontTextureFactory::ReleaseFontTexture();
+	VulkanObjectManager::Get()->Release();
 	VulkanManager::ReleaseManager();
 	//保存配置文件
 	SaveRendererConfig();
@@ -413,6 +415,7 @@ void VulkanApp::UpdateRender()
 	for (auto w : _forms)
 	{
 		Texture2D::GlobalUpdate();
+		VulkanObjectManager::Get()->Update();
 		if(w->renderer != nullptr && !w->bMinimized && !w->bStopRender)
 			w->renderer->Render();
 	}

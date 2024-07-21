@@ -37,9 +37,9 @@ struct MaterialTextureInfo
 //每个面的数据
 struct ModelPrimitive
 {
-	bool						bNeedUpdate = true;
+	uint8_t						bNeedUpdate = true;
 
-	bool						bActive = true;
+	uint8_t						bActive = true;
 
 	HString						modelPrimitiveName;
 
@@ -56,17 +56,13 @@ struct ModelPrimitive
 	//用于排序
 	int							priority = 0;
 
+	uint64_t					vbSize = 0;
+
+	uint64_t					ibSize = 0;
+
 	std::vector<float>			vertexData;
 
 	std::vector<uint32_t>		vertexIndices;
-
-	uint64_t					vbPos = UINT64_MAX;
-
-	uint64_t					vbSize = 0;
-
-	uint64_t					ibPos = UINT64_MAX;
-
-	uint64_t					ibSize = 0;
 
 	std::vector<class VulkanRenderer*> rendererFrom;
 
@@ -74,9 +70,9 @@ struct ModelPrimitive
 
 	void SetActive(bool newActive)
 	{
-		if (newActive != bActive)
-			bNeedUpdate = true;
-		bActive = newActive;
+		if ((uint8_t)newActive != bActive)
+			bNeedUpdate = 1;
+		bActive = (uint8_t)newActive;
 	}
 };
 
@@ -240,6 +236,13 @@ private:
 
 };
 
+struct ModelPrimitiveGroup
+{
+	std::vector<ModelPrimitive*> prims;
+	VkDeviceSize vbWholeSize = 0;
+	VkDeviceSize ibWholeSize = 0;
+};
+
 class PrimitiveProxy
 {
 public:
@@ -267,7 +270,7 @@ public:
 			return nullptr;
 	}
 
-	inline static std::vector<ModelPrimitive*>* GetModelPrimitives(MaterialPrimitive* index, class VulkanRenderer* renderer) {
+	inline static ModelPrimitiveGroup* GetModelPrimitives(MaterialPrimitive* index, class VulkanRenderer* renderer) {
 		auto it = _allModelPrimitives.find(index);
 		if (it != _allModelPrimitives.end())
 			return &it->second[renderer];
@@ -279,6 +282,6 @@ private:
 
 	static std::vector<std::vector<MaterialPrimitive*>> _allGraphicsPrimitives;
 
-	static std::map<MaterialPrimitive*, std::map<class VulkanRenderer*, std::vector<ModelPrimitive*>>> _allModelPrimitives;
+	static std::map<MaterialPrimitive*, std::map<class VulkanRenderer*, ModelPrimitiveGroup>> _allModelPrimitives;
 
 };

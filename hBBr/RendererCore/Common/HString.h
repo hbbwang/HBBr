@@ -181,7 +181,7 @@ public:
 
 	HString& operator+=(const HString& obj)
 	{
-		if (obj._str == nullptr || obj._str == nullptr)
+		if (obj._str == nullptr && obj._wstr == nullptr)
 			return *this;
 		char* temp = new char[length + 1];
 		strcpy_s(temp, length + 1, _str);//先把字符串复制到temp

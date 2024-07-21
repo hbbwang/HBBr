@@ -219,7 +219,7 @@ void Texture2D::UploadToGPU()
 		if (_upload_textures.capacity() < 200)
 			_upload_textures.reserve(_upload_textures.capacity() + 20);
 		else
-			_upload_textures.reserve(_upload_textures.capacity() * 1.2);
+			_upload_textures.reserve(_upload_textures.capacity() * 2);
 	}
 	_upload_textures.push_back(this);
 }
