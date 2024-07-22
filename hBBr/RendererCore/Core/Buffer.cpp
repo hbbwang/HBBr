@@ -28,21 +28,15 @@ bool Buffer::Resize(uint64_t newSize, bool bForceResize)
 	{
 		return false;
 	}
-	UnMapMemory();
-	_bufferCapacity = newSize;
-	//保存旧缓存,保证安全释放,我们必须保证Buffer不再被使用的时候再释放
-	//从GetBuffer里进行帧计算
- 
-	//BufferWaitToRelease oldBuffer;
-	//oldBuffer.old_buffer = std::move(_buffer);
-	//oldBuffer.old_bufferMemory = std::move(_bufferMemory);
-	//if (_oldBuffer.capacity() == 0)
-	//{
-	//	_oldBuffer.reserve(4);
-	//}
-	//_oldBuffer.push_back(oldBuffer);
+
+	auto manager = VulkanManager::GetManager();
+
+	void* oldBufferData = _bufferMapping;
+	auto oldBufferMemory = _bufferMemory;
+	const auto oldBufferSize = _bufferCapacity;
 
 	//创建新Buffer
+	_bufferCapacity = newSize;
 	_buffer = VulkanObjectManager::Get()->CreateVkBuffer(_bufferUsage, _bufferCapacity);
 	_bufferMemory = VulkanObjectManager::Get()->AllocateVkDeviceMemory(*_buffer);
 
@@ -50,7 +44,15 @@ bool Buffer::Resize(uint64_t newSize, bool bForceResize)
 	ConsoleDebug::printf_endl_succeed(GetInternationalizationText("Renderer", "ResizeBuffer"), _bufferCapacity , (double)_bufferCapacity/ (double)1024.0/ (double)1024.0);
 #endif
 
-	MapMemory();
+	//把旧的缓冲区复制到新的里
+	void* newBufferData = nullptr;
+	auto result = vkMapMemory(manager->GetDevice(), *_bufferMemory, 0, VK_WHOLE_SIZE, 0, &newBufferData);
+	memcpy(newBufferData, oldBufferData, oldBufferSize);
+	_bufferMapping = newBufferData;
+
+	//关闭旧缓存映射,等待GC释放
+	vkUnmapMemory(manager->GetDevice(), *oldBufferMemory);
+
 	return true;
 }
 
