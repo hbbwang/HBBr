@@ -3,7 +3,7 @@
 
 std::vector<std::vector<MaterialPrimitive*>> PrimitiveProxy::_allGraphicsPrimitives;
 
-std::map<MaterialPrimitive*, std::map<class VulkanRenderer*, ModelPrimitiveGroup>>  PrimitiveProxy::_allModelPrimitives;
+std::map<MaterialPrimitive*, std::map<MaterialPrimitiveGroup, ModelPrimitiveGroup>>  PrimitiveProxy::_allModelPrimitives;
 
 
 void PrimitiveProxy::AddMaterialPrimitive(MaterialPrimitive* prim)
@@ -20,7 +20,22 @@ void PrimitiveProxy::AddMaterialPrimitive(MaterialPrimitive* prim)
 		else
 			graphicsPrimitive.reserve(graphicsPrimitive.capacity() * 2);
 	}
+
 	graphicsPrimitive.push_back(prim);
+}
+
+void PrimitiveProxy::RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
+{
+	if ((uint32_t)PrimitiveProxy::_allGraphicsPrimitives.size() != (uint32_t)Pass::MaxNum)
+	{
+		_allGraphicsPrimitives.resize((uint32_t)Pass::MaxNum);
+	}
+	int index = (uint32_t)pass;
+	auto it = std::find(_allGraphicsPrimitives[index].begin(), _allGraphicsPrimitives[index].end(), prim);
+	if (it != _allGraphicsPrimitives[index].end())
+	{
+		_allGraphicsPrimitives[index].erase(it);
+	}
 }
 
 void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, HString vsFullName, HString psFullName)
@@ -46,48 +61,46 @@ void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, std::
 		ps);
 }
 
-void PrimitiveProxy::RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
-{
-	if ((uint32_t)PrimitiveProxy::_allGraphicsPrimitives.size() != (uint32_t)Pass::MaxNum)
-	{
-		_allGraphicsPrimitives.resize((uint32_t)Pass::MaxNum);
-	}
-	int index = (uint32_t)pass;
-	auto it = std::find(_allGraphicsPrimitives[index].begin(), _allGraphicsPrimitives[index].end(), prim);
-	if (it != _allGraphicsPrimitives[index].end())
-	{
-		_allGraphicsPrimitives[index].erase(it);
-	}
-}
-
 void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim, class VulkanRenderer* renderer)
 {
 	prim->vertexData = prim->vertexInput.GetData(Shader::_vsShader[mat->graphicsIndex.GetVSShaderFullName()]->header.vertexInput);
 	prim->vertexIndices = prim->vertexInput.vertexIndices;
+	MaterialPrimitiveGroup mpg = { renderer };
+	ModelPrimitiveGroup * modelPrim = nullptr;
 
-	auto it = _allModelPrimitives[mat].find(renderer);
-	if (it == _allModelPrimitives[mat].end())
+	auto& mit = _allModelPrimitives[mat];
+	auto it = mit.find(mpg);
+	if (it == mit.end())
 	{
 		ModelPrimitiveGroup newGroup = {};
 		newGroup.prims = std::vector<ModelPrimitive*>();
-		_allModelPrimitives[mat].emplace(renderer, newGroup);
+
+		//为material primitive 创建buffer
+		mpg._descriptorSet_mat_vs.reset(new DescriptorSet(renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVS(), 32, { VK_SHADER_STAGE_VERTEX_BIT }));
+		mpg._descriptorSet_mat_ps.reset(new DescriptorSet(renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(), 32, { VK_SHADER_STAGE_FRAGMENT_BIT }));
+		mpg.primFrom = mat;
+		mit.emplace(mpg, newGroup);
+		modelPrim = &mit[mpg];
+	}
+	else
+	{
+		modelPrim = &it->second;
 	}
 
-	auto& modelPrim = _allModelPrimitives[mat][renderer];
-	if (modelPrim.prims.capacity() <= modelPrim.prims.size())
+	if (modelPrim->prims.capacity() <= modelPrim->prims.size())
 	{
-		if (modelPrim.prims.capacity() < 200)
-			modelPrim.prims.reserve(modelPrim.prims.capacity() + 20);
+		if (modelPrim->prims.capacity() < 200)
+			modelPrim->prims.reserve(modelPrim->prims.capacity() + 20);
 		else
-			modelPrim.prims.reserve(modelPrim.prims.capacity() * 2);
+			modelPrim->prims.reserve(modelPrim->prims.capacity() * 2);
 	}
 
 	prim->bNeedUpdate = true;
 	prim->vbSize = prim->vertexData.size()	* sizeof(float);
 	prim->ibSize = prim->vertexIndices.size()	* sizeof(uint32_t);
-	modelPrim.prims.push_back(prim);
-	modelPrim.vbWholeSize += prim->vbSize;
-	modelPrim.ibWholeSize += prim->ibSize;
+	modelPrim->prims.push_back(prim);
+	modelPrim->vbWholeSize += prim->vbSize;
+	modelPrim->ibWholeSize += prim->ibSize;
 	//modelPrim.vbUpdatePos = std::min(modelPrim.vbUpdatePos, prim->vbPos);
 	//modelPrim.ibUpdatePos = std::min(modelPrim.ibUpdatePos, prim->ibPos);
 	//顶点数据生成完毕，就把源数据卸载掉
@@ -101,7 +114,8 @@ void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive
 		auto it = _allModelPrimitives.find(mat);
 		if (it != _allModelPrimitives.end())
 		{
-			auto rit = it->second.find(renderer);
+			MaterialPrimitiveGroup mpg = { renderer };
+			auto rit = it->second.find(mpg);
 			if (rit != it->second.end())
 			{
 				auto pit = std::find(rit->second.prims.begin(), rit->second.prims.end(), prim);
@@ -128,6 +142,12 @@ void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive
 			}
 		}
 	}
+}
+
+void PrimitiveProxy::ClearAll()
+{
+	_allGraphicsPrimitives.clear();
+	_allModelPrimitives.clear();
 }
 
 void MaterialPrimitive::SetTexture(int index, Texture2D* newTexture)
@@ -471,5 +491,21 @@ void MaterialPrimitive::SetTextureSampler(HString textureName, VkSampler sampler
 	if (it != _textureInfos.end())
 	{
 		SetTextureSampler(it->index, sampler);
+	}
+}
+
+void MaterialPrimitiveGroup::ResizeOrUpdateDecriptorSet()const
+{
+	if (primFrom->uniformBufferSize_vs > 0)
+	{
+		_descriptorSet_mat_vs->ResizeDescriptorBuffer(primFrom->uniformBufferSize_vs);
+		_descriptorSet_mat_vs->BufferMappingWithNeed(primFrom->uniformBuffer_vs.data(), 0, primFrom->uniformBufferSize_vs);
+		_descriptorSet_mat_vs->UpdateDescriptorSet(primFrom->uniformBufferSize_vs, 0);
+	}
+	if (primFrom->uniformBufferSize_ps > 0)
+	{
+		_descriptorSet_mat_ps->ResizeDescriptorBuffer(primFrom->uniformBufferSize_ps);
+		_descriptorSet_mat_ps->BufferMappingWithNeed(primFrom->uniformBuffer_ps.data(), 0, primFrom->uniformBufferSize_ps);
+		_descriptorSet_mat_ps->UpdateDescriptorSet(primFrom->uniformBufferSize_ps, 0);
 	}
 }

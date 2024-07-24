@@ -223,6 +223,7 @@ void VulkanApp::DeInitVulkanManager()
 	ContentManager::Get()->Release();
 	Texture2D::GlobalRelease();
 	FontTextureFactory::ReleaseFontTexture();
+	PrimitiveProxy::ClearAll();
 	VulkanObjectManager::Get()->Release();
 	VulkanManager::ReleaseManager();
 	//保存配置文件

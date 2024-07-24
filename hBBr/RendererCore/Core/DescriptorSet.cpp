@@ -76,6 +76,14 @@ void DescriptorSet::BufferMapping(void* mappingData, uint64_t offset, uint64_t b
 	//VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, bufferIndex, offset, alignmentSize);
 }
 
+void DescriptorSet::BufferMappingWithNeed(void* mappingData, uint64_t offset, uint64_t bufferSize, int bufferIndex)
+{
+	if (_needUpdates[_renderer->GetCurrentFrameIndex()] == 1)
+	{
+		BufferMapping(mappingData, offset, bufferSize, bufferIndex);
+	}
+}
+
 bool DescriptorSet::ResizeDescriptorBuffer(VkDeviceSize newSize, int bufferIndex)
 {
 	if (_buffers[bufferIndex] == nullptr)

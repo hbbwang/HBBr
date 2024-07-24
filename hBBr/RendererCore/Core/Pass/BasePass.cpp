@@ -37,8 +37,6 @@ void BasePass::PassInit()
 	//Texture2D DescriptorSet
 	_opaque_descriptorSet_pass.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVSPS(), sizeof(PassUniformBuffer)));
 	_opaque_descriptorSet_obj.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVSPS(), 32));
-	_opaque_descriptorSet_mat_vs.reset(new DescriptorSet(_renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVS(), 32, { VK_SHADER_STAGE_VERTEX_BIT }));
-	_opaque_descriptorSet_mat_ps.reset(new DescriptorSet(_renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(), 32, { VK_SHADER_STAGE_FRAGMENT_BIT }));
 	_opaque_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 32));
 	_opaque_indexBuffer.reset(new Buffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT, 32));
 
@@ -105,8 +103,6 @@ void BasePass::SetupPassAndDraw(Pass p)
 {
 	auto& pass = _opaque_descriptorSet_pass;
 	auto& obj = _opaque_descriptorSet_obj;
-	auto& mat_vs = _opaque_descriptorSet_mat_vs;
-	auto& mat_ps = _opaque_descriptorSet_mat_ps;
 	auto &vb = _opaque_vertexBuffer;
 	auto &ib = _opaque_indexBuffer;
 	const auto manager = VulkanManager::GetManager();
@@ -212,55 +208,8 @@ void BasePass::SetupPassAndDraw(Pass p)
 
 			//Material uniform buffer
 			{
-				if (m->uniformBufferSize_vs != 0)
-				{
-					if (matBufferOffset_vs.capacity() <= matBufferOffset_vs.size())
-					{
-						if (matBufferOffset_vs.capacity() < 200)
-							matBufferOffset_vs.reserve(matBufferOffset_vs.capacity() + 10);
-						else
-							matBufferOffset_vs.reserve(matBufferOffset_vs.capacity() * 2);
-						matBufferSize_vs.reserve(matBufferOffset_vs.capacity());
-					}
-
-					auto currentBufferWholeSize = matOffset_vs + m->uniformBufferSize_vs;
-
-					//尝试重置Buffer大小
-					{
-						VkDeviceSize targetBufferSize_matvs = (currentBufferWholeSize + (VkDeviceSize)UniformBufferSizeRange - 1) & ~((VkDeviceSize)UniformBufferSizeRange - 1);
-						mat_vs->ResizeDescriptorTargetBuffer(currentBufferWholeSize, targetBufferSize_matvs);
-					}
-
-					mat_vs->BufferMapping(m->uniformBuffer_vs.data(), 0, m->uniformBufferSize_vs);
-					matBufferOffset_vs.push_back((uint32_t)matOffset_vs);
-					matBufferSize_vs.push_back((uint32_t)m->uniformBufferSize_vs);
-					matOffset_vs = currentBufferWholeSize;
-				}
-				if (m->uniformBufferSize_ps != 0)
-				{
-					if (matBufferOffset_ps.capacity() <= matBufferOffset_ps.size())
-					{
-						if (matBufferOffset_ps.capacity() < 200)
-							matBufferOffset_ps.reserve(matBufferOffset_ps.capacity() + 10);
-						else
-							matBufferOffset_ps.reserve(matBufferOffset_ps.capacity() * 2);
-
-						matBufferSize_ps.reserve(matBufferOffset_ps.capacity());
-					}
-
-					auto currentBufferWholeSize = matOffset_ps + m->uniformBufferSize_ps;
-
-					//尝试重置Buffer大小
-					{
-						VkDeviceSize targetBufferSize_matps = (currentBufferWholeSize + (VkDeviceSize)UniformBufferSizeRange - 1) & ~((VkDeviceSize)UniformBufferSizeRange - 1);
-						mat_ps->ResizeDescriptorTargetBuffer(currentBufferWholeSize, targetBufferSize_matps);
-					}
-
-					mat_ps->BufferMapping(m->uniformBuffer_ps.data(), 0, m->uniformBufferSize_ps);
-					matBufferOffset_ps.push_back((uint32_t)matOffset_ps);
-					matBufferSize_ps.push_back((uint32_t)m->uniformBufferSize_ps);
-					matOffset_ps = currentBufferWholeSize;
-				}
+				const auto matPrimGroup = PrimitiveProxy::GetMaterialPrimitiveGroup(m, _renderer);
+				matPrimGroup->ResizeOrUpdateDecriptorSet();
 			}
 
 			//Textures
@@ -350,9 +299,6 @@ void BasePass::SetupPassAndDraw(Pass p)
 		}
 		//更新obj的描述符集大小，每个obj对应一个uniform大小，所以只更新一次就行了。
 		obj->UpdateDescriptorSet(sizeof(ObjectUniformBuffer), 0);
-		//更新material描述符集大小，每个pipeline对应其中一段，所以需要更新多次。
-		mat_vs->UpdateDescriptorSet(matBufferSize_vs, matBufferOffset_vs);
-		mat_ps->UpdateDescriptorSet(matBufferSize_ps, matBufferOffset_ps);
 	}
 
 	//Update Render
@@ -365,6 +311,7 @@ void BasePass::SetupPassAndDraw(Pass p)
 	auto matPrims = PrimitiveProxy::GetMaterialPrimitives((uint32_t)p);
 	for (auto m : *matPrims)
 	{
+		const auto matPrimGroup = PrimitiveProxy::GetMaterialPrimitiveGroup(m, _renderer);
 		//Objects
 		auto prims = PrimitiveProxy::GetModelPrimitives(m, _renderer);
 		const auto numPrims = prims->prims.size();
@@ -379,31 +326,31 @@ void BasePass::SetupPassAndDraw(Pass p)
 			//Material uniform buffers & Textures
 			if (curPipeline->bHasMaterialParameterVS && curPipeline->bHasMaterialParameterPS && curPipeline->bHasMaterialTexture)
 			{
-				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat_vs->GetDescriptorSet(), 1, &matBufferOffset_vs[matIndex]);
-				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &mat_ps->GetDescriptorSet(), 1, &matBufferOffset_ps[matIndex]);
+				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &matPrimGroup->_descriptorSet_mat_vs->GetDescriptorSet(), 1, dynamicOffset);
+				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &matPrimGroup->_descriptorSet_mat_ps->GetDescriptorSet(), 1, dynamicOffset);
 				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 4, 1, &tds, 0, nullptr);
 			}
 			else if (curPipeline->bHasMaterialParameterVS && curPipeline->bHasMaterialParameterPS && !curPipeline->bHasMaterialTexture)
 			{
-				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat_vs->GetDescriptorSet(), 1, &matBufferOffset_vs[matIndex]);
-				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &mat_ps->GetDescriptorSet(), 1, &matBufferOffset_ps[matIndex]);
+				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &matPrimGroup->_descriptorSet_mat_vs->GetDescriptorSet(), 1, dynamicOffset);
+				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &matPrimGroup->_descriptorSet_mat_ps->GetDescriptorSet(), 1, dynamicOffset);
 			}
 			else if (curPipeline->bHasMaterialParameterVS && !curPipeline->bHasMaterialParameterPS && !curPipeline->bHasMaterialTexture)
 			{
-				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat_vs->GetDescriptorSet(), 1, &matBufferOffset_vs[matIndex]);
+				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &matPrimGroup->_descriptorSet_mat_vs->GetDescriptorSet(), 1, dynamicOffset);
 			}
 			else if (!curPipeline->bHasMaterialParameterVS && curPipeline->bHasMaterialParameterPS && !curPipeline->bHasMaterialTexture)
 			{
-				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat_ps->GetDescriptorSet(), 1, &matBufferOffset_ps[matIndex]);
+				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &matPrimGroup->_descriptorSet_mat_ps->GetDescriptorSet(), 1, dynamicOffset);
 			}
 			else if (!curPipeline->bHasMaterialParameterVS && curPipeline->bHasMaterialParameterPS && curPipeline->bHasMaterialTexture)
 			{
-				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat_ps->GetDescriptorSet(), 1, &matBufferOffset_ps[matIndex]);
+				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &matPrimGroup->_descriptorSet_mat_ps->GetDescriptorSet(), 1, dynamicOffset);
 				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &tds, 0, nullptr);
 			}
 			else if (curPipeline->bHasMaterialParameterVS && !curPipeline->bHasMaterialParameterPS && curPipeline->bHasMaterialTexture)
 			{
-				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &mat_vs->GetDescriptorSet(), 1, &matBufferOffset_ps[matIndex]);
+				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 2, 1, &matPrimGroup->_descriptorSet_mat_vs->GetDescriptorSet(), 1, dynamicOffset);
 				vkCmdBindDescriptorSets(cmdBuf, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, curPipeline->layout, 3, 1, &tds, 0, nullptr);
 			}
 			for (auto& prim : prims->prims)

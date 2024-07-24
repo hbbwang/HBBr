@@ -21,8 +21,6 @@ private:
 
 	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_pass;
 	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_obj;
-	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_mat_vs;
-	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_mat_ps;
 	
 	std::map<class MaterialPrimitive*,std::vector<TextureDescriptorSet>> _descriptorSet_tex;
 	std::shared_ptr<class Buffer>_opaque_vertexBuffer;

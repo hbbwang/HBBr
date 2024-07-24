@@ -14,6 +14,8 @@ public:
 	//初始化的时候会根据bindingCount创建相同数量的VkBuffer(数组),bufferIndex是为了识别该数组,如果是1，则保持0即可
 	void BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize, int bufferIndex = 0);
 
+	void BufferMappingWithNeed(void* mappingData, uint64_t offset, uint64_t bufferSize, int bufferIndex = 0);
+
 	bool ResizeDescriptorBuffer(VkDeviceSize newSize , int bufferIndex = 0);
 
 	//checkSize是检查用的,当检查通过之后,将使用targetSize进行Resize

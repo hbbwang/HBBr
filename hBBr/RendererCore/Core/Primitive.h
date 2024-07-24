@@ -7,6 +7,7 @@
 #include "Texture2D.h"
 #include "Pipeline.h"
 #include "Shader.h"
+#include "DescriptorSet.h"
 
 //从Shader源码里获取到的Parameter信息
 struct MaterialParameterInfo
@@ -79,6 +80,7 @@ struct ModelPrimitive
 class MaterialPrimitive
 {
 	friend class Material;
+	friend class PrimitiveProxy;
 public:
 	MaterialPrimitive()
 	{
@@ -236,6 +238,7 @@ private:
 	//采样器选择
 	std::vector<VkSampler> _samplers;
 
+
 };
 
 struct ModelPrimitiveGroup
@@ -243,6 +246,31 @@ struct ModelPrimitiveGroup
 	std::vector<ModelPrimitive*> prims;
 	VkDeviceSize	vbWholeSize = 0;
 	VkDeviceSize	ibWholeSize = 0;
+};
+
+struct MaterialPrimitiveGroup
+{
+	class VulkanRenderer* renderer = nullptr;
+	//一个材质用一个material vs buffer
+	std::shared_ptr<class DescriptorSet> _descriptorSet_mat_vs;
+	//一个材质用一个material ps buffer
+	std::shared_ptr<class DescriptorSet> _descriptorSet_mat_ps;
+
+	MaterialPrimitive* primFrom = nullptr;
+
+	//让MaterialPrimitiveGroup支持std::map
+	bool operator<(const MaterialPrimitiveGroup& other) const
+	{
+		return renderer < other.renderer;
+	}
+
+	bool operator==(const MaterialPrimitiveGroup& other) const
+	{
+		return renderer == other.renderer;
+	}
+
+	void ResizeOrUpdateDecriptorSet()const;
+
 };
 
 class PrimitiveProxy
@@ -272,18 +300,40 @@ public:
 			return nullptr;
 	}
 
-	inline static ModelPrimitiveGroup* GetModelPrimitives(MaterialPrimitive* index, class VulkanRenderer* renderer) {
+	inline static const MaterialPrimitiveGroup* GetMaterialPrimitiveGroup(MaterialPrimitive* index, class VulkanRenderer* renderer) {
 		auto it = _allModelPrimitives.find(index);
 		if (it != _allModelPrimitives.end())
-			return &it->second[renderer];
+		{
+			MaterialPrimitiveGroup mpg = { renderer };
+			auto mgpit = it->second.find(mpg);
+			if (mgpit != it->second.end())
+			{
+				return &mgpit->first;
+			}
+			return nullptr;
+		}
 		else
 			return nullptr;
 	}
+
+	inline static ModelPrimitiveGroup* GetModelPrimitives(MaterialPrimitive* index, class VulkanRenderer* renderer) {
+		auto it = _allModelPrimitives.find(index);
+		if (it != _allModelPrimitives.end())
+		{
+			MaterialPrimitiveGroup mpg = {};
+			mpg.renderer = renderer;
+			return &it->second[mpg];
+		}
+		else
+			return nullptr;
+	}
+
+	static void ClearAll();
 
 private:
 
 	static std::vector<std::vector<MaterialPrimitive*>> _allGraphicsPrimitives;
 
-	static std::map<MaterialPrimitive*, std::map<class VulkanRenderer*, ModelPrimitiveGroup>> _allModelPrimitives;
+	static std::map<MaterialPrimitive*, std::map<MaterialPrimitiveGroup, ModelPrimitiveGroup>> _allModelPrimitives;
 
 };
