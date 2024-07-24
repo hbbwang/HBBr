@@ -336,6 +336,14 @@ public:
 
 	VkDeviceSize GetMinUboAlignmentSize(VkDeviceSize realSize);
 
+	inline uint32_t GetMaxUniformBufferSize()const {
+		return _gpuProperties.limits.maxUniformBufferRange;
+	}
+
+	inline VkPhysicalDeviceProperties GetPhysicalDeviceProperties()const {
+		return _gpuProperties;
+	}
+
 	/* CMD */
 	void CmdSetViewport(VkCommandBuffer cmdbuf, std::vector<VkExtent2D> viewports);
 

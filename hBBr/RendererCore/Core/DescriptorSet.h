@@ -16,6 +16,9 @@ public:
 
 	bool ResizeDescriptorBuffer(VkDeviceSize newSize , int bufferIndex = 0);
 
+	//checkSize是检查用的,当检查通过之后,将使用targetSize进行Resize
+	bool ResizeDescriptorTargetBuffer(VkDeviceSize checkSize, VkDeviceSize targetSize, int bufferIndex = 0);
+
 	void UpdateDescriptorSet(std::vector<uint32_t> bufferRanges, std::vector<uint32_t> offsets, uint32_t dstBinding = 0);
 
 	void UpdateDescriptorSet(uint32_t bufferSize , uint32_t offset = 0, uint32_t dstBinding = 0);
@@ -56,4 +59,6 @@ private:
 	std::vector<std::unique_ptr<Buffer>> _buffers;
 
 	class VulkanRenderer* _renderer;
+
+	bool _hasUniformBuffer;
 };

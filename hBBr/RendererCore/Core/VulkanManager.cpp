@@ -2635,9 +2635,7 @@ void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, st
 VkDeviceSize VulkanManager::GetMinUboAlignmentSize(VkDeviceSize realSize)
 {
 	VkDeviceSize outSize = realSize;
-	VkPhysicalDeviceProperties properties;
-	vkGetPhysicalDeviceProperties(_gpuDevice, &properties);
-	VkDeviceSize minUboAlignment = properties.limits.minUniformBufferOffsetAlignment;
+	VkDeviceSize minUboAlignment = _gpuProperties.limits.minUniformBufferOffsetAlignment;
 	if (minUboAlignment > 0) {
 		outSize = (outSize + (VkDeviceSize)minUboAlignment - 1) & ~((VkDeviceSize)minUboAlignment - 1);
 	}

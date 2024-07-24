@@ -201,6 +201,7 @@ public:
 	//顶点输入
 	VertexInputLayout	inputLayout;
 
+	//管线索引
 	PipelineIndex	graphicsIndex;
 
 	//用于排序
@@ -209,10 +210,11 @@ public:
 	//其实就是材质名字
 	HString graphicsName;
 
+	//使用的是哪个pass
 	Pass passUsing;
 
-	//参数
-	//Shader参数
+	//-----------------------参数 Shader参数
+
 	//PS
 	std::vector<glm::vec4> uniformBuffer_ps;
 	uint64_t uniformBufferSize_ps = 0;
@@ -223,7 +225,7 @@ public:
 	uint64_t uniformBufferSize_vs = 0;
 	std::vector<MaterialParameterInfo> _paramterInfos_vs;
 
-	//Texs
+	//Textures
 	std::vector<MaterialTextureInfo> _textureInfos;
 
 private:
@@ -239,8 +241,8 @@ private:
 struct ModelPrimitiveGroup
 {
 	std::vector<ModelPrimitive*> prims;
-	VkDeviceSize vbWholeSize = 0;
-	VkDeviceSize ibWholeSize = 0;
+	VkDeviceSize	vbWholeSize = 0;
+	VkDeviceSize	ibWholeSize = 0;
 };
 
 class PrimitiveProxy

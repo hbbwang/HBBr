@@ -135,31 +135,12 @@ void BasePass::SetupPassAndDraw(Pass p)
 			PassUniformBuffer passUniformBuffer = _manager->GetPassUniformBufferCache();
 			pass->BufferMapping(&passUniformBuffer, 0, sizeof(PassUniformBuffer));
 		}
-		uint32_t objectCount = 0;
+		uint32_t modelPrimitiveCount = 0;
 		uint64_t vbPos = 0;
 		uint64_t ibPos = 0;
-		uint64_t vbWholeSize = 0;
-		uint64_t ibWholeSize = 0;
 		bool bNeedUpdateObjUniform = false;
 		bool bNeedUpdateVbIb = false;
 		bool bBeginUpdate = false;
-		for (auto m : *matPrim)
-		{
-			auto prims = PrimitiveProxy::GetModelPrimitives(m, _renderer);
-			vbWholeSize += prims->vbWholeSize;
-			ibWholeSize += prims->ibWholeSize;
-			objectCount += prims->prims.size();
-		}
-		//尝试重置VertexBuffer和IndedxBuffer重置大小
-		{
-			//尝试 重置 ObjectUniformBuffer大小
-			size_t objUbNeedSize = (sizeof(ObjectUniformBuffer) * (objectCount)+ (VkDeviceSize)BufferSizeRange - 1) & ~((VkDeviceSize)BufferSizeRange - 1);
-			size_t vbNeedSize = (vbWholeSize + (VkDeviceSize)BufferSizeRange - 1) & ~((VkDeviceSize)BufferSizeRange - 1);
-			size_t ibNeedSize = (ibWholeSize + (VkDeviceSize)BufferSizeRange - 1) & ~((VkDeviceSize)BufferSizeRange - 1);
-			bNeedUpdateObjUniform = obj->ResizeDescriptorBuffer(objUbNeedSize);
-			bNeedUpdateVbIb |= vb->Resize(vbNeedSize);
-			bNeedUpdateVbIb |= ib->Resize(ibNeedSize);
-		}
 		//更新缓冲区
 		for (auto m : *matPrim)
 		{
@@ -241,10 +222,19 @@ void BasePass::SetupPassAndDraw(Pass p)
 							matBufferOffset_vs.reserve(matBufferOffset_vs.capacity() * 2);
 						matBufferSize_vs.reserve(matBufferOffset_vs.capacity());
 					}
+
+					auto currentBufferWholeSize = matOffset_vs + m->uniformBufferSize_vs;
+
+					//尝试重置Buffer大小
+					{
+						VkDeviceSize targetBufferSize_matvs = (currentBufferWholeSize + (VkDeviceSize)UniformBufferSizeRange - 1) & ~((VkDeviceSize)UniformBufferSizeRange - 1);
+						mat_vs->ResizeDescriptorTargetBuffer(currentBufferWholeSize, targetBufferSize_matvs);
+					}
+
 					mat_vs->BufferMapping(m->uniformBuffer_vs.data(), 0, m->uniformBufferSize_vs);
 					matBufferOffset_vs.push_back((uint32_t)matOffset_vs);
 					matBufferSize_vs.push_back((uint32_t)m->uniformBufferSize_vs);
-					matOffset_vs += m->uniformBufferSize_vs;
+					matOffset_vs = currentBufferWholeSize;
 				}
 				if (m->uniformBufferSize_ps != 0)
 				{
@@ -257,10 +247,19 @@ void BasePass::SetupPassAndDraw(Pass p)
 
 						matBufferSize_ps.reserve(matBufferOffset_ps.capacity());
 					}
+
+					auto currentBufferWholeSize = matOffset_ps + m->uniformBufferSize_ps;
+
+					//尝试重置Buffer大小
+					{
+						VkDeviceSize targetBufferSize_matps = (currentBufferWholeSize + (VkDeviceSize)UniformBufferSizeRange - 1) & ~((VkDeviceSize)UniformBufferSizeRange - 1);
+						mat_ps->ResizeDescriptorTargetBuffer(currentBufferWholeSize, targetBufferSize_matps);
+					}
+
 					mat_ps->BufferMapping(m->uniformBuffer_ps.data(), 0, m->uniformBufferSize_ps);
 					matBufferOffset_ps.push_back((uint32_t)matOffset_ps);
 					matBufferSize_ps.push_back((uint32_t)m->uniformBufferSize_ps);
-					matOffset_ps += m->uniformBufferSize_ps;
+					matOffset_ps = currentBufferWholeSize;
 				}
 			}
 
@@ -298,41 +297,60 @@ void BasePass::SetupPassAndDraw(Pass p)
 			}
 
 			//Primtive/Vertex/Index buffer
-			auto prims = PrimitiveProxy::GetModelPrimitives(m, _renderer);
-			if (prims)
 			{
-				//更新Primitives
-				for (auto& prim : (prims->prims))
+				auto prims = PrimitiveProxy::GetModelPrimitives(m, _renderer);
+				if (prims)
 				{
-					if (prim->bNeedUpdate)
+					modelPrimitiveCount += prims->prims.size();//计算PrimitiveCount
+					//更新Primitives
+					for (auto& prim : (prims->prims))
 					{
-						prim->bNeedUpdate = false;
-						bBeginUpdate = true;
-					}
-					if (bBeginUpdate || prim->transform->NeedUpdateUb() || bNeedUpdateObjUniform)
-					{
-						ObjectUniformBuffer objectUniformBuffer = {};
-						objectUniformBuffer.WorldMatrix = prim->transform->GetWorldMatrix();
-						obj->BufferMapping(&objectUniformBuffer, (uint64_t)objectUboOffset, sizeof(ObjectUniformBuffer));
-					}
-					if (bBeginUpdate || bNeedUpdateVbIb)
-					{
-						vb->BufferMapping(prim->vertexData.data(),		vbPos, prim->vbSize);
-						ib->BufferMapping(prim->vertexIndices.data(),	ibPos, prim->ibSize);
-					}
+						if (prim->bNeedUpdate)
+						{
+							prim->bNeedUpdate = false;
+							bBeginUpdate = true;
+						}
 
-					//更新buffer起始位置
-					vbPos += prim->vbSize;
-					ibPos += prim->ibSize;
-					objectUboOffset += (uint32_t)sizeof(ObjectUniformBuffer);
+						VkDeviceSize currentBufferWholeSize_vb = vbPos + prim->vbSize;
+						VkDeviceSize currentBufferWholeSize_ib = ibPos + prim->ibSize;
+						uint32_t currentObjectUniformBufferWholeSize = objectUboOffset + (uint32_t)sizeof(ObjectUniformBuffer);
+						//检查buffer大小是否充足
+						{
+							//obj
+							VkDeviceSize targetBufferSize_objub = ((VkDeviceSize)currentObjectUniformBufferWholeSize + (VkDeviceSize)UniformBufferSizeRange - 1) & ~((VkDeviceSize)UniformBufferSizeRange - 1);
+							bNeedUpdateObjUniform = obj->ResizeDescriptorTargetBuffer(currentObjectUniformBufferWholeSize, targetBufferSize_objub);
+							//vb
+							VkDeviceSize targetBufferSize_vb = (currentBufferWholeSize_vb + (VkDeviceSize)BufferSizeRange - 1) & ~((VkDeviceSize)BufferSizeRange - 1);
+							bNeedUpdateVbIb |= vb->Resize(targetBufferSize_vb);
+							//ib
+							VkDeviceSize targetBufferSize_ib = (currentBufferWholeSize_ib + (VkDeviceSize)BufferSizeRange - 1) & ~((VkDeviceSize)BufferSizeRange - 1);
+							bNeedUpdateVbIb |= ib->Resize(targetBufferSize_ib);
+						}
+
+						//拷贝数据
+						if (bBeginUpdate || prim->transform->NeedUpdateUb() || bNeedUpdateObjUniform)
+						{
+							ObjectUniformBuffer objectUniformBuffer = {};
+							objectUniformBuffer.WorldMatrix = prim->transform->GetWorldMatrix();
+							obj->BufferMapping(&objectUniformBuffer, (uint64_t)objectUboOffset, sizeof(ObjectUniformBuffer));
+						}
+						if (bBeginUpdate || bNeedUpdateVbIb)
+						{
+							vb->BufferMapping(prim->vertexData.data(), vbPos, prim->vbSize);
+							ib->BufferMapping(prim->vertexIndices.data(), ibPos, prim->ibSize);
+						}
+
+						//更新buffer起始位置
+						vbPos = currentBufferWholeSize_vb;
+						ibPos = currentBufferWholeSize_ib;
+						objectUboOffset = currentObjectUniformBufferWholeSize;
+					}
 				}
 			}
 		}
 		//更新obj的描述符集大小，每个obj对应一个uniform大小，所以只更新一次就行了。
 		obj->UpdateDescriptorSet(sizeof(ObjectUniformBuffer), 0);
 		//更新material描述符集大小，每个pipeline对应其中一段，所以需要更新多次。
-		mat_vs->ResizeDescriptorBuffer(matOffset_vs);
-		mat_ps->ResizeDescriptorBuffer(matOffset_ps);
 		mat_vs->UpdateDescriptorSet(matBufferSize_vs, matBufferOffset_vs);
 		mat_ps->UpdateDescriptorSet(matBufferSize_ps, matBufferOffset_ps);
 	}

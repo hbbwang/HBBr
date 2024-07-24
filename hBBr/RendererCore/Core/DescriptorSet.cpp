@@ -19,6 +19,7 @@ DescriptorSet::DescriptorSet(VulkanRenderer* renderer, VkDescriptorType type, Vk
 	}
 	if (type & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || type & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
 	{
+		_hasUniformBuffer = true;
 		auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSizeInit);
 		std::unique_ptr<Buffer> buffer;
 		buffer.reset(new Buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, alignmentSize));
@@ -46,6 +47,7 @@ DescriptorSet::DescriptorSet(VulkanRenderer* renderer, std::vector<VkDescriptorT
 		std::unique_ptr<Buffer> buffer;
 		if (types[i] == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || types[i] == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
 		{
+			_hasUniformBuffer = true;
 			auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSizeInit);
 			buffer.reset(new Buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, alignmentSize));
 		}
@@ -81,10 +83,41 @@ bool DescriptorSet::ResizeDescriptorBuffer(VkDeviceSize newSize, int bufferIndex
 		MessageOut("Buffer Mapping Failed._buffers[bufferIndex] is nullptr", false, true, "255,255,0");
 		return false;
 	}
-	auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(newSize);
-	if (alignmentSize > _buffers[bufferIndex]->GetBufferSize())
+
+	if (_hasUniformBuffer)
 	{
-		_buffers[bufferIndex]->Resize(alignmentSize);
+		newSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(newSize);
+	}
+
+	if (newSize > _buffers[bufferIndex]->GetBufferSize())
+	{
+		_buffers[bufferIndex]->Resize(newSize);
+		NeedUpdate();
+		return true;
+	}
+	return false;
+}
+
+bool DescriptorSet::ResizeDescriptorTargetBuffer(VkDeviceSize checkSize, VkDeviceSize targetSize, int bufferIndex)
+{
+	if (_buffers[bufferIndex] == nullptr)
+	{
+		MessageOut("Buffer Mapping Failed._buffers[bufferIndex] is nullptr", false, true, "255,255,0");
+		return false;
+	}
+
+	if (_hasUniformBuffer)
+	{
+		checkSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(checkSize);
+	}
+
+	if (checkSize > _buffers[bufferIndex]->GetBufferSize())
+	{
+		if (_hasUniformBuffer)
+		{
+			targetSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(targetSize);
+		}
+		_buffers[bufferIndex]->Resize(targetSize);
 		NeedUpdate();
 		return true;
 	}

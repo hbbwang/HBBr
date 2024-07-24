@@ -8,6 +8,10 @@
 //(UINT32_MAX/512)约等于8M
 #define BufferSizeRange (UINT32_MAX/512)
 
+//Uniform Buffer每次增长大小
+//Uniform Buffer好像是有大小限制的:VulkanManager->GetMaxUniformBufferSize()
+#define UniformBufferSizeRange (512)
+
 //struct BufferWaitToRelease
 //{
 //	int				safeDestoryOldBuffer = -1;
