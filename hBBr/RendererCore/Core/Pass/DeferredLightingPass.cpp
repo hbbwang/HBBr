@@ -30,7 +30,6 @@ void DeferredLightingPass::PassInit()
 			_texDescriptorSetLayout,
 		}
 	, _pipelineLayout);
-	_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 512));
 	vertices =
 	{
 		{ glm::vec2(-1.0f, -1.0f)	, glm::vec2(0.0f, 0.0f) },
@@ -40,6 +39,7 @@ void DeferredLightingPass::PassInit()
 		{ glm::vec2(1.0f, 1.0f)		, glm::vec2(1.0f, 1.0f) },
 		{ glm::vec2(-1.0f, 1.0f)	, glm::vec2(0.0f, 1.0f) }
 	};
+	_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, sizeof(LightingVertexData) * vertices.size()));
 	_vertexBuffer->BufferMapping(vertices.data(), 0, sizeof(LightingVertexData) * vertices.size());
 	_vertexBuffer->UnMapMemory();
 	//DescriptorSet
