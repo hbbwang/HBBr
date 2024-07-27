@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 #include <thread>
-
+#include <typeinfo>
 struct VkBufferObject
 {
 	std::shared_ptr<VkBuffer> buffer;
@@ -20,15 +20,26 @@ struct VkDeviceMemoryObject
 	uint8_t frameCount = 0;
 };
 
+struct VkPtrObject
+{
+	std::size_t typeHash;
+	class RefCounter* ptrCounter = nullptr;
+	void* ptr = nullptr;
+	bool bImmediate = true;
+	uint8_t frameCount = 0;
+};
+
 //在这里创建的Vulkan对象，拥有最简单的垃圾回收机制
 class VulkanObjectManager
 {
 	friend class VulkanApp;
+	friend class VkPtrBase;
 public:
 	HBBR_API HBBR_INLINE static VulkanObjectManager* Get() {
 		if (!_vulkanObjectManager)
 		{
 			_vulkanObjectManager.reset(new VulkanObjectManager);
+			_vulkanObjectManager->_vulkanPtrs.reserve(1024);
 		}
 		return _vulkanObjectManager.get();
 	}
@@ -49,17 +60,21 @@ public:
 
 	std::shared_ptr<VkDeviceMemory> AllocateVkDeviceMemory(VkBuffer buffer, VkMemoryPropertyFlags propertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, bool bImmediate = true);
 
+	void VulkanPtrGC(class VkPtrBase* vkptr);
+
 protected:
 	void Update();
 	void Release();
+
 private:
+
 	static std::unique_ptr<VulkanObjectManager>		_vulkanObjectManager;
 	//Objects
-	
+
 	std::vector<VkBufferObject*>_bufferObjects;
 	std::vector<VkDeviceMemoryObject*>_deviceMemoryObjects;
-	
-	//
+	std::vector<VkPtrObject> _vulkanPtrs;
+
 	double _gcCurrentSecond = 0;
 	double _gcMaxSecond = 40;
 	HTime _gcTime;
