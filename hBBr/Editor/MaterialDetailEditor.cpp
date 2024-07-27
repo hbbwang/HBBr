@@ -257,48 +257,60 @@ void MaterialDetailEditor::InitMP()
 			if (i.type == MPType::VSFloat)
 			{
 				vector = new VectorSetting(this, 1, 0.0001f, 8);
-				vector->SetValue(prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index]);
-				vector->_vec4_f[0] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index];
+				vector->SetValue(prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index]);
+				vector->_vec4_f[0] = &prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index];
+				vector->BindValue = [prim](QList<FloatSetting*>) {
+					prim->UpdateUniformBufferVS();
+					};
 			}
 			else if (i.type == MPType::VSFloat2)
 			{
 				vector = new VectorSetting(this, 2, 0.0001f, 8);
 				vecType = 2;
 				vector->SetValue(
-					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index],
-					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1],
+					prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index],
+					prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1],
 					0
 				);
-				vector->_vec4_f[0] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index];
-				vector->_vec4_f[1] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1];
+				vector->_vec4_f[0] = &prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1];
+				vector->BindValue = [prim](QList<FloatSetting*>) {
+					prim->UpdateUniformBufferVS();
+					};
 			}
 			else if (i.type == MPType::VSFloat3)
 			{
 				vector = new VectorSetting(this, 3, 0.0001f, 8);
 				vecType = 3;
 				vector->SetValue(
-					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index],
-					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1],
-					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 2]
+					prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index],
+					prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1],
+					prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index + 2]
 				);
-				vector->_vec4_f[0] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index];
-				vector->_vec4_f[1] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1];
-				vector->_vec4_f[2] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 2];
+				vector->_vec4_f[0] = &prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1];
+				vector->_vec4_f[2] = &prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index + 2];
+				vector->BindValue = [prim](QList<FloatSetting*>) {
+					prim->UpdateUniformBufferVS();
+					};
 			}
 			else if (i.type == MPType::VSFloat4)
 			{
 				vector = new VectorSetting(this, 4, 0.0001f, 8);
 				vecType = 4;
 				vector->SetValue(
-					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index],
-					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1],
-					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 2],
-					prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 3]
+					prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index],
+					prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1],
+					prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index + 2],
+					prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index + 3]
 				);
-				vector->_vec4_f[0] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index];
-				vector->_vec4_f[1] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1];
-				vector->_vec4_f[2] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 2];
-				vector->_vec4_f[3] = &prim->uniformBuffer_vs[i.arrayIndex][i.vec4Index + 3];
+				vector->_vec4_f[0] = &prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index + 1];
+				vector->_vec4_f[2] = &prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index + 2];
+				vector->_vec4_f[3] = &prim->_uniformBuffer_vs[i.arrayIndex][i.vec4Index + 3];
+				vector->BindValue = [prim](QList<FloatSetting*>) {
+					prim->UpdateUniformBufferVS();
+					};
 			}
 			pw_mp->AddItem(i.name.c_str(), vector, 30, mp_sub_group);
 		}
@@ -315,48 +327,60 @@ void MaterialDetailEditor::InitMP()
 			if (i.type == MPType::PSFloat)
 			{
 				vector = new VectorSetting(this, 1, 0.0001f, 8);
-				vector->SetValue(prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index]);
-				vector->_vec4_f[0] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index];
+				vector->SetValue(prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index]);
+				vector->_vec4_f[0] = &prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index];
+				vector->BindValue = [prim](QList<FloatSetting*>) {
+					prim->UpdateUniformBufferPS();
+					};
 			}
 			else if (i.type == MPType::PSFloat2)
 			{
 				vector = new VectorSetting(this, 2, 0.0001f, 8);
 				vecType = 2;
 				vector->SetValue(
-					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index],
-					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1],
+					prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index],
+					prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1],
 					0
 				);
-				vector->_vec4_f[0] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index];
-				vector->_vec4_f[1] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1];
+				vector->_vec4_f[0] = &prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1];
+				vector->BindValue = [prim](QList<FloatSetting*>) {
+					prim->UpdateUniformBufferPS();
+					};
 			}
 			else if (i.type == MPType::PSFloat3)
 			{
 				vector = new VectorSetting(this, 3, 0.0001f, 8);
 				vecType = 3;
 				vector->SetValue(
-					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index],
-					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1],
-					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 2]
+					prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index],
+					prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1],
+					prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index + 2]
 				);
-				vector->_vec4_f[0] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index];
-				vector->_vec4_f[1] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1];
-				vector->_vec4_f[2] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 2];
+				vector->_vec4_f[0] = &prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1];
+				vector->_vec4_f[2] = &prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index + 2];
+				vector->BindValue = [prim](QList<FloatSetting*>) {
+					prim->UpdateUniformBufferPS();
+					};
 			}
 			else if (i.type == MPType::PSFloat4)
 			{
 				vector = new VectorSetting(this, 4, 0.0001f, 8);
 				vecType = 4;
 				vector->SetValue(
-					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index],
-					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1],
-					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 2],
-					prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 3]
+					prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index],
+					prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1],
+					prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index + 2],
+					prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index + 3]
 				);
-				vector->_vec4_f[0] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index];
-				vector->_vec4_f[1] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1];
-				vector->_vec4_f[2] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 2];
-				vector->_vec4_f[3] = &prim->uniformBuffer_ps[i.arrayIndex][i.vec4Index + 3];
+				vector->_vec4_f[0] = &prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index];
+				vector->_vec4_f[1] = &prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index + 1];
+				vector->_vec4_f[2] = &prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index + 2];
+				vector->_vec4_f[3] = &prim->_uniformBuffer_ps[i.arrayIndex][i.vec4Index + 3];
+				vector->BindValue = [prim](QList<FloatSetting*>) {
+					prim->UpdateUniformBufferPS();
+					};
 			}
 			pw_mp->AddItem(i.name.c_str(), vector, 30, mp_sub_group);
 		}
@@ -469,7 +493,7 @@ void MaterialDetailEditor::InitMA()
 					comboBox->AddItem(shader_name.c_str());
 				}
 			}
-			comboBox->SetCurrentSelection(_material.lock()->GetPrimitive()->graphicsIndex.GetPSShaderName().c_str());
+			comboBox->SetCurrentSelection(_material.lock()->GetPrimitive()->_graphicsIndex.GetPSShaderName().c_str());
 			comboBox->_bindCurrentTextChanged = 
 				[](int index, const char* s) 
 				{
@@ -489,10 +513,20 @@ void MaterialDetailEditor::InitMA()
 			{
 				ConsoleDebug::printf_endl(
 					HString(GetEditorInternationalization("MaterialEditor", "RefreshShader").toStdString()),
-					_material.lock()->GetPrimitive()->graphicsIndex.GetVSShaderName().c_str(),
-					_material.lock()->GetPrimitive()->graphicsIndex.GetPSShaderName().c_str());
+					_material.lock()->GetPrimitive()->_graphicsIndex.GetVSShaderName().c_str(),
+					_material.lock()->GetPrimitive()->_graphicsIndex.GetPSShaderName().c_str());
 				Shader::ReloadMaterialShaderCacheAndPipelineObject(_material);
 				//重新打开，主要为了重新加载参数页面
+				for (auto& i : _allDetailWindows)
+				{
+					//刷新已经打开的材质编辑器
+					if (i != this)
+					{
+						if (i->_material.lock()->GetPrimitive()->_graphicsIndex.GetPSShaderName().IsSame(this->_material.lock()->GetPrimitive()->_graphicsIndex.GetPSShaderName()))
+							i->RefreshEditor(i->_material);
+					}
+				}
+				//刷新自己
 				RefreshEditor(_material);
 			});
 		}

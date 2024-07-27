@@ -174,11 +174,11 @@ float3 Diffuse_OrenNayar( float3 DiffuseColor, float Roughness, float NoV, float
 
 float3 SpecularGGX( float Roughness, float3 SpecularColor, half NoL, half NoV, half VoH, half NoH)
 {
-	float a2 = Pow4( Roughness );
+	float a2 = Roughness * Roughness * Roughness * Roughness;
 	float D = D_GGX( a2, NoH );
 	float Vis = Vis_SmithJointApprox( a2, NoV, NoL );
 	float3 F = F_Schlick( SpecularColor, VoH );
-	return (D * Vis) * F;
+	return (D*Vis) * F;
 }
 
 

@@ -383,7 +383,7 @@ void Component::StringToPropertyValue(ComponentProperty& p, HString& valueStr)
 		} 
 		else
 		{
-			*((float*)p.value) = HString::ToDouble(valueStr);
+			*((float*)p.value) = (float)HString::ToDouble(valueStr);
 		}
 	}
 	else if (p.type.IsSame("Vector2", false))

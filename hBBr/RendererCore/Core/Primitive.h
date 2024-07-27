@@ -77,6 +77,41 @@ struct ModelPrimitive
 	//}
 };
 
+struct MaterialPrimitiveGroup
+{
+	std::vector<ModelPrimitive*> prims;
+
+	VkDeviceSize	vbWholeSize = 0;
+
+	VkDeviceSize	ibWholeSize = 0;
+
+	class VulkanRenderer* renderer = nullptr;
+
+	std::shared_ptr<class DescriptorSet> descriptorSet_uniformBufferVS;
+
+	std::shared_ptr<class DescriptorSet> descriptorSet_uniformBufferPS;
+
+	std::vector<VkDescriptorSet>	descriptorSet_texture;
+
+	class MaterialPrimitive* primFrom = nullptr;
+
+	uint8_t needCopyDataVS = 1;
+
+	uint8_t needCopyDataPS = 1;
+
+	std::vector<uint8_t> needUpdateTextures;
+
+	//
+	void ResetDecriptorSet(uint8_t numTextures, bool& bNeedUpdateVSUniformBuffer, bool& bNeedUpdatePSUniformBuffer, bool& bNeedUpdateTextures);
+
+	void UpdateDecriptorSet(bool bNeedUpdateVSUniformBuffer, bool bNeedUpdatePSUniformBuffer, bool bNeedUpdateTextures);
+
+	MaterialPrimitiveGroup() {
+		needCopyDataVS = 1;
+		needCopyDataPS = 1;
+	}
+};
+
 class MaterialPrimitive
 {
 	friend class Material;
@@ -84,20 +119,21 @@ class MaterialPrimitive
 public:
 	MaterialPrimitive()
 	{
-		inputLayout = {};
-		graphicsIndex = {};
+		_inputLayout = {};
+		_graphicsIndex = {};
 		int priority = 0;
 		HString graphicsName = "";
 		Pass passUsing = Pass::OpaquePass;
-		uniformBufferSize_vs = 0;
-		uniformBufferSize_ps = 0;
-		uniformBuffer_vs.clear();
-		uniformBuffer_ps.clear();
+		_uniformBufferSize_vs = 0;
+		_uniformBufferSize_ps = 0;
+		_uniformBuffer_vs.clear();
+		_uniformBuffer_ps.clear();
 		_paramterInfos_vs.clear();
 		_paramterInfos_ps.clear();
 		_textureInfos.clear();
-		textures.clear();
+		_textures.clear();
 		_samplers.clear();
+		_materialPrimitiveGroups.clear();
 	}
 
 	/*HBBR_INLINE void Reset()
@@ -117,7 +153,7 @@ public:
 	}*/
 
 	HBBR_API HBBR_INLINE std::vector<class Texture2D*> GetTextures() {
-		return textures;
+		return _textures;
 	}
 
 	HBBR_API HBBR_INLINE std::vector<VkSampler> GetSamplers() {
@@ -196,82 +232,58 @@ public:
 
 	HBBR_API void SetTexture(HString textureName, class Texture2D* newTexture);
 
+	HBBR_API void UpdateUniformBufferVS();
+
+	HBBR_API void UpdateUniformBufferPS();
+
+	HBBR_API void UpdateTextures();
+
 	~MaterialPrimitive()
 	{
 	}
 
 	//顶点输入
-	VertexInputLayout	inputLayout;
+	VertexInputLayout	_inputLayout;
 
 	//管线索引
-	PipelineIndex	graphicsIndex;
+	PipelineIndex		_graphicsIndex;
 
 	//用于排序
-	int priority = 0;
+	int					_priority = 0;
 
 	//其实就是材质名字
-	HString graphicsName;
+	HString				_graphicsName;
 
 	//使用的是哪个pass
-	Pass passUsing;
+	Pass				_passUsing;
 
 	//-----------------------参数 Shader参数
 
 	//PS
-	std::vector<glm::vec4> uniformBuffer_ps;
-	uint64_t uniformBufferSize_ps = 0;
-	std::vector<MaterialParameterInfo> _paramterInfos_ps;
+	std::vector<glm::vec4>				_uniformBuffer_ps;
+	uint64_t							_uniformBufferSize_ps = 0;
+	std::vector<MaterialParameterInfo>	_paramterInfos_ps;
 
 	//VS
-	std::vector<glm::vec4> uniformBuffer_vs;
-	uint64_t uniformBufferSize_vs = 0;
-	std::vector<MaterialParameterInfo> _paramterInfos_vs;
+	std::vector<glm::vec4>				_uniformBuffer_vs;
+	uint64_t							_uniformBufferSize_vs = 0;
+	std::vector<MaterialParameterInfo>	_paramterInfos_vs;
 
 	//Textures
-	std::vector<MaterialTextureInfo> _textureInfos;
+	std::vector<MaterialTextureInfo>	_textureInfos;
 
 private:
 
 	//纹理贴图
-	std::vector<class Texture2D*> textures;
+	std::vector<class Texture2D*>		_textures;
 
 	//采样器选择
-	std::vector<VkSampler> _samplers;
+	std::vector<VkSampler>				_samplers;
 
-
-};
-
-struct ModelPrimitiveGroup
-{
-	std::vector<ModelPrimitive*> prims;
-	VkDeviceSize	vbWholeSize = 0;
-	VkDeviceSize	ibWholeSize = 0;
-};
-
-struct MaterialPrimitiveGroup
-{
-	class VulkanRenderer* renderer = nullptr;
-	//一个材质用一个material vs buffer
-	std::shared_ptr<class DescriptorSet> _descriptorSet_mat_vs;
-	//一个材质用一个material ps buffer
-	std::shared_ptr<class DescriptorSet> _descriptorSet_mat_ps;
-
-	MaterialPrimitive* primFrom = nullptr;
-
-	//让MaterialPrimitiveGroup支持std::map
-	bool operator<(const MaterialPrimitiveGroup& other) const
-	{
-		return renderer < other.renderer;
-	}
-
-	bool operator==(const MaterialPrimitiveGroup& other) const
-	{
-		return renderer == other.renderer;
-	}
-
-	void ResizeOrUpdateDecriptorSet()const;
+	std::map<VulkanRenderer*, MaterialPrimitiveGroup>	_materialPrimitiveGroups;
 
 };
+
 
 class PrimitiveProxy
 {
@@ -300,29 +312,14 @@ public:
 			return nullptr;
 	}
 
-	inline static const MaterialPrimitiveGroup* GetMaterialPrimitiveGroup(MaterialPrimitive* index, class VulkanRenderer* renderer) {
-		auto it = _allModelPrimitives.find(index);
-		if (it != _allModelPrimitives.end())
+	inline static MaterialPrimitiveGroup* GetMaterialPrimitiveGroup(MaterialPrimitive* mat, class VulkanRenderer* renderer) {
+		if (mat)
 		{
-			MaterialPrimitiveGroup mpg = { renderer };
-			auto mgpit = it->second.find(mpg);
-			if (mgpit != it->second.end())
-			{
-				return &mgpit->first;
-			}
-			return nullptr;
-		}
-		else
-			return nullptr;
-	}
-
-	inline static ModelPrimitiveGroup* GetModelPrimitives(MaterialPrimitive* index, class VulkanRenderer* renderer) {
-		auto it = _allModelPrimitives.find(index);
-		if (it != _allModelPrimitives.end())
-		{
-			MaterialPrimitiveGroup mpg = {};
-			mpg.renderer = renderer;
-			return &it->second[mpg];
+			auto result = mat->_materialPrimitiveGroups.find(renderer);
+			if(result != mat->_materialPrimitiveGroups.end())
+				return &result->second;
+			else
+				return nullptr;
 		}
 		else
 			return nullptr;
@@ -333,7 +330,5 @@ public:
 private:
 
 	static std::vector<std::vector<MaterialPrimitive*>> _allGraphicsPrimitives;
-
-	static std::map<MaterialPrimitive*, std::map<MaterialPrimitiveGroup, ModelPrimitiveGroup>> _allModelPrimitives;
 
 };

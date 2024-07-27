@@ -36,6 +36,7 @@ PipelineObject* PipelineManager::CreatePipelineObject(VkGraphicsPipelineCreateIn
 	newPSO->bHasMaterialParameterVS = createInfo.bHasMaterialParameterVS;
 	newPSO->bHasMaterialParameterPS = createInfo.bHasMaterialParameterPS;
 	newPSO->bHasMaterialTexture = createInfo.bHasMaterialTexture;
+	newPSO->numTextures = createInfo.numTextures;
 	SetPipelineLayout(createInfo, layout);
 	if (pipelineType == PipelineType::Graphics)
 	{
@@ -230,6 +231,9 @@ void PipelineManager::SetVertexShaderAndPixelShader(VkGraphicsPipelineCreateInfo
 
 	createInfo.bHasMaterialParameterVS = vs->params.size() > 0;
 	createInfo.bHasMaterialParameterPS = ps->params.size() > 0;
+
+	createInfo.numTextures = ps->header.shaderTextureCount;
+
 	createInfo.bHasMaterialTexture = vs->texs.size() > 0 && ps->texs.size() > 0;
 }
 

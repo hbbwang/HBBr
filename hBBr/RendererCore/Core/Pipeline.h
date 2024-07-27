@@ -35,8 +35,13 @@ struct VkGraphicsPipelineCreateInfoCache
 	std::vector<VkPipelineShaderStageCreateInfo>	stages;
 
 	bool bHasMaterialParameterVS = false;
+
 	bool bHasMaterialParameterPS = false;
+
 	bool bHasMaterialTexture = false;
+
+	//vs和ps共用一套纹理绑定
+	uint8_t numTextures = 0;
 	
 };
 
@@ -250,6 +255,9 @@ struct PipelineObject
 	bool bHasMaterialParameterPS = false;
 	bool bHasMaterialTexture = false;
 	bool bHasStoreTexture = false;
+
+	uint8_t numTextures= 0;
+
 	~PipelineObject();
 };
 

@@ -420,8 +420,8 @@ void Shader::ReloadMaterialShaderCacheAndPipelineObject(std::weak_ptr<Material> 
 {
 	if (mat.expired())
 		return;
-	HString vs_n = mat.lock()->GetPrimitive()->graphicsIndex.GetVSShaderFullName();
-	HString ps_n = mat.lock()->GetPrimitive()->graphicsIndex.GetVSShaderFullName();
+	HString vs_n = mat.lock()->GetPrimitive()->_graphicsIndex.GetVSShaderFullName();
+	HString ps_n = mat.lock()->GetPrimitive()->_graphicsIndex.GetVSShaderFullName();
 	std::weak_ptr<ShaderCache> vs = Shader::GetVSCache(vs_n);
 	std::weak_ptr<ShaderCache> ps = Shader::GetPSCache(ps_n);
 	HString vs_shaderSourceName = vs.lock()->shaderName;
@@ -435,7 +435,7 @@ void Shader::ReloadMaterialShaderCacheAndPipelineObject(std::weak_ptr<Material> 
 	manager->DeviceWaitIdle();
 
 	//删除管线
-	PipelineManager::RemovePipelineObjects(mat.lock()->GetPrimitive()->graphicsIndex);
+	PipelineManager::RemovePipelineObjects(mat.lock()->GetPrimitive()->_graphicsIndex);
 
 	//重新编译所有变体
 #if IS_EDITOR
@@ -454,8 +454,8 @@ void Shader::ReloadMaterialShaderCacheAndPipelineObject(std::weak_ptr<Material> 
 	{
 		auto matCache = i.second->GetAssetObject<Material>();
 		if (
-			matCache.lock()->GetPrimitive()->graphicsIndex.GetVSShaderName() == vs_shaderSourceName
-			|| matCache.lock()->GetPrimitive()->graphicsIndex.GetPSShaderName() == ps_shaderSourceName
+			matCache.lock()->GetPrimitive()->_graphicsIndex.GetVSShaderName() == vs_shaderSourceName
+			|| matCache.lock()->GetPrimitive()->_graphicsIndex.GetPSShaderName() == ps_shaderSourceName
 			)
 		{
 			i.second->NeedToReload();

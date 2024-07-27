@@ -14,12 +14,6 @@
 class Texture2D;
 class VulkanRenderer;
 
-struct TextureDescriptorSet
-{
-	VkDescriptorSet descriptorSet_tex;
-	std::vector<class Texture2D*>texCache;
-};
-
 class PassBase
 {
 	friend class VulkanManager;

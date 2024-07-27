@@ -72,7 +72,7 @@ float4 PSMain(VSToPS IN) :SV_Target0
     //View Direction
     half3 ViewDir = normalize(CameraPos.xyz - WorldPosition.xyz);
     //BRDF Content
-    half NoV = dot(GBuffer.WorldNormal.xyz, ViewDir.xyz);
+    half NoV = saturate(dot(GBuffer.WorldNormal.xyz, ViewDir.xyz));
     //Directional Light
     [loop]
     for(int i = 0; i < ValidLightCount; i++)

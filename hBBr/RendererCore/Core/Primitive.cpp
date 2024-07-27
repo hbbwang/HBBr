@@ -1,10 +1,8 @@
 ﻿#include "Primitive.h"
 #include "Shader.h"
+#include "VulkanRenderer.h"
 
 std::vector<std::vector<MaterialPrimitive*>> PrimitiveProxy::_allGraphicsPrimitives;
-
-std::map<MaterialPrimitive*, std::map<MaterialPrimitiveGroup, ModelPrimitiveGroup>>  PrimitiveProxy::_allModelPrimitives;
-
 
 void PrimitiveProxy::AddMaterialPrimitive(MaterialPrimitive* prim)
 {
@@ -12,7 +10,7 @@ void PrimitiveProxy::AddMaterialPrimitive(MaterialPrimitive* prim)
 	{
 		_allGraphicsPrimitives.resize((uint32_t)Pass::MaxNum);
 	}
-	auto& graphicsPrimitive = _allGraphicsPrimitives[(uint32_t)prim->passUsing];
+	auto& graphicsPrimitive = _allGraphicsPrimitives[(uint32_t)prim->_passUsing];
 	if (graphicsPrimitive.capacity() <= graphicsPrimitive.size())
 	{
 		if (graphicsPrimitive.capacity() < 200)
@@ -42,13 +40,13 @@ void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, HStri
 {
 	if (vsFullName.Length() <= 1 || psFullName.Length() <= 1)
 	{
-		prim->graphicsIndex = PipelineIndex::GetPipelineIndex(
-			Shader::_vsShader[prim->graphicsIndex.GetVSShaderName() + "@" + HString::FromUInt(prim->graphicsIndex.GetVSVarient())],
-			Shader::_psShader[prim->graphicsIndex.GetPSShaderName() + "@" + HString::FromUInt(prim->graphicsIndex.GetPSVarient())]);
+		prim->_graphicsIndex = PipelineIndex::GetPipelineIndex(
+			Shader::_vsShader[prim->_graphicsIndex.GetVSShaderName() + "@" + HString::FromUInt(prim->_graphicsIndex.GetVSVarient())],
+			Shader::_psShader[prim->_graphicsIndex.GetPSShaderName() + "@" + HString::FromUInt(prim->_graphicsIndex.GetPSVarient())]);
 	}
 	else
 	{
-		prim->graphicsIndex = PipelineIndex::GetPipelineIndex(
+		prim->_graphicsIndex = PipelineIndex::GetPipelineIndex(
 			Shader::_vsShader[vsFullName],
 			Shader::_psShader[psFullName]);
 	}
@@ -56,51 +54,49 @@ void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, HStri
 
 void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, std::weak_ptr<ShaderCache> vs, std::weak_ptr<ShaderCache> ps)
 {
-	prim->graphicsIndex = PipelineIndex::GetPipelineIndex(
+	prim->_graphicsIndex = PipelineIndex::GetPipelineIndex(
 		vs,
 		ps);
 }
 
 void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim, class VulkanRenderer* renderer)
 {
-	prim->vertexData = prim->vertexInput.GetData(Shader::_vsShader[mat->graphicsIndex.GetVSShaderFullName()]->header.vertexInput);
+	if (!mat)
+		return;
+
+	prim->vertexData = prim->vertexInput.GetData(Shader::_vsShader[mat->_graphicsIndex.GetVSShaderFullName()]->header.vertexInput);
 	prim->vertexIndices = prim->vertexInput.vertexIndices;
-	MaterialPrimitiveGroup mpg = { renderer };
-	ModelPrimitiveGroup * modelPrim = nullptr;
 
-	auto& mit = _allModelPrimitives[mat];
-	auto it = mit.find(mpg);
-	if (it == mit.end())
+	MaterialPrimitiveGroup* matGroup = nullptr;
+	auto it = mat->_materialPrimitiveGroups.find(renderer);
+	if (it == mat->_materialPrimitiveGroups.end())
 	{
-		ModelPrimitiveGroup newGroup = {};
+		MaterialPrimitiveGroup newGroup = {};
 		newGroup.prims = std::vector<ModelPrimitive*>();
-
-		//为material primitive 创建buffer
-		mpg._descriptorSet_mat_vs.reset(new DescriptorSet(renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVS(), 32, { VK_SHADER_STAGE_VERTEX_BIT }));
-		mpg._descriptorSet_mat_ps.reset(new DescriptorSet(renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(), 32, { VK_SHADER_STAGE_FRAGMENT_BIT }));
-		mpg.primFrom = mat;
-		mit.emplace(mpg, newGroup);
-		modelPrim = &mit[mpg];
+		newGroup.primFrom = mat;
+		newGroup.renderer = renderer;
+		mat->_materialPrimitiveGroups.emplace(renderer, newGroup);
+		matGroup = &mat->_materialPrimitiveGroups[renderer];
 	}
 	else
 	{
-		modelPrim = &it->second;
+		matGroup = &it->second;
 	}
 
-	if (modelPrim->prims.capacity() <= modelPrim->prims.size())
+	if (matGroup->prims.capacity() <= matGroup->prims.size())
 	{
-		if (modelPrim->prims.capacity() < 200)
-			modelPrim->prims.reserve(modelPrim->prims.capacity() + 20);
+		if (matGroup->prims.capacity() < 200)
+			matGroup->prims.reserve(matGroup->prims.capacity() + 20);
 		else
-			modelPrim->prims.reserve(modelPrim->prims.capacity() * 2);
+			matGroup->prims.reserve(matGroup->prims.capacity() * 2);
 	}
 
 	prim->bNeedUpdate = true;
 	prim->vbSize = prim->vertexData.size()	* sizeof(float);
 	prim->ibSize = prim->vertexIndices.size()	* sizeof(uint32_t);
-	modelPrim->prims.push_back(prim);
-	modelPrim->vbWholeSize += prim->vbSize;
-	modelPrim->ibWholeSize += prim->ibSize;
+	matGroup->prims.push_back(prim);
+	matGroup->vbWholeSize += prim->vbSize;
+	matGroup->ibWholeSize += prim->ibSize;
 	//modelPrim.vbUpdatePos = std::min(modelPrim.vbUpdatePos, prim->vbPos);
 	//modelPrim.ibUpdatePos = std::min(modelPrim.ibUpdatePos, prim->ibPos);
 	//顶点数据生成完毕，就把源数据卸载掉
@@ -111,48 +107,44 @@ void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive
 {
 	if(prim)
 	{
-		auto it = _allModelPrimitives.find(mat);
-		if (it != _allModelPrimitives.end())
+		auto rit = mat->_materialPrimitiveGroups.find(renderer);
+		if (rit != mat->_materialPrimitiveGroups.end())
 		{
-			MaterialPrimitiveGroup mpg = { renderer };
-			auto rit = it->second.find(mpg);
-			if (rit != it->second.end())
+			auto pit = std::find(rit->second.prims.begin(), rit->second.prims.end(), prim);
+			if (pit != rit->second.prims.end())
 			{
-				auto pit = std::find(rit->second.prims.begin(), rit->second.prims.end(), prim);
-				if (pit != rit->second.prims.end())
+				//是否是最后一个对象,如果不是，需要标记下一个对象需要更新Buffer
+				bool isTheLastItem = false;
+				if (rit->second.prims.back() != *pit)
 				{
-					//是否是最后一个对象,如果不是，需要标记下一个对象需要更新Buffer
-					bool isTheLastItem = false;
-					if (rit->second.prims.back() != *pit)
-					{
-						(*(pit + 1))->bNeedUpdate = true;
-					}
-					else
-					{
-						isTheLastItem = true;
-					}
-
-					rit->second.vbWholeSize -= (*pit)->vbSize;
-					rit->second.ibWholeSize -= (*pit)->ibSize;
-
-					rit->second.prims.erase(pit);
-					if (rit->second.prims.size() > 0 && isTheLastItem)
-						rit->second.prims.back()->bNeedUpdate = true;
+					(*(pit + 1))->bNeedUpdate = true;
 				}
+				else
+				{
+					isTheLastItem = true;
+				}
+
+				rit->second.vbWholeSize -= (*pit)->vbSize;
+				rit->second.ibWholeSize -= (*pit)->ibSize;
+
+				rit->second.prims.erase(pit);
+				if (rit->second.prims.size() > 0 && isTheLastItem)
+					rit->second.prims.back()->bNeedUpdate = true;
 			}
 		}
+		
 	}
 }
 
 void PrimitiveProxy::ClearAll()
 {
 	_allGraphicsPrimitives.clear();
-	_allModelPrimitives.clear();
 }
 
 void MaterialPrimitive::SetTexture(int index, Texture2D* newTexture)
 {
-	textures[index] = newTexture;
+	UpdateTextures();
+	_textures[index] = newTexture;
 }
 
 void MaterialPrimitive::SetTexture(HString textureName, Texture2D* newTexture)
@@ -162,7 +154,37 @@ void MaterialPrimitive::SetTexture(HString textureName, Texture2D* newTexture)
 	});
 	if (it != _textureInfos.end())
 	{
+		UpdateTextures();
 		SetTexture(it->index, newTexture);
+	}
+}
+
+void MaterialPrimitive::UpdateUniformBufferVS()
+{
+	for (auto& i : _materialPrimitiveGroups)
+	{
+		i.second.needCopyDataVS = 1;
+	}
+}
+
+void MaterialPrimitive::UpdateUniformBufferPS()
+{
+	for (auto& i : _materialPrimitiveGroups)
+	{
+		i.second.needCopyDataPS = 1;
+	}
+}
+
+void MaterialPrimitive::UpdateTextures()
+{
+	for (auto& i : _materialPrimitiveGroups)
+	{
+		auto& updateContent = i.second.needUpdateTextures;
+		const auto updateCount = updateContent.size();
+		if (updateCount > 0)
+		{
+			memset(updateContent.data(), 1, updateCount * sizeof(uint8_t));
+		}
 	}
 }
 
@@ -176,7 +198,7 @@ float MaterialPrimitive::GetScalarParameter_VS(HString name, int* arrayIndex, in
 	{
 		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
 		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
-		return uniformBuffer_vs[it->arrayIndex][it->vec4Index];
+		return _uniformBuffer_vs[it->arrayIndex][it->vec4Index];
 	}
 	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
 	return 0;
@@ -193,8 +215,8 @@ glm::vec2 MaterialPrimitive::GetVector2Parameter_VS(HString name, int* arrayInde
 	{
 		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
 		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
-		result.x = uniformBuffer_vs[it->arrayIndex][it->vec4Index];
-		result.y = uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1];
+		result.x = _uniformBuffer_vs[it->arrayIndex][it->vec4Index];
+		result.y = _uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1];
 		return result;
 	}
 	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
@@ -212,9 +234,9 @@ glm::vec3 MaterialPrimitive::GetVector3Parameter_VS(HString name, int* arrayInde
 	{
 		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
 		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
-		result.x = uniformBuffer_vs[it->arrayIndex][it->vec4Index];
-		result.y = uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1];
-		result.z = uniformBuffer_vs[it->arrayIndex][it->vec4Index + 2];
+		result.x = _uniformBuffer_vs[it->arrayIndex][it->vec4Index];
+		result.y = _uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1];
+		result.z = _uniformBuffer_vs[it->arrayIndex][it->vec4Index + 2];
 		return result;
 	}
 	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
@@ -232,10 +254,10 @@ glm::vec4 MaterialPrimitive::GetVector4Parameter_VS(HString name, int* arrayInde
 	{
 		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
 		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
-		result.x = uniformBuffer_vs[it->arrayIndex][it->vec4Index];
-		result.y = uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1];
-		result.z = uniformBuffer_vs[it->arrayIndex][it->vec4Index + 2];
-		result.w = uniformBuffer_vs[it->arrayIndex][it->vec4Index + 3];
+		result.x = _uniformBuffer_vs[it->arrayIndex][it->vec4Index];
+		result.y = _uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1];
+		result.z = _uniformBuffer_vs[it->arrayIndex][it->vec4Index + 2];
+		result.w = _uniformBuffer_vs[it->arrayIndex][it->vec4Index + 3];
 		return result;
 	}
 	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
@@ -250,9 +272,15 @@ float MaterialPrimitive::GetScalarParameter_PS(HString name, int* arrayIndex, in
 		});
 	if (it != _paramterInfos_ps.end())
 	{
-		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
-		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
-		return uniformBuffer_ps[it->arrayIndex][it->vec4Index];
+		if (arrayIndex != nullptr) 
+		{
+			*arrayIndex = (int)it->arrayIndex;
+		}
+		if (vec4Index != nullptr) 
+		{
+			*vec4Index = (int)it->vec4Index;
+		}
+		return _uniformBuffer_ps[it->arrayIndex][it->vec4Index];
 	}
 	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
 	return 0;
@@ -267,10 +295,16 @@ glm::vec2 MaterialPrimitive::GetVector2Parameter_PS(HString name, int* arrayInde
 		});
 	if (it != _paramterInfos_ps.end())
 	{
-		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
-		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
-		result.x = uniformBuffer_ps[it->arrayIndex][it->vec4Index];
-		result.y = uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1];
+		if (arrayIndex != nullptr) 
+		{
+			*arrayIndex = (int)it->arrayIndex;
+		}
+		if (vec4Index != nullptr) 
+		{
+			*vec4Index = (int)it->vec4Index;
+		}
+		result.x = _uniformBuffer_ps[it->arrayIndex][it->vec4Index];
+		result.y = _uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1];
 		return result;
 	}
 	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
@@ -286,11 +320,17 @@ glm::vec3 MaterialPrimitive::GetVector3Parameter_PS(HString name, int* arrayInde
 		});
 	if (it != _paramterInfos_ps.end())
 	{
-		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
-		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
-		result.x = uniformBuffer_ps[it->arrayIndex][it->vec4Index];
-		result.y = uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1];
-		result.z = uniformBuffer_ps[it->arrayIndex][it->vec4Index + 2];
+		if (arrayIndex != nullptr) 
+		{
+			*arrayIndex = (int)it->arrayIndex;
+		}
+		if (vec4Index != nullptr) 
+		{
+			*vec4Index = (int)it->vec4Index;
+		}
+		result.x = _uniformBuffer_ps[it->arrayIndex][it->vec4Index];
+		result.y = _uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1];
+		result.z = _uniformBuffer_ps[it->arrayIndex][it->vec4Index + 2];
 		return result;
 	}
 	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
@@ -306,12 +346,18 @@ glm::vec4 MaterialPrimitive::GetVector4Parameter_PS(HString name, int* arrayInde
 		});
 	if (it != _paramterInfos_ps.end())
 	{
-		if (arrayIndex != nullptr)		*arrayIndex = (int)it->arrayIndex;
-		if (vec4Index != nullptr)		*vec4Index = (int)it->vec4Index;
-		result.x = uniformBuffer_ps[it->arrayIndex][it->vec4Index];
-		result.y = uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1];
-		result.z = uniformBuffer_ps[it->arrayIndex][it->vec4Index + 2];
-		result.w = uniformBuffer_ps[it->arrayIndex][it->vec4Index + 3];
+		if (arrayIndex != nullptr) 
+		{
+			*arrayIndex = (int)it->arrayIndex;
+		}
+		if (vec4Index != nullptr)
+		{
+			*vec4Index = (int)it->vec4Index;
+		}
+		result.x = _uniformBuffer_ps[it->arrayIndex][it->vec4Index];
+		result.y = _uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1];
+		result.z = _uniformBuffer_ps[it->arrayIndex][it->vec4Index + 2];
+		result.w = _uniformBuffer_ps[it->arrayIndex][it->vec4Index + 3];
 		return result;
 	}
 	ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer", "A000026"), name.c_str());
@@ -326,7 +372,8 @@ void MaterialPrimitive::SetScalarParameter_PS(HString name, float value)
 		});
 	if (it != _paramterInfos_ps.end())
 	{
-		uniformBuffer_ps[it->arrayIndex][it->vec4Index] = value;
+		UpdateUniformBufferPS();
+		_uniformBuffer_ps[it->arrayIndex][it->vec4Index] = value;
 	}
 }
 
@@ -338,8 +385,9 @@ void MaterialPrimitive::SetVec2Parameter_PS(HString name, glm::vec2 value)
 		});
 	if (it != _paramterInfos_ps.end())
 	{
-		uniformBuffer_ps[it->arrayIndex][it->vec4Index] = value.x;
-		uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1] = value.y;
+		UpdateUniformBufferPS();
+		_uniformBuffer_ps[it->arrayIndex][it->vec4Index] = value.x;
+		_uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1] = value.y;
 	}
 }
 
@@ -351,9 +399,10 @@ void MaterialPrimitive::SetVec3Parameter_PS(HString name, glm::vec3 value)
 		});
 	if (it != _paramterInfos_ps.end())
 	{
-		uniformBuffer_ps[it->arrayIndex][it->vec4Index] = value.x;
-		uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1] = value.y;
-		uniformBuffer_ps[it->arrayIndex][it->vec4Index + 2] = value.z;
+		UpdateUniformBufferPS();
+		_uniformBuffer_ps[it->arrayIndex][it->vec4Index] = value.x;
+		_uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1] = value.y;
+		_uniformBuffer_ps[it->arrayIndex][it->vec4Index + 2] = value.z;
 	}
 }
 
@@ -365,37 +414,42 @@ void MaterialPrimitive::SetVec4Parameter_PS(HString name, glm::vec4 value)
 		});
 	if (it != _paramterInfos_ps.end())
 	{
-		uniformBuffer_ps[it->arrayIndex][it->vec4Index] = value.x;
-		uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1] = value.y;
-		uniformBuffer_ps[it->arrayIndex][it->vec4Index + 2] = value.z;
-		uniformBuffer_ps[it->arrayIndex][it->vec4Index + 3] = value.w;
+		UpdateUniformBufferPS();
+		_uniformBuffer_ps[it->arrayIndex][it->vec4Index] = value.x;
+		_uniformBuffer_ps[it->arrayIndex][it->vec4Index + 1] = value.y;
+		_uniformBuffer_ps[it->arrayIndex][it->vec4Index + 2] = value.z;
+		_uniformBuffer_ps[it->arrayIndex][it->vec4Index + 3] = value.w;
 	}
 }
 
 void MaterialPrimitive::SetScalarParameter_PS(int arrayIndex, int vec4Index, float value)
 {
-	uniformBuffer_ps[arrayIndex][vec4Index] = value;
+	_uniformBuffer_ps[arrayIndex][vec4Index] = value;
+	UpdateUniformBufferPS();
 }
 
 void MaterialPrimitive::SetVec2Parameter_PS(int arrayIndex, int vec4Index, glm::vec2 value)
 {
-	uniformBuffer_ps[arrayIndex][vec4Index] = value.x;
-	uniformBuffer_ps[arrayIndex][vec4Index + 1] = value.y;
+	_uniformBuffer_ps[arrayIndex][vec4Index] = value.x;
+	_uniformBuffer_ps[arrayIndex][vec4Index + 1] = value.y;
+	UpdateUniformBufferPS();
 }
 
 void MaterialPrimitive::SetVec3Parameter_PS(int arrayIndex, int vec4Index, glm::vec3 value)
 {
-	uniformBuffer_ps[arrayIndex][vec4Index] = value.x;
-	uniformBuffer_ps[arrayIndex][vec4Index + 1] = value.y;
-	uniformBuffer_ps[arrayIndex][vec4Index + 2] = value.z;
+	_uniformBuffer_ps[arrayIndex][vec4Index] = value.x;
+	_uniformBuffer_ps[arrayIndex][vec4Index + 1] = value.y;
+	_uniformBuffer_ps[arrayIndex][vec4Index + 2] = value.z;
+	UpdateUniformBufferPS();
 }
 
 void MaterialPrimitive::SetVec4Parameter_PS(int arrayIndex, int vec4Index, glm::vec4 value)
 {
-	uniformBuffer_ps[arrayIndex][vec4Index] = value.x;
-	uniformBuffer_ps[arrayIndex][vec4Index + 1] = value.y;
-	uniformBuffer_ps[arrayIndex][vec4Index + 2] = value.z;
-	uniformBuffer_ps[arrayIndex][vec4Index + 3] = value.w;
+	_uniformBuffer_ps[arrayIndex][vec4Index] = value.x;
+	_uniformBuffer_ps[arrayIndex][vec4Index + 1] = value.y;
+	_uniformBuffer_ps[arrayIndex][vec4Index + 2] = value.z;
+	_uniformBuffer_ps[arrayIndex][vec4Index + 3] = value.w;
+	UpdateUniformBufferPS();
 }
 
 void MaterialPrimitive::SetScalarParameter_VS(HString name, float value)
@@ -406,7 +460,8 @@ void MaterialPrimitive::SetScalarParameter_VS(HString name, float value)
 		});
 	if (it != _paramterInfos_vs.end())
 	{
-		uniformBuffer_vs[it->arrayIndex][it->vec4Index] = value;
+		UpdateUniformBufferVS();
+		_uniformBuffer_vs[it->arrayIndex][it->vec4Index] = value;
 	}
 }
 
@@ -418,8 +473,9 @@ void MaterialPrimitive::SetVec2Parameter_VS(HString name, glm::vec2 value)
 		});
 	if (it != _paramterInfos_vs.end())
 	{
-		uniformBuffer_vs[it->arrayIndex][it->vec4Index] = value.x;
-		uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1] = value.y;
+		UpdateUniformBufferVS();
+		_uniformBuffer_vs[it->arrayIndex][it->vec4Index] = value.x;
+		_uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1] = value.y;
 	}
 }
 
@@ -431,9 +487,10 @@ void MaterialPrimitive::SetVec3Parameter_VS(HString name, glm::vec3 value)
 		});
 	if (it != _paramterInfos_vs.end())
 	{
-		uniformBuffer_vs[it->arrayIndex][it->vec4Index] = value.x;
-		uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1] = value.y;
-		uniformBuffer_vs[it->arrayIndex][it->vec4Index + 2] = value.z;
+		UpdateUniformBufferVS();
+		_uniformBuffer_vs[it->arrayIndex][it->vec4Index] = value.x;
+		_uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1] = value.y;
+		_uniformBuffer_vs[it->arrayIndex][it->vec4Index + 2] = value.z;
 	}
 }
 
@@ -445,41 +502,47 @@ void MaterialPrimitive::SetVec4Parameter_VS(HString name, glm::vec4 value)
 		});
 	if (it != _paramterInfos_vs.end())
 	{
-		uniformBuffer_vs[it->arrayIndex][it->vec4Index] = value.x;
-		uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1] = value.y;
-		uniformBuffer_vs[it->arrayIndex][it->vec4Index + 2] = value.z;
-		uniformBuffer_vs[it->arrayIndex][it->vec4Index + 3] = value.w;
+		UpdateUniformBufferVS();
+		_uniformBuffer_vs[it->arrayIndex][it->vec4Index] = value.x;
+		_uniformBuffer_vs[it->arrayIndex][it->vec4Index + 1] = value.y;
+		_uniformBuffer_vs[it->arrayIndex][it->vec4Index + 2] = value.z;
+		_uniformBuffer_vs[it->arrayIndex][it->vec4Index + 3] = value.w;
 	}
 }
 
 void MaterialPrimitive::SetScalarParameter_VS(int arrayIndex, int vec4Index, float value)
 {
-	uniformBuffer_vs[arrayIndex][vec4Index] = value;
+	UpdateUniformBufferVS();
+	_uniformBuffer_vs[arrayIndex][vec4Index] = value;
 }
 
 void MaterialPrimitive::SetVec2Parameter_VS(int arrayIndex, int vec4Index, glm::vec2 value)
 {
-	uniformBuffer_vs[arrayIndex][vec4Index] = value.x;
-	uniformBuffer_vs[arrayIndex][vec4Index + 1] = value.y;
+	UpdateUniformBufferVS();;
+	_uniformBuffer_vs[arrayIndex][vec4Index] = value.x;
+	_uniformBuffer_vs[arrayIndex][vec4Index + 1] = value.y;
 }
 
 void MaterialPrimitive::SetVec3Parameter_VS(int arrayIndex, int vec4Index, glm::vec3 value)
 {
-	uniformBuffer_vs[arrayIndex][vec4Index] = value.x;
-	uniformBuffer_vs[arrayIndex][vec4Index + 1] = value.y;
-	uniformBuffer_vs[arrayIndex][vec4Index + 2] = value.z;
+	UpdateUniformBufferVS();
+	_uniformBuffer_vs[arrayIndex][vec4Index] = value.x;
+	_uniformBuffer_vs[arrayIndex][vec4Index + 1] = value.y;
+	_uniformBuffer_vs[arrayIndex][vec4Index + 2] = value.z;
 }
 
 void MaterialPrimitive::SetVec4Parameter_VS(int arrayIndex, int vec4Index, glm::vec4 value)
 {
-	uniformBuffer_vs[arrayIndex][vec4Index] = value.x;
-	uniformBuffer_vs[arrayIndex][vec4Index + 1] = value.y;
-	uniformBuffer_vs[arrayIndex][vec4Index + 2] = value.z;
-	uniformBuffer_vs[arrayIndex][vec4Index + 3] = value.w;
+	UpdateUniformBufferVS();
+	_uniformBuffer_vs[arrayIndex][vec4Index] = value.x;
+	_uniformBuffer_vs[arrayIndex][vec4Index + 1] = value.y;
+	_uniformBuffer_vs[arrayIndex][vec4Index + 2] = value.z;
+	_uniformBuffer_vs[arrayIndex][vec4Index + 3] = value.w;
 }
 
 void MaterialPrimitive::SetTextureSampler(int index, VkSampler sampler)
 {
+	UpdateTextures();
 	_samplers[index] = sampler;
 }
 
@@ -490,22 +553,106 @@ void MaterialPrimitive::SetTextureSampler(HString textureName, VkSampler sampler
 		});
 	if (it != _textureInfos.end())
 	{
+		UpdateTextures();
 		SetTextureSampler(it->index, sampler);
 	}
 }
 
-void MaterialPrimitiveGroup::ResizeOrUpdateDecriptorSet()const
+void MaterialPrimitiveGroup::ResetDecriptorSet(uint8_t numTextures, bool& bNeedUpdateVSUniformBuffer, bool& bNeedUpdatePSUniformBuffer, bool& bNeedUpdateTextures)
 {
-	if (primFrom->uniformBufferSize_vs > 0)
+	auto vkManager = VulkanManager::GetManager();
+	const auto frameIndex = renderer->GetCurrentFrameIndex();
+
+	if(!descriptorSet_uniformBufferVS)
+		descriptorSet_uniformBufferVS.reset(new DescriptorSet(renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVS(), 32, { VK_SHADER_STAGE_VERTEX_BIT }));
+	if (!descriptorSet_uniformBufferPS)
+		descriptorSet_uniformBufferPS.reset(new DescriptorSet(renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(), 32, { VK_SHADER_STAGE_FRAGMENT_BIT }));
+
+	if (primFrom->_uniformBufferSize_vs > 0)
 	{
-		_descriptorSet_mat_vs->ResizeDescriptorBuffer(primFrom->uniformBufferSize_vs);
-		_descriptorSet_mat_vs->BufferMappingWithNeed(primFrom->uniformBuffer_vs.data(), 0, primFrom->uniformBufferSize_vs);
-		_descriptorSet_mat_vs->UpdateDescriptorSet(primFrom->uniformBufferSize_vs, 0);
+		//Update vs buffer
+		bNeedUpdateVSUniformBuffer = descriptorSet_uniformBufferVS->ResizeDescriptorBuffer(primFrom->_uniformBufferSize_vs);
 	}
-	if (primFrom->uniformBufferSize_ps > 0)
+	if (primFrom->_uniformBufferSize_ps > 0)
 	{
-		_descriptorSet_mat_ps->ResizeDescriptorBuffer(primFrom->uniformBufferSize_ps);
-		_descriptorSet_mat_ps->BufferMappingWithNeed(primFrom->uniformBuffer_ps.data(), 0, primFrom->uniformBufferSize_ps);
-		_descriptorSet_mat_ps->UpdateDescriptorSet(primFrom->uniformBufferSize_ps, 0);
+		//Update ps buffer
+		bNeedUpdatePSUniformBuffer = descriptorSet_uniformBufferPS->ResizeDescriptorBuffer(primFrom->_uniformBufferSize_ps);
+	}
+	//Update texture
+	bool bNeedRecreate = false;
+	if (vkManager->GetSwapchainBufferCount() != descriptorSet_texture.size())
+	{
+		descriptorSet_texture.resize(vkManager->GetSwapchainBufferCount());
+		needUpdateTextures.resize(vkManager->GetSwapchainBufferCount());
+		memset(needUpdateTextures.data(), 1, needUpdateTextures.size() * sizeof(uint8_t) );
+		bNeedRecreate = true;
+	}
+	auto& dstex = descriptorSet_texture[frameIndex];
+	if (primFrom->_textureInfos.size() > 0)
+	{
+		if (bNeedRecreate || dstex == VK_NULL_HANDLE || primFrom->_textureInfos.size() != numTextures)
+		{
+			vkManager->AllocateDescriptorSet(vkManager->GetDescriptorPool(), PipelineManager::GetDescriptorSetLayout_TextureSamplerVSPS(numTextures), dstex);
+			bNeedUpdateTextures = true;
+		}
+	}
+	else
+	{
+		//没打算允许Vulkan手动释放符集的功能，所以不做释放，如果已经初始化，那就把数量降低到1，并改为绑定小图，VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT
+		if (dstex != VK_NULL_HANDLE && numTextures != 1)
+		{
+			vkManager->AllocateDescriptorSet(vkManager->GetDescriptorPool(), PipelineManager::GetDescriptorSetLayout_TextureSamplerVSPS(numTextures), dstex);
+			bNeedUpdateTextures = true;
+		}
+	}
+}
+
+void MaterialPrimitiveGroup::UpdateDecriptorSet(bool bNeedUpdateVSUniformBuffer, bool bNeedUpdatePSUniformBuffer, bool bNeedUpdateTextures)
+{
+	const auto& vkManager = VulkanManager::GetManager();
+	const auto frameIndex = renderer->GetCurrentFrameIndex();
+	if (bNeedUpdateVSUniformBuffer)
+		descriptorSet_uniformBufferVS->NeedUpdate();
+	if (bNeedUpdatePSUniformBuffer)
+		descriptorSet_uniformBufferPS->NeedUpdate();
+	//Update vs uniform buffer
+	if (primFrom->_uniformBufferSize_vs > 0)
+	{
+		if (needCopyDataVS)
+		{
+			needCopyDataVS = 0;
+			descriptorSet_uniformBufferVS->BufferMapping(primFrom->_uniformBuffer_vs.data(), 0, primFrom->_uniformBufferSize_vs);
+		}
+		descriptorSet_uniformBufferVS->UpdateDescriptorSet(primFrom->_uniformBufferSize_vs, 0);
+	}
+	//Update ps uniform buffer
+	if (primFrom->_uniformBufferSize_ps > 0)
+	{
+		if (needCopyDataPS)
+		{
+			needCopyDataPS = 0;
+			descriptorSet_uniformBufferPS->BufferMapping(primFrom->_uniformBuffer_ps.data(), 0, primFrom->_uniformBufferSize_ps);
+		}
+		descriptorSet_uniformBufferPS->UpdateDescriptorSet(primFrom->_uniformBufferSize_ps, 0);
+	}
+	//Update vsps _textures
+	if (descriptorSet_texture.size() > 0 && descriptorSet_texture[frameIndex] != VK_NULL_HANDLE)
+	{
+		if (needUpdateTextures[frameIndex] == 1)
+		{
+			needUpdateTextures[frameIndex] = 0;
+			bNeedUpdateTextures = true;
+		}
+		if (bNeedUpdateTextures)
+		{
+			if (primFrom->_textureInfos.size() > 0)
+			{
+				vkManager->UpdateTextureDescriptorSet(descriptorSet_texture[frameIndex], primFrom->GetTextures(), primFrom->GetSamplers());
+			}
+			else
+			{
+				vkManager->UpdateTextureDescriptorSet(descriptorSet_texture[frameIndex], { Texture2D::GetSystemTexture("Black") }, { Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp) });
+			}
+		}
 	}
 }
