@@ -10,6 +10,7 @@
 #include "Serializable.h"
 #include "RendererConfig.h"
 #include "TextureCube.h"
+#include "VulkanObjectManager.h"
 
 std::vector<Texture2D*> Texture2D::_upload_textures;
 std::unordered_map<HString, Texture2D*> Texture2D::_system_textures;
@@ -135,7 +136,7 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 	{
 		return dataPtr->GetData();
 	}
-	else if (!dataPtr->IsAssetLoad() && dataPtr->GetMetadata())
+	else if (!dataPtr->IsAssetLoad() && !dataPtr->GetWeakPtr().expired())
 	{
 		bReload = true;
 	}
@@ -171,7 +172,7 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 	else
 	{
 		//重新刷新asset
-		newTexture = dataPtr->GetMetadata();
+		newTexture = dataPtr->GetWeakPtr().lock();
 	}
 
 	//Create Texture2D Object.

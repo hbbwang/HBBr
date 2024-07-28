@@ -7,6 +7,7 @@ class AssetObject :public Serializable
 public:
 	AssetObject()
 	{
+		bResident = false;
 		SetToolTip();
 	}
 
@@ -21,6 +22,16 @@ public:
 
 	std::weak_ptr<AssetInfoBase> _assetInfo;
 
+	//设置常驻资产,不会因为没有引用的情况下，被定时GC
+	void SetResident(bool isResident)
+	{
+		bResident = isResident;
+	}
+
+	const bool GetResident()const {
+		return bResident;
+	}
+
 	//编辑器ListWidget生成Item图标的时候触发...不要随意在其他(非编辑器)位置执行。
 	//每个HString为单独一行
 	//目前设定是，一般只有资产Load了才会执行
@@ -31,5 +42,9 @@ public:
 		}
 	}
 #endif
+
+protected:
+
+	bool bResident = false;
 
 };

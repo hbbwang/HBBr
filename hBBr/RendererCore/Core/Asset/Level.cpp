@@ -231,7 +231,7 @@ void Level::AddNewObject(std::shared_ptr<GameObject> newObject, bool bSkipWorldC
 		if (_gameObjects.capacity() < 200)
 			_gameObjects.reserve(_gameObjects.capacity() + 25);
 		else
-			_gameObjects.reserve(_gameObjects.capacity() * 1.4);
+			_gameObjects.reserve((size_t)((float)_gameObjectNeedDestroy.capacity() * (float)1.4));
 	}
 	_gameObjects.push_back(newObject);
 	if (!bSkipWorldCallback)
@@ -255,7 +255,7 @@ void Level::RemoveObject(GameObject* object, bool bNotDestoryObject)
 				if (_gameObjectNeedDestroy.capacity() < 200)
 					_gameObjectNeedDestroy.reserve(_gameObjectNeedDestroy.capacity() + 20);
 				else
-					_gameObjectNeedDestroy.reserve(_gameObjectNeedDestroy.capacity() * 1.2);
+					_gameObjectNeedDestroy.reserve((size_t)((float)_gameObjectNeedDestroy.capacity() * (float)1.2));
 			}
 			//延迟到下一帧再销毁
 			_gameObjectNeedDestroy.push_back(*it);

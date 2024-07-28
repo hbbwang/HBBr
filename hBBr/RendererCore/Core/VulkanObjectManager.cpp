@@ -1,7 +1,20 @@
 ﻿#include "VulkanObjectManager.h"
 #include "VkPtr.h"
+#include "AssetObject.h"
 
 std::unique_ptr<VulkanObjectManager> VulkanObjectManager::_vulkanObjectManager;
+
+VulkanObjectManager::VulkanObjectManager() :
+	_assetCheckCount(0),
+	_maxAssetCheckCount(4),//为了提高效率，分帧检查，一帧检查4个资产，按最低标准一秒30帧，那就是1秒检查120个资产。
+	_bStartCheckAsset(false),
+	_gcCurrentSecond(0),
+	_gcMaxSecond(40),
+	_numRequestObjects(0)
+{
+	_vulkanPtrs.reserve(1024);
+	_vulkanObjects.reserve(1024);
+}
 
 std::shared_ptr<VkBuffer> VulkanObjectManager::CreateVkBuffer(VkBufferUsageFlags usage, VkDeviceSize bufferSize, bool bImmediate)
 {
@@ -55,6 +68,14 @@ void VulkanObjectManager::VulkanPtrGC(VkPtrBase* vkptr)
 	_numRequestObjects++;
 }
 
+void VulkanObjectManager::AssetLinkGC(std::weak_ptr<class AssetObject> asset, bool bImmediate)
+{
+	VkAssetObject obj = {};
+	obj.asset = asset;
+	obj.bImmediate = bImmediate;
+	_vulkanObjects.push_back(obj);
+}
+
 void VulkanObjectManager::Update()
 {
 	auto manager = VulkanManager::GetManager();
@@ -83,6 +104,7 @@ void VulkanObjectManager::Update()
 					if (!object->bImmediate && _gcCurrentSecond < _gcMaxSecond)
 						continue;
 					manager->FreeBufferMemory(*object->buffer);
+					delete object;
 					it = _deviceMemoryObjects.erase(it);
 					_numRequestObjects--;
 					continue;
@@ -107,13 +129,14 @@ void VulkanObjectManager::Update()
 					if (!object->bImmediate && _gcCurrentSecond < _gcMaxSecond)
 						continue;
 					manager->DestroyBuffer(*object->buffer);
+					delete object;
 					it = _bufferObjects.erase(it);
 					_numRequestObjects--;
 					continue;
 				}
-				else if(object->frameCount <= swapchainBufferCount)
+				else if (object->frameCount <= swapchainBufferCount)
 					object->frameCount++;
-			}	
+			}
 			it++;
 		}
 	}
@@ -155,6 +178,43 @@ void VulkanObjectManager::Update()
 			it++;
 		}
 	}
+
+	if (_gcCurrentSecond < _gcMaxSecond)
+	{
+		_bStartCheckAsset = true;
+	}
+
+	//if (_vulkanObjects.size() > 0)
+	//{
+	//	if (_bStartCheckAsset)
+	//	{
+	//		const auto num = _vulkanObjects.size();
+	//		auto startIndex = _assetCheckCount;
+	//		for (auto i = _vulkanObjects.begin() + startIndex; i != _vulkanObjects.end(); i++)
+	//		{
+	//			if (!i->asset.expired())
+	//			{
+	//				if (!i->asset.lock()->GetResident())//常驻资产不会被GC
+	//				{
+	//					if (i->asset.lock().use_count() <= 1)
+	//					{
+	//						i->asset.lock()->_assetInfo.lock()->ReleaseData(); //卸载资产
+	//					}
+	//				}
+	//				_assetCheckCount++;
+	//				if (_assetCheckCount - startIndex >= _maxAssetCheckCount)
+	//				{
+	//					break;
+	//				}
+	//			}
+	//		}
+	//		if (_assetCheckCount >= num)
+	//		{
+	//			_assetCheckCount = 0;
+	//		}
+	//	}
+	//}
+
 
 	//到时间重新计时
 	if (_gcCurrentSecond > _gcMaxSecond)

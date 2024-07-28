@@ -212,7 +212,7 @@ void BasePass::SetupPassAndDraw(Pass p)
 
 				//Primtive/Vertex/Index buffer	
 				{
-					modelPrimitiveCount += matPrimGroup->prims.size();//计算PrimitiveCount
+					modelPrimitiveCount += (uint32_t)matPrimGroup->prims.size();//计算PrimitiveCount
 					//更新Primitives
 					for (auto& prim : (matPrimGroup->prims))
 					{

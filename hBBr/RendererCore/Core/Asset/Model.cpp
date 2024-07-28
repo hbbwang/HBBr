@@ -41,7 +41,7 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 	{
 		return dataPtr->GetData();
 	}
-	else if (!dataPtr->IsAssetLoad() && dataPtr->GetMetadata())
+	else if (!dataPtr->IsAssetLoad() && !dataPtr->GetWeakPtr().expired())
 	{
 		bReload = true;
 	}
@@ -90,7 +90,7 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 	else
 	{
 		//重新刷新asset
-		model = dataPtr->GetMetadata();
+		model = dataPtr->GetWeakPtr().lock();
 	}
 
 	model->_assetInfo = dataPtr;

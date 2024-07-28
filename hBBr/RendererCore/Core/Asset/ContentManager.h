@@ -9,6 +9,7 @@
 #include "Asset/HGuid.h"
 #include "HString.h"
 #include "Asset/HGuid.h"
+#include "VulkanObjectManager.h"
 
 #define StdVectorRemoveIf(stdVector,func)  \
 std::remove_if(stdVector.begin(), stdVector.end(), func); 
@@ -115,7 +116,6 @@ public:
 
 protected:
 	bool bAssetLoad = false;
-
 private:
 	virtual std::shared_ptr<class AssetObject> GetSharedData()const {
 		return std::shared_ptr<class AssetObject>();}
@@ -142,6 +142,7 @@ public:
 template<class T>
 class AssetInfo : public AssetInfoBase
 {
+	//只存一份源数据在AssetInofo里,其余时候尽可能通过weak_ptr获取
 	std::shared_ptr<T> data = nullptr;
 public:
 	AssetInfo():AssetInfoBase(){}
@@ -153,8 +154,7 @@ public:
 		}
 		return T::LoadAsset(this->guid);
 	}
-	//获取元数据,很危险,建议使用GetData或者GetAssetData
-	inline const std::shared_ptr<T> GetMetadata()const {
+	inline const std::weak_ptr<T> GetWeakPtr()const {
 		return data;
 	}
 	inline std::weak_ptr<class AssetObject> GetAssetData()const override {
@@ -172,6 +172,8 @@ public:
 	inline void SetData(std::shared_ptr<T> newData){
 		data = std::move(newData);
 		bAssetLoad = true;
+		//插入VOM
+		VulkanObjectManager::Get()->AssetLinkGC(data);
 	}
 private:
 	virtual std::shared_ptr<class AssetObject> GetSharedData()const override {

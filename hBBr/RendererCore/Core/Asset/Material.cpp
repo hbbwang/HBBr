@@ -60,7 +60,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 	{
 		return dataPtr->GetData();
 	}
-	else if (!dataPtr->IsAssetLoad() && dataPtr->GetMetadata())
+	else if (!dataPtr->IsAssetLoad() && !dataPtr->GetWeakPtr().expired())
 	{
 		bReload = true;
 	}
@@ -86,7 +86,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		else
 		{
 			//重新刷新asset
-			mat = dataPtr->GetMetadata();
+			mat = dataPtr->GetWeakPtr().lock();
 		}
 		//MaterialPrimitive
 		mat->_assetInfo = dataPtr;

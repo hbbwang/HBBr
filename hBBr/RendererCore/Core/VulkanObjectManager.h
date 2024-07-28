@@ -29,17 +29,26 @@ struct VkPtrObject
 	uint8_t frameCount = 0;
 };
 
+struct VkAssetObject
+{
+	std::weak_ptr<class AssetObject> asset;
+	uint8_t frameCount = 0;
+	bool bImmediate = false;
+};
+
 //在这里创建的Vulkan对象，拥有最简单的垃圾回收机制
 class VulkanObjectManager
 {
 	friend class VulkanApp;
 	friend class VkPtrBase;
+
+	VulkanObjectManager();
+
 public:
 	HBBR_API HBBR_INLINE static VulkanObjectManager* Get() {
 		if (!_vulkanObjectManager)
 		{
 			_vulkanObjectManager.reset(new VulkanObjectManager);
-			_vulkanObjectManager->_vulkanPtrs.reserve(1024);
 		}
 		return _vulkanObjectManager.get();
 	}
@@ -62,6 +71,8 @@ public:
 
 	void VulkanPtrGC(class VkPtrBase* vkptr);
 
+	void AssetLinkGC(std::weak_ptr<class AssetObject> asset,bool bImmediate = false);
+
 protected:
 	void Update();
 	void Release();
@@ -75,8 +86,13 @@ private:
 	std::vector<VkDeviceMemoryObject*>_deviceMemoryObjects;
 	std::vector<VkPtrObject> _vulkanPtrs;
 
-	double _gcCurrentSecond = 0;
-	double _gcMaxSecond = 40;
+	std::vector<VkAssetObject> _vulkanObjects;
+	uint32_t _assetCheckCount;
+	uint32_t _maxAssetCheckCount;
+	bool _bStartCheckAsset;
+
+	double _gcCurrentSecond;
+	double _gcMaxSecond;
 	HTime _gcTime;
-	uint32_t _numRequestObjects = 0;
+	uint32_t _numRequestObjects;
 };
