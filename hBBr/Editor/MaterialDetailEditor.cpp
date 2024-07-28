@@ -421,7 +421,7 @@ void MaterialDetailEditor::InitMP()
 							if (!getTex.expired())
 							{
 								line->ui.LineEdit->setText(s);
-								_material.lock()->GetPrimitive()->SetTexture(i.index, getTex.lock().get());
+								_material.lock()->GetPrimitive()->SetTexture(i.index, getTex.lock());
 							}
 						}
 					};

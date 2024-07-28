@@ -149,7 +149,7 @@ void MemoryWatcher::UpdateAssetWatcher()
 				}
 				else if (target->object.lock()->IsSystemAsset())
 				{
-					QString text = QString::number(refCount) + QString::fromLocal8Bit("(系统资产)(常驻)");
+					QString text = QString::number(refCount) + QString::fromLocal8Bit("(系统常驻)");
 					target->item->setText(1, text);
 				}
 				else

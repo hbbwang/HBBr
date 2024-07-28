@@ -152,7 +152,7 @@ public:
 		}
 	}*/
 
-	HBBR_API HBBR_INLINE std::vector<class Texture2D*> GetTextures() {
+	HBBR_API HBBR_INLINE std::vector<std::shared_ptr<Texture2D>> GetTextures() {
 		return _textures;
 	}
 
@@ -228,9 +228,9 @@ public:
 
 	HBBR_API void SetTextureSampler(HString textureName, VkSampler sampler);
 
-	HBBR_API void SetTexture(int index, class Texture2D* newTexture);
+	HBBR_API void SetTexture(int index, std::shared_ptr<class Texture2D> newTexture);
 
-	HBBR_API void SetTexture(HString textureName, class Texture2D* newTexture);
+	HBBR_API void SetTexture(HString textureName, std::shared_ptr<class Texture2D> newTexture);
 
 	HBBR_API void UpdateUniformBufferVS();
 
@@ -275,7 +275,7 @@ public:
 private:
 
 	//纹理贴图
-	std::vector<class Texture2D*>		_textures;
+	std::vector<std::shared_ptr<Texture2D>>		_textures;
 
 	//采样器选择
 	std::vector<VkSampler>				_samplers;

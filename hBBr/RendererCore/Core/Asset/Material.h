@@ -28,7 +28,7 @@ public:
 
 	HBBR_API HBBR_INLINE MaterialPrimitive* GetPrimitive()const { return _primitive.get(); }
 
-	HBBR_INLINE std::vector<class Texture2D*> GetTextures() {
+	HBBR_INLINE std::vector<std::shared_ptr<class Texture2D>> GetTextures() {
 		return _primitive->GetTextures();
 	}
 

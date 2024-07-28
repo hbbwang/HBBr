@@ -141,13 +141,13 @@ void PrimitiveProxy::ClearAll()
 	_allGraphicsPrimitives.clear();
 }
 
-void MaterialPrimitive::SetTexture(int index, Texture2D* newTexture)
+void MaterialPrimitive::SetTexture(int index, std::shared_ptr<class Texture2D> newTexture)
 {
 	UpdateTextures();
 	_textures[index] = newTexture;
 }
 
-void MaterialPrimitive::SetTexture(HString textureName, Texture2D* newTexture)
+void MaterialPrimitive::SetTexture(HString textureName, std::shared_ptr<class Texture2D>newTexture)
 {
 	auto it = std::find_if(_textureInfos.begin(), _textureInfos.end(), [textureName](MaterialTextureInfo& info) {
 		return info.name.IsSame(textureName, false);

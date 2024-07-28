@@ -352,15 +352,15 @@ void Texture2D::AddSystemTexture(HString tag, std::weak_ptr<Texture2D> tex)
 	_system_textures.emplace(tag, tex);
 }
 
-Texture2D* Texture2D::GetSystemTexture(HString tag)
+std::shared_ptr<Texture2D> Texture2D::GetSystemTexture(HString tag)
 {
 	//_system_textures[tag];
 	auto it = _system_textures.find(tag);
 	if (it != _system_textures.end())
 	{
-		return it->second.lock().get();
+		return it->second.lock();
 	}
-	return _system_textures.begin()->second.lock().get();
+	return _system_textures.begin()->second.lock();
 }
 
 bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)

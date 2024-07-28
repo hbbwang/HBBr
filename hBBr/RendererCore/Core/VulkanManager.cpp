@@ -2607,7 +2607,7 @@ void VulkanManager::UpdateBufferDescriptorSetAll(DescriptorSet* descriptorSet, u
 	}
 }
 
-void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture2D*> textures, std::vector<VkSampler> samplers)
+void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<std::shared_ptr<Texture2D>> textures, std::vector<VkSampler> samplers)
 {
 	const uint32_t count = (uint32_t)textures.size();
 	std::vector<VkWriteDescriptorSet> descriptorWrite(count);

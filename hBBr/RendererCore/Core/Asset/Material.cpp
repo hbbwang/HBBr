@@ -496,13 +496,13 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 							{
 								auto asset = ContentManager::Get()->GetAsset<Texture2D>(guid, AssetType::Texture2D);
 								if (asset)
-									mat->_primitive->SetTexture(it->index, asset.get());
+									mat->_primitive->SetTexture(it->index, asset);
 							}
 							else if (info.type == MTType::TextureCube)
 							{
 								auto asset = ContentManager::Get()->GetAsset<TextureCube>(guid, AssetType::Texture2D);
 								if (asset)
-									mat->_primitive->SetTexture(it->index, asset.get());
+									mat->_primitive->SetTexture(it->index, asset);
 							}
 						}
 						texCount++;

@@ -112,7 +112,7 @@ public:
 	HBBR_API static void AddSystemTexture(HString tag, std::weak_ptr<Texture2D> tex);
 
 	//获取渲染系统纹理,如果查找失败则返回第一张
-	HBBR_API static Texture2D* GetSystemTexture(HString tag);
+	HBBR_API static std::shared_ptr<Texture2D> GetSystemTexture(HString tag);
 
 	HString _textureName;
 

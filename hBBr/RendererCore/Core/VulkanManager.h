@@ -332,7 +332,7 @@ public:
 
 	void UpdateBufferDescriptorSetAll(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
 
-	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture2D*> textures, std::vector<VkSampler> samplers);
+	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<std::shared_ptr<Texture2D>> textures, std::vector<VkSampler> samplers);
 
 	VkDeviceSize GetMinUboAlignmentSize(VkDeviceSize realSize);
 
