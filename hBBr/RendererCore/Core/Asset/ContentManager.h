@@ -357,8 +357,6 @@ private:
 	/* 更新单个资产的引用关系(info) */
 	void UpdateAssetReference(std::weak_ptr<AssetInfoBase> info);
 
-	void AssetUpdate();
-
 	void Release();
 
 	ContentManager();

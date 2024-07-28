@@ -5,7 +5,6 @@
 #include <functional>
 #include <unordered_map>
 #include "Component/GameObject.h"
-#include "./ThirdParty/pugixml/pugixml.hpp"
 #include "Asset/HGuid.h"
 #include "Asset/Serializable.h"
 

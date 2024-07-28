@@ -3,6 +3,7 @@
 #include "VulkanManager.h"
 #include "HTime.h"
 #include <vector>
+#include <list>
 #include <memory>
 #include <thread>
 #include <typeinfo>
@@ -91,7 +92,8 @@ private:
 	std::vector<VkDeviceMemoryObject*>_deviceMemoryObjects;
 	std::vector<VkPtrObject> _vulkanPtrs;
 
-	std::vector<VkAssetObject> _vulkanObjects;
+	std::list<VkAssetObject> _vulkanObjects;
+	std::list<VkAssetObject> _vulkanObjectsRelease;
 	uint32_t _assetCheckCount;
 	uint32_t _maxAssetCheckCount;
 	bool _bStartCheckAsset;

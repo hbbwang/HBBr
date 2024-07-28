@@ -75,6 +75,7 @@ LOCAL_C_INCLUDES += $(THIRD_PARTY_PATH)/sdl3/Include/
 LOCAL_C_INCLUDES += $(THIRD_PARTY_PATH)/vulkan/
 LOCAL_C_INCLUDES += $(THIRD_PARTY_PATH)/vulkan/glm/
 LOCAL_C_INCLUDES += $(THIRD_PARTY_PATH)/vulkan/Include/
+LOCAL_C_INCLUDES += $(THIRD_PARTY_PATH)/nlohmann/
 
 LOCAL_C_INCLUDES += \
     system/core/libnetutils/include \
@@ -107,6 +108,7 @@ $(wildcard $(THIRD_PARTY_PATH)/vulkan/*.cpp) \
 $(wildcard $(THIRD_PARTY_PATH)/vulkan/glm/*.cpp) \
 $(wildcard $(THIRD_PARTY_PATH)/vulkan/Include/*.cpp) \
 $(wildcard $(THIRD_PARTY_PATH)/vulkan/vulkan_wrapper/*.cpp) \
+$(wildcard $(THIRD_PARTY_PATH)/nlohmann/*.cpp) \
 ) \
 
 

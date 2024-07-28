@@ -845,11 +845,6 @@ void ContentManager::UpdateAssetReference(std::weak_ptr<AssetInfoBase> info)
 	}
 }
 
-void ContentManager::AssetUpdate()
-{
-
-}
-
 std::weak_ptr<AssetInfoBase> ContentManager::GetAssetInfo(HGUID guid, AssetType type)const
 {
 	if (type != AssetType::Unknow)

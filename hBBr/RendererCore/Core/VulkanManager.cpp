@@ -1,7 +1,6 @@
 ﻿#include "VulkanManager.h"
 #include <vector>
 #include <array>
-#include "pugixml.hpp"
 #include "HString.h"
 #include "ConsoleDebug.h"
 #include "RendererConfig.h"

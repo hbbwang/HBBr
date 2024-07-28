@@ -5,7 +5,6 @@
 #include "HString.h"
 #include "Transform.h"
 #include "HGuid.h"
-#include "pugixml/pugixml.hpp"
 #include "Serializable.h"
 
 class GameObject
