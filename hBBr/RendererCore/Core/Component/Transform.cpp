@@ -1,5 +1,11 @@
 ﻿#include "Transform.h"
 #include "GameObject.h"
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/rotate_vector.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/euler_angles.hpp"
+#include "glm/gtx/compatibility.hpp"
+#include "glm/gtx/transform.hpp"
 
 Transform::Transform(GameObject* parent, glm::vec3 pos , glm::vec3 eulerAge, glm::vec3 scale3D)
 {

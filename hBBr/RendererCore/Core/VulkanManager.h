@@ -72,7 +72,7 @@ struct OptionalVulkanDeviceExtensions
 	uint8_t HasQcomRenderPassTransform = 0;
 	uint8_t HasKHRCreateRenderPass2 = 0;
 	uint8_t HasKHRSeparateDepthStencilLayouts = 0;
-	uint8_t HasEXTFullscreenExclusive = 1;
+	uint8_t HasEXTFullscreenExclusive = 0;
 	uint8_t HasKHRShaderFloatControls = 0;
 };
 

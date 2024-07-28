@@ -215,6 +215,8 @@ void VulkanRenderer::Render()
 			//这个 _swapchainIndex 和 _currentFrameIndex 不是一个东西，前者是有效交换链的index，后者只是帧Index
 			uint32_t swapchainIndex = 0;
 
+			manager->WaitForFences({ _executeFence[_currentFrameIndex] });
+
 			if (!manager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], VK_NULL_HANDLE, &swapchainIndex))
 			{
 				ResizeBuffer();
@@ -234,8 +236,6 @@ void VulkanRenderer::Render()
 			if (_world)
 				_world->WorldUpdate();
 
-
-			manager->WaitForFences({ _executeFence[_currentFrameIndex] });
 			auto cmdBuf = _cmdBuf[_currentFrameIndex];
 			manager->ResetCommandBuffer(cmdBuf);
 			manager->BeginCommandBuffer(cmdBuf);
@@ -260,7 +260,7 @@ void VulkanRenderer::Render()
 			}
 
 			manager->EndCommandBuffer(cmdBuf);
-			manager->SubmitQueueForPasses(cmdBuf, GetPresentSemaphore(), GetSubmitSemaphore(), _executeFence[_currentFrameIndex]);
+			manager->SubmitQueueForPasses(cmdBuf, &_presentSemaphore[_currentFrameIndex], &_queueSubmitSemaphore[_currentFrameIndex], _executeFence[_currentFrameIndex]);
 
 			//Present swapchain.
 			if (!manager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], swapchainIndex))
@@ -299,6 +299,7 @@ bool VulkanRenderer::ResizeBuffer()
 		VulkanManager* _vulkanManager = VulkanManager::GetManager();
 		{
 			vkDeviceWaitIdle(_vulkanManager->GetDevice());
+
 			_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
 #if __ANDROID__
 			_Sleep(200);
@@ -315,6 +316,7 @@ bool VulkanRenderer::ResizeBuffer()
 			_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
 			_renderSize = _surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore, &_queueSubmitSemaphore
 			, &_executeFence, false, true);
+
 			if (_swapchain == VK_NULL_HANDLE)
 			{
 				return false;
@@ -327,6 +329,7 @@ bool VulkanRenderer::ResizeBuffer()
 			bResizeBuffer = false;
 
 			//重置buffer会导致画面丢失，我们要在这一瞬间重新把buffer绘制回去，缓解缩放卡顿。
+			_currentFrameIndex = 0;
 			//for (int i = 0; i < (int)_vulkanManager->GetSwapchainBufferCount(); i++)
 			//{
 				Render();

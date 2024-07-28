@@ -613,6 +613,13 @@ void VulkanManager::InitDevice()
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRSeparateDepthStencilLayouts = 1;
 				}
+				else if (bHasRenderPass2Ext && strcmp(availableExts[i].extensionName, VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME) == 0)
+				{
+					//全屏支持
+					extensions.push_back(VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasEXTFullscreenExclusive = 1;
+					}
 			}
 		}
 

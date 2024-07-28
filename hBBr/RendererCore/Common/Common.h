@@ -39,15 +39,15 @@
 
 //Math include
 #include "glm/glm.hpp"
-#include "glm/gtx/compatibility.hpp"
 #include "glm/matrix.hpp"
 #include "glm/ext.hpp"
 #include "glm/exponential.hpp"
 #include "glm/geometric.hpp"
-#include "glm/gtx/euler_angles.hpp"
-#include "glm/gtx/rotate_vector.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtx/transform.hpp"
+//#include "glm/gtx/rotate_vector.hpp"
+//#include "glm/gtc/matrix_transform.hpp"
+//#include "glm/gtx/euler_angles.hpp"
+//#include "glm/gtx/compatibility.hpp"
+//#include "glm/gtx/transform.hpp"
 
 #include "HString.h"
 

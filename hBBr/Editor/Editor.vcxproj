@@ -86,7 +86,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core;$(SolutionDir)RendererCore\Editor;$(SolutionDir)RendererCore\Form;$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir);$(SolutionDir)ThirdParty\Imgui;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)RendererCore\Core\Asset;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core;$(SolutionDir)RendererCore\Editor;$(SolutionDir)RendererCore\Form;$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir);$(SolutionDir)ThirdParty\Imgui;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)RendererCore\Core\Asset;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>IS_EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>
@@ -102,7 +102,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core;$(SolutionDir)RendererCore\Editor;$(SolutionDir)RendererCore\Form;$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir);$(SolutionDir)ThirdParty\Imgui;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)RendererCore\Core\Asset;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore\Common\;$(SolutionDir)RendererCore\Core;$(SolutionDir)RendererCore\Editor;$(SolutionDir)RendererCore\Form;$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty\;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir);$(SolutionDir)ThirdParty\Imgui;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)RendererCore\Core\Asset;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>IS_EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>
