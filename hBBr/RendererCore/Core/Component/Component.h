@@ -64,7 +64,7 @@ struct AssetRef
 {
 	HString path = "";
 	HString displayName = "";
-	std::weak_ptr<AssetInfoBase> assetInfo;
+	std::shared_ptr<AssetObject> asset;
 	std::function<void()> callBack = []() {};
 };
 

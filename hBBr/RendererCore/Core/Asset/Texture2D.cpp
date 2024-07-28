@@ -13,7 +13,7 @@
 #include "VulkanObjectManager.h"
 
 std::vector<Texture2D*> Texture2D::_upload_textures;
-std::unordered_map<HString, Texture2D*> Texture2D::_system_textures;
+std::unordered_map<HString, std::weak_ptr<Texture2D>> Texture2D::_system_textures;
 std::vector<VkSampler>Texture2D::_samplers;
 uint64_t Texture2D::_textureStreamingSize = 0;
 uint64_t Texture2D::_maxTextureStreamingSize = (uint64_t)4 * (uint64_t)1024 * (uint64_t)1024 * (uint64_t)1024; //4 GB
@@ -115,7 +115,7 @@ std::shared_ptr<Texture2D> Texture2D::CreateTexture2D(
 	return newTexture;
 }
 
-std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usageFlags)
+std::shared_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usageFlags)
 {
 	const auto texAssets = ContentManager::Get()->GetAssets(AssetType::Texture2D);
 	HString guidStr = GUIDToString(guid);
@@ -125,7 +125,7 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 		if (it == texAssets.end())
 		{
 			MessageOut(HString("Can not find [" + guidStr + "] texture in content manager."), false, false, "255,255,0");
-			return std::weak_ptr<Texture2D>();
+			return nullptr;
 		}
 	}
 	auto dataPtr = std::static_pointer_cast<AssetInfo<Texture2D>>(it->second);
@@ -136,7 +136,7 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 	{
 		return dataPtr->GetData();
 	}
-	else if (!dataPtr->IsAssetLoad() && !dataPtr->GetWeakPtr().expired())
+	else if (!dataPtr->IsAssetLoad() && dataPtr->GetSharedPtr())
 	{
 		bReload = true;
 	}
@@ -145,7 +145,7 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 	HString filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
-		return std::weak_ptr<Texture2D>();
+		return nullptr;
 	}
 #if _DEBUG
 	ConsoleDebug::print_endl("Import 2D(dds) texture :" + filePath, "255,255,255");
@@ -155,13 +155,13 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 	auto out = loader.LoadDDSToImage();
 	if (out == nullptr)
 	{
-		return std::weak_ptr<Texture2D>();
+		return nullptr;
 	}
 
 	if (out->isCubeMap)
 	{
 		ConsoleDebug::printf_endl_warning("The texture asset is a cube map.");
-		return std::weak_ptr<Texture2D>();
+		return nullptr;
 	}
 
 	std::shared_ptr<Texture2D> newTexture;
@@ -172,7 +172,7 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 	else
 	{
 		//重新刷新asset
-		newTexture = dataPtr->GetWeakPtr().lock();
+		newTexture = dataPtr->GetSharedPtr();
 	}
 
 	//Create Texture2D Object.
@@ -204,7 +204,7 @@ std::weak_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usag
 	//标记为需要CopyBufferToImage
 	newTexture->UploadToGPU();
 
-	dataPtr->SetData(std::move(newTexture));
+	dataPtr->SetData(newTexture);
 
 	return dataPtr->GetData();
 }
@@ -298,18 +298,36 @@ void Texture2D::GlobalInitialize()
 	auto testTex = ContentManager::Get()->LoadAsset<Texture2D>(HGUID("eb8ac147-e469-f5a3-c48a-5daec8880f1f"));
 	auto blackCubeMapTex = ContentManager::Get()->LoadAsset<TextureCube>(HGUID("f1490ebb-c873-4baa-b4bf-e8292af28cf5"));
 
-	if(!uvGridTex.expired())
-		Texture2D::AddSystemTexture("UVGrid", uvGridTex.lock().get());
-	if (!whiteTex.expired())
-		Texture2D::AddSystemTexture("White", whiteTex.lock().get());
-	if (!blackTex.expired())
-		Texture2D::AddSystemTexture("Black", blackTex.lock().get());
-	if (!normalTex.expired())
-		Texture2D::AddSystemTexture("Normal", normalTex.lock().get());
-	if (!testTex.expired())
-		Texture2D::AddSystemTexture("TestTex", testTex.lock().get());
-	if (!blackCubeMapTex.expired())
-		Texture2D::AddSystemTexture("CubeMapBalck", blackCubeMapTex.lock().get());
+	if (uvGridTex)
+	{
+		uvGridTex->SetSystemAsset(true);
+		Texture2D::AddSystemTexture("UVGrid", uvGridTex);
+	}
+	if (whiteTex)
+	{
+		whiteTex->SetSystemAsset(true);
+		Texture2D::AddSystemTexture("White", whiteTex);
+	}
+	if (blackTex)
+	{
+		blackTex->SetSystemAsset(true);
+		Texture2D::AddSystemTexture("Black", blackTex);
+	}
+	if (normalTex)
+	{
+		normalTex->SetSystemAsset(true);
+		Texture2D::AddSystemTexture("Normal", normalTex);
+	}
+	if (testTex)
+	{
+		testTex->SetSystemAsset(true);
+		Texture2D::AddSystemTexture("TestTex", testTex);
+	}
+	if (blackCubeMapTex)
+	{
+		blackCubeMapTex->SetSystemAsset(true);
+		Texture2D::AddSystemTexture("CubeMapBalck", blackCubeMapTex);
+	}
 }
 
 void Texture2D::GlobalUpdate()
@@ -324,12 +342,13 @@ void Texture2D::GlobalRelease()
 		vkDestroySampler(manager->GetDevice(), i, nullptr);
 	}
 	_samplers.clear();
+	_system_textures.clear();
 }
 
-void Texture2D::AddSystemTexture(HString tag, Texture2D* tex)
+void Texture2D::AddSystemTexture(HString tag, std::weak_ptr<Texture2D> tex)
 {
 	//系统纹理是渲染器底层预设纹理，需要直接准备就绪
-	tex->CopyBufferToTextureImmediate();
+	tex.lock()->CopyBufferToTextureImmediate();
 	_system_textures.emplace(tag, tex);
 }
 
@@ -339,9 +358,9 @@ Texture2D* Texture2D::GetSystemTexture(HString tag)
 	auto it = _system_textures.find(tag);
 	if (it != _system_textures.end())
 	{
-		return it->second;
+		return it->second.lock().get();
 	}
-	return _system_textures.begin()->second;
+	return _system_textures.begin()->second.lock().get();
 }
 
 bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)

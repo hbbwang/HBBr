@@ -35,7 +35,7 @@ std::shared_ptr<TextureCube> TextureCube::CreateTextureCube(uint32_t width, uint
 	return newTexture;
 }
 
-std::weak_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags usageFlags)
+std::shared_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags usageFlags)
 {
 	const auto texAssets = ContentManager::Get()->GetAssets(AssetType::TextureCube);
 	HString guidStr = GUIDToString(guid);
@@ -45,7 +45,7 @@ std::weak_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags 
 		if (it == texAssets.end())
 		{
 			MessageOut(HString("Can not find [" + guidStr + "] cube texture in content manager."), false, false, "255,255,0");
-			return std::weak_ptr<TextureCube>();
+			return nullptr;
 		}
 	}
 	auto dataPtr = std::static_pointer_cast<AssetInfo<TextureCube>>(it->second);
@@ -56,7 +56,7 @@ std::weak_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags 
 	{
 		return dataPtr->GetData();
 	}
-	else if (!dataPtr->IsAssetLoad() && !dataPtr->GetWeakPtr().expired())
+	else if (!dataPtr->IsAssetLoad() && dataPtr->GetSharedPtr())
 	{
 		bReload = true;
 	}
@@ -65,7 +65,7 @@ std::weak_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags 
 	HString filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
-		return std::weak_ptr<TextureCube>();
+		return nullptr;
 	}
 #if _DEBUG
 	ConsoleDebug::print_endl("Import cubemap(dds) texture :" + filePath, "255,255,255");
@@ -75,13 +75,13 @@ std::weak_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags 
 	auto out = loader.LoadDDSToImage();
 	if (out == nullptr)
 	{
-		return std::weak_ptr<TextureCube>();
+		return nullptr;
 	}
 
 	if (!out->isCubeMap)
 	{
 		ConsoleDebug::printf_endl_warning("The texture asset is not a cube map.");
-		return std::weak_ptr<TextureCube>();
+		return nullptr;
 	}
 
 	std::shared_ptr<TextureCube> newTexture;
@@ -92,7 +92,7 @@ std::weak_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags 
 	else
 	{
 		//重新刷新asset
-		newTexture = dataPtr->GetWeakPtr().lock();
+		newTexture = dataPtr->GetSharedPtr();
 	}
 
 	//Create TextureCube Object.
@@ -125,7 +125,7 @@ std::weak_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags 
 	//标记为需要CopyBufferToImage
 	newTexture->UploadToGPU();
 
-	dataPtr->SetData(std::move(newTexture));
+	dataPtr->SetData(newTexture);
 	return dataPtr->GetData();
 }
 

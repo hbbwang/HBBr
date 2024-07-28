@@ -69,6 +69,7 @@ struct AssetInfoRefTemp
 
 class AssetInfoBase
 {
+	friend class AssetObject;
 public:
 	HGUID guid;
 	AssetType type;
@@ -112,22 +113,30 @@ public:
 
 	virtual ~AssetInfoBase() {}
 
-	virtual std::weak_ptr<class AssetObject> GetAssetData()const { return std::weak_ptr<class AssetObject>(); }
-
 protected:
 	bool bAssetLoad = false;
-private:
-	virtual std::shared_ptr<class AssetObject> GetSharedData()const {
-		return std::shared_ptr<class AssetObject>();}
-
+	bool bResident = false;
+	bool bSystemAsset = false;
 public:
 	void NeedToReload() {
 		bAssetLoad = false;
 	}
 
+	virtual int GetRefCount() {
+		return 0;
+	}
+
+	virtual bool IsSystemAsset() {
+		return bSystemAsset;
+	}
+
+	virtual std::shared_ptr<class AssetObject> GetSharedAssetObject(bool bLoad = true)const {
+		return std::shared_ptr<class AssetObject>();
+	}
+
 	template<class T>
-	std::weak_ptr<T>GetAssetObject()const {
-		return std::static_pointer_cast<T>(GetSharedData());
+	std::shared_ptr<T>GetAssetObject()const {
+		return std::static_pointer_cast<T>(GetSharedAssetObject());
 	}
 
 	virtual void ReleaseData() {}
@@ -137,32 +146,22 @@ public:
 	}
 };
 
-#define GetAssetByInfo(type,assetInfo)  (std::weak_ptr<type>)std::static_pointer_cast<type>(assetInfo->GetAssetData().lock())
-
 template<class T>
 class AssetInfo : public AssetInfoBase
 {
-	//只存一份源数据在AssetInofo里,其余时候尽可能通过weak_ptr获取
 	std::shared_ptr<T> data = nullptr;
 public:
 	AssetInfo():AssetInfoBase(){}
 	virtual ~AssetInfo() { ReleaseData(); }
-	inline std::weak_ptr<T> GetData()const{
+	inline std::shared_ptr<T> GetData()const{
 		if (data && bAssetLoad)
 		{
 			return data;
 		}
 		return T::LoadAsset(this->guid);
 	}
-	inline const std::weak_ptr<T> GetWeakPtr()const {
+	inline const std::shared_ptr<T> GetSharedPtr()const {
 		return data;
-	}
-	inline std::weak_ptr<class AssetObject> GetAssetData()const override {
-		if (data && bAssetLoad)
-		{
-			return data;
-		}
-		return T::LoadAsset(this->guid);
 	}
 	inline void ReleaseData() override{
 		data.reset();
@@ -175,13 +174,14 @@ public:
 		//插入VOM
 		VulkanObjectManager::Get()->AssetLinkGC(data);
 	}
-private:
-	virtual std::shared_ptr<class AssetObject> GetSharedData()const override {
-		if (GetData().expired() || !bAssetLoad)
-		{
-			T::LoadAsset(this->guid);
-		}
-		return data;
+	virtual std::shared_ptr<class AssetObject> GetSharedAssetObject(bool bLoad = true)const override {
+		if (bLoad)
+			return GetData();
+		else
+			return data;
+	}
+	virtual int GetRefCount() override {
+		return (int)data.use_count(); 
 	}
 };
 
@@ -210,6 +210,7 @@ struct AssetImportInfo
 class ContentManager
 {
 	friend class VulkanApp;
+	friend class VulkanObjectManager;
 public:
 	~ContentManager();
 
@@ -333,12 +334,12 @@ public:
 	HBBR_API std::weak_ptr<AssetInfoBase> ReloadAsset(nlohmann::json& assetNode, HString& repositoryName);
 
 	template<class T>
-	HBBR_INLINE std::weak_ptr<T> GetAsset(HGUID guid , AssetType type = AssetType::Unknow)
+	HBBR_INLINE std::shared_ptr<T> GetAsset(HGUID guid , AssetType type = AssetType::Unknow)
 	{
 		auto assetInfo = GetAssetInfo(guid , type);
 		if (assetInfo.expired())
 		{
-			return std::weak_ptr<T>();
+			return nullptr;
 		}
 		auto asset = std::static_pointer_cast<AssetInfo<T>>(assetInfo.lock());
 		return asset->GetData();
@@ -346,7 +347,7 @@ public:
 
 	//通过已知类型和guid加载资产
 	template<class T>
-	HBBR_INLINE std::weak_ptr<T> LoadAsset(HGUID guid)
+	HBBR_INLINE std::shared_ptr<T> LoadAsset(HGUID guid)
 	{
 		return T::LoadAsset(guid);
 	}
@@ -355,6 +356,8 @@ private:
 
 	/* 更新单个资产的引用关系(info) */
 	void UpdateAssetReference(std::weak_ptr<AssetInfoBase> info);
+
+	void AssetUpdate();
 
 	void Release();
 

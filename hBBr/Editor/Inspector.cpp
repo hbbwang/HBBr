@@ -330,9 +330,9 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 					for (int i = 0; i < refs->size(); i++)
 					{
 						HString text = "";
-						if (!refs->at(i).assetInfo.expired())
+						if (refs->at(i).asset)
 						{
-							text = refs->at(i).assetInfo.lock()->virtualFilePath;
+							text = refs->at(i).asset->_assetInfo.lock()->virtualFilePath;
 						}
 						AssetLine* line = new AssetLine(this, text, p.condition);
 						if (refs->at(i).displayName.Length() > 0)
@@ -346,9 +346,9 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 
 						//component callback
 						refs->at(i).callBack = [line, refs,i]() {
-							if (!refs->at(i).assetInfo.expired())
+							if (refs->at(i).asset)
 							{
-								line->ui.LineEdit->setText(refs->at(i).assetInfo.lock()->virtualFilePath.c_str());
+								line->ui.LineEdit->setText(refs->at(i).asset->_assetInfo.lock()->virtualFilePath.c_str());
 							}
 							else
 							{
@@ -357,7 +357,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 						};
 						//查找按钮
 						line->_bindFindButtonFunc = [refs, i](const char* p) {
-							auto assetInfo = refs->at(i).assetInfo;
+							auto assetInfo = refs->at(i).asset->_assetInfo;
 							if (!assetInfo.expired())
 							{
 								auto treeItems = assetInfo.lock()->virtualPath.Split("/");
@@ -397,17 +397,17 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 				{
 					AssetRef* ref = (AssetRef*)p.value;
 					HString text = "";
-					if (!ref->assetInfo.expired())
+					if (ref->asset)
 					{
-						text = ref->assetInfo.lock()->virtualFilePath;
+						text = ref->asset->_assetInfo.lock()->virtualFilePath;
 					}
 					AssetLine* line = new AssetLine(this, text, p.condition);
 					pw->AddItem(p.name.c_str(), line, 30, group_comp);
 					//component callback
 					ref->callBack = [line,ref]() {
-						if (!ref->assetInfo.expired())
+						if (ref->asset)
 						{
-							line->ui.LineEdit->setText(ref->assetInfo.lock()->virtualFilePath.c_str());
+							line->ui.LineEdit->setText(ref->asset->_assetInfo.lock()->virtualFilePath.c_str());
 						}
 						else
 						{
@@ -416,7 +416,7 @@ void Inspector::LoadInspector_GameObject(std::weak_ptr<GameObject> gameObj, bool
 					};
 					//查找按钮
 					line->_bindFindButtonFunc = [ref](const char* p) {
-						auto assetInfo = ref->assetInfo;
+						auto assetInfo = ref->asset->_assetInfo;
 						if (!assetInfo.expired())
 						{
 							auto treeItems = assetInfo.lock()->virtualPath.Split("/");

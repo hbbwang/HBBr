@@ -211,7 +211,7 @@ void MaterialDetailEditor::Init()
 				modelComp->SetModel(HGUID("6146e15a-0632-b197-b6f9-b12fc8a16b05"));
 				for (int i = 0; i < modelComp->GetMaterialNum(); i++)
 				{
-					modelComp->SetMaterial(_material, i);
+					modelComp->SetMaterial(_material.lock(), i);
 				}
 				//Directional light
 				_directionalLight = renderer->GetWorld().lock()->SpawnGameObject("PreviewLight", renderer->GetWorld().lock()->_editorLevel.get());

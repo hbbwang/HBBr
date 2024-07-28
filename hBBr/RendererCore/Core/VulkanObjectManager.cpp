@@ -179,9 +179,9 @@ void VulkanObjectManager::Update()
 		}
 	}
 
-	if (_gcCurrentSecond < _gcMaxSecond)
+	if (_gcCurrentSecond >= _gcMaxSecond)
 	{
-		_bStartCheckAsset = true;
+		ContentManager::Get()->AssetUpdate();
 	}
 
 	//if (_vulkanObjects.size() > 0)

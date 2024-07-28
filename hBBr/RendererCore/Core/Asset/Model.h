@@ -134,7 +134,7 @@ class Model :public AssetObject
 {
 public:
 
-	HBBR_API static std::weak_ptr<Model> LoadAsset(HGUID guid);
+	HBBR_API static std::shared_ptr<Model> LoadAsset(HGUID guid);
 
 	HBBR_API static bool BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prims,class VulkanRenderer* renderer);
 

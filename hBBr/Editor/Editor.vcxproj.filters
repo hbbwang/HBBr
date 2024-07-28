@@ -33,6 +33,9 @@
     <Filter Include="Widgets\Extension">
       <UniqueIdentifier>{26e3ddb3-cb37-4cbe-8494-b6ad4b86c3e1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Widgets\Tool">
+      <UniqueIdentifier>{b155491b-65d5-403b-95d2-45c05193ba20}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="EditorMain.qrc">
@@ -130,6 +133,9 @@
     <ClCompile Include="CustomTitleBar.cpp">
       <Filter>Widgets\Extension</Filter>
     </ClCompile>
+    <ClCompile Include="MemoryWatcher.cpp">
+      <Filter>Widgets\Tool</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="EditorMain.h">
@@ -210,6 +216,9 @@
     <QtMoc Include="CustomTitleBar.h">
       <Filter>Widgets\Extension</Filter>
     </QtMoc>
+    <QtMoc Include="MemoryWatcher.h">
+      <Filter>Widgets\Tool</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditorCommonFunction.h">
@@ -278,6 +287,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="WorldSelector.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="MemoryWatcher.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

@@ -454,8 +454,8 @@ void Shader::ReloadMaterialShaderCacheAndPipelineObject(std::weak_ptr<Material> 
 	{
 		auto matCache = i.second->GetAssetObject<Material>();
 		if (
-			matCache.lock()->GetPrimitive()->_graphicsIndex.GetVSShaderName() == vs_shaderSourceName
-			|| matCache.lock()->GetPrimitive()->_graphicsIndex.GetPSShaderName() == ps_shaderSourceName
+			matCache->GetPrimitive()->_graphicsIndex.GetVSShaderName() == vs_shaderSourceName
+			|| matCache->GetPrimitive()->_graphicsIndex.GetPSShaderName() == ps_shaderSourceName
 			)
 		{
 			i.second->NeedToReload();

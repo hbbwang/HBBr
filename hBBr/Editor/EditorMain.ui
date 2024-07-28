@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>600</width>
-     <height>18</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="MainMenu">
@@ -47,8 +47,15 @@
     </property>
     <addaction name="ResetWindowStyle"/>
    </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>工具</string>
+    </property>
+    <addaction name="MemoryWatcher"/>
+   </widget>
    <addaction name="MainMenu"/>
    <addaction name="menu_3"/>
+   <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="CreateNewWorld">
@@ -89,6 +96,11 @@
   <action name="OpenWorld">
    <property name="text">
     <string>打开世界</string>
+   </property>
+  </action>
+  <action name="MemoryWatcher">
+   <property name="text">
+    <string>内存观察器</string>
    </property>
   </action>
  </widget>

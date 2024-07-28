@@ -182,6 +182,7 @@
     <ClCompile Include="Inspector.cpp" />
     <ClCompile Include="LineEditDialog.cpp" />
     <ClCompile Include="MaterialDetailEditor.cpp" />
+    <ClCompile Include="MemoryWatcher.cpp" />
     <ClCompile Include="PropertyClass.cpp" />
     <ClCompile Include="PropertyWidget.cpp" />
     <ClCompile Include="RenderView.cpp" />
@@ -211,6 +212,7 @@
     <QtUic Include="DetailEditor_Attribute.ui" />
     <QtUic Include="DetailEditor_Parameter.ui" />
     <QtUic Include="DetailEditor_Renderer.ui" />
+    <QtUic Include="MemoryWatcher.ui" />
     <QtUic Include="ToolBox.ui" />
     <QtUic Include="ToolPage.ui" />
     <QtUic Include="VectorSetting.ui" />
@@ -223,6 +225,7 @@
     <QtMoc Include="SceneOutline.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="MemoryWatcher.h" />
     <QtMoc Include="TextureDetailEditor.h" />
     <QtMoc Include="SDLWidget.h" />
     <QtMoc Include="WorldSelector.h" />

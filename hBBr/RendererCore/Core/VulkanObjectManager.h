@@ -58,6 +58,11 @@ public:
 		return _gcCurrentSecond;
 	}
 
+	HBBR_API HBBR_INLINE double GetMaxGCTime()
+	{
+		return _gcMaxSecond;
+	}
+
 	//设置GC的时间间隔，建议不要少于10秒
 	HBBR_API HBBR_INLINE void SetGCInterval(uint32_t interval)
 	{

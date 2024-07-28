@@ -24,7 +24,9 @@ std::weak_ptr<Material> Material::GetDefaultMaterial()
 	static std::weak_ptr<Material> defaultMat;
 	if (defaultMat.expired())
 	{
-		defaultMat = Material::LoadAsset(HGUID("b51e2e9a-0985-75e8-6138-fa95efcbab57"));
+		auto shared = Material::LoadAsset(HGUID("b51e2e9a-0985-75e8-6138-fa95efcbab57"));
+		shared->SetResident(true);
+		defaultMat = shared;
 	}
 	return defaultMat;
 }
@@ -34,12 +36,14 @@ std::weak_ptr<Material> Material::GetErrorMaterial()
 	static std::weak_ptr<Material> errorMat;
 	if (errorMat.expired())
 	{
-		errorMat = Material::LoadAsset(HGUID("22d44cd6-68c3-4997-ad5f-3d52c45ef8fe"));
+		auto shared = Material::LoadAsset(HGUID("22d44cd6-68c3-4997-ad5f-3d52c45ef8fe"));
+		shared->SetResident(true);
+		errorMat = shared;
 	}
 	return errorMat;
 }
 
-std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
+std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 {
 	const auto matAssets = ContentManager::Get()->GetAssets(AssetType::Material);
 	HString guidStr = GUIDToString(guid);
@@ -49,7 +53,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		if (it == matAssets.end())
 		{
 			MessageOut(HString("Can not find [" + guidStr + "] material in content manager."), false, false, "255,255,0");
-			return std::weak_ptr<Material>();
+			return nullptr;
 		}
 	}
 	auto dataPtr = std::static_pointer_cast<AssetInfo<Material>>(it->second);
@@ -60,7 +64,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 	{
 		return dataPtr->GetData();
 	}
-	else if (!dataPtr->IsAssetLoad() && !dataPtr->GetWeakPtr().expired())
+	else if (!dataPtr->IsAssetLoad() && dataPtr->GetSharedPtr())
 	{
 		bReload = true;
 	}
@@ -69,7 +73,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 	HString filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
-		return std::weak_ptr<Material>();
+		return nullptr;
 	}
 
 	nlohmann::json json;
@@ -86,7 +90,7 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 		else
 		{
 			//重新刷新asset
-			mat = dataPtr->GetWeakPtr().lock();
+			mat = dataPtr->GetSharedPtr();
 		}
 		//MaterialPrimitive
 		mat->_assetInfo = dataPtr;
@@ -491,14 +495,14 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 							if (info.type == MTType::Texture2D)
 							{
 								auto asset = ContentManager::Get()->GetAsset<Texture2D>(guid, AssetType::Texture2D);
-								if (!asset.expired())
-									mat->_primitive->SetTexture(it->index, asset.lock().get());
+								if (asset)
+									mat->_primitive->SetTexture(it->index, asset.get());
 							}
 							else if (info.type == MTType::TextureCube)
 							{
 								auto asset = ContentManager::Get()->GetAsset<TextureCube>(guid, AssetType::Texture2D);
-								if (!asset.expired())
-									mat->_primitive->SetTexture(it->index, asset.lock().get());
+								if (asset)
+									mat->_primitive->SetTexture(it->index, asset.get());
 							}
 						}
 						texCount++;
@@ -534,11 +538,11 @@ std::weak_ptr<Material> Material::LoadAsset(HGUID guid)
 			PrimitiveProxy::AddMaterialPrimitive(mat->_primitive.get());
 		}
 
-		dataPtr->SetData(std::move(mat));
+		dataPtr->SetData(mat);
 		//_allMaterials.emplace(std::make_pair(guid, std::move(mat)));
 		return dataPtr->GetData();
 	}
-	return std::weak_ptr<Material>();
+	return nullptr;
 }
 
 void Material::SaveAsset(HString path)

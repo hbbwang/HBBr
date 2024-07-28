@@ -18,9 +18,9 @@ public:
 	//写Hard code之类的就比较适合。
 	HBBR_API void SetModel(HGUID guid);
 
-	HBBR_API virtual void SetModel(std::weak_ptr<class Model> model, std::vector<std::weak_ptr<class Material>>* mats = nullptr);
+	HBBR_API virtual void SetModel(std::shared_ptr<class Model> model, std::vector<std::shared_ptr<class Material>>* mats = nullptr);
 
-	HBBR_API virtual void SetMaterial(std::weak_ptr<class Material>mat, int index = 0);
+	HBBR_API virtual void SetMaterial(std::shared_ptr<class Material>mat, int index = 0);
 
 	HBBR_API int GetMaterialNum()const {
 		return (int)_materials.size();
@@ -53,4 +53,4 @@ private:
 
 	bool _bErrorStatus = false;
 
-};
+}; 

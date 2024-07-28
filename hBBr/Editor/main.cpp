@@ -64,7 +64,7 @@ protected:
         }
         if (event->type() == QEvent::MouseMove)
         {
-            if (watched == _titleBar)
+            /*if (watched == _titleBar)
             {
                 _titleBar->MouseMoveUpdate();
             }
@@ -73,7 +73,7 @@ protected:
                 QWidget* widget = (QWidget*)watched;
                 if (widget->cursor() != Qt::ArrowCursor)
                     widget->setCursor(Qt::ArrowCursor);
-            }
+            }*/
         }
         return false; // 事件未被处理，继续传递
     }

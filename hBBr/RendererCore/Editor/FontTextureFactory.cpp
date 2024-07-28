@@ -33,7 +33,7 @@ void FontTextureFactory::LoadFontTexture()
 		_fontTexture = Texture2D::CreateTexture2D(imageData->data_header.width, imageData->data_header.height, imageData->texFormat, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, "FontTexture");
 		_fontTexture->_imageData = *imageData;
 		//上传到GPU,并储存一份指针到System Texture2D
-		Texture2D::AddSystemTexture("Font", _fontTexture.get());
+		Texture2D::AddSystemTexture("Font", _fontTexture);
 	}
 
 	//导入文字信息

@@ -20,7 +20,7 @@
 
 #include "ContentManager.h"
 
-std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
+std::shared_ptr<Model> Model::LoadAsset(HGUID guid)
 {
 	const auto modelAssets = ContentManager::Get()->GetAssets(AssetType::Model);
 	HString guidStr = GUIDToString(guid);
@@ -30,7 +30,7 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 		if (it == modelAssets.end())
 		{
 			MessageOut(HString("Can not find [" + guidStr + "] model in content manager."), false, false, "255,255,0");
-			return std::weak_ptr<Model>();
+			return nullptr;
 		}
 	}
 	auto dataPtr = std::static_pointer_cast<AssetInfo<Model>>(it->second);
@@ -41,7 +41,7 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 	{
 		return dataPtr->GetData();
 	}
-	else if (!dataPtr->IsAssetLoad() && !dataPtr->GetWeakPtr().expired())
+	else if (!dataPtr->IsAssetLoad() && dataPtr->GetSharedPtr())
 	{
 		bReload = true;
 	}
@@ -50,7 +50,7 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 	HString filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
-		return std::weak_ptr<Model>();
+		return nullptr;
 	}
 	//导入fbx文件
 #if _DEBUG
@@ -69,17 +69,17 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 	if (!scene)
 	{
 		MessageOut(importer.GetErrorString(), false, true, "255,255,0");
-		return std::weak_ptr<Model>();
+		return nullptr;
 	}
 	if (!scene->HasMaterials())
 	{
 		MessageOut("Error,cannot find materials in this fbx file.Import failed.", false, true, "255,255,0");
-		return std::weak_ptr<Model>();
+		return nullptr;
 	}
 	if (!scene->HasMeshes())
 	{
 		MessageOut("Error,cannot find meshes in this fbx file.Import failed.", false, true, "255,255,0");
-		return std::weak_ptr<Model>();
+		return nullptr;
 	}
 
 	std::shared_ptr<Model> model;
@@ -90,7 +90,7 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 	else
 	{
 		//重新刷新asset
-		model = dataPtr->GetWeakPtr().lock();
+		model = dataPtr->GetSharedPtr();
 	}
 
 	model->_assetInfo = dataPtr;
@@ -220,7 +220,7 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 			{
 				MessageOut("Face indices number was not equal 3.", false, true, "255,255,0");
 				model.reset();
-				return std::weak_ptr<Model>();
+				return nullptr;
 			}
 			//
 			newData.vertexData.vertexIndices.push_back(mesh->mFaces[i].mIndices[0]);
@@ -242,7 +242,7 @@ std::weak_ptr<Model> Model::LoadAsset(HGUID guid)
 	}
 	//----------------------
 	//_modelCache.emplace(std::make_pair(fbxPath, std::move(Model)));
-	dataPtr->SetData(std::move(model));
+	dataPtr->SetData(model);
 	return dataPtr->GetData();
 }
 

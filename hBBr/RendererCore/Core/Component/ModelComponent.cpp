@@ -20,15 +20,15 @@ void ModelComponent::UpdateMaterial()
 	for (int i = 0; i < (int)_primitives.size(); i++)
 	{
 		_primitives[i]->transform = GetGameObject()->GetTransform();
-		if (_materials[i].assetInfo.expired())
+		if (!_materials[i].asset)
 		{
 			auto defaultMaterial = Material::GetDefaultMaterial();
-			_materials[i].assetInfo = defaultMaterial.lock()->_assetInfo;
+			_materials[i].asset = defaultMaterial.lock();
 		}
-		auto matAsset = _materials[i].assetInfo.lock()->GetAssetObject<Material>();
-		PrimitiveProxy::AddModelPrimitive(matAsset.lock()->GetPrimitive(), _primitives[i], _gameObject->GetWorld()->GetRenderer());
+		auto matAsset = AssetObject::Cast<Material>(_materials[i].asset);
+		PrimitiveProxy::AddModelPrimitive(matAsset->GetPrimitive(), _primitives[i], _gameObject->GetWorld()->GetRenderer());
 
-		_materials[i].path = _materials[i].assetInfo.lock()->virtualFilePath;
+		_materials[i].path = _materials[i].asset->_assetInfo.lock()->virtualFilePath;
 		_materials[i].callBack();
 	}
 }
@@ -41,7 +41,7 @@ void ModelComponent::SetModelByAssetPath(HString virtualPath)
 	if (info.expired())
 		return;
 	auto model = info.lock()->GetAssetObject<Model>();
-	if (!model.expired())
+	if (model)
 	{
 		SetModel(model);
 	}
@@ -55,17 +55,17 @@ void ModelComponent::SetModel(HGUID guid)
 	SetModel(Model::LoadAsset(guid));
 }
 
-void ModelComponent::SetModel(std::weak_ptr<class Model> model, std::vector<std::weak_ptr<class Material>> *mats)
+void ModelComponent::SetModel(std::shared_ptr<class Model> model, std::vector<std::shared_ptr<class Material>> *mats)
 {
 	if (!_bActive || !_gameObject->IsActive())
 		return;
-	if (!model.expired())
+	if (model)
 	{
-		_model.assetInfo = model.lock()->_assetInfo;
-		_model.path = model.lock()->_assetInfo.lock()->virtualFilePath;
+		_model.asset = model;
+		_model.path = model->_assetInfo.lock()->virtualFilePath;
 		_model.callBack();
 		ClearPrimitves();
-		Model::BuildModelPrimitives(_model.assetInfo.lock()->GetAssetObject<Model>().lock().get(), _primitives, this->_renderer);
+		Model::BuildModelPrimitives(model.get(), _primitives, this->_renderer);
 		if (mats!=nullptr && mats->size()>0)
 		{
 			const int inputMatCount = (int)mats->size();
@@ -78,8 +78,8 @@ void ModelComponent::SetModel(std::weak_ptr<class Model> model, std::vector<std:
 			{
 				if (i < inputMatCount)
 				{
-					_materials[i].assetInfo = mats->at(i).lock()->_assetInfo;
-					_materials[i].path = mats->at(i).lock()->_assetInfo.lock()->virtualFilePath;
+					_materials[i].asset = mats->at(i);
+					_materials[i].path = mats->at(i)->_assetInfo.lock()->virtualFilePath;
 					_materials[i].callBack();
 				}
 			}
@@ -88,19 +88,19 @@ void ModelComponent::SetModel(std::weak_ptr<class Model> model, std::vector<std:
 	}
 }
 
-void ModelComponent::SetMaterial(std::weak_ptr<class Material> mat, int index)
+void ModelComponent::SetMaterial(std::shared_ptr<class Material> mat, int index)
 {
 	if (index >= _materials.size())
 	{
 		ConsoleDebug::printf_endl_warning(GetInternationalizationText("ModelComponent","SetMaterialIndexError"));
 		return;
 	}
-	if (!mat.expired() && !_model.assetInfo.expired())
+	if (mat && _model.asset)
 	{
 		ClearPrimitves();
-		Model::BuildModelPrimitives(_model.assetInfo.lock()->GetAssetObject<Model>().lock().get(), _primitives, this->_renderer);
-		_materials[index].assetInfo = mat.lock()->_assetInfo;
-		_materials[index].path = mat.lock()->_assetInfo.lock()->virtualFilePath;
+		Model::BuildModelPrimitives(AssetObject::Cast<Model>(_model.asset).get(), _primitives, this->_renderer);
+		_materials[index].asset = mat;
+		_materials[index].path = mat->_assetInfo.lock()->virtualFilePath;
 		_materials[index].callBack();
 		UpdateMaterial();
 	}
@@ -121,12 +121,17 @@ void ModelComponent::GameObjectActiveChanged(bool objActive)
 void ModelComponent::UpdateData()
 {
 	//Model
-	_model.assetInfo = ContentManager::Get()->GetAssetByVirtualPath(_model.path);
-	if (!_model.assetInfo.expired())
+	auto modelInfo = ContentManager::Get()->GetAssetByVirtualPath(_model.path);
+	if (!modelInfo.expired())
+	{
+		_model.asset = modelInfo.lock()->GetSharedAssetObject();
+	}
+
+	if (_model.asset)
 	{
 		_bErrorStatus = false;
 		//Material
-		std::vector<std::weak_ptr<class Material>> mats;
+		std::vector<std::shared_ptr<class Material>> mats;
 		mats.resize(_materials.size());
 		const int count = (int)_materials.size();
 		for (int i = 0; i < count; i++)
@@ -137,17 +142,17 @@ void ModelComponent::UpdateData()
 				mats[i] = info.lock()->GetAssetObject<Material>();
 			}
 		}
-		SetModel(_model.assetInfo.lock()->GetAssetObject<Model>(), &mats);
+		SetModel(AssetObject::Cast<Model>(_model.asset), &mats);
 	}
 	else
 	{
 		_errorModelPath = _model.path;
 		_bErrorStatus = true;
-		_model.assetInfo = ContentManager::Get()->GetAssetInfo(HGUID("0a13c94b-ff3a-4786-bc1b-10e420a23bf4"), AssetType::Model);
-		SetModel(_model.assetInfo.lock()->GetAssetObject<Model>());
+		_model.asset = ContentManager::Get()->GetAssetInfo(HGUID("0a13c94b-ff3a-4786-bc1b-10e420a23bf4"), AssetType::Model).lock()->GetSharedAssetObject();
+		SetModel(AssetObject::Cast<Model>(_model.asset));
 		for (int i = 0; i < GetMaterialNum(); i++)
 		{
-			SetMaterial(Material::GetErrorMaterial(), i);
+			SetMaterial(Material::GetErrorMaterial().lock(), i);
 		}
 	}
 }
@@ -166,10 +171,10 @@ void ModelComponent::ClearPrimitves()
 	//clear
 	for (int i = 0; i < (int)_materials.size(); i++)
 	{
-		if (_primitives.size() > i && _primitives[i] != nullptr && !_materials[i].assetInfo.expired())
+		if (_primitives.size() > i && _primitives[i] != nullptr && _materials[i].asset)
 		{
 			PrimitiveProxy::RemoveModelPrimitive(
-				_materials[i].assetInfo.lock()->GetAssetObject<Material>().lock()->GetPrimitive(), 
+				AssetObject::Cast<Material>(_materials[i].asset)->GetPrimitive(),
 				_primitives[i], 
 				_gameObject->GetWorld()->GetRenderer());
 			delete _primitives[i];
