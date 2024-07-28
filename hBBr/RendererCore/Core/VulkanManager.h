@@ -27,6 +27,8 @@
 #include "HString.h"
 #include "Thread.h"
 
+#include <vma/vk_mem_alloc.h>
+
 #define COMMAND_MAKER(cmdBuf ,UniqueID ,name, color) \
 	struct Renderer_Command_Maker_##UniqueID\
 	{\
@@ -109,6 +111,10 @@ public:
 
 	HBBR_API void QueueWaitIdle(VkQueue queue);
 
+	HBBR_API HBBR_INLINE VmaAllocator GetVMA()const {
+		return _vma_allocator;
+	}
+
 	/* 初始化Vulkan */
 
 	void InitInstance(bool bEnableDebug);
@@ -116,6 +122,8 @@ public:
 	void InitDevice();
 
 	void InitDebug();
+
+	void InitVMA();
 
 	/* 创建Surface */
 	void ReCreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurface);
@@ -286,6 +294,31 @@ public:
 
 	void CreateBufferAndAllocateMemory(size_t bufferSize, uint32_t bufferUsage, uint32_t bufferMemoryProperty, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
+	//VMA_MEMORY_USAGE_UNKNOWN					
+	// 没有预设的内存使用，可以使用VmaAllocationCreateInfo当中的其他字段来对内存进行规范（比如preferrableFlags或者requiredFlags)
+	// 
+	//VMA_MEMORY_USAGE_GPU_ONLY					
+	// 内存只能被GPU使用，在GPU上访问速度是最快的；也意味着从显存（VRAM）上面进行分配，不需要在host端做mapping操作。用途：GPU对其进行读写的设备，比如作为attachments的图片。只会从CPU端传输一次或者特别低频的数据，而且这个数据会被GPU高频读取，比如纹理贴图，VBO，UniformBuffer（注意前面说了CPU低频）以及大部分的只在GPU使用的资源。在某些情况下（比如AMD的256M的VRAM）可以使用HOST_VISIBLE与此并存，所以也可以进行Map后来直接操作数据。
+	// 
+	//VMA_MEMORY_USAGE_CPU_ONLY					
+	// 此类内存可以直接通过Map到CPU端进行操作，这个usage绝对保证是HOST_VISIBLE并且是HOST_COHERENT（即时同步），CPU端是uncached状态，就是说不需要flush到GPU。写入操作有可能是Write - Combined类型（也就是说写入一堆数据一起送入GPU）。GPU端也是可以自由访问这种内存，但是会比较慢。用途：用于StagingBuffer（中间传输跳板）
+	// 
+	//VMA_MEMORY_USAGE_CPU_TO_GPU				
+	// 此类内存可以从CPU进行Map操作后访问（一定是HOST_VISIBLE），并且尽可能快速地从GPU访问。CPU段Uncached，写入操作可能是Write - Combined。用途：CPU端频繁进行数据写入，GPU端对数据进行读取。比如说纹理，VBO，UniformBuffers，这些Buffer如果每一帧都更新，可以这么使用。
+	// 
+	//VMA_MEMORY_USAGE_GPU_TO_CPU				
+	// 此类内存可以通过Map操作在CPU访问（一定是HOST_VISIBLE）并且是拥有Cached状态。用途：被GPU写入并且被CPU读取的buffer / image，比如录屏，HDR的全屏操作等。任何在CPU端随机访问的资源。
+	// 
+	//VMA_MEMORY_USAGE_CPU_COPY					
+	// CPU的内存，尽可能不是GPU可访问的，但是一定是HOST_VISIBLE。用途：属于GPU当中，由于换页等操作，临时挪动到CPU的资源，当需要的时候会被换回到GPU显存
+	// 
+	//VMA_MEMORY_USAGE_GPU_LAZILY_ALLOCATED		
+	// 懒惰分配的内存，也就是及说GPU端Memory在分配的时候使用了VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT标识符，也就是按需分配，如果内存不被访问，即便是调用了接口也不会申请内存分配。注意：如果是没有这种标识符对应类型的内存，就会分配失败哦。用途：临时的图片等，比如MSAA抗锯齿的时候会用到，因为可能关掉抗锯齿。此类图片内存一定有关键字：VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT
+	//
+	void VMACraeteBufferAndAllocateMemory(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkBuffer& buffer, VmaAllocation& allocation, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bFocusCreateDedicatedMemory = false);
+
+	void VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation);
+
 	void DestroyBufferAndMemory(VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
 	void FreeBufferMemory(VkDeviceMemory& bufferMemory);
@@ -419,6 +452,8 @@ private:
 	VkDevice _device;
 
 	VkPhysicalDevice _gpuDevice;
+
+	VmaAllocator _vma_allocator;
 
 	VkDebugReportCallbackCreateInfoEXT	debugCallbackCreateInfo{};
 

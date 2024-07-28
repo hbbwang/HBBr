@@ -1,4 +1,18 @@
-﻿#include "VulkanManager.h"
+﻿//Vulkan 内存管理器
+#define VMA_IMPLEMENTATION
+
+#if __ANDROID__
+#define API_VERSION  VK_API_VERSION_1_1;
+#define VMA_VULKAN_VERSION 1001000
+//#define VMA_STATIC_VULKAN_FUNCTIONS 0 //安卓走的是动态库
+//#define VMA_DYNAMIC_VULKAN_FUNCTIONS 1
+#else
+#define API_VERSION  VK_API_VERSION_1_3;
+#define VMA_VULKAN_VERSION 1003000
+#endif
+
+//
+#include "VulkanManager.h"
 #include <vector>
 #include <array>
 #include "HString.h"
@@ -46,14 +60,17 @@ VulkanDebugCallback(
 	HString title;
 	HString color;
 	bool bError = false;
+	bool bWarning = false;
 	if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
 		title = "INFO: "; color = "255,255,255";
 	}
 	if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT) {
 		title = "WARNING: "; color = "255,255,0";
+		bWarning = true;
 	}
 	if (flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
 		title = "PERFORMANCE WARNING: "; color = "255,175,0";
+		bWarning = true;
 	}
 	if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
 		title = "ERROR: "; color = "255,0,0";
@@ -84,6 +101,10 @@ VulkanDebugCallback(
 		{
 			ConsoleDebug::print_endl(HString("Error: ")+ e.what());
 		}
+	}
+	else if(bWarning)
+	{
+		MessageOut(HString(title + "\n" + msg), false, false, "255,255,0");
 	}
 	return false;
 }
@@ -132,6 +153,8 @@ VulkanManager::VulkanManager(bool bDebug)
 	ConsoleDebug::print_endl("hBBr:Start init Vulkan Device.");
 	InitDevice();
 	InitDebug();
+	ConsoleDebug::print_endl("hBBr:Start init Vulkan Memory Allocator(VMA).");
+	InitVMA();
 	ConsoleDebug::print_endl("hBBr:Start init Command Pool.");
 	CreateCommandPool();
 	ConsoleDebug::print_endl("hBBr:Start Create Descripotr Pool.");
@@ -174,6 +197,11 @@ VulkanManager::~VulkanManager()
 	{
 		vkDestroyInstance(_instance, VK_NULL_HANDLE);
 		_instance = VK_NULL_HANDLE;
+	}
+	if (_vma_allocator != VK_NULL_HANDLE)
+	{
+		vmaDestroyAllocator(_vma_allocator);
+		_vma_allocator = VK_NULL_HANDLE;
 	}
 	#if defined(_WIN32)
 		fclose(pFileOut);
@@ -295,11 +323,7 @@ void VulkanManager::InitInstance(bool bEnableDebug)
     auto GetApiVersionResult = vkEnumerateInstanceVersion(&apiVersion);
 	if (VK_SUCCESS != GetApiVersionResult)
 	{
-#if __ANDROID__
-		apiVersion = VK_API_VERSION_1_1;
-#else
-		apiVersion = VK_API_VERSION_1_3;
-#endif
+		apiVersion = API_VERSION;
 	}
 
 	VkApplicationInfo appInfo = {};
@@ -731,6 +755,19 @@ void VulkanManager::InitDebug()
 			MessageOut("Vulkan ERROR: Cant fetch debug function pointers.");
 		}
 		fvkCreateDebugReportCallbackEXT(_instance, &debugCallbackCreateInfo, VK_NULL_HANDLE, &_debugReport);
+	}
+}
+
+void VulkanManager::InitVMA()
+{
+	VmaAllocatorCreateInfo allocatorInfo = {};
+	allocatorInfo.physicalDevice = _gpuDevice;
+	allocatorInfo.device = _device;
+	allocatorInfo.instance = _instance;
+	auto result = vmaCreateAllocator(&allocatorInfo, &_vma_allocator);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut(GetInternationalizationText("Renderer", "A000029"), true, true);
 	}
 }
 
@@ -2224,6 +2261,39 @@ void VulkanManager::CreateBufferAndAllocateMemory(size_t bufferSize, uint32_t bu
 {
 	CreateBuffer(bufferUsage, bufferSize, buffer);
 	AllocateBufferMemory(buffer, bufferMemory, bufferMemoryProperty);
+}
+
+void VulkanManager::VMACraeteBufferAndAllocateMemory(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkBuffer& buffer, VmaAllocation& allocation, VmaMemoryUsage memoryUsage, bool bFocusCreateDedicatedMemory)
+{
+	VkBufferCreateInfo bufferInfo{};
+	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferInfo.queueFamilyIndexCount = 0;
+	bufferInfo.pQueueFamilyIndices = VK_NULL_HANDLE;
+	bufferInfo.usage = bufferUsage;
+	bufferInfo.size = bufferSize;
+	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	VmaAllocationCreateInfo allocInfo = {};
+	allocInfo.usage = memoryUsage;
+	if (bFocusCreateDedicatedMemory)
+	{
+		//正常情况下VMA会从一块大的内存里分割一部分出来创建Buffer
+		//不过也有部分情况，VMA会自动帮我们做这个决定
+		//这个flag表示是否强制分配独立内存
+		allocInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;//
+	}
+
+	vmaCreateBuffer(_vma_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, nullptr);
+}
+
+void VulkanManager::VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation)
+{
+	if (buffer != VK_NULL_HANDLE && allocation != VK_NULL_HANDLE)
+	{
+		vmaDestroyBuffer(_vma_allocator, buffer, allocation);
+	}
+	buffer = VK_NULL_HANDLE;
+	allocation = VK_NULL_HANDLE;
 }
 
 void VulkanManager::DestroyBufferAndMemory(VkBuffer& buffer, VkDeviceMemory& bufferMemory)
