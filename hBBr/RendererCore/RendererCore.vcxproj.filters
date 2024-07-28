@@ -280,6 +280,9 @@
     <ClInclude Include="Core\VkPtr.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\VMABuffer.h">
+      <Filter>Renderer\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -466,6 +469,9 @@
       <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
     </ClCompile>
     <ClCompile Include="Core\VulkanObjectManager.cpp">
+      <Filter>Renderer\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\VMABuffer.cpp">
       <Filter>Renderer\Core</Filter>
     </ClCompile>
   </ItemGroup>

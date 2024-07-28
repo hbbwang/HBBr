@@ -315,7 +315,7 @@ public:
 	//VMA_MEMORY_USAGE_GPU_LAZILY_ALLOCATED		
 	// 懒惰分配的内存，也就是及说GPU端Memory在分配的时候使用了VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT标识符，也就是按需分配，如果内存不被访问，即便是调用了接口也不会申请内存分配。注意：如果是没有这种标识符对应类型的内存，就会分配失败哦。用途：临时的图片等，比如MSAA抗锯齿的时候会用到，因为可能关掉抗锯齿。此类图片内存一定有关键字：VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT
 	//
-	void VMACraeteBufferAndAllocateMemory(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkBuffer& buffer, VmaAllocation& allocation, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bFocusCreateDedicatedMemory = false);
+	void VMACraeteBufferAndAllocateMemory(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo* vmaInfo = nullptr, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bAlwayMapping = false, bool bFocusCreateDedicatedMemory = false);
 
 	void VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation);
 

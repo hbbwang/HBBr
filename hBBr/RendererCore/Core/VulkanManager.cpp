@@ -2263,7 +2263,7 @@ void VulkanManager::CreateBufferAndAllocateMemory(size_t bufferSize, uint32_t bu
 	AllocateBufferMemory(buffer, bufferMemory, bufferMemoryProperty);
 }
 
-void VulkanManager::VMACraeteBufferAndAllocateMemory(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkBuffer& buffer, VmaAllocation& allocation, VmaMemoryUsage memoryUsage, bool bFocusCreateDedicatedMemory)
+void VulkanManager::VMACraeteBufferAndAllocateMemory(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo* vmaInfo, VmaMemoryUsage memoryUsage, bool bAlwayMapping, bool bFocusCreateDedicatedMemory)
 {
 	VkBufferCreateInfo bufferInfo{};
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -2280,10 +2280,15 @@ void VulkanManager::VMACraeteBufferAndAllocateMemory(VkDeviceSize bufferSize, Vk
 		//正常情况下VMA会从一块大的内存里分割一部分出来创建Buffer
 		//不过也有部分情况，VMA会自动帮我们做这个决定
 		//这个flag表示是否强制分配独立内存
-		allocInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;//
+		allocInfo.flags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+	}
+	if (bAlwayMapping)
+	{
+		//永远开启mapping
+		allocInfo.flags |= VMA_ALLOCATION_CREATE_MAPPED_BIT;
 	}
 
-	vmaCreateBuffer(_vma_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, nullptr);
+	vmaCreateBuffer(_vma_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, vmaInfo);
 }
 
 void VulkanManager::VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation)
