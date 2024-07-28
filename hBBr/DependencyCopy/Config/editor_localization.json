@@ -31,11 +31,11 @@
         "ContentBrowserTitle": "内容浏览器",
         "Inspector": "细节编辑器",
         "MainTitle": "HBB渲染编辑器",
-        "PosX": 413,
-        "PosY": 424,
+        "PosX": 224,
+        "PosY": 34,
         "SceneOutlineTitle": "场景大纲",
-        "WindowHeight": 781,
-        "WindowWidth": 1009,
+        "WindowHeight": 796,
+        "WindowWidth": 1096,
         "bWindowed": true
     },
     "MaterialEditor": {
@@ -45,14 +45,24 @@
         "MaterialTextureTitle": "Texture",
         "MaterialUniformBufferTitle": "Uniform Buffer",
         "PixelUniformBuffer": "像素着色器",
-        "PosX": 539,
-        "PosY": 583,
+        "PosX": 323,
+        "PosY": 395,
         "RefreshShader": "刷新Shader:[vs:%s][ps:%s]",
         "RefreshShaderButton": "刷新Shader",
         "SaveButton": "保存",
         "VertexUniformBuffer": "顶点着色器",
-        "WindowHeight": 768,
-        "WindowWidth": 1024
+        "WindowHeight": 637,
+        "WindowWidth": 692
+    },
+    "MemoryWatcher": {
+        "AssetWatch-Header0": "资产名",
+        "AssetWatch-Header1": "资产引用次数",
+        "AssetWatch-Header2": "资产虚拟路径",
+        "AssetWatch-Header3": "GUID",
+        "PosX": 1066,
+        "PosY": 607,
+        "WindowHeight": 481,
+        "WindowWidth": 822
     },
     "RenderView": {
         "SpawnGameObject": "目前没有场景开启编辑状态!"

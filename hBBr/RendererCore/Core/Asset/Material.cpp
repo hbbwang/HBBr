@@ -487,7 +487,6 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 							{
 								tex = Texture2D::GetSystemTexture("CubeMapBalck");
 							}
-
 							mat->_primitive->SetTexture(it->index, tex);
 						}
 						else

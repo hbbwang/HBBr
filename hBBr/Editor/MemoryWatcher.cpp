@@ -68,6 +68,8 @@ MemoryWatcher::MemoryWatcher(QWidget *parent)
 		});
 	_timer->start();
 
+	LoadEditorWindowSetting(this, "MemoryWatcher");
+
 	//Asset Watcher
 	{
 		_assetWatcher = new QWidget(this);
@@ -91,9 +93,11 @@ MemoryWatcher::MemoryWatcher(QWidget *parent)
 			item->setText(0, GetAssetTypeString((AssetType)i).c_str());
 			_assetWatcherTree->addTopLevelItem(item);
 		}
+		_assetWatcherTree->setColumnWidth(0, this->width() * 0.2f);
+		_assetWatcherTree->setColumnWidth(1, this->width() * 0.1f);
+		_assetWatcherTree->setColumnWidth(2, this->width() * 0.4f);
+		_assetWatcherTree->setColumnWidth(3, this->width() * 0.3f);
 	}
-
-	LoadEditorWindowSetting(this, "MemoryWatcher");
 }
 
 MemoryWatcher::~MemoryWatcher()

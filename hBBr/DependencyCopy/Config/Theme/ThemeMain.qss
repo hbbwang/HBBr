@@ -2,7 +2,7 @@
 
 
 VariableDefine {
-    BackgroundColor: rgb(31, 31, 31) ;
+    BackgroundColor: rgb(30, 30, 30) ;
     FontFamily:  Arial, Helvetica, sans-serif;
     BaseFontFamily: Arial, Helvetica, sans-serif;
     SplitterHandleColor : rgb(125,125,125);
@@ -10,10 +10,11 @@ VariableDefine {
 }
 #EditorMain
 {
-
+    background-color:BackgroundColor;
 }
 QWidget
 {
+    background-color:BackgroundCtolor;
     font-family:  FontFamily;
     color: rgb(190, 190, 190);
     selection-color:rgb(125,125,125);
@@ -25,18 +26,21 @@ QMainWindow::separator
     width: SplitterWidth;
     border: 1px solid rgb(0,0,0);
 }
-QTabWidget
-{
-
-}
+QTabWidget,
 QTabWidget::pane
-{
-
+{ 
+    background-color:BackgroundColor;
 }
+QToolBar
+{
+    background-color:BackgroundColor;
+    border: 1px solid rgb(90, 90, 90);
+}
+QTabBar,
 QTabBar::tab 
 {
-    height: 25px;
-    font-size: 16px ;
+    height: 20px;
+    font-size: 15px ;
     background-color: rgb(25,25,25);
     color:rgb(150,150,150);
     font-family:  FontFamily;
@@ -47,7 +51,7 @@ QTabBar::tab:selected
     height: 25px;
     color:rgb(230,230,230);
     background-color: rgb(62, 66, 71);
-    border: 1px solid rgb(99, 197, 143);
+    border: 1px solid rgb(181, 194, 187);
 }
 QTabBar::tab:!selected:hover 
 {
@@ -64,8 +68,9 @@ QCheckBox{
 }
 QLabel
 {    
+    background-color:BackgroundColor;
     font-family:  FontFamily;
-    color:rgb(130,130,130);
+    color:rgb(201, 201, 201);
 }
 QComboBox
 {    
@@ -307,6 +312,31 @@ QTreeView::indicator:checked
 {
 
 }
+
+QTreeWidget::item
+{
+    font-family:  FontFamily;
+    height: 20px;
+    color:rgb(170, 170, 170);
+    border:none;
+    border: 1px solid rgb(86, 86, 86);
+    background-color: rgb(15, 15, 15);
+}
+QTreeWidget::item:hover
+{
+    color:rgb(190, 190, 190);
+    border:none;
+    border: 1px solid rgb(90, 90, 90);
+    background-color: rgb(35, 35, 35);
+}
+QTreeWidget::item:selected
+{
+    color:rgb(240,240,240);
+    border:none;
+    border: 1px solid rgb(100, 100, 100);
+    background-color: rgb(46, 48, 44);
+}
+
 QListView
 {
     outline: 0; 
@@ -341,6 +371,7 @@ QSplitter::handle
 }
 #DockWidgetTitleText
 {    
+    background: transparent;
     font-family: BaseFontFamily;
     font-size: 16px;
     font-weight: 100;
@@ -397,6 +428,7 @@ QSplitter::handle
     margin-left: 5px;
     color:rgb(255, 255, 255);
     font-size: 20px;
+    background-color:transparent ;
 }
 #ToolBox
 {
@@ -432,6 +464,26 @@ QSplitter::handle
     margin-left: 4px;
     margin-right: 4px;
 }
+
+#SceneOutline QTreeWidget::item
+{
+    font-family:  FontFamily;
+    height: 20px;
+    color:rgb(170, 170, 170);
+    border:none;
+    background-color: transparent;
+}
+#SceneOutline QTreeWidget::item:hover
+{
+    color:rgb(190, 190, 190);
+    background-color: rgb(45, 45, 45);
+}
+#SceneOutline QTreeWidget::item:selected
+{
+    color:rgb(255,255,255);
+    background-color: rgb(80,80,80);
+}
+
 /* All Property Name */
 #PropertyName
 {
@@ -639,8 +691,18 @@ QSplitter::handle
 /* ContentBrowser */
 #ContentBrowser
 {
-    background-color: rgba(25,25,25,0.95);
+    background-color: rgb(25,25,25);
     font-family: FontFamily;
+}
+#ContentBrowser QToolButton
+{
+    background-color: rgb(40,40, 40);
+    font-family: FontFamily;
+}
+#ContentBrowser QListView,
+#ContentBrowser QTreeView
+{
+    background-color: rgb(30, 30, 30);
 }
 #ContentBrowser_RepositorySelection
 {
