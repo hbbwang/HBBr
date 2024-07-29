@@ -65,9 +65,9 @@ struct ModelPrimitive
 
 	std::vector<uint32_t>		vertexIndices;
 
-	std::vector<class VulkanRenderer*> rendererFrom;
-
 	class VulkanRenderer* renderer = nullptr;
+
+	~ModelPrimitive();
 
 	//void SetActive(bool newActive)
 	//{
@@ -106,10 +106,8 @@ struct MaterialPrimitiveGroup
 
 	void UpdateDecriptorSet(bool bNeedUpdateVSUniformBuffer, bool bNeedUpdatePSUniformBuffer, bool bNeedUpdateTextures);
 
-	MaterialPrimitiveGroup() {
-		needCopyDataVS = 1;
-		needCopyDataPS = 1;
-	}
+	MaterialPrimitiveGroup();
+	~MaterialPrimitiveGroup();
 };
 
 class MaterialPrimitive
@@ -117,24 +115,8 @@ class MaterialPrimitive
 	friend class Material;
 	friend class PrimitiveProxy;
 public:
-	MaterialPrimitive()
-	{
-		_inputLayout = {};
-		_graphicsIndex = {};
-		int priority = 0;
-		HString graphicsName = "";
-		Pass passUsing = Pass::OpaquePass;
-		_uniformBufferSize_vs = 0;
-		_uniformBufferSize_ps = 0;
-		_uniformBuffer_vs.clear();
-		_uniformBuffer_ps.clear();
-		_paramterInfos_vs.clear();
-		_paramterInfos_ps.clear();
-		_textureInfos.clear();
-		_textures.clear();
-		_samplers.clear();
-		_materialPrimitiveGroups.clear();
-	}
+	MaterialPrimitive();
+	~MaterialPrimitive();
 
 	/*HBBR_INLINE void Reset()
 	{
@@ -238,10 +220,6 @@ public:
 
 	HBBR_API void UpdateTextures();
 
-	~MaterialPrimitive()
-	{
-	}
-
 	//顶点输入
 	VertexInputLayout	_inputLayout;
 
@@ -280,10 +258,9 @@ private:
 	//采样器选择
 	std::vector<VkSampler>				_samplers;
 
-	std::map<VulkanRenderer*, MaterialPrimitiveGroup>	_materialPrimitiveGroups;
+	std::map<VulkanRenderer*, MaterialPrimitiveGroup*>	_materialPrimitiveGroups;s
 
 };
-
 
 class PrimitiveProxy
 {
@@ -317,7 +294,7 @@ public:
 		{
 			auto result = mat->_materialPrimitiveGroups.find(renderer);
 			if(result != mat->_materialPrimitiveGroups.end())
-				return &result->second;
+				return result->second;
 			else
 				return nullptr;
 		}

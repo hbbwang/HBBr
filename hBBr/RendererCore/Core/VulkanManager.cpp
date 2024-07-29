@@ -189,6 +189,11 @@ VulkanManager::~VulkanManager()
 	DestroyCommandPool();
 	if (_bDebugEnable)
 		fvkDestroyDebugReportCallbackEXT(_instance, _debugReport, VK_NULL_HANDLE);
+	if (_vma_allocator != VK_NULL_HANDLE)
+	{
+		vmaDestroyAllocator(_vma_allocator);
+		_vma_allocator = VK_NULL_HANDLE;
+	}
 	if (_device != VK_NULL_HANDLE)
 	{
 		vkDestroyDevice(_device, VK_NULL_HANDLE);
@@ -198,11 +203,6 @@ VulkanManager::~VulkanManager()
 	{
 		vkDestroyInstance(_instance, VK_NULL_HANDLE);
 		_instance = VK_NULL_HANDLE;
-	}
-	if (_vma_allocator != VK_NULL_HANDLE)
-	{
-		vmaDestroyAllocator(_vma_allocator);
-		_vma_allocator = VK_NULL_HANDLE;
 	}
 	#if defined(_WIN32)
 		fclose(pFileOut);
@@ -2786,6 +2786,30 @@ void VulkanManager::CmdColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImag
 	region.dstOffsets[1].z = 1;
 	//vkCmdBlitImage(_renderer->GetCommandBuffer(), src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1, &region, VK_FILTER_LINEAR);
 	vkCmdBlitImage(cmdBuf, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region, VK_FILTER_LINEAR);
+}
+
+void VulkanManager::CmdBufferCopyToBuffer(VkCommandBuffer cmdBuf, VkBuffer src, VkBuffer dst, VkDeviceSize copySize, VkDeviceSize srcOffset, VkDeviceSize dstOffset)
+{
+	bool bNoCmdBuf = (cmdBuf == VK_NULL_HANDLE || cmdBuf == nullptr);
+	if (bNoCmdBuf)
+	{
+		AllocateCommandBuffer(_commandPool, cmdBuf);
+		BeginCommandBuffer(cmdBuf, 0);
+	}
+
+	VkBufferCopy copyRegion = {};
+	copyRegion.srcOffset = srcOffset;
+	copyRegion.dstOffset = dstOffset;
+	copyRegion.size = copySize;
+	vkCmdCopyBuffer(cmdBuf, src, dst, 1, &copyRegion);
+
+	if (bNoCmdBuf)
+	{
+		EndCommandBuffer(cmdBuf);
+		SubmitQueueImmediate({ cmdBuf });
+		vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
+		FreeCommandBuffer(_commandPool, cmdBuf);
+	}
 }
 
 void VulkanManager::SetObjectName(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name)

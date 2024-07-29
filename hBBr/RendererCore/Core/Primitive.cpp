@@ -71,16 +71,15 @@ void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* p
 	auto it = mat->_materialPrimitiveGroups.find(renderer);
 	if (it == mat->_materialPrimitiveGroups.end())
 	{
-		MaterialPrimitiveGroup newGroup = {};
-		newGroup.prims = std::vector<ModelPrimitive*>();
-		newGroup.primFrom = mat;
-		newGroup.renderer = renderer;
-		mat->_materialPrimitiveGroups.emplace(renderer, newGroup);
-		matGroup = &mat->_materialPrimitiveGroups[renderer];
+		matGroup = new MaterialPrimitiveGroup();
+		matGroup->prims = std::vector<ModelPrimitive*>();
+		matGroup->primFrom = mat;
+		matGroup->renderer = renderer;
+		mat->_materialPrimitiveGroups.emplace(renderer, matGroup);
 	}
 	else
 	{
-		matGroup = &it->second;
+		matGroup = it->second;
 	}
 
 	if (matGroup->prims.capacity() <= matGroup->prims.size())
@@ -110,12 +109,12 @@ void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive
 		auto rit = mat->_materialPrimitiveGroups.find(renderer);
 		if (rit != mat->_materialPrimitiveGroups.end())
 		{
-			auto pit = std::find(rit->second.prims.begin(), rit->second.prims.end(), prim);
-			if (pit != rit->second.prims.end())
+			auto pit = std::find(rit->second->prims.begin(), rit->second->prims.end(), prim);
+			if (pit != rit->second->prims.end())
 			{
 				//是否是最后一个对象,如果不是，需要标记下一个对象需要更新Buffer
 				bool isTheLastItem = false;
-				if (rit->second.prims.back() != *pit)
+				if (rit->second->prims.back() != *pit)
 				{
 					(*(pit + 1))->bNeedUpdate = true;
 				}
@@ -124,12 +123,12 @@ void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive
 					isTheLastItem = true;
 				}
 
-				rit->second.vbWholeSize -= (*pit)->vbSize;
-				rit->second.ibWholeSize -= (*pit)->ibSize;
+				rit->second->vbWholeSize -= (*pit)->vbSize;
+				rit->second->ibWholeSize -= (*pit)->ibSize;
 
-				rit->second.prims.erase(pit);
-				if (rit->second.prims.size() > 0 && isTheLastItem)
-					rit->second.prims.back()->bNeedUpdate = true;
+				rit->second->prims.erase(pit);
+				if (rit->second->prims.size() > 0 && isTheLastItem)
+					rit->second->prims.back()->bNeedUpdate = true;
 			}
 		}
 		
@@ -163,7 +162,7 @@ void MaterialPrimitive::UpdateUniformBufferVS()
 {
 	for (auto& i : _materialPrimitiveGroups)
 	{
-		i.second.needCopyDataVS = 1;
+		i.second->needCopyDataVS = 1;
 	}
 }
 
@@ -171,7 +170,7 @@ void MaterialPrimitive::UpdateUniformBufferPS()
 {
 	for (auto& i : _materialPrimitiveGroups)
 	{
-		i.second.needCopyDataPS = 1;
+		i.second->needCopyDataPS = 1;
 	}
 }
 
@@ -179,13 +178,52 @@ void MaterialPrimitive::UpdateTextures()
 {
 	for (auto& i : _materialPrimitiveGroups)
 	{
-		auto& updateContent = i.second.needUpdateTextures;
+		auto& updateContent = i.second->needUpdateTextures;
 		const auto updateCount = updateContent.size();
 		if (updateCount > 0)
 		{
 			memset(updateContent.data(), 1, updateCount * sizeof(uint8_t));
 		}
 	}
+}
+
+MaterialPrimitive::MaterialPrimitive()
+{
+	_inputLayout = {};
+	_graphicsIndex = {};
+	int priority = 0;
+	HString graphicsName = "";
+	Pass passUsing = Pass::OpaquePass;
+	_uniformBufferSize_vs = 0;
+	_uniformBufferSize_ps = 0;
+	_uniformBuffer_vs.clear();
+	_uniformBuffer_ps.clear();
+	_paramterInfos_vs.clear();
+	_paramterInfos_ps.clear();
+	_textureInfos.clear();
+	_textures.clear();
+	_samplers.clear();
+	_materialPrimitiveGroups.clear();
+}
+
+
+MaterialPrimitive::~MaterialPrimitive()
+{
+	_inputLayout = {};
+	_graphicsIndex = {};
+	int priority = 0;
+	HString graphicsName = "";
+	Pass passUsing = Pass::OpaquePass;
+	_uniformBufferSize_vs = 0;
+	_uniformBufferSize_ps = 0;
+	_uniformBuffer_vs.clear();
+	_uniformBuffer_ps.clear();
+	_paramterInfos_vs.clear();
+	_paramterInfos_ps.clear();
+	_textureInfos.clear();
+	_textures.clear();
+	_samplers.clear();
+	_materialPrimitiveGroups.clear();
 }
 
 float MaterialPrimitive::GetScalarParameter_VS(HString name, int* arrayIndex, int* vec4Index)
@@ -655,4 +693,32 @@ void MaterialPrimitiveGroup::UpdateDecriptorSet(bool bNeedUpdateVSUniformBuffer,
 			}
 		}
 	}
+}
+
+MaterialPrimitiveGroup::MaterialPrimitiveGroup()
+{
+	needCopyDataVS = 1;
+	needCopyDataPS = 1;
+	vbWholeSize = 0;
+	ibWholeSize = 0;
+}
+
+MaterialPrimitiveGroup::~MaterialPrimitiveGroup()
+{
+	prims.clear();
+	renderer = nullptr;
+	descriptorSet_uniformBufferVS.reset();
+	descriptorSet_uniformBufferPS.reset();
+	descriptorSet_texture.clear();
+	primFrom = nullptr;
+	needUpdateTextures.clear();
+}
+
+ModelPrimitive::~ModelPrimitive()
+{
+	vertexInput = VertexFactory::VertexInput();
+	transform = nullptr;
+	vertexData.clear();
+	vertexIndices.clear();
+	renderer = nullptr;
 }

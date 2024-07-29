@@ -16,7 +16,9 @@ public:
 	VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bAlwayMapping = false, bool bFocusCreateDedicatedMemory = false);
 	~VMABuffer();
 
-	void Mapping(void* data, VkDeviceSize offset, VkDeviceSize dataSize);
+	//最后的VkCommandBuffer是给VMA_MEMORY_USAGE_GPU_ONLY准备的
+	//如果是nullptr，会自动创建一个，并且强行等待执行完成，效率较低。
+	void Mapping(void* data, VkDeviceSize offset, VkDeviceSize dataSize, VkCommandBuffer cmdBuf = VK_NULL_HANDLE);
 
 	bool Resize(VkDeviceSize newSize);
 

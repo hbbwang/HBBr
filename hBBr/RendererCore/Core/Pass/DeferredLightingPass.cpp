@@ -3,6 +3,7 @@
 #include "SceneTexture.h"
 #include "Pass/PassManager.h"
 #include <stdio.h>
+#include <VMABuffer.h>
 
 DeferredLightingPass::~DeferredLightingPass()
 {
@@ -39,9 +40,8 @@ void DeferredLightingPass::PassInit()
 		{ glm::vec2(1.0f, 1.0f)		, glm::vec2(1.0f, 1.0f) },
 		{ glm::vec2(-1.0f, 1.0f)	, glm::vec2(0.0f, 1.0f) }
 	};
-	_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, sizeof(LightingVertexData) * vertices.size()));
-	_vertexBuffer->BufferMapping(vertices.data(), 0, sizeof(LightingVertexData) * vertices.size());
-	_vertexBuffer->UnMapMemory();
+	_vertexBuffer.reset(new VMABuffer(sizeof(LightingVertexData) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_GPU_ONLY, false, false));
+	_vertexBuffer->Mapping(vertices.data(), 0, sizeof(LightingVertexData) * vertices.size());
 	//DescriptorSet
 	auto bufferSize = sizeof(LightingUniformBuffer);
 	_ub_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(), bufferSize, VK_SHADER_STAGE_FRAGMENT_BIT));

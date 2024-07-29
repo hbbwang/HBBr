@@ -8,7 +8,7 @@ VulkanObjectManager::VulkanObjectManager() :
 	_maxAssetCheckCount(4),//为了提高效率，分帧检查，一帧检查4个资产，按最低标准一秒30帧，那就是1秒检查120个资产。
 	_bStartCheckAsset(false),
 	_gcCurrentSecond(0),
-	_gcMaxSecond(50),
+	_gcMaxSecond(30),
 	_numRequestObjects(0)
 {
 	_vmaBufferObjects.reserve(20);

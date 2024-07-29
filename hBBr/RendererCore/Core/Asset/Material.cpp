@@ -25,7 +25,6 @@ std::weak_ptr<Material> Material::GetDefaultMaterial()
 	if (defaultMat.expired())
 	{
 		auto shared = Material::LoadAsset(HGUID("b51e2e9a-0985-75e8-6138-fa95efcbab57"));
-		shared->SetResident(true);
 		defaultMat = shared;
 	}
 	return defaultMat;
@@ -37,7 +36,6 @@ std::weak_ptr<Material> Material::GetErrorMaterial()
 	if (errorMat.expired())
 	{
 		auto shared = Material::LoadAsset(HGUID("22d44cd6-68c3-4997-ad5f-3d52c45ef8fe"));
-		shared->SetResident(true);
 		errorMat = shared;
 	}
 	return errorMat;
