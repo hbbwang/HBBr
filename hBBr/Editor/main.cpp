@@ -39,11 +39,11 @@ protected:
                     auto forms = VulkanApp::GetForms();
                     for (auto& i : forms)
                     {              
-                        auto winHwnd = (HWND)VulkanApp::GetWindowHandle(i);
+                        auto winHwnd = (HWND)VulkanApp::GetWindowHandle(i->window);
                         if (windowAt == winHwnd)
                         {
                             VulkanApp::SetFocusForm(i);
-                            SetFocus((HWND)VulkanApp::GetWindowHandle(i));
+                            SetFocus((HWND)VulkanApp::GetWindowHandle(i->window));
                         }
                     }
                 }

@@ -77,7 +77,7 @@ void VulkanRenderer::Init()
 	ConsoleDebug::print_endl("hBBr:Start Check Surface Format.");
 	_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
 	ConsoleDebug::print_endl("hBBr:Start Create Swapchain.");
-	_renderSize =  _surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore ,&_queueSubmitSemaphore,&_executeFence);
+	_renderSize =  _surfaceSize = _vulkanManager->CreateSwapchain(_windowHandle, _windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore ,&_queueSubmitSemaphore,&_executeFence);
 
 	//Set renderer map , Add new renderer
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
@@ -314,7 +314,7 @@ bool VulkanRenderer::ResizeBuffer()
 			}
 
 			_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
-			_renderSize = _surfaceSize = _vulkanManager->CreateSwapchain(_windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore, &_queueSubmitSemaphore
+			_renderSize = _surfaceSize = _vulkanManager->CreateSwapchain(_windowHandle, _windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore, &_queueSubmitSemaphore
 			, &_executeFence, false, true);
 
 			if (_swapchain == VK_NULL_HANDLE)

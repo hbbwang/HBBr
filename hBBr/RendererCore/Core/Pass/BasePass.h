@@ -22,6 +22,6 @@ private:
 	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_pass;
 	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_obj;
 	
-	std::shared_ptr<class Buffer>_opaque_vertexBuffer;
+	std::shared_ptr<class VMABuffer>_opaque_vertexBuffer;
 	std::shared_ptr<class Buffer>_opaque_indexBuffer;
 };

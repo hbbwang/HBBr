@@ -294,7 +294,6 @@
     <ClInclude Include="Core\Component\ModelComponent.h" />
     <ClInclude Include="Core\Component\Transform.h" />
     <ClInclude Include="Core\DescriptorSet.h" />
-    <ClInclude Include="Core\VkPtr.h" />
     <ClInclude Include="Core\VMABuffer.h" />
     <ClInclude Include="Core\VulkanObjectManager.h" />
     <ClInclude Include="Core\Pass\GUIPass.h" />

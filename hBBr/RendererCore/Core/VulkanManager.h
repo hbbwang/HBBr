@@ -141,6 +141,7 @@ public:
 
 	/* 创建Swapchain */
 	VkExtent2D CreateSwapchain(
+		SDL_Window* window,
 		VkExtent2D surfaceSize,
 		VkSurfaceKHR surface,
 		VkSurfaceFormatKHR surfaceFormat,

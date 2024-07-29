@@ -8,6 +8,7 @@
 #include "Texture2D.h"
 #include "ConsoleDebug.h"
 #include "PassManager.h"
+#include "VMABuffer.h"
 /*
 	Opaque pass
 */
@@ -37,7 +38,8 @@ void BasePass::PassInit()
 	//Texture2D DescriptorSet
 	_opaque_descriptorSet_pass.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVSPS(), sizeof(PassUniformBuffer)));
 	_opaque_descriptorSet_obj.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVSPS(), 32));
-	_opaque_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 32));
+	//_opaque_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 32));
+	_opaque_vertexBuffer.reset(new VMABuffer(32, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, false, true));
 	_opaque_indexBuffer.reset(new Buffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT, 32));
 
 	//Pass Uniform总是一尘不变的,并且我们用的是Dynamic uniform buffer ,所以只需要更新一次所有的DescriptorSet即可。
@@ -247,7 +249,8 @@ void BasePass::SetupPassAndDraw(Pass p)
 						}
 						if (bBeginUpdate || bNeedUpdateVbIb)
 						{
-							vb->BufferMapping(prim->vertexData.data(), vbPos, prim->vbSize);
+							//vb->BufferMapping(prim->vertexData.data(), vbPos, prim->vbSize);
+							vb->Mapping(prim->vertexData.data(), vbPos, prim->vbSize);
 							ib->BufferMapping(prim->vertexIndices.data(), ibPos, prim->ibSize);
 						}
 

@@ -36,7 +36,7 @@ public:
 	HBBR_API static void RemoveWindow(VulkanForm* form);
 	HBBR_API static void ResizeWindow(VulkanForm* form, uint32_t w, uint32_t h);
 	HBBR_API static void SetWindowPos(VulkanForm* form, uint32_t x, uint32_t y);
-	HBBR_API static void* GetWindowHandle(VulkanForm* form);
+	HBBR_API static void* GetWindowHandle(SDL_Window* window);
 	HBBR_API static inline VulkanForm* GetMainForm() { return _mainForm; }
 	HBBR_API static void SetFocusForm(VulkanForm* form);
 	HBBR_API static VulkanForm* GetFocusForm() { return _focusForm; }

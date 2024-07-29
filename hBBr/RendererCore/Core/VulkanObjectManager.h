@@ -21,20 +21,18 @@ struct VkDeviceMemoryObject
 	uint8_t frameCount = 0;
 };
 
-struct VkPtrObject
-{
-	std::size_t typeHash;
-	class RefCounter* ptrCounter = nullptr;
-	void* ptr = nullptr;
-	bool bImmediate = true;
-	uint8_t frameCount = 0;
-};
-
 struct VkAssetObject
 {
 	std::weak_ptr<class AssetObject> asset;
 	uint8_t frameCount = 0;
 	bool bImmediate = false;
+};
+
+struct VMABufferObject
+{
+	VkBuffer buffer;
+	VmaAllocation allocation;
+	uint8_t frameCount = 0;
 };
 
 //在这里创建的Vulkan对象，拥有最简单的垃圾回收机制
@@ -75,7 +73,7 @@ public:
 
 	std::shared_ptr<VkDeviceMemory> AllocateVkDeviceMemory(VkBuffer buffer, VkMemoryPropertyFlags propertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, bool bImmediate = true);
 
-	void VulkanPtrGC(class VkPtrBase* vkptr);
+	void SafeReleaseVMABuffer(VkBuffer buffer, VmaAllocation allocation);
 
 	void AssetLinkGC(std::weak_ptr<class AssetObject> asset,bool bImmediate = false);
 
@@ -90,7 +88,7 @@ private:
 
 	std::vector<VkBufferObject*>_bufferObjects;
 	std::vector<VkDeviceMemoryObject*>_deviceMemoryObjects;
-	std::vector<VkPtrObject> _vulkanPtrs;
+	std::vector<VMABufferObject*>_vmaBufferObjects;
 
 	std::list<VkAssetObject> _vulkanObjects;
 	std::list<VkAssetObject> _vulkanObjectsRelease;

@@ -26,10 +26,10 @@ SDLWidget::SDLWidget(QWidget* parent)
 		});
 	//
 	_rendererForm = VulkanApp::InitVulkanManager(false, true, (void*)this->winId());
-	_hwnd = (HWND)VulkanApp::GetWindowHandle(_rendererForm);
+	_hwnd = (HWND)VulkanApp::GetWindowHandle(_rendererForm->window);
 
 	VulkanApp::SetFocusForm(_rendererForm);
-	SetFocus((HWND)VulkanApp::GetWindowHandle(_rendererForm));
+	SetFocus(_hwnd);
 }
 
 SDLWidget::SDLWidget(QWidget* parent, QString titleName)
@@ -43,10 +43,10 @@ SDLWidget::SDLWidget(QWidget* parent, QString titleName)
 	setUpdatesEnabled(false);
 	setObjectName("SDLRenderer");
 	_rendererForm = VulkanApp::CreateNewWindow(512, 512, titleName.toStdString().c_str(), true, (void*)this->winId());
-	_hwnd = (HWND)VulkanApp::GetWindowHandle(_rendererForm);
+	_hwnd = (HWND)VulkanApp::GetWindowHandle(_rendererForm->window);
 
 	VulkanApp::SetFocusForm(_rendererForm);
-	SetFocus((HWND)VulkanApp::GetWindowHandle(_rendererForm));
+	SetFocus(_hwnd);
 }
 
 SDLWidget::~SDLWidget()

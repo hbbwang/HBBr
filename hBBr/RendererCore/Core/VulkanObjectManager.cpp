@@ -1,5 +1,4 @@
 ﻿#include "VulkanObjectManager.h"
-#include "VkPtr.h"
 #include "AssetObject.h"
 
 std::unique_ptr<VulkanObjectManager> VulkanObjectManager::_vulkanObjectManager;
@@ -12,7 +11,7 @@ VulkanObjectManager::VulkanObjectManager() :
 	_gcMaxSecond(10),
 	_numRequestObjects(0)
 {
-	_vulkanPtrs.reserve(1024);
+	_vmaBufferObjects.reserve(32);
 }
 
 std::shared_ptr<VkBuffer> VulkanObjectManager::CreateVkBuffer(VkBufferUsageFlags usage, VkDeviceSize bufferSize, bool bImmediate)
@@ -53,17 +52,13 @@ std::shared_ptr<VkDeviceMemory> VulkanObjectManager::AllocateVkDeviceMemory(VkBu
 	return newObject->buffer;
 }
 
-void VulkanObjectManager::VulkanPtrGC(VkPtrBase* vkptr)
+void VulkanObjectManager::SafeReleaseVMABuffer(VkBuffer buffer, VmaAllocation allocation)
 {
-	VkPtrObject newObject = { };
-
-	newObject.ptr = vkptr->_ptr;
-	newObject.typeHash = vkptr->_typeHash;
-	newObject.bImmediate = (bool)vkptr->_bImmediateRelease;
-	newObject.ptrCounter = vkptr->_refCounter;
-
-	newObject.frameCount = 0;
-	_vulkanPtrs.push_back(newObject);
+	VMABufferObject* newObject = new VMABufferObject();
+	newObject->buffer = buffer;
+	newObject->allocation = allocation;
+	newObject->frameCount = 0;
+	_vmaBufferObjects.push_back(newObject);
 	_numRequestObjects++;
 }
 
@@ -141,40 +136,23 @@ void VulkanObjectManager::Update()
 		}
 	}
 
-
-	if (_vulkanPtrs.size() > 0)
+	//VMA Buffer
+	if (_vmaBufferObjects.size() > 0)
 	{
-		for (auto it = _vulkanPtrs.begin(); it != _vulkanPtrs.end();)
+		for (auto it = _vmaBufferObjects.begin(); it != _vmaBufferObjects.end();)
 		{
 			auto& object = (*it);
-			if (object.ptrCounter->Get() <= 0)//引用次数==0代表可以释放
+			
+			if (object->frameCount > swapchainBufferCount)
 			{
-				if (object.frameCount > swapchainBufferCount)
-				{
-					if (!object.bImmediate && _gcCurrentSecond < _gcMaxSecond)
-						continue;
-					//正式销毁
-					{
-						delete object.ptrCounter;
-						//根据类型针对性销毁
-						if (object.typeHash == typeid(VkBuffer).hash_code())
-						{
-							VkBuffer buffer = (VkBuffer)object.ptr;
-							manager->DestroyBuffer(buffer);
-						}
-						else if (object.typeHash == typeid(VkDeviceMemory).hash_code())
-						{
-							VkDeviceMemory deviceMemory = (VkDeviceMemory)object.ptr;
-							manager->FreeBufferMemory(deviceMemory);
-						}
-					}
-					it = _vulkanPtrs.erase(it);
-					_numRequestObjects--;
-					continue;
-				}
-				else if (object.frameCount <= swapchainBufferCount)
-					object.frameCount++;
+				manager->VMADestroyBufferAndFreeMemory(object->buffer, object->allocation);
+				delete object;
+				it = _vmaBufferObjects.erase(it);
+				_numRequestObjects--;
+				continue;
 			}
+			else
+				object->frameCount++;
 			it++;
 		}
 	}

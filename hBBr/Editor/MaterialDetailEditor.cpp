@@ -192,7 +192,6 @@ void MaterialDetailEditor::Init()
 	//äÖÈ¾Æ÷
 	{
 		_renderer = new SDLWidget(this, _material.lock()->_assetInfo.lock()->guid.str().c_str());
-		//HWND hwnd = (HWND)VulkanApp::GetWindowHandle(_matWindow);
 		ui_r.verticalLayout_2->addWidget(_renderer);
 		ui_r.verticalLayout_2->setStretch(1, 10);
 		auto renderer = _renderer->_rendererForm->renderer;

@@ -24,6 +24,7 @@
 #include "DescriptorSet.h"
 #include "Primitive.h"
 #include "Pass/PassBase.h"
+#include "FormMain.h"
 
 #ifdef IS_EDITOR
 // --------- IMGUI
@@ -916,6 +917,7 @@ bool VulkanManager::GetSurfaceCapabilities(VkSurfaceKHR& surface, VkSurfaceCapab
 }
 
 VkExtent2D VulkanManager::CreateSwapchain(
+	SDL_Window* window,
 	VkExtent2D surfaceSize, 
 	VkSurfaceKHR surface, 
 	VkSurfaceFormatKHR surfaceFormat , 
@@ -1179,13 +1181,24 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	}
 
 #ifdef _WIN32
+
+	HWND hWnd = (HWND)VulkanApp::GetWindowHandle(window);
+	//dwFlags：一个 DWORD 类型的值，表示如何选择与窗口关联的显示器。可能的值包括：
+	//MONITOR_DEFAULTTONULL：如果窗口没有与显示器重叠，则返回 NULL。
+	//MONITOR_DEFAULTTOPRIMARY：如果窗口没有与显示器重叠，则返回主显示器。
+	//MONITOR_DEFAULTTONEAREST：如果窗口没有与显示器重叠，则返回最接近窗口的显示器。
+	HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+	VkSurfaceFullScreenExclusiveWin32InfoEXT fullScreenExclusiveWin32Info = {};
+	fullScreenExclusiveWin32Info.sType = VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_WIN32_INFO_EXT;
+	fullScreenExclusiveWin32Info.hmonitor = hMonitor;
+
     //fullscreen support
     VkSurfaceFullScreenExclusiveInfoEXT FullScreenInfo = {};
     if (_deviceExtensionOptionals.HasEXTFullscreenExclusive)
     {
         FullScreenInfo.sType = VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_INFO_EXT;
         FullScreenInfo.fullScreenExclusive = bIsFullScreen ? VK_FULL_SCREEN_EXCLUSIVE_ALLOWED_EXT : VK_FULL_SCREEN_EXCLUSIVE_DISALLOWED_EXT;
-        FullScreenInfo.pNext = (void*)info.pNext;
+        FullScreenInfo.pNext = &fullScreenExclusiveWin32Info;
         info.pNext = &FullScreenInfo;
     }
 #endif
@@ -1198,7 +1211,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		if (result == VK_ERROR_INITIALIZATION_FAILED)
 		{
 			//ConsoleDebug::printf_endl_warning("vkCreateSwapchainKHR return VK_ERROR_INITIALIZATION_FAILED . Create swapchain failed with Initialization error; removing FullScreen extension...");
-			info.pNext = FullScreenInfo.pNext;
+			info.pNext = nullptr;
 			result = vkCreateSwapchainKHR(_device, &info, VK_NULL_HANDLE, &newSwapchain);
 		}
         if (result != VK_SUCCESS)

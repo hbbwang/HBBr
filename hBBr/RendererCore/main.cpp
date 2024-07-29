@@ -518,13 +518,13 @@ void VulkanApp::SetWindowPos(VulkanForm* form, uint32_t x, uint32_t y)
 		SDL_SetWindowPosition(form->window, (int)x, (int)y);
 }
 
-void* VulkanApp::GetWindowHandle(VulkanForm* form)
+void* VulkanApp::GetWindowHandle(SDL_Window* window)
 {
-	if (form && form->window)
+	if (window)
 	{
 		#if defined(_WIN32)
 		SDL_SysWMinfo wmInfo;
-		SDL_GetWindowWMInfo(form->window, &wmInfo , SDL_SYSWM_CURRENT_VERSION);
+		SDL_GetWindowWMInfo(window, &wmInfo , SDL_SYSWM_CURRENT_VERSION);
 		return (void*)wmInfo.info.win.window;
 		#endif
 	}
