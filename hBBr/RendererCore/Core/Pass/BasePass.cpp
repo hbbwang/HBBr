@@ -38,9 +38,8 @@ void BasePass::PassInit()
 	//Texture2D DescriptorSet
 	_opaque_descriptorSet_pass.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVSPS(), sizeof(PassUniformBuffer)));
 	_opaque_descriptorSet_obj.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVSPS(), 32));
-	//_opaque_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 32));
 	_opaque_vertexBuffer.reset(new VMABuffer(32, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, false, true));
-	_opaque_indexBuffer.reset(new Buffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT, 32));
+	_opaque_indexBuffer.reset(new VMABuffer(32, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, false, true));
 
 	//Pass Uniform总是一尘不变的,并且我们用的是Dynamic uniform buffer ,所以只需要更新一次所有的DescriptorSet即可。
 	_opaque_descriptorSet_pass->UpdateDescriptorSetAll(sizeof(PassUniformBuffer));
@@ -215,6 +214,15 @@ void BasePass::SetupPassAndDraw(Pass p)
 				//Primtive/Vertex/Index buffer	
 				{
 					modelPrimitiveCount += (uint32_t)matPrimGroup->prims.size();//计算PrimitiveCount
+					std::vector<float> vertexData;
+					std::vector<uint32_t> vertexIndices;
+					std::vector<ObjectUniformBuffer>objubs;
+					objubs.reserve(matPrimGroup->prims.size());
+					bool bUpdate_objub = false;
+					bool bUpdate_vbib = false;
+					VkDeviceSize vbUpdateBeginPos = 0;
+					VkDeviceSize ibUpdateBeginPos = 0;
+					VkDeviceSize ubUpdateBeginPos = 0;
 					//更新Primitives
 					for (auto& prim : (matPrimGroup->prims))
 					{
@@ -243,21 +251,40 @@ void BasePass::SetupPassAndDraw(Pass p)
 						//拷贝数据
 						if (bBeginUpdate || prim->transform->NeedUpdateUb() || bNeedUpdateObjUniform)
 						{
+							if (!bUpdate_objub)
+							{
+								bUpdate_objub = true;
+								ubUpdateBeginPos = (VkDeviceSize)objectUboOffset;
+							}
 							ObjectUniformBuffer objectUniformBuffer = {};
 							objectUniformBuffer.WorldMatrix = prim->transform->GetWorldMatrix();
-							obj->BufferMapping(&objectUniformBuffer, (uint64_t)objectUboOffset, sizeof(ObjectUniformBuffer));
+							objubs.push_back(objectUniformBuffer);
 						}
 						if (bBeginUpdate || bNeedUpdateVbIb)
 						{
-							//vb->BufferMapping(prim->vertexData.data(), vbPos, prim->vbSize);
-							vb->Mapping(prim->vertexData.data(), vbPos, prim->vbSize);
-							ib->BufferMapping(prim->vertexIndices.data(), ibPos, prim->ibSize);
+							if (!bUpdate_vbib)
+							{
+								bUpdate_vbib = true;
+								vbUpdateBeginPos = vbPos;
+								ibUpdateBeginPos = ibPos;
+							}
+							vertexData.insert(vertexData.end(), prim->vertexData.begin(), prim->vertexData.end());
+							vertexIndices.insert(vertexIndices.end(), prim->vertexIndices.begin(), prim->vertexIndices.end());
 						}
 
-						//更新buffer起始位置
+						//更新下一个buffer起始位置
 						vbPos = currentBufferWholeSize_vb;
 						ibPos = currentBufferWholeSize_ib;
 						objectUboOffset = currentObjectUniformBufferWholeSize;
+					}
+					if (bUpdate_objub)
+					{
+						obj->BufferMapping(objubs.data(), ubUpdateBeginPos, objubs.size() * sizeof(ObjectUniformBuffer));
+					}
+					if (bUpdate_vbib)
+					{
+						vb->Mapping(vertexData.data(), vbUpdateBeginPos, vertexData.size() * sizeof(float));
+						ib->Mapping(vertexIndices.data(), ibUpdateBeginPos, vertexIndices.size() * sizeof(uint32_t));
 					}
 				}
 			}

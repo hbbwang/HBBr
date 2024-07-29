@@ -7,25 +7,19 @@
 #include <memory>
 #include <thread>
 #include <typeinfo>
-struct VkBufferObject
-{
-	std::shared_ptr<VkBuffer> buffer;
-	uint8_t bImmediate = true;
-	uint8_t frameCount = 0;
-};
-
-struct VkDeviceMemoryObject
-{
-	std::shared_ptr<VkDeviceMemory> buffer;
-	uint8_t bImmediate = true;
-	uint8_t frameCount = 0;
-};
 
 struct VkAssetObject
 {
 	std::weak_ptr<class AssetObject> asset;
 	uint8_t frameCount = 0;
 	bool bImmediate = false;
+};
+
+struct VkBufferObject
+{
+	VkBuffer buffer;
+	VkDeviceMemory memory;
+	uint8_t frameCount = 0;
 };
 
 struct VMABufferObject
@@ -41,23 +35,20 @@ class VulkanObjectManager
 	friend class VulkanApp;
 	friend class VkPtrBase;
 
-	VulkanObjectManager();
-
 public:
-	HBBR_API HBBR_INLINE static VulkanObjectManager* Get() {
-		if (!_vulkanObjectManager)
-		{
-			_vulkanObjectManager.reset(new VulkanObjectManager);
-		}
-		return _vulkanObjectManager.get();
+
+	HBBR_API inline static VulkanObjectManager* Get() {
+		if (!_ptr)
+			_ptr.reset(new VulkanObjectManager());
+		return _ptr.get();
 	}
 
-	HBBR_API HBBR_INLINE double GetGCTime()
+	HBBR_API HBBR_INLINE double GetGCTime()const
 	{
 		return _gcCurrentSecond;
 	}
 
-	HBBR_API HBBR_INLINE double GetMaxGCTime()
+	HBBR_API HBBR_INLINE double GetMaxGCTime()const
 	{
 		return _gcMaxSecond;
 	}
@@ -68,26 +59,25 @@ public:
 		_gcMaxSecond = interval;
 	}
 
-	//bImmediate = true的时候,代表如果没有引用了，只需要等待3帧即可销毁，不然就还需要等待GC倒计时
-	std::shared_ptr<VkBuffer> CreateVkBuffer(VkBufferUsageFlags usage, VkDeviceSize bufferSize, bool bImmediate = true);
-
-	std::shared_ptr<VkDeviceMemory> AllocateVkDeviceMemory(VkBuffer buffer, VkMemoryPropertyFlags propertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, bool bImmediate = true);
+	void SafeReleaseVkBuffer(VkBuffer buffer, VkDeviceMemory memory);
 
 	void SafeReleaseVMABuffer(VkBuffer buffer, VmaAllocation allocation);
 
 	void AssetLinkGC(std::weak_ptr<class AssetObject> asset,bool bImmediate = false);
 
 protected:
+
 	void Update();
+
 	void Release();
 
 private:
+	VulkanObjectManager();
 
-	static std::unique_ptr<VulkanObjectManager>		_vulkanObjectManager;
-	//Objects
+	static std::unique_ptr<VulkanObjectManager> _ptr;
 
-	std::vector<VkBufferObject*>_bufferObjects;
-	std::vector<VkDeviceMemoryObject*>_deviceMemoryObjects;
+	std::vector<VkBufferObject*>_vkBufferObjects;
+
 	std::vector<VMABufferObject*>_vmaBufferObjects;
 
 	std::list<VkAssetObject> _vulkanObjects;

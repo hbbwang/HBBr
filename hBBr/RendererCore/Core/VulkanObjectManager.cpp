@@ -1,55 +1,28 @@
 ﻿#include "VulkanObjectManager.h"
 #include "AssetObject.h"
 
-std::unique_ptr<VulkanObjectManager> VulkanObjectManager::_vulkanObjectManager;
+std::unique_ptr<VulkanObjectManager> VulkanObjectManager::_ptr = nullptr;
 
 VulkanObjectManager::VulkanObjectManager() :
 	_assetCheckCount(0),
 	_maxAssetCheckCount(4),//为了提高效率，分帧检查，一帧检查4个资产，按最低标准一秒30帧，那就是1秒检查120个资产。
 	_bStartCheckAsset(false),
 	_gcCurrentSecond(0),
-	_gcMaxSecond(10),
+	_gcMaxSecond(50),
 	_numRequestObjects(0)
 {
-	_vmaBufferObjects.reserve(32);
+	_vmaBufferObjects.reserve(20);
+	_vkBufferObjects.reserve(20);
 }
 
-std::shared_ptr<VkBuffer> VulkanObjectManager::CreateVkBuffer(VkBufferUsageFlags usage, VkDeviceSize bufferSize, bool bImmediate)
+void VulkanObjectManager::SafeReleaseVkBuffer(VkBuffer buffer, VkDeviceMemory memory)
 {
-	auto manager = VulkanManager::GetManager();
-
-	VkBufferObject* newObject = new VkBufferObject;
-	std::shared_ptr<VkBuffer> result;
-	result.reset(new VkBuffer);
-	manager->CreateBuffer(usage, bufferSize, *result);
-
-	newObject->bImmediate = bImmediate;
-	newObject->buffer = std::move(result);
+	VkBufferObject* newObject = new VkBufferObject();
+	newObject->buffer = buffer;
+	newObject->memory = memory;
 	newObject->frameCount = 0;
-	_bufferObjects.push_back(newObject);
-
+	_vkBufferObjects.push_back(newObject);
 	_numRequestObjects++;
-
-	return newObject->buffer;
-}
-
-std::shared_ptr<VkDeviceMemory> VulkanObjectManager::AllocateVkDeviceMemory(VkBuffer buffer, VkMemoryPropertyFlags propertyFlags, bool bImmediate)
-{
-	auto manager = VulkanManager::GetManager();
-
-	VkDeviceMemoryObject* newObject = new VkDeviceMemoryObject;
-	std::shared_ptr<VkDeviceMemory> result;
-	result.reset(new VkDeviceMemory);
-	manager->AllocateBufferMemory(buffer, *result, propertyFlags);
-
-	newObject->bImmediate = bImmediate;
-	newObject->buffer = std::move(result);
-	newObject->frameCount = 0;
-	_deviceMemoryObjects.push_back(newObject);
-
-	_numRequestObjects++;
-
-	return newObject->buffer;
 }
 
 void VulkanObjectManager::SafeReleaseVMABuffer(VkBuffer buffer, VmaAllocation allocation)
@@ -86,52 +59,24 @@ void VulkanObjectManager::Update()
 		_gcCurrentSecond = _gcTime.End_s();
 	}
 
-	//VkDeviceMemory
-	if (_deviceMemoryObjects.size() > 0)
-	{
-		for (auto it = _deviceMemoryObjects.begin(); it != _deviceMemoryObjects.end();)
-		{
-			auto& object = (*it);
-			if (object->buffer.use_count() <= 1)//引用次数少于2代表可以释放
-			{
-				if (object->frameCount > swapchainBufferCount)
-				{
-					if (!object->bImmediate && _gcCurrentSecond < _gcMaxSecond)
-						continue;
-					manager->FreeBufferMemory(*object->buffer);
-					delete object;
-					it = _deviceMemoryObjects.erase(it);
-					_numRequestObjects--;
-					continue;
-				}
-				else if (object->frameCount <= swapchainBufferCount)
-					object->frameCount++;
-			}
-			it++;
-		}
-	}
-
 	//VkBuffer
-	if (_bufferObjects.size() > 0)
+	if (_vkBufferObjects.size() > 0)
 	{
-		for (auto it = _bufferObjects.begin(); it != _bufferObjects.end();)
+		for (auto it = _vkBufferObjects.begin(); it != _vkBufferObjects.end();)
 		{
 			auto& object = (*it);
-			if (object->buffer.use_count() <= 1)//引用次数少于2代表可以释放
+
+			if (object->frameCount > swapchainBufferCount)
 			{
-				if (object->frameCount > swapchainBufferCount)
-				{
-					if (!object->bImmediate && _gcCurrentSecond < _gcMaxSecond)
-						continue;
-					manager->DestroyBuffer(*object->buffer);
-					delete object;
-					it = _bufferObjects.erase(it);
-					_numRequestObjects--;
-					continue;
-				}
-				else if (object->frameCount <= swapchainBufferCount)
-					object->frameCount++;
+				manager->DestroyBuffer(object->buffer);
+				manager->FreeBufferMemory(object->memory);
+				delete object;
+				it = _vkBufferObjects.erase(it);
+				_numRequestObjects--;
+				continue;
 			}
+			else
+				object->frameCount++;
 			it++;
 		}
 	}

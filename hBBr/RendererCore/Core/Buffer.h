@@ -24,68 +24,68 @@ class Buffer
 public:
 	Buffer(VkBufferUsageFlags usageFlags, uint64_t bufferSize = BufferSizeRange);
 	~Buffer();
-	bool Resize(uint64_t newSize, bool bForceResize = false);
+	HBBR_API bool Resize(uint64_t newSize, bool bForceResize = false);
 
-	void AddSize(uint64_t newSize);
+	HBBR_API void AddSize(uint64_t newSize);
 
-	void CreateBuffer(VkBufferUsageFlags usageFlags, uint64_t bufferSize = BufferSizeRange);
+	HBBR_API void CreateBuffer(VkBufferUsageFlags usageFlags, uint64_t bufferSize = BufferSizeRange);
 
-	void MapMemory();
+	HBBR_API void MapMemory();
 
-	void UnMapMemory();
+	HBBR_API void UnMapMemory();
 
-	inline void BufferMapping(void* mappingData, uint64_t bufferSize)
+	HBBR_API inline void BufferMapping(void* mappingData, uint64_t bufferSize)
 	{
 		void* bufBegin = (uint8_t*)(_bufferMapping);
 		memcpy(bufBegin, mappingData, bufferSize);
 	}
 
-	inline void BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize)
+	HBBR_API inline void BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize)
 	{
 		void* bufBegin = (uint8_t*)(_bufferMapping) + offset;
 		memcpy(bufBegin, mappingData, bufferSize);
 	}
 
 	template<class T>
-	inline void BufferMapping(T mappingStruct)
+	HBBR_API inline void BufferMapping(T mappingStruct)
 	{
 		void* bufBegin = (uint8_t*)(_bufferMapping);
 		memcpy(bufBegin, &mappingStruct, sizeof(T));
 	}
 
 	template<class T>
-	inline void BufferMapping(T* mappingData, uint64_t offset, uint64_t bufferSize)
+	HBBR_API inline void BufferMapping(T* mappingData, uint64_t offset, uint64_t bufferSize)
 	{
 		void* bufBegin = (uint8_t*)(_bufferMapping) + offset;
 		memcpy(bufBegin, mappingData, bufferSize);
 	}
 
 	template<class T>
-	inline void BufferMapping(T* mappingData, uint64_t bufferSize)
+	HBBR_API inline void BufferMapping(T* mappingData, uint64_t bufferSize)
 	{
 		void* bufBegin = (uint8_t*)(_bufferMapping);
 		memcpy(bufBegin, mappingData, bufferSize);
 	}
 
-	HBBR_INLINE const bool IsMapping()const { return _bufferIsMapping; }
+	HBBR_API HBBR_INLINE const bool IsMapping()const { return _bufferIsMapping; }
 
-	HBBR_INLINE const VkDeviceSize GetBufferSize()const { return _bufferCapacity; }
+	HBBR_API HBBR_INLINE const VkDeviceSize GetBufferSize()const { return _bufferCapacity; }
 
-	HBBR_INLINE void* GetBufferMemory()const{return _bufferMapping;}
+	HBBR_API HBBR_INLINE void* GetBufferMemory()const{return _bufferMapping;}
 
-	VkBuffer GetBuffer();
+	HBBR_API HBBR_INLINE VkBuffer GetBuffer()const{
+		return _buffer;
+	}
 
-	VkDeviceMemory GetMemory();
+	HBBR_API HBBR_INLINE VkDeviceMemory GetMemory()const {
+		return _bufferMemory;
+	}
 
 private:
 
-	//VkBuffer						_buffer = VK_NULL_HANDLE;
+	VkBuffer			_buffer;
 
-	//VkDeviceMemory					_bufferMemory = VK_NULL_HANDLE;
-
-	std::shared_ptr<VkBuffer>			_buffer;
-
-	std::shared_ptr<VkDeviceMemory>		_bufferMemory;
+	VkDeviceMemory		_bufferMemory;
 
 	//std::vector<BufferWaitToRelease>	_oldBuffer;
 
@@ -94,7 +94,7 @@ private:
 	VkBufferUsageFlags				_bufferUsage;
 
 	/* The pointer point to buffer */
-	void* _bufferMapping = nullptr;
+	void* _bufferMapping;
 
-	bool _bufferIsMapping = false;
+	bool _bufferIsMapping;
 };

@@ -57,7 +57,7 @@ MemoryWatcher::MemoryWatcher(QWidget *parent)
 			}
 			// GC給數奀
 			{
-				QString text = QString::fromLocal8Bit("GC呁豻給數奀 : ") + QString::number(int(VulkanObjectManager::Get()->GetMaxGCTime() - VulkanObjectManager::Get()->GetGCTime()));
+				QString text = QString::fromLocal8Bit("GC呁豻給數奀 : ") + QString::number(int(VulkanObjectManager::Get()->GetMaxGCTime() - VulkanObjectManager::Get()->GetGCTime())); 
 				_gcStaus->setText(text);
 			}
 			//
