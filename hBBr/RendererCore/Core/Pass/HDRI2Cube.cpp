@@ -46,7 +46,13 @@ HDRI2Cube::HDRI2Cube(HString hdrImagePath)
 		}
 	, _pipelineLayout);
 	//Create DescriptorSet
-	store_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _storeDescriptorSetLayout, 0, VK_SHADER_STAGE_COMPUTE_BIT));
+	store_descriptorSet.reset(new DescriptorSet(
+		_renderer, 
+		VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 
+		_storeDescriptorSetLayout,
+		VMA_MEMORY_USAGE_CPU_TO_GPU,
+		0,
+		VK_SHADER_STAGE_COMPUTE_BIT));
 	//Create uniform buffer
 	auto alignmentSize = manager->GetMinUboAlignmentSize(sizeof(HDRI2CubeUnifrom));
 	_uniformBuffer.reset(new Buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, alignmentSize));

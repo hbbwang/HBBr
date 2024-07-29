@@ -3,12 +3,13 @@
 #include "RendererConfig.h"
 #include "VulkanObjectManager.h"
 
-VMABuffer::VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage, bool bAlwayMapping, bool bFocusCreateDedicatedMemory):
+VMABuffer::VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage, bool bAlwayMapping, bool bFocusCreateDedicatedMemory, HString debugName):
 	_lastSize(bufferSize),
 	_bufferUsage(bufferUsage),
 	_memoryUsage(memoryUsage),
 	_bAlwayMapping(bAlwayMapping),
-	_bFocusCreateDedicatedMemory(bFocusCreateDedicatedMemory)
+	_bFocusCreateDedicatedMemory(bFocusCreateDedicatedMemory),
+	_debugName(debugName)
 {
 	if (bufferSize <= 0)//不能创建一个大小为0的Buffer
 	{
@@ -21,7 +22,7 @@ VMABuffer::VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, Vm
 	}
 	manager->VMACraeteBufferAndAllocateMemory(_lastSize, _bufferUsage, _buffer, _allocation, &_allocationInfo, _memoryUsage, _bAlwayMapping, _bFocusCreateDedicatedMemory);
 #if IS_EDITOR
-	ConsoleDebug::printf_endl_succeed(GetInternationalizationText("Renderer", "CreateBuffer"), _allocationInfo.size, (double)_allocationInfo.size / (double)1024.0 / (double)1024.0);
+	ConsoleDebug::printf_endl_succeed(GetInternationalizationText("Renderer", "CreateBuffer"), _debugName.c_str(), _allocationInfo.size, (double)_allocationInfo.size / (double)1024.0 / (double)1024.0);
 #endif
 }
 
@@ -107,13 +108,13 @@ bool VMABuffer::Resize(VkDeviceSize newSize)
 			void* newMappedData;
 			vmaMapMemory(manager->GetVMA(), _allocation,	&oldMappedData);
 			vmaMapMemory(manager->GetVMA(), newAllocation,	&newMappedData);
-			memcpy(newMappedData, oldMappedData, _lastSize);
+			memcpy(newMappedData, oldMappedData, std::min(_lastSize, newSize));
 			vmaUnmapMemory(manager->GetVMA(), _allocation);
 			vmaUnmapMemory(manager->GetVMA(), newAllocation);
 		}
 		else
 		{
-			memcpy(newAllocationInfo.pMappedData, _allocationInfo.pMappedData, _lastSize);
+			memcpy(newAllocationInfo.pMappedData, _allocationInfo.pMappedData, std::min(_lastSize, newSize));
 		}
 	}
 
@@ -126,8 +127,17 @@ bool VMABuffer::Resize(VkDeviceSize newSize)
 	_allocationInfo = newAllocationInfo;
 
 #if IS_EDITOR
-	ConsoleDebug::printf_endl_succeed(GetInternationalizationText("Renderer", "ResizeBuffer"), _allocationInfo.size, (double)_allocationInfo.size / (double)1024.0 / (double)1024.0);
+	ConsoleDebug::printf_endl_succeed(GetInternationalizationText("Renderer", "ResizeBuffer"), _debugName.c_str(), _allocationInfo.size, (double)_allocationInfo.size / (double)1024.0 / (double)1024.0);
 #endif
 
 	return true;
+}
+
+bool VMABuffer::ResizeBigger(VkDeviceSize newSize)
+{
+	if (newSize > _lastSize)
+	{
+		return Resize(newSize);
+	}	
+	return false;
 }

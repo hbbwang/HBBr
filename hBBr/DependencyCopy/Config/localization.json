@@ -31,8 +31,8 @@
         "A000027":"[AssetImport] 导入资产(HDR图像)CubeMap失败",
         "A000028":"资产[%s]引用为0,正在发送VulkanObbjectManager准备销毁",
         "A000029":"错误,创建VulkanMemoryAllocator(VMA)失败!正在退出。",
-        "ResizeBuffer":"[ResizeVulkanBuffer]重置Vulkan缓冲区大小: %llu (%lf M)",
-        "CreateBuffer":"[CreateVulkanBuffer]创建Vulkan缓冲区,大小: %llu (%lf M)"
+        "ResizeBuffer":"[ResizeVulkanBuffer][%s]重置Vulkan缓冲区大小: %llu (%lf M)",
+        "CreateBuffer":"[CreateVulkanBuffer][%s]创建Vulkan缓冲区,大小: %llu (%lf M)"
     },
     "ModelComponent":{
         "SetMaterialIndexError": "[ModelComponent::SetMaterial]SetMaterial失败,Index错误."

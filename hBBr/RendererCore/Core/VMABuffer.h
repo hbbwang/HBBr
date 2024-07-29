@@ -3,8 +3,8 @@
 #include "VulkanManager.h"
 
 //每次顶点Buffer最大增加的大小 :
-//(UINT32_MAX/512)约等于8M
-#define VMABufferSizeRange (UINT32_MAX/512)
+//(UINT32_MAX/1024)约等于2M
+#define VMABufferSizeRange (UINT32_MAX/1024)
 
 //Uniform Buffer每次增长大小
 //Uniform Buffer好像是有大小限制的:VulkanManager->GetMaxUniformBufferSize()
@@ -13,7 +13,7 @@
 class VMABuffer
 {
 public:
-	VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bAlwayMapping = false, bool bFocusCreateDedicatedMemory = false);
+	VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bAlwayMapping = false, bool bFocusCreateDedicatedMemory = false, HString debugName = "VMABuffer");
 	~VMABuffer();
 
 	//最后的VkCommandBuffer是给VMA_MEMORY_USAGE_GPU_ONLY准备的
@@ -22,10 +22,19 @@ public:
 
 	bool Resize(VkDeviceSize newSize);
 
+	//扩容
+	bool ResizeBigger(VkDeviceSize newSize);
+
+	static inline VkDeviceSize GetMaxAlignmentSize(VkDeviceSize targetSize, VkDeviceSize AlignSize) {
+		return (targetSize + AlignSize - 1) & ~(AlignSize - 1);
+	}
+
 	inline VkBuffer GetBuffer()const {
 		return _buffer;
 	}
-
+	inline VkDeviceSize GetBufferSize()const {
+		return _lastSize;
+	}
 private:
 
 	VkBuffer _buffer; 
@@ -42,6 +51,8 @@ private:
 	VkBufferUsageFlags _bufferUsage;
 
 	VmaMemoryUsage _memoryUsage;
+
+	HString _debugName;
 
 	bool _bFocusCreateDedicatedMemory;
 };

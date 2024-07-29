@@ -19,7 +19,7 @@ GUIPass::~GUIPass()
 	manager->DestroyDescriptorSetLayout(_texDescriptorSetLayout);
 	manager->DestroyDescriptorSetLayout(_ubDescriptorSetLayout);
 }
-
+ 
 void GUIPass::PassInit()
 {
 	const auto& manager = VulkanManager::GetManager();
@@ -33,7 +33,7 @@ void GUIPass::PassInit()
 	//DescriptorSet
 	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, _ubDescriptorSetLayout, VK_SHADER_STAGE_FRAGMENT_BIT);
 	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }, _texDescriptorSetLayout, VK_SHADER_STAGE_FRAGMENT_BIT);
-	_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
+	_vertexBuffer.reset(new VMABuffer(8, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, true, true));
 	manager->CreatePipelineLayout(
 		{
 			_ubDescriptorSetLayout,
@@ -71,7 +71,6 @@ void GUIPass::PassUpdate()
 	{
 		ShowPerformance();
 	}
-	//GUIDrawText("fonttest",L"AbCd,自定义GUI文字测试~\n你好呀123嘿嘿。 ", 0, 20.0f, 200, 200, GUIDrawState(GUIAnchor_CenterLeft, false, glm::vec4(1)), 20.0f);
 
 	//设置管线
 	//Create GUIShader Pipeline
@@ -88,9 +87,10 @@ void GUIPass::PassUpdate()
 		vertices.insert(vertices.end(), i.second.Data.begin(), i.second.Data.end());
 		//textures
 		i.second.tex_descriptorSet->UpdateTextureDescriptorSet({ i.second.BaseTexture }, { Texture2D::GetSampler(TextureSampler::TextureSampler_Linear_Wrap) });
-		uint32_t ubSize = (uint32_t)manager->GetMinUboAlignmentSize(sizeof(GUIUniformBuffer));
+		uint32_t ubSize = sizeof(GUIUniformBuffer);
 		uint32_t ubOffset = 0;
-		i.second.ub_descriptorSet->ResizeDescriptorBuffer(ubSize * (i.second.States.size()));
+		VkDeviceSize targetBufferSize = ((VkDeviceSize)ubSize * (i.second.States.size() + (VkDeviceSize)VMAUniformBufferSizeRange - 1) & ~((VkDeviceSize)VMAUniformBufferSizeRange - 1));
+		i.second.ub_descriptorSet->ResizeBigDescriptorBuffer(targetBufferSize);
 		i.second.ub_descriptorSet->UpdateDescriptorSet(ubSize * ((uint32_t)i.second.States.size()));
 		for (auto s : i.second.States)
 		{
@@ -101,7 +101,9 @@ void GUIPass::PassUpdate()
 	}
 
 	//vertex buffer
-	_vertexBuffer->BufferMapping(vertices.data(), 0, sizeof(GUIVertexData) * vertices.size());
+	VkDeviceSize targetVertexBufferSize = ((sizeof(GUIVertexData) * vertices.size()) + (VkDeviceSize)VMABufferSizeRange - 1) & ~((VkDeviceSize)VMABufferSizeRange - 1);
+	_vertexBuffer->ResizeBigger(targetVertexBufferSize);
+	_vertexBuffer->Mapping(vertices.data(), 0, sizeof(GUIVertexData) * vertices.size());
 	VkDeviceSize vbOffset = 0;
 	VkBuffer verBuf[] = { _vertexBuffer->GetBuffer() };
 	vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, &vbOffset);
@@ -312,11 +314,23 @@ GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateC
 
 	if (!prim->ub_descriptorSet)
 	{
-		prim->ub_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, _ubDescriptorSetLayout, BufferSizeRange, VK_SHADER_STAGE_FRAGMENT_BIT));
+		prim->ub_descriptorSet.reset(new DescriptorSet(
+			_renderer, 
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 
+			_ubDescriptorSetLayout, 
+			VMA_MEMORY_USAGE_CPU_TO_GPU,
+			2, 
+			VK_SHADER_STAGE_FRAGMENT_BIT));
 	}
 	if (!prim->tex_descriptorSet)
 	{
-		prim->tex_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _texDescriptorSetLayout, 0, VK_SHADER_STAGE_FRAGMENT_BIT));
+		prim->tex_descriptorSet.reset(new DescriptorSet(
+			_renderer, 
+			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			_texDescriptorSetLayout, 
+			VMA_MEMORY_USAGE_CPU_TO_GPU,
+			0, 
+			VK_SHADER_STAGE_FRAGMENT_BIT));
 	}
 	prim->viewport = { (int)x,(int)y,(uint32_t)w,(uint32_t)h };
 	prim->Data.resize(6 * stateCount);

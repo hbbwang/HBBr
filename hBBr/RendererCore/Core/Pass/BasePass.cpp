@@ -19,7 +19,6 @@ BasePass::~BasePass()
 
 void BasePass::PassInit()
 {
-
 	//SceneDepth	: 0
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, GetSceneTexture(SceneTextureDesc::SceneDepth)->GetFormat(), VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 	//SceneColor	: 1
@@ -36,10 +35,24 @@ void BasePass::PassInit()
 
 	auto manager = VulkanManager::GetManager();
 	//Texture2D DescriptorSet
-	_opaque_descriptorSet_pass.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVSPS(), sizeof(PassUniformBuffer)));
-	_opaque_descriptorSet_obj.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVSPS(), 32));
-	_opaque_vertexBuffer.reset(new VMABuffer(32, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, false, true));
-	_opaque_indexBuffer.reset(new VMABuffer(32, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, false, true));
+	_opaque_descriptorSet_pass.reset(
+		new DescriptorSet(
+			_renderer, 
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 
+			PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVSPS(), 
+			VMA_MEMORY_USAGE_CPU_TO_GPU, 
+			sizeof(PassUniformBuffer),
+			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT));
+	_opaque_descriptorSet_obj.reset(
+		new DescriptorSet(
+			_renderer, 
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 
+			PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVSPS(), 
+			VMA_MEMORY_USAGE_CPU_TO_GPU, 
+			32));
+
+	_opaque_vertexBuffer.reset(new VMABuffer(32, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, false, true,"BasePassVertexBuffer"));
+	_opaque_indexBuffer.reset(new VMABuffer(32, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, false, true, "BasePassIndexBuffer"));
 
 	//Pass Uniform总是一尘不变的,并且我们用的是Dynamic uniform buffer ,所以只需要更新一次所有的DescriptorSet即可。
 	_opaque_descriptorSet_pass->UpdateDescriptorSetAll(sizeof(PassUniformBuffer));
@@ -238,14 +251,14 @@ void BasePass::SetupPassAndDraw(Pass p)
 						//检查buffer大小是否充足
 						{
 							//obj
-							VkDeviceSize targetBufferSize_objub = ((VkDeviceSize)currentObjectUniformBufferWholeSize + (VkDeviceSize)UniformBufferSizeRange - 1) & ~((VkDeviceSize)UniformBufferSizeRange - 1);
-							bNeedUpdateObjUniform = obj->ResizeDescriptorTargetBuffer(currentObjectUniformBufferWholeSize, targetBufferSize_objub);
+							VkDeviceSize targetBufferSize_objub = VMABuffer::GetMaxAlignmentSize((VkDeviceSize)currentObjectUniformBufferWholeSize, VMAUniformBufferSizeRange);
+							bNeedUpdateObjUniform = obj->ResizeBigDescriptorBuffer(targetBufferSize_objub);
 							//vb
-							VkDeviceSize targetBufferSize_vb = (currentBufferWholeSize_vb + (VkDeviceSize)BufferSizeRange - 1) & ~((VkDeviceSize)BufferSizeRange - 1);
-							bNeedUpdateVbIb |= vb->Resize(targetBufferSize_vb);
+							VkDeviceSize targetBufferSize_vb = VMABuffer::GetMaxAlignmentSize(currentBufferWholeSize_vb, VMABufferSizeRange);
+							bNeedUpdateVbIb |= vb->ResizeBigger(targetBufferSize_vb);
 							//ib
-							VkDeviceSize targetBufferSize_ib = (currentBufferWholeSize_ib + (VkDeviceSize)BufferSizeRange - 1) & ~((VkDeviceSize)BufferSizeRange - 1);
-							bNeedUpdateVbIb |= ib->Resize(targetBufferSize_ib);
+							VkDeviceSize targetBufferSize_ib = VMABuffer::GetMaxAlignmentSize(currentBufferWholeSize_ib, VMABufferSizeRange);
+							bNeedUpdateVbIb |= ib->ResizeBigger(targetBufferSize_ib);
 						}
 
 						//拷贝数据

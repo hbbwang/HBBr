@@ -44,8 +44,20 @@ void DeferredLightingPass::PassInit()
 	_vertexBuffer->Mapping(vertices.data(), 0, sizeof(LightingVertexData) * vertices.size());
 	//DescriptorSet
 	auto bufferSize = sizeof(LightingUniformBuffer);
-	_ub_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(), bufferSize, VK_SHADER_STAGE_FRAGMENT_BIT));
-	_tex_descriptorSet.reset(new DescriptorSet(_renderer, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _texDescriptorSetLayout, 0, VK_SHADER_STAGE_FRAGMENT_BIT));
+	_ub_descriptorSet.reset(new DescriptorSet(
+		_renderer, 
+		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 
+		PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(), 
+		VMA_MEMORY_USAGE_CPU_TO_GPU,
+		bufferSize,
+		VK_SHADER_STAGE_FRAGMENT_BIT)); 
+	_tex_descriptorSet.reset(new DescriptorSet(
+		_renderer, 
+		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 
+		_texDescriptorSetLayout, 
+		VMA_MEMORY_USAGE_CPU_TO_GPU,
+		0, 
+		VK_SHADER_STAGE_FRAGMENT_BIT));
 	_ub_descriptorSet->UpdateDescriptorSetAll((uint32_t)bufferSize);
 	//Set Pass Name
 	_passName = "Lighting Pass"; 

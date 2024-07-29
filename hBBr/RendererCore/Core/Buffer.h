@@ -93,6 +93,8 @@ private:
 
 	VkBufferUsageFlags				_bufferUsage;
 
+	HString				_debugName;
+
 	/* The pointer point to buffer */
 	void* _bufferMapping;
 

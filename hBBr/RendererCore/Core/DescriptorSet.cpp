@@ -4,7 +4,7 @@
 #include "Texture2D.h"
 #include <vector>
 
-DescriptorSet::DescriptorSet(VulkanRenderer* renderer, VkDescriptorType type, VkDescriptorSetLayout setLayout, VkDeviceSize bufferSizeInit, VkShaderStageFlags shaderStageFlags)
+DescriptorSet::DescriptorSet(VulkanRenderer* renderer, VkDescriptorType type, VkDescriptorSetLayout setLayout, VmaMemoryUsage memoryUsage, VkDeviceSize bufferSizeInit, VkShaderStageFlags shaderStageFlags)
 {
 	_renderer = renderer;
 	_descriptorTypes.push_back(type);
@@ -19,42 +19,8 @@ DescriptorSet::DescriptorSet(VulkanRenderer* renderer, VkDescriptorType type, Vk
 	}
 	if (type & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || type & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
 	{
-		_hasUniformBuffer = true;
-		auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSizeInit);
-		std::unique_ptr<Buffer> buffer;
-		buffer.reset(new Buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, alignmentSize));
-		_buffers.push_back(std::move(buffer));
-	}
-	_needUpdates.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
-	NeedUpdate();
-}
-
-DescriptorSet::DescriptorSet(VulkanRenderer* renderer, std::vector<VkDescriptorType> types, VkDescriptorSetLayout setLayout, VkDeviceSize bufferSizeInit, std::vector<VkShaderStageFlags> shaderStageFlags)
-{
-	_renderer = renderer;
-	_descriptorTypes = std::move(types);
-	_shaderStageFlags = std::move(shaderStageFlags);
-	if (setLayout != VK_NULL_HANDLE)
-	{
-		_descriptorSets.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
-		for (int i = 0; i < (int)VulkanManager::GetManager()->GetSwapchainBufferCount(); i++)
-		{
-			VulkanManager::GetManager()->AllocateDescriptorSet(VulkanManager::GetManager()->GetDescriptorPool(), setLayout, _descriptorSets[i]);
-		}
-	}
-	for (int i = 0; i < types.size(); i++)
-	{
-		std::unique_ptr<Buffer> buffer;
-		if (types[i] == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || types[i] == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-		{
-			_hasUniformBuffer = true;
-			auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSizeInit);
-			buffer.reset(new Buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, alignmentSize));
-		}
-		else if (types[i] == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-		{
-		}
-		_buffers.push_back(std::move(buffer));
+		//Uniform buffer常开mapped
+		_buffer.reset(new VMABuffer(bufferSizeInit, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, memoryUsage, true));
 	}
 	_needUpdates.resize(VulkanManager::GetManager()->GetSwapchainBufferCount());
 	NeedUpdate();
@@ -64,68 +30,26 @@ DescriptorSet::~DescriptorSet()
 {
 }
 
-void DescriptorSet::BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize, int bufferIndex)
+void DescriptorSet::BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize)
 {
-	if (_buffers[bufferIndex] == nullptr)
-	{
-		MessageOut("Buffer Mapping Failed._buffers[bufferIndex] is nullptr", false, true, "255,255,0");
-		return;
-	}
-	_buffers[bufferIndex]->BufferMapping(mappingData, offset, bufferSize);
-	//auto alignmentSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(bufferSize);
-	//VulkanManager::GetManager()->UpdateBufferDescriptorSet(this, bufferIndex, offset, alignmentSize);
+	_buffer->Mapping(mappingData, offset, bufferSize);
 }
 
-void DescriptorSet::BufferMappingWithNeed(void* mappingData, uint64_t offset, uint64_t bufferSize, int bufferIndex)
+bool DescriptorSet::ResizeDescriptorBuffer(VkDeviceSize newSize)
 {
-	if (_needUpdates[_renderer->GetCurrentFrameIndex()] == 1)
+	if (_buffer->Resize(newSize))
 	{
-		BufferMapping(mappingData, offset, bufferSize, bufferIndex);
-	}
-}
-
-bool DescriptorSet::ResizeDescriptorBuffer(VkDeviceSize newSize, int bufferIndex)
-{
-	if (_buffers[bufferIndex] == nullptr)
-	{
-		MessageOut("Buffer Mapping Failed._buffers[bufferIndex] is nullptr", false, true, "255,255,0");
-		return false;
-	}
-
-	if (_hasUniformBuffer)
-	{
-		newSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(newSize);
-	}
-
-	if (newSize > _buffers[bufferIndex]->GetBufferSize())
-	{
-		_buffers[bufferIndex]->Resize(newSize);
 		NeedUpdate();
 		return true;
 	}
 	return false;
 }
 
-bool DescriptorSet::ResizeDescriptorTargetBuffer(VkDeviceSize checkSize, VkDeviceSize targetSize, int bufferIndex)
+bool DescriptorSet::ResizeBigDescriptorBuffer(VkDeviceSize newSize)
 {
-	if (_buffers[bufferIndex] == nullptr)
+	if (newSize > _buffer->GetBufferSize())
 	{
-		MessageOut("Buffer Mapping Failed._buffers[bufferIndex] is nullptr", false, true, "255,255,0");
-		return false;
-	}
-
-	if (_hasUniformBuffer)
-	{
-		checkSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(checkSize);
-	}
-
-	if (checkSize > _buffers[bufferIndex]->GetBufferSize())
-	{
-		if (_hasUniformBuffer)
-		{
-			targetSize = VulkanManager::GetManager()->GetMinUboAlignmentSize(targetSize);
-		}
-		_buffers[bufferIndex]->Resize(targetSize);
+		_buffer->Resize(newSize);
 		NeedUpdate();
 		return true;
 	}

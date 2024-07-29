@@ -9,7 +9,8 @@ Buffer::Buffer(VkBufferUsageFlags usageFlags, uint64_t bufferSize):
 	_bufferCapacity(bufferSize),
 	_bufferUsage(usageFlags),
 	_bufferMapping(nullptr),
-	_bufferIsMapping(false)
+	_bufferIsMapping(false),
+	_debugName("VkBuffer")
 {
 	CreateBuffer(usageFlags, bufferSize);
 }
@@ -40,7 +41,7 @@ bool Buffer::Resize(uint64_t newSize, bool bForceResize)
 	manager->AllocateBufferMemory(_buffer, _bufferMemory);
 
 #if IS_EDITOR
-	ConsoleDebug::printf_endl_succeed(GetInternationalizationText("Renderer", "ResizeBuffer"), _bufferCapacity , (double)_bufferCapacity/ (double)1024.0/ (double)1024.0);
+	ConsoleDebug::printf_endl_succeed(GetInternationalizationText("Renderer", "ResizeBuffer"), _debugName.c_str(), _bufferCapacity , (double)_bufferCapacity/ (double)1024.0/ (double)1024.0);
 #endif
 
 	//把旧的缓冲区复制到新的里
@@ -74,7 +75,7 @@ void Buffer::CreateBuffer(VkBufferUsageFlags usageFlags, uint64_t bufferSize)
 	manager->AllocateBufferMemory(_buffer, _bufferMemory);
 
 #if IS_EDITOR
-	ConsoleDebug::printf_endl_succeed(GetInternationalizationText("Renderer", "CreateBuffer"), _bufferCapacity, (double)_bufferCapacity / (double)1024.0 / (double)1024.0);
+	ConsoleDebug::printf_endl_succeed(GetInternationalizationText("Renderer", "CreateBuffer"), _debugName.c_str(), _bufferCapacity, (double)_bufferCapacity / (double)1024.0 / (double)1024.0);
 #endif
 
 	MapMemory();

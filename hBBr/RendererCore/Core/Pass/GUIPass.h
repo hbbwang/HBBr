@@ -38,7 +38,7 @@ struct GUIUniformBuffer
 	float TextureSizeY = 512;
 	float ScreenSizeX = 512;
 	float ScreenSizeY = 512;
-	int Flags = 0;
+	alignas(16) int Flags = 0;
 
 	bool operator!=(const GUIUniformBuffer& c) const
 	{
@@ -118,7 +118,7 @@ private:
 	PipelineIndex _guiShaderIndex;
 
 	void SetupPanelAnchor(GUIDrawState state, float x, float y, float w, float h, GUIVertexData* vertexData);
-	std::shared_ptr<class Buffer>_vertexBuffer;
+	std::shared_ptr<class VMABuffer>_vertexBuffer;
 	std::map<HString,GUIPrimitive> _drawList;
 	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
 	VkDescriptorSetLayout _ubDescriptorSetLayout = VK_NULL_HANDLE;

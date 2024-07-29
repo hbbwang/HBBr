@@ -599,19 +599,31 @@ void MaterialPrimitiveGroup::ResetDecriptorSet(uint8_t numTextures, bool& bNeedU
 	const auto frameIndex = renderer->GetCurrentFrameIndex();
 
 	if(!descriptorSet_uniformBufferVS)
-		descriptorSet_uniformBufferVS.reset(new DescriptorSet(renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVS(), 32, { VK_SHADER_STAGE_VERTEX_BIT }));
+		descriptorSet_uniformBufferVS.reset(new DescriptorSet(
+			renderer, 
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+			PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVS(), 
+			VMA_MEMORY_USAGE_CPU_TO_GPU,
+			32, 
+			VK_SHADER_STAGE_VERTEX_BIT));
 	if (!descriptorSet_uniformBufferPS)
-		descriptorSet_uniformBufferPS.reset(new DescriptorSet(renderer, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(), 32, { VK_SHADER_STAGE_FRAGMENT_BIT }));
+		descriptorSet_uniformBufferPS.reset(new DescriptorSet(
+			renderer, 
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+			PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(), 
+			VMA_MEMORY_USAGE_CPU_TO_GPU,
+			32, 
+			VK_SHADER_STAGE_FRAGMENT_BIT));
 
 	if (primFrom->_uniformBufferSize_vs > 0)
 	{
 		//Update vs buffer
-		bNeedUpdateVSUniformBuffer = descriptorSet_uniformBufferVS->ResizeDescriptorBuffer(primFrom->_uniformBufferSize_vs);
+		bNeedUpdateVSUniformBuffer = descriptorSet_uniformBufferVS->ResizeBigDescriptorBuffer(primFrom->_uniformBufferSize_vs);
 	}
 	if (primFrom->_uniformBufferSize_ps > 0)
 	{
 		//Update ps buffer
-		bNeedUpdatePSUniformBuffer = descriptorSet_uniformBufferPS->ResizeDescriptorBuffer(primFrom->_uniformBufferSize_ps);
+		bNeedUpdatePSUniformBuffer = descriptorSet_uniformBufferPS->ResizeBigDescriptorBuffer(primFrom->_uniformBufferSize_ps);
 	}
 	//Update texture
 	bool bNeedRecreate = false;

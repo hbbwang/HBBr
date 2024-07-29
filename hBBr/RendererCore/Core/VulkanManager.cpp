@@ -292,6 +292,11 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 				extensions.push_back(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME);
 				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME ext.");
 			}
+			else if (strcmp(availableExts[i].extensionName, "VK_KHR_get_surface_capabilities2") == 0)
+			{
+				extensions.push_back("VK_KHR_get_surface_capabilities2");
+				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_KHR_get_surface_capabilities2 ext.");
+			}
 		}
 		ConsoleDebug::print_endl("\t---------End Enumerate Instance Extension Properties------");
 
@@ -633,11 +638,10 @@ void VulkanManager::InitDevice()
 					extensions.push_back(VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME);
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRSeparateDepthStencilLayouts = 1;
-				}
+				} 
 				else if (strcmp(availableExts[i].extensionName, VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME) == 0)
 				{
 					//全屏支持
-					//extensions.push_back("VK_KHR_get_surface_capabilities2");
 					extensions.push_back(VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME);		
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasEXTFullscreenExclusive = 1;
@@ -1176,9 +1180,11 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		// Swap to get identity width and height
 		std::swap(info.imageExtent.width, info.imageExtent.height);
 	}
-
+	if (_deviceExtensionOptionals.HasEXTFullscreenExclusive)
+	{
 #ifdef _WIN32
-
+    //fullscreen support
+    VkSurfaceFullScreenExclusiveInfoEXT FullScreenInfo = {};
 	HWND hWnd = (HWND)VulkanApp::GetWindowHandle(window);
 	//dwFlags：一个 DWORD 类型的值，表示如何选择与窗口关联的显示器。可能的值包括：
 	//MONITOR_DEFAULTTONULL：如果窗口没有与显示器重叠，则返回 NULL。
@@ -1189,17 +1195,12 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	fullScreenExclusiveWin32Info.sType = VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_WIN32_INFO_EXT;
 	fullScreenExclusiveWin32Info.hmonitor = hMonitor;
 
-    //fullscreen support
-    VkSurfaceFullScreenExclusiveInfoEXT FullScreenInfo = {};
-    if (_deviceExtensionOptionals.HasEXTFullscreenExclusive)
-    {
-        FullScreenInfo.sType = VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_INFO_EXT;
-        FullScreenInfo.fullScreenExclusive = bIsFullScreen ? VK_FULL_SCREEN_EXCLUSIVE_ALLOWED_EXT : VK_FULL_SCREEN_EXCLUSIVE_DISALLOWED_EXT;
-        FullScreenInfo.pNext = &fullScreenExclusiveWin32Info;
-        info.pNext = &FullScreenInfo;
-    }
+    FullScreenInfo.sType = VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_INFO_EXT;
+    FullScreenInfo.fullScreenExclusive = bIsFullScreen ? VK_FULL_SCREEN_EXCLUSIVE_ALLOWED_EXT : VK_FULL_SCREEN_EXCLUSIVE_DISALLOWED_EXT;
+    FullScreenInfo.pNext = &fullScreenExclusiveWin32Info;
+    info.pNext = &FullScreenInfo;
 #endif
-
+	}
 	auto result = vkCreateSwapchainKHR(_device, &info, VK_NULL_HANDLE, &newSwapchain);
 	if (result != VK_SUCCESS)
 	{

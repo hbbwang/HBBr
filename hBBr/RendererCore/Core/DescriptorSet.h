@@ -2,24 +2,22 @@
 #include "VulkanManager.h"
 #include <vector>
 #include <thread>
-#include "Buffer.h"
+#include "VMABuffer.h"
 
 class DescriptorSet
 {
 public:
-	DescriptorSet(class VulkanRenderer* renderer, VkDescriptorType type,VkDescriptorSetLayout setLayout, VkDeviceSize bufferSizeInit = BufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
-	DescriptorSet(class VulkanRenderer* renderer, std::vector<VkDescriptorType> types, VkDescriptorSetLayout setLayout, VkDeviceSize bufferSizeInit = BufferSizeRange, std::vector<VkShaderStageFlags> shaderStageFlags = { VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT });
+	DescriptorSet(class VulkanRenderer* renderer, VkDescriptorType type,VkDescriptorSetLayout setLayout,VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_CPU_TO_GPU,  VkDeviceSize bufferSizeInit = VMABufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 	~DescriptorSet();
 
-	//初始化的时候会根据bindingCount创建相同数量的VkBuffer(数组),bufferIndex是为了识别该数组,如果是1，则保持0即可
-	void BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize, int bufferIndex = 0);
+	//初始化的时候会根据bindingCount创建相同数量的VkBuffer(数组)
+	void BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize);
 
-	void BufferMappingWithNeed(void* mappingData, uint64_t offset, uint64_t bufferSize, int bufferIndex = 0);
+	//可缩放大，也可缩放小
+	bool ResizeDescriptorBuffer(VkDeviceSize newSize);
 
-	bool ResizeDescriptorBuffer(VkDeviceSize newSize , int bufferIndex = 0);
-
-	//checkSize是检查用的,当检查通过之后,将使用targetSize进行Resize
-	bool ResizeDescriptorTargetBuffer(VkDeviceSize checkSize, VkDeviceSize targetSize, int bufferIndex = 0);
+	//只有比之前申请的内存更大，才会执行
+	bool ResizeBigDescriptorBuffer(VkDeviceSize newSize);
 
 	void UpdateDescriptorSet(std::vector<uint32_t> bufferRanges, std::vector<uint32_t> offsets, uint32_t dstBinding = 0);
 
@@ -35,7 +33,7 @@ public:
 
 	void UpdateTextureViewDescriptorSet(std::vector<VkImageView> images, std::vector<VkSampler> samplers);
 
-	HBBR_INLINE Buffer* GetBuffer(int bufferIndex = 0)const { return _buffers[bufferIndex].get(); }
+	HBBR_INLINE VMABuffer* GetBuffer()const { return _buffer.get(); }
 
 	HBBR_INLINE std::vector<VkDescriptorType> GetTypes()const { return _descriptorTypes; }
 
@@ -48,7 +46,6 @@ public:
 	const VkDescriptorSet& GetDescriptorSet(int index);
 
 private:
-	std::vector<class Texture2D*> _textures;
 
 	std::vector<VkDescriptorType>	_descriptorTypes;
 
@@ -58,9 +55,7 @@ private:
 
 	std::vector<VkShaderStageFlags>	_shaderStageFlags;
 
-	std::vector<std::unique_ptr<Buffer>> _buffers;
+	std::unique_ptr<VMABuffer> _buffer;
 
 	class VulkanRenderer* _renderer;
-
-	bool _hasUniformBuffer;
 };
