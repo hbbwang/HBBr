@@ -33,7 +33,7 @@ void GUIPass::PassInit()
 	//DescriptorSet
 	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, _ubDescriptorSetLayout, VK_SHADER_STAGE_FRAGMENT_BIT);
 	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }, _texDescriptorSetLayout, VK_SHADER_STAGE_FRAGMENT_BIT);
-	_vertexBuffer.reset(new VMABuffer(8, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, true, true));
+	_vertexBuffer.reset(new VMABuffer(10240, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, true, true));
 	manager->CreatePipelineLayout(
 		{
 			_ubDescriptorSetLayout,

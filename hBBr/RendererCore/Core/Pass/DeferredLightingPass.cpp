@@ -40,10 +40,11 @@ void DeferredLightingPass::PassInit()
 		{ glm::vec2(1.0f, 1.0f)		, glm::vec2(1.0f, 1.0f) },
 		{ glm::vec2(-1.0f, 1.0f)	, glm::vec2(0.0f, 1.0f) }
 	};
-	_vertexBuffer.reset(new VMABuffer(sizeof(LightingVertexData) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_GPU_ONLY, false, false));
+	_vertexBuffer.reset(new VMABuffer(sizeof(LightingVertexData) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_GPU_ONLY, false, false, "DeferredLightingPass_VB"));
 	_vertexBuffer->Mapping(vertices.data(), 0, sizeof(LightingVertexData) * vertices.size());
 	//DescriptorSet
 	auto bufferSize = sizeof(LightingUniformBuffer);
+
 	_ub_descriptorSet.reset(new DescriptorSet(
 		_renderer, 
 		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 
@@ -51,6 +52,8 @@ void DeferredLightingPass::PassInit()
 		VMA_MEMORY_USAGE_CPU_TO_GPU,
 		bufferSize,
 		VK_SHADER_STAGE_FRAGMENT_BIT)); 
+	_ub_descriptorSet->UpdateDescriptorSetAll((uint32_t)bufferSize);
+
 	_tex_descriptorSet.reset(new DescriptorSet(
 		_renderer, 
 		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 
@@ -58,7 +61,7 @@ void DeferredLightingPass::PassInit()
 		VMA_MEMORY_USAGE_CPU_TO_GPU,
 		0, 
 		VK_SHADER_STAGE_FRAGMENT_BIT));
-	_ub_descriptorSet->UpdateDescriptorSetAll((uint32_t)bufferSize);
+
 	//Set Pass Name
 	_passName = "Lighting Pass"; 
 }

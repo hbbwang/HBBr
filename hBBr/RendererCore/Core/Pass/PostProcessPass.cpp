@@ -39,9 +39,11 @@ void PostProcessPass::PassInit()
 		{ glm::vec2(1.0f, 1.0f)		, glm::vec2(1.0f, 1.0f) },
 		{ glm::vec2(-1.0f, 1.0f)	, glm::vec2(0.0f, 1.0f) }
 	};
-	_vertexBuffer.reset(new Buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, sizeof(PostProcessVertexData) * vertices.size()));
-	_vertexBuffer->BufferMapping(vertices.data(), 0, sizeof(PostProcessVertexData) * vertices.size());
-	_vertexBuffer->UnMapMemory();
+
+	//后处理永远都使用的是屏幕面片，不会发生改变，所以用 VMA_MEMORY_USAGE_GPU_ONLY
+	_vertexBuffer.reset(new VMABuffer(sizeof(PostProcessVertexData) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_GPU_ONLY, false, false, "DeferredLightingPass_VB"));
+	_vertexBuffer->Mapping(vertices.data(), 0, sizeof(PostProcessVertexData) * vertices.size());
+
 	//DescriptorSet
 	auto bufferSize = sizeof(PostProcessUniformBuffer);
 	_ub_descriptorSet.reset(new DescriptorSet(
