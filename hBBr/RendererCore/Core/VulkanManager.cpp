@@ -75,10 +75,6 @@ VulkanDebugCallback(
 	}
 	if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
 		title = "ERROR: "; color = "255,0,0";
-		if (!HString(msg).Contains("VkLayer_nsight-sys_windows.json")) //Ignore Nsight-sys json not found error.
-		{
-			bError = true;
-		}
 	}
 	if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
 		title = "DEBUG: "; color = "255,255,255";
@@ -638,13 +634,14 @@ void VulkanManager::InitDevice()
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRSeparateDepthStencilLayouts = 1;
 				}
-				else if (bHasRenderPass2Ext && strcmp(availableExts[i].extensionName, VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME) == 0)
+				else if (strcmp(availableExts[i].extensionName, VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME) == 0)
 				{
 					//全屏支持
-					extensions.push_back(VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME);
+					//extensions.push_back("VK_KHR_get_surface_capabilities2");
+					extensions.push_back(VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME);		
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasEXTFullscreenExclusive = 1;
-					}
+				}
 			}
 		}
 

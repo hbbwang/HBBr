@@ -48,6 +48,20 @@ void VulkanRenderer::Release()
 		i.second.reset();
 	}
 	_passManagers.clear();
+	//Remove material
+	for (auto& p : PrimitiveProxy::GetAllMaterialPrimitiveArray())
+	{
+		for (auto& m : p)
+		{
+			auto it = m->_materialPrimitiveGroups.find(this);
+			if (it != m->_materialPrimitiveGroups.end())
+			{
+				delete it->second;
+			}
+			m->_materialPrimitiveGroups.erase(this);
+		}
+	}
+	//
 	VulkanManager::GetManager()->FreeCommandBuffers(VulkanManager::GetManager()->GetCommandPool(), _cmdBuf);
 	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
 	_vulkanManager->DestroyRenderFences(_executeFence);

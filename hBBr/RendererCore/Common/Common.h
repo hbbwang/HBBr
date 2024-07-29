@@ -55,7 +55,7 @@
 
 //assert
 #if defined(_WIN32)
-	#define DE_ASSERT(exp_, msgw_) _ASSERT_EXPR((exp_), HString(HString("\r\nMessage: ")+ HString(msgw_)).c_wstr());
+	#define DE_ASSERT(exp_, msgw_) _ASSERT_EXPR((exp_), (HString(TEXT("\r\n断言: ")) + msgw_ ).c_wstr());
 #elif defined(__ANDROID__)
 #elif defined(__linux__)
 #endif

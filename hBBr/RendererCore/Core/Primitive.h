@@ -113,6 +113,7 @@ struct MaterialPrimitiveGroup
 class MaterialPrimitive
 {
 	friend class Material;
+	friend class VulkanRenderer;
 	friend class PrimitiveProxy;
 public:
 	MaterialPrimitive();
@@ -255,11 +256,10 @@ private:
 	//纹理贴图
 	std::vector<std::shared_ptr<Texture2D>>		_textures;
 
-	//采样器选择
+	//采样器选择 
 	std::vector<VkSampler>				_samplers;
 
-	std::map<VulkanRenderer*, MaterialPrimitiveGroup*>	_materialPrimitiveGroups;s
-
+	std::map<VulkanRenderer*, MaterialPrimitiveGroup*>	_materialPrimitiveGroups;
 };
 
 class PrimitiveProxy

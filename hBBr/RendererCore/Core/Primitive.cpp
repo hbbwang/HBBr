@@ -32,6 +32,11 @@ void PrimitiveProxy::RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
 	auto it = std::find(_allGraphicsPrimitives[index].begin(), _allGraphicsPrimitives[index].end(), prim);
 	if (it != _allGraphicsPrimitives[index].end())
 	{
+		for (auto& matGroup : (*it)->_materialPrimitiveGroups)
+		{
+			delete matGroup.second;
+		}
+		(*it)->_materialPrimitiveGroups.clear();
 		_allGraphicsPrimitives[index].erase(it);
 	}
 }
@@ -196,14 +201,6 @@ MaterialPrimitive::MaterialPrimitive()
 	Pass passUsing = Pass::OpaquePass;
 	_uniformBufferSize_vs = 0;
 	_uniformBufferSize_ps = 0;
-	_uniformBuffer_vs.clear();
-	_uniformBuffer_ps.clear();
-	_paramterInfos_vs.clear();
-	_paramterInfos_ps.clear();
-	_textureInfos.clear();
-	_textures.clear();
-	_samplers.clear();
-	_materialPrimitiveGroups.clear();
 }
 
 
@@ -211,11 +208,7 @@ MaterialPrimitive::~MaterialPrimitive()
 {
 	_inputLayout = {};
 	_graphicsIndex = {};
-	int priority = 0;
-	HString graphicsName = "";
 	Pass passUsing = Pass::OpaquePass;
-	_uniformBufferSize_vs = 0;
-	_uniformBufferSize_ps = 0;
 	_uniformBuffer_vs.clear();
 	_uniformBuffer_ps.clear();
 	_paramterInfos_vs.clear();
@@ -223,6 +216,10 @@ MaterialPrimitive::~MaterialPrimitive()
 	_textureInfos.clear();
 	_textures.clear();
 	_samplers.clear();
+	for (auto& i : _materialPrimitiveGroups)
+	{
+		delete i.second;
+	}
 	_materialPrimitiveGroups.clear();
 }
 

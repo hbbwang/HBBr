@@ -17,6 +17,7 @@ Material::Material()
 Material::~Material()
 {
 	PrimitiveProxy::RemoveMaterialPrimitive(_primitive->_passUsing, _primitive.get());
+	_primitive.reset();
 }
 
 std::weak_ptr<Material> Material::GetDefaultMaterial()
