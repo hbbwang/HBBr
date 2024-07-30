@@ -271,7 +271,8 @@ bool Model::BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prim
 	}
 	return false;
 }
-
+#if IS_EDITOR
 void Model::SaveAsset(HString path)
 {
 }
+#endif

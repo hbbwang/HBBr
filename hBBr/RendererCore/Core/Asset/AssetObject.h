@@ -9,7 +9,6 @@ public:
 	{
 		_bResident = false;
 		_bSystemAsset = false;
-		SetToolTip();
 	}
 
 	virtual ~AssetObject() = default;
@@ -18,8 +17,9 @@ public:
 	//		1.HBBR_API static std::shared_ptr<Material> LoadAsset(HGUID guid)
 	//		2.HBBR_API virtual void SaveAsset(HString path) = 0;
 
-	//
+#if IS_EDITOR
 	HBBR_API virtual void SaveAsset(HString path) = 0;
+#endif
 
 	std::weak_ptr<AssetInfoBase> _assetInfo;
 
@@ -50,17 +50,6 @@ public:
 	{
 		return std::static_pointer_cast<T>(assetObject);
 	}
-
-	//编辑器ListWidget生成Item图标的时候触发...不要随意在其他(非编辑器)位置执行。
-	//每个HString为单独一行
-	//目前设定是，一般只有资产Load了才会执行
-#if IS_EDITOR
-	virtual void SetToolTip() {
-		if (!_assetInfo.expired())
-		{
-		}
-	}
-#endif
 
 protected:
 

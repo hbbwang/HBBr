@@ -1209,7 +1209,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		{
 			//ConsoleDebug::printf_endl_warning("vkCreateSwapchainKHR return VK_ERROR_INITIALIZATION_FAILED . Create swapchain failed with Initialization error; removing FullScreen extension...");
 			info.pNext = nullptr;
-			result = vkCreateSwapchainKHR(_device, &info, VK_NULL_HANDLE, &newSwapchain);
+			result = vkCreateSwapchainKHR(_device, &info, nullptr, &newSwapchain);
 		}
         if (result != VK_SUCCESS)
 #endif
@@ -1221,18 +1221,14 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	_swapchainBufferCount = DesiredNumBuffers;
 
 	//获取交换链Image,注意数量可能与_swapchainBufferCount不一致
-	uint32_t numSwapchainImages = 0;
-	vkGetSwapchainImagesKHR(_device, newSwapchain, &numSwapchainImages, VK_NULL_HANDLE);
-	if (_bIsIgnoreVulkanSwapChainExtraImages)
-	{
-		numSwapchainImages = _swapchainBufferCount;
-	}
+	uint32_t numSwapchainImages = surfaceCapabilities.minImageCount + 1;
+	vkGetSwapchainImagesKHR(_device, newSwapchain, &numSwapchainImages, nullptr);
 	swapchainImages.resize(numSwapchainImages);
-	swapchainImageViews.resize(numSwapchainImages);
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &numSwapchainImages, swapchainImages.data());
 
 	//创建ImageView
 	//ConsoleDebug::print_endl("hBBr:Swapchain: Create Swapchain Image View.");
+	swapchainImageViews.resize(numSwapchainImages);
 	for (int i = 0; i < (int)numSwapchainImages; i++)
 	{
 		CreateImageView(swapchainImages[i], surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, swapchainImageViews[i]);
@@ -1254,12 +1250,13 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	_swapchainBufferCount = numSwapchainImages;
 
 	//init semaphores & fences
-	if (acquireImageSemaphore != nullptr)
+	if (acquireImageSemaphore != nullptr && acquireImageSemaphore->size() != _swapchainBufferCount)
 	{
 		//ConsoleDebug::print_endl("hBBr:Swapchain: Present Semaphore.");
 		for (int i = 0; i < (int)acquireImageSemaphore->size(); i++)
 		{
 			DestroySemaphore(acquireImageSemaphore->at(i));		
+			acquireImageSemaphore->at(i) = nullptr;
 		}
 		acquireImageSemaphore->resize(_swapchainBufferCount);
 		for (int i = 0; i < (int)_swapchainBufferCount; i++)
@@ -1267,12 +1264,13 @@ VkExtent2D VulkanManager::CreateSwapchain(
 			CreateVkSemaphore(acquireImageSemaphore->at(i));
 		}
 	}
-	if (queueSubmitSemaphore != nullptr)
+	if (queueSubmitSemaphore != nullptr && queueSubmitSemaphore->size() != _swapchainBufferCount)
 	{
 		//ConsoleDebug::print_endl("hBBr:Swapchain: Queue Submit Semaphore.");
 		for (int i = 0; i < (int)queueSubmitSemaphore->size(); i++)
 		{
 			DestroySemaphore(queueSubmitSemaphore->at(i));
+			queueSubmitSemaphore->at(i) = nullptr;
 		}
 		queueSubmitSemaphore->resize(_swapchainBufferCount);
 		for (int i = 0; i < (int)_swapchainBufferCount; i++)
@@ -1280,12 +1278,13 @@ VkExtent2D VulkanManager::CreateSwapchain(
 			CreateVkSemaphore(queueSubmitSemaphore->at(i));
 		}
 	}
-	if (fences != nullptr)
+	if (fences != nullptr && fences->size() != _swapchainBufferCount)
 	{
 		//ConsoleDebug::print_endl("hBBr:Swapchain: image acquired fences.");
 		for (int i = 0; i < (int)fences->size(); i++)
 		{
 			DestroyFence(fences->at(i));
+			fences->at(i) = nullptr;
 		}
 		fences->resize(_swapchainBufferCount);
 		for (int i = 0; i < (int)_swapchainBufferCount; i++)
@@ -1294,45 +1293,31 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		}
 	}
 
-	if (cmdBuf != nullptr)
+	if (cmdBuf != nullptr && cmdBuf->size() != _swapchainBufferCount)
 	{
 		//ConsoleDebug::print_endl("hBBr:Swapchain: Allocate Main CommandBuffers.");
-		FreeCommandBuffers(_commandPool, *cmdBuf);
+		for (int i = 0; i < (int)cmdBuf->size(); i++)
+		{
+			FreeCommandBuffer(_commandPool, cmdBuf->at(i));
+			cmdBuf->at(i) = nullptr;
+		}
 		cmdBuf->resize(_swapchainBufferCount);
 		for (int i = 0; i < (int)_swapchainBufferCount; i++)
 		{
 			AllocateCommandBuffer(_commandPool, cmdBuf->at(i));
 		}
 	}
-
 	return info.imageExtent;
 }
 
 void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImageView>& swapchainImageViews)
 {
-	for (int i = 0; i < (int)swapchainImageViews.size(); i++)
+	for (auto& i: swapchainImageViews)
 	{
-		DestroyImageView(swapchainImageViews[i]);
-		swapchainImageViews[i] = VK_NULL_HANDLE;
+		vkDestroyImageView(_device, i, VK_NULL_HANDLE);
+		i = VK_NULL_HANDLE;
 	}
 	std::vector<VkImageView>().swap(swapchainImageViews);
-	if (swapchain != VK_NULL_HANDLE)
-	{
-		vkDestroySwapchainKHR(_device, swapchain, VK_NULL_HANDLE);
-		swapchain = VK_NULL_HANDLE;
-	}
-}
-
-void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<std::shared_ptr<class Texture2D>>& textures)
-{
-	for (int i = 0; i < (int)textures.size(); i++)
-	{
-		DestroyImageView(textures[i]->_imageView);
-		textures[i]->_image = VK_NULL_HANDLE;
-		textures[i]->_imageView = VK_NULL_HANDLE;
-	}
-	textures.clear();
-	//
 	if (swapchain != VK_NULL_HANDLE)
 	{
 		vkDestroySwapchainKHR(_device, swapchain, VK_NULL_HANDLE);
@@ -1625,13 +1610,13 @@ void VulkanManager::DestroyCommandPool()
 	DestroyCommandPool(_commandPool);
 }
 
-void VulkanManager::CreateCommandPool(VkCommandPool& commandPool)
+void VulkanManager::CreateCommandPool(VkCommandPool& commandPool, VkCommandPoolCreateFlags flags)
 {
 	VkCommandPoolCreateInfo cmdPoolInfo = {};
 	cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	cmdPoolInfo.pNext = nullptr;
 	cmdPoolInfo.queueFamilyIndex = _graphicsQueueFamilyIndex;
-	cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	cmdPoolInfo.flags = flags;
 
 	vkCreateCommandPool(_device, &cmdPoolInfo, VK_NULL_HANDLE, &commandPool);
 }
@@ -1685,12 +1670,12 @@ void VulkanManager::FreeCommandBuffer(VkCommandPool commandPool, VkCommandBuffer
 	cmdBuf = VK_NULL_HANDLE;
 }
 
-void VulkanManager::ResetCommandBuffer(VkCommandBuffer cmdBuf)
+void VulkanManager::ResetCommandBuffer(VkCommandBuffer& cmdBuf)
 {
 	vkResetCommandBuffer(cmdBuf, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 }
 
-void VulkanManager::BeginCommandBuffer(VkCommandBuffer cmdBuf, VkCommandBufferUsageFlags flag)
+void VulkanManager::BeginCommandBuffer(VkCommandBuffer& cmdBuf, VkCommandBufferUsageFlags flag)
 {
 	//VkCommandBufferBeginInfo.flags:
 	//VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT: 命令缓冲区将在执行一次后立即重新记录。
@@ -1703,12 +1688,12 @@ void VulkanManager::BeginCommandBuffer(VkCommandBuffer cmdBuf, VkCommandBufferUs
 	vkBeginCommandBuffer(cmdBuf,&info);
 }
 
-void VulkanManager::EndCommandBuffer(VkCommandBuffer cmdBuf)
+void VulkanManager::EndCommandBuffer(VkCommandBuffer& cmdBuf)
 {
 	vkEndCommandBuffer(cmdBuf);
 }
 
-void VulkanManager::BeginRenderPass(VkCommandBuffer cmdBuf, VkFramebuffer framebuffer, VkRenderPass renderPass, VkExtent2D areaSize, std::vector<VkAttachmentDescription>_attachmentDescs, std::array<float, 4> clearColor)
+void VulkanManager::BeginRenderPass(VkCommandBuffer& cmdBuf, VkFramebuffer framebuffer, VkRenderPass renderPass, VkExtent2D areaSize, std::vector<VkAttachmentDescription>_attachmentDescs, std::array<float, 4> clearColor)
 {
 	const auto clearValueCount = _attachmentDescs.size();
 
@@ -1742,14 +1727,22 @@ void VulkanManager::BeginRenderPass(VkCommandBuffer cmdBuf, VkFramebuffer frameb
 	vkCmdBeginRenderPass(cmdBuf, &info, VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
 }
 
-void VulkanManager::EndRenderPass(VkCommandBuffer cmdBuf)
+void VulkanManager::EndRenderPass(VkCommandBuffer& cmdBuf)
 {
 	vkCmdEndRenderPass(cmdBuf);
 }
 
-bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore, VkFence fence, uint32_t* swapchainIndex)
+bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, VkFence* fence, uint32_t* swapchainIndex)
 {
-	VkResult result = vkAcquireNextImageKHR(_device, swapchain, UINT64_MAX, semaphore, fence, swapchainIndex);
+	VkResult result = VK_SUCCESS;
+	if (fence == nullptr)
+	{
+		result = vkAcquireNextImageKHR(_device, swapchain, UINT64_MAX, semaphore, nullptr, swapchainIndex);
+	}
+	else
+	{
+		result = vkAcquireNextImageKHR(_device, swapchain, UINT64_MAX, semaphore, *fence, swapchainIndex);
+	}
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 	{
 		#if _DEBUG
@@ -1765,7 +1758,7 @@ bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore 
 	return true;
 }
 
-bool VulkanManager::Present(VkSwapchainKHR swapchain, VkSemaphore& semaphore, uint32_t& swapchainImageIndex)
+bool VulkanManager::Present(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, uint32_t& swapchainImageIndex)
 {
 	VkResult infoResult = VK_SUCCESS;
 	VkPresentInfoKHR presentInfo = {};
@@ -2518,15 +2511,15 @@ VkViewport VulkanManager::GetViewport(float w, float h)
 	return viewport;
 }
 
-void VulkanManager::SubmitQueueForPasses(VkCommandBuffer cmdBuf, VkSemaphore* presentSemaphore, VkSemaphore* submitFinishSemaphore, VkFence executeFence, VkPipelineStageFlags waitStageMask, VkQueue queue)
+void VulkanManager::SubmitQueueForPasses(VkCommandBuffer& cmdBuf, VkSemaphore& presentSemaphore, VkSemaphore& submitFinishSemaphore, VkFence& executeFence, VkPipelineStageFlags waitStageMask, VkQueue queue)
 {
 	VkSubmitInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	info.pWaitDstStageMask = &waitStageMask;
 	info.waitSemaphoreCount = 1;
-	info.pWaitSemaphores = presentSemaphore;
+	info.pWaitSemaphores = &presentSemaphore;
 	info.signalSemaphoreCount = 1;
-	info.pSignalSemaphores = submitFinishSemaphore;
+	info.pSignalSemaphores = &submitFinishSemaphore;
 	info.commandBufferCount = 1;
 	info.pCommandBuffers = &cmdBuf;
 	VkResult result;

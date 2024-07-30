@@ -98,7 +98,9 @@ public:
 
 	HBBR_API static std::shared_ptr<Texture2D> LoadAsset(HGUID guid , VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
+#if IS_EDITOR
 	HBBR_API virtual void SaveAsset(HString path)override;
+#endif
 
 	void UploadToGPU();
 

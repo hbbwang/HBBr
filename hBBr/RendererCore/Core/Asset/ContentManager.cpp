@@ -13,7 +13,11 @@
 #include "Pass/HDRI2Cube.h"
 
 std::unique_ptr<ContentManager> ContentManager::_ptr;
+
+#if IS_EDITOR
 std::vector<std::weak_ptr<AssetInfoBase>> ContentManager::_dirtyAssets;
+#endif
+
 ContentManager::ContentManager()
 {
 	_assets.resize((uint32_t)AssetType::MaxNum);
@@ -675,8 +679,10 @@ std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(nlohmann::json&input, H
 	//资产重新导入了，如果资产已经导入过了，就需要卸载掉内存，等待重新导入刷新
 	info->ReleaseData();
 
+#if IS_EDITOR
 	info->toolTips.reserve(20);
 	UpdateToolTips(info.get());
+#endif
 
 	//读取引用关系
 	{

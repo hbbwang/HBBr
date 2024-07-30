@@ -3,7 +3,9 @@
 #include "FileSystem.h"
 #include "Component/Component.h"
 
+#if IS_EDITOR
 std::vector<std::weak_ptr<Level>> Level::_dirtyLevels;
+#endif
 
 Level::Level(class World* world, HString name)
 {
@@ -43,8 +45,8 @@ void Level::Rename(HString newName)
 			SaveLevel();
 		}
 	};
-	dirtyFunc.push_back(func);
 #if IS_EDITOR
+	dirtyFunc.push_back(func);
 	_world->MarkDirty();
 	MarkDirty();
 	_world->_editorLevelChanged();

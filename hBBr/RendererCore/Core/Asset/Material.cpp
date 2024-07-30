@@ -83,7 +83,7 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 		std::shared_ptr<Material> mat;
 		if (!bReload)
 		{
-			mat.reset(new Material);
+			mat.reset(new Material());
 			mat->_primitive.reset(new MaterialPrimitive());
 		}
 		else
@@ -542,7 +542,7 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 	}
 	return nullptr;
 }
-
+#if IS_EDITOR
 void Material::SaveAsset(HString path)
 {
 	ToJson();
@@ -595,6 +595,8 @@ std::weak_ptr<AssetInfoBase> Material::CreateMaterial(HString repository, HStrin
 	}
 	return std::weak_ptr<AssetInfoBase>();
 }
+
+#endif
 
 nlohmann::json Material::ToJson()
 {

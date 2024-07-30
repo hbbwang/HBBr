@@ -209,9 +209,11 @@ std::shared_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags us
 	return dataPtr->GetData();
 }
 
+#if IS_EDITOR
 void Texture2D::SaveAsset(HString path)
 {
 }
+#endif
 
 void Texture2D::UploadToGPU()
 {

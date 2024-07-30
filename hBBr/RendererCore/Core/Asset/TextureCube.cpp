@@ -128,8 +128,9 @@ std::shared_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlag
 	dataPtr->SetData(newTexture);
 	return dataPtr->GetData();
 }
-
+#if IS_EDITOR
 void TextureCube::SaveAsset(HString path)
 {
 
 }
+#endif

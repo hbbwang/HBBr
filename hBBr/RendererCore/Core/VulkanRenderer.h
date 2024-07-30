@@ -54,26 +54,6 @@ public:
 		return _swapchainImages;
 	}
 
-	HBBR_INLINE int GetLastValidSwapchainIndex() {
-		return _lastValidSwapchainIndex;
-	}
-
-	//获取上一帧绘制成功的image view
-	HBBR_INLINE VkImageView GetLastValidSwapchainImageView() {
-		if(_lastValidSwapchainIndex>=0)
-			return _swapchainImageViews[_lastValidSwapchainIndex];
-		else
-			return VK_NULL_HANDLE;
-	}
-
-	//获取上一帧绘制成功的image
-	HBBR_INLINE VkImage GetLastValidSwapchainImage() {
-		if (_lastValidSwapchainIndex >= 0)
-			return _swapchainImages[_lastValidSwapchainIndex];
-		else
-			return VK_NULL_HANDLE;
-	}
-
 	//窗口分辨率
 	HBBR_API HBBR_INLINE VkExtent2D GetWindowSurfaceSize()const {
 		return _surfaceSize;
@@ -100,7 +80,7 @@ public:
 		return _rendererName;
 	}
 
-	HBBR_INLINE VkCommandBuffer GetCommandBuffer()const{
+	HBBR_INLINE VkCommandBuffer& GetCommandBuffer(){
 		return _cmdBuf[_currentFrameIndex];
 	}
 
@@ -220,8 +200,6 @@ private:
 	uint32_t _currentFrameIndex;
 
 	uint32_t _maxSwapchainImages = 0;
-
-	int _lastValidSwapchainIndex = -1;
 
 	bool _bRendererRelease;
 

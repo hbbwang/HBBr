@@ -3,6 +3,7 @@
 #include "EditorCommonFunction.h"
 #include <functional>
 #include "FormMain.h"
+#include <qwindow.h>
 
 VulkanForm* SDLWidget::_mainRenderer = nullptr;
 SDLWidget::SDLWidget(QWidget* parent)
@@ -24,11 +25,8 @@ SDLWidget::SDLWidget(QWidget* parent)
 			Shaderc::ShaderCompiler::SetEnableShaderDebug(GetEditorConfigInt("Default", "EnableShaderDebug"));		
 		});
 	//
-	_rendererForm = VulkanApp::InitVulkanManager(false, true);
+	_rendererForm = VulkanApp::InitVulkanManager(false, true, (void*)this->winId());
 	_hwnd = (HWND)VulkanApp::GetWindowHandle(_rendererForm->window);
-
-	SetParent(_hwnd, (HWND)this->winId());s
-
 	VulkanApp::SetFocusForm(_rendererForm);
 	SetFocus(_hwnd);
 }
@@ -66,5 +64,9 @@ SDLWidget::~SDLWidget()
 }
 
 void SDLWidget::RendererUpdate()
+{
+}
+
+void SDLWidget::resizeEvent(QResizeEvent* event)
 {
 }

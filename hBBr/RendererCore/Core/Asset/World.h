@@ -37,7 +37,9 @@ public:
 
 	HBBR_API void AddNewLevel(HString name);
 
+#if IS_EDITOR
 	HBBR_API void DeleteLevel(HString levelName);
+#endif
 
 	HBBR_API const HGUID GetGUID()const { return _guid; }
 

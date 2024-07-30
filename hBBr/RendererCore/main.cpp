@@ -29,8 +29,9 @@
 //#include "include/vld.h"
 //#pragma comment(lib ,"vld.lib")
 //#endif
-
+#if IS_EDITOR
 std::function<void()>VulkanApp::_editorVulkanInit = []() {};
+#endif
 std::vector<VulkanForm*> VulkanApp::_forms;
 VulkanForm* VulkanApp::_mainForm = nullptr;
 VulkanForm* VulkanApp::_focusForm = nullptr;
@@ -160,9 +161,9 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	//Create Main Window
 	auto win = CreateNewWindow(128, 128, "MainRenderer", false, parent);
 
+#if IS_EDITOR
 	VulkanApp::_editorVulkanInit();
 
-#if IS_EDITOR
 	Shaderc::ShaderCompiler::CompileAllShaders(FileSystem::GetShaderIncludeAbsPath().c_str());
 #endif
 	Shader::LoadShaderCache(FileSystem::GetShaderCacheAbsPath().c_str());
@@ -562,10 +563,12 @@ void VulkanApp::RecompileAllShader()
 	_bRecompilerShaders = true;
 }
 
+#if IS_EDITOR
 void VulkanApp::SetEditorVulkanInit(std::function<void()> func)
 {
 	_editorVulkanInit = func;
 }
+#endif
 
 #if defined(IS_GAME)
 

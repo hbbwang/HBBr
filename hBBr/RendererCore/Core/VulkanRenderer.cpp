@@ -201,7 +201,6 @@ void VulkanRenderer::CreateEmptyWorld()
 	_world = World::CreateNewWorld("NewWorld");
 	_world->Load(this);
 }
-
 void VulkanRenderer::Render()
 {
 	if (!_bInit) //Render loop Init.
@@ -233,17 +232,18 @@ void VulkanRenderer::Render()
 
 			_vulkanManager->WaitForFences({ _executeFence[_currentFrameIndex] });
 
-			if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], VK_NULL_HANDLE, &swapchainIndex))
+			if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], nullptr, &swapchainIndex))
 			{
 				ResizeBuffer();
 				return;
 			}
-
-			auto funcOnce = std::move(_renderThreadFuncsOnce);
-			for (auto& func : funcOnce)
+			
+			for (auto& func : _renderThreadFuncsOnce)
 			{
 				func();
 			}
+			_renderThreadFuncsOnce.clear();
+
 			for (auto& func : _renderThreadFuncs)
 			{
 				func();
@@ -252,8 +252,8 @@ void VulkanRenderer::Render()
 			if (_world)
 				_world->WorldUpdate();
 
-			auto cmdBuf = _cmdBuf[_currentFrameIndex];
-			_vulkanManager->ResetCommandBuffer(cmdBuf);
+			auto& cmdBuf = _cmdBuf[_currentFrameIndex];
+			//_vulkanManager->ResetCommandBuffer(cmdBuf);
 			_vulkanManager->BeginCommandBuffer(cmdBuf);
 
 			for (auto& p : _passManagers)
@@ -275,7 +275,7 @@ void VulkanRenderer::Render()
 			}
 
 			_vulkanManager->EndCommandBuffer(cmdBuf);
-			_vulkanManager->SubmitQueueForPasses(cmdBuf, &_presentSemaphore[_currentFrameIndex], &_queueSubmitSemaphore[_currentFrameIndex], _executeFence[_currentFrameIndex]);
+			_vulkanManager->SubmitQueueForPasses(cmdBuf, _presentSemaphore[_currentFrameIndex], _queueSubmitSemaphore[_currentFrameIndex], _executeFence[_currentFrameIndex]);
 
 			//Present swapchain.
 			if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], swapchainIndex))
@@ -284,12 +284,8 @@ void VulkanRenderer::Render()
 				return;
 			}
 
-			//Get valid frame index
-			_lastValidSwapchainIndex = _currentFrameIndex;
-
 			//Get next frame index.
-			uint32_t maxNumSwapchainImages = _vulkanManager->GetSwapchainBufferCount();
-			_currentFrameIndex = (_currentFrameIndex + 1) % maxNumSwapchainImages;
+			_currentFrameIndex = (_currentFrameIndex + 1) % _vulkanManager->GetSwapchainBufferCount();
 		}
 	}
 }
@@ -304,7 +300,6 @@ void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
 
 bool VulkanRenderer::ResizeBuffer()
 {
-	_lastValidSwapchainIndex = -1;
 	if (_windowSize.width<=0 && _windowSize.height <= 0)
 	{
 		_vulkanManager->GetSurfaceSize(_surface, _windowSize);
@@ -326,14 +321,8 @@ bool VulkanRenderer::ResizeBuffer()
 			return false;
 		}
 
-		_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
 		_renderSize = _surfaceSize = _vulkanManager->CreateSwapchain(_windowHandle, _windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore, &_queueSubmitSemaphore
 		, &_executeFence, false, true);
-
-		if (_swapchain == VK_NULL_HANDLE)
-		{
-			return false;
-		}
 
 		for (auto& p : _passManagers)
 		{

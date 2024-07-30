@@ -135,9 +135,8 @@ void GameObject::SetParent(GameObject* newParent)
 			_transform->ResetTransformForAttachment();
 		#if IS_EDITOR
 		ConsoleDebug::print_endl("GameObject " + _name + " attach to  : " + newParent->GetObjectName());
-		#endif
-
 		_level->GetWorld()->_editorGameObjectSetParentFunc(this->_selfWeak.lock(),this->_parent->_selfWeak.lock());
+		#endif
 	}
 	else
 	{
@@ -158,7 +157,9 @@ void GameObject::SetParent(GameObject* newParent)
 		}
 		_parent = nullptr;
 
+		#if IS_EDITOR
 		_level->GetWorld()->_editorGameObjectSetParentFunc(this->_selfWeak.lock(), nullptr);
+		#endif
 	}
 
 }

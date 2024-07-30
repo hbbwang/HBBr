@@ -117,8 +117,8 @@ public:
 	void* _editorObject = nullptr;
 	bool _bEditorNeedUpdate = false;
 	bool _sceneEditorHide = false;
-	bool _IsEditorObject = false;
 #endif
+	bool _IsEditorObject = false;
 
 private:
 

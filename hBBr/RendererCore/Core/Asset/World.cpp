@@ -6,7 +6,11 @@
 #include "FileSystem.h"
 #include "ConsoleDebug.h"
 #include "FormMain.h"
+
+#if IS_EDITOR
 std::vector<std::weak_ptr<World>>World::_dirtyWorlds;
+#endif
+
 World::World()
 {
 	_cameras.reserve(8);
@@ -55,13 +59,14 @@ void World::AddNewLevel(HString name)
 	newLevel.reset(new Level(this, name));
 	newLevel->Load();
 	_levels.push_back(newLevel);
-	newLevel->MarkDirty();
 #if IS_EDITOR
+	newLevel->MarkDirty();
 	_editorLevelChanged();
 	MarkDirty();
 #endif
 }
 
+#if IS_EDITOR
 void World::DeleteLevel(HString levelName)
 {
 	//此操作并不会删除.level文件，只会更改World的_levels，等待DirtyAssetsManager里确认保存了才会真正删除保存
@@ -76,11 +81,10 @@ void World::DeleteLevel(HString levelName)
 		it->get()->DeleteLevel();
 		_levels.erase(it);
 		//标记需要保存
-		#if IS_EDITOR
 			MarkDirty();
-		#endif
 	}
 }
+#endif
 
 std::shared_ptr<World> World::CreateNewWorld(HString newWorldName)
 {

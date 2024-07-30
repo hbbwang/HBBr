@@ -139,7 +139,9 @@ public:
 
 	HBBR_API static bool BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prims,class VulkanRenderer* renderer);
 
+#if IS_EDITOR
 	HBBR_API void SaveAsset(HString path)override;
+#endif
 
 	//根据材质区分面
 	std::vector<FaceData*>		faces;

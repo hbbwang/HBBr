@@ -22,9 +22,13 @@ public:
 
 	HBBR_API static std::shared_ptr<Material> LoadAsset(HGUID guid);
 
+#if IS_EDITOR
+
 	HBBR_API void SaveAsset(HString path)override;
 
 	HBBR_API static  std::weak_ptr<AssetInfoBase> CreateMaterial(HString repository,HString virtualPath);
+
+#endif
 
 	HBBR_API HBBR_INLINE MaterialPrimitive* GetPrimitive()const { return _primitive.get(); }
 

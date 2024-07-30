@@ -20,4 +20,8 @@ public:
 	class VulkanForm* _rendererForm = nullptr;
 
 	static VulkanForm* _mainRenderer;
+
+protected:
+
+	virtual void resizeEvent(QResizeEvent* event);
 };

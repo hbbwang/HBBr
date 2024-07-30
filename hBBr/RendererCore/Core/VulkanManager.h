@@ -160,9 +160,6 @@ public:
 	/* 释放Swapchain */
 	void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImageView>& swapchainImageViews);
 
-	/* 释放Swapchain From Texture2D Class */
-	void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<std::shared_ptr<class Texture2D>>& textures);
-
 	/* 创建Vulkan image ,但是不带 mipmaps */
 	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image ,uint32_t miplevel = 1, uint32_t layerCount = 1);
 
@@ -191,7 +188,7 @@ public:
 
 	void DestroyCommandPool();
 
-	void CreateCommandPool(VkCommandPool& commandPool);
+	void CreateCommandPool(VkCommandPool& commandPool , VkCommandPoolCreateFlags flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 
 	void ResetCommandPool(VkCommandPool& commandPool);
 
@@ -203,20 +200,20 @@ public:
 
 	void FreeCommandBuffer(VkCommandPool commandPool, VkCommandBuffer& cmdBuf);
 
-	void ResetCommandBuffer(VkCommandBuffer cmdBuf);
+	void ResetCommandBuffer(VkCommandBuffer& cmdBuf);
 
-	void BeginCommandBuffer(VkCommandBuffer cmdBuf , VkCommandBufferUsageFlags flag = 0);
+	void BeginCommandBuffer(VkCommandBuffer& cmdBuf , VkCommandBufferUsageFlags flag = 0);
 
-	void EndCommandBuffer(VkCommandBuffer cmdBuf);
+	void EndCommandBuffer(VkCommandBuffer& cmdBuf);
 
-	void BeginRenderPass(VkCommandBuffer cmdBuf, VkFramebuffer framebuffer, VkRenderPass renderPass, VkExtent2D areaSize, std::vector<VkAttachmentDescription>_attachmentDescs, std::array<float, 4> clearColor = { 0.0f, 0.0f, 0.0f, 0.0f });
+	void BeginRenderPass(VkCommandBuffer& cmdBuf, VkFramebuffer framebuffer, VkRenderPass renderPass, VkExtent2D areaSize, std::vector<VkAttachmentDescription>_attachmentDescs, std::array<float, 4> clearColor = { 0.0f, 0.0f, 0.0f, 0.0f });
 
-	void EndRenderPass(VkCommandBuffer cmdBuf);
+	void EndRenderPass(VkCommandBuffer& cmdBuf);
 
 	/* return the swapchain is normal (not out of data). */
-	bool GetNextSwapchainIndex(VkSwapchainKHR swapchain, VkSemaphore semaphore,VkFence fence , uint32_t* swapchainIndex);
+	bool GetNextSwapchainIndex(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, VkFence* fence , uint32_t* swapchainIndex);
 
-	bool Present(VkSwapchainKHR swapchain, VkSemaphore& semaphore, uint32_t& swapchainImageIndex);
+	bool Present(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, uint32_t& swapchainImageIndex);
 
 	void CreatePipelineLayout(std::vector <VkDescriptorSetLayout> descriptorSetLayout , VkPipelineLayout& pipelineLayout);
 
@@ -352,7 +349,7 @@ public:
 
 	VkViewport GetViewport(float w,float h);
 
-	void SubmitQueueForPasses(VkCommandBuffer cmdBuf, VkSemaphore* presentSemaphore, VkSemaphore* submitFinishSemaphore, VkFence executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkQueue queue = VK_NULL_HANDLE);
+	void SubmitQueueForPasses(VkCommandBuffer& cmdBuf, VkSemaphore& presentSemaphore, VkSemaphore& submitFinishSemaphore, VkFence& executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkQueue queue = VK_NULL_HANDLE);
 
 	void UpdateBufferDescriptorSet(VkBuffer buffer, VkDescriptorSet descriptorSet, VkDescriptorType type,  uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
 
@@ -366,7 +363,7 @@ public:
 
 	void UpdateBufferDescriptorSetAll(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
 
-	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<std::shared_ptr<Texture2D>> textures, std::vector<VkSampler> samplers);
+	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<std::shared_ptr<class Texture2D>> textures, std::vector<VkSampler> samplers);
 
 	VkDeviceSize GetMinUboAlignmentSize(VkDeviceSize realSize);
 
@@ -430,9 +427,6 @@ public:
 	HBBR_INLINE VkPhysicalDeviceFeatures GetPhysicalDeviceFeatures()const {
 		return _gpuFeatures;
 	}
-
-	//忽略vkGetSwapchainImagesKHR里获取到的Images数量，坚持使用我们设定的数量
-	bool _bIsIgnoreVulkanSwapChainExtraImages = false;
 
 	static bool _bDebugEnable;
 
