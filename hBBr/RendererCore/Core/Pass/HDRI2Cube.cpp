@@ -5,28 +5,45 @@
 #include "ImageTool.h"
 #include "FormMain.h"
 #include "NvidiaTextureTools.h"
+#include "VMABuffer.h"
 
-HDRI2Cube::HDRI2Cube(HString hdrImagePath)
+HDRI2Cube::HDRI2Cube()
 	:ComputePass(nullptr)
 {
+}
+
+HDRI2Cube::~HDRI2Cube()
+{
+	const auto& manager = VulkanManager::GetManager();
+	ReleasePass();
+	_hdriTexture.reset();
+	manager->DestroyPipelineLayout(_pipelineLayout);
+	manager->DestroyDescriptorSetLayout(_storeDescriptorSetLayout);
+}
+
+bool HDRI2Cube::PassExecute(HString hdrImagePath, HString ddsOutputPath, bool bGenerateMips, int cubeMapSize)
+{
+	const auto& manager = VulkanManager::GetManager();
+
 	//Init
 	_hdrImagePath = hdrImagePath;
 	_renderer = VulkanApp::GetMainForm()->renderer;
+
 	//Load hdr image
 	auto imageData = ImageTool::LoadImage32Bit(hdrImagePath.c_str());
 	uint32_t w = imageData->data_header.width;
 	uint32_t h = imageData->data_header.height;
+
 	//Load HDRI image
 	_hdriTexture = Texture2D::CreateTexture2D(
 		w, h,
 		VK_FORMAT_R32G32B32A32_SFLOAT,
 		VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
 		HString("Provisional HDRI Texture")
-	); 
+	);
 	_hdriTexture->_imageData = *imageData;
 	_hdriTexture->CopyBufferToTextureImmediate();
-	//Init pass
-	const auto& manager = VulkanManager::GetManager();
+
 	//Create DescriptorSetLayout
 	manager->CreateDescripotrSetLayout(
 		{
@@ -39,44 +56,32 @@ HDRI2Cube::HDRI2Cube(HString hdrImagePath)
 			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
 		}, _storeDescriptorSetLayout, VK_SHADER_STAGE_COMPUTE_BIT);
+
 	//Create PipelineLayout
 	manager->CreatePipelineLayout(
 		{
 			_storeDescriptorSetLayout
 		}
 	, _pipelineLayout);
+
 	//Create DescriptorSet
 	store_descriptorSet.reset(new DescriptorSet(
-		_renderer, 
-		VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 
+		_renderer,
+		VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
 		_storeDescriptorSetLayout,
 		VMA_MEMORY_USAGE_CPU_TO_GPU,
 		0,
 		VK_SHADER_STAGE_COMPUTE_BIT));
+
 	//Create uniform buffer
-	auto alignmentSize = manager->GetMinUboAlignmentSize(sizeof(HDRI2CubeUnifrom));
-	_uniformBuffer.reset(new Buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, alignmentSize));
-}
+	_uniformBuffer.reset(new VMABuffer(sizeof(HDRI2CubeUnifrom), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_GPU_ONLY, false, true, "HDRI2CubeUnifrom"));
 
-HDRI2Cube::~HDRI2Cube()
-{
-	const auto& manager = VulkanManager::GetManager();
-	ReleasePass();
-	_hdriTexture.reset();
-	manager->DestroyPipelineLayout(_pipelineLayout);
-	manager->DestroyDescriptorSetLayout(_storeDescriptorSetLayout);
-}
-
-bool HDRI2Cube::PassExecute(HString ddsOutputPath, bool bGenerateMips, int cubeMapSize)
-{
 	//Set cube map output size
 	if (cubeMapSize < 1)
 	{
 		cubeMapSize = _hdriTexture->_imageData.data_header.height;
 	}
 
-	std::shared_ptr<Buffer>cubeBuffer;
-	const auto& manager = VulkanManager::GetManager();
 	//Pass Execute
 	{
 		//Create Store Texture
@@ -89,6 +94,7 @@ bool HDRI2Cube::PassExecute(HString ddsOutputPath, bool bGenerateMips, int cubeM
 				HString("Cube Map Store Texture")
 			);
 		}
+
 		{
 			VkCommandBuffer cmdBuf;
 			manager->AllocateCommandBuffer(manager->GetCommandPool(), cmdBuf);
@@ -133,7 +139,7 @@ bool HDRI2Cube::PassExecute(HString ddsOutputPath, bool bGenerateMips, int cubeM
 				//uniform
 				HDRI2CubeUnifrom u = {};
 				u.CubeMapSize = (float)cubeMapSize;
-				_uniformBuffer->BufferMapping(&u, 0, sizeof(HDRI2CubeUnifrom));
+				_uniformBuffer->Mapping(&u, 0, sizeof(HDRI2CubeUnifrom));
 				auto alignmentSize = manager->GetMinUboAlignmentSize(sizeof(HDRI2CubeUnifrom));
 				manager->UpdateBufferDescriptorSet(_uniformBuffer->GetBuffer(), store_descriptorSet->GetDescriptorSet(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 7, 0, alignmentSize);
 			}
@@ -158,34 +164,46 @@ bool HDRI2Cube::PassExecute(HString ddsOutputPath, bool bGenerateMips, int cubeM
 		}
 	}
 
+	std::shared_ptr<VMABuffer> copyTextureToBuffer;
+	copyTextureToBuffer.reset(new VMABuffer(
+		_storeTexture[0]->GetTextureMemorySize() * 6,
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		VMA_MEMORY_USAGE_GPU_ONLY,false,true,"HDRI2Cube-Texture2Buffer"));
 	//Copy store texture to buffer
 	{
-		//等待ComputeShader执行完成之后，导出图像
-		cubeBuffer.reset(new Buffer(VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			_storeTexture[0]->GetTextureMemorySize() * 6
-		));
 		VkDeviceSize copy_offset = 0;
 		for (int i = 0; i < 6; i++)
 		{
-			_storeTexture[i]->CopyTextureToBufferImmediate(cubeBuffer.get(), copy_offset);
+			_storeTexture[i]->CopyTextureToBufferImmediate(copyTextureToBuffer->GetBuffer(), copy_offset);
 			copy_offset += _storeTexture[i]->GetTextureMemorySize();
 		}
 	}
 
 #if IS_EDITOR
 
+	std::shared_ptr<VMABuffer> copBufferToCPU;
+	copBufferToCPU.reset(new VMABuffer(
+		_storeTexture[0]->GetTextureMemorySize() * 6,
+		VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		VMA_MEMORY_USAGE_GPU_TO_CPU, false, true, "HDRI2Cube-Buffer2File"));
+
+
+	//Copy GPUBuffer to CPUBuffer
+	manager->CmdBufferCopyToBuffer(nullptr, copyTextureToBuffer->GetBuffer(), copBufferToCPU->GetBuffer(), _storeTexture[0]->GetTextureMemorySize() * 6);
+	void* textureData = copBufferToCPU->BeginMapping();
 	HString hdrCubeMapCachePath = FileSystem::Append(_hdrImagePath.GetFilePath(), _hdrImagePath.GetBaseName() + "_HDRCubeMapCache.hdr");
 	//Export cube map cache
 	{
 		//生成临时HDR图
 		//if (!stbi_write_hdr(hdrCubeMapCachePath.c_str(), cubeMapSize, cubeMapSize * 6, 4, (float*)cubeBuffer->GetBufferMemory()))
-		if (!ImageTool::SaveImage32Bit(hdrCubeMapCachePath.c_str(), cubeMapSize, cubeMapSize * 6, 4, (float*)cubeBuffer->GetBufferMemory()))
+		if (!ImageTool::SaveImage32Bit(hdrCubeMapCachePath.c_str(), cubeMapSize, cubeMapSize * 6, 4, (float*)textureData))
 		{
 			ConsoleDebug::print_endl("Save output image failed", "255,255,0");
 			return false;
 		}
-		cubeBuffer->UnMapMemory();
 	}
+	copBufferToCPU->EndMapping();
+
 
 	//NVTT spawn cube map dds
 	{
@@ -267,5 +285,6 @@ void HDRI2Cube::ReleasePass()
 	{
 		_storeTexture[i].reset();
 	}
+	_uniformBuffer.reset();
 }
 

@@ -9,7 +9,6 @@
 #include "HString.h"
 #include "ImageTool.h"
 #include "AssetObject.h"
-#include "Buffer.h"
 //Vulkan api
 #include "VulkanManager.h"
 
@@ -85,9 +84,9 @@ public:
 
 	void DestoryUploadBuffer();
 
-	HBBR_API bool CopyTextureToBuffer(VkCommandBuffer cmdbuf, Buffer* buffer, VkDeviceSize offset = 0);
+	HBBR_API bool CopyTextureToBuffer(VkCommandBuffer cmdbuf, VkBuffer buffer, VkDeviceSize offset = 0);
 
-	HBBR_API void CopyTextureToBufferImmediate(Buffer* buffer, VkDeviceSize offset = 0);
+	HBBR_API void CopyTextureToBufferImmediate(VkBuffer buffer, VkDeviceSize offset = 0);
 
 	HBBR_API void Resize(uint32_t width, uint32_t height);
 

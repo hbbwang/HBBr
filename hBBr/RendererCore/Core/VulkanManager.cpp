@@ -2302,11 +2302,14 @@ void VulkanManager::VMACraeteBufferAndAllocateMemory(VkDeviceSize bufferSize, Vk
 	vmaCreateBuffer(_vma_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, vmaInfo);
 }
 
-void VulkanManager::VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation)
+void VulkanManager::VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation, HString debugName, VkDeviceSize debugSize)
 {
 	if (buffer != VK_NULL_HANDLE && allocation != VK_NULL_HANDLE)
 	{
 		vmaDestroyBuffer(_vma_allocator, buffer, allocation);
+		#if IS_EDITOR
+		ConsoleDebug::printf_endl(GetInternationalizationText("Renderer", "DestroyBuffer"), debugName.c_str(), debugSize, (double)debugSize / (double)1024.0 / (double)1024.0);
+		#endif
 	}
 	buffer = VK_NULL_HANDLE;
 	allocation = VK_NULL_HANDLE;

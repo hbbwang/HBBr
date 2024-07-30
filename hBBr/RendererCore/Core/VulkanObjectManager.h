@@ -26,6 +26,8 @@ struct VMABufferObject
 {
 	VkBuffer buffer;
 	VmaAllocation allocation;
+	HString debugName = "VMABuffer";
+	VkDeviceSize debugSize = 0;
 	uint8_t frameCount = 0;
 };
 
@@ -61,7 +63,7 @@ public:
 
 	void SafeReleaseVkBuffer(VkBuffer buffer, VkDeviceMemory memory);
 
-	void SafeReleaseVMABuffer(VkBuffer buffer, VmaAllocation allocation);
+	void SafeReleaseVMABuffer(VkBuffer buffer, VmaAllocation allocation, HString debugName = "VMABuffer", VkDeviceSize debugSize = 0);
 
 	void AssetLinkGC(std::weak_ptr<class AssetObject> asset,bool bImmediate = false);
 

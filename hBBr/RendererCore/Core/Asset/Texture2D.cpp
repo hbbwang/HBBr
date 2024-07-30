@@ -11,7 +11,7 @@
 #include "RendererConfig.h"
 #include "TextureCube.h"
 #include "VulkanObjectManager.h"
-
+#include  "VMABuffer.h"
 std::vector<Texture2D*> Texture2D::_upload_textures;
 std::unordered_map<HString, std::weak_ptr<Texture2D>> Texture2D::_system_textures;
 std::vector<VkSampler>Texture2D::_samplers;
@@ -520,7 +520,7 @@ void Texture2D::DestoryUploadBuffer()
 	}
 }
 
-bool Texture2D::CopyTextureToBuffer(VkCommandBuffer cmdbuf, Buffer* buffer, VkDeviceSize offset)
+bool Texture2D::CopyTextureToBuffer(VkCommandBuffer cmdbuf, VkBuffer buffer, VkDeviceSize offset)
 {
 	VkBufferImageCopy copy = {};
 	copy.bufferOffset = offset;
@@ -530,11 +530,11 @@ bool Texture2D::CopyTextureToBuffer(VkCommandBuffer cmdbuf, Buffer* buffer, VkDe
 	copy.imageOffset = { 0, 0, 0 };
 	copy.imageExtent = _imageSize;
 	copy.imageExtent.depth = 1;
-	vkCmdCopyImageToBuffer(cmdbuf, _image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, buffer->GetBuffer(), 1, &copy);
+	vkCmdCopyImageToBuffer(cmdbuf, _image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, buffer, 1, &copy);
 	return true;
 }
 
-void Texture2D::CopyTextureToBufferImmediate(Buffer* buffer, VkDeviceSize offset)
+void Texture2D::CopyTextureToBufferImmediate(VkBuffer buffer, VkDeviceSize offset)
 {
 	const auto& manager = VulkanManager::GetManager();
 	VkCommandBuffer buf;

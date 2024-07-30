@@ -18,11 +18,11 @@ struct HDRI2CubeUnifrom
 class HDRI2Cube :public ComputePass
 {
 public:
-	HDRI2Cube(HString hdrImagePath);
+	HDRI2Cube();
 
 	virtual ~HDRI2Cube();
 
-	bool PassExecute(HString ddsOutputPath, bool bGenerateMips, int cubeMapSize = -1);
+	bool PassExecute(HString hdrImagePath, HString ddsOutputPath, bool bGenerateMips, int cubeMapSize = -1);
 
 	void ReleasePass();
 
@@ -39,5 +39,5 @@ private:
 
 	std::shared_ptr<Texture2D> _hdriTexture;
 
-	std::unique_ptr<Buffer> _uniformBuffer;
+	std::unique_ptr<VMABuffer> _uniformBuffer;
 };

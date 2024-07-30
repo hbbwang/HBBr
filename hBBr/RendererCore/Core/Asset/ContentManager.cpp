@@ -168,8 +168,8 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				savePath = FileSystem::Append(savePath, guidStr + ".dds");
 				suffix = "dds";
 				//使用nvtt插件导入hdr,转为cubedds(dds)
-				HDRI2Cube hdriToCube(i.absAssetFilePath);
-				if (!hdriToCube.PassExecute(savePath, true))
+				HDRI2Cube hdriToCube;
+				if (!hdriToCube.PassExecute(i.absAssetFilePath, savePath, true))
 				{
 					ConsoleDebug::printf_endl_warning(GetInternationalizationText("Renderer","A000027"));
 				}

@@ -2,7 +2,6 @@
 #include "VulkanRenderer.h"
 #include "DescriptorSet.h"
 #include "VertexFactory.h"
-#include "Buffer.h"
 #include "Primitive.h"
 #include "Pass/PassType.h"
 #include "Texture2D.h"

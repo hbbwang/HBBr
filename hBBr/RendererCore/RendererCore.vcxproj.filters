@@ -151,9 +151,6 @@
     <ClInclude Include="Core\Primitive.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Buffer.h">
-      <Filter>Renderer\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Component\CameraComponent.h">
       <Filter>Renderer\Core\Object\Component</Filter>
     </ClInclude>
@@ -347,9 +344,6 @@
     </ClCompile>
     <ClCompile Include="Common\HTime.cpp">
       <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Buffer.cpp">
-      <Filter>Renderer\Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\VertexFactory.cpp">
       <Filter>Renderer\Core</Filter>

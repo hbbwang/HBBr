@@ -25,12 +25,14 @@ void VulkanObjectManager::SafeReleaseVkBuffer(VkBuffer buffer, VkDeviceMemory me
 	_numRequestObjects++;
 }
 
-void VulkanObjectManager::SafeReleaseVMABuffer(VkBuffer buffer, VmaAllocation allocation)
+void VulkanObjectManager::SafeReleaseVMABuffer(VkBuffer buffer, VmaAllocation allocation, HString debugName, VkDeviceSize debugSize)
 {
 	VMABufferObject* newObject = new VMABufferObject();
 	newObject->buffer = buffer;
 	newObject->allocation = allocation;
 	newObject->frameCount = 0;
+	newObject->debugName = debugName;
+	newObject->debugSize = debugSize;
 	_vmaBufferObjects.push_back(newObject);
 	_numRequestObjects++;
 }
@@ -90,7 +92,7 @@ void VulkanObjectManager::Update()
 			
 			if (object->frameCount > swapchainBufferCount)
 			{
-				manager->VMADestroyBufferAndFreeMemory(object->buffer, object->allocation);
+				manager->VMADestroyBufferAndFreeMemory(object->buffer, object->allocation, object->debugName, object->debugSize);
 				delete object;
 				it = _vmaBufferObjects.erase(it);
 				_numRequestObjects--;

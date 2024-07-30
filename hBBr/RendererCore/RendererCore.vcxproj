@@ -286,7 +286,6 @@
     <ClInclude Include="Core\Asset\Texture2D.h" />
     <ClInclude Include="Core\Asset\TextureCube.h" />
     <ClInclude Include="Core\Asset\World.h" />
-    <ClInclude Include="Core\Buffer.h" />
     <ClInclude Include="Core\Component\CameraComponent.h" />
     <ClInclude Include="Core\Component\Component.h" />
     <ClInclude Include="Core\Component\DirectionalLightComponent.h" />
@@ -354,7 +353,6 @@
     <ClCompile Include="Core\Asset\Texture2D.cpp" />
     <ClCompile Include="Core\Asset\TextureCube.cpp" />
     <ClCompile Include="Core\Asset\World.cpp" />
-    <ClCompile Include="Core\Buffer.cpp" />
     <ClCompile Include="Core\Component\CameraComponent.cpp" />
     <ClCompile Include="Core\Component\Component.cpp" />
     <ClCompile Include="Core\Component\DirectionalLightComponent.cpp" />
