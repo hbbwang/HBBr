@@ -135,6 +135,7 @@ void MemoryWatcher::UpdateAssetWatcher()
 			{
 				_assetWatcherTree->topLevelItem(i)->removeChild(it->second.item);
 				delete it->second.item;
+				it->second.item = nullptr;
 				_assets.erase(it);
 			}
 			else if (it != _assets.end() && !it->second.object.expired())

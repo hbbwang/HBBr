@@ -227,19 +227,10 @@ void Component::ExecuteDestroy()
 
 }
 
-
 void Component::Destroy()
 {
 	SetActive(false);
 	this->ExecuteDestroy();
-	auto it = std::remove_if(this->GetGameObject()->_comps.begin(), this->GetGameObject()->_comps.end(), [this](Component*& comp) {
-		return comp == this;
-		});
-	if (it != this->GetGameObject()->_comps.end())
-	{
-		this->GetGameObject()->_comps.erase(it);
-		delete this;
-	}
 }
 
 HString Component::PropertyValueToString(ComponentProperty& p)

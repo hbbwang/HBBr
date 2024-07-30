@@ -61,19 +61,27 @@ void GameObject::ObjectInit(HString objectName, Level* level, bool SceneEditorHi
 	//Create Transform
 	_transform = new Transform(this);
 
-	auto sharedPtr = std::shared_ptr<GameObject>(this);
-	_selfWeak = sharedPtr;
-	_level->AddNewObject(sharedPtr);
+	//auto sharedPtr = std::shared_ptr<GameObject>(this);
+	//_selfWeak = sharedPtr;
+	//_level->AddNewObject(sharedPtr);
 }
 
 GameObject* GameObject::CreateGameObject(HString objectName, Level* level)
 {
-	return new GameObject(objectName, level);
+	std::shared_ptr<GameObject> sharedPtr;
+	sharedPtr.reset(new GameObject(objectName, level));
+	sharedPtr->_selfWeak = sharedPtr;
+	level->AddNewObject(sharedPtr);
+	return sharedPtr.get();
 }
 
 GameObject* GameObject::CreateGameObjectWithGUID(HString objectName, HString guidStr, Level* level)
 {
-	return new GameObject(objectName, guidStr, level);
+	std::shared_ptr<GameObject> sharedPtr;
+	sharedPtr.reset(new GameObject(objectName, guidStr, level));
+	sharedPtr->_selfWeak = sharedPtr;
+	level->AddNewObject(sharedPtr);
+	return sharedPtr.get();
 }
 
 void GameObject::SetActive(bool newActive)
@@ -235,6 +243,15 @@ bool GameObject::ExecuteDestroy()
 	for (int i = 0; i < _comps.size(); i++)
 	{
 		_comps[i]->Destroy();
+		auto it = std::remove_if(_comps.begin(), _comps.end(), [&](Component*& comp) {
+			return comp == _comps[i];
+			});
+		if (it != _comps.end())
+		{
+			delete _comps[i];
+			_comps[i] = nullptr;
+			_comps.erase(it);
+		}
 	}
 
 	if (_transform != nullptr)

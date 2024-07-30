@@ -75,6 +75,7 @@ void TextureDetailEditor::deleteItem(QLayout* layout)
 			delete child->layout();
 		}
 		delete child;
+		child = nullptr;
 	}
 	if (layout->widget())
 	{
@@ -118,6 +119,7 @@ TextureDetailEditor* TextureDetailEditor::RefreshEditor(std::weak_ptr<Texture2D>
 	if (editor != nullptr)
 	{
 		delete editor->_mp;
+		editor->_mp = nullptr;
 		editor->Init();
 	}
 	return editor;

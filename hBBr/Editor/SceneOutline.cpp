@@ -352,6 +352,7 @@ void SceneOutlineTree::contextMenuEvent(QContextMenuEvent* event)
                 for (auto& i :items)
                 {
                     delete i;
+                    i = nullptr;
                 }
                 items.clear();
                 // ((SceneOutlineItem*)this->currentItem())->_gameObject.lock()->GetLevel()->MarkDirty();
@@ -739,6 +740,7 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                     {
                         auto level = _treeWidget->takeTopLevelItem(_treeWidget->indexOfTopLevelItem(i));
                         delete level;
+                        level = nullptr;
                     }
                     _levelItems.clear();
                     //生成世界预览图
@@ -754,6 +756,7 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                     {
                         auto level = _treeWidget->takeTopLevelItem(_treeWidget->indexOfTopLevelItem(i));
                         delete level;
+                        level = nullptr;
                     }
                     _levelItems.clear();
                     if (!world.expired())
@@ -858,6 +861,7 @@ SceneOutline::SceneOutline(VulkanRenderer* renderer, QWidget *parent)
                         }
                     }
                     item->Destroy();
+                    item = nullptr;
                 }
             };
             

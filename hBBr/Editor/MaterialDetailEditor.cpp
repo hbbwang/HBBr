@@ -83,6 +83,7 @@ void MaterialDetailEditor::deleteItem(QLayout* layout)
 			delete child->layout();
 		}
 		delete child;
+		child = nullptr;
 	}
 	if (layout->widget())
 	{
@@ -129,7 +130,8 @@ MaterialDetailEditor* MaterialDetailEditor::RefreshEditor(std::weak_ptr<Material
 	{
 		delete editor->mp;
 		delete editor->ma;
-
+		editor->mp = nullptr;
+		editor->ma = nullptr;
 		editor->Init();
 	}
 	return editor;

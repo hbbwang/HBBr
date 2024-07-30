@@ -118,6 +118,7 @@ public:
 	void ReleaseInclude(shaderc_include_result* data) override {
 		// 释放我们在 GetInclude 中分配的内存。
 		delete data;
+		data = nullptr;
 	}
 };
 

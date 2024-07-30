@@ -92,6 +92,9 @@ EditorMain::EditorMain(QWidget *parent)
         VulkanApp::RecompileAllShader();
         MaterialDetailEditor::RefreshAllEditor();
     });
+    connect(ui.CreateNewWorld, &QAction::triggered, this, [this](bool bChecked) {
+        VulkanApp::GetMainForm()->renderer->CreateEmptyWorld();
+    });
     connect(ui.SaveWorld, &QAction::triggered, this, [this](bool bChecked) {
         VulkanApp::GetMainForm()->renderer->GetWorld().lock()->SaveWorld();
      });

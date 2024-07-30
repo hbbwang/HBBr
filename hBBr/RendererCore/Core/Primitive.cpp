@@ -35,6 +35,7 @@ void PrimitiveProxy::RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
 		for (auto& matGroup : (*it)->_materialPrimitiveGroups)
 		{
 			delete matGroup.second;
+			matGroup.second = nullptr;
 		}
 		(*it)->_materialPrimitiveGroups.clear();
 		_allGraphicsPrimitives[index].erase(it);
@@ -219,6 +220,7 @@ MaterialPrimitive::~MaterialPrimitive()
 	for (auto& i : _materialPrimitiveGroups)
 	{
 		delete i.second;
+		i.second = nullptr;
 	}
 	_materialPrimitiveGroups.clear();
 }

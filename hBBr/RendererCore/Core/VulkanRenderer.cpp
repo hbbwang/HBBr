@@ -57,6 +57,7 @@ void VulkanRenderer::Release()
 			if (it != m->_materialPrimitiveGroups.end())
 			{
 				delete it->second;
+				it->second = nullptr;
 			}
 			m->_materialPrimitiveGroups.erase(this);
 		}
@@ -195,6 +196,10 @@ bool VulkanRenderer::LoadWorld(HString worldNameOrGUID)
 
 void VulkanRenderer::CreateEmptyWorld()
 {
+	if (_world)
+	{
+		_world.reset();
+	}
 	_world = World::CreateNewWorld("NewWorld");
 	_world->Load(this);
 }

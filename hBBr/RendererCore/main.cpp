@@ -496,6 +496,7 @@ void VulkanApp::RemoveWindow(VulkanForm* form)
 					form->renderer = nullptr;
 				}
 				delete form;
+				form = nullptr;
 				break;
 			}
 		}

@@ -558,6 +558,7 @@ public:
 			tmpStr = strtok_s(nullptr, pattern, &temp);
 		}
 		delete[] strc;
+		strc = nullptr;
 		return resultVec;
 	}
 

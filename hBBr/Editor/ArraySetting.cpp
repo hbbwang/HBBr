@@ -96,6 +96,7 @@ void ArraySetting::RemoveValue(int index)
 	{
 		ui.listWidget->removeItemWidget(arrayitem[index]);
 		delete arrayitem[index];
+		arrayitem[index] = nullptr;
 		arrayitem.removeAt(index);
 		arraylist.removeAt(index);
 		lastArrayCount--;

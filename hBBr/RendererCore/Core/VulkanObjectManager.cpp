@@ -73,6 +73,7 @@ void VulkanObjectManager::Update()
 				manager->DestroyBuffer(object->buffer);
 				manager->FreeBufferMemory(object->memory);
 				delete object;
+				object = nullptr;
 				it = _vkBufferObjects.erase(it);
 				_numRequestObjects--;
 				continue;
@@ -94,6 +95,7 @@ void VulkanObjectManager::Update()
 			{
 				manager->VMADestroyBufferAndFreeMemory(object->buffer, object->allocation, object->debugName, object->debugSize);
 				delete object;
+				object = nullptr;
 				it = _vmaBufferObjects.erase(it);
 				_numRequestObjects--;
 				continue;

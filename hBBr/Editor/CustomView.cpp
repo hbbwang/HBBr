@@ -373,6 +373,7 @@ void CustomListView::RemoveAllItems()
 	{
 		takeItem(row(i));
 		delete i;
+		i = nullptr;
 	}
 	_allItems.clear();
 }

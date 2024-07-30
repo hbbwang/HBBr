@@ -141,6 +141,7 @@ void PropertyWidget::ClearItems()
 			child->widget()->setParent(nullptr);
 		}
 		delete child;
+		child = nullptr;
 	}
 	child = nullptr;
 	while ((child = _value_layout->takeAt(0)) != 0)
@@ -150,6 +151,7 @@ void PropertyWidget::ClearItems()
 			child->widget()->setParent(nullptr);
 		}
 		delete child;
+		child = nullptr;
 	}
 }
 
@@ -163,6 +165,7 @@ void PropertyWidget::ShowItems()
 			child->widget()->setParent(nullptr);
 		}
 		delete child;
+		child = nullptr;
 	}
 	child = nullptr;
 	while ((child = _value_layout->takeAt(0)) != 0)
@@ -172,6 +175,7 @@ void PropertyWidget::ShowItems()
 			child->widget()->setParent(nullptr);
 		}
 		delete child;
+		child = nullptr;
 	}
 
 	//先处理没有分组,并且也没有Parent组的
