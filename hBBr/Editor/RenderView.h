@@ -17,8 +17,6 @@ public:
 
 	SDLWidget* _mainRendererWidget = nullptr;
 
-	static SDL_Keycode mapQtKeyToSdlKey(int qtKey);
-
 protected:
 	//不使用Qt默认的绘制引擎
 	//virtual QPaintEngine* paintEngine() const { return 0; }

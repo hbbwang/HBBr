@@ -42,9 +42,6 @@ MemoryWatcher::MemoryWatcher(QWidget *parent)
 	_timer->setInterval(500);//0.5秒更新一次
 	connect(_timer, &QTimer::timeout, this, [this]() 
 		{
-			if (VulkanApp::GetForms().size() <= 0)
-				return;
-			//
 			// 更新内存使用情况
 			{
 				size_t memoryUsage = 0;
@@ -55,6 +52,8 @@ MemoryWatcher::MemoryWatcher(QWidget *parent)
 				text += QString(" kb(") + QString::number(memoryUsage / 1024 / 1024) + " mb)";
 				ui.MemoryStaus->setText(text);
 			}
+			if (VulkanApp::GetForms().size() <= 0)
+				return;
 			// GC倒计时
 			{
 				QString text = QString::fromLocal8Bit("GC剩余倒计时 : ") + QString::number(int(VulkanObjectManager::Get()->GetMaxGCTime() - VulkanObjectManager::Get()->GetGCTime())); 

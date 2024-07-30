@@ -250,4 +250,6 @@ private:
 	static std::map < void*, std::function<void(class VulkanRenderer* renderer, KeyCode key, KeyMod mod, Action action)>> _key_inputs;
 	static std::map < void*, std::function<void(class VulkanRenderer* renderer, MouseButton mouse, Action action)>> _mouse_inputs;
 
+	VulkanManager* _vulkanManager;
+
 };

@@ -132,7 +132,7 @@ public:
 	void DestroySurface(VkSurfaceKHR& surface);
 
 	/* 获取Surface的大小 */
-	VkExtent2D GetSurfaceSize(VkExtent2D windowSizeIn, VkSurfaceKHR surface);
+	void GetSurfaceSize(VkSurfaceKHR surface, VkExtent2D& surfaceSize);
 
 	/* 检查Surface支持 */
 	void CheckSurfaceFormat(VkSurfaceKHR surface, VkSurfaceFormatKHR& surfaceFormat);

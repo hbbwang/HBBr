@@ -148,6 +148,7 @@ void EditorMain::focusOutEvent(QFocusEvent* event)
 
 void EditorMain::UpdateRender()
 {
+    VulkanApp::UpdateForm();
     if (_inspector)
         _inspector->PropertyUpdate();
     if (_mainRenderView)

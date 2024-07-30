@@ -431,6 +431,7 @@ ColorWindow::~ColorWindow()
 void ColorWindow::resizeEvent(QResizeEvent* event)
 {
     UpdateColorMap();
+    QWidget::resizeEvent(event);
 }
 void ColorWindow::paintEvent(QPaintEvent* p)//paintEvent函数由系统自动调用，用不着我们人为的去调用。
 {

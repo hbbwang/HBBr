@@ -8,25 +8,26 @@ VulkanForm* SDLWidget::_mainRenderer = nullptr;
 SDLWidget::SDLWidget(QWidget* parent)
 	:QWidget(parent)
 {
+	//务必关闭QT5的更新，不然在刷新窗口的时候会有一瞬间顶在SDL的上面，造成闪烁。
+	setUpdatesEnabled(false);
 	//若是使用用户自定义绘制，则须要设置WA_PaintOnScreen
 	setAttribute(Qt::WA_ForceUpdatesDisabled, true);
 	setAttribute(Qt::WA_StaticContents, true);
 	setAttribute(Qt::WA_PaintOnScreen, true);
 	setAttribute(Qt::WA_NoSystemBackground, true);
 	setAttribute(Qt::WA_UpdatesDisabled, true);
-	//务必关闭QT5的更新，不然在刷新窗口的时候会有一瞬间顶在SDL的上面，造成闪烁。
-	setUpdatesEnabled(false);
 	setObjectName("SDLRenderer_Main");
 
 	//Global setting
 	VulkanApp::SetEditorVulkanInit(
 		[]() {
-			Shaderc::ShaderCompiler::SetEnableShaderDebug(GetEditorConfigInt("Default", "EnableShaderDebug"));
-			
+			Shaderc::ShaderCompiler::SetEnableShaderDebug(GetEditorConfigInt("Default", "EnableShaderDebug"));		
 		});
 	//
-	_rendererForm = VulkanApp::InitVulkanManager(false, true, (void*)this->winId());
+	_rendererForm = VulkanApp::InitVulkanManager(false, true);
 	_hwnd = (HWND)VulkanApp::GetWindowHandle(_rendererForm->window);
+
+	SetParent(_hwnd, (HWND)this->winId());s
 
 	VulkanApp::SetFocusForm(_rendererForm);
 	SetFocus(_hwnd);
@@ -35,16 +36,15 @@ SDLWidget::SDLWidget(QWidget* parent)
 SDLWidget::SDLWidget(QWidget* parent, QString titleName)
 	:QWidget(parent)
 {
+	setUpdatesEnabled(false);
 	setAttribute(Qt::WA_ForceUpdatesDisabled, true);
 	setAttribute(Qt::WA_StaticContents, true);
 	setAttribute(Qt::WA_PaintOnScreen, true);
 	setAttribute(Qt::WA_NoSystemBackground, true);
 	setAttribute(Qt::WA_UpdatesDisabled, true);
-	setUpdatesEnabled(false);
 	setObjectName("SDLRenderer");
 	_rendererForm = VulkanApp::CreateNewWindow(512, 512, titleName.toStdString().c_str(), true, (void*)this->winId());
 	_hwnd = (HWND)VulkanApp::GetWindowHandle(_rendererForm->window);
-
 	VulkanApp::SetFocusForm(_rendererForm);
 	SetFocus(_hwnd);
 }
@@ -58,6 +58,10 @@ SDLWidget::~SDLWidget()
 			VulkanApp::RemoveWindow(_rendererForm);
 			_rendererForm->renderer = nullptr;
 		}
+	}
+	if (VulkanApp::GetForms().size() <= 0)
+	{
+		VulkanApp::DeInitVulkanManager();
 	}
 }
 

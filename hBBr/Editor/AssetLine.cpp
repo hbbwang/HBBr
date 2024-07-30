@@ -270,4 +270,5 @@ void AssetLine::UpdateSetting()
 void AssetLine::resizeEvent(QResizeEvent* event)
 {
 	highLight->resize(width(),height());
+	QWidget::resizeEvent(event);
 }

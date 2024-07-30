@@ -50,6 +50,7 @@ void CollapsedWidget::Expand()
 void CollapsedWidget::resizeEvent(QResizeEvent* event)
 {
 	//ResizeButton();
+	QWidget::resizeEvent(event);
 }
 
 void CollapsedWidget::paintEvent(QPaintEvent* event)

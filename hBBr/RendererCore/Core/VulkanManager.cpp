@@ -830,24 +830,23 @@ void VulkanManager::DestroySurface(VkSurfaceKHR& surface)
 	}
 }
 
-VkExtent2D VulkanManager::GetSurfaceSize(VkExtent2D windowSize, VkSurfaceKHR surface)
+void VulkanManager::GetSurfaceSize(VkSurfaceKHR surface, VkExtent2D& surfaceSize)
 {
 	const int SwapchainBufferCount = 3;
 	VkSurfaceCapabilitiesKHR _surfaceCapabilities{};
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_gpuDevice, surface, &_surfaceCapabilities);
 	if (_surfaceCapabilities.currentExtent.width < UINT32_MAX && _surfaceCapabilities.currentExtent.width>0) {
-		windowSize.width = _surfaceCapabilities.currentExtent.width;
-		windowSize.height = _surfaceCapabilities.currentExtent.height;
+		surfaceSize.width = _surfaceCapabilities.currentExtent.width;
+		surfaceSize.height = _surfaceCapabilities.currentExtent.height;
 	}
 	else {
-		windowSize.width = _surfaceCapabilities.maxImageExtent.width < (uint32_t)windowSize.width ? _surfaceCapabilities.maxImageExtent.width : (uint32_t)windowSize.width;
-		windowSize.width = _surfaceCapabilities.minImageExtent.width > (uint32_t)windowSize.width ? _surfaceCapabilities.minImageExtent.width : (uint32_t)windowSize.width;
-		windowSize.height = _surfaceCapabilities.maxImageExtent.height < (uint32_t)windowSize.height ? _surfaceCapabilities.maxImageExtent.height : (uint32_t)windowSize.height;
-		windowSize.height = _surfaceCapabilities.minImageExtent.height > (uint32_t)windowSize.height ? _surfaceCapabilities.minImageExtent.height : (uint32_t)windowSize.height;
+		surfaceSize.width = _surfaceCapabilities.maxImageExtent.width < (uint32_t)surfaceSize.width ? _surfaceCapabilities.maxImageExtent.width : (uint32_t)surfaceSize.width;
+		surfaceSize.width = _surfaceCapabilities.minImageExtent.width > (uint32_t)surfaceSize.width ? _surfaceCapabilities.minImageExtent.width : (uint32_t)surfaceSize.width;
+		surfaceSize.height = _surfaceCapabilities.maxImageExtent.height < (uint32_t)surfaceSize.height ? _surfaceCapabilities.maxImageExtent.height : (uint32_t)surfaceSize.height;
+		surfaceSize.height = _surfaceCapabilities.minImageExtent.height > (uint32_t)surfaceSize.height ? _surfaceCapabilities.minImageExtent.height : (uint32_t)surfaceSize.height;
 	}
 	_swapchainBufferCount = _surfaceCapabilities.minImageCount > SwapchainBufferCount ? _surfaceCapabilities.minImageCount : SwapchainBufferCount;
 	_swapchainBufferCount = _surfaceCapabilities.maxImageCount < _swapchainBufferCount ? _surfaceCapabilities.maxImageCount : _swapchainBufferCount;
-	return windowSize;
 }
 
 void VulkanManager::DeviceWaitIdle()
@@ -1314,8 +1313,9 @@ void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkIm
 	for (int i = 0; i < (int)swapchainImageViews.size(); i++)
 	{
 		DestroyImageView(swapchainImageViews[i]);
+		swapchainImageViews[i] = VK_NULL_HANDLE;
 	}
-	swapchainImageViews.clear();
+	std::vector<VkImageView>().swap(swapchainImageViews);
 	if (swapchain != VK_NULL_HANDLE)
 	{
 		vkDestroySwapchainKHR(_device, swapchain, VK_NULL_HANDLE);

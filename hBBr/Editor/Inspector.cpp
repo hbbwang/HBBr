@@ -481,16 +481,18 @@ void Inspector::resizeEvent(QResizeEvent* event)
 	{
 		scrollArea->setGeometry(0, 0, this->width(), this->height());
 	}
+	QWidget::resizeEvent(event);
 }
 
 void Inspector::focusInEvent(QFocusEvent* event)
 {
 	_currentInspector = this;
+	QWidget::focusInEvent(event);
 }
 
 void Inspector::focusOutEvent(QFocusEvent* event)
 {
-
+	QWidget::focusOutEvent(event);
 }
 
 void Inspector::TimerUpdate()

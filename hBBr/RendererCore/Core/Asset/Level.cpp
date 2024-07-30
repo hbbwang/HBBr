@@ -28,7 +28,6 @@ Level::~Level()
 	std::vector<std::shared_ptr<GameObject>>().swap(_gameObjectNeedDestroy);
 	std::map<HGUID, AssetType>().swap(_dependency);
 	_world = nullptr;
-
 }
 
 void Level::Rename(HString newName)
