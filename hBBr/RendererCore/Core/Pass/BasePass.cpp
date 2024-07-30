@@ -114,12 +114,12 @@ void BasePass::PassReset()
 
 void BasePass::SetupPassAndDraw(Pass p)
 {
-	auto& pass = _opaque_descriptorSet_pass;
-	auto& obj = _opaque_descriptorSet_obj;
+	auto &pass = _opaque_descriptorSet_pass;
+	auto &obj = _opaque_descriptorSet_obj;
 	auto &vb = _opaque_vertexBuffer;
 	auto &ib = _opaque_indexBuffer;
-	const auto manager = VulkanManager::GetManager();
-	const auto cmdBuf = _renderer->GetCommandBuffer();
+	const auto& manager = VulkanManager::GetManager();
+	const auto& cmdBuf = _renderer->GetCommandBuffer();
 	uint32_t matOffset_vs = 0;
 	uint32_t matOffset_ps = 0;
 	std::vector<uint32_t> matBufferOffset_vs;
@@ -171,7 +171,7 @@ void BasePass::SetupPassAndDraw(Pass p)
 					PipelineManager::SetColorBlend(pipelineCreateInfo, false, blendState);
 					PipelineManager::SetRenderRasterizer(pipelineCreateInfo);
 					PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
-					PipelineManager::SetVertexInput(pipelineCreateInfo, m->_inputLayout);
+					PipelineManager::SetVertexInput(pipelineCreateInfo, *m->_inputLayout);
 					PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, vsCache.get(), psCache.get());
 					//Setting pipeline end
 					VkPipelineLayout pipelineLayout;

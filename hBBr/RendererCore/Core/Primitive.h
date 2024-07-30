@@ -44,15 +44,13 @@ struct ModelPrimitive
 
 	HString						modelPrimitiveName;
 
-	VertexFactory::VertexInput  vertexInput;
+	struct FaceData*			faceData = nullptr;
 
 	glm::vec3					boundingBox_min = glm::vec3(0, 0, 0);
 
 	glm::vec3					boundingBox_max = glm::vec3(0, 0, 0);
 
 	Transform*					transform = nullptr;
-
-	HString						matSocketName="";
 
 	//用于排序
 	int							priority = 0;
@@ -222,7 +220,7 @@ public:
 	HBBR_API void UpdateTextures();
 
 	//顶点输入
-	VertexInputLayout	_inputLayout;
+	std::unique_ptr<VertexInputLayout>	_inputLayout;
 
 	//管线索引
 	PipelineIndex		_graphicsIndex;

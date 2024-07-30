@@ -48,6 +48,14 @@ void CameraComponent::Update()
 	auto worldRot = trans->GetWorldRotation();
 	auto renderer = _gameObject->GetWorld()->GetRenderer();
 
+	//if (GetKey(Key_O))
+	//{
+
+	//}
+	//if (GetKey(Key_P))
+	//{
+	//}
+
 #if IS_EDITOR
 	//Editor camera behavior.
 	if (_bIsEditorCamera && !renderer->IsInGame())

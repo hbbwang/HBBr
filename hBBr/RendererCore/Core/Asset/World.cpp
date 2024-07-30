@@ -14,7 +14,23 @@ World::World()
 
 World::~World()
 {
-	ReleaseWorld();
+	for (auto& i : _levels)
+		i.reset();
+#if IS_EDITOR
+	_editorLevel.reset();
+#endif
+
+	std::vector<std::shared_ptr<Level>>().swap(_levels);
+	std::vector<CameraComponent*>().swap(_cameras);
+
+	_renderer = nullptr;
+	_mainCamera = nullptr;
+	_worldName.empty();
+	_worldAbsPath.empty();
+	_worldSettingAbsPath.empty();
+	_guid = HGUID();
+	_guidStr.empty();
+
 	ConsoleDebug::printf_endl("Release World[%s][%s]", this->GetWorldName().c_str(), this->GetGUID().str().c_str());
 #if IS_EDITOR
 	_editorWorldRelease();
@@ -253,19 +269,6 @@ void World::Load(class VulkanRenderer* renderer)
 	//auto modelComp = testModel->AddComponent<ModelComponent>();
 	//modelComp->SetModel(HGUID("c51a01e8-9349-660a-d2df-353a310db461"));
 	//ConsoleDebug::printf_endl("Test Model Spawn......");
-}
-
-bool World::ReleaseWorld()
-{
-	for (auto& i : _levels)
-	{
-		i.reset();
-	}
-#if IS_EDITOR
-	_editorLevel.reset();
-#endif
-	_levels.clear();
-	return true;
 }
 
 void World::WorldUpdate()

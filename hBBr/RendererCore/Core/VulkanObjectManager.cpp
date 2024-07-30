@@ -171,7 +171,6 @@ void VulkanObjectManager::Update()
 		}
 	}
 
-
 	//到时间重新计时
 	if (_gcCurrentSecond > _gcMaxSecond)
 	{

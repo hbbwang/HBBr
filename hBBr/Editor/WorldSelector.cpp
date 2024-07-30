@@ -32,7 +32,6 @@ WorldSelector::WorldSelector(QWidget *parent)
 				{
 					auto renderer = EditorMain::_self->_mainRenderView->_mainRendererWidget->_rendererForm->renderer;
 					auto item = (CustomListItem*)it;
-					//renderer->ReleaseWorld();
 					renderer->LoadWorld(item->_path.toStdString());
 				}
 			}

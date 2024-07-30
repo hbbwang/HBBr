@@ -236,7 +236,7 @@ bool GameObject::ExecuteDestroy()
 		{
 			i->Destroy();
 		}
-		_children.clear();
+		std::vector<GameObject*>().swap(_children);
 		return false;
 	}
 
@@ -250,9 +250,9 @@ bool GameObject::ExecuteDestroy()
 		{
 			delete _comps[i];
 			_comps[i] = nullptr;
-			_comps.erase(it);
 		}
 	}
+	std::vector<Component*>().swap(_comps);
 
 	if (_transform != nullptr)
 	{
@@ -260,13 +260,9 @@ bool GameObject::ExecuteDestroy()
 		_transform = nullptr;
 	}
 
-	if (_comps.size() > 0)
-		return false;
-	else
-	{
-		#if IS_EDITOR
-		ConsoleDebug::print_endl("GameObject " + _name + " has been Destroy.");
-		#endif
-		return true;
-	}
+	#if IS_EDITOR
+	ConsoleDebug::print_endl("GameObject " + _name + " has been Destroy.");
+	#endif
+	return true;
+
 }

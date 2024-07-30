@@ -69,6 +69,11 @@ public:
 			delete[] _str;
 			_str = nullptr;
 		}
+		if (_wstr != nullptr)
+		{
+			delete[] _wstr;
+			_wstr = nullptr;
+		}
 		length = 0;
 	}
 
@@ -85,6 +90,7 @@ public:
 	//字符串初始化
 	HString()
 	{
+		clear();
 		this->_str = new char[1];
 		this->_str[0] = '\0';
 		this->length = 0;
@@ -185,9 +191,10 @@ public:
 			return *this;
 		char* temp = new char[length + 1];
 		strcpy_s(temp, length + 1, _str);//先把字符串复制到temp
+		ReleaseCache();
 		if (_str != nullptr)
 		{
-			delete[] _str;//清空
+			delete[] _str;
 			_str = nullptr;
 		}
 		//申请新的大小
@@ -306,51 +313,14 @@ public:
 			return;
 		else if (strLength > length)
 			strLength = length;
-#if 1
 		std::string resultStr = _str;
 		resultStr.erase(resultStr.begin() + begin , resultStr.begin() + strLength);
 		this->assign(resultStr.c_str());
-#else
-		size_t AllLen = length;
-		size_t leftLen = begin;//获取之前的长度
-		size_t rightLen = length - (end + 1);//获取之后的长度
-		if ((end + 1) - (begin) == length)
-		{
-			//要删除的字符数量和当前字符数量一致，直接清空
-			clear();
-			this->_str = new char[1];
-			this->_str[0] = '\0';
-			this->length = 0;
-			return;
-		}
-		length = leftLen + rightLen;
-		char* temp = new char[length + 2];//包含0和\0
-		size_t index = 0;
-		for (size_t i = 0; i < leftLen; i++)
-		{
-			temp[index] = _str[i];//读取之前的字符
-			index += 1;
-		}
-		for (size_t i = end + 1; i < AllLen; i++)
-		{
-			temp[index] = _str[i];//读取之后的字符
-			index += 1;
-		}
-		temp[length] = '\0';//最后一个字符填充空字符
-		if (_str != nullptr)
-			delete[] _str;//释放字符串
-		_str = new char[length + 1];
-		strcpy_s(_str, strlen(temp) + 1, temp);
-		delete[] temp;
-		temp = nullptr;
-		length = strlen(_str);
-#endif
 	}
 
 	//根据某段字符串删除
 	void Remove(const char* removeStr)
 	{
-#if 1
 		size_t newLen = strlen(removeStr);
 		if (newLen <= 0)
 			return;
@@ -361,57 +331,6 @@ public:
 			resultStr.erase(resultStr.begin() + beginPos , resultStr.begin() + beginPos + newLen);
 		}
 		this->assign(resultStr.c_str());
-#elif 0
-		HString result;
-		auto splitStr = this->Split(removeStr);
-		for (auto s : splitStr)
-			result += s;
-		this->assign(result);
-#else
-		size_t len = strlen(removeStr);//获取字符串的长度
-		char* temp = nullptr;
-		temp = new char[len + 1];//加上最后代表结束的\0字符
-		temp[len] = '\0';
-		//resetRemove:
-		for (size_t i = 0; i < length; i++)
-		{
-			for (size_t j = 0; j < len; j++)
-			{
-				temp[j] = _str[i + j];//读取连续字符
-			}
-			if (strcmp(temp, removeStr) == 0)//判断连续字符内是否和 函数输入进来的 参数相同，相同就删除掉该段字符
-			{
-				size_t oldLen = length;
-				length = length - len;
-				size_t index = 0;
-				char* temp_str = new char[length + 1];
-				for (size_t j = 0; j < i; j++)//读取左字符串
-				{
-					temp_str[index] = _str[j];
-					index++;
-				}
-				for (size_t j = i + len; j < oldLen; j++)//读取右字符串
-				{
-					temp_str[index] = _str[j];
-					index++;
-				}
-				temp_str[length] = '\0';//最后一个字符填充空字符
-				if (_str != nullptr)
-					delete[] _str;//释放字符串
-				_str = new char[length + 1];
-				strcpy_s(_str, strlen(temp_str) + 1, temp_str);
-				_str[length] = '\0';
-				delete[] temp_str;
-				//goto resetRemove;//因为字符串发生了变化，重新开始循环
-				if (i <= len)//因为字符串发生了变化，把循环值i回退到 对应删减后的值
-					i = 0;
-				else
-					i -= len;
-			}
-		}
-		delete[] temp;
-		temp = nullptr;
-#endif
 	}
 
 	HBBR_INLINE void assign(const char* str)

@@ -6,6 +6,10 @@ namespace VertexFactory
 {
 	struct VertexInput
 	{
+		~VertexInput()
+		{
+
+		}
 		std::vector<glm::vec3> pos;
 		std::vector<glm::vec3> nor;
 		std::vector<glm::vec3> tan;
@@ -181,38 +185,36 @@ namespace VertexFactory
 			return result;
 		}
 
-		static VertexInputLayout BuildLayout(uint8_t inputType[7])
+		static void BuildLayout(uint8_t inputType[7], VertexInputLayout* vertexLayout)
 		{
-			VertexInputLayout result = {};
-			result.inputSize = 0;
-			result.inputLayouts.reserve(7);
+			vertexLayout->inputSize = 0;
+			vertexLayout->inputLayouts.reserve(7);
 			for (int i = 0; i < 7; i++)
 			{
 				if (inputType[i] == 0)
 					continue;
 				else if (inputType[i] == 1)
 				{
-					result.inputLayouts.push_back(VK_FORMAT_R32_SFLOAT);
-					result.inputSize += sizeof(float);
+					vertexLayout->inputLayouts.push_back(VK_FORMAT_R32_SFLOAT);
+					vertexLayout->inputSize += sizeof(float);
 				}
 				else if (inputType[i] == 2)
 				{
-					result.inputLayouts.push_back(VK_FORMAT_R32G32_SFLOAT);
-					result.inputSize += sizeof(glm::vec2);
+					vertexLayout->inputLayouts.push_back(VK_FORMAT_R32G32_SFLOAT);
+					vertexLayout->inputSize += sizeof(glm::vec2);
 				}
 				else if (inputType[i] == 3)
 				{
-					result.inputLayouts.push_back(VK_FORMAT_R32G32B32_SFLOAT);
-					result.inputSize += sizeof(glm::vec3);
+					vertexLayout->inputLayouts.push_back(VK_FORMAT_R32G32B32_SFLOAT);
+					vertexLayout->inputSize += sizeof(glm::vec3);
 				}
 				else if (inputType[i] == 4)
 				{
-					result.inputLayouts.push_back(VK_FORMAT_R32G32B32A32_SFLOAT);
-					result.inputSize += sizeof(glm::vec4);
+					vertexLayout->inputLayouts.push_back(VK_FORMAT_R32G32B32A32_SFLOAT);
+					vertexLayout->inputSize += sizeof(glm::vec4);
 				}
 			}
-			result.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-			return result;
+			vertexLayout->inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		}
 	};
 

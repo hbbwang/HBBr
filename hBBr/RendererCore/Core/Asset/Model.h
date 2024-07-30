@@ -22,11 +22,11 @@ struct VertexData
 //FaceData(MaterialData)
 struct FaceData	
 {
-	uint32_t				vertexNum;
-	uint32_t				indexNum;
-	VertexFactory::VertexInput vertexData;
-	char					matName[64];
-	char					matPath[512];
+	uint32_t					vertexNum = 0;
+	uint32_t					indexNum = 0;
+	VertexFactory::VertexInput	vertexData = VertexFactory::VertexInput{};
+	char						matName[64] = "\0";
+	char						matPath[512] = "\0";
 };
 
 typedef uint16_t ModelFileDataStructFlags;
@@ -133,6 +133,7 @@ struct Vec4ColorFileData
 class Model :public AssetObject
 {
 public:
+	virtual ~Model();
 
 	HBBR_API static std::shared_ptr<Model> LoadAsset(HGUID guid);
 
@@ -141,7 +142,7 @@ public:
 	HBBR_API void SaveAsset(HString path)override;
 
 	//根据材质区分面
-	std::vector<FaceData>		faces;
+	std::vector<FaceData*>		faces;
 	ModelFileDataStructFlags	fileFlags = //文件结构枚举,用于识别可能内容不同的模型文件
 		ModelFileDataStruct_Flags | ModelFileDataStruct_MeshInfo | ModelFileDataStruct_SubMeshData;
 	uint8_t						faceNum = 0;

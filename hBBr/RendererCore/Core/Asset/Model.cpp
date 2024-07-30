@@ -20,6 +20,15 @@
 
 #include "ContentManager.h"
 
+Model::~Model()
+{
+	for (auto& i : faces)
+	{
+		delete i;
+		i = nullptr;
+	}
+}
+
 std::shared_ptr<Model> Model::LoadAsset(HGUID guid)
 {
 	const auto modelAssets = ContentManager::Get()->GetAssets(AssetType::Model);
@@ -105,18 +114,17 @@ std::shared_ptr<Model> Model::LoadAsset(HGUID guid)
 		ConsoleDebug::print_endl("Found meshes successful.\nThere are " + HString::FromUInt(mesh->mNumVertices) + " vertices have been found.", "160,160,160");
 #endif
 		//
-		FaceData newData = {};
-		newData.vertexNum = mesh->mNumVertices;
+		FaceData* newData = new FaceData;
+		newData->vertexNum = mesh->mNumVertices;
 		model->faceNum += 1;
-		VertexFactory::VertexInput vertex{};
 		//
-		vertex.pos.reserve(mesh->mNumVertices);
-		vertex.nor.reserve(mesh->mNumVertices);
-		vertex.tan.reserve(mesh->mNumVertices);
-		vertex.col.reserve(mesh->mNumVertices);
-		vertex.uv01.reserve(mesh->mNumVertices);
-		vertex.uv23.reserve(mesh->mNumVertices);
-		vertex.uv45.reserve(mesh->mNumVertices);
+		newData->vertexData.pos.reserve(mesh->mNumVertices);
+		newData->vertexData.nor.reserve(mesh->mNumVertices);
+		newData->vertexData.tan.reserve(mesh->mNumVertices);
+		newData->vertexData.col.reserve(mesh->mNumVertices);
+		newData->vertexData.uv01.reserve(mesh->mNumVertices);
+		newData->vertexData.uv23.reserve(mesh->mNumVertices);
+		newData->vertexData.uv45.reserve(mesh->mNumVertices);
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
 			glm::vec3 vec3 = glm::vec3(0);
@@ -124,7 +132,7 @@ std::shared_ptr<Model> Model::LoadAsset(HGUID guid)
 			vec3.x = mesh->mVertices[i].x;
 			vec3.y = mesh->mVertices[i].y;
 			vec3.z = mesh->mVertices[i].z;
-			vertex.pos.push_back(vec3);
+			newData->vertexData.pos.push_back(vec3);
 			{//计算Bounding Box大小
 				boundingBox_min.x = boundingBox_min.x >= vec3.x ? vec3.x : boundingBox_min.x;
 				boundingBox_min.y = boundingBox_min.y >= vec3.y ? vec3.y : boundingBox_min.y;
@@ -141,14 +149,14 @@ std::shared_ptr<Model> Model::LoadAsset(HGUID guid)
 				vec3.x = mesh->mNormals[i].x;
 				vec3.y = mesh->mNormals[i].y;
 				vec3.z = mesh->mNormals[i].z;
-				vertex.nor.push_back(vec3);
+				newData->vertexData.nor.push_back(vec3);
 			}
 			if (mesh->HasTangentsAndBitangents())
 			{
 				vec3.x = mesh->mTangents[i].x;
 				vec3.y = mesh->mTangents[i].y;
 				vec3.z = mesh->mTangents[i].z;
-				vertex.tan.push_back(vec3);
+				newData->vertexData.tan.push_back(vec3);
 			}
 			if (mesh->HasVertexColors(0))
 			{
@@ -156,7 +164,7 @@ std::shared_ptr<Model> Model::LoadAsset(HGUID guid)
 				vec4.y = mesh->mColors[0][i].g;
 				vec4.z = mesh->mColors[0][i].b;
 				vec4.w = mesh->mColors[0][i].a;
-				vertex.col.push_back(vec4);
+				newData->vertexData.col.push_back(vec4);
 			}
 			//UV 01
 			vec4 = glm::vec4(0);
@@ -174,7 +182,7 @@ std::shared_ptr<Model> Model::LoadAsset(HGUID guid)
 				model->uv_0_1_abs_max.z = glm::fmax(model->uv_0_1_abs_max.z, glm::abs(vec4.z));
 				model->uv_0_1_abs_max.w = glm::fmax(model->uv_0_1_abs_max.w, glm::abs(vec4.w));
 			}
-			vertex.uv01.push_back(vec4);
+			newData->vertexData.uv01.push_back(vec4);
 			//UV 23
 			vec4 = glm::vec4(0);
 			if (mesh->HasTextureCoords(2))
@@ -191,7 +199,7 @@ std::shared_ptr<Model> Model::LoadAsset(HGUID guid)
 				model->uv_2_3_abs_max.z = glm::fmax(model->uv_2_3_abs_max.z, glm::abs(vec4.z));
 				model->uv_2_3_abs_max.w = glm::fmax(model->uv_2_3_abs_max.w, glm::abs(vec4.w));
 			}
-			vertex.uv23.push_back(vec4);
+			newData->vertexData.uv23.push_back(vec4);
 			//UV 45
 			vec4 = glm::vec4(0);
 			if (mesh->HasTextureCoords(4))
@@ -208,12 +216,11 @@ std::shared_ptr<Model> Model::LoadAsset(HGUID guid)
 				model->uv_4_5_abs_max.z = glm::fmax(model->uv_4_5_abs_max.z, glm::abs(vec4.z));
 				model->uv_4_5_abs_max.w = glm::fmax(model->uv_4_5_abs_max.w, glm::abs(vec4.w));
 			}
-			vertex.uv45.push_back(vec4);
+			newData->vertexData.uv45.push_back(vec4);
 		}
-		newData.vertexData = vertex;
 		//indices
 		//默认它是三角面，所以每个面3个Index
-		vertex.vertexIndices.reserve(mesh->mNumFaces * 3);
+		newData->vertexData.vertexIndices.reserve(mesh->mNumFaces * 3);
 		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 		{
 			if (mesh->mFaces[i].mNumIndices != 3)
@@ -223,15 +230,15 @@ std::shared_ptr<Model> Model::LoadAsset(HGUID guid)
 				return nullptr;
 			}
 			//
-			newData.vertexData.vertexIndices.push_back(mesh->mFaces[i].mIndices[0]);
-			newData.vertexData.vertexIndices.push_back(mesh->mFaces[i].mIndices[1]);
-			newData.vertexData.vertexIndices.push_back(mesh->mFaces[i].mIndices[2]);
-			newData.indexNum += 3;
+			newData->vertexData.vertexIndices.push_back(mesh->mFaces[i].mIndices[0]);
+			newData->vertexData.vertexIndices.push_back(mesh->mFaces[i].mIndices[1]);
+			newData->vertexData.vertexIndices.push_back(mesh->mFaces[i].mIndices[2]);
+			newData->indexNum += 3;
 		}
 
 		//Materials
 		uint32_t matNameSize = std::min((uint32_t)128, (uint32_t)strlen(scene->mMaterials[mesh->mMaterialIndex]->GetName().C_Str()));
-		strcpy_s(newData.matName, matNameSize + 1, scene->mMaterials[mesh->mMaterialIndex]->GetName().C_Str());
+		strcpy_s(newData->matName, matNameSize + 1, scene->mMaterials[mesh->mMaterialIndex]->GetName().C_Str());
 
 		//Skin data
 		if (mesh->HasBones())
@@ -254,10 +261,9 @@ bool Model::BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prim
 		for (int i = 0; i < data->faces.size(); i++)
 		{
 			prims[i] = new ModelPrimitive();
-			prims[i]->matSocketName = data->faces[i].matName;
+			prims[i]->faceData = data->faces[i];
 			prims[i]->boundingBox_min = data->boundingBox_min;
 			prims[i]->boundingBox_max = data->boundingBox_max;
-			prims[i]->vertexInput = data->faces[i].vertexData;
 			prims[i]->modelPrimitiveName = data->_assetInfo.lock()->displayName;
 			prims[i]->renderer = renderer;
 		}

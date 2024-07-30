@@ -121,9 +121,6 @@ private:
 	//加载场景资产
 	void Load(class VulkanRenderer* renderer);
 
-	//释放场景
-	bool ReleaseWorld();
-
 	void WorldUpdate();
 
 	//请勿要主动使用该函数

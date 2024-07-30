@@ -129,7 +129,7 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 		}
 
 		//获取布局
-		mat->_primitive->_inputLayout = VertexFactory::VertexInput::BuildLayout(vsCache->header.vertexInput);
+		VertexFactory::VertexInput::BuildLayout(vsCache->header.vertexInput, mat->_primitive->_inputLayout.get());
 
 		//Parameters VS
 		{

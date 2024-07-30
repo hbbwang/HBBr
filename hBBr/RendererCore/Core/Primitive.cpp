@@ -1,6 +1,7 @@
 ﻿#include "Primitive.h"
 #include "Shader.h"
 #include "VulkanRenderer.h"
+#include "Model.h"
 
 std::vector<std::vector<MaterialPrimitive*>> PrimitiveProxy::_allGraphicsPrimitives;
 
@@ -70,8 +71,8 @@ void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* p
 	if (!mat)
 		return;
 
-	prim->vertexData = prim->vertexInput.GetData(Shader::_vsShader[mat->_graphicsIndex.GetVSShaderFullName()]->header.vertexInput);
-	prim->vertexIndices = prim->vertexInput.vertexIndices;
+	prim->vertexData = prim->faceData->vertexData.GetData(Shader::_vsShader[mat->_graphicsIndex.GetVSShaderFullName()]->header.vertexInput);
+	prim->vertexIndices = prim->faceData->vertexData.vertexIndices;
 
 	MaterialPrimitiveGroup* matGroup = nullptr;
 	auto it = mat->_materialPrimitiveGroups.find(renderer);
@@ -104,8 +105,7 @@ void PrimitiveProxy::AddModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* p
 	matGroup->ibWholeSize += prim->ibSize;
 	//modelPrim.vbUpdatePos = std::min(modelPrim.vbUpdatePos, prim->vbPos);
 	//modelPrim.ibUpdatePos = std::min(modelPrim.ibUpdatePos, prim->ibPos);
-	//顶点数据生成完毕，就把源数据卸载掉
-	prim->vertexInput = VertexFactory::VertexInput();
+
 }
 
 void PrimitiveProxy::RemoveModelPrimitive(MaterialPrimitive* mat, ModelPrimitive* prim, class VulkanRenderer* renderer)
@@ -195,19 +195,19 @@ void MaterialPrimitive::UpdateTextures()
 
 MaterialPrimitive::MaterialPrimitive()
 {
-	_inputLayout = {};
 	_graphicsIndex = {};
 	int priority = 0;
 	HString graphicsName = "";
 	Pass passUsing = Pass::OpaquePass;
 	_uniformBufferSize_vs = 0;
 	_uniformBufferSize_ps = 0;
+	_inputLayout.reset(new VertexInputLayout);
 }
 
 
 MaterialPrimitive::~MaterialPrimitive()
 {
-	_inputLayout = {};
+	_inputLayout.reset();
 	_graphicsIndex = {};
 	Pass passUsing = Pass::OpaquePass;
 	_uniformBuffer_vs.clear();
@@ -727,7 +727,6 @@ MaterialPrimitiveGroup::~MaterialPrimitiveGroup()
 
 ModelPrimitive::~ModelPrimitive()
 {
-	vertexInput = VertexFactory::VertexInput();
 	transform = nullptr;
 	vertexData.clear();
 	vertexIndices.clear();
