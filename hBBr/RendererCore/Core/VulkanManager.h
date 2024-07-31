@@ -241,6 +241,8 @@ public:
 
 	bool Present(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, uint32_t& swapchainImageIndex);
 
+	void ReCreatePipelineLayout(std::vector <VkDescriptorSetLayout> descriptorSetLayout, VkPipelineLayout& pipelineLayout);
+
 	void CreatePipelineLayout(std::vector <VkDescriptorSetLayout> descriptorSetLayout , VkPipelineLayout& pipelineLayout);
 
 	void DestroyPipelineLayout(VkPipelineLayout& pipelineLayout);
@@ -382,11 +384,11 @@ public:
 
 	void UpdateBufferDescriptorSet(VkBuffer buffer, VkDescriptorSet descriptorSet, VkDescriptorType type,  uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
 
-	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<std::shared_ptr<Texture2D>> texs, std::vector<VkSampler>samplers, int beginBindingIndex);
+	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<std::shared_ptr<Texture2D>> texs, std::vector<VkSampler>samplers, int beginBindingIndex = 0);
 
-	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<TextureUpdateInfo> updateInfo, int beginBindingIndex);
+	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<TextureUpdateInfo> updateInfo, int beginBindingIndex = 0);
 
-	void UpdateStoreTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture2D*> textures, int beginBindingIndex);
+	void UpdateStoreTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture2D*> textures, int beginBindingIndex = 0);
 
 	VkDeviceSize GetMinUboAlignmentSize(VkDeviceSize realSize);
 

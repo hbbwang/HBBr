@@ -44,18 +44,7 @@ void DeferredLightingPass::PassInit()
 		VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, "DeferredLightingPass_PassUb");
 	_ub_descriptorSet->CreateBuffer(1, sizeof(LightingUniformBuffer),
 		VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, "DeferredLightingPass_LightingUb");
-	_ub_descriptorSet->BuildDescriptorSet();
-
-	_tex_descriptorSet.reset(new DescriptorSet(_renderer));
-	_tex_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
-	_tex_descriptorSet->BuildDescriptorSet();
-
-	manager->CreatePipelineLayout(
-		{
-			_ub_descriptorSet->GetLayout(),
-			_tex_descriptorSet->GetLayout(),
-		}
-	, _pipelineLayout);
+	_ub_descriptorSet->BuildDescriptorSetLayout();
 
 	//Set Pass Name
 	_passName = "Lighting Pass"; 
@@ -128,8 +117,8 @@ void DeferredLightingPass::PassUpdate()
 	}
 	//textures
 	vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 1, 1, &_tex_descriptorSet->GetDescriptorSet(), 0, 0);
-	//uniform buffers
-	uint32_t ubOffset[2] = { 0 , _ub_descriptorSet->GetBuffer(0)->GetBufferSize() };
+	//uniform buffers 
+	uint32_t ubOffset[2] = { 0 , 0 };
 	vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_ub_descriptorSet->GetDescriptorSet(), 2, ubOffset);
 	//draw primitive
 	vkCmdDraw(cmdBuf, 6, 1, 0, 0);
@@ -139,11 +128,12 @@ void DeferredLightingPass::PassUpdate()
 
 void DeferredLightingPass::PassReset()
 {
-	_tex_descriptorSet->RefreshDescriptorSet();
+	_tex_descriptorSet->RefreshDescriptorSet(0);
 }
 
 PipelineIndex DeferredLightingPass::CreatePipeline(HString shaderName)
 {
+	const auto& manager = VulkanManager::GetManager();
 	//CraetePipeline..
 	VkPipeline pipeline = VK_NULL_HANDLE;
 	auto vsCache = Shader::_vsShader[shaderName];
@@ -168,6 +158,17 @@ PipelineIndex DeferredLightingPass::CreatePipeline(HString shaderName)
 	//PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
 	PipelineManager::SetVertexInput(pipelineCreateInfo, vertexInputLayout);
 	PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, vsCache.get(), psCache.get());
+
+	_tex_descriptorSet.reset(new DescriptorSet(_renderer));
+	_tex_descriptorSet->CreateBindings(psCache->texs.size(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+	_tex_descriptorSet->BuildDescriptorSetLayout();
+	manager->ReCreatePipelineLayout(
+		{
+			_ub_descriptorSet->GetLayout(),
+			_tex_descriptorSet->GetLayout(),
+		}
+	, _pipelineLayout);
+
 	PipelineManager::SetPipelineLayout(pipelineCreateInfo, _pipelineLayout);
 	PipelineManager::BuildGraphicsPipelineState(pipelineCreateInfo, _renderPass, 0, pipeline);
 	//_guiPipelines.emplace(std::make_pair(pipelineTag, pipeline));

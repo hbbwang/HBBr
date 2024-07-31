@@ -67,7 +67,7 @@ bool HDRI2Cube::PassExecute(HString hdrImagePath, HString ddsOutputPath, bool bG
 	//Create DescriptorSet
 	store_descriptorSet.reset(new DescriptorSet(_renderer));
 	store_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT);
-	store_descriptorSet->BuildDescriptorSet();
+	store_descriptorSet->BuildDescriptorSetLayout();
 
 	//Create uniform buffer
 	_uniformBuffer.reset(new VMABuffer(sizeof(HDRI2CubeUnifrom), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_GPU_ONLY, false, true, "HDRI2CubeUnifrom"));
@@ -119,7 +119,7 @@ bool HDRI2Cube::PassExecute(HString hdrImagePath, HString ddsOutputPath, bool bG
 			newPSO->pipelineType = PipelineType::Compute;
 			{
 				//textures
-				store_descriptorSet->RefreshDescriptorSet();
+				store_descriptorSet->RefreshDescriptorSet(0);
 				std::vector<Texture2D* > storeTexs = {
 					_storeTexture[0].get(),
 					_storeTexture[1].get(),

@@ -41,10 +41,11 @@ void PostProcessPass::PassInit()
 	_ub_descriptorSet.reset(new DescriptorSet(_renderer));
 	_ub_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_FRAGMENT_BIT);
 	_ub_descriptorSet->CreateBuffer(0, bufferSize, VMA_MEMORY_USAGE_CPU_TO_GPU, TRUE, FALSE, "PostProcessPass_Ub");
+	_ub_descriptorSet->BuildDescriptorSetLayout();
 
 	_tex_descriptorSet.reset(new DescriptorSet(_renderer));
-	_tex_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
-	_tex_descriptorSet->BuildDescriptorSet();
+	_tex_descriptorSet->CreateBindings(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+	_tex_descriptorSet->BuildDescriptorSetLayout();
 
 	manager->CreatePipelineLayout(
 		{
@@ -131,7 +132,7 @@ void PostProcessPass::PassUpdate()
 
 void PostProcessPass::PassReset()
 {
-	_tex_descriptorSet->RefreshDescriptorSet();
+	_tex_descriptorSet->RefreshDescriptorSet(0);
 }
 
 PipelineIndex PostProcessPass::CreatePipeline(HString shaderName)

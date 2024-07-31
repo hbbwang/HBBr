@@ -37,14 +37,14 @@ void BasePass::PassInit()
 	//PassUniform
 	_pass_descriptorSet.reset(new DescriptorSet(_renderer));
 	_pass_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
-	_pass_descriptorSet->CreateBuffer(0, 32, VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, "BasePass_PassUb");
-	_pass_descriptorSet->BuildDescriptorSet();
+	_pass_descriptorSet->CreateBuffer(0, sizeof(PassUniformBuffer), VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, "BasePass_PassUb");
+	_pass_descriptorSet->BuildDescriptorSetLayout();
 
 	//ObjectUniform
 	_object_descriptorSet.reset(new DescriptorSet(_renderer));
 	_object_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 	_object_descriptorSet->CreateBuffer(0, 32, VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, "BasePass_ObjectUb");
-	_object_descriptorSet->BuildDescriptorSet();
+	_object_descriptorSet->BuildDescriptorSetLayout();
 
 	//VertexBuffer
 	_opaque_vertexBuffer.reset(new VMABuffer(32, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, false, true,"BasePass_Vb"));

@@ -163,7 +163,7 @@ void GUIPass::_GUIDrawText(HString tag, HString h_text, float x, float y, float 
 	if (prim->BaseTexture != FontTextureFactory::GetFontTexture())
 	{
 		prim->BaseTexture = FontTextureFactory::GetFontTexture();
-		prim->tex_descriptorSet->RefreshDescriptorSet();
+		prim->tex_descriptorSet->RefreshDescriptorSet(0);
 	}
 	//计算每个文字面片位置
 	float tx = 0;
@@ -217,7 +217,7 @@ void GUIPass::_GUIDrawImage(HString tag, std::shared_ptr<Texture2D> texture, flo
 	if (prim->BaseTexture != texture)
 	{
 		prim->BaseTexture = texture;
-		prim->tex_descriptorSet->RefreshDescriptorSet();
+		prim->tex_descriptorSet->RefreshDescriptorSet(0);
 	}
 }
 
@@ -320,13 +320,13 @@ GUIPrimitive* GUIPass::GetPrimitve(HString& tag, GUIDrawState& state, int stateC
 		prim->ub_descriptorSet.reset(new DescriptorSet(_renderer));
 		prim->ub_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_FRAGMENT_BIT);
 		prim->ub_descriptorSet->CreateBuffer(0, 32, VMA_MEMORY_USAGE_CPU_TO_GPU,true,false,"DeferredLightingPass_PassUb");
-		prim->ub_descriptorSet->BuildDescriptorSet();
+		prim->ub_descriptorSet->BuildDescriptorSetLayout();
 	}
 	if (!prim->tex_descriptorSet)
 	{
 		prim->tex_descriptorSet.reset(new DescriptorSet(_renderer));
 		prim->tex_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
-		prim->tex_descriptorSet->BuildDescriptorSet();
+		prim->tex_descriptorSet->BuildDescriptorSetLayout();
 	}
 	prim->viewport = { (int)x,(int)y,(uint32_t)w,(uint32_t)h };
 	prim->Data.resize(6 * stateCount);

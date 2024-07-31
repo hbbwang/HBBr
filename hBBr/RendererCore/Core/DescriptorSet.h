@@ -21,6 +21,12 @@ public:
 		VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT
 	);
 
+	void CreateBindings(
+		uint32_t bindingCount,
+		VkDescriptorType type,
+		VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT
+	);
+
 	//给当前VkDescriptorType创建Buffer（仅限可用Buffer，像Image类型的就不会创建）
 	VMABuffer* CreateBuffer(
 		uint32_t bindingIndex,
@@ -30,8 +36,8 @@ public:
 		bool bFocusCreateDedicatedMemory = false,
 		HString debugName = "VMABuffer");
 
-	//创建VkDescriptorSetLayer,并分配VkDescriptorSet
-	void BuildDescriptorSet();
+	//创建VkDescriptorSetLayer
+	void BuildDescriptorSetLayout();
 
 	VMABuffer* GetBuffer(uint32_t bindingIndex)const {
 		auto it = _buffers.find(bindingIndex);
@@ -60,7 +66,9 @@ public:
 	}
 
 	//需要更新
-	void RefreshDescriptorSet();
+	void RefreshDescriptorSet(uint32_t bindingIndex);
+
+	void RefreshDescriptorSetAllBinding();
 
 	const VkDescriptorSet& GetDescriptorSet();
 
@@ -74,11 +82,13 @@ private:
 	std::vector<VkShaderStageFlags>	_shaderStageFlags;
 
 	//一般不会出现超过4缓冲的,直接固定给4个
-	std::vector<VkDescriptorSet>	_descriptorSets;
+	VkDescriptorSet	_descriptorSets[4];
+
+	//<binding>
+	std::vector<uint8_t> _bNeedUpdate[4];
 
 	class VulkanRenderer* _renderer;
 
 	VkDescriptorSetLayout _layout;
 
-	bool _bUpdateStatus;
 };

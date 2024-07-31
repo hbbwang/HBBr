@@ -263,7 +263,7 @@ void ExecCompileShader(HString& _shaderSrcCode, HString& fileName, const char* e
 		if (out.is_open())
 		{
 			//通过spirv-cross获取shader信息，二次处理shaderCache
-			Shaderc::ShaderCompiler::PostProcessShaderCache(resultChar, header);
+			Shaderc::ShaderCompiler::PostProcessShaderCache(resultChar, header, shaderParamInfos, shaderTextureInfos);
 			//Header 存入
 			out.write((char*)&header, sizeof(ShaderCacheHeader));
 			//保存变体名
@@ -906,7 +906,7 @@ void Shaderc::ShaderCompiler::CompileShader(const char* srcShaderFileFullPath, c
 
 }
 
-void Shaderc::ShaderCompiler::PostProcessShaderCache(std::vector<uint32_t> shaderCacheData, ShaderCacheHeader& header)
+void Shaderc::ShaderCompiler::PostProcessShaderCache(std::vector<uint32_t> shaderCacheData, ShaderCacheHeader& header, std::vector<ShaderParameterInfo>& params, std::vector < ShaderTextureInfo>& tex)
 {
 	//二次处理shader cache
 	int SV_TargetCount = 0;
@@ -916,8 +916,15 @@ void Shaderc::ShaderCompiler::PostProcessShaderCache(std::vector<uint32_t> shade
 	switch (executionModel)
 	{
 	case spv::ExecutionModelVertex:	//Vertex Shader
-
-		break;
+	{
+		ConsoleDebug::print_endl("PostProcess Shader type: Fragment");
+		if (header.flags & NativeHLSL)
+		{
+			header.shaderTextureCount = reflector.get_shader_resources().separate_images.size();
+			tex.resize(header.shaderTextureCount);
+		}
+	}
+	break;
 	case spv::ExecutionModelTessellationControl:
 		ConsoleDebug::print_endl("PostProcess Shader type: Tessellation Control");
 		break;
@@ -928,19 +935,24 @@ void Shaderc::ShaderCompiler::PostProcessShaderCache(std::vector<uint32_t> shade
 		ConsoleDebug::print_endl("PostProcess Shader type: Geometry");
 		break;
 	case spv::ExecutionModelFragment: //Pixel Shader
+	{
 		ConsoleDebug::print_endl("PostProcess Shader type: Fragment");
+		for (const auto& entry : reflector.get_shader_resources().stage_outputs)
 		{
-			for (const auto& entry : reflector.get_shader_resources().stage_outputs)
+			HString outputEntryName = entry.name;
+			const spirv_cross::SPIRType& type = reflector.get_type(entry.base_type_id);
+			if (type.vecsize > 1)//输出格式大于float的都认为是ColorAttachment
 			{
-				HString outputEntryName = entry.name;
-				const spirv_cross::SPIRType& type = reflector.get_type(entry.base_type_id);
-				if (type.vecsize > 1)//输出格式大于float的都认为是ColorAttachment
-				{
-					header.colorAttachmentCount++;
-				}
+				header.colorAttachmentCount++;
 			}
 		}
-		break;
+		if (header.flags & NativeHLSL)
+		{
+			header.shaderTextureCount = reflector.get_shader_resources().separate_images.size();
+			tex.resize(header.shaderTextureCount);
+		}
+	}
+	break;
 	case spv::ExecutionModelGLCompute:
 		ConsoleDebug::print_endl("PostProcess Shader type: Compute");
 		break;

@@ -8,17 +8,34 @@
 DescriptorSet::DescriptorSet(class VulkanRenderer* renderer)
 {
 	_renderer = renderer;
-	_bUpdateStatus = false;
 }
 
 DescriptorSet::~DescriptorSet()
 {
+	const auto& manager = VulkanManager::GetManager();
+	if (_layout)
+	{
+		manager->DestroyDescriptorSetLayout(_layout);
+	}
+	for (auto& i : _buffers)
+	{
+		i.second.reset();
+	}
+	_buffers.clear();
 }
 
 void DescriptorSet::CreateBinding(VkDescriptorType type, VkShaderStageFlags shaderStageFlags)
 {
 	_descriptorTypes.push_back(type);
 	_shaderStageFlags.push_back(shaderStageFlags);
+}
+
+void DescriptorSet::CreateBindings(uint32_t bindingCount, VkDescriptorType type, VkShaderStageFlags shaderStageFlags)
+{
+	std::vector<VkDescriptorType>	new_descriptorTypes(bindingCount, type);
+	std::vector<VkShaderStageFlags>	new_shaderStageFlags(bindingCount, shaderStageFlags);
+	_descriptorTypes.insert(_descriptorTypes.end(), new_descriptorTypes.begin(), new_descriptorTypes.end());
+	_shaderStageFlags.insert(_shaderStageFlags.end(), new_shaderStageFlags.begin(), new_shaderStageFlags.end());
 }
 
 VMABuffer* DescriptorSet::CreateBuffer(uint32_t bindingIndex, VkDeviceSize initSize, VmaMemoryUsage memoryUsage, bool bAlwayMapping, bool bFocusCreateDedicatedMemory, HString debugName)
@@ -54,22 +71,29 @@ VMABuffer* DescriptorSet::CreateBuffer(uint32_t bindingIndex, VkDeviceSize initS
 	return insert_result.first->second.get();
 }
 
-void DescriptorSet::BuildDescriptorSet()
+void DescriptorSet::BuildDescriptorSetLayout()
 {
 	const auto& manager = VulkanManager::GetManager();
-	manager->CreateDescripotrSetLayout(_descriptorTypes, _shaderStageFlags, _layout);
-	_descriptorSets.resize(manager->GetSwapchainBufferCount());
-	for (int i = 0; i < (int)manager->GetSwapchainBufferCount(); i++)
+	
+	for (auto& i : _bNeedUpdate)
 	{
-		manager->AllocateDescriptorSet(manager->GetDescriptorPool(), _layout, _descriptorSets[i]);
+		i.resize(_descriptorTypes.size());
 	}
-	RefreshDescriptorSet();
+
+	manager->CreateDescripotrSetLayout(_descriptorTypes, _shaderStageFlags, _layout);
+	//_descriptorSets.resize(manager->GetSwapchainBufferCount());
+	//for (int i = 0; i < (int)manager->GetSwapchainBufferCount(); i++)
+	//{
+	//	manager->AllocateDescriptorSet(manager->GetDescriptorPool(), _layout, _descriptorSets[i]);
+	//}
+	RefreshDescriptorSetAllBinding();
 }
 
 void DescriptorSet::UpdateDescriptorSet(uint32_t bindingIndex, VkDeviceSize offset, VkDeviceSize range)
 {
-	if (_bUpdateStatus)
+	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][bindingIndex] == 1)
 	{
+		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][bindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();
 		manager->UpdateBufferDescriptorSet(
 			_buffers[bindingIndex]->GetBuffer(),
@@ -81,8 +105,9 @@ void DescriptorSet::UpdateDescriptorSet(uint32_t bindingIndex, VkDeviceSize offs
 
 void DescriptorSet::UpdateDescriptorSetWholeBuffer(uint32_t bindingIndex)
 {
-	if (_bUpdateStatus)
+	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][bindingIndex] == 1)
 	{
+		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][bindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();
 		manager->UpdateBufferDescriptorSet(
 			_buffers[bindingIndex]->GetBuffer(),
@@ -94,8 +119,9 @@ void DescriptorSet::UpdateDescriptorSetWholeBuffer(uint32_t bindingIndex)
 
 void DescriptorSet::UpdateTextureDescriptorSet(std::vector<TextureUpdateInfo> texs, int beginBindingIndex)
 {
-	if (_bUpdateStatus)
+	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] == 1)
 	{
+		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();
 		manager->UpdateTextureDescriptorSet(GetDescriptorSet(), texs , beginBindingIndex);
 	}
@@ -103,8 +129,9 @@ void DescriptorSet::UpdateTextureDescriptorSet(std::vector<TextureUpdateInfo> te
 
 void DescriptorSet::UpdateTextureDescriptorSet(std::vector<std::shared_ptr<Texture2D>> texs, std::vector<VkSampler> samplers, int beginBindingIndex)
 {
-	if (_bUpdateStatus)
+	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] == 1)
 	{
+		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();
 		manager->UpdateTextureDescriptorSet(GetDescriptorSet(), texs, samplers, beginBindingIndex);
 	}
@@ -112,19 +139,32 @@ void DescriptorSet::UpdateTextureDescriptorSet(std::vector<std::shared_ptr<Textu
 
 void DescriptorSet::UpdateStoreTextureDescriptorSet(std::vector<class Texture2D*> textures, int beginBindingIndex)
 {
-	if (_bUpdateStatus)
+	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] == 1)
 	{
+		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();
 		manager->UpdateStoreTextureDescriptorSet(GetDescriptorSet(), textures, beginBindingIndex);
 	}
 }
 
-void DescriptorSet::RefreshDescriptorSet()
+void DescriptorSet::RefreshDescriptorSet(uint32_t bindingIndex)
 {
-	VulkanObjectManager::Get()->MarkDescriptorSetUpdate(this);
+	for (auto& i : _bNeedUpdate)
+		i[bindingIndex] = 1;
+}
+
+void DescriptorSet::RefreshDescriptorSetAllBinding()
+{
+	for (auto& i : _bNeedUpdate)
+		memset(i.data(), 1, sizeof(uint8_t) * _descriptorTypes.size());
 }
 
 const VkDescriptorSet& DescriptorSet::GetDescriptorSet()
 {
+	if (_descriptorSets[_renderer->GetCurrentFrameIndex()] == nullptr)
+	{
+		const auto& manager = VulkanManager::GetManager();
+		manager->AllocateDescriptorSet(manager->GetDescriptorPool(), _layout, _descriptorSets[_renderer->GetCurrentFrameIndex()]);
+	}
 	return _descriptorSets[_renderer->GetCurrentFrameIndex()];
 }

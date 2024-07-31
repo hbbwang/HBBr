@@ -1788,6 +1788,28 @@ bool VulkanManager::Present(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, u
 	return true;
 }
 
+void VulkanManager::ReCreatePipelineLayout(std::vector<VkDescriptorSetLayout> descriptorSetLayout, VkPipelineLayout& pipelineLayout)
+{
+	if (pipelineLayout != nullptr)
+	{
+		DestroyPipelineLayout(pipelineLayout);
+		pipelineLayout = nullptr;
+	}
+
+	VkPipelineLayoutCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	info.flags = 0;
+	info.pushConstantRangeCount = 0;
+	info.pPushConstantRanges = VK_NULL_HANDLE;
+	info.pSetLayouts = descriptorSetLayout.data();
+	info.setLayoutCount = (uint32_t)descriptorSetLayout.size();
+	auto result = vkCreatePipelineLayout(_device, &info, VK_NULL_HANDLE, &pipelineLayout);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut("vkCreatePipelineLayout error!", true, true);
+	}
+}
+
 void VulkanManager::CreatePipelineLayout(std::vector <VkDescriptorSetLayout> descriptorSetLayout, VkPipelineLayout& pipelineLayout)
 {
 	VkPipelineLayoutCreateInfo info = {};
@@ -2002,10 +2024,10 @@ void VulkanManager::AllocateDescriptorSets(VkDescriptorPool pool, VkDescriptorSe
 	VkDescriptorSetAllocateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	info.descriptorPool = pool;
-	info.descriptorSetCount = descriptorSet.size();
+	info.descriptorSetCount = (uint32_t)descriptorSet.size();
 	info.pSetLayouts = &descriptorSetLayout;
 	auto result = vkAllocateDescriptorSets(_device, &info, descriptorSet.data());
-	if (result != VK_SUCCESS)
+	if (result != VK_SUCCESS) 
 	{
 		MessageOut("Vulkan ERROR: Allocate Descriptor Sets Failed.", false, true);
 	}

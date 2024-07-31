@@ -605,15 +605,15 @@ void MaterialPrimitiveGroup::ResetDecriptorSet(uint8_t numTextures, bool& bNeedU
 		descriptorSet_uniformBufferVS.reset(new DescriptorSet(renderer));
 		descriptorSet_uniformBufferVS->CreateBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_VERTEX_BIT);
 		descriptorSet_uniformBufferVS->CreateBuffer(0, 32, VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, primFrom->_graphicsName + "_Material_Ub_VS");
-		descriptorSet_uniformBufferVS->BuildDescriptorSet();
+		descriptorSet_uniformBufferVS->BuildDescriptorSetLayout();
 	}
 	
 	if (!descriptorSet_uniformBufferPS)
 	{
-		descriptorSet_uniformBufferVS.reset(new DescriptorSet(renderer));
-		descriptorSet_uniformBufferVS->CreateBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_FRAGMENT_BIT);
-		descriptorSet_uniformBufferVS->CreateBuffer(0, 32, VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, primFrom->_graphicsName + "_Material_Ub_PS");
-		descriptorSet_uniformBufferVS->BuildDescriptorSet();
+		descriptorSet_uniformBufferPS.reset(new DescriptorSet(renderer));
+		descriptorSet_uniformBufferPS->CreateBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_FRAGMENT_BIT);
+		descriptorSet_uniformBufferPS->CreateBuffer(0, 32, VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, primFrom->_graphicsName + "_Material_Ub_PS");
+		descriptorSet_uniformBufferPS->BuildDescriptorSetLayout();
 	}
 
 	if (primFrom->_uniformBufferSize_vs > 0)
@@ -662,9 +662,9 @@ void MaterialPrimitiveGroup::UpdateDecriptorSet(bool bNeedUpdateVSUniformBuffer,
 	const auto& vkManager = VulkanManager::GetManager();
 	const auto frameIndex = renderer->GetCurrentFrameIndex();
 	if (bNeedUpdateVSUniformBuffer)
-		descriptorSet_uniformBufferVS->RefreshDescriptorSet();
+		descriptorSet_uniformBufferVS->RefreshDescriptorSet(0);
 	if (bNeedUpdatePSUniformBuffer)
-		descriptorSet_uniformBufferPS->RefreshDescriptorSet();
+		descriptorSet_uniformBufferPS->RefreshDescriptorSet(0);
 	//Update vs uniform buffer
 	if (primFrom->_uniformBufferSize_vs > 0)
 	{
