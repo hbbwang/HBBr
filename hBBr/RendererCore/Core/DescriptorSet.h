@@ -6,56 +6,79 @@
 
 class DescriptorSet
 {
+	friend class VulkanObjectManager;
+
 public:
-	DescriptorSet(class VulkanRenderer* renderer, VkDescriptorType type,VkDescriptorSetLayout setLayout,VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_CPU_TO_GPU,  VkDeviceSize bufferSizeInit = VMABufferSizeRange, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+
+	DescriptorSet(class VulkanRenderer* renderer);
+
 	~DescriptorSet();
 
-	//初始化的时候会根据bindingCount创建相同数量的VkBuffer(数组)
-	void BufferMapping(void* mappingData, uint64_t offset, uint64_t bufferSize);
+	//创建DescriptorSet绑定
+	//如果是UniformBuffer或者StorageBuffer这种类型，会帮忙创建VMABuffer,
+	void CreateBinding(
+		VkDescriptorType type,
+		VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT
+	);
 
-	//可缩放大，也可缩放小
-	bool ResizeDescriptorBuffer(VkDeviceSize newSize);
+	//给当前VkDescriptorType创建Buffer（仅限可用Buffer，像Image类型的就不会创建）
+	VMABuffer* CreateBuffer(
+		uint32_t bindingIndex,
+		VkDeviceSize initSize,
+		VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_CPU_TO_GPU,
+		bool bAlwayMapping = true,
+		bool bFocusCreateDedicatedMemory = false,
+		HString debugName = "VMABuffer");
 
-	//只有比之前申请的内存更大，才会执行
-	bool ResizeBigDescriptorBuffer(VkDeviceSize newSize);
+	//创建VkDescriptorSetLayer,并分配VkDescriptorSet
+	void BuildDescriptorSet();
 
-	void UpdateDescriptorSet(std::vector<uint32_t> bufferRanges, std::vector<uint32_t> offsets, uint32_t dstBinding = 0);
+	VMABuffer* GetBuffer(uint32_t bindingIndex)const {
+		auto it = _buffers.find(bindingIndex);
+		if (it != _buffers.end())
+			return it->second.get();
+		return nullptr;
+	}
 
-	void UpdateDescriptorSet(uint32_t bufferSize , uint32_t offset = 0, uint32_t dstBinding = 0);
+	HBBR_INLINE VkDescriptorSetLayout GetLayout()const {
+		return _layout;
+	}
 
-	void UpdateDescriptorSet(uint32_t sameBufferSize, std::vector<uint32_t> offsets, uint32_t dstBinding = 0);
+	//更新DescriptorSet
+	void UpdateDescriptorSet(uint32_t bindingIndex, VkDeviceSize offset, VkDeviceSize range);
 
-	void UpdateDescriptorSetAll(uint32_t sameBufferSize);
+	void UpdateDescriptorSetWholeBuffer(uint32_t bindingIndex);
 
-	void UpdateTextureDescriptorSet(std::vector<class Texture2D*> textures, std::vector<VkSampler> samplers, int beginBindingIndex = 0);
+	void UpdateTextureDescriptorSet(std::vector<TextureUpdateInfo> texs, int beginBindingIndex = 0 );
+
+	void UpdateTextureDescriptorSet(std::vector<std::shared_ptr<class Texture2D>> texs, std::vector<VkSampler>samplers, int beginBindingIndex = 0);
 
 	void UpdateStoreTextureDescriptorSet(std::vector<class Texture2D*> textures, int beginBindingIndex = 0);
 
-	void UpdateTextureViewDescriptorSet(std::vector<VkImageView> images, std::vector<VkSampler> samplers);
-
-	HBBR_INLINE VMABuffer* GetBuffer()const { return _buffer.get(); }
-
-	HBBR_INLINE std::vector<VkDescriptorType> GetTypes()const { return _descriptorTypes; }
-
-	HBBR_INLINE void NeedUpdate() {
-		memset(_needUpdates.data(), 1, sizeof(uint8_t) * _needUpdates.size());
+	HBBR_INLINE std::vector<VkDescriptorType>GetTypes()const {
+		return _descriptorTypes;
 	}
+
+	//需要更新
+	void RefreshDescriptorSet();
 
 	const VkDescriptorSet& GetDescriptorSet();
 
-	const VkDescriptorSet& GetDescriptorSet(int index);
-
 private:
+
+	//<type , buffer> 可以跟某个类型创建Buffer
+	std::map<uint32_t, std::shared_ptr<VMABuffer>>_buffers;
 
 	std::vector<VkDescriptorType>	_descriptorTypes;
 
-	std::vector<VkDescriptorSet>	_descriptorSets;
-
-	std::vector<uint8_t>	_needUpdates;
-
 	std::vector<VkShaderStageFlags>	_shaderStageFlags;
 
-	std::unique_ptr<VMABuffer> _buffer;
+	//一般不会出现超过4缓冲的,直接固定给4个
+	std::vector<VkDescriptorSet>	_descriptorSets;
 
 	class VulkanRenderer* _renderer;
+
+	VkDescriptorSetLayout _layout;
+
+	bool _bUpdateStatus;
 };

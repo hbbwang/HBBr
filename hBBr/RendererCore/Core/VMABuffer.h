@@ -23,9 +23,6 @@ public:
 	//Buffer大小重置,如果是从大的重置成小的,原来的数据将会丢失
 	bool Resize(VkDeviceSize newSize, VkCommandBuffer cmdBuf = VK_NULL_HANDLE);
 
-	//Buffer扩容
-	bool ResizeBigger(VkDeviceSize newSize, VkCommandBuffer cmdBuf = VK_NULL_HANDLE);
-
 	void* BeginMapping();
 
 	void EndMapping();
@@ -37,19 +34,20 @@ public:
 	inline VkBuffer GetBuffer()const {
 		return _buffer;
 	}
+
 	inline VkDeviceSize GetBufferSize()const {
-		return _lastSize;
+		return _allocationInfo.size;
 	}
+
 private:
+
+	void AlignmentSize(VkDeviceSize& sizeInout);
 
 	VkBuffer _buffer; 
 
 	VmaAllocation _allocation;
 
 	VmaAllocationInfo _allocationInfo;
-
-	//上一次buffer所需的大小，这并不是Buffer的内存大小，因为它还未进行对齐，只是用来进行Resize判断的。
-	VkDeviceSize _lastSize;
 
 	bool _bAlwayMapping;
 

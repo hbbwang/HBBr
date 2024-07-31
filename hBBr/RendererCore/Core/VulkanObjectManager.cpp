@@ -1,5 +1,6 @@
 ﻿#include "VulkanObjectManager.h"
 #include "AssetObject.h"
+#include "DescriptorSet.h"
 
 std::unique_ptr<VulkanObjectManager> VulkanObjectManager::_ptr = nullptr;
 
@@ -13,6 +14,7 @@ VulkanObjectManager::VulkanObjectManager() :
 {
 	_vmaBufferObjects.reserve(20);
 	_vkBufferObjects.reserve(20);
+	_descriptorSetUpdates.reserve(20);
 }
 
 void VulkanObjectManager::SafeReleaseVkBuffer(VkBuffer buffer, VkDeviceMemory memory)
@@ -44,6 +46,15 @@ void VulkanObjectManager::AssetLinkGC(std::weak_ptr<class AssetObject> asset, bo
 	obj.bImmediate = bImmediate;
 	_vulkanObjects.push_back(obj);
 	_numRequestObjects++;
+}
+
+void VulkanObjectManager::MarkDescriptorSetUpdate(DescriptorSet* des)
+{
+	DescriptorSetUpdate newUpdate= {};
+	newUpdate.frameCount = 0;
+	newUpdate.descriptorSet = des;
+	des->_bUpdateStatus = true;
+	_descriptorSetUpdates.push_back(newUpdate);
 }
 
 void VulkanObjectManager::Update()
@@ -164,6 +175,23 @@ void VulkanObjectManager::Update()
 				}
 				_numRequestObjects--;
 				it = _vulkanObjectsRelease.erase(it);
+				continue;
+			}
+			it->frameCount++;
+			it++;
+		}
+	}
+
+	//更新DescriptorSet，一轮缓冲为周期
+	if (_descriptorSetUpdates.size() > 0)
+	{
+		for (auto it = _descriptorSetUpdates.begin(); it != _descriptorSetUpdates.end(); )
+		{
+			if (it->frameCount > swapchainBufferCount)
+			{
+				//更新结束
+				it->descriptorSet->_bUpdateStatus = false;
+				it = _descriptorSetUpdates.erase(it);
 				continue;
 			}
 			it->frameCount++;

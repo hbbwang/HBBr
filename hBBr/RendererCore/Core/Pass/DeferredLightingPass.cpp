@@ -9,7 +9,6 @@ DeferredLightingPass::~DeferredLightingPass()
 {
 	auto manager = VulkanManager::GetManager();
 	manager->DestroyPipelineLayout(_pipelineLayout);
-	manager->DestroyDescriptorSetLayout(_texDescriptorSetLayout);
 }
 
 void DeferredLightingPass::PassInit()
@@ -24,13 +23,6 @@ void DeferredLightingPass::PassInit()
 	CreateRenderPass();
 	//DescriptorSet
 	//SceneDepth,GBuffer0,GBuffer1,GBuffer2
-	manager->CreateDescripotrSetLayout(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4, _texDescriptorSetLayout, VK_SHADER_STAGE_FRAGMENT_BIT);
-	manager->CreatePipelineLayout(
-		{
-			PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(),
-			_texDescriptorSetLayout,
-		}
-	, _pipelineLayout);
 	vertices =
 	{
 		{ glm::vec2(-1.0f, -1.0f)	, glm::vec2(0.0f, 0.0f) },
@@ -40,30 +32,34 @@ void DeferredLightingPass::PassInit()
 		{ glm::vec2(1.0f, 1.0f)		, glm::vec2(1.0f, 1.0f) },
 		{ glm::vec2(-1.0f, 1.0f)	, glm::vec2(0.0f, 1.0f) }
 	};
-	_vertexBuffer.reset(new VMABuffer(sizeof(LightingVertexData) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_GPU_ONLY, false, false, "DeferredLightingPass_VB"));
+	_vertexBuffer.reset(new VMABuffer(sizeof(LightingVertexData) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_GPU_ONLY, false, false, "DeferredLightingPass_Vb"));
 	_vertexBuffer->Mapping(vertices.data(), 0, sizeof(LightingVertexData) * vertices.size());
 	//DescriptorSet
 	auto bufferSize = sizeof(LightingUniformBuffer);
 
-	_ub_descriptorSet.reset(new DescriptorSet(
-		_renderer, 
-		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 
-		PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(), 
-		VMA_MEMORY_USAGE_CPU_TO_GPU,
-		bufferSize,
-		VK_SHADER_STAGE_FRAGMENT_BIT)); 
-	_ub_descriptorSet->UpdateDescriptorSetAll((uint32_t)bufferSize);
+	_ub_descriptorSet.reset(new DescriptorSet(_renderer));
+	_ub_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_FRAGMENT_BIT);
+	_ub_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_FRAGMENT_BIT);
+	_ub_descriptorSet->CreateBuffer(0, sizeof(PassUniformBuffer),
+		VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, "DeferredLightingPass_PassUb");
+	_ub_descriptorSet->CreateBuffer(1, sizeof(LightingUniformBuffer),
+		VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, "DeferredLightingPass_LightingUb");
+	_ub_descriptorSet->BuildDescriptorSet();
 
-	_tex_descriptorSet.reset(new DescriptorSet(
-		_renderer, 
-		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 
-		_texDescriptorSetLayout, 
-		VMA_MEMORY_USAGE_CPU_TO_GPU,
-		0, 
-		VK_SHADER_STAGE_FRAGMENT_BIT));
+	_tex_descriptorSet.reset(new DescriptorSet(_renderer));
+	_tex_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+	_tex_descriptorSet->BuildDescriptorSet();
+
+	manager->CreatePipelineLayout(
+		{
+			_ub_descriptorSet->GetLayout(),
+			_tex_descriptorSet->GetLayout(),
+		}
+	, _pipelineLayout);
 
 	//Set Pass Name
 	_passName = "Lighting Pass"; 
+
 }
 
 void DeferredLightingPass::PassUpdate()
@@ -72,7 +68,7 @@ void DeferredLightingPass::PassUpdate()
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.5, 0.6, 0.7, 0.3));
 	//Update FrameBuffer
-	ResetFrameBufferCustom(_renderer->GetRenderSize(), 
+	ResetFrameBufferCustom(_renderer->GetRenderSize(),
 		{
 			GetSceneTexture(SceneTextureDesc::SceneColor)->GetTextureView()
 		});
@@ -100,26 +96,28 @@ void DeferredLightingPass::PassUpdate()
 	vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, &vbOffset);
 
 	//textures
-	_tex_descriptorSet->UpdateTextureDescriptorSet(
-		{
-			sceneDepth.get(),
-			gbuffer0.get(),
-			gbuffer1.get(),
-			gbuffer2.get()
-		}, 
-		{ 
-			Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp),
-			Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp),
-			Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp),
-			Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp),
-		});
+	auto sampler = Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp);
+	_tex_descriptorSet->UpdateTextureDescriptorSet({
+		{ sceneDepth, sampler },
+		{ gbuffer0, sampler },
+		{ gbuffer1, sampler },
+		{ gbuffer2, sampler },
+	});
 
 	//uniform buffers
-	uint32_t ubSize = (uint32_t)manager->GetMinUboAlignmentSize(sizeof(LightingUniformBuffer));
+	auto passUb = _manager->GetPassUniformBufferCache();
+	_ub_descriptorSet->GetBuffer(0)->Mapping(&passUb, 0, sizeof(PassUniformBuffer));
 	auto uniformBuffer = _manager->GetLightingUniformBuffer();
-	_ub_descriptorSet->BufferMapping(uniformBuffer, 0, ubSize);
-	_ub_descriptorSet->NeedUpdate();
-	_ub_descriptorSet->UpdateDescriptorSet(sizeof(LightingUniformBuffer));
+	if (*uniformBuffer != _cache)
+	{
+		_cache = *uniformBuffer;
+		_ub_descriptorSet->GetBuffer(1)->Mapping(uniformBuffer, 0, sizeof(LightingUniformBuffer));
+	}
+
+	_ub_descriptorSet->UpdateDescriptorSet(0, 0, sizeof(PassUniformBuffer));
+	_ub_descriptorSet->UpdateDescriptorSet(1, 0, sizeof(LightingUniformBuffer));
+
+
 	//Pipeline
 	VkPipeline pipeline = VK_NULL_HANDLE;
 	VkPipeline currentPipeline = PipelineManager::GetGraphicsPipelineMap(_shaderIndex)->pipeline;
@@ -131,8 +129,8 @@ void DeferredLightingPass::PassUpdate()
 	//textures
 	vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 1, 1, &_tex_descriptorSet->GetDescriptorSet(), 0, 0);
 	//uniform buffers
-	uint32_t ubOffset = 0;
-	vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_ub_descriptorSet->GetDescriptorSet(), 1, &ubOffset);
+	uint32_t ubOffset[2] = { 0 , _ub_descriptorSet->GetBuffer(0)->GetBufferSize() };
+	vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_ub_descriptorSet->GetDescriptorSet(), 2, ubOffset);
 	//draw primitive
 	vkCmdDraw(cmdBuf, 6, 1, 0, 0);
 	//End...
@@ -141,7 +139,7 @@ void DeferredLightingPass::PassUpdate()
 
 void DeferredLightingPass::PassReset()
 {
-	_tex_descriptorSet->NeedUpdate();
+	_tex_descriptorSet->RefreshDescriptorSet();
 }
 
 PipelineIndex DeferredLightingPass::CreatePipeline(HString shaderName)

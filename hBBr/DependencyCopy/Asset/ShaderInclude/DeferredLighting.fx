@@ -11,6 +11,11 @@
 #include "Include/Common.hlsl"
 #include "Deferred/DeferredCommon.hlsl"
 
+cbuffer Pass :register(b0,space0)
+{
+    PassUniformBuffer Pass;
+};
+
 struct LightingParameter
 {
     float3  LightPosition;
@@ -22,9 +27,8 @@ struct LightingParameter
 	uint    LightFlags;
 };
 
-cbuffer Pass :register(b0,space0)
+cbuffer Lighting :register(b1,space0)
 {
-    PassUniformBuffer Pass;
     uint ValidLightCount;//有效灯光数量
     LightingParameter LightingParams[MaxLightingNum];
 };

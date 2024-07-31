@@ -60,48 +60,52 @@ VulkanDebugCallback(
 {
 	HString title;
 	HString color;
+	bool bInformation = false;
+	bool bDebug = false;
 	bool bError = false;
 	bool bWarning = false;
 	if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
-		title = "INFO: "; color = "255,255,255";
+		title = "INFO: \n"; color = "255,255,255";
+		bInformation = true;
 	}
 	if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT) {
-		title = "WARNING: "; color = "255,255,0";
+		title = "WARNING: \n"; color = "255,255,0";
 		bWarning = true;
 	}
 	if (flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
-		title = "PERFORMANCE WARNING: "; color = "255,175,0";
+		title = "PERFORMANCE WARNING: \n"; color = "255,175,0";
 		bWarning = true;
 	}
 	if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
-		title = "ERROR: "; color = "255,0,0";
+		title = "ERROR: \n"; color = "255,0,0";
+		bError = true;
 	}
 	if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
-		title = "DEBUG: "; color = "255,255,255";
+		title = "DEBUG: \n"; color = "200,200,200";
+		bDebug = true;
 	}
-	//if (flags & VK_DEBUG_REPORT_FLAG_BITS_MAX_ENUM_EXT) {
-	//	ConsoleDebug::print_endl(DString(": "));
-	//}
 	title = title + HString("@[") + layer_prefix + "]";
-	//ConsoleDebug::print_endl(title, color);
-	//ConsoleDebug::print_endl(msg, color);
-	if (HString(msg).Contains("loader_get_json:"))
-	{
-		return false;
-	}
 	if (bError)
 	{
 		try {
-			MessageOut(HString(title + "\n" + msg), false, true, "255,0,0");
+			HCheck_Color(HString(title + msg), false, true, "255,0,0");
 		}
 		catch(const std::system_error& e)
 		{
 			ConsoleDebug::print_endl(HString("Error: ")+ e.what());
 		}
 	}
+	else if (bDebug)
+	{
+		HCheck_Color(HString(title + msg), false, false, "255,255,0");
+	}
+	else if (bInformation)
+	{
+		HCheck_Color(HString(title + msg), false, false, "255,255,0");
+	}
 	else if(bWarning)
 	{
-		MessageOut(HString(title + "\n" + msg), false, false, "255,255,0");
+		HCheck_Color(HString(title + msg), false, false, "255,255,0");
 	}
 	return false;
 }
@@ -1993,6 +1997,20 @@ void VulkanManager::AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSet
 	}
 }
 
+void VulkanManager::AllocateDescriptorSets(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSet)
+{
+	VkDescriptorSetAllocateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	info.descriptorPool = pool;
+	info.descriptorSetCount = descriptorSet.size();
+	info.pSetLayouts = &descriptorSetLayout;
+	auto result = vkAllocateDescriptorSets(_device, &info, descriptorSet.data());
+	if (result != VK_SUCCESS)
+	{
+		MessageOut("Vulkan ERROR: Allocate Descriptor Sets Failed.", false, true);
+	}
+}
+
 void VulkanManager::AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, uint32_t newDescriptorSetCount , std::vector<VkDescriptorSet>&  descriptorSet)
 {
 	std::vector<VkDescriptorSetLayout> setLayout;
@@ -2550,154 +2568,9 @@ void VulkanManager::UpdateBufferDescriptorSet(VkBuffer buffer, VkDescriptorSet d
 	vkUpdateDescriptorSets(_device, 1, &descriptorWrite, 0, VK_NULL_HANDLE);
 }
 
-void VulkanManager::UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range)
+void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<std::shared_ptr<Texture2D>> texs, std::vector<VkSampler> samplers, int beginBindingIndex)
 {
-	for (int i = 0; i < descriptorSet->GetTypes().size(); i++)
-	{
-		if (descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-		{
-			VkDescriptorBufferInfo bufferInfo = {};
-			bufferInfo.buffer = descriptorSet->GetBuffer()->GetBuffer();
-			bufferInfo.offset = offset;
-			bufferInfo.range = Range;
-			VkWriteDescriptorSet descriptorWrite = {};
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = descriptorSet->GetDescriptorSet();
-			descriptorWrite.dstBinding = dstBinding;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = descriptorSet->GetTypes()[i];
-			descriptorWrite.descriptorCount = 1;
-			descriptorWrite.pBufferInfo = &bufferInfo;
-			descriptorWrite.pImageInfo = VK_NULL_HANDLE; 
-			descriptorWrite.pTexelBufferView = VK_NULL_HANDLE;
-			vkUpdateDescriptorSets(_device, 1, &descriptorWrite, 0, VK_NULL_HANDLE);
-		}
-	}
-}
-
-void VulkanManager::UpdateBufferDescriptorSet(DescriptorSet* descriptorSet, uint32_t dstBinding, uint32_t sameBufferSize, std::vector<uint32_t> offsets)
-{
-	for (int i = 0; i < descriptorSet->GetTypes().size(); i++)
-	{
-		if (descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-		{
-			std::vector<VkWriteDescriptorSet> descriptorWrite(offsets.size());
-			std::vector<VkDescriptorBufferInfo> bufferInfo(offsets.size());
-			for (int o = 0; o < offsets.size(); o++)
-			{
-				bufferInfo[o] = {};
-				bufferInfo[o].buffer = descriptorSet->GetBuffer()->GetBuffer();
-				bufferInfo[o].offset = offsets[o];
-				bufferInfo[o].range = (VkDeviceSize)sameBufferSize;
-				descriptorWrite[o] = {};
-				descriptorWrite[o].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				descriptorWrite[o].dstSet = descriptorSet->GetDescriptorSet();
-				descriptorWrite[o].dstBinding = dstBinding;
-				descriptorWrite[o].dstArrayElement = 0;
-				descriptorWrite[o].descriptorType = descriptorSet->GetTypes()[i];
-				descriptorWrite[o].descriptorCount = 1;
-				descriptorWrite[o].pBufferInfo = &bufferInfo[o];
-				descriptorWrite[o].pImageInfo = VK_NULL_HANDLE;
-				descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE;
-			}
-			vkUpdateDescriptorSets(_device, (uint32_t)offsets.size() , descriptorWrite.data(), 0, VK_NULL_HANDLE);
-		}
-	}
-}
-
-void VulkanManager::UpdateBufferDescriptorSet(DescriptorSet* descriptorSet, uint32_t dstBinding, std::vector<uint32_t> bufferSizes, std::vector<uint32_t> offsets)
-{
-	for (int i = 0; i < descriptorSet->GetTypes().size(); i++)
-	{
-		if (descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-		{
-			std::vector<VkWriteDescriptorSet> descriptorWrite(offsets.size());
-			std::vector<VkDescriptorBufferInfo> bufferInfo(offsets.size());
-			for (int o = 0; o < offsets.size(); o++)
-			{
-				bufferInfo[o] = {};
-				bufferInfo[o].buffer = descriptorSet->GetBuffer()->GetBuffer();
-				bufferInfo[o].offset = offsets[o];
-				bufferInfo[o].range = bufferSizes[o];
-				descriptorWrite[o] = {};
-				descriptorWrite[o].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				descriptorWrite[o].dstSet = descriptorSet->GetDescriptorSet();
-				descriptorWrite[o].dstBinding = dstBinding;
-				descriptorWrite[o].dstArrayElement = 0;
-				descriptorWrite[o].descriptorType = descriptorSet->GetTypes()[i];
-				descriptorWrite[o].descriptorCount = 1;
-				descriptorWrite[o].pBufferInfo = &bufferInfo[o];
-				descriptorWrite[o].pImageInfo = VK_NULL_HANDLE;
-				descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE;
-			}
-			vkUpdateDescriptorSets(_device, (uint32_t)offsets.size(), descriptorWrite.data(), 0, VK_NULL_HANDLE);
-		}
-	}
-}
-
-void VulkanManager::UpdateBufferDescriptorSetArray(DescriptorSet* descriptorSet, uint32_t dstBinding, std::vector<uint32_t> bufferSizes, std::vector<uint32_t> offsets)
-{
-	for (int i = 0; i < descriptorSet->GetTypes().size(); i++)
-	{
-		if (descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-		{
-			std::vector<VkWriteDescriptorSet> descriptorWrite(offsets.size());
-			std::vector<VkDescriptorBufferInfo> bufferInfo(offsets.size());
-			for (int o = 0; o < offsets.size(); o++)
-			{
-				bufferInfo[o] = {};
-				bufferInfo[o].buffer = descriptorSet->GetBuffer()->GetBuffer();
-				bufferInfo[o].offset = offsets[o];
-				bufferInfo[o].range = bufferSizes[o];
-				descriptorWrite[o] = {};
-				descriptorWrite[o].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				descriptorWrite[o].dstSet = descriptorSet->GetDescriptorSet();
-				descriptorWrite[o].dstBinding = dstBinding;
-				descriptorWrite[o].dstArrayElement = o;
-				descriptorWrite[o].descriptorType = descriptorSet->GetTypes()[i];
-				descriptorWrite[o].descriptorCount = 1;
-				descriptorWrite[o].pBufferInfo = &bufferInfo[o];
-				descriptorWrite[o].pImageInfo = VK_NULL_HANDLE;
-				descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE;
-			}
-			vkUpdateDescriptorSets(_device, (uint32_t)offsets.size(), descriptorWrite.data(), 0, VK_NULL_HANDLE);
-		}
-	}
-}
-
-void VulkanManager::UpdateBufferDescriptorSetAll(DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range)
-{
-	for (int i = 0; i < descriptorSet->GetTypes().size(); i++)
-	{
-		if (descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC || descriptorSet->GetTypes()[i] & VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-		{
-			std::vector<VkDescriptorBufferInfo> bufferInfo(_swapchainBufferCount);
-			std::vector<VkWriteDescriptorSet> descriptorWrite(_swapchainBufferCount);
-			for (uint32_t d = 0; d < _swapchainBufferCount; d++)
-			{
-				bufferInfo[d] = {};
-				bufferInfo[d].buffer = descriptorSet->GetBuffer()->GetBuffer();
-				bufferInfo[d].offset = offset;
-				bufferInfo[d].range = Range;
-				descriptorWrite[d] = {};
-				descriptorWrite[d].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				descriptorWrite[d].dstSet = descriptorSet->GetDescriptorSet(d);
-				descriptorWrite[d].dstBinding = dstBinding;
-				descriptorWrite[d].dstArrayElement = 0;
-				descriptorWrite[d].descriptorType = descriptorSet->GetTypes()[i];
-				descriptorWrite[d].descriptorCount = 1;
-				descriptorWrite[d].pBufferInfo = &bufferInfo[d];
-				descriptorWrite[d].pImageInfo = VK_NULL_HANDLE;
-				descriptorWrite[d].pTexelBufferView = VK_NULL_HANDLE;
-			}		
-			vkUpdateDescriptorSets(_device, _swapchainBufferCount, descriptorWrite.data(), 0, VK_NULL_HANDLE);
-		}
-	}
-}
-
-void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<std::shared_ptr<Texture2D>> textures, std::vector<VkSampler> samplers)
-{
-	const uint32_t count = (uint32_t)textures.size();
+	const uint32_t count = (uint32_t)texs.size();
 	std::vector<VkWriteDescriptorSet> descriptorWrite(count);
 	std::vector<VkDescriptorImageInfo> imageInfo(count);
 	for (uint32_t o = 0; o < count; o++)
@@ -2705,11 +2578,11 @@ void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, st
 		imageInfo[o] = {};
 		imageInfo[o].sampler = samplers[o];
 		imageInfo[o].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		imageInfo[o].imageView = textures[o]->GetTextureView();
+		imageInfo[o].imageView = texs[o]->GetTextureView();
 		descriptorWrite[o] = {};
 		descriptorWrite[o].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		descriptorWrite[o].dstSet = descriptorSet;
-		descriptorWrite[o].dstBinding = o;
+		descriptorWrite[o].dstBinding = beginBindingIndex + o;
 		descriptorWrite[o].dstArrayElement = 0;
 		descriptorWrite[o].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		descriptorWrite[o].descriptorCount = 1;
@@ -2720,10 +2593,80 @@ void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, st
 	vkUpdateDescriptorSets(_device, (uint32_t)descriptorWrite.size(), descriptorWrite.data(), 0, VK_NULL_HANDLE);
 }
 
+void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<TextureUpdateInfo> updateInfo, int beginBindingIndex)
+{
+	const uint32_t count = (uint32_t)updateInfo.size();
+	std::vector<VkWriteDescriptorSet> descriptorWrite(count);
+	std::vector<VkDescriptorImageInfo> imageInfo(count);
+	for (uint32_t o = 0; o < count; o++)
+	{
+		imageInfo[o] = {};
+		imageInfo[o].sampler = updateInfo[o].sampler;
+		imageInfo[o].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo[o].imageView = updateInfo[o].texture->GetTextureView();
+		descriptorWrite[o] = {};
+		descriptorWrite[o].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite[o].dstSet = descriptorSet;
+		descriptorWrite[o].dstBinding = beginBindingIndex + o;
+		descriptorWrite[o].dstArrayElement = 0;
+		descriptorWrite[o].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorWrite[o].descriptorCount = 1;
+		descriptorWrite[o].pBufferInfo = VK_NULL_HANDLE;
+		descriptorWrite[o].pImageInfo = &imageInfo[o];
+		descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE;
+	}
+	vkUpdateDescriptorSets(_device, (uint32_t)descriptorWrite.size(), descriptorWrite.data(), 0, VK_NULL_HANDLE);
+}
+
+void VulkanManager::UpdateStoreTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture2D*> textures, int beginBindingIndex)
+{
+	const uint32_t count = (uint32_t)textures.size();
+	std::vector<VkWriteDescriptorSet> descriptorWrite(count);
+	std::vector<VkDescriptorImageInfo> imageInfo(count);
+	for (uint32_t o = 0; o < count; o++)
+	{
+		imageInfo[o] = {};
+		imageInfo[o].sampler = nullptr;
+		imageInfo[o].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+		imageInfo[o].imageView = textures[o]->GetTextureView();
+		descriptorWrite[o] = {};
+		descriptorWrite[o].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite[o].dstSet = descriptorSet;
+		descriptorWrite[o].dstBinding = o + beginBindingIndex;
+		descriptorWrite[o].dstArrayElement = 0;
+		descriptorWrite[o].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		descriptorWrite[o].descriptorCount = 1;
+		descriptorWrite[o].pBufferInfo = VK_NULL_HANDLE;
+		descriptorWrite[o].pImageInfo = &imageInfo[o]; // Optional
+		descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE; // Optional
+	}
+	vkUpdateDescriptorSets(VulkanManager::GetManager()->GetDevice(), count, descriptorWrite.data(), 0, VK_NULL_HANDLE);
+}
+
 VkDeviceSize VulkanManager::GetMinUboAlignmentSize(VkDeviceSize realSize)
 {
 	VkDeviceSize outSize = realSize;
 	VkDeviceSize minUboAlignment = _gpuProperties.limits.minUniformBufferOffsetAlignment;
+	if (minUboAlignment > 0) {
+		outSize = (outSize + (VkDeviceSize)minUboAlignment - 1) & ~((VkDeviceSize)minUboAlignment - 1);
+	}
+	return outSize;
+}
+
+VkDeviceSize VulkanManager::GetMinTboAlignmentSize(VkDeviceSize realSize)
+{
+	VkDeviceSize outSize = realSize;
+	VkDeviceSize minUboAlignment = _gpuProperties.limits.minTexelBufferOffsetAlignment;
+	if (minUboAlignment > 0) {
+		outSize = (outSize + (VkDeviceSize)minUboAlignment - 1) & ~((VkDeviceSize)minUboAlignment - 1);
+	}
+	return outSize;
+}
+
+VkDeviceSize VulkanManager::GetMinSboAlignmentSize(VkDeviceSize realSize)
+{
+	VkDeviceSize outSize = realSize;
+	VkDeviceSize minUboAlignment = _gpuProperties.limits.minStorageBufferOffsetAlignment;
 	if (minUboAlignment > 0) {
 		outSize = (outSize + (VkDeviceSize)minUboAlignment - 1) & ~((VkDeviceSize)minUboAlignment - 1);
 	}

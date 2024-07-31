@@ -53,7 +53,6 @@ void PassManager::PassesUpdate()
 	int lightIndex = 0;
 	for (auto& i : _lightings)
 	{
-		_lightUniformBuffer.passUniform = _passUniformBuffer;
 		_lightUniformBuffer.lightParams[lightIndex].LightColor = i->GetLightColor();
 		_lightUniformBuffer.lightParams[lightIndex].LightStrength = i->GetLightIntensity();
 		_lightUniformBuffer.lightParams[lightIndex].LightDirection = -(i->GetTransform()->GetForwardVector());

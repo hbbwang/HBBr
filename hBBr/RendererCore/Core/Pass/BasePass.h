@@ -19,8 +19,8 @@ private:
 
 	std::vector<PipelineObject*> _pipelineTemps;
 
-	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_pass;
-	std::shared_ptr<class DescriptorSet> _opaque_descriptorSet_obj;
+	std::shared_ptr<class DescriptorSet> _pass_descriptorSet;
+	std::shared_ptr<class DescriptorSet> _object_descriptorSet;
 	
 	std::shared_ptr<class VMABuffer>_opaque_vertexBuffer;
 	std::shared_ptr<class VMABuffer>_opaque_indexBuffer;

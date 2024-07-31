@@ -18,6 +18,10 @@ std::vector<VkSampler>Texture2D::_samplers;
 uint64_t Texture2D::_textureStreamingSize = 0;
 uint64_t Texture2D::_maxTextureStreamingSize = (uint64_t)4 * (uint64_t)1024 * (uint64_t)1024 * (uint64_t)1024; //4 GB
 
+Texture2D::Texture2D()
+{
+}
+
 Texture2D::~Texture2D()
 {
 	auto manager = VulkanManager::GetManager();

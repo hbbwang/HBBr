@@ -13,6 +13,14 @@ struct PassUniformBuffer
 	glm::vec4 ScreenInfo; // screen xy,z near,w zfar
 	glm::vec4 CameraPos_GameTime;//view pos xyz , game time w.
 	glm::vec4 CameraDirection;//view dir xyz
+
+	bool operator!=(const PassUniformBuffer& a) const {
+		return ViewProj != a.ViewProj
+			&& ScreenInfo != a.ScreenInfo
+			&& CameraPos_GameTime != a.CameraPos_GameTime
+			&& CameraDirection != a.CameraDirection;
+	}
+
 };
 
 struct ObjectUniformBuffer
@@ -44,13 +52,27 @@ struct LightingParameters
 	glm::vec3 LightDirection = glm::vec3(0, 1, 0);
 	uint32_t LightType = 0;
 	alignas(16) uint32_t LightFlags = 0;
+
+	bool operator!=(const LightingParameters& a) const {
+		return LightPosition != a.LightPosition
+			&& LightStrength != a.LightStrength
+			&& LightColor != a.LightColor
+			&& LightSpecular != a.LightSpecular
+			&& LightDirection != a.LightDirection
+			&& LightType != a.LightType
+			&& LightFlags != a.LightFlags;
+	}
 }; 
 
 struct LightingUniformBuffer
 {
-	PassUniformBuffer passUniform;
 	alignas(16) uint32_t validLightCount;
 	LightingParameters lightParams[MaxLightingNum];
+
+	bool operator!=(const LightingUniformBuffer& a) const {
+		return validLightCount != a.validLightCount
+			&& lightParams != a.lightParams;
+	}
 };
 
 struct PostProcessUniformBuffer

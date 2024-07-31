@@ -78,6 +78,32 @@ struct OptionalVulkanDeviceExtensions
 	uint8_t HasKHRShaderFloatControls = 0;
 };
 
+struct BufferUpdateInfo
+{
+	VkDeviceSize offset;
+	VkDeviceSize range;
+	BufferUpdateInfo(
+		VkDeviceSize _offset,
+		VkDeviceSize _range)
+	{
+		offset = _offset;
+		range = _range;
+	}
+};
+
+struct TextureUpdateInfo
+{
+	std::shared_ptr<class Texture2D>texture;
+	VkSampler sampler;
+	TextureUpdateInfo(
+		std::shared_ptr<class Texture2D>_texture,
+		VkSampler _sampler)
+	{
+		texture = _texture;
+		sampler = _sampler;
+	}
+};
+
 class VulkanManager
 {
 
@@ -239,6 +265,8 @@ public:
 	/* Allocate a new descriptorSet ,attention,we should be free the old or unuseful descriptorSet for save memory. */
 	void AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptorSet);
 
+	void AllocateDescriptorSets(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSet);
+
 	void AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, uint32_t newDescriptorSetCount, std::vector<VkDescriptorSet>& descriptorSet);
 
 	/* Pool must created setting VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT */
@@ -315,7 +343,8 @@ public:
 	//
 	void VMACraeteBufferAndAllocateMemory(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo* vmaInfo = nullptr, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bAlwayMapping = false, bool bFocusCreateDedicatedMemory = false);
 
-	void VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation, HString debugName = "VMABuffer", VkDeviceSize debugSize = 0);
+	void VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation, HString debugName = "VMABuffer", VkDeviceSize debugSize = 0
+	);
 
 	void DestroyBufferAndMemory(VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
@@ -353,19 +382,17 @@ public:
 
 	void UpdateBufferDescriptorSet(VkBuffer buffer, VkDescriptorSet descriptorSet, VkDescriptorType type,  uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
 
-	void UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset , VkDeviceSize Range);
+	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<std::shared_ptr<Texture2D>> texs, std::vector<VkSampler>samplers, int beginBindingIndex);
 
-	void UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, uint32_t sameBufferSize, std::vector<uint32_t> offsets);
+	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<TextureUpdateInfo> updateInfo, int beginBindingIndex);
 
-	void UpdateBufferDescriptorSet(class DescriptorSet* descriptorSet, uint32_t dstBinding, std::vector<uint32_t>bufferSizes, std::vector<uint32_t> offsets);
-
-	void UpdateBufferDescriptorSetArray(class DescriptorSet* descriptorSet, uint32_t dstBinding, std::vector<uint32_t>bufferSizes, std::vector<uint32_t> offsets);
-
-	void UpdateBufferDescriptorSetAll(class DescriptorSet* descriptorSet, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
-
-	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<std::shared_ptr<class Texture2D>> textures, std::vector<VkSampler> samplers);
+	void UpdateStoreTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture2D*> textures, int beginBindingIndex);
 
 	VkDeviceSize GetMinUboAlignmentSize(VkDeviceSize realSize);
+
+	VkDeviceSize GetMinTboAlignmentSize(VkDeviceSize realSize);
+
+	VkDeviceSize GetMinSboAlignmentSize(VkDeviceSize realSize);
 
 	inline uint32_t GetMaxUniformBufferSize()const {
 		return _gpuProperties.limits.maxUniformBufferRange;

@@ -6,13 +6,31 @@
 #include "VulkanManager.h"
 void MessageOut(HString msg, bool bExit, bool bMessageBox, const char* textColor)
 {
-	//HString msgStr = msg.c_wstr(); 
-	//msgStr = "[hBBr]:" + msgStr;
+	ConsoleDebug::print_endl(msg, textColor);
     if (bMessageBox && VulkanManager::_bDebugEnable)
     {
-		SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_ERROR, "HBBr msg", msg.c_str(), nullptr);
+		#if IS_EDITOR
+		const SDL_MessageBoxButtonData buttons[] = {
+			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 0, "继续" },
+			{ SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 1, "中断" },
+		};
+		const SDL_MessageBoxData messageboxdata = {
+			SDL_MESSAGEBOX_WARNING,
+			NULL,
+			"断言",
+			msg.c_str(),
+			SDL_arraysize(buttons),
+			buttons,
+			NULL
+		};
+		int buttonid;
+		SDL_ShowMessageBox(&messageboxdata, &buttonid);
+		if (buttonid == 1)
+		{
+			throw std::runtime_error("Program Exception.");
+		}
+		#endif
     }
-	ConsoleDebug::print_endl(msg, textColor);
 	if (bExit)
 	{
 		VulkanApp::AppQuit();

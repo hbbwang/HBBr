@@ -5,6 +5,7 @@
 #include "PassBase.h"
 #include "HGuid.h"
 #include "HRect.h"
+#include "UniformBuffer.h"
 
 struct LightingVertexData
 {
@@ -24,7 +25,6 @@ private:
 	std::shared_ptr<class VMABuffer>_vertexBuffer;
 
 	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
-	VkDescriptorSetLayout _texDescriptorSetLayout = VK_NULL_HANDLE;
 
 	PipelineIndex _shaderIndex;
 
@@ -34,4 +34,6 @@ private:
 	PipelineIndex CreatePipeline(HString shaderName);
 
 	std::vector<LightingVertexData> vertices;
+
+	LightingUniformBuffer _cache;
 };

@@ -24,7 +24,6 @@ private:
 	std::shared_ptr<class VMABuffer>_vertexBuffer;
 
 	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
-	VkDescriptorSetLayout _texDescriptorSetLayout = VK_NULL_HANDLE;
 
 	PipelineIndex _shaderIndex;
 

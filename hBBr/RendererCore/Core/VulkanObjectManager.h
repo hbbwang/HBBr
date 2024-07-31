@@ -31,6 +31,12 @@ struct VMABufferObject
 	uint8_t frameCount = 0;
 };
 
+struct DescriptorSetUpdate
+{
+	class DescriptorSet* descriptorSet;
+	uint8_t frameCount = 0;
+};
+
 //在这里创建的Vulkan对象，拥有最简单的垃圾回收机制
 class VulkanObjectManager
 {
@@ -67,6 +73,8 @@ public:
 
 	void AssetLinkGC(std::weak_ptr<class AssetObject> asset,bool bImmediate = false);
 
+	void MarkDescriptorSetUpdate(DescriptorSet* des);
+
 protected:
 
 	void Update();
@@ -81,6 +89,8 @@ private:
 	std::vector<VkBufferObject*>_vkBufferObjects;
 
 	std::vector<VMABufferObject*>_vmaBufferObjects;
+
+	std::vector<DescriptorSetUpdate> _descriptorSetUpdates;
 
 	std::list<VkAssetObject> _vulkanObjects;
 	std::list<VkAssetObject> _vulkanObjectsRelease;

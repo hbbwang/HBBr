@@ -600,32 +600,33 @@ void MaterialPrimitiveGroup::ResetDecriptorSet(uint8_t numTextures, bool& bNeedU
 	auto vkManager = VulkanManager::GetManager();
 	const auto frameIndex = renderer->GetCurrentFrameIndex();
 
-	if(!descriptorSet_uniformBufferVS)
-		descriptorSet_uniformBufferVS.reset(new DescriptorSet(
-			renderer, 
-			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-			PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVS(), 
-			VMA_MEMORY_USAGE_CPU_TO_GPU,
-			32, 
-			VK_SHADER_STAGE_VERTEX_BIT));
+	if (!descriptorSet_uniformBufferVS)
+	{
+		descriptorSet_uniformBufferVS.reset(new DescriptorSet(renderer));
+		descriptorSet_uniformBufferVS->CreateBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_VERTEX_BIT);
+		descriptorSet_uniformBufferVS->CreateBuffer(0, 32, VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, primFrom->_graphicsName + "_Material_Ub_VS");
+		descriptorSet_uniformBufferVS->BuildDescriptorSet();
+	}
+	
 	if (!descriptorSet_uniformBufferPS)
-		descriptorSet_uniformBufferPS.reset(new DescriptorSet(
-			renderer, 
-			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-			PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(), 
-			VMA_MEMORY_USAGE_CPU_TO_GPU,
-			32, 
-			VK_SHADER_STAGE_FRAGMENT_BIT));
+	{
+		descriptorSet_uniformBufferVS.reset(new DescriptorSet(renderer));
+		descriptorSet_uniformBufferVS->CreateBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_FRAGMENT_BIT);
+		descriptorSet_uniformBufferVS->CreateBuffer(0, 32, VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, primFrom->_graphicsName + "_Material_Ub_PS");
+		descriptorSet_uniformBufferVS->BuildDescriptorSet();
+	}
 
 	if (primFrom->_uniformBufferSize_vs > 0)
 	{
 		//Update vs buffer
-		bNeedUpdateVSUniformBuffer = descriptorSet_uniformBufferVS->ResizeBigDescriptorBuffer(primFrom->_uniformBufferSize_vs);
+		if (primFrom->_uniformBufferSize_vs > descriptorSet_uniformBufferVS->GetBuffer(0)->GetBufferSize())
+			bNeedUpdateVSUniformBuffer = descriptorSet_uniformBufferVS->GetBuffer(0)->Resize(primFrom->_uniformBufferSize_vs);
 	}
 	if (primFrom->_uniformBufferSize_ps > 0)
 	{
 		//Update ps buffer
-		bNeedUpdatePSUniformBuffer = descriptorSet_uniformBufferPS->ResizeBigDescriptorBuffer(primFrom->_uniformBufferSize_ps);
+		if (primFrom->_uniformBufferSize_ps > descriptorSet_uniformBufferPS->GetBuffer(0)->GetBufferSize())
+			bNeedUpdatePSUniformBuffer = descriptorSet_uniformBufferPS->GetBuffer(0)->Resize(primFrom->_uniformBufferSize_ps);
 	}
 	//Update texture
 	bool bNeedRecreate = false;
@@ -661,18 +662,18 @@ void MaterialPrimitiveGroup::UpdateDecriptorSet(bool bNeedUpdateVSUniformBuffer,
 	const auto& vkManager = VulkanManager::GetManager();
 	const auto frameIndex = renderer->GetCurrentFrameIndex();
 	if (bNeedUpdateVSUniformBuffer)
-		descriptorSet_uniformBufferVS->NeedUpdate();
+		descriptorSet_uniformBufferVS->RefreshDescriptorSet();
 	if (bNeedUpdatePSUniformBuffer)
-		descriptorSet_uniformBufferPS->NeedUpdate();
+		descriptorSet_uniformBufferPS->RefreshDescriptorSet();
 	//Update vs uniform buffer
 	if (primFrom->_uniformBufferSize_vs > 0)
 	{
 		if (needCopyDataVS)
 		{
 			needCopyDataVS = 0;
-			descriptorSet_uniformBufferVS->BufferMapping(primFrom->_uniformBuffer_vs.data(), 0, primFrom->_uniformBufferSize_vs);
+			descriptorSet_uniformBufferVS->GetBuffer(0)->Mapping(primFrom->_uniformBuffer_vs.data(), 0, primFrom->_uniformBufferSize_vs);
 		}
-		descriptorSet_uniformBufferVS->UpdateDescriptorSet((uint32_t)primFrom->_uniformBufferSize_vs, 0);
+		descriptorSet_uniformBufferVS->UpdateDescriptorSet(0, 0, primFrom->_uniformBufferSize_vs);
 	}
 	//Update ps uniform buffer
 	if (primFrom->_uniformBufferSize_ps > 0)
@@ -680,9 +681,9 @@ void MaterialPrimitiveGroup::UpdateDecriptorSet(bool bNeedUpdateVSUniformBuffer,
 		if (needCopyDataPS)
 		{
 			needCopyDataPS = 0;
-			descriptorSet_uniformBufferPS->BufferMapping(primFrom->_uniformBuffer_ps.data(), 0, primFrom->_uniformBufferSize_ps);
+			descriptorSet_uniformBufferPS->GetBuffer(0)->Mapping(primFrom->_uniformBuffer_ps.data(), 0, primFrom->_uniformBufferSize_ps);
 		}
-		descriptorSet_uniformBufferPS->UpdateDescriptorSet((uint32_t)primFrom->_uniformBufferSize_ps, 0);
+		descriptorSet_uniformBufferPS->UpdateDescriptorSet(0, 0, primFrom->_uniformBufferSize_ps);
 	}
 	//Update vsps _textures
 	if (descriptorSet_texture.size() > 0 && descriptorSet_texture[frameIndex] != VK_NULL_HANDLE)

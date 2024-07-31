@@ -8,7 +8,6 @@ PostProcessPass::~PostProcessPass()
 {
 	auto manager = VulkanManager::GetManager();
 	manager->DestroyPipelineLayout(_pipelineLayout);
-	manager->DestroyDescriptorSetLayout(_texDescriptorSetLayout);
 }
 
 void PostProcessPass::PassInit()
@@ -23,13 +22,6 @@ void PostProcessPass::PassInit()
 	CreateRenderPass();
 	//DescriptorSet
 	//SceneDepth,SceneColor,GBuffer0,GBuffer1,GBuffer2
-	manager->CreateDescripotrSetLayout(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 5, _texDescriptorSetLayout, VK_SHADER_STAGE_FRAGMENT_BIT);
-	manager->CreatePipelineLayout(
-		{
-			PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(),
-			_texDescriptorSetLayout,
-		}
-	, _pipelineLayout);
 	vertices =
 	{
 		{ glm::vec2(-1.0f, -1.0f)	, glm::vec2(0.0f, 0.0f) },
@@ -41,26 +33,25 @@ void PostProcessPass::PassInit()
 	};
 
 	//后处理永远都使用的是屏幕面片，不会发生改变，所以用 VMA_MEMORY_USAGE_GPU_ONLY
-	_vertexBuffer.reset(new VMABuffer(sizeof(PostProcessVertexData) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_GPU_ONLY, false, false, "DeferredLightingPass_VB"));
+	_vertexBuffer.reset(new VMABuffer(sizeof(PostProcessVertexData) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_GPU_ONLY, false, false, "PostProcessPass_Vb"));
 	_vertexBuffer->Mapping(vertices.data(), 0, sizeof(PostProcessVertexData) * vertices.size());
 
 	//DescriptorSet
 	auto bufferSize = sizeof(PostProcessUniformBuffer);
-	_ub_descriptorSet.reset(new DescriptorSet(
-		_renderer, 
-		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 
-		PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicPS(), 
-		VMA_MEMORY_USAGE_CPU_TO_GPU,
-		bufferSize, 
-		VK_SHADER_STAGE_FRAGMENT_BIT));
-	_tex_descriptorSet.reset(new DescriptorSet( 
-		_renderer, 
-		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 
-		_texDescriptorSetLayout, 
-		VMA_MEMORY_USAGE_CPU_TO_GPU,
-		0, 
-		VK_SHADER_STAGE_FRAGMENT_BIT));
-	_ub_descriptorSet->UpdateDescriptorSetAll((uint32_t)bufferSize);
+	_ub_descriptorSet.reset(new DescriptorSet(_renderer));
+	_ub_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_FRAGMENT_BIT);
+	_ub_descriptorSet->CreateBuffer(0, bufferSize, VMA_MEMORY_USAGE_CPU_TO_GPU, TRUE, FALSE, "PostProcessPass_Ub");
+
+	_tex_descriptorSet.reset(new DescriptorSet(_renderer));
+	_tex_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+	_tex_descriptorSet->BuildDescriptorSet();
+
+	manager->CreatePipelineLayout(
+		{
+			_ub_descriptorSet->GetLayout(),
+			_tex_descriptorSet->GetLayout(),
+		}
+	, _pipelineLayout);
 }
 
 void PostProcessPass::PassUpdate()
@@ -103,29 +94,21 @@ void PostProcessPass::PassUpdate()
 	vkCmdBindVertexBuffers(cmdBuf, 0, 1, verBuf, &vbOffset);
 
 	//textures
-	_tex_descriptorSet->UpdateTextureDescriptorSet(
-		{
-			sceneDepth.get(),
-			gbuffer0.get(),
-			gbuffer1.get(),
-			gbuffer2.get(),
-			sceneColor.get(),
-		}, 
-		{ 
-			Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp),
-			Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp),
-			Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp),
-			Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp),
-			Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp),
-		});
+	auto sampler = Texture2D::GetSampler(TextureSampler::TextureSampler_Nearest_Clamp);
+	_tex_descriptorSet->UpdateTextureDescriptorSet({
+		{sceneDepth,sampler},
+		{gbuffer0,sampler},
+		{gbuffer1,sampler},
+		{gbuffer2,sampler},
+		{sceneColor,sampler},
+	});
 		 
 	//uniform buffers
 	uint32_t ubSize = (uint32_t)manager->GetMinUboAlignmentSize(sizeof(PostProcessUniformBuffer));
 	auto uniformBuffer = _manager->GetPostProcessUniformBuffer();
 	uniformBuffer->passUniform = _manager->GetPassUniformBufferCache(); 
-	_ub_descriptorSet->BufferMapping(uniformBuffer, 0, ubSize);
-	_ub_descriptorSet->NeedUpdate();
-	_ub_descriptorSet->UpdateDescriptorSet(sizeof(PostProcessUniformBuffer));
+	_ub_descriptorSet->GetBuffer(0)->Mapping(uniformBuffer, 0, ubSize);
+	_ub_descriptorSet->UpdateDescriptorSetWholeBuffer(0);
 	//Pipeline
 	VkPipeline pipeline = VK_NULL_HANDLE;
 	VkPipeline currentPipeline = PipelineManager::GetGraphicsPipelineMap(_shaderIndex)->pipeline;
@@ -148,7 +131,7 @@ void PostProcessPass::PassUpdate()
 
 void PostProcessPass::PassReset()
 {
-	_tex_descriptorSet->NeedUpdate();
+	_tex_descriptorSet->RefreshDescriptorSet();
 }
 
 PipelineIndex PostProcessPass::CreatePipeline(HString shaderName)

@@ -33,28 +33,23 @@ void BasePass::PassInit()
 	CreateRenderPass();
 
 	auto manager = VulkanManager::GetManager();
-	//Texture2D DescriptorSet
-	_opaque_descriptorSet_pass.reset(
-		new DescriptorSet(
-			_renderer, 
-			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 
-			PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVSPS(), 
-			VMA_MEMORY_USAGE_CPU_TO_GPU, 
-			sizeof(PassUniformBuffer),
-			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT));
-	_opaque_descriptorSet_obj.reset(
-		new DescriptorSet(
-			_renderer, 
-			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 
-			PipelineManager::GetDescriptorSetLayout_UniformBufferDynamicVSPS(), 
-			VMA_MEMORY_USAGE_CPU_TO_GPU, 
-			32));
 
-	_opaque_vertexBuffer.reset(new VMABuffer(32, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, false, true,"BasePassVertexBuffer"));
-	_opaque_indexBuffer.reset(new VMABuffer(32, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, false, true, "BasePassIndexBuffer"));
+	//PassUniform
+	_pass_descriptorSet.reset(new DescriptorSet(_renderer));
+	_pass_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+	_pass_descriptorSet->CreateBuffer(0, 32, VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, "BasePass_PassUb");
+	_pass_descriptorSet->BuildDescriptorSet();
 
-	//Pass Uniform总是一尘不变的,并且我们用的是Dynamic uniform buffer ,所以只需要更新一次所有的DescriptorSet即可。
-	_opaque_descriptorSet_pass->UpdateDescriptorSetAll(sizeof(PassUniformBuffer));
+	//ObjectUniform
+	_object_descriptorSet.reset(new DescriptorSet(_renderer));
+	_object_descriptorSet->CreateBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+	_object_descriptorSet->CreateBuffer(0, 32, VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, "BasePass_ObjectUb");
+	_object_descriptorSet->BuildDescriptorSet();
+
+	//VertexBuffer
+	_opaque_vertexBuffer.reset(new VMABuffer(32, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, false, true,"BasePass_Vb"));
+	//IndexBuffer
+	_opaque_indexBuffer.reset(new VMABuffer(32, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, false, true, "BasePass_Ib"));
 }
 
 void BasePass::PassUpdate()
@@ -86,6 +81,9 @@ void BasePass::PassUpdate()
 			GetSceneTexture(SceneTextureDesc::GBuffer2)->GetTextureView(),
 		});
 	SetViewport(_currentFrameBufferSize);
+
+	_pass_descriptorSet->UpdateDescriptorSetWholeBuffer(0);
+
 	BeginRenderPass({ 0,0,0,0 });
 
 	//Opaque Base Pass
@@ -114,8 +112,8 @@ void BasePass::PassReset()
 
 void BasePass::SetupPassAndDraw(Pass p)
 {
-	auto &pass = _opaque_descriptorSet_pass;
-	auto &obj = _opaque_descriptorSet_obj;
+	auto &pass = _pass_descriptorSet;
+	auto &obj = _object_descriptorSet;
 	auto &vb = _opaque_vertexBuffer;
 	auto &ib = _opaque_indexBuffer;
 	const auto& manager = VulkanManager::GetManager();
@@ -141,7 +139,7 @@ void BasePass::SetupPassAndDraw(Pass p)
 		//Update pass uniform buffers
 		{
 			PassUniformBuffer passUniformBuffer = _manager->GetPassUniformBufferCache();
-			pass->BufferMapping(&passUniformBuffer, 0, sizeof(PassUniformBuffer));
+			pass->GetBuffer(0)->Mapping(&passUniformBuffer, 0, sizeof(PassUniformBuffer));
 		}
 		uint32_t modelPrimitiveCount = 0;
 		uint64_t vbPos = 0;
@@ -251,13 +249,16 @@ void BasePass::SetupPassAndDraw(Pass p)
 						{
 							//obj
 							VkDeviceSize targetBufferSize_objub = VMABuffer::GetMaxAlignmentSize((VkDeviceSize)currentObjectUniformBufferWholeSize, VMAUniformBufferSizeRange);
-							bNeedUpdateObjUniform = obj->ResizeBigDescriptorBuffer(targetBufferSize_objub);
+							if (targetBufferSize_objub > obj->GetBuffer(0)->GetBufferSize())
+								bNeedUpdateObjUniform = obj->GetBuffer(0)->Resize(targetBufferSize_objub);
 							//vb
 							VkDeviceSize targetBufferSize_vb = VMABuffer::GetMaxAlignmentSize(currentBufferWholeSize_vb, VMABufferSizeRange);
-							bNeedUpdateVbIb |= vb->ResizeBigger(targetBufferSize_vb);
+							if (targetBufferSize_vb > vb->GetBufferSize())
+								bNeedUpdateVbIb |= vb->Resize(targetBufferSize_vb);
 							//ib
 							VkDeviceSize targetBufferSize_ib = VMABuffer::GetMaxAlignmentSize(currentBufferWholeSize_ib, VMABufferSizeRange);
-							bNeedUpdateVbIb |= ib->ResizeBigger(targetBufferSize_ib);
+							if (targetBufferSize_ib > ib->GetBufferSize())
+								bNeedUpdateVbIb |= ib->Resize(targetBufferSize_ib);
 						}
 
 						//拷贝数据
@@ -291,7 +292,7 @@ void BasePass::SetupPassAndDraw(Pass p)
 					}
 					if (bUpdate_objub)
 					{
-						obj->BufferMapping(objubs.data(), ubUpdateBeginPos, objubs.size() * sizeof(ObjectUniformBuffer));
+						obj->GetBuffer(0)->Mapping(objubs.data(), ubUpdateBeginPos, objubs.size() * sizeof(ObjectUniformBuffer));
 					}
 					if (bUpdate_vbib)
 					{
@@ -303,7 +304,7 @@ void BasePass::SetupPassAndDraw(Pass p)
 
 		}
 		//更新obj的描述符集大小，每个obj对应一个uniform大小，所以只更新一次就行了。
-		obj->UpdateDescriptorSet(sizeof(ObjectUniformBuffer), 0);
+		obj->UpdateDescriptorSet(0, 0, sizeof(ObjectUniformBuffer));
 	}
 
 	//Update Render

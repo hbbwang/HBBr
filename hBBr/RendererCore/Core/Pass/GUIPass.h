@@ -76,7 +76,7 @@ struct GUIPrimitive
 	std::vector<GUIDrawState> States;
 	PipelineIndex pipelineIndex;
 	std::vector<wchar_t> fontCharacter;
-	Texture2D* BaseTexture = nullptr;
+	std::shared_ptr<Texture2D> BaseTexture = nullptr;
 	VkRect2D viewport;
 	std::shared_ptr<class DescriptorSet> ub_descriptorSet;
 	std::shared_ptr<class DescriptorSet> tex_descriptorSet;
@@ -104,7 +104,7 @@ public:
 	GUIPrimitive* GetGUIPrimitive(HString tag) { return &_drawList[tag]; }
 
 	//生成纹理图片，自动生成tag
-	void _GUIDrawImage(HString tag, Texture2D* texture, float x, float y, float w, float h, GUIDrawState state);
+	void _GUIDrawImage(HString tag, std::shared_ptr<Texture2D> texture, float x, float y, float w, float h, GUIDrawState state);
 	
 	//生成文字，自定义tag
 	void _GUIDrawText(HString tag, HString text, float x, float y, float w, float h, GUIDrawState state , float fontSize = 20);

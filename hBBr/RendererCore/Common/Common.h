@@ -68,6 +68,54 @@ HBBR_API void MessageOut(HString msg, bool bExit = false, bool bMessageBox = fal
 
 HBBR_API void MsgBox(const char* title, const char* msg);
 
+#if IS_EDITOR
+#define HCheck_Color(msg,bbExit,bMessageBox,textColor)\
+{\
+	HString ggOutMsgggggggg = HString::printf("%s/%s:%d:\n", __FILE__, __func__, __LINE__) + msg;\
+	ConsoleDebug::print_endl(ggOutMsgggggggg, textColor);\
+	if (bMessageBox && VulkanManager::_bDebugEnable)\
+	{\
+		const SDL_MessageBoxButtonData buttons[] = {\
+			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 0, "继续" },\
+			{ SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 1, "中断" },\
+		};\
+		const SDL_MessageBoxData messageboxdata = {\
+			SDL_MESSAGEBOX_WARNING,\
+			NULL,\
+			"断言",\
+			ggOutMsgggggggg.c_str(),\
+			SDL_arraysize(buttons),\
+			buttons,\
+			NULL\
+		};\
+		int buttonid;\
+		SDL_ShowMessageBox(&messageboxdata, &buttonid);\
+		if (buttonid == 1)\
+		{\
+			throw std::runtime_error("Program Exception.");\
+		}\
+	}\
+	if (bbExit)\
+	{\
+		VulkanApp::AppQuit();\
+	}\
+}
+
+#define HCheck(Conditions,msg)\
+{\
+	HString ggOutMsgggggggg = HString::printf("%s/%s:%d:\n", __FILE__, __func__, __LINE__) + msg;\
+	ConsoleDebug::print_endl(ggOutMsgggggggg, "255,50,0");\
+	if (Conditions)\
+	{\
+		throw std::runtime_error("Program Exception.");\
+	}\
+	if (bbExit)\
+	{\
+		VulkanApp::AppQuit();\
+	}\
+}
+#endif
+
 
 #ifdef _WIN32
 

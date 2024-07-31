@@ -31,7 +31,7 @@ class Texture2D : public AssetObject
 	friend class VulkanManager;
 	friend class ContentManager;
 public:
-	Texture2D() {}
+	Texture2D();
 	~Texture2D();
 	
 	HBBR_API HBBR_INLINE uint64_t GetTextureMemorySize()const {
