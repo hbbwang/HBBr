@@ -26,7 +26,7 @@ public:
 
 	static void ReleaseFontTexture();
 
-	HBBR_API HBBR_INLINE static class std::shared_ptr<Texture2D> GetFontTexture() {
+	HBBR_API HBBR_INLINE static class std::shared_ptr<class Texture2D> GetFontTexture() {
 		return _fontTexture;
 	}
 
