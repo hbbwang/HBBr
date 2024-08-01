@@ -13,11 +13,31 @@ PassBase::PassBase(class PassManager* manager)
 	{
 		_renderer = _manager->_renderer;
 	}
+	memset(bStartQuery, 0, sizeof(uint8_t) * 4);
 }
 
 PassBase::~PassBase()
 {
 
+}
+
+void PassBase::PassBeginUpdate()
+{
+	const auto& cmdBuf = _renderer->GetCommandBuffer();
+	const auto& vkManager = VulkanManager::GetManager();
+	_cpuTimer.Start();
+	vkCmdWriteTimestamp(cmdBuf, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, vkManager->GetQueryTimestamp(),
+		(_renderer->GetCurrentFrameIndex() * _manager->GetInitPasses().size() * 2) + (passIndex * 2));
+}
+
+void PassBase::PassEndUpdate()
+{
+	const auto& cmdBuf = _renderer->GetCommandBuffer();
+	const auto& vkManager = VulkanManager::GetManager();
+	vkCmdWriteTimestamp(cmdBuf, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, vkManager->GetQueryTimestamp(), 
+		(_renderer->GetCurrentFrameIndex() * _manager->GetInitPasses().size() * 2) + (passIndex * 2) + 1);
+	_cpuTime = _cpuTimer.End_ms();
+	bStartQuery[_renderer->GetCurrentFrameIndex()] = true;
 }
 
 std::shared_ptr<Texture2D> PassBase::GetSceneTexture(uint32_t descIndex)

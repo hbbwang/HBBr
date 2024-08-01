@@ -304,7 +304,7 @@ void BasePass::SetupPassAndDraw(Pass p)
 
 		}
 		//更新obj的描述符集大小，每个obj对应一个uniform大小，所以只更新一次就行了。
-		obj->UpdateDescriptorSet(0, 0, sizeof(ObjectUniformBuffer));
+		obj->UpdateBufferDescriptorSet(0, 0, sizeof(ObjectUniformBuffer));
 	}
 
 	//Update Render

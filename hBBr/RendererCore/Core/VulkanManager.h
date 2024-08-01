@@ -396,6 +396,8 @@ public:
 
 	VkDeviceSize GetMinSboAlignmentSize(VkDeviceSize realSize);
 
+	VkDeviceSize GetTimestampPeriod();
+
 	inline uint32_t GetMaxUniformBufferSize()const {
 		return _gpuProperties.limits.maxUniformBufferRange;
 	}
@@ -457,6 +459,23 @@ public:
 		return _gpuFeatures;
 	}
 
+	//计算出来的是纳秒,转毫秒需要 (double)/1000000.0
+	HBBR_INLINE double CalculateTimestampQuery(uint32_t firstIndex, uint32_t CalculateCount)const {
+		uint64_t timestamps[2];
+		vkGetQueryPoolResults(_device, _queryTimeStamp, firstIndex, CalculateCount, sizeof(timestamps), timestamps, sizeof(uint64_t), VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
+		uint64_t elapsedTime = timestamps[1] - timestamps[0];
+		return (double)elapsedTime * (double)_gpuProperties.limits.timestampPeriod;
+	}
+
+	void CreateQueryPool(uint32_t queryCount, VkQueryPool& poolInOut, VkQueryType type = VK_QUERY_TYPE_TIMESTAMP);
+
+	void DestroyQueryPool(VkQueryPool& poolInOut);
+
+	
+	VkQueryPool GetQueryTimestamp()const {
+		return _queryTimeStamp;
+	}
+
 	static bool _bDebugEnable;
 
 private:
@@ -506,6 +525,8 @@ private:
 #ifdef _WIN32
 	bool _enable_VK_KHR_display;
 #endif
+
+	VkQueryPool _queryTimeStamp = VK_NULL_HANDLE;
 
 	OptionalVulkanDeviceExtensions _deviceExtensionOptionals;
 

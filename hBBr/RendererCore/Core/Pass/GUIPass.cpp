@@ -92,7 +92,7 @@ void GUIPass::PassUpdate()
 		VkDeviceSize targetBufferSize = ((VkDeviceSize)ubSize * (i.second.States.size() + (VkDeviceSize)VMAUniformBufferSizeRange - 1) & ~((VkDeviceSize)VMAUniformBufferSizeRange - 1));
 		if (targetBufferSize > i.second.ub_descriptorSet->GetBuffer(0)->GetBufferSize())
 			i.second.ub_descriptorSet->GetBuffer(0)->Resize(targetBufferSize);
-		i.second.ub_descriptorSet->UpdateDescriptorSet(0,0, ubSize * ((uint32_t)i.second.States.size()));
+		i.second.ub_descriptorSet->UpdateBufferDescriptorSet(0,0, ubSize * ((uint32_t)i.second.States.size()));
 
 		for (auto s : i.second.States)
 		{

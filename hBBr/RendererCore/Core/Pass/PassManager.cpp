@@ -44,7 +44,7 @@ PassManager::PassManager(VulkanRenderer* renderer)
 
 void PassManager::PassesUpdate()
 {
-	const uint32_t frameIndex =_renderer->_currentFrameIndex;
+	const uint32_t& frameIndex =_renderer->_currentFrameIndex;
 
 	_sceneTextures->UpdateTextures();
 
@@ -71,12 +71,27 @@ void PassManager::PassesUpdate()
 	_postProcessUniformBuffer.passUniform = _passUniformBuffer;
 	_postProcessUniformBuffer.debugMode = 0;
 
+	const auto& vkManager = VulkanManager::GetManager();
 	//Collect render setting (Commandbuffer record)
 	_executePasses.clear();
+
+	const auto queryFrameIndex = frameIndex * _passes.size() * 2;
+	vkCmdResetQueryPool(_renderer->GetCommandBuffer(), vkManager->GetQueryTimestamp(), queryFrameIndex, _passes.size() * 2);
 	for (auto p : _passes)
 	{
+		const auto queryFirstIndex = queryFrameIndex + p->passIndex * 2;
+		if (p->bStartQuery[frameIndex])
+		{
+			p->bStartQuery[frameIndex] = false;
+			p->_gpuTime = vkManager->CalculateTimestampQuery(queryFirstIndex, 2) / 1000000.0;
+		}
+
+		p->PassBeginUpdate();
+
 		p->PassUpdate();
 		_executePasses.push_back(p);
+
+		p->PassEndUpdate();
 	}
 }
 
@@ -111,6 +126,7 @@ void PassManager::AddPass(std::shared_ptr<PassBase> newPass, const char* passNam
 		MessageOut("Add Pass Failed.Pass Name Has Been Exist.", true, true);
 	}
 	newPass->_passName = passName;
+	newPass->passIndex = _passes.size();
 	_passes.push_back(newPass);
 }
 

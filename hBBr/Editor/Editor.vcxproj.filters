@@ -133,7 +133,7 @@
     <ClCompile Include="CustomTitleBar.cpp">
       <Filter>Widgets\Extension</Filter>
     </ClCompile>
-    <ClCompile Include="MemoryWatcher.cpp">
+    <ClCompile Include="PerformanceWatcher.cpp">
       <Filter>Widgets\Tool</Filter>
     </ClCompile>
   </ItemGroup>
@@ -216,7 +216,7 @@
     <QtMoc Include="CustomTitleBar.h">
       <Filter>Widgets\Extension</Filter>
     </QtMoc>
-    <QtMoc Include="MemoryWatcher.h">
+    <QtMoc Include="PerformanceWatcher.h">
       <Filter>Widgets\Tool</Filter>
     </QtMoc>
   </ItemGroup>
@@ -289,7 +289,7 @@
     <QtUic Include="WorldSelector.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="MemoryWatcher.ui">
+    <QtUic Include="PerformanceWatcher.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

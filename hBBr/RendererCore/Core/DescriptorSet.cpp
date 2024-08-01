@@ -89,14 +89,24 @@ void DescriptorSet::BuildDescriptorSetLayout()
 	RefreshDescriptorSetAllBinding();
 }
 
-void DescriptorSet::UpdateDescriptorSet(uint32_t bindingIndex, VkDeviceSize offset, VkDeviceSize range)
+void DescriptorSet::BufferMapping(uint32_t bindingIndex, void* data, VkDeviceSize offset, VkDeviceSize dataSize, VkCommandBuffer cmdBuf)
 {
-	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][bindingIndex] == 1)
+	auto it = _buffers.find(bindingIndex);
+	if (_buffers.end() != it)
+	{
+		it->second->Mapping(data, offset, dataSize, cmdBuf);
+	}
+}
+
+void DescriptorSet::UpdateBufferDescriptorSet(uint32_t bindingIndex, VkDeviceSize offset, VkDeviceSize range)
+{
+	auto it = _buffers.find(bindingIndex);
+	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][bindingIndex] == 1 && _buffers.end() != it)
 	{
 		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][bindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();
 		manager->UpdateBufferDescriptorSet(
-			_buffers[bindingIndex]->GetBuffer(),
+			it->second->GetBuffer(),
 			GetDescriptorSet(),
 			_descriptorTypes[bindingIndex],
 			bindingIndex, offset, range);
@@ -105,7 +115,8 @@ void DescriptorSet::UpdateDescriptorSet(uint32_t bindingIndex, VkDeviceSize offs
 
 void DescriptorSet::UpdateDescriptorSetWholeBuffer(uint32_t bindingIndex)
 {
-	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][bindingIndex] == 1)
+	auto it = _buffers.find(bindingIndex);
+	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][bindingIndex] == 1 && _buffers.end() != it)
 	{
 		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][bindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();

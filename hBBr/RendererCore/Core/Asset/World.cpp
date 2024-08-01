@@ -24,18 +24,11 @@ World::~World()
 	_editorLevel.reset();
 #endif
 
-	std::vector<std::shared_ptr<Level>>().swap(_levels);
-	std::vector<CameraComponent*>().swap(_cameras);
+	ConsoleDebug::printf_endl("Release World[%s][%s]", this->GetWorldName().c_str(), this->GetGUID().str().c_str());
 
 	_renderer = nullptr;
 	_mainCamera = nullptr;
-	_worldName.empty();
-	_worldAbsPath.empty();
-	_worldSettingAbsPath.empty();
-	_guid = HGUID();
-	_guidStr.empty();
 
-	ConsoleDebug::printf_endl("Release World[%s][%s]", this->GetWorldName().c_str(), this->GetGUID().str().c_str());
 #if IS_EDITOR
 	_editorWorldRelease();
 #endif

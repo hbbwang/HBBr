@@ -237,7 +237,6 @@ bool GameObject::ExecuteDestroy()
 		{
 			i->Destroy();
 		}
-		std::vector<GameObject*>().swap(_children);
 		return false;
 	}
 
@@ -253,7 +252,7 @@ bool GameObject::ExecuteDestroy()
 			_comps[i] = nullptr;
 		}
 	}
-	std::vector<Component*>().swap(_comps);
+	_comps.clear();
 
 	if (_transform != nullptr)
 	{

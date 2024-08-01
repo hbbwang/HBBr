@@ -25,10 +25,6 @@ Level::~Level()
 		}
 		LevelUpdate();
 	}
-
-	std::vector<std::shared_ptr<GameObject>>().swap(_gameObjects);
-	std::vector<std::shared_ptr<GameObject>>().swap(_gameObjectNeedDestroy);
-	std::map<HGUID, AssetType>().swap(_dependency);
 	_world = nullptr;
 }
 

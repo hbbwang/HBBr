@@ -21,7 +21,7 @@
 #include <MaterialDetailEditor.h>
 #include "CustomDockPanelTitleBar.h"
 #include "CustomTitleBar.h"
-#include "MemoryWatcher.h"
+#include "PerformanceWatcher.h"
 EditorMain* EditorMain::_self = nullptr;
 
 CustomDockWidget::CustomDockWidget(QWidget* parent) :QDockWidget(parent)
@@ -69,8 +69,8 @@ EditorMain::EditorMain(QWidget *parent)
 
     setObjectName("EditorMain");
     //setStyleSheet(GetWidgetStyleSheetFromFile("EditorMain"));
-    connect(ui.MemoryWatcher, &QAction::triggered, this, [this](bool bChecked) {
-        MemoryWatcher* mw = new MemoryWatcher(this);
+    connect(ui.PerformanceWatcher, &QAction::triggered, this, [this](bool bChecked) {
+        PerformanceWatcher* mw = new PerformanceWatcher(this);
         mw->show();
     });
     connect(ui.ResetWindowStyle, &QAction::triggered, this, [this](bool bChecked) {

@@ -160,7 +160,10 @@ VulkanManager::VulkanManager(bool bDebug)
 	CreateCommandPool();
 	ConsoleDebug::print_endl("hBBr:Start Create Descripotr Pool.");
 	CreateDescripotrPool(_descriptorPool);
-	//
+	CreateQueryPool(256, _queryTimeStamp);
+
+	//Imgui
+#if ENABLE_IMGUI
 #ifdef IS_EDITOR
 	ConsoleDebug::print_endl("hBBr:Start init imgui.");
 	IMGUI_CHECKVERSION();
@@ -177,14 +180,17 @@ VulkanManager::VulkanManager(bool bDebug)
 	ImGui::GetStyle().ScaleAllSizes(3.0f);
 #endif
 #endif
-
+#endif
 }
 
 VulkanManager::~VulkanManager()
 {
+#if ENABLE_IMGUI
 #ifdef IS_EDITOR
 	ImGui::DestroyContext();
 #endif
+#endif
+	DestroyQueryPool(_queryTimeStamp);
 	DestroyDescriptorPool(_descriptorPool);
 	DestroyCommandPool();
 	if (_bDebugEnable)
@@ -697,6 +703,7 @@ void VulkanManager::InitDevice()
 	////开启vk的gpu特殊功能
 	//_gpuVk12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 	//_gpuVk12Features.separateDepthStencilLayouts = VK_TRUE;
+	//_gpuVk12Features.hostQueryReset = VK_TRUE;
 
 	VkDeviceCreateInfo device_create_info = {};
 	device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -775,6 +782,29 @@ void VulkanManager::InitVMA()
 	{
 		MessageOut(GetInternationalizationText("Renderer", "A000029"), true, true);
 	}
+}
+
+void VulkanManager::CreateQueryPool(uint32_t queryCount, VkQueryPool& poolInOut, VkQueryType type)
+{
+	if (poolInOut)
+	{
+		DestroyQueryPool(poolInOut);
+	}
+	VkQueryPoolCreateInfo queryPoolInfo{};
+	queryPoolInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
+	queryPoolInfo.queryType = type;
+	queryPoolInfo.queryCount = queryCount;
+	vkCreateQueryPool(_device, &queryPoolInfo, nullptr, &poolInOut);
+
+}
+
+void VulkanManager::DestroyQueryPool(VkQueryPool& poolInOut)
+{
+	if (poolInOut)
+	{
+		vkDestroyQueryPool(_device, poolInOut, nullptr);
+	}
+	poolInOut = nullptr;
 }
 
 uint32_t VulkanManager::FindMemoryTypeIndex(const VkMemoryRequirements* memory_requirements, const VkMemoryPropertyFlags required_properties)
@@ -1321,7 +1351,7 @@ void VulkanManager::DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkIm
 		vkDestroyImageView(_device, i, VK_NULL_HANDLE);
 		i = VK_NULL_HANDLE;
 	}
-	std::vector<VkImageView>().swap(swapchainImageViews);
+	swapchainImageViews.clear();
 	if (swapchain != VK_NULL_HANDLE)
 	{
 		vkDestroySwapchainKHR(_device, swapchain, VK_NULL_HANDLE);
@@ -2375,6 +2405,7 @@ bool VulkanManager::CreateShaderModule(std::vector<char> data, VkShaderModule& s
 
 void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, uint32_t subPassIndex)
 {
+#if ENABLE_IMGUI
 #ifdef IS_EDITOR
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.IniFilename = nullptr;
@@ -2416,10 +2447,12 @@ void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, u
 	FreeCommandBuffer(_commandPool, buf);
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 #endif
+#endif
 }
 
 void VulkanManager::ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex, glm::mat4 projMat)
 {
+#if ENABLE_IMGUI
 #ifdef IS_EDITOR
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplVulkan_InitInfo init_info = {};
@@ -2456,31 +2489,38 @@ void VulkanManager::ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassInd
 	FreeCommandBuffer(_commandPool, buf);
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 #endif
+#endif
 }
 
 void VulkanManager::ShutdownImgui()
 {
+#if ENABLE_IMGUI
 #ifdef IS_EDITOR
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplSDL3_Shutdown();
+#endif
 #endif
 }
 
 void VulkanManager::ImguiNewFrame()
 {
+#if ENABLE_IMGUI
 #ifdef IS_EDITOR
 	ImGui_ImplVulkan_SetMinImageCount(_swapchainBufferCount);
 	ImGui_ImplVulkan_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
 	ImGui::NewFrame();
 #endif
+#endif
 }
 
 void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf)
 {
+#if ENABLE_IMGUI
 #ifdef IS_EDITOR
 	ImGui::Render();
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuf);
+#endif
 #endif
 }
 
@@ -2693,6 +2733,11 @@ VkDeviceSize VulkanManager::GetMinSboAlignmentSize(VkDeviceSize realSize)
 		outSize = (outSize + (VkDeviceSize)minUboAlignment - 1) & ~((VkDeviceSize)minUboAlignment - 1);
 	}
 	return outSize;
+}
+
+VkDeviceSize VulkanManager::GetTimestampPeriod()
+{
+	return _gpuProperties.limits.timestampPeriod;
 }
 
 void VulkanManager::CmdSetViewport(VkCommandBuffer cmdbuf, std::vector<VkExtent2D> viewports)

@@ -156,6 +156,8 @@ public:
 
 	HBBR_API void Release();
 
+	HBBR_INLINE double GetCPURenderingTime()const { return _cpuTime; }
+
 	void Init();
 
 	//Renderer map
@@ -229,5 +231,9 @@ private:
 	static std::map < void*, std::function<void(class VulkanRenderer* renderer, MouseButton mouse, Action action)>> _mouse_inputs;
 
 	VulkanManager* _vulkanManager;
+
+	//性能测试
+	HTime _cpuTimer;
+	double _cpuTime;
 
 };

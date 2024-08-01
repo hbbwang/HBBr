@@ -22,18 +22,29 @@ public:
 	PassBase(class PassManager* manager);
 	virtual ~PassBase();
 	HBBR_INLINE HString GetName()const { return _passName; }
+	HBBR_INLINE double GetPassCPURenderingTime()const { return _cpuTime; }
+	HBBR_INLINE double GetPassGPURenderingTime()const { return _gpuTime; }
 	HBBR_INLINE void SetPassName(HString name) { _passName = name; }
 protected:
 	virtual void PassInit() {}
 	virtual void PassUpdate() {}
 	virtual void Reset() {}
 	virtual void PassReset() {}
+	virtual void PassBeginUpdate();
+	virtual void PassEndUpdate();
 	std::shared_ptr<Texture2D> GetSceneTexture(uint32_t descIndex);
 	std::shared_ptr<Texture2D> GetSceneTexture(SceneTextureDesc desc); 
 	class PassManager* _manager = nullptr;
 	VulkanRenderer* _renderer = nullptr;
 	HString _passName = "PassBase";
 	glm::vec4 _markColor = glm::vec4(1,1,1,0.5);
+
+	//性能测试
+	int passIndex = 0;
+	HTime _cpuTimer;
+	double _cpuTime;
+	double _gpuTime;
+	bool bStartQuery[4];
 };
 
 class GraphicsPass : public PassBase

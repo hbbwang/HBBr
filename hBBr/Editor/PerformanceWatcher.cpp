@@ -1,9 +1,13 @@
-#include "MemoryWatcher.h"
+#include "PerformanceWatcher.h"
 #include "qlabel.h"
 #include "FormMain.h"
 #include "EditorCommonFunction.h"
 #include "AssetObject.h"
 #include "VulkanObjectManager.h"
+#include "VulkanRenderer.h"
+#include "Pass/PassManager.h"
+#include "Pass/PassBase.h"
+#include "HTime.h"
 #if WIN32
 #include <Psapi.h>
 void ProcessMemoryCounters(size_t& memoryUsage)
@@ -20,7 +24,7 @@ void ProcessMemoryCounters(size_t& memoryUsage)
 }
 #endif
 
-MemoryWatcher::MemoryWatcher(QWidget *parent)
+PerformanceWatcher::PerformanceWatcher(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
@@ -62,30 +66,32 @@ MemoryWatcher::MemoryWatcher(QWidget *parent)
 			//
 			if (_tabWidget->currentIndex() == 0)
 			{
+				if (_timer->interval() != 500)
+					_timer->setInterval(500);
 				UpdateAssetWatcher();
 			}		
+			else if (_tabWidget->currentIndex() == 1)
+			{
+				if (_timer->interval() != 100)
+					_timer->setInterval(100);
+				UpdateRenderingTimeWatcher();
+			}
 		});
 	_timer->start();
 
-	LoadEditorWindowSetting(this, "MemoryWatcher");
+	LoadEditorWindowSetting(this, "PerformanceWatcher");
 
 	//Asset Watcher
 	{
-		_assetWatcher = new QWidget(this);
-		_tabWidget->addTab(_assetWatcher, "Memory Watcher");
-		QVBoxLayout* mianLayout = new QVBoxLayout(this);
-		mianLayout->setContentsMargins(0,0,0,0);
-		mianLayout->setSpacing(0);
-		_assetWatcher->setLayout(mianLayout);
 		_assetWatcherTree = new QTreeWidget(this);
+		_tabWidget->addTab(_assetWatcherTree, GetEditorInternationalization("PerformanceWatcher", "AssetWatch-Ttile"));
 		_assetWatcherTree->setHeaderLabels(
 			{
-		GetEditorInternationalization("MemoryWatcher","AssetWatch-Header0"),
-		GetEditorInternationalization("MemoryWatcher","AssetWatch-Header1"),
-		GetEditorInternationalization("MemoryWatcher","AssetWatch-Header2"),
-		GetEditorInternationalization("MemoryWatcher","AssetWatch-Header3"),
+				GetEditorInternationalization("PerformanceWatcher","AssetWatch-Header0"),
+				GetEditorInternationalization("PerformanceWatcher","AssetWatch-Header1"),
+				GetEditorInternationalization("PerformanceWatcher","AssetWatch-Header2"),
+				GetEditorInternationalization("PerformanceWatcher","AssetWatch-Header3"),
 			});
-		mianLayout->addWidget(_assetWatcherTree);
 		for (int i = 1; i < (int)AssetType::MaxNum; i++)
 		{
 			QTreeWidgetItem* item = new QTreeWidgetItem(_assetWatcherTree);
@@ -97,20 +103,70 @@ MemoryWatcher::MemoryWatcher(QWidget *parent)
 		_assetWatcherTree->setColumnWidth(2, this->width() * 0.4f);
 		_assetWatcherTree->setColumnWidth(3, this->width() * 0.3f);
 	}
+
+	//Rendering Time Watcher 渲染耗时(ms)
+	{
+		_renderingTimeWatcherTree = new QTreeWidget(this);
+		_tabWidget->addTab(_renderingTimeWatcherTree, GetEditorInternationalization("PerformanceWatcher", "RenderingTimeWatch-Ttile"));
+		_renderingTimeWatcherTree->setHeaderLabels(
+			{
+				GetEditorInternationalization("PerformanceWatcher","RenderingTimeWatch-Header0"),
+				GetEditorInternationalization("PerformanceWatcher","RenderingTimeWatch-Header1"),
+			});
+		//一帧总时间
+		{
+			_frame.item_parent = AddTreeTopItem(_renderingTimeWatcherTree, "Frame");
+			//CPU
+			{
+				_frame.item_cpu = new QTreeWidgetItem(_frame.item_parent);
+				_frame.item_cpu->setText(0,"CPU");
+			}
+			//GPU
+			{
+				_frame.item_gpu = new QTreeWidgetItem(_frame.item_parent);
+				_frame.item_gpu->setText(0, "GPU");
+			}
+		}
+		//每个Pass
+		{
+			auto passes = AddTreeTopItem(_renderingTimeWatcherTree, "Passes");
+			for (auto& i : VulkanApp::GetMainForm()->renderer->GetPassManagers())
+			{
+				for (auto& p : i.second->GetInitPasses())
+				{
+					RenderingTileItem pass_info;
+					pass_info.item_parent = new QTreeWidgetItem(passes);
+					pass_info.item_parent->setText(0, p->GetName().c_str());
+					pass_info.pass = p.get();
+					//CPU
+					{
+						pass_info.item_cpu = new QTreeWidgetItem(pass_info.item_parent);
+						pass_info.item_cpu->setText(0, "CPU");
+					}
+					//GPU
+					{
+						pass_info.item_gpu = new QTreeWidgetItem(pass_info.item_parent);
+						pass_info.item_gpu->setText(0, "GPU");
+					}
+					_renderingTimes.push_back(pass_info);
+				}
+			}
+		}
+	}
 }
 
-MemoryWatcher::~MemoryWatcher()
+PerformanceWatcher::~PerformanceWatcher()
 {
 
 }
 
-void MemoryWatcher::closeEvent(QCloseEvent* event)
+void PerformanceWatcher::closeEvent(QCloseEvent* event)
 {
 	_timer->stop();
-	SaveEditorWindowSetting(this, "MemoryWatcher");
+	SaveEditorWindowSetting(this, "PerformanceWatcher");
 }
 
-void MemoryWatcher::UpdateAssetWatcher()
+void PerformanceWatcher::UpdateAssetWatcher()
 {
 	for (int i = 0; i < (int)AssetType::MaxNum - 1; i++)
 	{
@@ -174,4 +230,30 @@ void MemoryWatcher::UpdateAssetWatcher()
 			}
 		}
 	}
+}
+
+void PerformanceWatcher::UpdateRenderingTimeWatcher()
+{ 
+	//Frame Update
+	{
+		_frame.item_parent->setText(1, QString::number(VulkanApp::GetFrameRate()));
+		_frame.item_cpu->setText(1, QString::number(VulkanApp::GetMainForm()->renderer->GetCPURenderingTime()));
+		_frame.item_gpu;
+	}
+	//Passes Update
+	{
+		for (auto& i : _renderingTimes)
+		{
+			i.item_cpu->setText(1, QString::number(i.pass->GetPassCPURenderingTime()));
+			i.item_gpu->setText(1, QString::number(i.pass->GetPassGPURenderingTime()));
+		}
+	}
+}
+
+QTreeWidgetItem* PerformanceWatcher::AddTreeTopItem(QTreeWidget* tree, QString itemName)
+{
+	QTreeWidgetItem* item = new QTreeWidgetItem(tree);
+	item->setText(0, itemName);
+	tree->addTopLevelItem(item);
+	return item;
 }

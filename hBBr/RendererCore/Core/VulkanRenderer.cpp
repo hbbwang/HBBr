@@ -203,6 +203,7 @@ void VulkanRenderer::CreateEmptyWorld()
 }
 void VulkanRenderer::Render()
 {
+	_cpuTimer.Start();
 	if (!_bInit) //Render loop Init.
 	{
 		if (_bIsMainRenderer)
@@ -288,6 +289,7 @@ void VulkanRenderer::Render()
 			_currentFrameIndex = (_currentFrameIndex + 1) % _vulkanManager->GetSwapchainBufferCount();
 		}
 	}
+	_cpuTime = _cpuTimer.End_ms();
 }
 
 void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)

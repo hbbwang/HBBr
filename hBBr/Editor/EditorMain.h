@@ -55,7 +55,7 @@ public:
     class CustomTitleBar* _customTitleBar = nullptr;
 private:
 
-    Ui::EditorMainClass ui;
+    Ui::EditorMainClass ui; 
 
     QTimer* _renderTimer;
 

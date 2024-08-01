@@ -39,6 +39,8 @@ public:
 	//创建VkDescriptorSetLayer
 	void BuildDescriptorSetLayout();
 
+	void BufferMapping(uint32_t bindingIndex, void* data, VkDeviceSize offset, VkDeviceSize dataSize, VkCommandBuffer cmdBuf = nullptr);
+
 	VMABuffer* GetBuffer(uint32_t bindingIndex)const {
 		auto it = _buffers.find(bindingIndex);
 		if (it != _buffers.end())
@@ -51,7 +53,7 @@ public:
 	}
 
 	//更新DescriptorSet
-	void UpdateDescriptorSet(uint32_t bindingIndex, VkDeviceSize offset, VkDeviceSize range);
+	void UpdateBufferDescriptorSet(uint32_t bindingIndex, VkDeviceSize offset, VkDeviceSize range);
 
 	void UpdateDescriptorSetWholeBuffer(uint32_t bindingIndex);
 

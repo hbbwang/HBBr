@@ -34,6 +34,10 @@ public:
 		return _executePasses;
 	}
 
+	HBBR_INLINE std::vector<std::shared_ptr<PassBase>> GetInitPasses()const {
+		return _passes;
+	}
+
 	HBBR_INLINE LightingUniformBuffer* GetLightingUniformBuffer(){
 		return &_lightUniformBuffer;
 	}

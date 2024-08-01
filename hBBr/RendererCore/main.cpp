@@ -258,8 +258,10 @@ bool VulkanApp::UpdateForm()
 			winForm = _forms[0];
 		}
 
+#if ENABLE_IMGUI
 #ifdef IS_EDITOR
 		ImGui_ImplSDL3_ProcessEvent(&event); 
+#endif
 #endif
 
 		//Get window form

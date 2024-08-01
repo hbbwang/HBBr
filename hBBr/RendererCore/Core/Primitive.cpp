@@ -671,9 +671,9 @@ void MaterialPrimitiveGroup::UpdateDecriptorSet(bool bNeedUpdateVSUniformBuffer,
 		if (needCopyDataVS)
 		{
 			needCopyDataVS = 0;
-			descriptorSet_uniformBufferVS->GetBuffer(0)->Mapping(primFrom->_uniformBuffer_vs.data(), 0, primFrom->_uniformBufferSize_vs);
+			descriptorSet_uniformBufferVS->BufferMapping(0, primFrom->_uniformBuffer_vs.data(), 0, primFrom->_uniformBufferSize_vs);
 		}
-		descriptorSet_uniformBufferVS->UpdateDescriptorSet(0, 0, primFrom->_uniformBufferSize_vs);
+		descriptorSet_uniformBufferVS->UpdateBufferDescriptorSet(0, 0, primFrom->_uniformBufferSize_vs);
 	}
 	//Update ps uniform buffer
 	if (primFrom->_uniformBufferSize_ps > 0)
@@ -681,9 +681,9 @@ void MaterialPrimitiveGroup::UpdateDecriptorSet(bool bNeedUpdateVSUniformBuffer,
 		if (needCopyDataPS)
 		{
 			needCopyDataPS = 0;
-			descriptorSet_uniformBufferPS->GetBuffer(0)->Mapping(primFrom->_uniformBuffer_ps.data(), 0, primFrom->_uniformBufferSize_ps);
+			descriptorSet_uniformBufferPS->BufferMapping(0, primFrom->_uniformBuffer_ps.data(), 0, primFrom->_uniformBufferSize_ps);
 		}
-		descriptorSet_uniformBufferPS->UpdateDescriptorSet(0, 0, primFrom->_uniformBufferSize_ps);
+		descriptorSet_uniformBufferPS->UpdateBufferDescriptorSet(0, 0, primFrom->_uniformBufferSize_ps);
 	}
 	//Update vsps _textures
 	if (descriptorSet_texture.size() > 0 && descriptorSet_texture[frameIndex] != VK_NULL_HANDLE)

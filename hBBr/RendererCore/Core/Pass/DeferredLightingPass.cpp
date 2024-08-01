@@ -103,8 +103,8 @@ void DeferredLightingPass::PassUpdate()
 		_ub_descriptorSet->GetBuffer(1)->Mapping(uniformBuffer, 0, sizeof(LightingUniformBuffer));
 	}
 
-	_ub_descriptorSet->UpdateDescriptorSet(0, 0, sizeof(PassUniformBuffer));
-	_ub_descriptorSet->UpdateDescriptorSet(1, 0, sizeof(LightingUniformBuffer));
+	_ub_descriptorSet->UpdateBufferDescriptorSet(0, 0, sizeof(PassUniformBuffer));
+	_ub_descriptorSet->UpdateBufferDescriptorSet(1, 0, sizeof(LightingUniformBuffer));
 
 
 	//Pipeline
