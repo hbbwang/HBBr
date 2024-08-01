@@ -1,6 +1,9 @@
 ﻿#pragma once
 //Vulkan底层核心管理类
 
+//使用IMGUI
+#define ENABLE_IMGUI 1
+
 #if defined(_WIN32)
 	#define WIN32_LEAN_AND_MEAN             // 从 Windows 头文件中排除极少使用的内容
 	#define VK_USE_PLATFORM_WIN32_KHR	1	//support win32
@@ -356,7 +359,7 @@ public:
 
 	bool CreateShaderModule(std::vector<char> data , VkShaderModule& shaderModule);
 
-	void InitImgui_SDL(SDL_Window* handle , VkRenderPass renderPass , uint32_t subPassIndex = 0);
+	struct ImGuiContext* InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, uint32_t subPassIndex = 0 );
 
 	void ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex = 0 , glm::mat4 projMat = 
 		glm::mat4(

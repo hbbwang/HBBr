@@ -235,9 +235,6 @@
     <ClInclude Include="Core\Pass\PassManager.h">
       <Filter>Renderer\Core\Pass</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Pass\GUIPass.h">
-      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Pass\ImguiPass.h">
       <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
     </ClInclude>
@@ -254,9 +251,6 @@
       <Filter>Renderer\Core\Pass\ComputePass</Filter>
     </ClInclude>
     <ClInclude Include="Editor\NvidiaTextureTools.h">
-      <Filter>Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\FontTextureFactory.h">
       <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="Core\Pass\BasePass.h">
@@ -426,9 +420,6 @@
     <ClCompile Include="Core\Pass\PassManager.cpp">
       <Filter>Renderer\Core\Pass</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Pass\GUIPass.cpp">
-      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Pass\ImguiPass.cpp">
       <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
     </ClCompile>
@@ -445,9 +436,6 @@
       <Filter>Renderer\Core\Pass\ComputePass</Filter>
     </ClCompile>
     <ClCompile Include="Editor\NvidiaTextureTools.cpp">
-      <Filter>Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\FontTextureFactory.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="Core\Pass\BasePass.cpp">

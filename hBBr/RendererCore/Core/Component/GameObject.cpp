@@ -237,6 +237,7 @@ bool GameObject::ExecuteDestroy()
 		{
 			i->Destroy();
 		}
+		_children.clear();
 		return false;
 	}
 

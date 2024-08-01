@@ -26,8 +26,8 @@
 #include "Pass/PassBase.h"
 #include "FormMain.h"
 
-#ifdef IS_EDITOR
 // --------- IMGUI
+#if ENABLE_IMGUI
 #include "Imgui/imgui.h"
 #include "Imgui/backends/imgui_impl_vulkan.h"
 #include "Imgui/backends/imgui_impl_sdl3.h"
@@ -160,36 +160,12 @@ VulkanManager::VulkanManager(bool bDebug)
 	CreateCommandPool();
 	ConsoleDebug::print_endl("hBBr:Start Create Descripotr Pool.");
 	CreateDescripotrPool(_descriptorPool);
+
 	CreateQueryPool(256, _queryTimeStamp);
-
-	//Imgui
-#if ENABLE_IMGUI
-#ifdef IS_EDITOR
-	ConsoleDebug::print_endl("hBBr:Start init imgui.");
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-#ifdef __ANDROID__
-	ImFontConfig font_cfg;
-	font_cfg.SizePixels = 22.0f;
-	io.Fonts->AddFontDefault(&font_cfg);
-	ImGui::GetStyle().ScaleAllSizes(3.0f);
-#endif
-#endif
-#endif
 }
 
 VulkanManager::~VulkanManager()
 {
-#if ENABLE_IMGUI
-#ifdef IS_EDITOR
-	ImGui::DestroyContext();
-#endif
-#endif
 	DestroyQueryPool(_queryTimeStamp);
 	DestroyDescriptorPool(_descriptorPool);
 	DestroyCommandPool();
@@ -2403,15 +2379,30 @@ bool VulkanManager::CreateShaderModule(std::vector<char> data, VkShaderModule& s
 	return result == VK_SUCCESS;
 }
 
-void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, uint32_t subPassIndex)
+ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, uint32_t subPassIndex)
 {
 #if ENABLE_IMGUI
-#ifdef IS_EDITOR
+	//Imgui
+	ConsoleDebug::print_endl("hBBr:Start init imgui.");
+
+	IMGUI_CHECKVERSION();
+	auto newContent = ImGui::CreateContext();
+	ImGui::SetCurrentContext(newContent);
+
+	ImGui::StyleColorsDark();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	#ifdef __ANDROID__
+		ImFontConfig font_cfg;
+		font_cfg.SizePixels = 22.0f;
+		io.Fonts->AddFontDefault(&font_cfg);
+		ImGui::GetStyle().ScaleAllSizes(3.0f);
+	#endif
 	io.IniFilename = nullptr;
 
 	if (!ImGui_ImplSDL3_InitForVulkan(handle))
-		MessageOut("Error,ImGui_ImplSDL3_InitForVulkan return false!", false,true,"255,0,0");
+		MessageOut("Error,ImGui_ImplSDL3_InitForVulkan return false!", false, true, "255,0,0");
 
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = _instance;
@@ -2430,7 +2421,6 @@ void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, u
 	//init_info.UseDynamicRendering = true;
 
 	ImGui_ImplVulkan_EnableLoadFunctions();
-
 	ImGui_ImplVulkan_Init(&init_info, renderPass, {
 		ImVec4(1,0,0,0),
 		ImVec4(0,1,0,0),
@@ -2446,14 +2436,14 @@ void VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, u
 	SubmitQueueImmediate({ buf });
 	FreeCommandBuffer(_commandPool, buf);
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
-#endif
+
+	return newContent;
 #endif
 }
 
 void VulkanManager::ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex, glm::mat4 projMat)
 {
 #if ENABLE_IMGUI
-#ifdef IS_EDITOR
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = _instance;
@@ -2489,38 +2479,31 @@ void VulkanManager::ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassInd
 	FreeCommandBuffer(_commandPool, buf);
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 #endif
-#endif
 }
 
 void VulkanManager::ShutdownImgui()
 {
 #if ENABLE_IMGUI
-#ifdef IS_EDITOR
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplSDL3_Shutdown();
-#endif
 #endif
 }
 
 void VulkanManager::ImguiNewFrame()
 {
 #if ENABLE_IMGUI
-#ifdef IS_EDITOR
 	ImGui_ImplVulkan_SetMinImageCount(_swapchainBufferCount);
 	ImGui_ImplVulkan_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
 	ImGui::NewFrame();
-#endif
 #endif
 }
 
 void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf)
 {
 #if ENABLE_IMGUI
-#ifdef IS_EDITOR
 	ImGui::Render();
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuf);
-#endif
 #endif
 }
 

@@ -11,6 +11,7 @@ struct VulkanForm
 	class VulkanRenderer* renderer = nullptr;
 	bool bMinimized = false;
 	bool bStopRender = false;
+	struct ImGuiContext* imguiContent = nullptr;
 	~VulkanForm();
 };
 

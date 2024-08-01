@@ -4,7 +4,6 @@
 #include "Pass/BasePass.h"
 #include "Pass/DeferredLightingPass.h"
 #include "Pass/ImguiPass.h"
-#include "Pass/GUIPass.h"
 #include "Pass/PreCommandPass.h"
 #include "Pass/PostProcessPass.h"
 #include "Component/CameraComponent.h"
@@ -27,13 +26,9 @@ PassManager::PassManager(VulkanRenderer* renderer)
 		//Post Process Pass
 		std::shared_ptr<PostProcessPass> postProcess = std::make_shared<PostProcessPass>(this);
 		AddPass(postProcess, "Post Process");
-		//Screen GUI Pass
-		std::shared_ptr<GUIPass> gui = std::make_shared<GUIPass>(this);
-		AddPass(gui, "GUI");
-		//#ifdef IS_EDITOR
-		//		std::shared_ptr<ImguiScreenPass> imgui = std::make_shared<ImguiScreenPass>(renderer);
-		//		AddPass(imgui, "Imgui");
-		//#endif
+		//Imgui Pass(暂时作为主要UI使用，可惜不知道如何支持多渲染窗口绘制)
+		std::shared_ptr<ImguiScreenPass> imgui = std::make_shared<ImguiScreenPass>(this);
+		AddPass(imgui, "Imgui");
 	}
 	for (auto p : _passes)
 	{
@@ -75,8 +70,8 @@ void PassManager::PassesUpdate()
 	//Collect render setting (Commandbuffer record)
 	_executePasses.clear();
 
-	const auto queryFrameIndex = frameIndex * _passes.size() * 2;
-	vkCmdResetQueryPool(_renderer->GetCommandBuffer(), vkManager->GetQueryTimestamp(), queryFrameIndex, _passes.size() * 2);
+	const auto queryFrameIndex = frameIndex * (uint32_t)_passes.size() * 2;
+	vkCmdResetQueryPool(_renderer->GetCommandBuffer(), vkManager->GetQueryTimestamp(), queryFrameIndex, (uint32_t)_passes.size() * 2);
 	for (auto p : _passes)
 	{
 		const auto queryFirstIndex = queryFrameIndex + p->passIndex * 2;
@@ -126,7 +121,7 @@ void PassManager::AddPass(std::shared_ptr<PassBase> newPass, const char* passNam
 		MessageOut("Add Pass Failed.Pass Name Has Been Exist.", true, true);
 	}
 	newPass->_passName = passName;
-	newPass->passIndex = _passes.size();
+	newPass->passIndex = (int)_passes.size();
 	_passes.push_back(newPass);
 }
 

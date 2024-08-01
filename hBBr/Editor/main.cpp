@@ -21,7 +21,7 @@ protected:
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
         bool bChangeFocus = false;
-        if (event->type() == QEvent::MouseButtonPress && watched->isWidgetType())
+        if (event->type() == QEvent::MouseMove && watched->isWidgetType())
         {
             //QWidget* newCurrentFocusWidget = QApplication::widgetAt(mouseEvent->globalPos());
             QWidget* newCurrentFocusWidget = (QWidget*)watched;
@@ -31,19 +31,18 @@ protected:
                 //窗口ObjectName包含RenderView才会强制给予焦点
                 if (newCurrentFocusWidget->objectName().contains("SDL", Qt::CaseSensitive))
                 {
-                    POINT point = {};
-                    point.x = mouseEvent->globalPos().x();
-                    point.y = mouseEvent->globalPos().y();
+                    POINT point = { 
+                        mouseEvent->globalPos().x() ,  
+                        mouseEvent->globalPos().y() };
                     HWND windowAt = WindowFromPoint(point);
-
-                    auto forms = VulkanApp::GetForms();
+                    auto& forms = VulkanApp::GetForms();
                     for (auto& i : forms)
                     {              
                         auto winHwnd = (HWND)VulkanApp::GetWindowHandle(i->window);
-                        if (windowAt == winHwnd)
+                        if (windowAt == winHwnd && VulkanApp::GetFocusForm() != i)
                         {
                             VulkanApp::SetFocusForm(i);
-                            SetFocus((HWND)VulkanApp::GetWindowHandle(i->window));
+                            SetFocus(winHwnd);
                         }
                     }
                 }

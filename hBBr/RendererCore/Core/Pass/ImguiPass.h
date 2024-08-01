@@ -12,4 +12,7 @@ public:
 	virtual void PassReset()override;
 private:
 	void ShowPerformance();
+
+	struct ImGuiContext* _imguiContent = nullptr;
+
 };

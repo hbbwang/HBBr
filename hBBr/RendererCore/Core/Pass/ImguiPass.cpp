@@ -2,6 +2,7 @@
 #include "VulkanRenderer.h"
 #include "imgui.h"
 #include "SceneTexture.h"
+#include "FormMain.h"
 /*
 	Imgui buffer pass 
 */
@@ -12,13 +13,23 @@ void ImguiScreenPass::PassInit()
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	AddSubpass({}, { 0 }, -1);
 	CreateRenderPass();
-	VulkanManager::GetManager()->InitImgui_SDL(_renderer->GetWindowHandle(), _renderPass);
+	_imguiContent = VulkanManager::GetManager()->InitImgui_SDL(_renderer->GetWindowHandle(), _renderPass);
+	for (auto& i : VulkanApp::GetForms())
+	{
+		if (i->renderer == _renderer)
+		{
+			i->imguiContent = _imguiContent;
+		}
+	}
 	_passName = "Imgui Render Pass";
 }
 
 ImguiScreenPass::~ImguiScreenPass()
 {
+	ImGui::SetCurrentContext(_imguiContent);
 	VulkanManager::GetManager()->ShutdownImgui();
+	if (_imguiContent != nullptr)
+		ImGui::DestroyContext(_imguiContent);
 }
 
 void ImguiScreenPass::PassReset()
@@ -30,16 +41,23 @@ void ImguiScreenPass::PassReset()
 
 void ImguiScreenPass::PassUpdate()
 {
+	if (ImGui::GetCurrentContext() != _imguiContent)
+	{
+		ImGui::SetCurrentContext(_imguiContent);
+	}
 	const auto manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.1, 0.4, 0.2, 0.2));
 	//Update FrameBuffer
-	ResetFrameBuffer(_renderer->GetRenderSize(), {GetSceneTexture(SceneTextureDesc::FinalColor)->GetTextureView()});
-	SetViewport(_currentFrameBufferSize);
+	ResetFrameBufferCustom(_renderer->GetRenderSize(),
+		{
+			GetSceneTexture(SceneTextureDesc::FinalColor)->GetTextureView()
+		});
+	SetViewport(_renderer->GetRenderSize());
 	BeginRenderPass({ 0,0,0,0 });
 	manager->ImguiNewFrame();
 	//Begin
-	//ImGui::ShowDemoWindow((bool*)1);
+	ImGui::ShowDemoWindow((bool*)1);
 	ShowPerformance();
 	//End
 	manager->ImguiEndFrame(cmdBuf);

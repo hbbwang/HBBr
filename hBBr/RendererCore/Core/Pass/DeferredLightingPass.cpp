@@ -46,6 +46,16 @@ void DeferredLightingPass::PassInit()
 		VMA_MEMORY_USAGE_CPU_TO_GPU, true, false, "DeferredLightingPass_LightingUb");
 	_ub_descriptorSet->BuildDescriptorSetLayout();
 
+	_tex_descriptorSet.reset(new DescriptorSet(_renderer));
+	_tex_descriptorSet->CreateBindings(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+	_tex_descriptorSet->BuildDescriptorSetLayout();
+	manager->ReCreatePipelineLayout(
+		{
+			_ub_descriptorSet->GetLayout(),
+			_tex_descriptorSet->GetLayout(),
+		}
+	, _pipelineLayout);
+
 	//Set Pass Name
 	_passName = "Lighting Pass"; 
 
@@ -158,16 +168,6 @@ PipelineIndex DeferredLightingPass::CreatePipeline(HString shaderName)
 	//PipelineManager::SetRenderDepthStencil(pipelineCreateInfo);
 	PipelineManager::SetVertexInput(pipelineCreateInfo, vertexInputLayout);
 	PipelineManager::SetVertexShaderAndPixelShader(pipelineCreateInfo, vsCache.get(), psCache.get());
-
-	_tex_descriptorSet.reset(new DescriptorSet(_renderer));
-	_tex_descriptorSet->CreateBindings(psCache->texs.size(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
-	_tex_descriptorSet->BuildDescriptorSetLayout();
-	manager->ReCreatePipelineLayout(
-		{
-			_ub_descriptorSet->GetLayout(),
-			_tex_descriptorSet->GetLayout(),
-		}
-	, _pipelineLayout);
 
 	PipelineManager::SetPipelineLayout(pipelineCreateInfo, _pipelineLayout);
 	PipelineManager::BuildGraphicsPipelineState(pipelineCreateInfo, _renderPass, 0, pipeline);

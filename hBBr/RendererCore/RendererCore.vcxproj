@@ -295,7 +295,6 @@
     <ClInclude Include="Core\DescriptorSet.h" />
     <ClInclude Include="Core\VMABuffer.h" />
     <ClInclude Include="Core\VulkanObjectManager.h" />
-    <ClInclude Include="Core\Pass\GUIPass.h" />
     <ClInclude Include="Core\Pass\HDRI2Cube.h" />
     <ClInclude Include="Core\Pass\ImguiPass.h" />
     <ClInclude Include="Core\Pass\DeferredLightingPass.h" />
@@ -314,7 +313,6 @@
     <ClInclude Include="Core\VertexFactory.h" />
     <ClInclude Include="Core\VulkanManager.h" />
     <ClInclude Include="Core\VulkanRenderer.h" />
-    <ClInclude Include="Editor\FontTextureFactory.h" />
     <ClInclude Include="Editor\NvidiaTextureTools.h" />
     <ClInclude Include="Editor\ShaderCompiler.h" />
     <ClInclude Include="Form\FormMain.h" />
@@ -362,7 +360,6 @@
     <ClCompile Include="Core\DescriptorSet.cpp" />
     <ClCompile Include="Core\VMABuffer.cpp" />
     <ClCompile Include="Core\VulkanObjectManager.cpp" />
-    <ClCompile Include="Core\Pass\GUIPass.cpp" />
     <ClCompile Include="Core\Pass\HDRI2Cube.cpp" />
     <ClCompile Include="Core\Pass\ImguiPass.cpp" />
     <ClCompile Include="Core\Pass\DeferredLightingPass.cpp" />
@@ -379,7 +376,6 @@
     <ClCompile Include="Core\VertexFactory.cpp" />
     <ClCompile Include="Core\VulkanManager.cpp" />
     <ClCompile Include="Core\VulkanRenderer.cpp" />
-    <ClCompile Include="Editor\FontTextureFactory.cpp" />
     <ClCompile Include="Editor\NvidiaTextureTools.cpp" />
     <ClCompile Include="Editor\ShaderCompiler.cpp" />
     <ClCompile Include="Form\FormMain.cpp" />

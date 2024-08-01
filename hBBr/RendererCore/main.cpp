@@ -8,7 +8,6 @@
 #include "./Asset/World.h"
 #include "./Core/RendererConfig.h"
 #include "./Asset/Material.h"
-#include "FontTextureFactory.h"
 #include "VulkanObjectManager.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
@@ -29,6 +28,7 @@
 //#include "include/vld.h"
 //#pragma comment(lib ,"vld.lib")
 //#endif
+
 #if IS_EDITOR
 std::function<void()>VulkanApp::_editorVulkanInit = []() {};
 #endif
@@ -140,23 +140,7 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	//Init Vulkan Manager
 	VulkanManager::InitManager(bEnableDebug);
 
-	//Import font
-	//HString ttfFontPath = FileSystem::GetAssetAbsPath() + "Font/msyhl.ttc";
-	HString ttfFontPath = GetRendererConfig("Default", "Font") ;
-	FileSystem::CorrectionPath(ttfFontPath);
-	HString outFontTexturePath = GetRendererConfig("Default", "FontTexture") ;
-	outFontTexturePath = FileSystem::GetRelativePath(outFontTexturePath.c_str());
-	outFontTexturePath = FileSystem::GetProgramPath() + outFontTexturePath;
-	FileSystem::CorrectionPath(outFontTexturePath);
-	
-#if IS_EDITOR
-	//生成字体纹理
-	//FontTextureFactory::CreateFontTexture(ttfFontPath, outFontTexturePath, true, 20U, 2800U);
-#endif
-
 	Texture2D::GlobalInitialize();
-
-	FontTextureFactory::LoadFontTexture();
 
 	//Create Main Window
 	auto win = CreateNewWindow(128, 128, "MainRenderer", false, parent);
@@ -202,19 +186,19 @@ void VulkanApp::DeInitVulkanManager()
 {
 	if (_forms.size() > 0)
 	{
-		for (int i = 0; i < _forms.size(); i++)
+		for (auto& i : _forms)
 		{
-			if (_forms[i]->renderer)
+			if (i->renderer)
 			{
-				_forms[i]->renderer->Release();
-				_forms[i]->renderer = nullptr;
+				i->renderer->Release();
+				i->renderer = nullptr;
 			}
-			if (_forms[i]->window)
+			if (i->window)
 			{
-				SDL_DestroyWindow(_forms[i]->window);
+				SDL_DestroyWindow(i->window);
 			}
-			delete _forms[i];
-			_forms[i] = nullptr;
+			delete i;
+			i = nullptr;
 		}
 		_forms.clear();
 	}
@@ -223,7 +207,6 @@ void VulkanApp::DeInitVulkanManager()
 	PipelineManager::GlobalRelease();
 	ContentManager::Get()->Release();
 	Texture2D::GlobalRelease();
-	FontTextureFactory::ReleaseFontTexture();
 	PrimitiveProxy::ClearAll();
 	VulkanObjectManager::Get()->Release();
 	VulkanManager::ReleaseManager();
@@ -245,24 +228,34 @@ bool VulkanApp::UpdateForm()
 	while (SDL_PollEvent(&event))
 	{
 		VulkanForm* winForm = nullptr;
+		int windowIndex = 0;
 		for (auto& i : _forms)
 		{
 			Uint32 flags = SDL_GetWindowFlags(i->window);
 			if (flags & SDL_WINDOW_INPUT_FOCUS || flags & SDL_WINDOW_MOUSE_FOCUS)
 			{
 				winForm = i;
+				break;
 			}
+			windowIndex++;
 		}
 		if (winForm == nullptr)
 		{
-			winForm = _forms[0];
+			winForm = *_forms.begin();
+			windowIndex = 0;
 		}
-
-#if ENABLE_IMGUI
-#ifdef IS_EDITOR
-		ImGui_ImplSDL3_ProcessEvent(&event); 
-#endif
-#endif
+		#if ENABLE_IMGUI
+		if (winForm->imguiContent)
+		{
+			if (winForm == GetFocusForm())
+			{
+				if (_forms.back() != _forms[windowIndex])
+					std::swap(_forms[windowIndex], _forms.back());
+			}
+			//ImGui::SetCurrentContext(winForm->imguiContent);
+			ImGui_ImplSDL3_ProcessEvent(&event);
+		}
+		#endif
 
 		//Get window form
 		switch (event.type)
@@ -459,7 +452,7 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 		CreateRenderer(newForm);
 	}
 	_forms.push_back(newForm);
-	return _forms[_forms.size() - 1];
+	return _forms.back();
 }
 
 void VulkanApp::CreateRenderer(VulkanForm* form)
