@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -18,21 +18,23 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "../../SDL_internal.h"
-
-#ifdef SDL_FILESYSTEM_XBOX
+#include "SDL_internal.h"
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent filesystem routines                                */
 
+extern "C" {
+#include "../SDL_sysfilesystem.h"
+}
+
 #include "../../core/windows/SDL_windows.h"
-#include "SDL_hints.h"
-#include "SDL_system.h"
-#include "SDL_filesystem.h"
+#include <SDL3/SDL_hints.h>
+#include <SDL3/SDL_system.h>
+#include <SDL3/SDL_filesystem.h>
 #include <XGameSaveFiles.h>
 
 char *
-SDL_GetBasePath(void)
+SDL_SYS_GetBasePath(void)
 {
     /* NOTE: This function is a UTF8 version of the Win32 SDL_GetBasePath()!
      * The GDK actually _recommends_ the 'A' functions over the 'W' functions :o
@@ -44,9 +46,8 @@ SDL_GetBasePath(void)
 
     while (SDL_TRUE) {
         void *ptr = SDL_realloc(path, buflen * sizeof(CHAR));
-        if (ptr == NULL) {
+        if (!ptr) {
             SDL_free(path);
-            SDL_OutOfMemory();
             return NULL;
         }
 
@@ -81,8 +82,7 @@ SDL_GetBasePath(void)
     return path;
 }
 
-char *
-SDL_GetPrefPath(const char *org, const char *app)
+char *SDL_SYS_GetPrefPath(const char *org, const char *app)
 {
     XUserHandle user = NULL;
     XAsyncBlock block = { 0 };
@@ -90,18 +90,18 @@ SDL_GetPrefPath(const char *org, const char *app)
     HRESULT result;
     const char *csid = SDL_GetHint("SDL_GDK_SERVICE_CONFIGURATION_ID");
     
-    if (app == NULL) {
+    if (!app) {
         SDL_InvalidParamError("app");
         return NULL;
     }
 
     /* This should be set before calling SDL_GetPrefPath! */
-    if (csid == NULL) {
+    if (!csid) {
         SDL_LogWarn(SDL_LOG_CATEGORY_SYSTEM, "Set SDL_GDK_SERVICE_CONFIGURATION_ID before calling SDL_GetPrefPath!");
         return SDL_strdup("T:\\");
     }
 
-    if (SDL_GDKGetDefaultUser(&user) < 0) {
+    if (SDL_GetGDKDefaultUser(&user) < 0) {
         /* Error already set, just return */
         return NULL;
     }
@@ -135,6 +135,11 @@ SDL_GetPrefPath(const char *org, const char *app)
     return folderPath;
 }
 
-#endif /* SDL_FILESYSTEM_XBOX */
+/* TODO */
+char *SDL_SYS_GetUserFolder(SDL_Folder folder)
+{
+    SDL_Unsupported();
+    return NULL;
+}
 
 /* vi: set ts=4 sw=4 expandtab: */

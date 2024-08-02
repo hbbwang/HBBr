@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -20,7 +20,7 @@
 */
 #include "SDL_internal.h"
 
-#if defined(__MACOS__)
+#if defined(SDL_PLATFORM_MACOS)
 
 #include "../SDL_sysurl.h"
 
@@ -36,4 +36,4 @@ int SDL_SYS_OpenURL(const char *url)
     }
 }
 
-#endif /* __MACOS__ */
+#endif /* SDL_PLATFORM_MACOS */

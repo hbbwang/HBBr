@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -87,7 +87,7 @@ static void kbd_cleanup(void)
 {
     struct mouse_info mData;
     SDL_EVDEV_keyboard_state *kbd = kbd_cleanup_state;
-    if (kbd == NULL) {
+    if (!kbd) {
         return;
     }
     kbd_cleanup_state = NULL;
@@ -133,7 +133,7 @@ static void kbd_cleanup_signal_action(int signum, siginfo_t *info, void *ucontex
     SDL_EVDEV_kbd_reraise_signal(signum);
 }
 
-static void kbd_unregister_emerg_cleanup()
+static void kbd_unregister_emerg_cleanup(void)
 {
     int tabidx;
 
@@ -178,7 +178,7 @@ static void kbd_register_emerg_cleanup(SDL_EVDEV_keyboard_state *kbd)
 {
     int tabidx;
 
-    if (kbd_cleanup_state != NULL) {
+    if (kbd_cleanup_state) {
         return;
     }
     kbd_cleanup_state = kbd;
@@ -230,7 +230,7 @@ SDL_EVDEV_keyboard_state *SDL_EVDEV_kbd_init(void)
     SDL_zero(mData);
     mData.operation = MOUSE_HIDE;
     kbd = (SDL_EVDEV_keyboard_state *)SDL_calloc(1, sizeof(SDL_EVDEV_keyboard_state));
-    if (kbd == NULL) {
+    if (!kbd) {
         return NULL;
     }
 
@@ -296,7 +296,7 @@ void SDL_EVDEV_kbd_quit(SDL_EVDEV_keyboard_state *kbd)
 {
     struct mouse_info mData;
 
-    if (kbd == NULL) {
+    if (!kbd) {
         return;
     }
     SDL_zero(mData);
@@ -318,6 +318,18 @@ void SDL_EVDEV_kbd_quit(SDL_EVDEV_keyboard_state *kbd)
     }
 
     SDL_free(kbd);
+}
+
+void SDL_EVDEV_kbd_set_muted(SDL_EVDEV_keyboard_state *state, SDL_bool muted)
+{
+}
+
+void SDL_EVDEV_kbd_set_vt_switch_callbacks(SDL_EVDEV_keyboard_state *state, void (*release_callback)(void*), void *release_callback_data, void (*acquire_callback)(void*), void *acquire_callback_data)
+{
+}
+
+void SDL_EVDEV_kbd_update(SDL_EVDEV_keyboard_state *state)
+{
 }
 
 /*
@@ -474,7 +486,7 @@ void SDL_EVDEV_kbd_keycode(SDL_EVDEV_keyboard_state *kbd, unsigned int keycode, 
     unsigned int final_key_state;
     unsigned int map_from_key_sym;
 
-    if (kbd == NULL) {
+    if (!kbd) {
         return;
     }
 
@@ -530,6 +542,7 @@ void SDL_EVDEV_kbd_keycode(SDL_EVDEV_keyboard_state *kbd, unsigned int keycode, 
                 if (down == 0) {
                     chg_vc_kbd_led(kbd, ALKED);
                 }
+                SDL_FALLTHROUGH;
             case LSH: /* left shift */
             case RSH: /* right shift */
                 k_shift(kbd, 0, down == 0);
@@ -539,6 +552,7 @@ void SDL_EVDEV_kbd_keycode(SDL_EVDEV_keyboard_state *kbd, unsigned int keycode, 
                 if (down == 0) {
                     chg_vc_kbd_led(kbd, ALKED);
                 }
+                SDL_FALLTHROUGH;
             case LCTR: /* left ctrl */
             case RCTR: /* right ctrl */
                 k_shift(kbd, 1, down == 0);
@@ -548,6 +562,7 @@ void SDL_EVDEV_kbd_keycode(SDL_EVDEV_keyboard_state *kbd, unsigned int keycode, 
                 if (down == 0) {
                     chg_vc_kbd_led(kbd, ALKED);
                 }
+                SDL_FALLTHROUGH;
             case LALT: /* left alt */
             case RALT: /* right alt */
                 k_shift(kbd, 2, down == 0);

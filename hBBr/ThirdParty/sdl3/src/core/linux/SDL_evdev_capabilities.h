@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
   Copyright (C) 2020 Collabora Ltd.
 
   This software is provided 'as-is', without any express or implied
@@ -28,6 +28,9 @@
 
 #include <linux/input.h>
 
+#ifndef INPUT_PROP_SEMI_MT
+#define INPUT_PROP_SEMI_MT          0x03
+#endif
 #ifndef INPUT_PROP_TOPBUTTONPAD
 #define INPUT_PROP_TOPBUTTONPAD     0x04
 #endif
@@ -53,6 +56,7 @@ typedef enum
     SDL_UDEV_DEVICE_ACCELEROMETER = 0x0020,
     SDL_UDEV_DEVICE_TOUCHPAD = 0x0040,
     SDL_UDEV_DEVICE_HAS_KEYS = 0x0080,
+    SDL_UDEV_DEVICE_VIDEO_CAPTURE = 0x0100,
 } SDL_UDEV_deviceclass;
 
 #define BITS_PER_LONG        (sizeof(unsigned long) * 8)

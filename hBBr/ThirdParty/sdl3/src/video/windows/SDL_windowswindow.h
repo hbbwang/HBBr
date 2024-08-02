@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -34,6 +34,30 @@
 extern "C" {
 #endif
 
+typedef enum SDL_WindowRect
+{
+    SDL_WINDOWRECT_CURRENT,
+    SDL_WINDOWRECT_WINDOWED,
+    SDL_WINDOWRECT_FLOATING
+} SDL_WindowRect;
+
+typedef enum SDL_WindowEraseBackgroundMode
+{
+    SDL_ERASEBACKGROUNDMODE_NEVER,
+    SDL_ERASEBACKGROUNDMODE_INITIAL,
+    SDL_ERASEBACKGROUNDMODE_ALWAYS,
+} SDL_WindowEraseBackgroundMode;
+
+typedef struct
+{
+    void **lpVtbl;
+    int refcount;
+    SDL_Window *window;
+    HWND hwnd;
+    UINT format_text;
+    UINT format_file;
+} SDLDropTarget;
+
 struct SDL_WindowData
 {
     SDL_Window *window;
@@ -45,7 +69,6 @@ struct SDL_WindowData
     HBITMAP hbm;
     WNDPROC wndproc;
     HHOOK keyboard_hook;
-    SDL_bool created;
     WPARAM mouse_button_flags;
     LPARAM last_pointer_update;
     WCHAR high_surrogate;
@@ -53,6 +76,7 @@ struct SDL_WindowData
     SDL_bool expected_resize;
     SDL_bool in_border_change;
     SDL_bool in_title_click;
+    SDL_bool floating_rect_pending;
     Uint8 focus_click_pending;
     SDL_bool skip_update_clipcursor;
     Uint64 last_updated_clipcursor;
@@ -60,12 +84,14 @@ struct SDL_WindowData
     SDL_bool windowed_mode_was_maximized;
     SDL_bool in_window_deactivation;
     RECT cursor_clipped_rect;
-    SDL_Point last_raw_mouse_position;
+    UINT windowed_mode_corner_rounding;
+    COLORREF dwma_border_color;
     SDL_bool mouse_tracked;
     SDL_bool destroy_parent_with_window;
     SDL_DisplayID last_displayID;
     WCHAR *ICMFileName;
     SDL_Window *keyboard_focus;
+    SDL_WindowEraseBackgroundMode hint_erase_background_mode;
     struct SDL_VideoData *videodata;
 #ifdef SDL_VIDEO_OPENGL_EGL
     EGLSurface egl_surface;
@@ -73,10 +99,10 @@ struct SDL_WindowData
 
     /* Whether we retain the content of the window when changing state */
     UINT copybits_flag;
+    SDLDropTarget *drop_target;
 };
 
-extern int WIN_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window);
-extern int WIN_CreateWindowFrom(SDL_VideoDevice *_this, SDL_Window *window, const void *data);
+extern int WIN_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_PropertiesID create_props);
 extern void WIN_SetWindowTitle(SDL_VideoDevice *_this, SDL_Window *window);
 extern int WIN_SetWindowIcon(SDL_VideoDevice *_this, SDL_Window *window, SDL_Surface *icon);
 extern int WIN_SetWindowPosition(SDL_VideoDevice *_this, SDL_Window *window);
@@ -93,23 +119,25 @@ extern void WIN_RestoreWindow(SDL_VideoDevice *_this, SDL_Window *window);
 extern void WIN_SetWindowBordered(SDL_VideoDevice *_this, SDL_Window *window, SDL_bool bordered);
 extern void WIN_SetWindowResizable(SDL_VideoDevice *_this, SDL_Window *window, SDL_bool resizable);
 extern void WIN_SetWindowAlwaysOnTop(SDL_VideoDevice *_this, SDL_Window *window, SDL_bool on_top);
-extern void WIN_SetWindowFullscreen(SDL_VideoDevice *_this, SDL_Window *window, SDL_VideoDisplay *display, SDL_bool fullscreen);
+extern int WIN_SetWindowFullscreen(SDL_VideoDevice *_this, SDL_Window *window, SDL_VideoDisplay *display, SDL_FullscreenOp fullscreen);
 extern void WIN_UpdateWindowICCProfile(SDL_Window *window, SDL_bool send_event);
 extern void *WIN_GetWindowICCProfile(SDL_VideoDevice *_this, SDL_Window *window, size_t *size);
-extern void WIN_SetWindowMouseRect(SDL_VideoDevice *_this, SDL_Window *window);
-extern void WIN_SetWindowMouseGrab(SDL_VideoDevice *_this, SDL_Window *window, SDL_bool grabbed);
-extern void WIN_SetWindowKeyboardGrab(SDL_VideoDevice *_this, SDL_Window *window, SDL_bool grabbed);
+extern int WIN_SetWindowMouseRect(SDL_VideoDevice *_this, SDL_Window *window);
+extern int WIN_SetWindowMouseGrab(SDL_VideoDevice *_this, SDL_Window *window, SDL_bool grabbed);
+extern int WIN_SetWindowKeyboardGrab(SDL_VideoDevice *_this, SDL_Window *window, SDL_bool grabbed);
 extern void WIN_DestroyWindow(SDL_VideoDevice *_this, SDL_Window *window);
-extern int WIN_GetWindowWMInfo(SDL_VideoDevice *_this, SDL_Window *window, struct SDL_SysWMinfo *info);
 extern void WIN_OnWindowEnter(SDL_VideoDevice *_this, SDL_Window *window);
 extern void WIN_UpdateClipCursor(SDL_Window *window);
 extern int WIN_SetWindowHitTest(SDL_Window *window, SDL_bool enabled);
 extern void WIN_AcceptDragAndDrop(SDL_Window *window, SDL_bool accept);
 extern int WIN_FlashWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_FlashOperation operation);
 extern void WIN_UpdateDarkModeForHWND(HWND hwnd);
-extern int WIN_SetWindowPositionInternal(SDL_Window *window, UINT flags);
+extern int WIN_SetWindowPositionInternal(SDL_Window *window, UINT flags, SDL_WindowRect rect_type);
 extern void WIN_ShowWindowSystemMenu(SDL_Window *window, int x, int y);
 extern int WIN_SetWindowFocusable(SDL_VideoDevice *_this, SDL_Window *window, SDL_bool focusable);
+extern int WIN_AdjustWindowRect(SDL_Window *window, int *x, int *y, int *width, int *height, SDL_WindowRect rect_type);
+extern int WIN_AdjustWindowRectForHWND(HWND hwnd, LPRECT lpRect, UINT frame_dpi);
+extern int WIN_SetWindowModalFor(SDL_VideoDevice *_this, SDL_Window *modal_window, SDL_Window *parent_window);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

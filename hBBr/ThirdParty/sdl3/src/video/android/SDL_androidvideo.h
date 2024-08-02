@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -35,16 +35,12 @@ extern void Android_SetDarkMode(SDL_bool enabled);
 
 struct SDL_VideoData
 {
-    SDL_Rect textRect;
     int isPaused;
     int isPausing;
-    int pauseAudio;
 };
 
 extern int Android_SurfaceWidth;
 extern int Android_SurfaceHeight;
 extern float Android_ScreenDensity;
-extern SDL_Semaphore *Android_PauseSem, *Android_ResumeSem;
-extern SDL_Mutex *Android_ActivityMutex;
 
 #endif /* SDL_androidvideo_h_ */

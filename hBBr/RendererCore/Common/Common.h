@@ -64,6 +64,8 @@
 	#define DE_ASSERT(exp_, msgw_)  ;
 #endif
 
+std::string wrapText(const std::string& input, size_t lineWidth);
+
 HBBR_API void MessageOut(HString msg, bool bExit = false, bool bMessageBox = false ,const char* textColor = ("255,255,255"));
 
 HBBR_API void MsgBox(const char* title, const char* msg);
@@ -76,9 +78,11 @@ HBBR_API void MsgBox(const char* title, const char* msg);
 	if (bMessageBox && VulkanManager::_bDebugEnable)\
 	{\
 		const SDL_MessageBoxButtonData buttons[] = {\
-			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 0, "继续" },\
-			{ SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 1, "中断" },\
+			{ 0, 0, "继续" },\
+			{ 0, 1, "中断" },\
+			{ 0, 2, "停止" },\
 		};\
+		wrapText(ggOutMsgggggggg, 75);\
 		const SDL_MessageBoxData messageboxdata = {\
 			SDL_MESSAGEBOX_WARNING,\
 			NULL,\

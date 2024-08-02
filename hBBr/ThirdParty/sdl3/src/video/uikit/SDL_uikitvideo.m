@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -36,6 +36,7 @@
 #include "SDL_uikitclipboard.h"
 #include "SDL_uikitvulkan.h"
 #include "SDL_uikitmetalview.h"
+#include "SDL_uikitmessagebox.h"
 
 #define UIKITVID_DRIVER_NAME "uikit"
 
@@ -52,8 +53,8 @@ static void UIKit_VideoQuit(SDL_VideoDevice *_this);
 static void UIKit_DeleteDevice(SDL_VideoDevice *device)
 {
     @autoreleasepool {
-        if (device->driverdata){
-            CFRelease(device->driverdata);
+        if (device->internal){
+            CFRelease(device->internal);
         }
         SDL_free(device);
     }
@@ -67,15 +68,13 @@ static SDL_VideoDevice *UIKit_CreateDevice(void)
 
         /* Initialize all variables that we clean on shutdown */
         device = (SDL_VideoDevice *)SDL_calloc(1, sizeof(SDL_VideoDevice));
-        if (device) {
-            data = [SDL_UIKitVideoData new];
-        } else {
-            SDL_free(device);
-            SDL_OutOfMemory();
-            return (0);
+        if (!device) {
+            return NULL;
         }
 
-        device->driverdata = (SDL_VideoData *)CFBridgingRetain(data);
+        data = [SDL_UIKitVideoData new];
+
+        device->internal = (SDL_VideoData *)CFBridgingRetain(data);
         device->system_theme = UIKit_GetSystemTheme();
 
         /* Set the function pointers */
@@ -92,9 +91,7 @@ static SDL_VideoDevice *UIKit_CreateDevice(void)
         device->RaiseWindow = UIKit_RaiseWindow;
         device->SetWindowBordered = UIKit_SetWindowBordered;
         device->SetWindowFullscreen = UIKit_SetWindowFullscreen;
-        device->SetWindowMouseGrab = UIKit_SetWindowMouseGrab;
         device->DestroyWindow = UIKit_DestroyWindow;
-        device->GetWindowWMInfo = UIKit_GetWindowWMInfo;
         device->GetDisplayUsableBounds = UIKit_GetDisplayUsableBounds;
         device->GetWindowSizeInPixels = UIKit_GetWindowSizeInPixels;
 
@@ -103,7 +100,7 @@ static SDL_VideoDevice *UIKit_CreateDevice(void)
         device->ShowScreenKeyboard = UIKit_ShowScreenKeyboard;
         device->HideScreenKeyboard = UIKit_HideScreenKeyboard;
         device->IsScreenKeyboardShown = UIKit_IsScreenKeyboardShown;
-        device->SetTextInputRect = UIKit_SetTextInputRect;
+        device->UpdateTextInputArea = UIKit_UpdateTextInputArea;
 #endif
 
         device->SetClipboardText = UIKit_SetClipboardText;
@@ -126,6 +123,7 @@ static SDL_VideoDevice *UIKit_CreateDevice(void)
         device->Vulkan_UnloadLibrary = UIKit_Vulkan_UnloadLibrary;
         device->Vulkan_GetInstanceExtensions = UIKit_Vulkan_GetInstanceExtensions;
         device->Vulkan_CreateSurface = UIKit_Vulkan_CreateSurface;
+        device->Vulkan_DestroySurface = UIKit_Vulkan_DestroySurface;
 #endif
 
 #ifdef SDL_VIDEO_METAL
@@ -133,6 +131,8 @@ static SDL_VideoDevice *UIKit_CreateDevice(void)
         device->Metal_DestroyView = UIKit_Metal_DestroyView;
         device->Metal_GetLayer = UIKit_Metal_GetLayer;
 #endif
+
+        device->device_caps = VIDEO_DEVICE_CAPS_SENDS_FULLSCREEN_DIMENSIONS;
 
         device->gl_config.accelerated = 1;
 
@@ -142,7 +142,8 @@ static SDL_VideoDevice *UIKit_CreateDevice(void)
 
 VideoBootStrap UIKIT_bootstrap = {
     UIKITVID_DRIVER_NAME, "SDL UIKit video driver",
-    UIKit_CreateDevice
+    UIKit_CreateDevice,
+    UIKit_ShowMessageBox
 };
 
 int UIKit_VideoInit(SDL_VideoDevice *_this)
@@ -156,11 +157,15 @@ int UIKit_VideoInit(SDL_VideoDevice *_this)
     SDL_InitGCKeyboard();
     SDL_InitGCMouse();
 
+    UIKit_InitClipboard(_this);
+
     return 0;
 }
 
 void UIKit_VideoQuit(SDL_VideoDevice *_this)
 {
+    UIKit_QuitClipboard(_this);
+
     SDL_QuitGCKeyboard();
     SDL_QuitGCMouse();
 
@@ -185,7 +190,7 @@ SDL_bool UIKit_IsSystemVersionAtLeast(double version)
 
 SDL_SystemTheme UIKit_GetSystemTheme(void)
 {
-#if !TARGET_OS_XR
+#ifndef SDL_PLATFORM_VISIONOS
     if (@available(iOS 12.0, tvOS 10.0, *)) {
         switch ([UIScreen mainScreen].traitCollection.userInterfaceStyle) {
         case UIUserInterfaceStyleDark:
@@ -200,14 +205,14 @@ SDL_SystemTheme UIKit_GetSystemTheme(void)
     return SDL_SYSTEM_THEME_UNKNOWN;
 }
 
-#if TARGET_OS_XR
+#ifdef SDL_PLATFORM_VISIONOS
 CGRect UIKit_ComputeViewFrame(SDL_Window *window){
     return CGRectMake(window->x, window->y, window->w, window->h);
 }
 #else
 CGRect UIKit_ComputeViewFrame(SDL_Window *window, UIScreen *screen)
 {
-    SDL_UIKitWindowData *data = (__bridge SDL_UIKitWindowData *)window->driverdata;
+    SDL_UIKitWindowData *data = (__bridge SDL_UIKitWindowData *)window->internal;
     CGRect frame = screen.bounds;
 
     /* Use the UIWindow bounds instead of the UIScreen bounds, when possible.
@@ -217,7 +222,7 @@ CGRect UIKit_ComputeViewFrame(SDL_Window *window, UIScreen *screen)
         frame = data.uiwindow.bounds;
     }
 
-#if !TARGET_OS_TV
+#ifndef SDL_PLATFORM_TVOS
     /* iOS 10 seems to have a bug where, in certain conditions, putting the
      * device to sleep with the a landscape-only app open, re-orienting the
      * device to portrait, and turning it back on will result in the screen
@@ -247,11 +252,11 @@ CGRect UIKit_ComputeViewFrame(SDL_Window *window, UIScreen *screen)
 
 void UIKit_ForceUpdateHomeIndicator(void)
 {
-#if !TARGET_OS_TV
+#ifndef SDL_PLATFORM_TVOS
     /* Force the main SDL window to re-evaluate home indicator state */
     SDL_Window *focus = SDL_GetKeyboardFocus();
     if (focus) {
-        SDL_UIKitWindowData *data = (__bridge SDL_UIKitWindowData *)focus->driverdata;
+        SDL_UIKitWindowData *data = (__bridge SDL_UIKitWindowData *)focus->internal;
         if (data != nil) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
@@ -262,7 +267,7 @@ void UIKit_ForceUpdateHomeIndicator(void)
 #pragma clang diagnostic pop
         }
     }
-#endif /* !TARGET_OS_TV */
+#endif /* !SDL_PLATFORM_TVOS */
 }
 
 /*

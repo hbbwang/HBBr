@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -65,12 +65,12 @@ static int SDLCALL SDL_ANDROID_SensorThread(void *data)
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
 
     SDL_sensor_looper = ALooper_prepare(ALOOPER_PREPARE_ALLOW_NON_CALLBACKS);
-    SDL_PostSemaphore(ctx->sem);
+    SDL_SignalSemaphore(ctx->sem);
 
     while (SDL_AtomicGet(&ctx->running)) {
         Uint64 timestamp = SDL_GetTicksNS();
 
-        if (ALooper_pollAll(-1, NULL, &events, (void **)&source) == LOOPER_ID_USER) {
+        if (ALooper_pollOnce(-1, NULL, &events, (void **)&source) == LOOPER_ID_USER) {
             SDL_LockSensors();
             for (i = 0; i < SDL_sensors_count; ++i) {
                 if (!SDL_sensors[i].event_queue) {
@@ -120,7 +120,7 @@ static int SDL_ANDROID_StartSensorThread(SDL_AndroidSensorThreadContext *ctx)
     }
 
     SDL_AtomicSet(&ctx->running, SDL_TRUE);
-    ctx->thread = SDL_CreateThreadInternal(SDL_ANDROID_SensorThread, "Sensors", 0, ctx);
+    ctx->thread = SDL_CreateThread(SDL_ANDROID_SensorThread, "Sensors", ctx);
     if (!ctx->thread) {
         SDL_ANDROID_StopSensorThread(ctx);
         return -1;
@@ -138,7 +138,7 @@ static int SDL_ANDROID_SensorInit(void)
     ASensorList sensors;
 
     SDL_sensor_manager = ASensorManager_getInstance();
-    if (SDL_sensor_manager == NULL) {
+    if (!SDL_sensor_manager) {
         return SDL_SetError("Couldn't create sensor manager");
     }
 
@@ -146,13 +146,13 @@ static int SDL_ANDROID_SensorInit(void)
     sensors_count = ASensorManager_getSensorList(SDL_sensor_manager, &sensors);
     if (sensors_count > 0) {
         SDL_sensors = (SDL_AndroidSensor *)SDL_calloc(sensors_count, sizeof(*SDL_sensors));
-        if (SDL_sensors == NULL) {
-            return SDL_OutOfMemory();
+        if (!SDL_sensors) {
+            return -1;
         }
 
         for (i = 0; i < sensors_count; ++i) {
             SDL_sensors[i].asensor = sensors[i];
-            SDL_sensors[i].instance_id = SDL_GetNextSensorInstanceID();
+            SDL_sensors[i].instance_id = SDL_GetNextObjectID();
         }
         SDL_sensors_count = sensors_count;
     }

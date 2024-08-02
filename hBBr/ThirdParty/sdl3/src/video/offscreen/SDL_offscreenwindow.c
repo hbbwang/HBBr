@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -23,19 +23,20 @@
 #ifdef SDL_VIDEO_DRIVER_OFFSCREEN
 
 #include "../SDL_sysvideo.h"
+#include "../../events/SDL_windowevents_c.h"
 #include "../SDL_egl_c.h"
 
 #include "SDL_offscreenwindow.h"
 
-int OFFSCREEN_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window)
+int OFFSCREEN_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_PropertiesID create_props)
 {
     SDL_WindowData *offscreen_window = (SDL_WindowData *)SDL_calloc(1, sizeof(SDL_WindowData));
 
-    if (offscreen_window == NULL) {
-        return SDL_OutOfMemory();
+    if (!offscreen_window) {
+        return -1;
     }
 
-    window->driverdata = offscreen_window;
+    window->internal = offscreen_window;
 
     if (window->x == SDL_WINDOWPOS_UNDEFINED) {
         window->x = 0;
@@ -70,7 +71,7 @@ int OFFSCREEN_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window)
 
 void OFFSCREEN_DestroyWindow(SDL_VideoDevice *_this, SDL_Window *window)
 {
-    SDL_WindowData *offscreen_window = window->driverdata;
+    SDL_WindowData *offscreen_window = window->internal;
 
     if (offscreen_window) {
 #ifdef SDL_VIDEO_OPENGL_EGL
@@ -79,7 +80,11 @@ void OFFSCREEN_DestroyWindow(SDL_VideoDevice *_this, SDL_Window *window)
         SDL_free(offscreen_window);
     }
 
-    window->driverdata = NULL;
+    window->internal = NULL;
 }
 
+void OFFSCREEN_SetWindowSize(SDL_VideoDevice *_this, SDL_Window *window)
+{
+    SDL_SendWindowEvent(window, SDL_EVENT_WINDOW_RESIZED, window->floating.w, window->floating.h);
+}
 #endif /* SDL_VIDEO_DRIVER_OFFSCREEN */

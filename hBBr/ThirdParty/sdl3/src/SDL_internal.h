@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -40,6 +40,17 @@
 #define SDL_VARIABLE_LENGTH_ARRAY
 #endif
 
+#if (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))) || defined(__clang__)
+#define HAVE_GCC_DIAGNOSTIC_PRAGMA 1
+#endif
+
+#ifdef _MSC_VER /* We use constant comparison for generated code */
+#pragma warning(disable : 6326)
+#endif
+
+#ifdef _MSC_VER /* SDL_MAX_SMALL_ALLOC_STACKSIZE is smaller than _ALLOCA_S_THRESHOLD and should be generally safe */
+#pragma warning(disable : 6255)
+#endif
 #define SDL_MAX_SMALL_ALLOC_STACKSIZE          128
 #define SDL_small_alloc(type, count, pisstack) ((*(pisstack) = ((sizeof(type) * (count)) < SDL_MAX_SMALL_ALLOC_STACKSIZE)), (*(pisstack) ? SDL_stack_alloc(type, count) : (type *)SDL_malloc(sizeof(type) * (count))))
 #define SDL_small_free(ptr, isstack) \
@@ -55,15 +66,15 @@
 
 #if SDL_DYNAMIC_API
 #include "dynapi/SDL_dynapi_overrides.h"
-/* force DECLSPEC off...it's all internal symbols now.
+/* force SDL_DECLSPEC off...it's all internal symbols now.
    These will have actual #defines during SDL_dynapi.c only */
-#ifdef DECLSPEC
-#undef DECLSPEC
+#ifdef SDL_DECLSPEC
+#undef SDL_DECLSPEC
 #endif
-#define DECLSPEC
+#define SDL_DECLSPEC
 #endif
 
-#ifdef __APPLE__
+#ifdef SDL_PLATFORM_APPLE
 #ifndef _DARWIN_C_SOURCE
 #define _DARWIN_C_SOURCE 1 /* for memset_pattern4() */
 #endif
@@ -103,9 +114,6 @@
 #elif defined(HAVE_STDINT_H)
 #include <stdint.h>
 #endif
-#ifdef HAVE_CTYPE_H
-#include <ctype.h>
-#endif
 #ifdef HAVE_MATH_H
 #include <math.h>
 #endif
@@ -126,13 +134,13 @@
 #endif
 
 /* Optimized functions from 'SDL_blit_0.c'
-   - blit with source BitsPerPixel < 8, palette */
+   - blit with source bits_per_pixel < 8, palette */
 #ifndef SDL_HAVE_BLIT_0
 #define SDL_HAVE_BLIT_0 !SDL_LEAN_AND_MEAN
 #endif
 
 /* Optimized functions from 'SDL_blit_1.c'
-   - blit with source BytesPerPixel == 1, palette */
+   - blit with source bytes_per_pixel == 1, palette */
 #ifndef SDL_HAVE_BLIT_1
 #define SDL_HAVE_BLIT_1 !SDL_LEAN_AND_MEAN
 #endif
@@ -183,23 +191,110 @@
 #define SDL_HAVE_YUV !SDL_LEAN_AND_MEAN
 #endif
 
+#ifndef SDL_RENDER_DISABLED
+/* define the not defined ones as 0 */
+#ifndef SDL_VIDEO_RENDER_D3D
+#define SDL_VIDEO_RENDER_D3D 0
+#endif
+#ifndef SDL_VIDEO_RENDER_D3D11
+#define SDL_VIDEO_RENDER_D3D11 0
+#endif
+#ifndef SDL_VIDEO_RENDER_D3D12
+#define SDL_VIDEO_RENDER_D3D12 0
+#endif
+#ifndef SDL_VIDEO_RENDER_METAL
+#define SDL_VIDEO_RENDER_METAL 0
+#endif
+#ifndef SDL_VIDEO_RENDER_OGL
+#define SDL_VIDEO_RENDER_OGL  0
+#endif
+#ifndef SDL_VIDEO_RENDER_OGL_ES2
+#define SDL_VIDEO_RENDER_OGL_ES2 0
+#endif
+#ifndef SDL_VIDEO_RENDER_PS2
+#define SDL_VIDEO_RENDER_PS2 0
+#endif
+#ifndef SDL_VIDEO_RENDER_PSP
+#define SDL_VIDEO_RENDER_PSP 0
+#endif
+#ifndef SDL_VIDEO_RENDER_VITA_GXM
+#define SDL_VIDEO_RENDER_VITA_GXM 0
+#endif
+#ifndef SDL_VIDEO_RENDER_VULKAN
+#define SDL_VIDEO_RENDER_VULKAN 0
+#endif
+#else /* define all as 0 */
+#undef SDL_VIDEO_RENDER_SW
+#define SDL_VIDEO_RENDER_SW 0
+#undef SDL_VIDEO_RENDER_D3D
+#define SDL_VIDEO_RENDER_D3D 0
+#undef SDL_VIDEO_RENDER_D3D11
+#define SDL_VIDEO_RENDER_D3D11 0
+#undef SDL_VIDEO_RENDER_D3D12
+#define SDL_VIDEO_RENDER_D3D12 0
+#undef SDL_VIDEO_RENDER_METAL
+#define SDL_VIDEO_RENDER_METAL 0
+#undef SDL_VIDEO_RENDER_OGL
+#define SDL_VIDEO_RENDER_OGL  0
+#undef SDL_VIDEO_RENDER_OGL_ES2
+#define SDL_VIDEO_RENDER_OGL_ES2 0
+#undef SDL_VIDEO_RENDER_PS2
+#define SDL_VIDEO_RENDER_PS2 0
+#undef SDL_VIDEO_RENDER_PSP
+#define SDL_VIDEO_RENDER_PSP 0
+#undef SDL_VIDEO_RENDER_VITA_GXM
+#define SDL_VIDEO_RENDER_VITA_GXM 0
+#undef SDL_VIDEO_RENDER_VULKAN
+#define SDL_VIDEO_RENDER_VULKAN 0
+#endif /* SDL_RENDER_DISABLED */
+
+#define SDL_HAS_RENDER_DRIVER \
+       (SDL_VIDEO_RENDER_SW       | \
+        SDL_VIDEO_RENDER_D3D      | \
+        SDL_VIDEO_RENDER_D3D11    | \
+        SDL_VIDEO_RENDER_D3D12    | \
+        SDL_VIDEO_RENDER_METAL    | \
+        SDL_VIDEO_RENDER_OGL      | \
+        SDL_VIDEO_RENDER_OGL_ES2  | \
+        SDL_VIDEO_RENDER_PS2      | \
+        SDL_VIDEO_RENDER_PSP      | \
+        SDL_VIDEO_RENDER_VITA_GXM | \
+        SDL_VIDEO_RENDER_VULKAN )
+
+#if !defined(SDL_RENDER_DISABLED) && !SDL_HAS_RENDER_DRIVER
+#error SDL_RENDER enabled without any backend drivers.
+#endif
+
+#if !defined(HAVE_LIBC)
+// If not using _any_ C runtime, these have to be defined before SDL_thread.h
+// gets included, so internal SDL_CreateThread calls will not try to reference
+// the (unavailable and unneeded) _beginthreadex/_endthreadex functions.
+#define SDL_BeginThreadFunction NULL
+#define SDL_EndThreadFunction NULL
+#endif
+
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_intrin.h>
 
 #define SDL_MAIN_NOIMPL /* don't drag in header-only implementation of SDL_main */
 #include <SDL3/SDL_main.h>
 
-/* The internal implementations of these functions have up to nanosecond precision.
-   We can expose these functions as part of the API if we want to later.
-*/
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern DECLSPEC int SDLCALL SDL_WaitSemaphoreTimeoutNS(SDL_Semaphore *sem, Sint64 timeoutNS);
-extern DECLSPEC int SDLCALL SDL_WaitConditionTimeoutNS(SDL_Condition *cond, SDL_Mutex *mutex, Sint64 timeoutNS);
-extern DECLSPEC int SDLCALL SDL_WaitEventTimeoutNS(SDL_Event *event, Sint64 timeoutNS);
+#include "SDL_utils_c.h"
+
+/* Do any initialization that needs to happen before threads are started */
+extern void SDL_InitMainThread(void);
+
+/* The internal implementations of these functions have up to nanosecond precision.
+   We can expose these functions as part of the API if we want to later.
+*/
+extern int SDLCALL SDL_WaitSemaphoreTimeoutNS(SDL_Semaphore *sem, Sint64 timeoutNS);
+extern int SDLCALL SDL_WaitConditionTimeoutNS(SDL_Condition *cond, SDL_Mutex *mutex, Sint64 timeoutNS);
+extern SDL_bool SDLCALL SDL_WaitEventTimeoutNS(SDL_Event *event, Sint64 timeoutNS);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

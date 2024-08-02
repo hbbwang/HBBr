@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -25,6 +25,9 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent filesystem routines                                */
 
+#include "../SDL_sysfilesystem.h"
+
+#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -35,7 +38,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#if defined(__FREEBSD__) || defined(__OPENBSD__)
+#if defined(SDL_PLATFORM_FREEBSD) || defined(SDL_PLATFORM_OPENBSD)
 #include <sys/sysctl.h>
 #endif
 
@@ -47,8 +50,7 @@ static char *readSymLink(const char *path)
 
     while (1) {
         char *ptr = (char *)SDL_realloc(retval, (size_t)len);
-        if (ptr == NULL) {
-            SDL_OutOfMemory();
+        if (!ptr) {
             break;
         }
 
@@ -69,23 +71,23 @@ static char *readSymLink(const char *path)
     return NULL;
 }
 
-#ifdef __OPENBSD__
+#ifdef SDL_PLATFORM_OPENBSD
 static char *search_path_for_binary(const char *bin)
 {
-    char *envr = SDL_getenv("PATH");
+    const char *envr_real = SDL_getenv("PATH");
+    char *envr;
     size_t alloc_size;
     char *exe = NULL;
     char *start = envr;
     char *ptr;
 
-    if (envr == NULL) {
+    if (!envr_real) {
         SDL_SetError("No $PATH set");
         return NULL;
     }
 
-    envr = SDL_strdup(envr);
-    if (envr == NULL) {
-        SDL_OutOfMemory();
+    envr = SDL_strdup(envr_real);
+    if (!envr) {
         return NULL;
     }
 
@@ -110,7 +112,7 @@ static char *search_path_for_binary(const char *bin)
             }
         }
         start = ptr + 1; /* start points to beginning of next element. */
-    } while (ptr != NULL);
+    } while (ptr);
 
     SDL_free(envr);
     SDL_free(exe);
@@ -120,23 +122,22 @@ static char *search_path_for_binary(const char *bin)
 }
 #endif
 
-char *SDL_GetBasePath(void)
+char *SDL_SYS_GetBasePath(void)
 {
     char *retval = NULL;
 
-#ifdef __FREEBSD__
+#ifdef SDL_PLATFORM_FREEBSD
     char fullpath[PATH_MAX];
     size_t buflen = sizeof(fullpath);
     const int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
     if (sysctl(mib, SDL_arraysize(mib), fullpath, &buflen, NULL, 0) != -1) {
         retval = SDL_strdup(fullpath);
-        if (retval == NULL) {
-            SDL_OutOfMemory();
+        if (!retval) {
             return NULL;
         }
     }
 #endif
-#ifdef __OPENBSD__
+#ifdef SDL_PLATFORM_OPENBSD
     /* Please note that this will fail if the process was launched with a relative path and $PWD + the cwd have changed, or argv is altered. So don't do that. Or add a new sysctl to OpenBSD. */
     char **cmdline;
     size_t len;
@@ -144,15 +145,13 @@ char *SDL_GetBasePath(void)
     if (sysctl(mib, 4, NULL, &len, NULL, 0) != -1) {
         char *exe, *pwddst;
         char *realpathbuf = (char *)SDL_malloc(PATH_MAX + 1);
-        if (realpathbuf == NULL) {
-            SDL_OutOfMemory();
+        if (!realpathbuf) {
             return NULL;
         }
 
         cmdline = SDL_malloc(len);
-        if (cmdline == NULL) {
+        if (!cmdline) {
             SDL_free(realpathbuf);
-            SDL_OutOfMemory();
             return NULL;
         }
 
@@ -172,7 +171,7 @@ char *SDL_GetBasePath(void)
         }
 
         if (exe) {
-            if (pwddst == NULL) {
+            if (!pwddst) {
                 if (realpath(exe, realpathbuf) != NULL) {
                     retval = realpathbuf;
                 }
@@ -188,7 +187,7 @@ char *SDL_GetBasePath(void)
             }
         }
 
-        if (retval == NULL) {
+        if (!retval) {
             SDL_free(realpathbuf);
         }
 
@@ -197,19 +196,19 @@ char *SDL_GetBasePath(void)
 #endif
 
     /* is a Linux-style /proc filesystem available? */
-    if (retval == NULL && (access("/proc", F_OK) == 0)) {
+    if (!retval && (access("/proc", F_OK) == 0)) {
         /* !!! FIXME: after 2.0.6 ships, let's delete this code and just
                       use the /proc/%llu version. There's no reason to have
                       two copies of this plus all the #ifdefs. --ryan. */
-#ifdef __FREEBSD__
+#ifdef SDL_PLATFORM_FREEBSD
         retval = readSymLink("/proc/curproc/file");
-#elif defined(__NETBSD__)
+#elif defined(SDL_PLATFORM_NETBSD)
         retval = readSymLink("/proc/curproc/exe");
-#elif defined(__SOLARIS__)
+#elif defined(SDL_PLATFORM_SOLARIS)
         retval = readSymLink("/proc/self/path/a.out");
 #else
         retval = readSymLink("/proc/self/exe"); /* linux. */
-        if (retval == NULL) {
+        if (!retval) {
             /* older kernels don't have /proc/self ... try PID version... */
             char path[64];
             const int rc = SDL_snprintf(path, sizeof(path),
@@ -222,13 +221,12 @@ char *SDL_GetBasePath(void)
 #endif
     }
 
-#ifdef __SOLARIS__  /* try this as a fallback if /proc didn't pan out */
+#ifdef SDL_PLATFORM_SOLARIS  /* try this as a fallback if /proc didn't pan out */
     if (!retval) {
         const char *path = getexecname();
-        if ((path != NULL) && (path[0] == '/')) { /* must be absolute path... */
+        if ((path) && (path[0] == '/')) { /* must be absolute path... */
             retval = SDL_strdup(path);
-            if (retval == NULL) {
-                SDL_OutOfMemory();
+            if (!retval) {
                 return NULL;
             }
         }
@@ -237,9 +235,9 @@ char *SDL_GetBasePath(void)
     /* If we had access to argv[0] here, we could check it for a path,
         or troll through $PATH looking for it, too. */
 
-    if (retval != NULL) { /* chop off filename. */
+    if (retval) { /* chop off filename. */
         char *ptr = SDL_strrchr(retval, '/');
-        if (ptr != NULL) {
+        if (ptr) {
             *(ptr + 1) = '\0';
         } else { /* shouldn't happen, but just in case... */
             SDL_free(retval);
@@ -247,10 +245,10 @@ char *SDL_GetBasePath(void)
         }
     }
 
-    if (retval != NULL) {
+    if (retval) {
         /* try to shrink buffer... */
         char *ptr = (char *)SDL_realloc(retval, SDL_strlen(retval) + 1);
-        if (ptr != NULL) {
+        if (ptr) {
             retval = ptr; /* oh well if it failed. */
         }
     }
@@ -258,7 +256,7 @@ char *SDL_GetBasePath(void)
     return retval;
 }
 
-char *SDL_GetPrefPath(const char *org, const char *app)
+char *SDL_SYS_GetPrefPath(const char *org, const char *app)
 {
     /*
      * We use XDG's base directory spec, even if you're not on Linux.
@@ -273,18 +271,18 @@ char *SDL_GetPrefPath(const char *org, const char *app)
     char *ptr = NULL;
     size_t len = 0;
 
-    if (app == NULL) {
+    if (!app) {
         SDL_InvalidParamError("app");
         return NULL;
     }
-    if (org == NULL) {
+    if (!org) {
         org = "";
     }
 
-    if (envr == NULL) {
+    if (!envr) {
         /* You end up with "$HOME/.local/share/Game Name 2" */
         envr = SDL_getenv("HOME");
-        if (envr == NULL) {
+        if (!envr) {
             /* we could take heroic measures with /etc/passwd, but oh well. */
             SDL_SetError("neither XDG_DATA_HOME nor HOME environment is set");
             return NULL;
@@ -301,8 +299,7 @@ char *SDL_GetPrefPath(const char *org, const char *app)
 
     len += SDL_strlen(append) + SDL_strlen(org) + SDL_strlen(app) + 3;
     retval = (char *)SDL_malloc(len);
-    if (retval == NULL) {
-        SDL_OutOfMemory();
+    if (!retval) {
         return NULL;
     }
 
@@ -362,7 +359,8 @@ char *SDL_GetPrefPath(const char *org, const char *app)
 static char *xdg_user_dir_lookup_with_fallback (const char *type, const char *fallback)
 {
   FILE *file;
-  char *home_dir, *config_home, *config_file;
+  const char *home_dir, *config_home;
+  char *config_file;
   char buffer[512];
   char *user_dir;
   char *p, *d;
@@ -372,15 +370,15 @@ static char *xdg_user_dir_lookup_with_fallback (const char *type, const char *fa
 
   home_dir = SDL_getenv ("HOME");
 
-  if (home_dir == NULL)
+  if (!home_dir)
     goto error;
 
   config_home = SDL_getenv ("XDG_CONFIG_HOME");
-  if (config_home == NULL || config_home[0] == 0)
+  if (!config_home || config_home[0] == 0)
     {
       l = SDL_strlen (home_dir) + SDL_strlen ("/.config/user-dirs.dirs") + 1;
       config_file = (char*) SDL_malloc (l);
-      if (config_file == NULL)
+      if (!config_file)
         goto error;
 
       SDL_strlcpy (config_file, home_dir, l);
@@ -390,7 +388,7 @@ static char *xdg_user_dir_lookup_with_fallback (const char *type, const char *fa
     {
       l = SDL_strlen (config_home) + SDL_strlen ("/user-dirs.dirs") + 1;
       config_file = (char*) SDL_malloc (l);
-      if (config_file == NULL)
+      if (!config_file)
         goto error;
 
       SDL_strlcpy (config_file, config_home, l);
@@ -399,7 +397,7 @@ static char *xdg_user_dir_lookup_with_fallback (const char *type, const char *fa
 
   file = fopen (config_file, "r");
   SDL_free (config_file);
-  if (file == NULL)
+  if (!file)
     goto error;
 
   user_dir = NULL;
@@ -452,7 +450,7 @@ static char *xdg_user_dir_lookup_with_fallback (const char *type, const char *fa
         {
           l = SDL_strlen (home_dir) + 1 + SDL_strlen (p) + 1;
           user_dir = (char*) SDL_malloc (l);
-          if (user_dir == NULL)
+          if (!user_dir)
             goto error2;
 
           SDL_strlcpy (user_dir, home_dir, l);
@@ -461,7 +459,7 @@ static char *xdg_user_dir_lookup_with_fallback (const char *type, const char *fa
       else
         {
           user_dir = (char*) SDL_malloc (SDL_strlen (p) + 1);
-          if (user_dir == NULL)
+          if (!user_dir)
             goto error2;
 
           *user_dir = 0;
@@ -490,37 +488,38 @@ error2:
 
 static char *xdg_user_dir_lookup (const char *type)
 {
-    char *dir, *home_dir, *user_dir;
+    const char *home_dir;
+    char *dir, *user_dir;
 
     dir = xdg_user_dir_lookup_with_fallback(type, NULL);
-    if (dir != NULL)
+    if (dir)
         return dir;
 
     home_dir = SDL_getenv("HOME");
 
-    if (home_dir == NULL)
+    if (!home_dir)
         return NULL;
 
     /* Special case desktop for historical compatibility */
-    if (SDL_strcmp(type, "DESKTOP") == 0)
-    {
-        user_dir = (char*) SDL_malloc(SDL_strlen(home_dir) +
-                                      SDL_strlen("/Desktop") + 1);
-        if (user_dir == NULL)
+    if (SDL_strcmp(type, "DESKTOP") == 0) {
+        size_t length = SDL_strlen(home_dir) + SDL_strlen("/Desktop") + 1;
+        user_dir = (char*) SDL_malloc(length);
+        if (!user_dir)
             return NULL;
 
-        strcpy(user_dir, home_dir);
-        strcat(user_dir, "/Desktop");
+        SDL_strlcpy(user_dir, home_dir, length);
+        SDL_strlcat(user_dir, "/Desktop", length);
         return user_dir;
     }
 
     return NULL;
 }
 
-char *SDL_GetUserFolder(SDL_Folder folder)
+char *SDL_SYS_GetUserFolder(SDL_Folder folder)
 {
     const char *param = NULL;
     char *retval;
+    char *newretval;
 
     /* According to `man xdg-user-dir`, the possible values are:
         DESKTOP
@@ -542,12 +541,7 @@ char *SDL_GetUserFolder(SDL_Folder folder)
         }
 
         retval = SDL_strdup(param);
-
-        if (!retval) {
-            SDL_OutOfMemory();
-        }
-
-        return retval;
+        goto append_slash;
 
     case SDL_FOLDER_DESKTOP:
         param = "DESKTOP";
@@ -606,6 +600,17 @@ char *SDL_GetUserFolder(SDL_Folder folder)
         SDL_SetError("XDG directory not available");
         return NULL;
     }
+
+append_slash:
+    newretval = (char *) SDL_realloc(retval, SDL_strlen(retval) + 2);
+
+    if (!newretval) {
+        SDL_free(retval);
+        return NULL;
+    }
+
+    retval = newretval;
+    SDL_strlcat(retval, "/", SDL_strlen(retval) + 2);
 
     return retval;
 }

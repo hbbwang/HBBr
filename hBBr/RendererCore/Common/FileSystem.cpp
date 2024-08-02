@@ -25,7 +25,6 @@ HString FileSystem::GetProgramPath()
         strcpy_s(pathStr, 4096, path);
         pathStr[strlen(path)] = '\0';
         _appPath = pathStr;
-        SDL_free(path);
         #elif __ANDROID__
         //获取android/data/ [package] /files路径
         _appPath = SDL_AndroidGetExternalStoragePath();

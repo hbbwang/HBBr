@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -26,7 +26,6 @@
 //   https://googlesamples.github.io/android-audio-high-performance/guides/opensl_es.html
 
 #include "../SDL_sysaudio.h"
-#include "../SDL_audio_c.h"
 #include "SDL_openslES.h"
 
 #include "../../core/android/SDL_android.h"
@@ -108,19 +107,19 @@ static const char *sldevaudioplayerstr   = "SLES Audio Player";
 
 #define SLES_DEV_AUDIO_RECORDER sldevaudiorecorderstr
 #define SLES_DEV_AUDIO_PLAYER   sldevaudioplayerstr
-static void openslES_DetectDevices( int iscapture )
+static void OPENSLES_DetectDevices( int recording )
 {
     LOGI( "openSLES_DetectDevices()" );
-    if ( iscapture )
+    if ( recording )
             addfn( SLES_DEV_AUDIO_RECORDER );
     else
             addfn( SLES_DEV_AUDIO_PLAYER );
 }
 #endif
 
-static void openslES_DestroyEngine(void)
+static void OPENSLES_DestroyEngine(void)
 {
-    LOGI("openslES_DestroyEngine()");
+    LOGI("OPENSLES_DestroyEngine()");
 
     // destroy output mix object, and invalidate all associated interfaces
     if (outputMixObject != NULL) {
@@ -136,7 +135,7 @@ static void openslES_DestroyEngine(void)
     }
 }
 
-static int openslES_CreateEngine(void)
+static int OPENSLES_CreateEngine(void)
 {
     const SLInterfaceID ids[1] = { SL_IID_VOLUME };
     const SLboolean req[1] = { SL_BOOLEAN_FALSE };
@@ -185,7 +184,7 @@ static int openslES_CreateEngine(void)
     return 1;
 
 error:
-    openslES_DestroyEngine();
+    OPENSLES_DestroyEngine();
     return 0;
 }
 
@@ -195,10 +194,10 @@ static void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context)
     struct SDL_PrivateAudioData *audiodata = (struct SDL_PrivateAudioData *)context;
 
     LOGV("SLES: Recording Callback");
-    SDL_PostSemaphore(audiodata->playsem);
+    SDL_SignalSemaphore(audiodata->playsem);
 }
 
-static void openslES_DestroyPCMRecorder(SDL_AudioDevice *device)
+static void OPENSLES_DestroyPCMRecorder(SDL_AudioDevice *device)
 {
     struct SDL_PrivateAudioData *audiodata = device->hidden;
     SLresult result;
@@ -229,7 +228,13 @@ static void openslES_DestroyPCMRecorder(SDL_AudioDevice *device)
     }
 }
 
-static int openslES_CreatePCMRecorder(SDL_AudioDevice *device)
+// !!! FIXME: make this non-blocking!
+static void SDLCALL RequestAndroidPermissionBlockingCallback(void *userdata, const char *permission, SDL_bool granted)
+{
+    SDL_AtomicSet((SDL_AtomicInt *) userdata, granted ? 1 : -1);
+}
+
+static int OPENSLES_CreatePCMRecorder(SDL_AudioDevice *device)
 {
     struct SDL_PrivateAudioData *audiodata = device->hidden;
     SLDataFormat_PCM format_pcm;
@@ -242,9 +247,22 @@ static int openslES_CreatePCMRecorder(SDL_AudioDevice *device)
     SLresult result;
     int i;
 
-    if (!Android_JNI_RequestPermission("android.permission.RECORD_AUDIO")) {
-        LOGE("This app doesn't have RECORD_AUDIO permission");
-        return SDL_SetError("This app doesn't have RECORD_AUDIO permission");
+    // !!! FIXME: make this non-blocking!
+    {
+        SDL_AtomicInt permission_response;
+        SDL_AtomicSet(&permission_response, 0);
+        if (SDL_RequestAndroidPermission("android.permission.RECORD_AUDIO", RequestAndroidPermissionBlockingCallback, &permission_response) == -1) {
+            return -1;
+        }
+
+        while (SDL_AtomicGet(&permission_response) == 0) {
+            SDL_Delay(10);
+        }
+
+        if (SDL_AtomicGet(&permission_response) < 0) {
+            LOGE("This app doesn't have RECORD_AUDIO permission");
+            return SDL_SetError("This app doesn't have RECORD_AUDIO permission");
+        }
     }
 
     // Just go with signed 16-bit audio as it's the most compatible
@@ -328,7 +346,7 @@ static int openslES_CreatePCMRecorder(SDL_AudioDevice *device)
 
     // Create the sound buffers
     audiodata->mixbuff = (Uint8 *)SDL_malloc(NUM_BUFFERS * device->buffer_size);
-    if (audiodata->mixbuff == NULL) {
+    if (!audiodata->mixbuff) {
         LOGE("mixbuffer allocate - out of memory");
         goto failed;
     }
@@ -372,10 +390,10 @@ static void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context)
     struct SDL_PrivateAudioData *audiodata = (struct SDL_PrivateAudioData *)context;
 
     LOGV("SLES: Playback Callback");
-    SDL_PostSemaphore(audiodata->playsem);
+    SDL_SignalSemaphore(audiodata->playsem);
 }
 
-static void openslES_DestroyPCMPlayer(SDL_AudioDevice *device)
+static void OPENSLES_DestroyPCMPlayer(SDL_AudioDevice *device)
 {
     struct SDL_PrivateAudioData *audiodata = device->hidden;
 
@@ -406,7 +424,7 @@ static void openslES_DestroyPCMPlayer(SDL_AudioDevice *device)
     }
 }
 
-static int openslES_CreatePCMPlayer(SDL_AudioDevice *device)
+static int OPENSLES_CreatePCMPlayer(SDL_AudioDevice *device)
 {
     /* If we want to add floating point audio support (requires API level 21)
        it can be done as described here:
@@ -575,7 +593,7 @@ static int openslES_CreatePCMPlayer(SDL_AudioDevice *device)
 
     // Create the sound buffers
     audiodata->mixbuff = (Uint8 *)SDL_malloc(NUM_BUFFERS * device->buffer_size);
-    if (audiodata->mixbuff == NULL) {
+    if (!audiodata->mixbuff) {
         LOGE("mixbuffer allocate - out of memory");
         goto failed;
     }
@@ -597,26 +615,26 @@ failed:
     return -1;
 }
 
-static int openslES_OpenDevice(SDL_AudioDevice *device)
+static int OPENSLES_OpenDevice(SDL_AudioDevice *device)
 {
     device->hidden = (struct SDL_PrivateAudioData *)SDL_calloc(1, sizeof(*device->hidden));
-    if (device->hidden == NULL) {
-        return SDL_OutOfMemory();
+    if (!device->hidden) {
+        return -1;
     }
 
-    if (device->iscapture) {
-        LOGI("openslES_OpenDevice() for capture");
-        return openslES_CreatePCMRecorder(device);
+    if (device->recording) {
+        LOGI("OPENSLES_OpenDevice() for recording");
+        return OPENSLES_CreatePCMRecorder(device);
     } else {
         int ret;
-        LOGI("openslES_OpenDevice() for playing");
-        ret = openslES_CreatePCMPlayer(device);
+        LOGI("OPENSLES_OpenDevice() for playback");
+        ret = OPENSLES_CreatePCMPlayer(device);
         if (ret < 0) {
             // Another attempt to open the device with a lower frequency
             if (device->spec.freq > 48000) {
-                openslES_DestroyPCMPlayer(device);
+                OPENSLES_DestroyPCMPlayer(device);
                 device->spec.freq = 48000;
-                ret = openslES_CreatePCMPlayer(device);
+                ret = OPENSLES_CreatePCMPlayer(device);
             }
         }
 
@@ -628,21 +646,32 @@ static int openslES_OpenDevice(SDL_AudioDevice *device)
     return 0;
 }
 
-static int openslES_WaitDevice(SDL_AudioDevice *device)
+static int OPENSLES_WaitDevice(SDL_AudioDevice *device)
 {
     struct SDL_PrivateAudioData *audiodata = device->hidden;
 
-    LOGV("openslES_WaitDevice()");
+    LOGV("OPENSLES_WaitDevice()");
 
-    // Wait for an audio chunk to finish
-    return SDL_WaitSemaphore(audiodata->playsem);
+    while (!SDL_AtomicGet(&device->shutdown)) {
+        // this semaphore won't fire when the app is in the background (OPENSLES_PauseDevices was called).
+        const int rc = SDL_WaitSemaphoreTimeout(audiodata->playsem, 100);
+        if (rc == -1) {  // uh, what?
+            return -1;
+        } else if (rc == 0) {
+            return 0;  // semaphore was signaled, let's go!
+        } else {
+            SDL_assert(rc == SDL_MUTEX_TIMEDOUT);
+        }
+        // Still waiting on the semaphore (or the system), check other things then wait again.
+    }
+    return 0;
 }
 
-static int openslES_PlayDevice(SDL_AudioDevice *device, const Uint8 *buffer, int buflen)
+static int OPENSLES_PlayDevice(SDL_AudioDevice *device, const Uint8 *buffer, int buflen)
 {
     struct SDL_PrivateAudioData *audiodata = device->hidden;
 
-    LOGV("======openslES_PlayDevice()======");
+    LOGV("======OPENSLES_PlayDevice()======");
 
     // Queue it up
     const SLresult result = (*bqPlayerBufferQueue)->Enqueue(bqPlayerBufferQueue, buffer, buflen);
@@ -655,7 +684,7 @@ static int openslES_PlayDevice(SDL_AudioDevice *device, const Uint8 *buffer, int
     // If Enqueue fails, callback won't be called.
     // Post the semaphore, not to run out of buffer
     if (SL_RESULT_SUCCESS != result) {
-        SDL_PostSemaphore(audiodata->playsem);
+        SDL_SignalSemaphore(audiodata->playsem);
     }
 
     return 0;
@@ -673,15 +702,15 @@ static int openslES_PlayDevice(SDL_AudioDevice *device, const Uint8 *buffer, int
 //
 // okay..
 
-static Uint8 *openslES_GetDeviceBuf(SDL_AudioDevice *device, int *bufsize)
+static Uint8 *OPENSLES_GetDeviceBuf(SDL_AudioDevice *device, int *bufsize)
 {
     struct SDL_PrivateAudioData *audiodata = device->hidden;
 
-    LOGV("openslES_GetDeviceBuf()");
+    LOGV("OPENSLES_GetDeviceBuf()");
     return audiodata->pmixbuff[audiodata->next_buffer];
 }
 
-static int openslES_CaptureFromDevice(SDL_AudioDevice *device, void *buffer, int buflen)
+static int OPENSLES_RecordDevice(SDL_AudioDevice *device, void *buffer, int buflen)
 {
     struct SDL_PrivateAudioData *audiodata = device->hidden;
 
@@ -704,16 +733,16 @@ static int openslES_CaptureFromDevice(SDL_AudioDevice *device, void *buffer, int
     return device->buffer_size;
 }
 
-static void openslES_CloseDevice(SDL_AudioDevice *device)
+static void OPENSLES_CloseDevice(SDL_AudioDevice *device)
 {
     // struct SDL_PrivateAudioData *audiodata = device->hidden;
     if (device->hidden) {
-        if (device->iscapture) {
-            LOGI("openslES_CloseDevice() for capture");
-            openslES_DestroyPCMRecorder(device);
+        if (device->recording) {
+            LOGI("OPENSLES_CloseDevice() for recording");
+            OPENSLES_DestroyPCMRecorder(device);
         } else {
-            LOGI("openslES_CloseDevice() for playing");
-            openslES_DestroyPCMPlayer(device);
+            LOGI("OPENSLES_CloseDevice() for playing");
+            OPENSLES_DestroyPCMPlayer(device);
         }
 
         SDL_free(device->hidden);
@@ -721,61 +750,61 @@ static void openslES_CloseDevice(SDL_AudioDevice *device)
     }
 }
 
-static SDL_bool openslES_Init(SDL_AudioDriverImpl *impl)
+static SDL_bool OPENSLES_Init(SDL_AudioDriverImpl *impl)
 {
-    LOGI("openslES_Init() called");
+    LOGI("OPENSLES_Init() called");
 
-    if (!openslES_CreateEngine()) {
+    if (!OPENSLES_CreateEngine()) {
         return SDL_FALSE;
     }
 
-    LOGI("openslES_Init() - set pointers");
+    LOGI("OPENSLES_Init() - set pointers");
 
     // Set the function pointers
-    // impl->DetectDevices = openslES_DetectDevices;
+    // impl->DetectDevices = OPENSLES_DetectDevices;
     impl->ThreadInit = Android_AudioThreadInit;
-    impl->OpenDevice = openslES_OpenDevice;
-    impl->WaitDevice = openslES_WaitDevice;
-    impl->PlayDevice = openslES_PlayDevice;
-    impl->GetDeviceBuf = openslES_GetDeviceBuf;
-    impl->WaitCaptureDevice = openslES_WaitDevice;
-    impl->CaptureFromDevice = openslES_CaptureFromDevice;
-    impl->CloseDevice = openslES_CloseDevice;
-    impl->Deinitialize = openslES_DestroyEngine;
+    impl->OpenDevice = OPENSLES_OpenDevice;
+    impl->WaitDevice = OPENSLES_WaitDevice;
+    impl->PlayDevice = OPENSLES_PlayDevice;
+    impl->GetDeviceBuf = OPENSLES_GetDeviceBuf;
+    impl->WaitRecordingDevice = OPENSLES_WaitDevice;
+    impl->RecordDevice = OPENSLES_RecordDevice;
+    impl->CloseDevice = OPENSLES_CloseDevice;
+    impl->Deinitialize = OPENSLES_DestroyEngine;
 
     // and the capabilities
-    impl->HasCaptureSupport = SDL_TRUE;
-    impl->OnlyHasDefaultOutputDevice = SDL_TRUE;
-    impl->OnlyHasDefaultCaptureDevice = SDL_TRUE;
+    impl->HasRecordingSupport = SDL_TRUE;
+    impl->OnlyHasDefaultPlaybackDevice = SDL_TRUE;
+    impl->OnlyHasDefaultRecordingDevice = SDL_TRUE;
 
-    LOGI("openslES_Init() - success");
+    LOGI("OPENSLES_Init() - success");
 
     // this audio target is available.
     return SDL_TRUE;
 }
 
-AudioBootStrap openslES_bootstrap = {
-    "openslES", "opensl ES audio driver", openslES_Init, SDL_FALSE
+AudioBootStrap OPENSLES_bootstrap = {
+    "openslES", "OpenSL ES audio driver", OPENSLES_Init, SDL_FALSE
 };
 
-void openslES_ResumeDevices(void)
+void OPENSLES_ResumeDevices(void)
 {
     if (bqPlayerPlay != NULL) {
         // set the player's state to 'playing'
         SLresult result = (*bqPlayerPlay)->SetPlayState(bqPlayerPlay, SL_PLAYSTATE_PLAYING);
         if (SL_RESULT_SUCCESS != result) {
-            LOGE("openslES_ResumeDevices failed: %d", result);
+            LOGE("OPENSLES_ResumeDevices failed: %d", result);
         }
     }
 }
 
-void openslES_PauseDevices(void)
+void OPENSLES_PauseDevices(void)
 {
     if (bqPlayerPlay != NULL) {
         // set the player's state to 'paused'
         SLresult result = (*bqPlayerPlay)->SetPlayState(bqPlayerPlay, SL_PLAYSTATE_PAUSED);
         if (SL_RESULT_SUCCESS != result) {
-            LOGE("openslES_PauseDevices failed: %d", result);
+            LOGE("OPENSLES_PauseDevices failed: %d", result);
         }
     }
 }

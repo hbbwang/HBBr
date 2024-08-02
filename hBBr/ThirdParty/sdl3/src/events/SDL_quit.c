@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -172,14 +172,14 @@ void SDL_SendPendingSignalEvents(void)
 #ifdef SDL_BACKGROUNDING_SIGNAL
     if (send_backgrounding_pending) {
         send_backgrounding_pending = SDL_FALSE;
-        SDL_OnApplicationWillResignActive();
+        SDL_OnApplicationWillEnterBackground();
     }
 #endif
 
 #ifdef SDL_FOREGROUNDING_SIGNAL
     if (send_foregrounding_pending) {
         send_foregrounding_pending = SDL_FALSE;
-        SDL_OnApplicationDidBecomeActive();
+        SDL_OnApplicationDidEnterForeground();
     }
 #endif
 #endif

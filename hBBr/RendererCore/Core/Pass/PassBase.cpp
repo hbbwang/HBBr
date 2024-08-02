@@ -27,7 +27,7 @@ void PassBase::PassBeginUpdate()
 	const auto& vkManager = VulkanManager::GetManager();
 	_cpuTimer.Start();
 	vkCmdWriteTimestamp(cmdBuf, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, vkManager->GetQueryTimestamp(),
-		(_renderer->GetCurrentFrameIndex() * _manager->GetInitPasses().size() * 2) + (passIndex * 2));
+		(_renderer->GetCurrentFrameIndex() * (uint32_t)_manager->GetInitPasses().size() * 2) + (passIndex * 2));
 }
 
 void PassBase::PassEndUpdate()
@@ -35,7 +35,7 @@ void PassBase::PassEndUpdate()
 	const auto& cmdBuf = _renderer->GetCommandBuffer();
 	const auto& vkManager = VulkanManager::GetManager();
 	vkCmdWriteTimestamp(cmdBuf, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, vkManager->GetQueryTimestamp(), 
-		(_renderer->GetCurrentFrameIndex() * _manager->GetInitPasses().size() * 2) + (passIndex * 2) + 1);
+		(_renderer->GetCurrentFrameIndex() * (uint32_t)_manager->GetInitPasses().size() * 2) + (passIndex * 2) + 1);
 	_cpuTime = _cpuTimer.End_ms();
 	bStartQuery[_renderer->GetCurrentFrameIndex()] = true;
 }

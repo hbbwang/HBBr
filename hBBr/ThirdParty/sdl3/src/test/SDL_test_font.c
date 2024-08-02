@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -34,6 +34,8 @@
 ;     Public Domain
 ;
 */
+
+#define NUM_FONT_GLYPHS 257
 
 static unsigned char SDLTest_FontData[] = {
 
@@ -3110,19 +3112,31 @@ static unsigned char SDLTest_FontData[] = {
     0x30, /* 00001100 */
     0x1f, /* 11111000 */
 
+    /*
+     * 256 0x100 - missing character
+     */
+    0x55, /* 01010101 */
+    0xAA, /* 10101010 */
+    0x55, /* 01010101 */
+    0xAA, /* 10101010 */
+    0x55, /* 01010101 */
+    0xAA, /* 10101010 */
+    0x55, /* 01010101 */
+    0xAA, /* 10101010 */
 };
+SDL_COMPILE_TIME_ASSERT(SDLTest_FontDataSize, SDL_arraysize(SDLTest_FontData) == NUM_FONT_GLYPHS * 8);
 
 /* ---- Character */
 
 struct SDLTest_CharTextureCache
 {
     SDL_Renderer *renderer;
-    SDL_Texture *charTextureCache[256];
+    SDL_Texture *charTextureCache[NUM_FONT_GLYPHS];
     struct SDLTest_CharTextureCache *next;
 };
 
 /*!
-\brief List of per-renderer caches for 8x8 pixel font textures created at runtime.
+List of per-renderer caches for 8x8 pixel font textures created at runtime.
 */
 static struct SDLTest_CharTextureCache *SDLTest_CharTextureCacheList;
 
@@ -3163,16 +3177,19 @@ int SDLTest_DrawCharacter(SDL_Renderer *renderer, float x, float y, Uint32 c)
 
     /* Character index in cache */
     ci = c;
+    if (ci >= NUM_FONT_GLYPHS) {
+        ci = (NUM_FONT_GLYPHS - 1);
+    }
 
     /* Search for this renderer's cache */
-    for (cache = SDLTest_CharTextureCacheList; cache != NULL; cache = cache->next) {
+    for (cache = SDLTest_CharTextureCacheList; cache; cache = cache->next) {
         if (cache->renderer == renderer) {
             break;
         }
     }
 
     /* Allocate a new cache for this renderer if needed */
-    if (cache == NULL) {
+    if (!cache) {
         cache = (struct SDLTest_CharTextureCache *)SDL_calloc(1, sizeof(struct SDLTest_CharTextureCache));
         cache->renderer = renderer;
         cache->next = SDLTest_CharTextureCacheList;
@@ -3187,7 +3204,7 @@ int SDLTest_DrawCharacter(SDL_Renderer *renderer, float x, float y, Uint32 c)
          * Redraw character into surface
          */
         character = SDL_CreateSurface(charWidth, charHeight, SDL_PIXELFORMAT_RGBA8888);
-        if (character == NULL) {
+        if (!character) {
             return -1;
         }
 
@@ -3342,9 +3359,7 @@ int SDLTest_DrawString(SDL_Renderer *renderer, float x, float y, const char *s)
     while (len > 0 && !result) {
         int advance = 0;
         Uint32 ch = UTF8_getch(s, len, &advance);
-        if (ch < 256) {
-            result |= SDLTest_DrawCharacter(renderer, curx, cury, ch);
-        }
+        result |= SDLTest_DrawCharacter(renderer, curx, cury, ch);
         curx += charWidth;
         s += advance;
         len -= advance;
@@ -3357,7 +3372,7 @@ SDLTest_TextWindow *SDLTest_TextWindowCreate(float x, float y, float w, float h)
 {
     SDLTest_TextWindow *textwin = (SDLTest_TextWindow *)SDL_malloc(sizeof(*textwin));
 
-    if (textwin == NULL) {
+    if (!textwin) {
         return NULL;
     }
 

@@ -13,6 +13,10 @@ DescriptorSet::DescriptorSet(class VulkanRenderer* renderer)
 DescriptorSet::~DescriptorSet()
 {
 	const auto& manager = VulkanManager::GetManager();
+	for (auto& i : _descriptorSets)
+	{
+		manager->FreeDescriptorSet(manager->GetDescriptorPool(), i);
+	}	
 	if (_layout)
 	{
 		manager->DestroyDescriptorSetLayout(_layout);
@@ -81,11 +85,6 @@ void DescriptorSet::BuildDescriptorSetLayout()
 	}
 
 	manager->CreateDescripotrSetLayout(_descriptorTypes, _shaderStageFlags, _layout);
-	//_descriptorSets.resize(manager->GetSwapchainBufferCount());
-	//for (int i = 0; i < (int)manager->GetSwapchainBufferCount(); i++)
-	//{
-	//	manager->AllocateDescriptorSet(manager->GetDescriptorPool(), _layout, _descriptorSets[i]);
-	//}
 	RefreshDescriptorSetAllBinding();
 }
 

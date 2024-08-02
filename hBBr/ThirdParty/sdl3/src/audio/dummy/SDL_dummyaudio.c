@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -22,7 +22,7 @@
 
 // Output audio to nowhere...
 
-#include "../SDL_audio_c.h"
+#include "../SDL_sysaudio.h"
 #include "SDL_dummyaudio.h"
 
 // !!! FIXME: this should be an SDL hint, not an environment variable.
@@ -40,13 +40,13 @@ static int DUMMYAUDIO_OpenDevice(SDL_AudioDevice *device)
 
     device->hidden = (struct SDL_PrivateAudioData *) SDL_calloc(1, sizeof(*device->hidden));
     if (!device->hidden) {
-        return SDL_OutOfMemory();
+        return -1;
     }
 
-    if (!device->iscapture) {
+    if (!device->recording) {
         device->hidden->mixbuf = (Uint8 *) SDL_malloc(device->buffer_size);
         if (!device->hidden->mixbuf) {
-            return SDL_OutOfMemory();
+            return -1;
         }
     }
 
@@ -69,7 +69,7 @@ static Uint8 *DUMMYAUDIO_GetDeviceBuf(SDL_AudioDevice *device, int *buffer_size)
     return device->hidden->mixbuf;
 }
 
-static int DUMMYAUDIO_CaptureFromDevice(SDL_AudioDevice *device, void *buffer, int buflen)
+static int DUMMYAUDIO_RecordDevice(SDL_AudioDevice *device, void *buffer, int buflen)
 {
     // always return a full buffer of silence.
     SDL_memset(buffer, device->silence_value, buflen);
@@ -82,12 +82,12 @@ static SDL_bool DUMMYAUDIO_Init(SDL_AudioDriverImpl *impl)
     impl->CloseDevice = DUMMYAUDIO_CloseDevice;
     impl->WaitDevice = DUMMYAUDIO_WaitDevice;
     impl->GetDeviceBuf = DUMMYAUDIO_GetDeviceBuf;
-    impl->WaitCaptureDevice = DUMMYAUDIO_WaitDevice;
-    impl->CaptureFromDevice = DUMMYAUDIO_CaptureFromDevice;
+    impl->WaitRecordingDevice = DUMMYAUDIO_WaitDevice;
+    impl->RecordDevice = DUMMYAUDIO_RecordDevice;
 
-    impl->OnlyHasDefaultOutputDevice = SDL_TRUE;
-    impl->OnlyHasDefaultCaptureDevice = SDL_TRUE;
-    impl->HasCaptureSupport = SDL_TRUE;
+    impl->OnlyHasDefaultPlaybackDevice = SDL_TRUE;
+    impl->OnlyHasDefaultRecordingDevice = SDL_TRUE;
+    impl->HasRecordingSupport = SDL_TRUE;
 
     return SDL_TRUE;
 }

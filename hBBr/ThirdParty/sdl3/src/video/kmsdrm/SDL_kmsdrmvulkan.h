@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -36,13 +36,17 @@
 
 int KMSDRM_Vulkan_LoadLibrary(SDL_VideoDevice *_this, const char *path);
 void KMSDRM_Vulkan_UnloadLibrary(SDL_VideoDevice *_this);
-SDL_bool KMSDRM_Vulkan_GetInstanceExtensions(SDL_VideoDevice *_this,
-                                             unsigned *count,
-                                             const char **names);
-SDL_bool KMSDRM_Vulkan_CreateSurface(SDL_VideoDevice *_this,
-                                     SDL_Window *window,
-                                     VkInstance instance,
-                                     VkSurfaceKHR *surface);
+char const* const* KMSDRM_Vulkan_GetInstanceExtensions(SDL_VideoDevice *_this,
+                                                       Uint32 *count);
+int KMSDRM_Vulkan_CreateSurface(SDL_VideoDevice *_this,
+                                SDL_Window *window,
+                                VkInstance instance,
+                                const struct VkAllocationCallbacks *allocator,
+                                VkSurfaceKHR *surface);
+void KMSDRM_Vulkan_DestroySurface(SDL_VideoDevice *_this,
+                                  VkInstance instance,
+                                  VkSurfaceKHR surface,
+                                  const struct VkAllocationCallbacks *allocator);
 
 #endif
 

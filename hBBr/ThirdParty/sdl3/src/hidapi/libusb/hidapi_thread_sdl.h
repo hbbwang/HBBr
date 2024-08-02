@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -179,7 +179,7 @@ static void hidapi_thread_create(hidapi_thread_state *state, void *(*func)(void*
      */
     param->func = func;
     param->func_arg = func_arg;
-    state->thread = SDL_CreateThreadInternal(RunInputThread, "libusb", 0, param);
+    state->thread = SDL_CreateThread(RunInputThread, "libusb", param);
 }
 
 static void hidapi_thread_join(hidapi_thread_state *state)

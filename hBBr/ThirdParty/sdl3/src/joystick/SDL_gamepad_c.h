@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -36,10 +36,10 @@ extern void SDL_PrivateGamepadAdded(SDL_JoystickID instance_id);
 extern void SDL_PrivateGamepadRemoved(SDL_JoystickID instance_id);
 
 /* Function to return whether a joystick name and GUID is a gamepad  */
-extern SDL_bool SDL_IsGamepadNameAndGUID(const char *name, SDL_JoystickGUID guid);
+extern SDL_bool SDL_IsGamepadNameAndGUID(const char *name, SDL_GUID guid);
 
 /* Function to return whether a gamepad should be ignored */
-extern SDL_bool SDL_ShouldIgnoreGamepad(const char *name, SDL_JoystickGUID guid);
+extern SDL_bool SDL_ShouldIgnoreGamepad(const char *name, SDL_GUID guid);
 
 /* Handle delayed guide button on a gamepad */
 extern void SDL_GamepadHandleDelayedGuideButton(SDL_Joystick *joystick);

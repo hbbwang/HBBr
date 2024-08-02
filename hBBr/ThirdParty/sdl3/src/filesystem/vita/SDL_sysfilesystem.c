@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -25,6 +25,8 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent filesystem routines                                */
 
+#include "../SDL_sysfilesystem.h"
+
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -34,25 +36,23 @@
 #include <limits.h>
 #include <fcntl.h>
 
-char *SDL_GetBasePath(void)
+char *SDL_SYS_GetBasePath(void)
 {
-    const char *basepath = "app0:/";
-    char *retval = SDL_strdup(basepath);
-    return retval;
+    return SDL_strdup("app0:/");
 }
 
-char *SDL_GetPrefPath(const char *org, const char *app)
+char *SDL_SYS_GetPrefPath(const char *org, const char *app)
 {
     const char *envr = "ux0:/data/";
     char *retval = NULL;
     char *ptr = NULL;
     size_t len = 0;
 
-    if (app == NULL) {
+    if (!app) {
         SDL_InvalidParamError("app");
         return NULL;
     }
-    if (org == NULL) {
+    if (!org) {
         org = "";
     }
 
@@ -60,8 +60,7 @@ char *SDL_GetPrefPath(const char *org, const char *app)
 
     len += SDL_strlen(org) + SDL_strlen(app) + 3;
     retval = (char *)SDL_malloc(len);
-    if (retval == NULL) {
-        SDL_OutOfMemory();
+    if (!retval) {
         return NULL;
     }
 
@@ -84,7 +83,7 @@ char *SDL_GetPrefPath(const char *org, const char *app)
 }
 
 /* TODO */
-char *SDL_GetUserFolder(SDL_Folder folder)
+char *SDL_SYS_GetUserFolder(SDL_Folder folder)
 {
     SDL_Unsupported();
     return NULL;

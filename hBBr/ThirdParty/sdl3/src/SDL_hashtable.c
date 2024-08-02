@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -18,7 +18,6 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-
 #include "SDL_internal.h"
 #include "SDL_hashtable.h"
 
@@ -33,6 +32,7 @@ struct SDL_HashTable
 {
     SDL_HashItem **table;
     Uint32 table_len;
+    int hash_shift;
     SDL_bool stackable;
     void *data;
     SDL_HashTable_HashFn hash;
@@ -47,26 +47,26 @@ SDL_HashTable *SDL_CreateHashTable(void *data, const Uint32 num_buckets, const S
 {
     SDL_HashTable *table;
 
-    /* num_buckets must be a power of two so we get a solid block of bits to mask hash values against. */
-    if ((num_buckets == 0) || ((num_buckets & (num_buckets - 1)) != 0)) {
+    // num_buckets must be a power of two so we can derive the bucket index with just a bitshift.
+    // Need at least two buckets, otherwise hash_shift would be 32, which is UB!
+    if ((num_buckets < 2) || !SDL_HasExactlyOneBitSet32(num_buckets)) {
         SDL_SetError("num_buckets must be a power of two");
         return NULL;
     }
 
     table = (SDL_HashTable *) SDL_calloc(1, sizeof (SDL_HashTable));
-    if (table == NULL) {
-        SDL_OutOfMemory();
+    if (!table) {
         return NULL;
     }
 
     table->table = (SDL_HashItem **) SDL_calloc(num_buckets, sizeof (SDL_HashItem *));
-    if (table->table == NULL) {
+    if (!table->table) {
         SDL_free(table);
-        SDL_OutOfMemory();
         return NULL;
     }
 
     table->table_len = num_buckets;
+    table->hash_shift = 32 - SDL_MostSignificantBitIndex32(num_buckets);
     table->stackable = stackable;
     table->data = data;
     table->hash = hashfn;
@@ -77,25 +77,32 @@ SDL_HashTable *SDL_CreateHashTable(void *data, const Uint32 num_buckets, const S
 
 static SDL_INLINE Uint32 calc_hash(const SDL_HashTable *table, const void *key)
 {
-    return table->hash(key, table->data) & (table->table_len - 1);
+    // Mix the bits together, and use the highest bits as the bucket index.
+    const Uint32 BitMixer = 0x9E3779B1u;
+    return (table->hash(key, table->data) * BitMixer) >> table->hash_shift;
 }
 
 
 SDL_bool SDL_InsertIntoHashTable(SDL_HashTable *table, const void *key, const void *value)
 {
     SDL_HashItem *item;
-    const Uint32 hash = calc_hash(table, key);
+    Uint32 hash;
+
+    if (!table) {
+        return SDL_FALSE;
+    }
 
     if ( (!table->stackable) && (SDL_FindInHashTable(table, key, NULL)) ) {
         return SDL_FALSE;
     }
 
-    /* !!! FIXME: grow and rehash table if it gets too saturated. */
+    // !!! FIXME: grow and rehash table if it gets too saturated.
     item = (SDL_HashItem *) SDL_malloc(sizeof (SDL_HashItem));
-    if (item == NULL) {
-        SDL_OutOfMemory();
+    if (!item) {
         return SDL_FALSE;
     }
+
+    hash = calc_hash(table, key);
 
     item->key = key;
     item->value = value;
@@ -107,30 +114,24 @@ SDL_bool SDL_InsertIntoHashTable(SDL_HashTable *table, const void *key, const vo
 
 SDL_bool SDL_FindInHashTable(const SDL_HashTable *table, const void *key, const void **_value)
 {
-    const Uint32 hash = calc_hash(table, key);
-    void *data = table->data;
-    SDL_HashItem *prev = NULL;
+    Uint32 hash;
+    void *data;
     SDL_HashItem *i;
 
-    for (i = table->table[hash]; i != NULL; i = i->next) {
+    if (!table) {
+        return SDL_FALSE;
+    }
+
+    hash = calc_hash(table, key);
+    data = table->data;
+
+    for (i = table->table[hash]; i; i = i->next) {
         if (table->keymatch(key, i->key, data)) {
-            if (_value != NULL) {
+            if (_value) {
                 *_value = i->value;
             }
-
-            /* Matched! Move to the front of list for faster lookup next time.
-               (stackable tables have to remain in the same order, though!) */
-            if ((!table->stackable) && (prev != NULL)) {
-                SDL_assert(prev->next == i);
-                prev->next = i->next;
-                i->next = table->table[hash];
-                table->table[hash] = i;
-            }
-
             return SDL_TRUE;
         }
-
-        prev = i;
     }
 
     return SDL_FALSE;
@@ -138,20 +139,29 @@ SDL_bool SDL_FindInHashTable(const SDL_HashTable *table, const void *key, const 
 
 SDL_bool SDL_RemoveFromHashTable(SDL_HashTable *table, const void *key)
 {
-    const Uint32 hash = calc_hash(table, key);
+    Uint32 hash;
     SDL_HashItem *item = NULL;
     SDL_HashItem *prev = NULL;
-    void *data = table->data;
+    void *data;
 
-    for (item = table->table[hash]; item != NULL; item = item->next) {
+    if (!table) {
+        return SDL_FALSE;
+    }
+
+    hash = calc_hash(table, key);
+    data = table->data;
+
+    for (item = table->table[hash]; item; item = item->next) {
         if (table->keymatch(key, item->key, data)) {
-            if (prev != NULL) {
+            if (prev) {
                 prev->next = item->next;
             } else {
                 table->table[hash] = item->next;
             }
 
-            table->nuke(item->key, item->value, data);
+            if (table->nuke) {
+                table->nuke(item->key, item->value, data);
+            }
             SDL_free(item);
             return SDL_TRUE;
         }
@@ -162,11 +172,17 @@ SDL_bool SDL_RemoveFromHashTable(SDL_HashTable *table, const void *key)
     return SDL_FALSE;
 }
 
-SDL_bool SDL_IterateHashTable(const SDL_HashTable *table, const void *key, const void **_value, void **iter)
+SDL_bool SDL_IterateHashTableKey(const SDL_HashTable *table, const void *key, const void **_value, void **iter)
 {
-    SDL_HashItem *item = iter ? ((SDL_HashItem *) *iter)->next : table->table[calc_hash(table, key)];
+    SDL_HashItem *item;
 
-    while (item != NULL) {
+    if (!table) {
+        return SDL_FALSE;
+    }
+
+    item = *iter ? ((SDL_HashItem *)*iter)->next : table->table[calc_hash(table, key)];
+
+    while (item) {
         if (table->keymatch(key, item->key, table->data)) {
             *_value = item->value;
             *iter = item;
@@ -175,62 +191,92 @@ SDL_bool SDL_IterateHashTable(const SDL_HashTable *table, const void *key, const
         item = item->next;
     }
 
-    /* no more matches. */
+    // no more matches.
     *_value = NULL;
     *iter = NULL;
     return SDL_FALSE;
 }
 
-SDL_bool SDL_IterateHashTableKeys(const SDL_HashTable *table, const void **_key, void **iter)
+SDL_bool SDL_IterateHashTable(const SDL_HashTable *table, const void **_key, const void **_value, void **iter)
 {
     SDL_HashItem *item = (SDL_HashItem *) *iter;
     Uint32 idx = 0;
 
-    if (item != NULL) {
+    if (!table) {
+        return SDL_FALSE;
+    }
+
+    if (item) {
         const SDL_HashItem *orig = item;
         item = item->next;
-        if (item == NULL) {
-            idx = calc_hash(table, orig->key) + 1;
+        if (!item) {
+            idx = calc_hash(table, orig->key) + 1;  // !!! FIXME: we probably shouldn't rehash each time.
         }
     }
 
     while (!item && (idx < table->table_len)) {
-        item = table->table[idx++];  /* skip empty buckets... */
+        item = table->table[idx++];  // skip empty buckets...
     }
 
-    if (item == NULL) { /* no more matches? */
+    if (!item) {  // no more matches?
         *_key = NULL;
         *iter = NULL;
         return SDL_FALSE;
     }
 
     *_key = item->key;
+    *_value = item->value;
     *iter = item;
+
     return SDL_TRUE;
 }
 
-void SDL_DestroyHashTable(SDL_HashTable *table)
+SDL_bool SDL_HashTableEmpty(SDL_HashTable *table)
 {
-    if (table != NULL) {
+    if (table) {
+        Uint32 i;
+
+        for (i = 0; i < table->table_len; i++) {
+            SDL_HashItem *item = table->table[i];
+            if (item) {
+                return SDL_FALSE;
+            }
+        }
+    }
+    return SDL_TRUE;
+}
+
+void SDL_EmptyHashTable(SDL_HashTable *table)
+{
+    if (table) {
         void *data = table->data;
         Uint32 i;
 
         for (i = 0; i < table->table_len; i++) {
             SDL_HashItem *item = table->table[i];
-            while (item != NULL) {
+            while (item) {
                 SDL_HashItem *next = item->next;
-                table->nuke(item->key, item->value, data);
+                if (table->nuke) {
+                    table->nuke(item->key, item->value, data);
+                }
                 SDL_free(item);
                 item = next;
             }
+            table->table[i] = NULL;
         }
+    }
+}
 
+void SDL_DestroyHashTable(SDL_HashTable *table)
+{
+    if (table) {
+        SDL_EmptyHashTable(table);
         SDL_free(table->table);
         SDL_free(table);
     }
 }
 
-/* this is djb's xor hashing function. */
+// this is djb's xor hashing function.
 static SDL_INLINE Uint32 hash_string_djbxor(const char *str, size_t len)
 {
     Uint32 hash = 5381;
@@ -240,20 +286,39 @@ static SDL_INLINE Uint32 hash_string_djbxor(const char *str, size_t len)
     return hash;
 }
 
-Uint32 SDL_HashString(const void *sym, void *data)
+Uint32 SDL_HashString(const void *key, void *data)
 {
-    const char *str = (const char*) sym;
-    return hash_string_djbxor(str, SDL_strlen((const char *) str));
+    const char *str = (const char *)key;
+    return hash_string_djbxor(str, SDL_strlen(str));
 }
 
 SDL_bool SDL_KeyMatchString(const void *a, const void *b, void *data)
 {
     if (a == b) {
-        return SDL_TRUE;  /* same pointer, must match. */
+        return SDL_TRUE;  // same pointer, must match.
     } else if (!a || !b) {
-        return SDL_FALSE;  /* one pointer is NULL (and first test shows they aren't the same pointer), must not match. */
+        return SDL_FALSE;  // one pointer is NULL (and first test shows they aren't the same pointer), must not match.
     }
-    return (SDL_strcmp((const char *) a, (const char *) b) == 0) ? SDL_TRUE : SDL_FALSE;  /* Check against actual string contents. */
+    return (SDL_strcmp((const char *)a, (const char *)b) == 0);  // Check against actual string contents.
 }
 
-/* vi: set ts=4 sw=4 expandtab: */
+// We assume we can fit the ID in the key directly
+SDL_COMPILE_TIME_ASSERT(SDL_HashID_KeySize, sizeof(Uint32) <= sizeof(const void *));
+
+Uint32 SDL_HashID(const void *key, void *unused)
+{
+    return (Uint32)(uintptr_t)key;
+}
+
+SDL_bool SDL_KeyMatchID(const void *a, const void *b, void *unused)
+{
+    if (a == b) {
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
+}
+
+void SDL_NukeFreeValue(const void *key, const void *value, void *unused)
+{
+    SDL_free((void *)value);
+}

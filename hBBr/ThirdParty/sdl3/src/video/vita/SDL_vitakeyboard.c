@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -43,16 +43,21 @@ void VITA_InitKeyboard(void)
     sceSysmoduleLoadModule(SCE_SYSMODULE_IME); /** For PVR OSK Support **/
 #endif
     sceHidKeyboardEnumerate(&keyboard_hid_handle, 1);
+
+    if (keyboard_hid_handle > 0) {
+        SDL_AddKeyboard((SDL_KeyboardID)keyboard_hid_handle, NULL, SDL_FALSE);
+    }
 }
 
 void VITA_PollKeyboard(void)
 {
     // We skip polling keyboard if no window is created
-    if (Vita_Window == NULL) {
+    if (!Vita_Window) {
         return;
     }
 
     if (keyboard_hid_handle > 0) {
+        SDL_KeyboardID keyboardID = (SDL_KeyboardID)keyboard_hid_handle;
         int numReports = sceHidKeyboardRead(keyboard_hid_handle, (SceHidKeyboardReport **)&k_reports, SCE_HID_MAX_REPORT);
 
         if (numReports < 0) {
@@ -62,40 +67,40 @@ void VITA_PollKeyboard(void)
             // The k_report only reports the state of the LED
             if (k_reports[numReports - 1].modifiers[1] & 0x1) {
                 if (!(locks & 0x1)) {
-                    SDL_SendKeyboardKey(0, SDL_PRESSED, SDL_SCANCODE_NUMLOCKCLEAR);
+                    SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_NUMLOCKCLEAR, SDL_PRESSED);
                     locks |= 0x1;
                 }
             } else {
                 if (locks & 0x1) {
-                    SDL_SendKeyboardKey(0, SDL_RELEASED, SDL_SCANCODE_NUMLOCKCLEAR);
-                    SDL_SendKeyboardKey(0, SDL_PRESSED, SDL_SCANCODE_NUMLOCKCLEAR);
-                    SDL_SendKeyboardKey(0, SDL_RELEASED, SDL_SCANCODE_NUMLOCKCLEAR);
+                    SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_NUMLOCKCLEAR, SDL_RELEASED);
+                    SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_NUMLOCKCLEAR, SDL_PRESSED);
+                    SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_NUMLOCKCLEAR, SDL_RELEASED);
                     locks &= ~0x1;
                 }
             }
 
             if (k_reports[numReports - 1].modifiers[1] & 0x2) {
                 if (!(locks & 0x2)) {
-                    SDL_SendKeyboardKey(0, SDL_PRESSED, SDL_SCANCODE_CAPSLOCK);
+                    SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_CAPSLOCK, SDL_PRESSED);
                     locks |= 0x2;
                 }
             } else {
                 if (locks & 0x2) {
-                    SDL_SendKeyboardKey(0, SDL_RELEASED, SDL_SCANCODE_CAPSLOCK);
-                    SDL_SendKeyboardKey(0, SDL_PRESSED, SDL_SCANCODE_CAPSLOCK);
-                    SDL_SendKeyboardKey(0, SDL_RELEASED, SDL_SCANCODE_CAPSLOCK);
+                    SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_CAPSLOCK, SDL_RELEASED);
+                    SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_CAPSLOCK, SDL_PRESSED);
+                    SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_CAPSLOCK, SDL_RELEASED);
                     locks &= ~0x2;
                 }
             }
 
             if (k_reports[numReports - 1].modifiers[1] & 0x4) {
                 if (!(locks & 0x4)) {
-                    SDL_SendKeyboardKey(0, SDL_PRESSED, SDL_SCANCODE_SCROLLLOCK);
+                    SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_SCROLLLOCK, SDL_PRESSED);
                     locks |= 0x4;
                 }
             } else {
                 if (locks & 0x4) {
-                    SDL_SendKeyboardKey(0, SDL_RELEASED, SDL_SCANCODE_SCROLLLOCK);
+                    SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_SCROLLLOCK, SDL_RELEASED);
                     locks &= ~0x4;
                 }
             }
@@ -105,58 +110,58 @@ void VITA_PollKeyboard(void)
 
                 if (changed_modifiers & 0x01) {
                     if (prev_modifiers & 0x01) {
-                        SDL_SendKeyboardKey(0, SDL_RELEASED, SDL_SCANCODE_LCTRL);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_LCTRL, SDL_RELEASED);
                     } else {
-                        SDL_SendKeyboardKey(0, SDL_PRESSED, SDL_SCANCODE_LCTRL);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_LCTRL, SDL_PRESSED);
                     }
                 }
                 if (changed_modifiers & 0x02) {
                     if (prev_modifiers & 0x02) {
-                        SDL_SendKeyboardKey(0, SDL_RELEASED, SDL_SCANCODE_LSHIFT);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_LSHIFT, SDL_RELEASED);
                     } else {
-                        SDL_SendKeyboardKey(0, SDL_PRESSED, SDL_SCANCODE_LSHIFT);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_LSHIFT, SDL_PRESSED);
                     }
                 }
                 if (changed_modifiers & 0x04) {
                     if (prev_modifiers & 0x04) {
-                        SDL_SendKeyboardKey(0, SDL_RELEASED, SDL_SCANCODE_LALT);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_LALT, SDL_RELEASED);
                     } else {
-                        SDL_SendKeyboardKey(0, SDL_PRESSED, SDL_SCANCODE_LALT);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_LALT, SDL_PRESSED);
                     }
                 }
                 if (changed_modifiers & 0x08) {
                     if (prev_modifiers & 0x08) {
-                        SDL_SendKeyboardKey(0, SDL_RELEASED, SDL_SCANCODE_LGUI);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_LGUI, SDL_RELEASED);
                     } else {
-                        SDL_SendKeyboardKey(0, SDL_PRESSED, SDL_SCANCODE_LGUI);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_LGUI, SDL_PRESSED);
                     }
                 }
                 if (changed_modifiers & 0x10) {
                     if (prev_modifiers & 0x10) {
-                        SDL_SendKeyboardKey(0, SDL_RELEASED, SDL_SCANCODE_RCTRL);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_RCTRL, SDL_RELEASED);
                     } else {
-                        SDL_SendKeyboardKey(0, SDL_PRESSED, SDL_SCANCODE_RCTRL);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_RCTRL, SDL_PRESSED);
                     }
                 }
                 if (changed_modifiers & 0x20) {
                     if (prev_modifiers & 0x20) {
-                        SDL_SendKeyboardKey(0, SDL_RELEASED, SDL_SCANCODE_RSHIFT);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_RSHIFT, SDL_RELEASED);
                     } else {
-                        SDL_SendKeyboardKey(0, SDL_PRESSED, SDL_SCANCODE_RSHIFT);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_RSHIFT, SDL_PRESSED);
                     }
                 }
                 if (changed_modifiers & 0x40) {
                     if (prev_modifiers & 0x40) {
-                        SDL_SendKeyboardKey(0, SDL_RELEASED, SDL_SCANCODE_RALT);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_RALT, SDL_RELEASED);
                     } else {
-                        SDL_SendKeyboardKey(0, SDL_PRESSED, SDL_SCANCODE_RALT);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_RALT, SDL_PRESSED);
                     }
                 }
                 if (changed_modifiers & 0x80) {
                     if (prev_modifiers & 0x80) {
-                        SDL_SendKeyboardKey(0, SDL_RELEASED, SDL_SCANCODE_RGUI);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_RGUI, SDL_RELEASED);
                     } else {
-                        SDL_SendKeyboardKey(0, SDL_PRESSED, SDL_SCANCODE_RGUI);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, SDL_SCANCODE_RGUI, SDL_PRESSED);
                     }
                 }
             }
@@ -170,10 +175,10 @@ void VITA_PollKeyboard(void)
                 if (keyCode != prev_keys[i]) {
 
                     if (prev_keys[i]) {
-                        SDL_SendKeyboardKey(0, SDL_RELEASED, prev_keys[i]);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, prev_keys[i], SDL_RELEASED);
                     }
                     if (keyCode) {
-                        SDL_SendKeyboardKey(0, SDL_PRESSED, keyCode);
+                        SDL_SendKeyboardKey(0, keyboardID, 0, keyCode, SDL_PRESSED);
                     }
                     prev_keys[i] = keyCode;
                 }

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -45,6 +45,7 @@ extern "C" {
 #endif
 
 #include <vector>
+
 
 /* Forward declarations */
 class SDL_BLooper;
@@ -248,12 +249,12 @@ class SDL_BLooper : public BLooper
             SDL_GetWindowPosition(win, &winPosX, &winPosY);
             int dx = x - (winWidth / 2);
             int dy = y - (winHeight / 2);
-            SDL_SendMouseMotion(0, win, 0, SDL_GetMouse()->relative_mode, (float)dx, (float)dy);
+            SDL_SendMouseMotion(0, win, SDL_DEFAULT_MOUSE_ID, SDL_GetMouse()->relative_mode, (float)dx, (float)dy);
             set_mouse_position((winPosX + winWidth / 2), (winPosY + winHeight / 2));
             if (!be_app->IsCursorHidden())
                 be_app->HideCursor();
         } else {
-            SDL_SendMouseMotion(0, win, 0, 0, (float)x, (float)y);
+            SDL_SendMouseMotion(0, win, SDL_DEFAULT_MOUSE_ID, SDL_FALSE, (float)x, (float)y);
             if (SDL_CursorVisible() && be_app->IsCursorHidden())
                 be_app->ShowCursor();
         }
@@ -271,7 +272,7 @@ class SDL_BLooper : public BLooper
             return;
         }
         win = GetSDLWindow(winID);
-        SDL_SendMouseButton(0, win, 0, state, button);
+        SDL_SendMouseButton(0, win, SDL_DEFAULT_MOUSE_ID, state, button);
     }
 
     void _HandleMouseWheel(BMessage *msg)
@@ -286,30 +287,29 @@ class SDL_BLooper : public BLooper
             return;
         }
         win = GetSDLWindow(winID);
-        SDL_SendMouseWheel(0, win, 0, xTicks, -yTicks, SDL_MOUSEWHEEL_NORMAL);
+        SDL_SendMouseWheel(0, win, SDL_DEFAULT_MOUSE_ID, xTicks, -yTicks, SDL_MOUSEWHEEL_NORMAL);
     }
 
     void _HandleKey(BMessage *msg)
     {
+        SDL_Window *win;
+        int32 winID;
         int32 scancode, state; /* scancode, pressed/released */
         if (
+            !_GetWinID(msg, &winID) ||
             msg->FindInt32("key-state", &state) != B_OK ||
             msg->FindInt32("key-scancode", &scancode) != B_OK) {
             return;
         }
 
-        /* Make sure this isn't a repeated event (key pressed and held) */
-        if (state == SDL_PRESSED && HAIKU_GetKeyState(scancode) == SDL_PRESSED) {
-            return;
-        }
-        HAIKU_SetKeyState(scancode, state);
-        SDL_SendKeyboardKey(0, state, HAIKU_GetScancodeFromBeKey(scancode));
+        SDL_SendKeyboardKey(0, SDL_DEFAULT_KEYBOARD_ID, scancode, HAIKU_GetScancodeFromBeKey(scancode), state);
 
-        if (state == SDL_PRESSED && SDL_EventEnabled(SDL_EVENT_TEXT_INPUT)) {
+        win = GetSDLWindow(winID);
+        if (state == SDL_PRESSED && SDL_TextInputActive(win)) {
             const int8 *keyUtf8;
             ssize_t count;
             if (msg->FindData("key-utf8", B_INT8_TYPE, (const void **)&keyUtf8, &count) == B_OK) {
-                char text[SDL_TEXTINPUTEVENT_TEXT_SIZE];
+                char text[64];
                 SDL_zeroa(text);
                 SDL_memcpy(text, keyUtf8, count);
                 SDL_SendKeyboardText(text);

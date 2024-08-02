@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -59,7 +59,7 @@ typedef enum SDL_ThreadState
 /* This is the system-independent thread info structure */
 struct SDL_Thread
 {
-    SDL_threadID threadid;
+    SDL_ThreadID threadid;
     SYS_ThreadHandle handle;
     int status;
     SDL_AtomicInt state; /* SDL_THREAD_STATE_* */
@@ -69,7 +69,7 @@ struct SDL_Thread
     int(SDLCALL *userfunc)(void *);
     void *userdata;
     void *data;
-    void *endfunc; /* only used on some platforms. */
+    SDL_FunctionPointer endfunc; /* only used on some platforms. */
 };
 
 /* This is the function called to run a thread */
@@ -78,7 +78,7 @@ extern void SDL_RunThread(SDL_Thread *thread);
 /* This is the system-independent thread local storage structure */
 typedef struct
 {
-    unsigned int limit;
+    int limit;
     struct
     {
         void *data;
@@ -89,16 +89,16 @@ typedef struct
 /* This is how many TLS entries we allocate at once */
 #define TLS_ALLOC_CHUNKSIZE 4
 
-/* Get cross-platform, slow, thread local storage for this thread.
-   This is only intended as a fallback if getting real thread-local
-   storage fails or isn't supported on this platform.
- */
-extern SDL_TLSData *SDL_Generic_GetTLSData(void);
+extern void SDL_InitTLSData(void);
+extern void SDL_QuitTLSData(void);
 
-/* Set cross-platform, slow, thread local storage for this thread.
+/* Generic TLS support.
    This is only intended as a fallback if getting real thread-local
    storage fails or isn't supported on this platform.
  */
+extern void SDL_Generic_InitTLSData(void);
+extern SDL_TLSData *SDL_Generic_GetTLSData(void);
 extern int SDL_Generic_SetTLSData(SDL_TLSData *data);
+extern void SDL_Generic_QuitTLSData(void);
 
 #endif /* SDL_thread_c_h_ */

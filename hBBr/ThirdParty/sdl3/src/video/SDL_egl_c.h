@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -129,7 +129,7 @@ extern int SDL_EGL_ChooseConfig(SDL_VideoDevice *_this);
 extern int SDL_EGL_SetSwapInterval(SDL_VideoDevice *_this, int interval);
 extern int SDL_EGL_GetSwapInterval(SDL_VideoDevice *_this, int *interval);
 extern int SDL_EGL_DeleteContext(SDL_VideoDevice *_this, SDL_GLContext context);
-extern EGLSurface *SDL_EGL_CreateSurface(SDL_VideoDevice *_this, SDL_Window *window, NativeWindowType nw);
+extern EGLSurface SDL_EGL_CreateSurface(SDL_VideoDevice *_this, SDL_Window *window, NativeWindowType nw);
 extern void SDL_EGL_DestroySurface(SDL_VideoDevice *_this, EGLSurface egl_surface);
 
 extern EGLSurface SDL_EGL_CreateOffscreenSurface(SDL_VideoDevice *_this, int width, int height);
@@ -150,19 +150,19 @@ extern int SDL_EGL_SetErrorEx(const char *message, const char *eglFunctionName, 
 #define SDL_EGL_SwapWindow_impl(BACKEND)                                                        \
     int BACKEND##_GLES_SwapWindow(SDL_VideoDevice *_this, SDL_Window *window)                                    \
     {                                                                                           \
-        return SDL_EGL_SwapBuffers(_this, window->driverdata->egl_surface);                     \
+        return SDL_EGL_SwapBuffers(_this, window->internal->egl_surface);                     \
     }
 
 #define SDL_EGL_MakeCurrent_impl(BACKEND)                                                                                          \
     int BACKEND##_GLES_MakeCurrent(SDL_VideoDevice *_this, SDL_Window *window, SDL_GLContext context)                                               \
     {                                                                                                                              \
-        return SDL_EGL_MakeCurrent(_this, window ? window->driverdata->egl_surface : EGL_NO_SURFACE, context); \
+        return SDL_EGL_MakeCurrent(_this, window ? window->internal->egl_surface : EGL_NO_SURFACE, context); \
     }
 
 #define SDL_EGL_CreateContext_impl(BACKEND)                                                     \
     SDL_GLContext BACKEND##_GLES_CreateContext(SDL_VideoDevice *_this, SDL_Window *window)                       \
     {                                                                                           \
-        return SDL_EGL_CreateContext(_this, window->driverdata->egl_surface);                   \
+        return SDL_EGL_CreateContext(_this, window->internal->egl_surface);                   \
     }
 
 #endif /* SDL_VIDEO_OPENGL_EGL */

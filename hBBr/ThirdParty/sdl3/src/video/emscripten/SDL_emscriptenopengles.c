@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -88,7 +88,7 @@ SDL_GLContext Emscripten_GLES_CreateContext(SDL_VideoDevice *_this, SDL_Window *
     if (_this->gl_config.major_version == 3)
         attribs.majorVersion = 2; /* WebGL 2.0 ~= GLES 3.0 */
 
-    window_data = window->driverdata;
+    window_data = window->internal;
 
     if (window_data->gl_context) {
         SDL_SetError("Cannot create multiple webgl contexts per window");
@@ -117,8 +117,8 @@ int Emscripten_GLES_DeleteContext(SDL_VideoDevice *_this, SDL_GLContext context)
     SDL_Window *window;
 
     /* remove the context from its window */
-    for (window = _this->windows; window != NULL; window = window->next) {
-        SDL_WindowData *window_data = window->driverdata;
+    for (window = _this->windows; window; window = window->next) {
+        SDL_WindowData *window_data = window->internal;
 
         if (window_data->gl_context == context) {
             window_data->gl_context = NULL;
@@ -142,7 +142,7 @@ int Emscripten_GLES_MakeCurrent(SDL_VideoDevice *_this, SDL_Window *window, SDL_
 {
     /* it isn't possible to reuse contexts across canvases */
     if (window && context) {
-        SDL_WindowData *window_data = window->driverdata;
+        SDL_WindowData *window_data = window->internal;
 
         if (context != window_data->gl_context) {
             return SDL_SetError("Cannot make context current to another window");

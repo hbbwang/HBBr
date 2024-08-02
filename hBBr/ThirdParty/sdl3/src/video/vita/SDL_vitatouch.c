@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -41,8 +41,8 @@ struct
     float range;
 } force_info[SCE_TOUCH_PORT_MAX_NUM];
 
-char *disableFrontPoll = NULL;
-char *disableBackPoll = NULL;
+const char *disableFrontPoll = NULL;
+const char *disableBackPoll = NULL;
 
 void VITA_InitTouch(void)
 {
@@ -68,8 +68,8 @@ void VITA_InitTouch(void)
     }
 
     // Support passing both front and back touch devices in events
-    SDL_AddTouch((SDL_TouchID)0, SDL_TOUCH_DEVICE_DIRECT, "Front");
-    SDL_AddTouch((SDL_TouchID)1, SDL_TOUCH_DEVICE_INDIRECT_ABSOLUTE, "Back");
+    SDL_AddTouch(1, SDL_TOUCH_DEVICE_DIRECT, "Front");
+    SDL_AddTouch(2, SDL_TOUCH_DEVICE_INDIRECT_ABSOLUTE, "Back");
 }
 
 void VITA_QuitTouch(void)
@@ -80,11 +80,12 @@ void VITA_QuitTouch(void)
 
 void VITA_PollTouch(void)
 {
-    SDL_FingerID finger_id = 0;
+    SDL_TouchID touch_id;
+    SDL_FingerID finger_id;
     int port;
 
     // We skip polling touch if no window is created
-    if (Vita_Window == NULL) {
+    if (!Vita_Window) {
         return;
     }
 
@@ -96,6 +97,9 @@ void VITA_PollTouch(void)
             continue;
         }
         sceTouchPeek(port, &touch[port], 1);
+
+        touch_id = (SDL_TouchID)(port + 1);
+
         if (touch[port].reportNum > 0) {
             for (int i = 0; i < touch[port].reportNum; i++) {
                 // adjust coordinates and forces to return normalized values
@@ -116,27 +120,16 @@ void VITA_PollTouch(void)
                 }
 
                 VITA_ConvertTouchXYToSDLXY(&x, &y, touch[port].report[i].x, touch[port].report[i].y, port);
-                finger_id = (SDL_FingerID)touch[port].report[i].id;
+                finger_id = (SDL_FingerID)(touch[port].report[i].id + 1);
 
                 // Skip if finger was already previously down
                 if (!finger_down) {
                     // Send an initial touch
-                    SDL_SendTouch(0, (SDL_TouchID)port,
-                                  finger_id,
-                                  Vita_Window,
-                                  SDL_TRUE,
-                                  x,
-                                  y,
-                                  force);
+                    SDL_SendTouch(0, touch_id, finger_id, Vita_Window, SDL_TRUE, x, y, force);
                 }
 
                 // Always send the motion
-                SDL_SendTouchMotion(0, (SDL_TouchID)port,
-                                    finger_id,
-                                    Vita_Window,
-                                    x,
-                                    y,
-                                    force);
+                SDL_SendTouchMotion(0, touch_id, finger_id, Vita_Window, x, y, force);
             }
         }
 
@@ -156,15 +149,9 @@ void VITA_PollTouch(void)
                     float y = 0;
                     float force = (touch_old[port].report[i].force - force_info[port].min) / force_info[port].range;
                     VITA_ConvertTouchXYToSDLXY(&x, &y, touch_old[port].report[i].x, touch_old[port].report[i].y, port);
-                    finger_id = (SDL_FingerID)touch_old[port].report[i].id;
+                    finger_id = (SDL_FingerID)(touch_old[port].report[i].id + 1);
                     // Finger released from screen
-                    SDL_SendTouch(0, (SDL_TouchID)port,
-                                  finger_id,
-                                  Vita_Window,
-                                  SDL_FALSE,
-                                  x,
-                                  y,
-                                  force);
+                    SDL_SendTouch(0, touch_id, finger_id, Vita_Window, SDL_FALSE, x, y, force);
                 }
             }
         }
@@ -173,14 +160,24 @@ void VITA_PollTouch(void)
 
 void VITA_ConvertTouchXYToSDLXY(float *sdl_x, float *sdl_y, int vita_x, int vita_y, int port)
 {
-    float x = (vita_x - area_info[port].x) / area_info[port].w;
-    float y = (vita_y - area_info[port].y) / area_info[port].h;
+    float x, y;
 
-    x = SDL_max(x, 0.0);
-    x = SDL_min(x, 1.0);
+    if (area_info[port].w <= 1) {
+        x = 0.5f;
+    } else {
+        x = (vita_x - area_info[port].x) / (area_info[port].w - 1);
+    }
+    if (area_info[port].h <= 1) {
+        y = 0.5f;
+    } else {
+        y = (vita_y - area_info[port].y) / (area_info[port].h - 1);
+    }
 
-    y = SDL_max(y, 0.0);
-    y = SDL_min(y, 1.0);
+    x = SDL_max(x, 0.0f);
+    x = SDL_min(x, 1.0f);
+
+    y = SDL_max(y, 0.0f);
+    y = SDL_min(y, 1.0f);
 
     *sdl_x = x;
     *sdl_y = y;

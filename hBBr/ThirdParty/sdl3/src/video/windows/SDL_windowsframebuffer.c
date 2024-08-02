@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -20,13 +20,13 @@
 */
 #include "SDL_internal.h"
 
-#if defined(SDL_VIDEO_DRIVER_WINDOWS) && !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+#if defined(SDL_VIDEO_DRIVER_WINDOWS) && !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
 
 #include "SDL_windowsvideo.h"
 
-int WIN_CreateWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window, Uint32 *format, void **pixels, int *pitch)
+int WIN_CreateWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window, SDL_PixelFormat *format, void **pixels, int *pitch)
 {
-    SDL_WindowData *data = window->driverdata;
+    SDL_WindowData *data = window->internal;
     SDL_bool isstack;
     size_t size;
     LPBITMAPINFO info;
@@ -47,7 +47,7 @@ int WIN_CreateWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window, Uint
     size = sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD);
     info = (LPBITMAPINFO)SDL_small_alloc(Uint8, size, &isstack);
     if (!info) {
-        return SDL_OutOfMemory();
+        return -1;
     }
 
     SDL_memset(info, 0, size);
@@ -66,7 +66,7 @@ int WIN_CreateWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window, Uint
 
         bpp = info->bmiHeader.biPlanes * info->bmiHeader.biBitCount;
         masks = (Uint32 *)((Uint8 *)info + info->bmiHeader.biSize);
-        *format = SDL_GetPixelFormatEnumForMasks(bpp, masks[0], masks[1], masks[2], 0);
+        *format = SDL_GetPixelFormatForMasks(bpp, masks[0], masks[1], masks[2], 0);
     }
     if (*format == SDL_PIXELFORMAT_UNKNOWN) {
         /* We'll use RGB format for now */
@@ -100,7 +100,7 @@ int WIN_CreateWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window, Uint
 
 int WIN_UpdateWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window, const SDL_Rect *rects, int numrects)
 {
-    SDL_WindowData *data = window->driverdata;
+    SDL_WindowData *data = window->internal;
     int i;
 
     for (i = 0; i < numrects; ++i) {
@@ -112,9 +112,9 @@ int WIN_UpdateWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window, cons
 
 void WIN_DestroyWindowFramebuffer(SDL_VideoDevice *_this, SDL_Window *window)
 {
-    SDL_WindowData *data = window->driverdata;
+    SDL_WindowData *data = window->internal;
 
-    if (data == NULL) {
+    if (!data) {
         /* The window wasn't fully initialized */
         return;
     }

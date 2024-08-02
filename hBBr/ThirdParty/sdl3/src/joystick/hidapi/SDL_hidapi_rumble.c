@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -107,7 +107,7 @@ static void SDL_HIDAPI_StopRumbleThread(SDL_HIDAPI_RumbleContext *ctx)
     if (ctx->thread) {
         int result;
 
-        SDL_PostSemaphore(ctx->request_sem);
+        SDL_SignalSemaphore(ctx->request_sem);
         SDL_WaitThread(ctx->thread, &result);
         ctx->thread = NULL;
     }
@@ -156,7 +156,7 @@ static int SDL_HIDAPI_StartRumbleThread(SDL_HIDAPI_RumbleContext *ctx)
     }
 
     SDL_AtomicSet(&ctx->running, SDL_TRUE);
-    ctx->thread = SDL_CreateThreadInternal(SDL_HIDAPI_RumbleThread, "HIDAPI Rumble", 0, ctx);
+    ctx->thread = SDL_CreateThread(SDL_HIDAPI_RumbleThread, "HIDAPI Rumble", ctx);
     if (!ctx->thread) {
         SDL_HIDAPI_StopRumbleThread(ctx);
         return -1;
@@ -168,7 +168,7 @@ int SDL_HIDAPI_LockRumble(void)
 {
     SDL_HIDAPI_RumbleContext *ctx = &rumble_context;
 
-    if (SDL_AtomicCAS(&ctx->initialized, SDL_FALSE, SDL_TRUE)) {
+    if (SDL_AtomicCompareAndSwap(&ctx->initialized, SDL_FALSE, SDL_TRUE)) {
         if (SDL_HIDAPI_StartRumbleThread(ctx) < 0) {
             return -1;
         }
@@ -214,9 +214,9 @@ int SDL_HIDAPI_SendRumbleWithCallbackAndUnlock(SDL_HIDAPI_Device *device, const 
     }
 
     request = (SDL_HIDAPI_RumbleRequest *)SDL_calloc(1, sizeof(*request));
-    if (request == NULL) {
+    if (!request) {
         SDL_HIDAPI_UnlockRumble();
-        return SDL_OutOfMemory();
+        return -1;
     }
     request->device = device;
     SDL_memcpy(request->data, data, size);
@@ -236,7 +236,7 @@ int SDL_HIDAPI_SendRumbleWithCallbackAndUnlock(SDL_HIDAPI_Device *device, const 
     /* Make sure we unlock before posting the semaphore so the rumble thread can run immediately */
     SDL_HIDAPI_UnlockRumble();
 
-    SDL_PostSemaphore(ctx->request_sem);
+    SDL_SignalSemaphore(ctx->request_sem);
 
     return size;
 }

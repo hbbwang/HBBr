@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -63,7 +63,7 @@ static void SDLCALL GDK_InternalHintCallback(
     const char *oldValue,
     const char *newValue)
 {
-    if (userdata == NULL) {
+    if (!userdata) {
         return;
     }
 
@@ -72,7 +72,7 @@ static void SDLCALL GDK_InternalHintCallback(
 
     if (userdata == &g_TextInputScope || userdata == &g_MaxTextLength) {
         /* int32 hint */
-        Sint32 intValue = (newValue == NULL || newValue[0] == '\0') ? 0 : SDL_atoi(newValue);
+        Sint32 intValue = (!newValue || newValue[0] == '\0') ? 0 : SDL_atoi(newValue);
         if (userdata == &g_MaxTextLength && intValue <= 0) {
             intValue = g_DefaultMaxTextLength;
         } else if (userdata == &g_TextInputScope && intValue < 0) {
@@ -82,16 +82,13 @@ static void SDLCALL GDK_InternalHintCallback(
         *(Sint32 *)userdata = intValue;
     } else {
         /* string hint */
-        if (newValue == NULL || newValue[0] == '\0') {
+        if (!newValue || newValue[0] == '\0') {
             /* treat empty or NULL strings as just NULL for this impl */
             SDL_free(*(char **)userdata);
             *(char **)userdata = NULL;
         } else {
             char *newString = SDL_strdup(newValue);
-            if (newString == NULL) {
-                /* couldn't strdup, oh well */
-                SDL_OutOfMemory();
-            } else {
+            if (newString) {
                 /* free previous value and write the new one */
                 SDL_free(*(char **)userdata);
                 *(char **)userdata = newString;
@@ -102,8 +99,8 @@ static void SDLCALL GDK_InternalHintCallback(
 
 static int GDK_InternalEnsureTaskQueue(void)
 {
-    if (g_TextTaskQueue == NULL) {
-        if (SDL_GDKGetTaskQueue(&g_TextTaskQueue) < 0) {
+    if (!g_TextTaskQueue) {
+        if (SDL_GetGDKTaskQueue(&g_TextTaskQueue) < 0) {
             /* SetError will be done for us. */
             return -1;
         }
@@ -128,9 +125,7 @@ static void CALLBACK GDK_InternalTextEntryCallback(XAsyncBlock *asyncBlock)
     } else if (resultSize > 0) {
         /* +1 to be super sure that the buffer will be null terminated */
         resultBuffer = (char *)SDL_calloc(sizeof(*resultBuffer), 1 + (size_t)resultSize);
-        if (resultBuffer == NULL) {
-            SDL_OutOfMemory();
-        } else {
+        if (resultBuffer) {
             /* still pass the original size that we got from ResultSize */
             if (FAILED(hR = XGameUiShowTextEntryResult(
                            asyncBlock,
@@ -168,7 +163,7 @@ void GDK_EnsureHints(void)
             GDK_InternalHintCallback,
             &g_DescriptionText);
         SDL_AddHintCallback(
-            SDL_HINT_GDK_TEXTINPUT_DEFAULT,
+            SDL_HINT_GDK_TEXTINPUT_DEFAULT_TEXT,
             GDK_InternalHintCallback,
             &g_DefaultText);
         SDL_AddHintCallback(
@@ -183,7 +178,7 @@ void GDK_EnsureHints(void)
     }
 }
 
-void GDK_StartTextInput(SDL_VideoDevice *_this)
+int GDK_StartTextInput(SDL_VideoDevice *_this, SDL_Window *window)
 {
     /*
      * Currently a stub, since all input is handled by the virtual keyboard,
@@ -196,14 +191,16 @@ void GDK_StartTextInput(SDL_VideoDevice *_this)
      * Right now this function isn't implemented on Desktop
      * and seems to be present only in the docs? So I didn't bother.
      */
+    return 0;
 }
 
-void GDK_StopTextInput(SDL_VideoDevice *_this)
+int GDK_StopTextInput(SDL_VideoDevice *_this, SDL_Window *window)
 {
     /* See notice in GDK_StartTextInput */
+    return 0;
 }
 
-int GDK_SetTextInputRect(SDL_VideoDevice *_this, const SDL_Rect *rect)
+int GDK_UpdateTextInputArea(SDL_VideoDevice *_this, SDL_Window *window)
 {
     /*
      * XGameUiShowTextEntryAsync does not allow you to set
@@ -217,20 +214,10 @@ int GDK_SetTextInputRect(SDL_VideoDevice *_this, const SDL_Rect *rect)
     return 0;
 }
 
-void GDK_ClearComposition(SDL_VideoDevice *_this)
+int GDK_ClearComposition(SDL_VideoDevice *_this, SDL_Window *window)
 {
     /* See notice in GDK_StartTextInput */
-}
-
-SDL_bool GDK_IsTextInputShown(SDL_VideoDevice *_this)
-{
-    /*
-     * The XGameUiShowTextEntryAsync window
-     * does specify potential input candidates
-     * just below the text box, so technically
-     * this is true whenever the window is shown.
-     */
-    return (g_TextBlock != NULL) ? SDL_TRUE : SDL_FALSE;
+    return 0;
 }
 
 SDL_bool GDK_HasScreenKeyboardSupport(SDL_VideoDevice *_this)
@@ -251,7 +238,7 @@ void GDK_ShowScreenKeyboard(SDL_VideoDevice *_this, SDL_Window *window)
 
     HRESULT hR = S_OK;
 
-    if (g_TextBlock != NULL) {
+    if (g_TextBlock) {
         /* already showing the keyboard */
         return;
     }
@@ -262,8 +249,7 @@ void GDK_ShowScreenKeyboard(SDL_VideoDevice *_this, SDL_Window *window)
     }
 
     g_TextBlock = (XAsyncBlock *)SDL_calloc(1, sizeof(*g_TextBlock));
-    if (g_TextBlock == NULL) {
-        SDL_OutOfMemory();
+    if (!g_TextBlock) {
         return;
     }
 
@@ -285,7 +271,7 @@ void GDK_ShowScreenKeyboard(SDL_VideoDevice *_this, SDL_Window *window)
 
 void GDK_HideScreenKeyboard(SDL_VideoDevice *_this, SDL_Window *window)
 {
-    if (g_TextBlock != NULL) {
+    if (g_TextBlock) {
         XAsyncCancel(g_TextBlock);
         /* the completion callback will free the block */
     }
@@ -293,8 +279,7 @@ void GDK_HideScreenKeyboard(SDL_VideoDevice *_this, SDL_Window *window)
 
 SDL_bool GDK_IsScreenKeyboardShown(SDL_VideoDevice *_this, SDL_Window *window)
 {
-    /* See notice in GDK_IsTextInputShown */
-    return GDK_IsTextInputShown(_this);
+    return (g_TextBlock != NULL);
 }
 
 #ifdef __cplusplus

@@ -1,4 +1,5 @@
-﻿#include "./Core/VulkanManager.h"
+﻿
+#include "./Core/VulkanManager.h"
 #include "./Core/VulkanRenderer.h"
 #include "./Form/FormMain.h"
 #include "./Core/Shader.h"
@@ -9,10 +10,15 @@
 #include "./Core/RendererConfig.h"
 #include "./Asset/Material.h"
 #include "VulkanObjectManager.h"
+
 #if IS_EDITOR
 #include "ShaderCompiler.h"
+#endif
+
+#if ENABLE_IMGUI
 #include "Imgui/backends/imgui_impl_sdl3.h"
 #endif
+
 #include "./Asset/ContentManager.h"
 #include "GLFWInclude.h"
 #include "ConsoleDebug.h"
@@ -90,7 +96,6 @@ void MouseButtonCallBack(VulkanForm* form, int button, int action)
 {
 	if (form)
 	{
-		SDL_SetWindowInputFocus(form->window);
 		SDL_SetWindowFocusable(form->window, SDL_TRUE);
 	}
 }
@@ -116,10 +121,22 @@ void Android_Init()
 
 VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDebug, void* parent)
 {
+	SetConsoleOutputCP(65001); // 设置控制台输出代码页为 UTF-8
+
 	CallStack();
 
 	//must be successful.
-    if (SDL_Init(SDL_INIT_EVERYTHING) == -1)
+    if (SDL_Init(
+		 SDL_INIT_TIMER 
+		| SDL_INIT_AUDIO 
+		| SDL_INIT_VIDEO 
+		| SDL_INIT_JOYSTICK 
+		| SDL_INIT_HAPTIC 
+		| SDL_INIT_GAMEPAD 
+		| SDL_INIT_EVENTS 
+		| SDL_INIT_SENSOR  
+		//| SDL_INIT_CAMERA
+	) == -1)
 	{
 		MessageOut("Init sdl3 failed.", true, true, "255,0,0");
 	}
@@ -131,7 +148,6 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 
 	//Set sdl hints
 	SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "0");
-	SDL_SetHint(SDL_HINT_VIDEO_FOREIGN_WINDOW_VULKAN, "1");//SDL_WINDOW_VULKAN
 
 #if __ANDROID__
 	Android_Init();
@@ -218,10 +234,15 @@ void VulkanApp::DeInitVulkanManager()
 //DISABLE_CODE_OPTIMIZE
 bool VulkanApp::UpdateForm()
 {
+	//窗口数量 == 0, 直接结束 
+	if (_forms.size() <= 0)
+		return false;
+
 	if (_mainForm == nullptr || _mainForm->renderer == nullptr)
 	{
 		return false;
 	}
+
 	bool bQuit = false;
 	SDL_Event event;
 	bool bStopRender = false; 
@@ -231,7 +252,7 @@ bool VulkanApp::UpdateForm()
 		int windowIndex = 0;
 		for (auto& i : _forms)
 		{
-			Uint32 flags = SDL_GetWindowFlags(i->window);
+			SDL_WindowFlags flags = SDL_GetWindowFlags(i->window);
 			if (flags & SDL_WINDOW_INPUT_FOCUS || flags & SDL_WINDOW_MOUSE_FOCUS)
 			{
 				winForm = i;
@@ -269,9 +290,13 @@ bool VulkanApp::UpdateForm()
 			{
 				FocusCallBack(winForm, 0);
 			}
+
+			//窗口数量 == 0, 直接结束 
+			if (_forms.size() <= 0)
+				return false;
+
 			break;
 		}
-		case SDL_EVENT_WINDOW_TAKE_FOCUS:
 		case SDL_EVENT_WINDOW_FOCUS_GAINED:
 		{
 			FocusCallBack(winForm, 1);
@@ -316,10 +341,10 @@ bool VulkanApp::UpdateForm()
 		case SDL_EVENT_KEY_DOWN:
 		case SDL_EVENT_KEY_UP:
 		{
-			KeyBoardCallBack(winForm, event.key.keysym.sym, event.key.keysym.scancode, event.key.state, event.key.keysym.mod);
+			KeyBoardCallBack(winForm, event.key.key, event.key.scancode, event.key.state, event.key.mod);
 			for (auto& func :VulkanRenderer::_key_inputs)
 			{
-				func.second(winForm->renderer, (KeyCode)event.key.keysym.sym, (KeyMod)event.key.keysym.mod, (Action)event.key.state);
+				func.second(winForm->renderer, (KeyCode)event.key.key, (KeyMod)event.key.mod, (Action)event.key.state);
 			}
 			break;
 		}
@@ -327,7 +352,7 @@ bool VulkanApp::UpdateForm()
 			break;
 		case SDL_EVENT_DROP_FILE:
 		{
-			char* file = event.drop.file;
+			auto file = event.drop.data;
 			if (file)
 			{
 				auto win = SDL_GetWindowFromID(event.drop.windowID);
@@ -338,7 +363,6 @@ bool VulkanApp::UpdateForm()
 				{
 					DropCallBack(winForm, file);
 				}
-				SDL_free(file);
 			}
 			break;
 		}
@@ -424,7 +448,23 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 	SDL_Window* window = nullptr;
 	if (parent != nullptr)
 	{
-		window = SDL_CreateWindowFrom(parent);
+		SDL_PropertiesID props;
+		props = SDL_CreateProperties();
+		SDL_SetNumberProperty(props, "width", h);
+		SDL_SetNumberProperty(props, "height", w);
+		SDL_SetStringProperty(props, "title", title); 
+		SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_VULKAN_BOOLEAN, SDL_TRUE);
+		SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, SDL_TRUE);	
+		SDL_SetPointerProperty(props, SDL_PROP_WINDOW_CREATE_PARENT_POINTER, parent);
+
+		#if defined(__ANDROID__)
+		SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, SDL_TRUE);
+		#elif _WIN32
+		//SDL_SetPointerProperty(props, SDL_PROP_WINDOW_CREATE_WIN32_HWND_POINTER, parent);
+		#endif
+
+		window = SDL_CreateWindowWithProperties(props);
+
 	}
 
 	if(!window)
@@ -519,10 +559,36 @@ void* VulkanApp::GetWindowHandle(SDL_Window* window)
 {
 	if (window)
 	{
-		#if defined(_WIN32)
-		SDL_SysWMinfo wmInfo;
-		SDL_GetWindowWMInfo(window, &wmInfo , SDL_SYSWM_CURRENT_VERSION);
-		return (void*)wmInfo.info.win.window;
+		#if defined(SDL_PLATFORM_WIN32)
+		HWND hwnd = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(window), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
+		return hwnd;
+		//#elif defined(SDL_PLATFORM_MACOS)
+		//NSWindow* nswindow = (__bridge NSWindow*)SDL_GetPointerProperty(SDL_GetWindowProperties(window), SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, NULL);
+		//return nswindow;
+		//#elif defined(SDL_PLATFORM_LINUX)
+		//if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") == 0) {
+		//	Display* xdisplay = (Display*)SDL_GetPointerProperty(SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_DISPLAY_POINTER, NULL);
+		//	Window xwindow = (Window)SDL_GetNumberProperty(SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
+		//	if (xdisplay && xwindow) {
+		//		...
+		//	}
+		//}
+		//else if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "wayland") == 0) {
+		//	struct wl_display* display = (struct wl_display*)SDL_GetPointerProperty(SDL_GetWindowProperties(window), SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER, NULL);
+		//	struct wl_surface* surface = (struct wl_surface*)SDL_GetPointerProperty(SDL_GetWindowProperties(window), SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, NULL);
+		//	if (display && surface) {
+		//		...
+		//	}
+		//}
+		//#elif defined(SDL_PLATFORM_IOS)
+		//SDL_PropertiesID props = SDL_GetWindowProperties(window);
+		//UIWindow* uiwindow = (__bridge UIWindow*)SDL_GetPointerProperty(props, SDL_PROP_WINDOW_UIKIT_WINDOW_POINTER, NULL);
+		//if (uiwindow) {
+		//	GLuint framebuffer = (GLuint)SDL_GetNumberProperty(props, SDL_PROP_WINDOW_UIKIT_OPENGL_FRAMEBUFFER_NUMBER, 0);
+		//	GLuint colorbuffer = (GLuint)SDL_GetNumberProperty(props, SDL_PROP_WINDOW_UIKIT_OPENGL_RENDERBUFFER_NUMBER, 0);
+		//	GLuint resolveFramebuffer = (GLuint)SDL_GetNumberProperty(props, SDL_PROP_WINDOW_UIKIT_OPENGL_RESOLVE_FRAMEBUFFER_NUMBER, 0);
+		//	...
+		//}
 		#endif
 	}
 	return nullptr;

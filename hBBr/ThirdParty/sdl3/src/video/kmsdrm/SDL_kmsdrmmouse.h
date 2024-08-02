@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -29,7 +29,7 @@
 #define MAX_CURSOR_W 512
 #define MAX_CURSOR_H 512
 
-typedef struct KMSDRM_CursorData
+struct SDL_CursorData
 {
     int hot_x, hot_y;
     int w, h;
@@ -41,7 +41,7 @@ typedef struct KMSDRM_CursorData
     size_t buffer_size;
     size_t buffer_pitch;
 
-} KMSDRM_CursorData;
+};
 
 extern void KMSDRM_InitMouse(SDL_VideoDevice *_this, SDL_VideoDisplay *display);
 extern void KMSDRM_QuitMouse(SDL_VideoDevice *_this);

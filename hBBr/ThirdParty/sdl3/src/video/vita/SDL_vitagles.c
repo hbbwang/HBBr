@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -80,7 +80,7 @@ static EGLint height = 544;
 SDL_GLContext VITA_GLES_CreateContext(SDL_VideoDevice *_this, SDL_Window *window)
 {
 
-    SDL_WindowData *wdata = window->driverdata;
+    SDL_WindowData *wdata = window->internal;
 
     EGLint attribs[32];
     EGLDisplay display;
@@ -193,7 +193,7 @@ int VITA_GLES_SwapWindow(SDL_VideoDevice *_this, SDL_Window *window)
 
 int VITA_GLES_DeleteContext(SDL_VideoDevice *_this, SDL_GLContext context)
 {
-    SDL_VideoData *phdata = _this->driverdata;
+    SDL_VideoData *phdata = _this->internal;
     EGLBoolean status;
 
     if (phdata->egl_initialized != SDL_TRUE) {

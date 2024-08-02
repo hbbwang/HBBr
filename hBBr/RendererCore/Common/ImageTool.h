@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "Common.h"
 #include "TypeConversion.h"
-#include "lodepng/lodepng.h"
 #include "HString.h"
 #include <algorithm>
 #include "Asset/HGuid.h"

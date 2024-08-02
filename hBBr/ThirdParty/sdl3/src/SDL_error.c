@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -27,12 +27,12 @@
 int SDL_SetError(SDL_PRINTF_FORMAT_STRING const char *fmt, ...)
 {
     /* Ignore call if invalid format pointer was passed */
-    if (fmt != NULL) {
+    if (fmt) {
         va_list ap;
         int result;
-        SDL_error *error = SDL_GetErrBuf();
+        SDL_error *error = SDL_GetErrBuf(SDL_TRUE);
 
-        error->error = 1; /* mark error as valid */
+        error->error = SDL_ErrorCodeGeneric;
 
         va_start(ap, fmt);
         result = SDL_vsnprintf(error->str, error->len, fmt, ap);
@@ -50,7 +50,7 @@ int SDL_SetError(SDL_PRINTF_FORMAT_STRING const char *fmt, ...)
             }
         }
 
-        if (SDL_LogGetPriority(SDL_LOG_CATEGORY_ERROR) <= SDL_LOG_PRIORITY_DEBUG) {
+        if (SDL_GetLogPriority(SDL_LOG_CATEGORY_ERROR) <= SDL_LOG_PRIORITY_DEBUG) {
             /* If we are in debug mode, print out the error message */
             SDL_LogDebug(SDL_LOG_CATEGORY_ERROR, "%s", error->str);
         }
@@ -59,46 +59,41 @@ int SDL_SetError(SDL_PRINTF_FORMAT_STRING const char *fmt, ...)
     return -1;
 }
 
-/* Available for backwards compatibility */
 const char *SDL_GetError(void)
 {
-    const SDL_error *error = SDL_GetErrBuf();
-    return error->error ? error->str : "";
-}
+    const SDL_error *error = SDL_GetErrBuf(SDL_FALSE);
 
-void SDL_ClearError(void)
-{
-    SDL_GetErrBuf()->error = 0;
-}
+    if (!error) {
+        return "";
+    }
 
-/* Very common errors go here */
-int SDL_Error(SDL_errorcode code)
-{
-    switch (code) {
-    case SDL_ENOMEM:
-        return SDL_SetError("Out of memory");
-    case SDL_EFREAD:
-        return SDL_SetError("Error reading from datastream");
-    case SDL_EFWRITE:
-        return SDL_SetError("Error writing to datastream");
-    case SDL_EFSEEK:
-        return SDL_SetError("Error seeking in datastream");
-    case SDL_UNSUPPORTED:
-        return SDL_SetError("That operation is not supported");
+    switch (error->error) {
+    case SDL_ErrorCodeGeneric:
+        return error->str;
+    case SDL_ErrorCodeOutOfMemory:
+        return "Out of memory";
     default:
-        return SDL_SetError("Unknown SDL error");
+        return "";
     }
 }
 
-char *SDL_GetErrorMsg(char *errstr, int maxlen)
+int SDL_ClearError(void)
 {
-    const SDL_error *error = SDL_GetErrBuf();
+    SDL_error *error = SDL_GetErrBuf(SDL_FALSE);
 
-    if (error->error) {
-        SDL_strlcpy(errstr, error->str, maxlen);
-    } else {
-        *errstr = '\0';
+    if (error) {
+        error->error = SDL_ErrorCodeNone;
     }
-
-    return errstr;
+    return 0;
 }
+
+int SDL_OutOfMemory(void)
+{
+    SDL_error *error = SDL_GetErrBuf(SDL_TRUE);
+
+    if (error) {
+        error->error = SDL_ErrorCodeOutOfMemory;
+    }
+    return -1;
+}
+

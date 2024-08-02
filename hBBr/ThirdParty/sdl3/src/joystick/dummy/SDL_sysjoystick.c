@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -41,6 +41,11 @@ static void DUMMY_JoystickDetect(void)
 {
 }
 
+static SDL_bool DUMMY_JoystickIsDevicePresent(Uint16 vendor_id, Uint16 product_id, Uint16 version, const char *name)
+{
+    return SDL_FALSE;
+}
+
 static const char *DUMMY_JoystickGetDeviceName(int device_index)
 {
     return NULL;
@@ -49,6 +54,11 @@ static const char *DUMMY_JoystickGetDeviceName(int device_index)
 static const char *DUMMY_JoystickGetDevicePath(int device_index)
 {
     return NULL;
+}
+
+static int DUMMY_JoystickGetDeviceSteamVirtualGamepadSlot(int device_index)
+{
+    return -1;
 }
 
 static int DUMMY_JoystickGetDevicePlayerIndex(int device_index)
@@ -60,9 +70,9 @@ static void DUMMY_JoystickSetDevicePlayerIndex(int device_index, int player_inde
 {
 }
 
-static SDL_JoystickGUID DUMMY_JoystickGetDeviceGUID(int device_index)
+static SDL_GUID DUMMY_JoystickGetDeviceGUID(int device_index)
 {
-    SDL_JoystickGUID guid;
+    SDL_GUID guid;
     SDL_zero(guid);
     return guid;
 }
@@ -85,11 +95,6 @@ static int DUMMY_JoystickRumble(SDL_Joystick *joystick, Uint16 low_frequency_rum
 static int DUMMY_JoystickRumbleTriggers(SDL_Joystick *joystick, Uint16 left_rumble, Uint16 right_rumble)
 {
     return SDL_Unsupported();
-}
-
-static Uint32 DUMMY_JoystickGetCapabilities(SDL_Joystick *joystick)
-{
-    return 0;
 }
 
 static int DUMMY_JoystickSetLED(SDL_Joystick *joystick, Uint8 red, Uint8 green, Uint8 blue)
@@ -128,8 +133,10 @@ SDL_JoystickDriver SDL_DUMMY_JoystickDriver = {
     DUMMY_JoystickInit,
     DUMMY_JoystickGetCount,
     DUMMY_JoystickDetect,
+    DUMMY_JoystickIsDevicePresent,
     DUMMY_JoystickGetDeviceName,
     DUMMY_JoystickGetDevicePath,
+    DUMMY_JoystickGetDeviceSteamVirtualGamepadSlot,
     DUMMY_JoystickGetDevicePlayerIndex,
     DUMMY_JoystickSetDevicePlayerIndex,
     DUMMY_JoystickGetDeviceGUID,
@@ -137,7 +144,6 @@ SDL_JoystickDriver SDL_DUMMY_JoystickDriver = {
     DUMMY_JoystickOpen,
     DUMMY_JoystickRumble,
     DUMMY_JoystickRumbleTriggers,
-    DUMMY_JoystickGetCapabilities,
     DUMMY_JoystickSetLED,
     DUMMY_JoystickSendEffect,
     DUMMY_JoystickSetSensorsEnabled,

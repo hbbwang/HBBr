@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -19,12 +19,6 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 #include "SDL_internal.h"
-
-/* Standard C++11 includes */
-#include <functional>
-#include <string>
-#include <sstream>
-using namespace std;
 
 /* Windows includes */
 #include "ppltasks.h"
@@ -59,7 +53,7 @@ extern "C" {
 #include "SDL_winrtapp_common.h"
 #include "SDL_winrtapp_direct3d.h"
 
-#if defined(SDL_VIDEO_RENDER_D3D11) && !defined(SDL_RENDER_DISABLED)
+#if SDL_VIDEO_RENDER_D3D11
 /* Calling IDXGIDevice3::Trim on the active Direct3D 11.x device is necessary
  * when Windows 8.1 apps are about to get suspended.
  */
@@ -114,7 +108,7 @@ static void WINRT_ProcessWindowSizeChange() // TODO: Pass an SDL_Window-identify
     if (coreWindow) {
         if (WINRT_GlobalSDLWindow) {
             SDL_Window *window = WINRT_GlobalSDLWindow;
-            SDL_WindowData *data = window->driverdata;
+            SDL_WindowData *data = window->internal;
 
             int x = (int)SDL_lroundf(data->coreWindow->Bounds.Left);
             int y = (int)SDL_lroundf(data->coreWindow->Bounds.Top);
@@ -143,7 +137,7 @@ static void WINRT_ProcessWindowSizeChange() // TODO: Pass an SDL_Window-identify
             }
 #endif
 
-            const Uint32 latestFlags = WINRT_DetectWindowFlags(window);
+            const SDL_WindowFlags latestFlags = WINRT_DetectWindowFlags(window);
             if (latestFlags & SDL_WINDOW_MAXIMIZED) {
                 SDL_SendWindowEvent(window, SDL_EVENT_WINDOW_MAXIMIZED, 0, 0);
             } else {
@@ -234,7 +228,7 @@ void SDL_WinRTApp::OnOrientationChanged(Object ^ sender)
     // TODO, WinRT: do more extensive research into why orientation changes on Win 8.x don't need D3D changes, or if they might, in some cases
     SDL_Window *window = WINRT_GlobalSDLWindow;
     if (window) {
-        SDL_WindowData *data = window->driverdata;
+        SDL_WindowData *data = window->internal;
         int w = (int)SDL_floorf(data->coreWindow->Bounds.Width);
         int h = (int)SDL_floorf(data->coreWindow->Bounds.Height);
         SDL_SendWindowEvent(WINRT_GlobalSDLWindow, SDL_EVENT_WINDOW_RESIZED, w, h);
@@ -296,11 +290,8 @@ void SDL_WinRTApp::SetWindow(CoreWindow ^ window)
         ref new TypedEventHandler<MouseDevice ^, MouseEventArgs ^>(this, &SDL_WinRTApp::OnMouseMoved);
 #endif
 
-    window->KeyDown +=
-        ref new TypedEventHandler<CoreWindow ^, KeyEventArgs ^>(this, &SDL_WinRTApp::OnKeyDown);
-
-    window->KeyUp +=
-        ref new TypedEventHandler<CoreWindow ^, KeyEventArgs ^>(this, &SDL_WinRTApp::OnKeyUp);
+    window->Dispatcher->AcceleratorKeyActivated +=
+        ref new TypedEventHandler<CoreDispatcher ^, AcceleratorKeyEventArgs ^>(this, &SDL_WinRTApp::OnAcceleratorKeyActivated);
 
     window->CharacterReceived +=
         ref new TypedEventHandler<CoreWindow ^, CharacterReceivedEventArgs ^>(this, &SDL_WinRTApp::OnCharacterReceived);
@@ -343,7 +334,7 @@ void SDL_WinRTApp::Run()
         // representation of command line arguments.
         int argc = 1;
         char **argv = (char **)SDL_malloc(2 * sizeof(*argv));
-        if (argv == NULL) {
+        if (!argv) {
             return;
         }
         argv[0] = SDL_strdup("WinRTApp");
@@ -488,7 +479,7 @@ void SDL_WinRTApp::OnVisibilityChanged(CoreWindow ^ sender, VisibilityChangedEve
     m_windowVisible = args->Visible;
     if (WINRT_GlobalSDLWindow) {
         SDL_bool wasSDLWindowSurfaceValid = WINRT_GlobalSDLWindow->surface_valid;
-        Uint32 latestWindowFlags = WINRT_DetectWindowFlags(WINRT_GlobalSDLWindow);
+        SDL_WindowFlags latestWindowFlags = WINRT_DetectWindowFlags(WINRT_GlobalSDLWindow);
         if (args->Visible) {
             SDL_SendWindowEvent(WINRT_GlobalSDLWindow, SDL_EVENT_WINDOW_SHOWN, 0, 0);
             SDL_SendWindowEvent(WINRT_GlobalSDLWindow, SDL_EVENT_WINDOW_FOCUS_GAINED, 0, 0);
@@ -547,7 +538,7 @@ void SDL_WinRTApp::OnWindowActivated(CoreWindow ^ sender, WindowActivatedEventAr
              */
 #if !SDL_WINAPI_FAMILY_PHONE || NTDDI_VERSION >= NTDDI_WINBLUE
             Point cursorPos = WINRT_TransformCursorPosition(window, sender->PointerPosition, TransformToSDLWindowSize);
-            SDL_SendMouseMotion(0, window, 0, 0, cursorPos.X, cursorPos.Y);
+            SDL_SendMouseMotion(0, window, SDL_GLOBAL_MOUSE_ID, SDL_FALSE, cursorPos.X, cursorPos.Y);
 #endif
 
             /* TODO, WinRT: see if the Win32 bugfix from https://hg.libsdl.org/SDL/rev/d278747da408 needs to be applied (on window activation) */
@@ -618,10 +609,10 @@ void SDL_WinRTApp::OnSuspending(Platform::Object ^ sender, SuspendingEventArgs ^
         // Let the Direct3D 11 renderer prepare for the app to be backgrounded.
         // This is necessary for Windows 8.1, possibly elsewhere in the future.
         // More details at: http://msdn.microsoft.com/en-us/library/windows/apps/Hh994929.aspx
-#if defined(SDL_VIDEO_RENDER_D3D11) && !defined(SDL_RENDER_DISABLED)
+#if SDL_VIDEO_RENDER_D3D11
         if (WINRT_GlobalSDLWindow) {
             SDL_Renderer *renderer = SDL_GetRenderer(WINRT_GlobalSDLWindow);
-            if (renderer && (SDL_strcmp(renderer->info.name, "direct3d11") == 0)) {
+            if (renderer && (SDL_strcmp(renderer->name, "direct3d11") == 0)) {
                 D3D11_Trim(renderer);
             }
         }
@@ -720,26 +711,21 @@ void SDL_WinRTApp::OnMouseMoved(MouseDevice ^ mouseDevice, MouseEventArgs ^ args
     WINRT_ProcessMouseMovedEvent(WINRT_GlobalSDLWindow, args);
 }
 
-void SDL_WinRTApp::OnKeyDown(Windows::UI::Core::CoreWindow ^ sender, Windows::UI::Core::KeyEventArgs ^ args)
+void SDL_WinRTApp::OnAcceleratorKeyActivated(Windows::UI::Core::CoreDispatcher ^ sender, Windows::UI::Core::AcceleratorKeyEventArgs ^ args)
 {
-    WINRT_ProcessKeyDownEvent(args);
-}
-
-void SDL_WinRTApp::OnKeyUp(Windows::UI::Core::CoreWindow ^ sender, Windows::UI::Core::KeyEventArgs ^ args)
-{
-    WINRT_ProcessKeyUpEvent(args);
+    WINRT_ProcessAcceleratorKeyActivated(args);
 }
 
 void SDL_WinRTApp::OnCharacterReceived(Windows::UI::Core::CoreWindow ^ sender, Windows::UI::Core::CharacterReceivedEventArgs ^ args)
 {
-    WINRT_ProcessCharacterReceivedEvent(args);
+    WINRT_ProcessCharacterReceivedEvent(WINRT_GlobalSDLWindow, args);
 }
 
 template <typename BackButtonEventArgs>
 static void WINRT_OnBackButtonPressed(BackButtonEventArgs ^ args)
 {
-    SDL_SendKeyboardKey(0, SDL_PRESSED, SDL_SCANCODE_AC_BACK);
-    SDL_SendKeyboardKey(0, SDL_RELEASED, SDL_SCANCODE_AC_BACK);
+    SDL_SendKeyboardKey(0, SDL_GLOBAL_KEYBOARD_ID, 0, SDL_SCANCODE_AC_BACK, SDL_PRESSED);
+    SDL_SendKeyboardKey(0, SDL_GLOBAL_KEYBOARD_ID, 0, SDL_SCANCODE_AC_BACK, SDL_RELEASED);
 
     if (SDL_GetHintBoolean(SDL_HINT_WINRT_HANDLE_BACK_BUTTON, SDL_FALSE)) {
         args->Handled = true;

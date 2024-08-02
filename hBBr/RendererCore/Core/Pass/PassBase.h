@@ -40,7 +40,7 @@ protected:
 	glm::vec4 _markColor = glm::vec4(1,1,1,0.5);
 
 	//性能测试
-	int passIndex = 0;
+	uint32_t passIndex = 0;
 	HTime _cpuTimer;
 	double _cpuTime;
 	double _gpuTime;

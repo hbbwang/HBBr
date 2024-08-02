@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -31,19 +31,16 @@ static void SDL_CleanupWaitableTimer(void *timer)
     CloseHandle(timer);
 }
 
-HANDLE SDL_GetWaitableTimer()
+HANDLE SDL_GetWaitableTimer(void)
 {
     static SDL_TLSID TLS_timer_handle;
     HANDLE timer;
 
-    if (!TLS_timer_handle) {
-        TLS_timer_handle = SDL_CreateTLS();
-    }
-    timer = SDL_GetTLS(TLS_timer_handle);
+    timer = SDL_GetTLS(&TLS_timer_handle);
     if (!timer) {
         timer = CreateWaitableTimerExW(NULL, NULL, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);
         if (timer) {
-            SDL_SetTLS(TLS_timer_handle, timer, SDL_CleanupWaitableTimer);
+            SDL_SetTLS(&TLS_timer_handle, timer, SDL_CleanupWaitableTimer);
         }
     }
     return timer;
@@ -66,7 +63,7 @@ Uint64 SDL_GetPerformanceFrequency(void)
     return (Uint64)frequency.QuadPart;
 }
 
-void SDL_DelayNS(Uint64 ns)
+void SDL_SYS_DelayNS(Uint64 ns)
 {
     /* CREATE_WAITABLE_TIMER_HIGH_RESOLUTION flag was added in Windows 10 version 1803.
      *
@@ -100,7 +97,7 @@ void SDL_DelayNS(Uint64 ns)
             ns = max_delay;
         }
 
-#if defined(__WINRT__) && defined(_MSC_FULL_VER) && (_MSC_FULL_VER <= 180030723)
+#if defined(SDL_PLATFORM_WINRT) && defined(_MSC_FULL_VER) && (_MSC_FULL_VER <= 180030723)
         static HANDLE mutex = 0;
         if (!mutex) {
             mutex = CreateEventEx(0, 0, 0, EVENT_ALL_ACCESS);

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -23,13 +23,13 @@
 #include <unistd.h>
 
 #include "SDL_fcitx.h"
+#include "../../video/SDL_sysvideo.h"
 #include "../../events/SDL_keyboard_c.h"
 #include "SDL_dbus.h"
 
 #ifdef SDL_VIDEO_DRIVER_X11
 #include "../../video/x11/SDL_x11video.h"
 #endif
-#include <SDL3/SDL_syswm.h>
 
 #define FCITX_DBUS_SERVICE "org.freedesktop.portal.Fcitx"
 
@@ -55,15 +55,15 @@ static FcitxClient fcitx_client;
 
 static char *GetAppName(void)
 {
-#if defined(__LINUX__) || defined(__FREEBSD__)
+#if defined(SDL_PLATFORM_LINUX) || defined(SDL_PLATFORM_FREEBSD)
     char *spot;
     char procfile[1024];
     char linkfile[1024];
     int linksize;
 
-#ifdef __LINUX__
+#ifdef SDL_PLATFORM_LINUX
     (void)SDL_snprintf(procfile, sizeof(procfile), "/proc/%d/exe", getpid());
-#elif defined(__FREEBSD__)
+#elif defined(SDL_PLATFORM_FREEBSD)
     (void)SDL_snprintf(procfile, sizeof(procfile), "/proc/%d/file", getpid());
 #endif
     linksize = readlink(procfile, linkfile, sizeof(linkfile) - 1);
@@ -76,7 +76,7 @@ static char *GetAppName(void)
             return SDL_strdup(linkfile);
         }
     }
-#endif /* __LINUX__ || __FREEBSD__ */
+#endif /* SDL_PLATFORM_LINUX || SDL_PLATFORM_FREEBSD */
 
     return SDL_strdup("SDL_App");
 }
@@ -192,17 +192,7 @@ static DBusHandlerResult DBus_MessageFilter(DBusConnection *conn, DBusMessage *m
         dbus->message_iter_init(msg, &iter);
         dbus->message_iter_get_basic(&iter, &text);
 
-        if (text && *text) {
-            char buf[SDL_TEXTINPUTEVENT_TEXT_SIZE];
-            size_t text_bytes = SDL_strlen(text), i = 0;
-
-            while (i < text_bytes) {
-                size_t sz = SDL_utf8strlcpy(buf, text + i, sizeof(buf));
-                SDL_SendKeyboardText(buf);
-
-                i += sz;
-            }
-        }
+        SDL_SendKeyboardText(text);
 
         return DBUS_HANDLER_RESULT_HANDLED;
     }
@@ -212,32 +202,17 @@ static DBusHandlerResult DBus_MessageFilter(DBusConnection *conn, DBusMessage *m
         Sint32 start_pos, end_pos;
         size_t text_bytes = Fcitx_GetPreeditString(dbus, msg, &text, &start_pos, &end_pos);
         if (text_bytes) {
-            if (SDL_GetHintBoolean(SDL_HINT_IME_SUPPORT_EXTENDED_TEXT, SDL_FALSE)) {
-                if (start_pos == -1) {
-                    Sint32 byte_pos = Fcitx_GetPreeditCursorByte(dbus, msg);
-                    start_pos = byte_pos >= 0 ? SDL_utf8strnlen(text, byte_pos) : -1;
-                }
-                SDL_SendEditingText(text, start_pos, end_pos >= 0 ? end_pos - start_pos : -1);
-            } else {
-                char buf[SDL_TEXTEDITINGEVENT_TEXT_SIZE];
-                size_t i = 0;
-                size_t cursor = 0;
-                while (i < text_bytes) {
-                    const size_t sz = SDL_utf8strlcpy(buf, text + i, sizeof(buf));
-                    const size_t chars = SDL_utf8strlen(buf);
-
-                    SDL_SendEditingText(buf, cursor, chars);
-
-                    i += sz;
-                    cursor += chars;
-                }
+            if (start_pos == -1) {
+                Sint32 byte_pos = Fcitx_GetPreeditCursorByte(dbus, msg);
+                start_pos = byte_pos >= 0 ? SDL_utf8strnlen(text, byte_pos) : -1;
             }
+            SDL_SendEditingText(text, start_pos, end_pos >= 0 ? end_pos - start_pos : -1);
             SDL_free(text);
         } else {
             SDL_SendEditingText("", 0, 0);
         }
 
-        SDL_Fcitx_UpdateTextRect(NULL);
+        SDL_Fcitx_UpdateTextInputArea(SDL_GetKeyboardFocus());
         return DBUS_HANDLER_RESULT_HANDLED;
     }
 
@@ -255,7 +230,7 @@ static void FcitxClientICCallMethod(FcitxClient *client, const char *method)
 static void SDLCALL Fcitx_SetCapabilities(void *data,
                                           const char *name,
                                           const char *old_val,
-                                          const char *internal_editing)
+                                          const char *hint)
 {
     FcitxClient *client = (FcitxClient *)data;
     Uint64 caps = 0;
@@ -263,9 +238,12 @@ static void SDLCALL Fcitx_SetCapabilities(void *data,
         return;
     }
 
-    if (!(internal_editing && *internal_editing == '1')) {
+    if (hint && SDL_strstr(hint, "composition")) {
         caps |= (1 << 1); /* Preedit Flag */
         caps |= (1 << 4); /* Formatted Preedit Flag */
+    }
+    if (hint && SDL_strstr(hint, "candidates")) {
+        // FIXME, turn off native candidate rendering
     }
 
     SDL_DBus_CallVoidMethod(FCITX_DBUS_SERVICE, client->ic_path, FCITX_IC_DBUS_INTERFACE, "SetCapability", DBUS_TYPE_UINT64, &caps, DBUS_TYPE_INVALID);
@@ -326,7 +304,7 @@ static SDL_bool FcitxClientCreateIC(FcitxClient *client)
                                     NULL);
         dbus->connection_flush(dbus->session_conn);
 
-        SDL_AddHintCallback(SDL_HINT_IME_INTERNAL_EDITING, Fcitx_SetCapabilities, client);
+        SDL_AddHintCallback(SDL_HINT_IME_IMPLEMENTED_UI, Fcitx_SetCapabilities, client);
         return SDL_TRUE;
     }
 
@@ -416,7 +394,7 @@ SDL_bool SDL_Fcitx_ProcessKeyEvent(Uint32 keysym, Uint32 keycode, Uint8 state)
                             DBUS_TYPE_UINT32, &keysym, DBUS_TYPE_UINT32, &keycode, DBUS_TYPE_UINT32, &mod_state, DBUS_TYPE_BOOLEAN, &is_release, DBUS_TYPE_UINT32, &event_time, DBUS_TYPE_INVALID,
                             DBUS_TYPE_BOOLEAN, &handled, DBUS_TYPE_INVALID)) {
         if (handled) {
-            SDL_Fcitx_UpdateTextRect(NULL);
+            SDL_Fcitx_UpdateTextInputArea(SDL_GetKeyboardFocus());
             return SDL_TRUE;
         }
     }
@@ -424,40 +402,40 @@ SDL_bool SDL_Fcitx_ProcessKeyEvent(Uint32 keysym, Uint32 keycode, Uint8 state)
     return SDL_FALSE;
 }
 
-void SDL_Fcitx_UpdateTextRect(const SDL_Rect *rect)
+void SDL_Fcitx_UpdateTextInputArea(SDL_Window *window)
 {
-    SDL_Window *focused_win = NULL;
-    SDL_SysWMinfo info;
     int x = 0, y = 0;
     SDL_Rect *cursor = &fcitx_client.cursor_rect;
 
-    if (rect) {
-        SDL_copyp(cursor, rect);
-    }
-
-    focused_win = SDL_GetKeyboardFocus();
-    if (focused_win == NULL) {
+    if (!window) {
         return;
     }
 
-    SDL_GetWindowPosition(focused_win, &x, &y);
+    // We'll use a square at the text input cursor location for the cursor_rect
+    cursor->x = window->text_input_rect.x + window->text_input_cursor;
+    cursor->y = window->text_input_rect.y;
+    cursor->w = window->text_input_rect.h;
+    cursor->h = window->text_input_rect.h;
 
-    if (SDL_GetWindowWMInfo(focused_win, &info, SDL_SYSWM_CURRENT_VERSION) == 0) {
-#ifdef SDL_ENABLE_SYSWM_X11
-        if (info.subsystem == SDL_SYSWM_X11) {
-            Display *x_disp = info.info.x11.display;
-            int x_screen = info.info.x11.screen;
-            Window x_win = info.info.x11.window;
-            Window unused;
+    SDL_GetWindowPosition(window, &x, &y);
+
+#ifdef SDL_VIDEO_DRIVER_X11
+    {
+        SDL_PropertiesID props = SDL_GetWindowProperties(window);
+        Display *x_disp = (Display *)SDL_GetPointerProperty(props, SDL_PROP_WINDOW_X11_DISPLAY_POINTER, NULL);
+        int x_screen = SDL_GetNumberProperty(props, SDL_PROP_WINDOW_X11_SCREEN_NUMBER, 0);
+        Window x_win = SDL_GetNumberProperty(props, SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
+        Window unused;
+        if (x_disp && x_win) {
             X11_XTranslateCoordinates(x_disp, x_win, RootWindow(x_disp, x_screen), 0, 0, &x, &y, &unused);
         }
-#endif
     }
+#endif
 
     if (cursor->x == -1 && cursor->y == -1 && cursor->w == 0 && cursor->h == 0) {
         /* move to bottom left */
         int w = 0, h = 0;
-        SDL_GetWindowSize(focused_win, &w, &h);
+        SDL_GetWindowSize(window, &w, &h);
         cursor->x = 0;
         cursor->y = h;
     }
@@ -478,6 +456,5 @@ void SDL_Fcitx_PumpEvents(void)
 
     while (dbus->connection_dispatch(conn) == DBUS_DISPATCH_DATA_REMAINS) {
         /* Do nothing, actual work happens in DBus_MessageFilter */
-        usleep(10);
     }
 }

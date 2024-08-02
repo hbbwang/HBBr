@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -31,11 +31,11 @@
 
 int Wayland_SetClipboardData(SDL_VideoDevice *_this)
 {
-    SDL_VideoData *video_data = _this->driverdata;
+    SDL_VideoData *video_data = _this->internal;
     SDL_WaylandDataDevice *data_device = NULL;
     int status = 0;
 
-    if (video_data->input != NULL && video_data->input->data_device != NULL) {
+    if (video_data->input && video_data->input->data_device) {
         data_device = video_data->input->data_device;
 
         if (_this->clipboard_callback && _this->clipboard_mime_types) {
@@ -56,11 +56,11 @@ int Wayland_SetClipboardData(SDL_VideoDevice *_this)
 
 void *Wayland_GetClipboardData(SDL_VideoDevice *_this, const char *mime_type, size_t *length)
 {
-    SDL_VideoData *video_data = _this->driverdata;
+    SDL_VideoData *video_data = _this->internal;
     SDL_WaylandDataDevice *data_device = NULL;
     void *buffer = NULL;
 
-    if (video_data->input != NULL && video_data->input->data_device != NULL) {
+    if (video_data->input && video_data->input->data_device) {
         data_device = video_data->input->data_device;
         if (data_device->selection_source) {
             buffer = SDL_GetInternalClipboardData(_this, mime_type, length);
@@ -74,13 +74,13 @@ void *Wayland_GetClipboardData(SDL_VideoDevice *_this, const char *mime_type, si
 
 SDL_bool Wayland_HasClipboardData(SDL_VideoDevice *_this, const char *mime_type)
 {
-    SDL_VideoData *video_data = _this->driverdata;
+    SDL_VideoData *video_data = _this->internal;
     SDL_WaylandDataDevice *data_device = NULL;
     SDL_bool result = SDL_FALSE;
 
-    if (video_data->input != NULL && video_data->input->data_device != NULL) {
+    if (video_data->input && video_data->input->data_device) {
         data_device = video_data->input->data_device;
-        if (data_device->selection_source != NULL) {
+        if (data_device->selection_source) {
             result = SDL_HasInternalClipboardData(_this, mime_type);
         } else {
             result = Wayland_data_offer_has_mime(data_device->selection_offer, mime_type);
@@ -105,11 +105,11 @@ const char **Wayland_GetTextMimeTypes(SDL_VideoDevice *_this, size_t *num_mime_t
 
 int Wayland_SetPrimarySelectionText(SDL_VideoDevice *_this, const char *text)
 {
-    SDL_VideoData *video_data = _this->driverdata;
+    SDL_VideoData *video_data = _this->internal;
     SDL_WaylandPrimarySelectionDevice *primary_selection_device = NULL;
-    int status = 0;
+    int status = -1;
 
-    if (video_data->input != NULL && video_data->input->primary_selection_device != NULL) {
+    if (video_data->input && video_data->input->primary_selection_device) {
         primary_selection_device = video_data->input->primary_selection_device;
         if (text[0] != '\0') {
             SDL_WaylandPrimarySelectionSource *source = Wayland_primary_selection_source_create(_this);
@@ -132,21 +132,21 @@ int Wayland_SetPrimarySelectionText(SDL_VideoDevice *_this, const char *text)
 
 char *Wayland_GetPrimarySelectionText(SDL_VideoDevice *_this)
 {
-    SDL_VideoData *video_data = _this->driverdata;
+    SDL_VideoData *video_data = _this->internal;
     SDL_WaylandPrimarySelectionDevice *primary_selection_device = NULL;
     char *text = NULL;
     size_t length = 0;
 
-    if (video_data->input != NULL && video_data->input->primary_selection_device != NULL) {
+    if (video_data->input && video_data->input->primary_selection_device) {
         primary_selection_device = video_data->input->primary_selection_device;
-        if (primary_selection_device->selection_source != NULL) {
+        if (primary_selection_device->selection_source) {
             text = Wayland_primary_selection_source_get_data(primary_selection_device->selection_source, TEXT_MIME, &length);
         } else if (Wayland_primary_selection_offer_has_mime(primary_selection_device->selection_offer, TEXT_MIME)) {
             text = Wayland_primary_selection_offer_receive(primary_selection_device->selection_offer, TEXT_MIME, &length);
         }
     }
 
-    if (text == NULL) {
+    if (!text) {
         text = SDL_strdup("");
     }
 
@@ -155,13 +155,13 @@ char *Wayland_GetPrimarySelectionText(SDL_VideoDevice *_this)
 
 SDL_bool Wayland_HasPrimarySelectionText(SDL_VideoDevice *_this)
 {
-    SDL_VideoData *video_data = _this->driverdata;
+    SDL_VideoData *video_data = _this->internal;
     SDL_WaylandPrimarySelectionDevice *primary_selection_device = NULL;
     SDL_bool result = SDL_FALSE;
 
-    if (video_data->input != NULL && video_data->input->primary_selection_device != NULL) {
+    if (video_data->input && video_data->input->primary_selection_device) {
         primary_selection_device = video_data->input->primary_selection_device;
-        if (primary_selection_device->selection_source != NULL) {
+        if (primary_selection_device->selection_source) {
             result = SDL_TRUE;
         } else {
             result = Wayland_primary_selection_offer_has_mime(primary_selection_device->selection_offer, TEXT_MIME);

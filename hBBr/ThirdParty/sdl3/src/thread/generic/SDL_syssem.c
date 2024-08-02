@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -46,7 +46,7 @@ Uint32 SDL_GetSemaphoreValue(SDL_Semaphore *sem)
     return 0;
 }
 
-int SDL_PostSemaphore(SDL_Semaphore *sem)
+int SDL_SignalSemaphore(SDL_Semaphore *sem)
 {
     return SDL_SetError("SDL not built with thread support");
 }
@@ -66,8 +66,7 @@ SDL_Semaphore *SDL_CreateSemaphore(Uint32 initial_value)
     SDL_Semaphore *sem;
 
     sem = (SDL_Semaphore *)SDL_malloc(sizeof(*sem));
-    if (sem == NULL) {
-        SDL_OutOfMemory();
+    if (!sem) {
         return NULL;
     }
     sem->count = initial_value;
@@ -108,7 +107,7 @@ int SDL_WaitSemaphoreTimeoutNS(SDL_Semaphore *sem, Sint64 timeoutNS)
 {
     int retval;
 
-    if (sem == NULL) {
+    if (!sem) {
         return SDL_InvalidParamError("sem");
     }
 
@@ -154,9 +153,9 @@ Uint32 SDL_GetSemaphoreValue(SDL_Semaphore *sem)
     return value;
 }
 
-int SDL_PostSemaphore(SDL_Semaphore *sem)
+int SDL_SignalSemaphore(SDL_Semaphore *sem)
 {
-    if (sem == NULL) {
+    if (!sem) {
         return SDL_InvalidParamError("sem");
     }
 

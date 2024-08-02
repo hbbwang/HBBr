@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -32,14 +32,14 @@
 /*#define DEBUG_LUNA_PROTOCOL*/
 
 /* Sending rumble on macOS blocks for a long time and eventually fails */
-#ifndef __MACOS__
+#ifndef SDL_PLATFORM_MACOS
 #define ENABLE_LUNA_BLUETOOTH_RUMBLE
 #endif
 
 enum
 {
-    SDL_CONTROLLER_BUTTON_LUNA_MIC = 15,
-    SDL_CONTROLLER_NUM_LUNA_BUTTONS,
+    SDL_GAMEPAD_BUTTON_LUNA_MICROPHONE = 11,
+    SDL_GAMEPAD_NUM_LUNA_BUTTONS,
 };
 
 typedef struct
@@ -72,8 +72,7 @@ static SDL_bool HIDAPI_DriverLuna_InitDevice(SDL_HIDAPI_Device *device)
     SDL_DriverLuna_Context *ctx;
 
     ctx = (SDL_DriverLuna_Context *)SDL_calloc(1, sizeof(*ctx));
-    if (ctx == NULL) {
-        SDL_OutOfMemory();
+    if (!ctx) {
         return SDL_FALSE;
     }
     device->context = ctx;
@@ -101,9 +100,9 @@ static SDL_bool HIDAPI_DriverLuna_OpenJoystick(SDL_HIDAPI_Device *device, SDL_Jo
     SDL_zeroa(ctx->last_state);
 
     /* Initialize the joystick capabilities */
-    joystick->nbuttons = SDL_CONTROLLER_NUM_LUNA_BUTTONS;
+    joystick->nbuttons = SDL_GAMEPAD_NUM_LUNA_BUTTONS;
     joystick->naxes = SDL_GAMEPAD_AXIS_MAX;
-    joystick->epowerlevel = SDL_JOYSTICK_POWER_FULL;
+    joystick->nhats = 1;
 
     return SDL_TRUE;
 }
@@ -142,7 +141,7 @@ static Uint32 HIDAPI_DriverLuna_GetJoystickCapabilities(SDL_HIDAPI_Device *devic
 
 #ifdef ENABLE_LUNA_BLUETOOTH_RUMBLE
     if (device->product_id == BLUETOOTH_PRODUCT_LUNA_CONTROLLER) {
-        result |= SDL_JOYCAP_RUMBLE;
+        result |= SDL_JOYSTICK_CAP_RUMBLE;
     }
 #endif
 
@@ -169,10 +168,10 @@ static void HIDAPI_DriverLuna_HandleUSBStatePacket(SDL_Joystick *joystick, SDL_D
     Uint64 timestamp = SDL_GetTicksNS();
 
     if (ctx->last_state[1] != data[1]) {
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_A, (data[1] & 0x01) ? SDL_PRESSED : SDL_RELEASED);
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_B, (data[1] & 0x02) ? SDL_PRESSED : SDL_RELEASED);
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_X, (data[1] & 0x04) ? SDL_PRESSED : SDL_RELEASED);
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_Y, (data[1] & 0x08) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_SOUTH, (data[1] & 0x01) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_EAST, (data[1] & 0x02) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_WEST, (data[1] & 0x04) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_NORTH, (data[1] & 0x08) ? SDL_PRESSED : SDL_RELEASED);
         SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, (data[1] & 0x10) ? SDL_PRESSED : SDL_RELEASED);
         SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, (data[1] & 0x20) ? SDL_PRESSED : SDL_RELEASED);
         SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_BACK, (data[1] & 0x40) ? SDL_PRESSED : SDL_RELEASED);
@@ -180,53 +179,44 @@ static void HIDAPI_DriverLuna_HandleUSBStatePacket(SDL_Joystick *joystick, SDL_D
     }
     if (ctx->last_state[2] != data[2]) {
         SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_GUIDE, (data[2] & 0x01) ? SDL_PRESSED : SDL_RELEASED);
-        SDL_SendJoystickButton(timestamp, joystick, SDL_CONTROLLER_BUTTON_LUNA_MIC, (data[2] & 0x02) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_LUNA_MICROPHONE, (data[2] & 0x02) ? SDL_PRESSED : SDL_RELEASED);
         SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_LEFT_STICK, (data[2] & 0x04) ? SDL_PRESSED : SDL_RELEASED);
         SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_RIGHT_STICK, (data[2] & 0x08) ? SDL_PRESSED : SDL_RELEASED);
     }
 
     if (ctx->last_state[3] != data[3]) {
-        SDL_bool dpad_up = SDL_FALSE;
-        SDL_bool dpad_down = SDL_FALSE;
-        SDL_bool dpad_left = SDL_FALSE;
-        SDL_bool dpad_right = SDL_FALSE;
+        Uint8 hat;
 
-        switch (data[3] & 0xf) {
+        switch (data[3] & 0x0f) {
         case 0:
-            dpad_up = SDL_TRUE;
+            hat = SDL_HAT_UP;
             break;
         case 1:
-            dpad_up = SDL_TRUE;
-            dpad_right = SDL_TRUE;
+            hat = SDL_HAT_RIGHTUP;
             break;
         case 2:
-            dpad_right = SDL_TRUE;
+            hat = SDL_HAT_RIGHT;
             break;
         case 3:
-            dpad_right = SDL_TRUE;
-            dpad_down = SDL_TRUE;
+            hat = SDL_HAT_RIGHTDOWN;
             break;
         case 4:
-            dpad_down = SDL_TRUE;
+            hat = SDL_HAT_DOWN;
             break;
         case 5:
-            dpad_left = SDL_TRUE;
-            dpad_down = SDL_TRUE;
+            hat = SDL_HAT_LEFTDOWN;
             break;
         case 6:
-            dpad_left = SDL_TRUE;
+            hat = SDL_HAT_LEFT;
             break;
         case 7:
-            dpad_up = SDL_TRUE;
-            dpad_left = SDL_TRUE;
+            hat = SDL_HAT_LEFTUP;
             break;
         default:
+            hat = SDL_HAT_CENTERED;
             break;
         }
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_DPAD_DOWN, dpad_down);
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_DPAD_UP, dpad_up);
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_DPAD_RIGHT, dpad_right);
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_DPAD_LEFT, dpad_left);
+        SDL_SendJoystickHat(timestamp, joystick, 0, hat);
     }
 
 #define READ_STICK_AXIS(offset) \
@@ -268,17 +258,8 @@ static void HIDAPI_DriverLuna_HandleBluetoothStatePacket(SDL_Joystick *joystick,
 
     if (size >= 2 && data[0] == 0x04) {
         /* Battery level report */
-        int level = data[1] * 100 / 0xFF;
-        if (level == 0) {
-            SDL_SendJoystickBatteryLevel(joystick, SDL_JOYSTICK_POWER_EMPTY);
-        } else if (level <= 20) {
-            SDL_SendJoystickBatteryLevel(joystick, SDL_JOYSTICK_POWER_LOW);
-        } else if (level <= 70) {
-            SDL_SendJoystickBatteryLevel(joystick, SDL_JOYSTICK_POWER_MEDIUM);
-        } else {
-            SDL_SendJoystickBatteryLevel(joystick, SDL_JOYSTICK_POWER_FULL);
-        }
-
+        int percent = (int)SDL_roundf((data[1] / 255.0f) * 100.0f);
+        SDL_SendJoystickPowerInfo(joystick, SDL_POWERSTATE_ON_BATTERY, percent);
         return;
     }
 
@@ -288,54 +269,45 @@ static void HIDAPI_DriverLuna_HandleBluetoothStatePacket(SDL_Joystick *joystick,
     }
 
     if (ctx->last_state[13] != data[13]) {
-        SDL_bool dpad_up = SDL_FALSE;
-        SDL_bool dpad_down = SDL_FALSE;
-        SDL_bool dpad_left = SDL_FALSE;
-        SDL_bool dpad_right = SDL_FALSE;
+        Uint8 hat;
 
-        switch (data[13] & 0xf) {
+        switch (data[13] & 0x0f) {
         case 1:
-            dpad_up = SDL_TRUE;
+            hat = SDL_HAT_UP;
             break;
         case 2:
-            dpad_up = SDL_TRUE;
-            dpad_right = SDL_TRUE;
+            hat = SDL_HAT_RIGHTUP;
             break;
         case 3:
-            dpad_right = SDL_TRUE;
+            hat = SDL_HAT_RIGHT;
             break;
         case 4:
-            dpad_right = SDL_TRUE;
-            dpad_down = SDL_TRUE;
+            hat = SDL_HAT_RIGHTDOWN;
             break;
         case 5:
-            dpad_down = SDL_TRUE;
+            hat = SDL_HAT_DOWN;
             break;
         case 6:
-            dpad_left = SDL_TRUE;
-            dpad_down = SDL_TRUE;
+            hat = SDL_HAT_LEFTDOWN;
             break;
         case 7:
-            dpad_left = SDL_TRUE;
+            hat = SDL_HAT_LEFT;
             break;
         case 8:
-            dpad_up = SDL_TRUE;
-            dpad_left = SDL_TRUE;
+            hat = SDL_HAT_LEFTUP;
             break;
         default:
+            hat = SDL_HAT_CENTERED;
             break;
         }
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_DPAD_DOWN, dpad_down);
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_DPAD_UP, dpad_up);
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_DPAD_RIGHT, dpad_right);
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_DPAD_LEFT, dpad_left);
+        SDL_SendJoystickHat(timestamp, joystick, 0, hat);
     }
 
     if (ctx->last_state[14] != data[14]) {
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_A, (data[14] & 0x01) ? SDL_PRESSED : SDL_RELEASED);
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_B, (data[14] & 0x02) ? SDL_PRESSED : SDL_RELEASED);
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_X, (data[14] & 0x08) ? SDL_PRESSED : SDL_RELEASED);
-        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_Y, (data[14] & 0x10) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_SOUTH, (data[14] & 0x01) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_EAST, (data[14] & 0x02) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_WEST, (data[14] & 0x08) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_NORTH, (data[14] & 0x10) ? SDL_PRESSED : SDL_RELEASED);
         SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, (data[14] & 0x40) ? SDL_PRESSED : SDL_RELEASED);
         SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, (data[14] & 0x80) ? SDL_PRESSED : SDL_RELEASED);
     }
@@ -346,7 +318,7 @@ static void HIDAPI_DriverLuna_HandleBluetoothStatePacket(SDL_Joystick *joystick,
     }
     if (ctx->last_state[16] != data[16]) {
         SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_BACK, (data[16] & 0x01) ? SDL_PRESSED : SDL_RELEASED);
-        SDL_SendJoystickButton(timestamp, joystick, SDL_CONTROLLER_BUTTON_LUNA_MIC, (data[16] & 0x02) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_SendJoystickButton(timestamp, joystick, SDL_GAMEPAD_BUTTON_LUNA_MICROPHONE, (data[16] & 0x02) ? SDL_PRESSED : SDL_RELEASED);
     }
 
 #define READ_STICK_AXIS(offset) \
@@ -384,7 +356,7 @@ static SDL_bool HIDAPI_DriverLuna_UpdateDevice(SDL_HIDAPI_Device *device)
     int size = 0;
 
     if (device->num_joysticks > 0) {
-        joystick = SDL_GetJoystickFromInstanceID(device->joysticks[0]);
+        joystick = SDL_GetJoystickFromID(device->joysticks[0]);
     } else {
         return SDL_FALSE;
     }
@@ -393,7 +365,7 @@ static SDL_bool HIDAPI_DriverLuna_UpdateDevice(SDL_HIDAPI_Device *device)
 #ifdef DEBUG_LUNA_PROTOCOL
         HIDAPI_DumpPacket("Amazon Luna packet: size = %d", data, size);
 #endif
-        if (joystick == NULL) {
+        if (!joystick) {
             continue;
         }
 

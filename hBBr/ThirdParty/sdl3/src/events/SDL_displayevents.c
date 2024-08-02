@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -24,11 +24,11 @@
 
 #include "SDL_events_c.h"
 
-int SDL_SendDisplayEvent(SDL_VideoDisplay *display, SDL_EventType displayevent, int data1)
+int SDL_SendDisplayEvent(SDL_VideoDisplay *display, SDL_EventType displayevent, int data1, int data2)
 {
     int posted;
 
-    if (display == NULL || display->id == 0) {
+    if (!display || display->id == 0) {
         return 0;
     }
     switch (displayevent) {
@@ -50,12 +50,16 @@ int SDL_SendDisplayEvent(SDL_VideoDisplay *display, SDL_EventType displayevent, 
         event.common.timestamp = 0;
         event.display.displayID = display->id;
         event.display.data1 = data1;
+        event.display.data2 = data2;
         posted = (SDL_PushEvent(&event) > 0);
     }
 
     switch (displayevent) {
-    case SDL_EVENT_DISPLAY_CONNECTED:
-        SDL_OnDisplayConnected(display);
+    case SDL_EVENT_DISPLAY_ADDED:
+        SDL_OnDisplayAdded(display);
+        break;
+    case SDL_EVENT_DISPLAY_MOVED:
+        SDL_OnDisplayMoved(display);
         break;
     default:
         break;

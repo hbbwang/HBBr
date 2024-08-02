@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -83,19 +83,33 @@ static int CG_SetError(const char *prefix, CGDisplayErr result)
     return SDL_SetError("%s: %s", prefix, error);
 }
 
+static NSScreen *GetNSScreenForDisplayID(CGDirectDisplayID displayID)
+{
+    NSArray *screens = [NSScreen screens];
+
+    /* !!! FIXME: maybe track the NSScreen in SDL_DisplayData? */
+    for (NSScreen *screen in screens) {
+        const CGDirectDisplayID thisDisplay = (CGDirectDisplayID)[[[screen deviceDescription] objectForKey:@"NSScreenNumber"] unsignedIntValue];
+        if (thisDisplay == displayID) {
+            return screen;
+        }
+    }
+    return nil;
+}
+
 static float GetDisplayModeRefreshRate(CGDisplayModeRef vidmode, CVDisplayLinkRef link)
 {
-    double refreshRate = CGDisplayModeGetRefreshRate(vidmode);
+    float refreshRate = (float)CGDisplayModeGetRefreshRate(vidmode);
 
     /* CGDisplayModeGetRefreshRate can return 0 (eg for built-in displays). */
     if (refreshRate == 0 && link != NULL) {
         CVTime time = CVDisplayLinkGetNominalOutputVideoRefreshPeriod(link);
         if ((time.flags & kCVTimeIsIndefinite) == 0 && time.timeValue != 0) {
-            refreshRate = (double)time.timeScale / time.timeValue;
+            refreshRate = (float)time.timeScale / time.timeValue;
         }
     }
 
-    return (int)(refreshRate * 100) / 100.0f;
+    return refreshRate;
 }
 
 static SDL_bool HasValidDisplayModeFlags(CGDisplayModeRef vidmode)
@@ -257,23 +271,42 @@ static SDL_bool GetDisplayMode(SDL_VideoDevice *_this, CGDisplayModeRef vidmode,
     mode->h = (int)height;
     mode->pixel_density = (float)pixelW / width;
     mode->refresh_rate = refreshrate;
-    mode->driverdata = data;
+    mode->internal = data;
     return SDL_TRUE;
 }
 
-static const char *Cocoa_GetDisplayName(CGDirectDisplayID displayID)
+static char *Cocoa_GetDisplayName(CGDirectDisplayID displayID)
 {
     /* This API is deprecated in 10.9 with no good replacement (as of 10.15). */
     io_service_t servicePort = CGDisplayIOServicePort(displayID);
     CFDictionaryRef deviceInfo = IODisplayCreateInfoDictionary(servicePort, kIODisplayOnlyPreferredName);
     NSDictionary *localizedNames = [(__bridge NSDictionary *)deviceInfo objectForKey:[NSString stringWithUTF8String:kDisplayProductName]];
-    const char *displayName = NULL;
+    char *displayName = NULL;
 
     if ([localizedNames count] > 0) {
         displayName = SDL_strdup([[localizedNames objectForKey:[[localizedNames allKeys] objectAtIndex:0]] UTF8String]);
     }
     CFRelease(deviceInfo);
     return displayName;
+}
+
+static void Cocoa_GetHDRProperties(CGDirectDisplayID displayID, SDL_HDROutputProperties *HDR)
+{
+    HDR->SDR_white_level = 1.0f;
+    HDR->HDR_headroom = 1.0f;
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 101500 /* Added in the 10.15 SDK */
+    if (@available(macOS 10.15, *)) {
+        NSScreen *screen = GetNSScreenForDisplayID(displayID);
+        if (screen) {
+            if (screen.maximumExtendedDynamicRangeColorComponentValue > 1.0f) {
+                HDR->HDR_headroom = screen.maximumExtendedDynamicRangeColorComponentValue;
+            } else {
+                HDR->HDR_headroom = screen.maximumPotentialExtendedDynamicRangeColorComponentValue;
+            }
+        }
+    }
+#endif
 }
 
 void Cocoa_InitModes(SDL_VideoDevice *_this)
@@ -337,8 +370,8 @@ void Cocoa_InitModes(SDL_VideoDevice *_this)
                 CVDisplayLinkCreateWithCGDisplay(displays[i], &link);
 
                 SDL_zero(display);
-                /* this returns a stddup'ed string */
-                display.name = (char *)Cocoa_GetDisplayName(displays[i]);
+                /* this returns a strdup'ed string */
+                display.name = Cocoa_GetDisplayName(displays[i]);
                 if (!GetDisplayMode(_this, moderef, SDL_TRUE, NULL, link, &mode)) {
                     CVDisplayLinkRelease(link);
                     CGDisplayModeRelease(moderef);
@@ -350,8 +383,10 @@ void Cocoa_InitModes(SDL_VideoDevice *_this)
                 CVDisplayLinkRelease(link);
                 CGDisplayModeRelease(moderef);
 
+                Cocoa_GetHDRProperties(displaydata->display, &display.HDR);
+
                 display.desktop_mode = mode;
-                display.driverdata = displaydata;
+                display.internal = displaydata;
                 SDL_AddVideoDisplay(&display, SDL_FALSE);
                 SDL_free(display.name);
             }
@@ -360,9 +395,23 @@ void Cocoa_InitModes(SDL_VideoDevice *_this)
     }
 }
 
+void Cocoa_UpdateDisplays(SDL_VideoDevice *_this)
+{
+    SDL_HDROutputProperties HDR;
+    int i;
+
+    for (i = 0; i < _this->num_displays; ++i) {
+        SDL_VideoDisplay *display = _this->displays[i];
+        SDL_DisplayData *displaydata = (SDL_DisplayData *)display->internal;
+
+        Cocoa_GetHDRProperties(displaydata->display, &HDR);
+        SDL_SetDisplayHDRProperties(display, &HDR);
+    }
+}
+
 int Cocoa_GetDisplayBounds(SDL_VideoDevice *_this, SDL_VideoDisplay *display, SDL_Rect *rect)
 {
-    SDL_DisplayData *displaydata = (SDL_DisplayData *)display->driverdata;
+    SDL_DisplayData *displaydata = (SDL_DisplayData *)display->internal;
     CGRect cgrect;
 
     cgrect = CGDisplayBounds(displaydata->display);
@@ -375,23 +424,11 @@ int Cocoa_GetDisplayBounds(SDL_VideoDevice *_this, SDL_VideoDisplay *display, SD
 
 int Cocoa_GetDisplayUsableBounds(SDL_VideoDevice *_this, SDL_VideoDisplay *display, SDL_Rect *rect)
 {
-    SDL_DisplayData *displaydata = (SDL_DisplayData *)display->driverdata;
-    const CGDirectDisplayID cgdisplay = displaydata->display;
-    NSArray *screens = [NSScreen screens];
-    NSScreen *screen = nil;
+    SDL_DisplayData *displaydata = (SDL_DisplayData *)display->internal;
+    NSScreen *screen = GetNSScreenForDisplayID(displaydata->display);
 
-    /* !!! FIXME: maybe track the NSScreen in SDL_DisplayData? */
-    for (NSScreen *i in screens) {
-        const CGDirectDisplayID thisDisplay = (CGDirectDisplayID)[[[i deviceDescription] objectForKey:@"NSScreenNumber"] unsignedIntValue];
-        if (thisDisplay == cgdisplay) {
-            screen = i;
-            break;
-        }
-    }
-
-    SDL_assert(screen != nil); /* didn't find it?! */
     if (screen == nil) {
-        return -1;
+        return SDL_SetError("Couldn't get NSScreen for display");
     }
 
     {
@@ -407,7 +444,7 @@ int Cocoa_GetDisplayUsableBounds(SDL_VideoDevice *_this, SDL_VideoDisplay *displ
 
 int Cocoa_GetDisplayModes(SDL_VideoDevice *_this, SDL_VideoDisplay *display)
 {
-    SDL_DisplayData *data = (SDL_DisplayData *)display->driverdata;
+    SDL_DisplayData *data = (SDL_DisplayData *)display->internal;
     CVDisplayLinkRef link = NULL;
     CFArrayRef modes;
     CFDictionaryRef dict = NULL;
@@ -451,8 +488,8 @@ int Cocoa_GetDisplayModes(SDL_VideoDevice *_this, SDL_VideoDisplay *display)
 
             if (GetDisplayMode(_this, moderef, SDL_FALSE, modes, link, &mode)) {
                 if (!SDL_AddFullscreenDisplayMode(display, &mode)) {
-                    CFRelease(((SDL_DisplayModeData *)mode.driverdata)->modes);
-                    SDL_free(mode.driverdata);
+                    CFRelease(mode.internal->modes);
+                    SDL_free(mode.internal);
                 }
             }
         }
@@ -484,17 +521,19 @@ static CGError SetDisplayModeForDisplay(CGDirectDisplayID display, SDL_DisplayMo
 
 int Cocoa_SetDisplayMode(SDL_VideoDevice *_this, SDL_VideoDisplay *display, SDL_DisplayMode *mode)
 {
-    SDL_DisplayData *displaydata = (SDL_DisplayData *)display->driverdata;
-    SDL_DisplayModeData *data = (SDL_DisplayModeData *)mode->driverdata;
+    SDL_DisplayData *displaydata = (SDL_DisplayData *)display->internal;
+    SDL_DisplayModeData *data = mode->internal;
     CGDisplayFadeReservationToken fade_token = kCGDisplayFadeReservationInvalidToken;
     CGError result = kCGErrorSuccess;
+
+    b_inModeTransition = SDL_TRUE;
 
     /* Fade to black to hide resolution-switching flicker */
     if (CGAcquireDisplayFadeReservation(5, &fade_token) == kCGErrorSuccess) {
         CGDisplayFade(fade_token, 0.3, kCGDisplayBlendNormal, kCGDisplayBlendSolidColor, 0.0, 0.0, 0.0, TRUE);
     }
 
-    if (data == display->desktop_mode.driverdata) {
+    if (data == display->desktop_mode.internal) {
         /* Restoring desktop mode */
         SetDisplayModeForDisplay(displaydata->display, data);
     } else {
@@ -507,6 +546,8 @@ int Cocoa_SetDisplayMode(SDL_VideoDevice *_this, SDL_VideoDisplay *display, SDL_
         CGDisplayFade(fade_token, 0.5, kCGDisplayBlendSolidColor, kCGDisplayBlendNormal, 0.0, 0.0, 0.0, FALSE);
         CGReleaseDisplayFadeReservation(fade_token);
     }
+
+    b_inModeTransition = SDL_FALSE;
 
     if (result != kCGErrorSuccess) {
         CG_SetError("CGDisplaySwitchToMode()", result);
@@ -523,15 +564,15 @@ void Cocoa_QuitModes(SDL_VideoDevice *_this)
         SDL_VideoDisplay *display = _this->displays[i];
         SDL_DisplayModeData *mode;
 
-        if (display->current_mode->driverdata != display->desktop_mode.driverdata) {
+        if (display->current_mode->internal != display->desktop_mode.internal) {
             Cocoa_SetDisplayMode(_this, display, &display->desktop_mode);
         }
 
-        mode = (SDL_DisplayModeData *)display->desktop_mode.driverdata;
+        mode = display->desktop_mode.internal;
         CFRelease(mode->modes);
 
         for (j = 0; j < display->num_fullscreen_modes; j++) {
-            mode = (SDL_DisplayModeData *)display->fullscreen_modes[j].driverdata;
+            mode = display->fullscreen_modes[j].internal;
             CFRelease(mode->modes);
         }
     }

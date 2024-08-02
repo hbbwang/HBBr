@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -22,7 +22,7 @@
 /**
  *  \file SDL_test_harness.h
  *
- *  \brief Test suite related functions of SDL test framework.
+ *  Test suite related functions of SDL test framework.
  *
  *  This code is a part of the SDL test library, not the main SDL library.
  */
@@ -69,7 +69,7 @@ typedef int (*SDLTest_TestCaseFp)(void *arg);
 /* !< Function pointer to a test case teardown function (run after every test) */
 typedef void  (*SDLTest_TestCaseTearDownFp)(void *arg);
 
-/**
+/*
  * Holds information about a single test case.
  */
 typedef struct SDLTest_TestCaseReference {
@@ -83,7 +83,7 @@ typedef struct SDLTest_TestCaseReference {
     int enabled;
 } SDLTest_TestCaseReference;
 
-/**
+/*
  * Holds information about a test suite (multiple test cases).
  */
 typedef struct SDLTest_TestSuiteReference {
@@ -98,8 +98,8 @@ typedef struct SDLTest_TestSuiteReference {
 } SDLTest_TestSuiteReference;
 
 
-/**
- * \brief Generates a random run seed string for the harness. The generated seed will contain alphanumeric characters (0-9A-Z).
+/*
+ * Generates a random run seed string for the harness. The generated seed will contain alphanumeric characters (0-9A-Z).
  *
  * Note: The returned string needs to be deallocated by the caller.
  *
@@ -109,8 +109,8 @@ typedef struct SDLTest_TestSuiteReference {
  */
 char *SDLTest_GenerateRunSeed(const int length);
 
-/**
- * \brief Execute a test suite using the given run seed and execution key.
+/*
+ * Execute a test suite using the given run seed and execution key.
  *
  * \param testSuites Suites containing the test case.
  * \param userRunSeed Custom run seed provided by user, or NULL to autogenerate one.

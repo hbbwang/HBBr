@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -122,6 +122,7 @@ static int PS2_JoystickInit(void)
                 info->slot = (uint8_t)slot;
                 info->opened = 1;
                 enabled_pads++;
+                SDL_PrivateJoystickAdded(enabled_pads);
             }
         }
     }
@@ -130,14 +131,20 @@ static int PS2_JoystickInit(void)
 }
 
 /* Function to return the number of joystick devices plugged in right now */
-static int PS2_JoystickGetCount()
+static int PS2_JoystickGetCount(void)
 {
     return (int)enabled_pads;
 }
 
 /* Function to cause any queued joystick insertions to be processed */
-static void PS2_JoystickDetect()
+static void PS2_JoystickDetect(void)
 {
+}
+
+static SDL_bool PS2_JoystickIsDevicePresent(Uint16 vendor_id, Uint16 product_id, Uint16 version, const char *name)
+{
+    /* We don't override any other drivers */
+    return SDL_FALSE;
 }
 
 /* Function to get the device-dependent name of a joystick */
@@ -157,6 +164,12 @@ static const char *PS2_JoystickGetDevicePath(int index)
     return NULL;
 }
 
+/* Function to get the Steam virtual gamepad slot of a joystick */
+static int PS2_JoystickGetDeviceSteamVirtualGamepadSlot(int device_index)
+{
+    return -1;
+}
+
 /* Function to get the player index of a joystick */
 static int PS2_JoystickGetDevicePlayerIndex(int device_index)
 {
@@ -169,7 +182,7 @@ static void PS2_JoystickSetDevicePlayerIndex(int device_index, int player_index)
 }
 
 /* Function to return the stable GUID for a plugged in device */
-static SDL_JoystickGUID PS2_JoystickGetDeviceGUID(int device_index)
+static SDL_GUID PS2_JoystickGetDeviceGUID(int device_index)
 {
     /* the GUID is just the name for now */
     const char *name = PS2_JoystickGetDeviceName(device_index);
@@ -179,7 +192,7 @@ static SDL_JoystickGUID PS2_JoystickGetDeviceGUID(int device_index)
 /* Function to get the current instance id of the joystick located at device_index */
 static SDL_JoystickID PS2_JoystickGetDeviceInstanceID(int device_index)
 {
-    return device_index;
+    return device_index + 1;
 }
 
 /*  Function to open a joystick for use.
@@ -202,7 +215,8 @@ static int PS2_JoystickOpen(SDL_Joystick *joystick, int device_index)
     joystick->nbuttons = PS2_BUTTONS;
     joystick->naxes = PS2_TOTAL_AXIS;
     joystick->nhats = 0;
-    joystick->instance_id = device_index;
+
+    SDL_SetBooleanProperty(SDL_GetJoystickProperties(joystick), SDL_PROP_JOYSTICK_CAP_RUMBLE_BOOLEAN, SDL_TRUE);
 
     return 0;
 }
@@ -234,31 +248,25 @@ static int PS2_JoystickRumble(SDL_Joystick *joystick, Uint16 low_frequency_rumbl
 /* Rumble functionality */
 static int PS2_JoystickRumbleTriggers(SDL_Joystick *joystick, Uint16 left, Uint16 right)
 {
-    return -1;
-}
-
-/* Capability detection */
-static Uint32 PS2_JoystickGetCapabilities(SDL_Joystick *joystick)
-{
-    return SDL_JOYCAP_RUMBLE;
+    return SDL_Unsupported();
 }
 
 /* LED functionality */
 static int PS2_JoystickSetLED(SDL_Joystick *joystick, Uint8 red, Uint8 green, Uint8 blue)
 {
-    return -1;
+    return SDL_Unsupported();
 }
 
 /* General effects */
 static int PS2_JoystickSendEffect(SDL_Joystick *joystick, const void *data, int size)
 {
-    return -1;
+    return SDL_Unsupported();
 }
 
 /* Sensor functionality */
 static int PS2_JoystickSetSensorsEnabled(SDL_Joystick *joystick, SDL_bool enabled)
 {
-    return -1;
+    return SDL_Unsupported();
 }
 
 /*  Function to update the state of a joystick - called as a device poll.
@@ -339,8 +347,10 @@ SDL_JoystickDriver SDL_PS2_JoystickDriver = {
     PS2_JoystickInit,
     PS2_JoystickGetCount,
     PS2_JoystickDetect,
+    PS2_JoystickIsDevicePresent,
     PS2_JoystickGetDeviceName,
     PS2_JoystickGetDevicePath,
+    PS2_JoystickGetDeviceSteamVirtualGamepadSlot,
     PS2_JoystickGetDevicePlayerIndex,
     PS2_JoystickSetDevicePlayerIndex,
     PS2_JoystickGetDeviceGUID,
@@ -348,7 +358,6 @@ SDL_JoystickDriver SDL_PS2_JoystickDriver = {
     PS2_JoystickOpen,
     PS2_JoystickRumble,
     PS2_JoystickRumbleTriggers,
-    PS2_JoystickGetCapabilities,
     PS2_JoystickSetLED,
     PS2_JoystickSendEffect,
     PS2_JoystickSetSensorsEnabled,

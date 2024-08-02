@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -53,6 +53,7 @@ static int LoadDBUSSyms(void)
     SDL_DBUS_SYM(void (*)(DBusConnection *, dbus_bool_t), connection_set_exit_on_disconnect);
     SDL_DBUS_SYM(dbus_bool_t (*)(DBusConnection *), connection_get_is_connected);
     SDL_DBUS_SYM(dbus_bool_t (*)(DBusConnection *, DBusHandleMessageFunction, void *, DBusFreeFunction), connection_add_filter);
+    SDL_DBUS_SYM(dbus_bool_t (*)(DBusConnection *, DBusHandleMessageFunction, void *), connection_remove_filter);
     SDL_DBUS_SYM(dbus_bool_t (*)(DBusConnection *, const char *, const DBusObjectPathVTable *, void *, DBusError *), connection_try_register_object_path);
     SDL_DBUS_SYM(dbus_bool_t (*)(DBusConnection *, DBusMessage *, dbus_uint32_t *), connection_send);
     SDL_DBUS_SYM(DBusMessage *(*)(DBusConnection *, DBusMessage *, int, DBusError *), connection_send_with_reply_and_block);
@@ -63,6 +64,7 @@ static int LoadDBUSSyms(void)
     SDL_DBUS_SYM(dbus_bool_t (*)(DBusConnection *, int), connection_read_write);
     SDL_DBUS_SYM(DBusDispatchStatus (*)(DBusConnection *), connection_dispatch);
     SDL_DBUS_SYM(dbus_bool_t (*)(DBusMessage *, const char *, const char *), message_is_signal);
+    SDL_DBUS_SYM(dbus_bool_t (*)(DBusMessage *, const char *), message_has_path);
     SDL_DBUS_SYM(DBusMessage *(*)(const char *, const char *, const char *, const char *), message_new_method_call);
     SDL_DBUS_SYM(dbus_bool_t (*)(DBusMessage *, int, ...), message_append_args);
     SDL_DBUS_SYM(dbus_bool_t (*)(DBusMessage *, int, va_list), message_append_args_valist);
@@ -96,7 +98,7 @@ static int LoadDBUSSyms(void)
 
 static void UnloadDBUSLibrary(void)
 {
-    if (dbus_handle != NULL) {
+    if (dbus_handle) {
         SDL_UnloadObject(dbus_handle);
         dbus_handle = NULL;
     }
@@ -105,9 +107,9 @@ static void UnloadDBUSLibrary(void)
 static int LoadDBUSLibrary(void)
 {
     int retval = 0;
-    if (dbus_handle == NULL) {
+    if (!dbus_handle) {
         dbus_handle = SDL_LoadObject(dbus_library);
-        if (dbus_handle == NULL) {
+        if (!dbus_handle) {
             retval = -1;
             /* Don't call SDL_SetError(): SDL_LoadObject already did. */
         } else {
@@ -168,9 +170,9 @@ static void SDL_DBus_Init_Spinlocked(void)
 
 void SDL_DBus_Init(void)
 {
-    SDL_AtomicLock(&spinlock_dbus_init); /* make sure two threads can't init at same time, since this can happen before SDL_Init. */
+    SDL_LockSpinlock(&spinlock_dbus_init); /* make sure two threads can't init at same time, since this can happen before SDL_Init. */
     SDL_DBus_Init_Spinlocked();
-    SDL_AtomicUnlock(&spinlock_dbus_init);
+    SDL_UnlockSpinlock(&spinlock_dbus_init);
 }
 
 void SDL_DBus_Quit(void)
@@ -183,14 +185,13 @@ void SDL_DBus_Quit(void)
         dbus.connection_close(dbus.session_conn);
         dbus.connection_unref(dbus.session_conn);
     }
-/* Don't do this - bug 3950
-   dbus_shutdown() is a debug feature which closes all global resources in the dbus library. Calling this should be done by the app, not a library, because if there are multiple users of dbus in the process then SDL could shut it down even though another part is using it.
-*/
-#if 0
-    if (dbus.shutdown) {
-        dbus.shutdown();
+
+    if (SDL_GetHintBoolean(SDL_HINT_SHUTDOWN_DBUS_ON_QUIT, SDL_FALSE)) {
+        if (dbus.shutdown) {
+            dbus.shutdown();
+        }
     }
-#endif
+
     SDL_zero(dbus);
     UnloadDBUSLibrary();
     SDL_free(inhibit_handle);
@@ -199,7 +200,7 @@ void SDL_DBus_Quit(void)
 
 SDL_DBusContext *SDL_DBus_GetContext(void)
 {
-    if (dbus_handle == NULL || !dbus.session_conn) {
+    if (!dbus_handle || !dbus.session_conn) {
         SDL_DBus_Init();
     }
 
@@ -360,7 +361,7 @@ SDL_bool SDL_DBus_QueryProperty(const char *node, const char *path, const char *
 
 void SDL_DBus_ScreensaverTickle(void)
 {
-    if (screensaver_cookie == 0 && inhibit_handle == NULL) { /* no need to tickle if we're inhibiting. */
+    if (screensaver_cookie == 0 && !inhibit_handle) { /* no need to tickle if we're inhibiting. */
         /* org.gnome.ScreenSaver is the legacy interface, but it'll either do nothing or just be a second harmless tickle on newer systems, so we leave it for now. */
         SDL_DBus_CallVoidMethod("org.gnome.ScreenSaver", "/org/gnome/ScreenSaver", "org.gnome.ScreenSaver", "SimulateUserActivity", DBUS_TYPE_INVALID);
         SDL_DBus_CallVoidMethod("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver", "org.freedesktop.ScreenSaver", "SimulateUserActivity", DBUS_TYPE_INVALID);
@@ -428,7 +429,7 @@ SDL_bool SDL_DBus_ScreensaverInhibit(SDL_bool inhibit)
 {
     const char *default_inhibit_reason = "Playing a game";
 
-    if ((inhibit && (screensaver_cookie != 0 || inhibit_handle != NULL)) || (!inhibit && (screensaver_cookie == 0 && inhibit_handle == NULL))) {
+    if ((inhibit && (screensaver_cookie != 0 || inhibit_handle)) || (!inhibit && (screensaver_cookie == 0 && !inhibit_handle))) {
         return SDL_TRUE;
     }
 
@@ -452,12 +453,12 @@ SDL_bool SDL_DBus_ScreensaverInhibit(SDL_bool inhibit)
             const char *key = "reason";
             const char *reply = NULL;
             const char *reason = SDL_GetHint(SDL_HINT_SCREENSAVER_INHIBIT_ACTIVITY_NAME);
-            if (reason == NULL || !reason[0]) {
+            if (!reason || !reason[0]) {
                 reason = default_inhibit_reason;
             }
 
             msg = dbus.message_new_method_call(bus_name, path, interface, "Inhibit");
-            if (msg == NULL) {
+            if (!msg) {
                 return SDL_FALSE;
             }
 
@@ -494,12 +495,9 @@ SDL_bool SDL_DBus_ScreensaverInhibit(SDL_bool inhibit)
         const char *interface = "org.freedesktop.ScreenSaver";
 
         if (inhibit) {
-            const char *app = SDL_GetHint(SDL_HINT_APP_NAME);
+            const char *app = SDL_GetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING);
             const char *reason = SDL_GetHint(SDL_HINT_SCREENSAVER_INHIBIT_ACTIVITY_NAME);
-            if (app == NULL || !app[0]) {
-                app = "My SDL application";
-            }
-            if (reason == NULL || !reason[0]) {
+            if (!reason || !reason[0]) {
                 reason = default_inhibit_reason;
             }
 
@@ -508,7 +506,7 @@ SDL_bool SDL_DBus_ScreensaverInhibit(SDL_bool inhibit)
                                      DBUS_TYPE_UINT32, &screensaver_cookie, DBUS_TYPE_INVALID)) {
                 return SDL_FALSE;
             }
-            return (screensaver_cookie != 0) ? SDL_TRUE : SDL_FALSE;
+            return (screensaver_cookie != 0);
         } else {
             if (!SDL_DBus_CallVoidMethod(bus_name, path, interface, "UnInhibit", DBUS_TYPE_UINT32, &screensaver_cookie, DBUS_TYPE_INVALID)) {
                 return SDL_FALSE;

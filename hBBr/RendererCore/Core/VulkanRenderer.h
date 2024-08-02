@@ -25,7 +25,7 @@ public:
 	HBBR_API ~VulkanRenderer();
 
 	/* Get current Frame buffer index. It is frequent use in the passes. */
-	HBBR_API HBBR_INLINE int GetCurrentFrameIndex() {
+	HBBR_API HBBR_INLINE uint32_t GetCurrentFrameIndex() {
 		return _currentFrameIndex;
 	}
 

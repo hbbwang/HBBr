@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -70,7 +70,8 @@ struct joystick_hwdata
     SDL_bool runLoopAttached; /* is 'deviceRef' attached to a CFRunLoop? */
 
     int instance_id;
-    SDL_JoystickGUID guid;
+    SDL_GUID guid;
+    int steam_virtual_gamepad_slot;
 
     struct joystick_hwdata *pNext; /* next device */
 };

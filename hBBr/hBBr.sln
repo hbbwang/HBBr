@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.33801.447
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RendererCore", "RendererCore\RendererCore.vcxproj", "{5EA35751-8425-4582-9566-D9E95F11D89D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor", "Editor\Editor.vcxproj", "{41ECBC84-31D1-4E1D-A5E7-C8D027FA0E4D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DependencyCopy", "DependencyCopy\DependencyCopy.vcxproj", "{62162565-C1F0-43C9-89E8-7014EB937665}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImguiEditor", "ImguiEditor\ImguiEditor.vcxproj", "{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -94,6 +96,30 @@ Global
 		{62162565-C1F0-43C9-89E8-7014EB937665}.ReleaseGame_GLFW|x64.Build.0 = ReleaseGame_GLFW|x64
 		{62162565-C1F0-43C9-89E8-7014EB937665}.ReleaseGame_GLFW|x86.ActiveCfg = ReleaseGame_GLFW|Win32
 		{62162565-C1F0-43C9-89E8-7014EB937665}.ReleaseGame_GLFW|x86.Build.0 = ReleaseGame_GLFW|Win32
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Debug|ARM.ActiveCfg = Debug|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Debug|ARM.Build.0 = Debug|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Debug|ARM64.ActiveCfg = Debug|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Debug|ARM64.Build.0 = Debug|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Debug|x64.ActiveCfg = Debug|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Debug|x64.Build.0 = Debug|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Debug|x86.ActiveCfg = Debug|Win32
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Debug|x86.Build.0 = Debug|Win32
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Release|ARM.ActiveCfg = Release|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Release|ARM.Build.0 = Release|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Release|ARM64.ActiveCfg = Release|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Release|ARM64.Build.0 = Release|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Release|x64.ActiveCfg = Release|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Release|x64.Build.0 = Release|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Release|x86.ActiveCfg = Release|Win32
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.Release|x86.Build.0 = Release|Win32
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.ReleaseGame_GLFW|ARM.ActiveCfg = Release|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.ReleaseGame_GLFW|ARM.Build.0 = Release|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.ReleaseGame_GLFW|ARM64.ActiveCfg = Release|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.ReleaseGame_GLFW|ARM64.Build.0 = Release|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.ReleaseGame_GLFW|x64.ActiveCfg = Release|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.ReleaseGame_GLFW|x64.Build.0 = Release|x64
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.ReleaseGame_GLFW|x86.ActiveCfg = Release|Win32
+		{8A5590BE-BCD0-41FB-934E-2A0764FB54F8}.ReleaseGame_GLFW|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -48,7 +48,10 @@ static int ThreadEntry(SceSize args, void *argp)
     return 0;
 }
 
-int SDL_SYS_CreateThread(SDL_Thread *thread)
+int SDL_SYS_CreateThread(SDL_Thread *thread,
+                         SDL_FunctionPointer pfnBeginThread,
+                         SDL_FunctionPointer pfnEndThread)
+
 {
     char thread_name[VITA_THREAD_NAME_MAX];
     size_t stack_size = VITA_THREAD_STACK_SIZE_DEFAULT;
@@ -92,9 +95,9 @@ void SDL_SYS_SetupThread(const char *name)
     /* Do nothing. */
 }
 
-SDL_threadID SDL_ThreadID(void)
+SDL_ThreadID SDL_GetCurrentThreadID(void)
 {
-    return (SDL_threadID)sceKernelGetThreadId();
+    return (SDL_ThreadID)sceKernelGetThreadId();
 }
 
 void SDL_SYS_WaitThread(SDL_Thread *thread)

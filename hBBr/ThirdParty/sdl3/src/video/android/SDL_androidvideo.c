@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -38,8 +38,9 @@
 #include "SDL_androidtouch.h"
 #include "SDL_androidwindow.h"
 #include "SDL_androidvulkan.h"
+#include "SDL_androidmessagebox.h"
 
-#define ANDROID_VID_DRIVER_NAME "Android"
+#define ANDROID_VID_DRIVER_NAME "android"
 
 /* Initialization/Query functions */
 static int Android_VideoInit(SDL_VideoDevice *_this);
@@ -62,9 +63,6 @@ static int Android_DeviceHeight = 0;
 static Uint32 Android_ScreenFormat = SDL_PIXELFORMAT_RGB565; /* Default SurfaceView format, in case this is queried before being filled */
 float Android_ScreenDensity = 1.0f;
 static float Android_ScreenRate = 0.0f;
-SDL_Semaphore *Android_PauseSem = NULL;
-SDL_Semaphore *Android_ResumeSem = NULL;
-SDL_Mutex *Android_ActivityMutex = NULL;
 static SDL_SystemTheme Android_SystemTheme;
 
 static int Android_SuspendScreenSaver(SDL_VideoDevice *_this)
@@ -74,7 +72,7 @@ static int Android_SuspendScreenSaver(SDL_VideoDevice *_this)
 
 static void Android_DeleteDevice(SDL_VideoDevice *device)
 {
-    SDL_free(device->driverdata);
+    SDL_free(device->internal);
     SDL_free(device);
 }
 
@@ -82,34 +80,25 @@ static SDL_VideoDevice *Android_CreateDevice(void)
 {
     SDL_VideoDevice *device;
     SDL_VideoData *data;
-    SDL_bool block_on_pause;
 
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *)SDL_calloc(1, sizeof(SDL_VideoDevice));
-    if (device == NULL) {
-        SDL_OutOfMemory();
+    if (!device) {
         return NULL;
     }
 
     data = (SDL_VideoData *)SDL_calloc(1, sizeof(SDL_VideoData));
-    if (data == NULL) {
-        SDL_OutOfMemory();
+    if (!data) {
         SDL_free(device);
         return NULL;
     }
 
-    device->driverdata = data;
+    device->internal = data;
     device->system_theme = Android_SystemTheme;
 
     /* Set the function pointers */
     device->VideoInit = Android_VideoInit;
     device->VideoQuit = Android_VideoQuit;
-    block_on_pause = SDL_GetHintBoolean(SDL_HINT_ANDROID_BLOCK_ON_PAUSE, SDL_TRUE);
-    if (block_on_pause) {
-        device->PumpEvents = Android_PumpEvents_Blocking;
-    } else {
-        device->PumpEvents = Android_PumpEvents_NonBlocking;
-    }
 
     device->CreateSDLWindow = Android_CreateWindow;
     device->SetWindowTitle = Android_SetWindowTitle;
@@ -117,7 +106,6 @@ static SDL_VideoDevice *Android_CreateDevice(void)
     device->MinimizeWindow = Android_MinimizeWindow;
     device->SetWindowResizable = Android_SetWindowResizable;
     device->DestroyWindow = Android_DestroyWindow;
-    device->GetWindowWMInfo = Android_GetWindowWMInfo;
 
     device->free = Android_DeleteDevice;
 
@@ -139,18 +127,16 @@ static SDL_VideoDevice *Android_CreateDevice(void)
     device->Vulkan_UnloadLibrary = Android_Vulkan_UnloadLibrary;
     device->Vulkan_GetInstanceExtensions = Android_Vulkan_GetInstanceExtensions;
     device->Vulkan_CreateSurface = Android_Vulkan_CreateSurface;
+    device->Vulkan_DestroySurface = Android_Vulkan_DestroySurface;
 #endif
 
     /* Screensaver */
     device->SuspendScreenSaver = Android_SuspendScreenSaver;
 
-    /* Text input */
-    device->StartTextInput = Android_StartTextInput;
-    device->StopTextInput = Android_StopTextInput;
-    device->SetTextInputRect = Android_SetTextInputRect;
-
     /* Screen keyboard */
     device->HasScreenKeyboardSupport = Android_HasScreenKeyboardSupport;
+    device->ShowScreenKeyboard = Android_ShowScreenKeyboard;
+    device->HideScreenKeyboard = Android_HideScreenKeyboard;
     device->IsScreenKeyboardShown = Android_IsScreenKeyboardShown;
 
     /* Clipboard */
@@ -158,31 +144,32 @@ static SDL_VideoDevice *Android_CreateDevice(void)
     device->GetClipboardText = Android_GetClipboardText;
     device->HasClipboardText = Android_HasClipboardText;
 
+    device->device_caps = VIDEO_DEVICE_CAPS_SENDS_FULLSCREEN_DIMENSIONS;
+
     return device;
 }
 
 VideoBootStrap Android_bootstrap = {
     ANDROID_VID_DRIVER_NAME, "SDL Android video driver",
-    Android_CreateDevice
+    Android_CreateDevice,
+    Android_ShowMessageBox
 };
 
 int Android_VideoInit(SDL_VideoDevice *_this)
 {
-    SDL_VideoData *videodata = _this->driverdata;
+    SDL_VideoData *videodata = _this->internal;
     SDL_DisplayID displayID;
     SDL_VideoDisplay *display;
     SDL_DisplayMode mode;
 
     videodata->isPaused = SDL_FALSE;
     videodata->isPausing = SDL_FALSE;
-    videodata->pauseAudio = SDL_GetHintBoolean(SDL_HINT_ANDROID_BLOCK_ON_PAUSE_PAUSEAUDIO, SDL_TRUE);
 
     SDL_zero(mode);
     mode.format = Android_ScreenFormat;
     mode.w = Android_DeviceWidth;
     mode.h = Android_DeviceHeight;
     mode.refresh_rate = Android_ScreenRate;
-    mode.driverdata = NULL;
 
     displayID = SDL_AddBasicVideoDisplay(&mode);
     if (displayID == 0) {

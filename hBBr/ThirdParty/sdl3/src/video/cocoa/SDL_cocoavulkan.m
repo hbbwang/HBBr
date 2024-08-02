@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -32,8 +32,6 @@
 
 #include "SDL_cocoametalview.h"
 #include "SDL_cocoavulkan.h"
-
-#include <SDL3/SDL_syswm.h>
 
 #include <dlfcn.h>
 
@@ -163,33 +161,30 @@ void Cocoa_Vulkan_UnloadLibrary(SDL_VideoDevice *_this)
     }
 }
 
-SDL_bool Cocoa_Vulkan_GetInstanceExtensions(SDL_VideoDevice *_this,
-                                            unsigned *count,
-                                            const char **names)
+char const* const* Cocoa_Vulkan_GetInstanceExtensions(SDL_VideoDevice *_this,
+                                            Uint32 *count)
 {
     static const char *const extensionsForCocoa[] = {
-        VK_KHR_SURFACE_EXTENSION_NAME, VK_EXT_METAL_SURFACE_EXTENSION_NAME
+        VK_KHR_SURFACE_EXTENSION_NAME, VK_EXT_METAL_SURFACE_EXTENSION_NAME, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME
     };
-    if (!_this->vulkan_config.loader_handle) {
-        SDL_SetError("Vulkan is not loaded");
-        return SDL_FALSE;
+    if(count) {
+        *count = SDL_arraysize(extensionsForCocoa);
     }
-    return SDL_Vulkan_GetInstanceExtensions_Helper(
-        count, names, SDL_arraysize(extensionsForCocoa),
-        extensionsForCocoa);
+    return extensionsForCocoa;
 }
 
-static SDL_bool Cocoa_Vulkan_CreateSurfaceViaMetalView(SDL_VideoDevice *_this,
-                                                       SDL_Window *window,
-                                                       VkInstance instance,
-                                                       VkSurfaceKHR *surface,
-                                                       PFN_vkCreateMetalSurfaceEXT vkCreateMetalSurfaceEXT,
-                                                       PFN_vkCreateMacOSSurfaceMVK vkCreateMacOSSurfaceMVK)
+static int Cocoa_Vulkan_CreateSurfaceViaMetalView(SDL_VideoDevice *_this,
+                                                  SDL_Window *window,
+                                                  VkInstance instance,
+                                                  const struct VkAllocationCallbacks *allocator,
+                                                  VkSurfaceKHR *surface,
+                                                  PFN_vkCreateMetalSurfaceEXT vkCreateMetalSurfaceEXT,
+                                                  PFN_vkCreateMacOSSurfaceMVK vkCreateMacOSSurfaceMVK)
 {
     VkResult result;
     SDL_MetalView metalview = Cocoa_Metal_CreateView(_this, window);
     if (metalview == NULL) {
-        return SDL_FALSE;
+        return -1;
     }
 
     if (vkCreateMetalSurfaceEXT) {
@@ -199,12 +194,10 @@ static SDL_bool Cocoa_Vulkan_CreateSurfaceViaMetalView(SDL_VideoDevice *_this,
         createInfo.flags = 0;
         createInfo.pLayer = (__bridge const CAMetalLayer *)
             Cocoa_Metal_GetLayer(_this, metalview);
-        result = vkCreateMetalSurfaceEXT(instance, &createInfo, NULL, surface);
+        result = vkCreateMetalSurfaceEXT(instance, &createInfo, allocator, surface);
         if (result != VK_SUCCESS) {
             Cocoa_Metal_DestroyView(_this, metalview);
-            SDL_SetError("vkCreateMetalSurfaceEXT failed: %s",
-                         SDL_Vulkan_GetResultString(result));
-            return SDL_FALSE;
+            return SDL_SetError("vkCreateMetalSurfaceEXT failed: %s", SDL_Vulkan_GetResultString(result));;
         }
     } else {
         VkMacOSSurfaceCreateInfoMVK createInfo = {};
@@ -216,9 +209,7 @@ static SDL_bool Cocoa_Vulkan_CreateSurfaceViaMetalView(SDL_VideoDevice *_this,
                                          NULL, surface);
         if (result != VK_SUCCESS) {
             Cocoa_Metal_DestroyView(_this, metalview);
-            SDL_SetError("vkCreateMacOSSurfaceMVK failed: %s",
-                         SDL_Vulkan_GetResultString(result));
-            return SDL_FALSE;
+            return SDL_SetError("vkCreateMacOSSurfaceMVK failed: %s", SDL_Vulkan_GetResultString(result));
         }
     }
 
@@ -226,16 +217,20 @@ static SDL_bool Cocoa_Vulkan_CreateSurfaceViaMetalView(SDL_VideoDevice *_this,
      * Metal_DestroyView from. Right now the metal view's ref count is +2 (one
      * from returning a new view object in CreateView, and one because it's
      * a subview of the window.) If we release the view here to make it +1, it
-     * will be destroyed when the window is destroyed. */
+     * will be destroyed when the window is destroyed.
+     *
+     * TODO: Now that we have SDL_Vulkan_DestroySurface someone with enough
+     * knowledge of Metal can proceed. */
     CFBridgingRelease(metalview);
 
-    return SDL_TRUE;
+    return 0;  // success!
 }
 
-SDL_bool Cocoa_Vulkan_CreateSurface(SDL_VideoDevice *_this,
-                                    SDL_Window *window,
-                                    VkInstance instance,
-                                    VkSurfaceKHR *surface)
+int Cocoa_Vulkan_CreateSurface(SDL_VideoDevice *_this,
+                               SDL_Window *window,
+                               VkInstance instance,
+                               const struct VkAllocationCallbacks *allocator,
+                               VkSurfaceKHR *surface)
 {
     PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr =
         (PFN_vkGetInstanceProcAddr)_this->vulkan_config.vkGetInstanceProcAddr;
@@ -250,19 +245,17 @@ SDL_bool Cocoa_Vulkan_CreateSurface(SDL_VideoDevice *_this,
     VkResult result;
 
     if (!_this->vulkan_config.loader_handle) {
-        SDL_SetError("Vulkan is not loaded");
-        return SDL_FALSE;
+        return SDL_SetError("Vulkan is not loaded");
     }
 
     if (!vkCreateMetalSurfaceEXT && !vkCreateMacOSSurfaceMVK) {
-        SDL_SetError(VK_EXT_METAL_SURFACE_EXTENSION_NAME " or " VK_MVK_MACOS_SURFACE_EXTENSION_NAME
-                                                         " extensions are not enabled in the Vulkan instance.");
-        return SDL_FALSE;
+        return SDL_SetError(VK_EXT_METAL_SURFACE_EXTENSION_NAME " or " VK_MVK_MACOS_SURFACE_EXTENSION_NAME
+                            " extensions are not enabled in the Vulkan instance.");
     }
 
-    if (window->flags & SDL_WINDOW_FOREIGN) {
+    if (window->flags & SDL_WINDOW_EXTERNAL) {
         @autoreleasepool {
-            SDL_CocoaWindowData *data = (__bridge SDL_CocoaWindowData *)window->driverdata;
+            SDL_CocoaWindowData *data = (__bridge SDL_CocoaWindowData *)window->internal;
             if (![data.sdlContentView.layer isKindOfClass:[CAMetalLayer class]]) {
                 [data.sdlContentView setLayer:[CAMetalLayer layer]];
             }
@@ -273,11 +266,9 @@ SDL_bool Cocoa_Vulkan_CreateSurface(SDL_VideoDevice *_this,
                 createInfo.pNext = NULL;
                 createInfo.flags = 0;
                 createInfo.pLayer = (CAMetalLayer *)data.sdlContentView.layer;
-                result = vkCreateMetalSurfaceEXT(instance, &createInfo, NULL, surface);
+                result = vkCreateMetalSurfaceEXT(instance, &createInfo, allocator, surface);
                 if (result != VK_SUCCESS) {
-                    SDL_SetError("vkCreateMetalSurfaceEXT failed: %s",
-                                 SDL_Vulkan_GetResultString(result));
-                    return SDL_FALSE;
+                    return SDL_SetError("vkCreateMetalSurfaceEXT failed: %s", SDL_Vulkan_GetResultString(result));
                 }
             } else {
                 VkMacOSSurfaceCreateInfoMVK createInfo = {};
@@ -286,19 +277,28 @@ SDL_bool Cocoa_Vulkan_CreateSurface(SDL_VideoDevice *_this,
                 createInfo.flags = 0;
                 createInfo.pView = (__bridge const void *)data.sdlContentView;
                 result = vkCreateMacOSSurfaceMVK(instance, &createInfo,
-                                                 NULL, surface);
+                                                 allocator, surface);
                 if (result != VK_SUCCESS) {
-                    SDL_SetError("vkCreateMacOSSurfaceMVK failed: %s",
-                                 SDL_Vulkan_GetResultString(result));
-                    return SDL_FALSE;
+                    return SDL_SetError("vkCreateMacOSSurfaceMVK failed: %s", SDL_Vulkan_GetResultString(result));
                 }
             }
         }
     } else {
-        return Cocoa_Vulkan_CreateSurfaceViaMetalView(_this, window, instance, surface, vkCreateMetalSurfaceEXT, vkCreateMacOSSurfaceMVK);
+        return Cocoa_Vulkan_CreateSurfaceViaMetalView(_this, window, instance, allocator, surface, vkCreateMetalSurfaceEXT, vkCreateMacOSSurfaceMVK);
     }
 
-    return SDL_TRUE;
+    return 0;
+}
+
+void Cocoa_Vulkan_DestroySurface(SDL_VideoDevice *_this,
+                                 VkInstance instance,
+                                 VkSurfaceKHR surface,
+                                 const struct VkAllocationCallbacks *allocator)
+{
+    if (_this->vulkan_config.loader_handle) {
+        SDL_Vulkan_DestroySurface_Internal(_this->vulkan_config.vkGetInstanceProcAddr, instance, surface, allocator);
+        /* TODO: Add CFBridgingRelease(metalview) here perhaps? */
+    }
 }
 
 #endif

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -55,17 +55,28 @@
 static int DUMMY_VideoInit(SDL_VideoDevice *_this);
 static void DUMMY_VideoQuit(SDL_VideoDevice *_this);
 
+static int DUMMY_SetWindowPosition(SDL_VideoDevice *_this, SDL_Window *window)
+{
+    SDL_SendWindowEvent(window, SDL_EVENT_WINDOW_MOVED, window->floating.x, window->floating.y);
+    return 0;
+}
+
+static void DUMMY_SetWindowSize(SDL_VideoDevice *_this, SDL_Window *window)
+{
+    SDL_SendWindowEvent(window, SDL_EVENT_WINDOW_RESIZED, window->floating.w, window->floating.h);
+}
+
 /* DUMMY driver bootstrap functions */
 
-static int DUMMY_Available(const char *enable_hint)
+static SDL_bool DUMMY_Available(const char *enable_hint)
 {
     const char *hint = SDL_GetHint(SDL_HINT_VIDEO_DRIVER);
     if (hint) {
         if (SDL_strcmp(hint, enable_hint) == 0) {
-            return 1;
+            return SDL_TRUE;
         }
     }
-    return 0;
+    return SDL_FALSE;
 }
 
 static void DUMMY_DeleteDevice(SDL_VideoDevice *device)
@@ -78,14 +89,13 @@ static SDL_VideoDevice *DUMMY_InternalCreateDevice(const char *enable_hint)
     SDL_VideoDevice *device;
 
     if (!DUMMY_Available(enable_hint)) {
-        return 0;
+        return NULL;
     }
 
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *)SDL_calloc(1, sizeof(SDL_VideoDevice));
-    if (device == NULL) {
-        SDL_OutOfMemory();
-        return 0;
+    if (!device) {
+        return NULL;
     }
     device->is_dummy = SDL_TRUE;
 
@@ -93,6 +103,8 @@ static SDL_VideoDevice *DUMMY_InternalCreateDevice(const char *enable_hint)
     device->VideoInit = DUMMY_VideoInit;
     device->VideoQuit = DUMMY_VideoQuit;
     device->PumpEvents = DUMMY_PumpEvents;
+    device->SetWindowSize = DUMMY_SetWindowSize;
+    device->SetWindowPosition = DUMMY_SetWindowPosition;
     device->CreateWindowFramebuffer = SDL_DUMMY_CreateWindowFramebuffer;
     device->UpdateWindowFramebuffer = SDL_DUMMY_UpdateWindowFramebuffer;
     device->DestroyWindowFramebuffer = SDL_DUMMY_DestroyWindowFramebuffer;
@@ -108,7 +120,8 @@ static SDL_VideoDevice *DUMMY_CreateDevice(void)
 
 VideoBootStrap DUMMY_bootstrap = {
     DUMMYVID_DRIVER_NAME, "SDL dummy video driver",
-    DUMMY_CreateDevice
+    DUMMY_CreateDevice,
+    NULL /* no ShowMessageBox implementation */
 };
 
 #ifdef SDL_INPUT_LINUXEV
@@ -130,7 +143,8 @@ static SDL_VideoDevice *DUMMY_EVDEV_CreateDevice(void)
 
 VideoBootStrap DUMMY_evdev_bootstrap = {
     DUMMYVID_DRIVER_EVDEV_NAME, "SDL dummy video driver with evdev",
-    DUMMY_EVDEV_CreateDevice
+    DUMMY_EVDEV_CreateDevice,
+    NULL /* no ShowMessageBox implementation */
 };
 
 #endif /* SDL_INPUT_LINUXEV */

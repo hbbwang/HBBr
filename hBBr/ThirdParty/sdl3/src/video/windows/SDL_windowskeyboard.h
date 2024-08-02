@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -29,12 +29,12 @@ extern void WIN_QuitKeyboard(SDL_VideoDevice *_this);
 
 extern void WIN_ResetDeadKeys(void);
 
-extern void WIN_StartTextInput(SDL_VideoDevice *_this);
-extern void WIN_StopTextInput(SDL_VideoDevice *_this);
-extern int WIN_SetTextInputRect(SDL_VideoDevice *_this, const SDL_Rect *rect);
-extern void WIN_ClearComposition(SDL_VideoDevice *_this);
-extern SDL_bool WIN_IsTextInputShown(SDL_VideoDevice *_this);
+extern int WIN_StartTextInput(SDL_VideoDevice *_this, SDL_Window *window);
+extern int WIN_StopTextInput(SDL_VideoDevice *_this, SDL_Window *window);
+extern int WIN_UpdateTextInputArea(SDL_VideoDevice *_this, SDL_Window *window);
+extern int WIN_ClearComposition(SDL_VideoDevice *_this, SDL_Window *window);
 
-extern SDL_bool IME_HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM *lParam, struct SDL_VideoData *videodata);
+extern SDL_bool WIN_HandleIMEMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM *lParam, struct SDL_VideoData *videodata);
+extern void WIN_UpdateIMECandidates(SDL_VideoDevice *_this);
 
 #endif /* SDL_windowskeyboard_h_ */

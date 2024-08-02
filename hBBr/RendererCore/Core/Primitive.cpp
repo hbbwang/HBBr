@@ -642,6 +642,9 @@ void MaterialPrimitiveGroup::ResetDecriptorSet(uint8_t numTextures, bool& bNeedU
 	{
 		if (bNeedRecreate || dstex == VK_NULL_HANDLE || primFrom->_textureInfos.size() != numTextures)
 		{
+			if (dstex != VK_NULL_HANDLE)
+				vkManager->FreeDescriptorSet(vkManager->GetDescriptorPool(), dstex);
+			dstex = VK_NULL_HANDLE;
 			vkManager->AllocateDescriptorSet(vkManager->GetDescriptorPool(), PipelineManager::GetDescriptorSetLayout_TextureSamplerVSPS(numTextures), dstex);
 			bNeedUpdateTextures = true;
 		}
@@ -651,6 +654,9 @@ void MaterialPrimitiveGroup::ResetDecriptorSet(uint8_t numTextures, bool& bNeedU
 		//没打算允许Vulkan手动释放符集的功能，所以不做释放，如果已经初始化，那就把数量降低到1，并改为绑定小图，VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT
 		if (dstex != VK_NULL_HANDLE && numTextures != 1)
 		{
+			if (dstex != VK_NULL_HANDLE)
+				vkManager->FreeDescriptorSet(vkManager->GetDescriptorPool(), dstex);
+			dstex = VK_NULL_HANDLE;
 			vkManager->AllocateDescriptorSet(vkManager->GetDescriptorPool(), PipelineManager::GetDescriptorSetLayout_TextureSamplerVSPS(numTextures), dstex);
 			bNeedUpdateTextures = true;
 		}
@@ -724,6 +730,11 @@ MaterialPrimitiveGroup::~MaterialPrimitiveGroup()
 	descriptorSet_texture.clear();
 	primFrom = nullptr;
 	needUpdateTextures.clear();
+	const auto& manager = VulkanManager::GetManager();
+	for (auto& i : descriptorSet_texture)
+	{
+		manager->FreeDescriptorSet(manager->GetDescriptorPool(), i);
+	}
 }
 
 ModelPrimitive::~ModelPrimitive()

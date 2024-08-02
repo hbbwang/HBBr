@@ -920,7 +920,7 @@ void Shaderc::ShaderCompiler::PostProcessShaderCache(std::vector<uint32_t> shade
 		ConsoleDebug::print_endl("PostProcess Shader type: Fragment");
 		if (header.flags & NativeHLSL)
 		{
-			header.shaderTextureCount = reflector.get_shader_resources().separate_images.size();
+			header.shaderTextureCount = (uint8_t)reflector.get_shader_resources().separate_images.size();
 			tex.resize(header.shaderTextureCount);
 		}
 	}
@@ -948,7 +948,7 @@ void Shaderc::ShaderCompiler::PostProcessShaderCache(std::vector<uint32_t> shade
 		}
 		if (header.flags & NativeHLSL)
 		{
-			header.shaderTextureCount = reflector.get_shader_resources().separate_images.size();
+			header.shaderTextureCount = (uint8_t)reflector.get_shader_resources().separate_images.size();
 			tex.resize(header.shaderTextureCount);
 		}
 	}

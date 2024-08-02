@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -22,3 +22,7 @@
 
 /* This is called from WIN_PumpEvents on GDK */
 extern void GDK_DispatchTaskQueue(void);
+
+extern int GDK_RegisterChangeNotifications(void);
+
+extern void GDK_UnregisterChangeNotifications(void);

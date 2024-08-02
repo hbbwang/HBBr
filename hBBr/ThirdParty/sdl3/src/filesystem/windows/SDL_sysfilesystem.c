@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -25,6 +25,8 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent filesystem routines                                */
 
+#include "../SDL_sysfilesystem.h"
+
 #include "../../core/windows/SDL_windows.h"
 #include <shlobj.h>
 #include <initguid.h>
@@ -41,7 +43,7 @@ DEFINE_GUID(SDL_FOLDERID_Screenshots, 0xb7bede81, 0xdf94, 0x4682, 0xa7, 0xd8, 0x
 DEFINE_GUID(SDL_FOLDERID_Templates, 0xA63293E8, 0x664E, 0x48DB, 0xA0, 0x79, 0xDF, 0x75, 0x9E, 0x05, 0x09, 0xF7);
 DEFINE_GUID(SDL_FOLDERID_Videos, 0x18989B1D, 0x99B5, 0x455B, 0x84, 0x1C, 0xAB, 0x7C, 0x74, 0xE4, 0xDD, 0xFC);
 
-char *SDL_GetBasePath(void)
+char *SDL_SYS_GetBasePath(void)
 {
     DWORD buflen = 128;
     WCHAR *path = NULL;
@@ -51,9 +53,8 @@ char *SDL_GetBasePath(void)
 
     while (SDL_TRUE) {
         void *ptr = SDL_realloc(path, buflen * sizeof(WCHAR));
-        if (ptr == NULL) {
+        if (!ptr) {
             SDL_free(path);
-            SDL_OutOfMemory();
             return NULL;
         }
 
@@ -91,7 +92,7 @@ char *SDL_GetBasePath(void)
     return retval;
 }
 
-char *SDL_GetPrefPath(const char *org, const char *app)
+char *SDL_SYS_GetPrefPath(const char *org, const char *app)
 {
     /*
      * Vista and later has a new API for this, but SHGetFolderPath works there,
@@ -108,11 +109,11 @@ char *SDL_GetPrefPath(const char *org, const char *app)
     size_t new_wpath_len = 0;
     BOOL api_result = FALSE;
 
-    if (app == NULL) {
+    if (!app) {
         SDL_InvalidParamError("app");
         return NULL;
     }
-    if (org == NULL) {
+    if (!org) {
         org = "";
     }
 
@@ -122,15 +123,13 @@ char *SDL_GetPrefPath(const char *org, const char *app)
     }
 
     worg = WIN_UTF8ToStringW(org);
-    if (worg == NULL) {
-        SDL_OutOfMemory();
+    if (!worg) {
         return NULL;
     }
 
     wapp = WIN_UTF8ToStringW(app);
-    if (wapp == NULL) {
+    if (!wapp) {
         SDL_free(worg);
-        SDL_OutOfMemory();
         return NULL;
     }
 
@@ -177,7 +176,7 @@ char *SDL_GetPrefPath(const char *org, const char *app)
     return retval;
 }
 
-char *SDL_GetUserFolder(SDL_Folder folder)
+char *SDL_SYS_GetUserFolder(SDL_Folder folder)
 {
     typedef HRESULT (WINAPI *pfnSHGetKnownFolderPath)(REFGUID /* REFKNOWNFOLDERID */, DWORD, HANDLE, PWSTR*);
     HMODULE lib = LoadLibrary(L"Shell32.dll");
@@ -323,6 +322,19 @@ char *SDL_GetUserFolder(SDL_Folder folder)
         } else {
             WIN_SetErrorFromHRESULT("Couldn't get folder", result);
         }
+    }
+
+    if (retval) {
+        char *newretval = (char *) SDL_realloc(retval, SDL_strlen(retval) + 2);
+
+        if (!newretval) {
+            SDL_free(retval);
+            retval = NULL; /* will be returned */
+            goto done;
+        }
+
+        retval = newretval;
+        SDL_strlcat(retval, "\\", SDL_strlen(retval) + 2);
     }
 
 done:

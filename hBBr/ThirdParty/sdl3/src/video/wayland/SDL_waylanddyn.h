@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -59,6 +59,13 @@ enum libdecor_window_state;
     (WAYLAND_VERSION_MAJOR > x ||                                 \
      (WAYLAND_VERSION_MAJOR == x && WAYLAND_VERSION_MINOR > y) || \
      (WAYLAND_VERSION_MAJOR == x && WAYLAND_VERSION_MINOR == y && WAYLAND_VERSION_MICRO >= z))
+
+#ifdef HAVE_LIBDECOR_H
+#define SDL_LIBDECOR_CHECK_VERSION(x, y, z)                                 \
+    (SDL_LIBDECOR_VERSION_MAJOR > x ||                                      \
+     (SDL_LIBDECOR_VERSION_MAJOR == x && SDL_LIBDECOR_VERSION_MINOR > y) || \
+     (SDL_LIBDECOR_VERSION_MAJOR == x && SDL_LIBDECOR_VERSION_MINOR == y && SDL_LIBDECOR_VERSION_PATCH >= z))
+#endif
 
 #ifdef __cplusplus
 extern "C" {

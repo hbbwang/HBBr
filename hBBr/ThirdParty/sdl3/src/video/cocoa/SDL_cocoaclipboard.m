@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -93,7 +93,7 @@ void Cocoa_CheckClipboardUpdate(SDL_CocoaVideoData *data)
 int Cocoa_SetClipboardData(SDL_VideoDevice *_this)
 {
     @autoreleasepool {
-        SDL_CocoaVideoData *data = (__bridge SDL_CocoaVideoData *)_this->driverdata;
+        SDL_CocoaVideoData *data = (__bridge SDL_CocoaVideoData *)_this->internal;
         NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
         NSPasteboardItem *newItem = [NSPasteboardItem new];
         NSMutableArray *utiTypes = [NSMutableArray new];
@@ -148,8 +148,6 @@ void *Cocoa_GetClipboardData(SDL_VideoDevice *_this, const char *mime_type, size
                 if (data) {
                     [itemData getBytes: data length: length];
                     SDL_memset((Uint8 *)data + length, 0, sizeof(Uint32));
-                } else {
-                    SDL_OutOfMemory();
                 }
                 break;
             }

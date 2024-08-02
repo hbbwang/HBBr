@@ -399,7 +399,7 @@ public:
 
 	VkDeviceSize GetMinSboAlignmentSize(VkDeviceSize realSize);
 
-	VkDeviceSize GetTimestampPeriod();
+	float GetTimestampPeriod();
 
 	inline uint32_t GetMaxUniformBufferSize()const {
 		return _gpuProperties.limits.maxUniformBufferRange;
@@ -524,6 +524,10 @@ private:
 	int _graphicsQueueFamilyIndex;
 
 	uint32_t _swapchainBufferCount;
+
+	static bool _enableImguiDock;
+
+	static bool _enableImguiMultiViewports;
 
 #ifdef _WIN32
 	bool _enable_VK_KHR_display;

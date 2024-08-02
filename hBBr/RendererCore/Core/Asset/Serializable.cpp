@@ -11,7 +11,7 @@ bool Serializable::SaveJson(nlohmann::json& json, HString path)
     {
         file << std::setw(4) << json << std::endl;
         file.close();
-        ConsoleDebug::print_endl("JSON data has been written to file.");
+        //ConsoleDebug::print_endl("JSON data has been written to file.");
         return true;
     }
     else

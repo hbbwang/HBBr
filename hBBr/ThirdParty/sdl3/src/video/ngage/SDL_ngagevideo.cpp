@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -54,7 +54,7 @@ static void NGAGE_VideoQuit(SDL_VideoDevice *_this);
 
 static void NGAGE_DeleteDevice(SDL_VideoDevice *device)
 {
-    SDL_VideoData *phdata = device->driverdata;
+    SDL_VideoData *phdata = device->internal;
 
     if (phdata) {
         /* Free Epoc resources */
@@ -104,17 +104,15 @@ static SDL_VideoDevice *NGAGE_CreateDevice(void)
 
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *)SDL_calloc(1, sizeof(SDL_VideoDevice));
-    if (device == NULL) {
-        SDL_OutOfMemory();
-        return 0;
+    if (!device) {
+        return NULL;
     }
 
     /* Initialize internal N-Gage specific data */
     phdata = (SDL_VideoData *)SDL_calloc(1, sizeof(SDL_VideoData));
-    if (phdata == NULL) {
-        SDL_OutOfMemory();
+    if (!phdata) {
         SDL_free(device);
-        return 0;
+        return NULL;
     }
 
     /* General video */
@@ -131,14 +129,15 @@ static SDL_VideoDevice *NGAGE_CreateDevice(void)
     device->DestroyWindow = NGAGE_DestroyWindow;
 
     /* N-Gage specific data */
-    device->driverdata = phdata;
+    device->internal = phdata;
 
     return device;
 }
 
 VideoBootStrap NGAGE_bootstrap = {
     NGAGEVID_DRIVER_NAME, "SDL ngage video driver",
-    NGAGE_CreateDevice
+    NGAGE_CreateDevice,
+    NULL /* no ShowMessageBox implementation */
 };
 
 int NGAGE_VideoInit(SDL_VideoDevice *_this)
@@ -147,7 +146,7 @@ int NGAGE_VideoInit(SDL_VideoDevice *_this)
 
     /* Use 12-bpp desktop mode */
     SDL_zero(mode);
-    mode.format = SDL_PIXELFORMAT_RGB444;
+    mode.format = SDL_PIXELFORMAT_XRGB4444;
     mode.w = 176;
     mode.h = 208;
     if (SDL_AddBasicVideoDisplay(&mode) == 0) {

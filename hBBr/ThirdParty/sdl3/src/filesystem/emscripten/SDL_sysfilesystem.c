@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -24,36 +24,37 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent filesystem routines                                */
+
+#include "../SDL_sysfilesystem.h"
+
 #include <errno.h>
 #include <sys/stat.h>
 
 #include <emscripten/emscripten.h>
 
-char *SDL_GetBasePath(void)
+char *SDL_SYS_GetBasePath(void)
 {
-    char *retval = "/";
-    return SDL_strdup(retval);
+    return SDL_strdup("/");
 }
 
-char *SDL_GetPrefPath(const char *org, const char *app)
+char *SDL_SYS_GetPrefPath(const char *org, const char *app)
 {
     const char *append = "/libsdl/";
     char *retval;
     char *ptr = NULL;
     size_t len = 0;
 
-    if (app == NULL) {
+    if (!app) {
         SDL_InvalidParamError("app");
         return NULL;
     }
-    if (org == NULL) {
+    if (!org) {
         org = "";
     }
 
     len = SDL_strlen(append) + SDL_strlen(org) + SDL_strlen(app) + 3;
     retval = (char *)SDL_malloc(len);
-    if (retval == NULL) {
-        SDL_OutOfMemory();
+    if (!retval) {
         return NULL;
     }
 
@@ -83,10 +84,9 @@ char *SDL_GetPrefPath(const char *org, const char *app)
     return retval;
 }
 
-char *SDL_GetUserFolder(SDL_Folder folder)
+char *SDL_SYS_GetUserFolder(SDL_Folder folder)
 {
     const char *home = NULL;
-    char *retval;
 
     if (folder != SDL_FOLDER_HOME) {
         SDL_SetError("Emscripten only supports the home folder");
@@ -99,10 +99,15 @@ char *SDL_GetUserFolder(SDL_Folder folder)
         return NULL;
     }
 
-    retval = SDL_strdup(home);
-
+    char *retval = SDL_malloc(SDL_strlen(home) + 2);
     if (!retval) {
-        SDL_OutOfMemory();
+        return NULL;
+    }
+
+    if (SDL_snprintf(retval, SDL_strlen(home) + 2, "%s/", home) < 0) {
+        SDL_SetError("Couldn't snprintf home path for Emscripten: %s", home);
+        SDL_free(retval);
+        return NULL;
     }
 
     return retval;

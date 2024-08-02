@@ -29,8 +29,8 @@
 // --------- IMGUI
 #if ENABLE_IMGUI
 #include "Imgui/imgui.h"
-#include "Imgui/backends/imgui_impl_vulkan.h"
 #include "Imgui/backends/imgui_impl_sdl3.h"
+#include "Imgui/backends/imgui_impl_vulkan.h"
 #endif
 
 std::unique_ptr<VulkanManager> VulkanManager::_vulkanManager;
@@ -45,6 +45,9 @@ PFN_vkDebugMarkerSetObjectNameEXT VulkanManager::vkDebugMarkerSetObjectName = VK
 PFN_vkCmdDebugMarkerBeginEXT VulkanManager::vkCmdDebugMarkerBegin = VK_NULL_HANDLE;
 PFN_vkCmdDebugMarkerEndEXT VulkanManager::vkCmdDebugMarkerEnd = VK_NULL_HANDLE;
 PFN_vkCmdDebugMarkerInsertEXT VulkanManager::vkCmdDebugMarkerInsert = VK_NULL_HANDLE;
+
+bool VulkanManager::_enableImguiDock = false;
+bool VulkanManager::_enableImguiMultiViewports = false;
 
 VKAPI_ATTR VkBool32 VKAPI_CALL
 VulkanDebugCallback(
@@ -88,7 +91,7 @@ VulkanDebugCallback(
 	if (bError)
 	{
 		try {
-			HCheck_Color(HString(title + msg), false, true, "255,0,0");
+			MessageOut(HString(title + msg), false, true, "255,0,0");
 		}
 		catch(const std::system_error& e)
 		{
@@ -97,15 +100,15 @@ VulkanDebugCallback(
 	}
 	else if (bDebug)
 	{
-		HCheck_Color(HString(title + msg), false, false, "255,255,0");
+		MessageOut(HString(title + msg), false, false, "255,255,0");
 	}
 	else if (bInformation)
 	{
-		HCheck_Color(HString(title + msg), false, false, "255,255,0");
+		MessageOut(HString(title + msg), false, false, "255,255,0");
 	}
 	else if(bWarning)
 	{
-		HCheck_Color(HString(title + msg), false, false, "255,255,0");
+		MessageOut(HString(title + msg), false, false, "255,255,0");
 	}
 	return false;
 }
@@ -293,18 +296,12 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 	}
 
 	//SDL
+	unsigned int eCount = 0;
+	SDL_Vulkan_GetInstanceExtensions(&eCount);
+	auto sdl_extensions = SDL_Vulkan_GetInstanceExtensions(&eCount);
+	for (unsigned int i = 0; i < eCount; i++)
 	{
-		unsigned int eCount = 0 ;
-		if(SDL_Vulkan_GetInstanceExtensions(&eCount, nullptr) != SDL_TRUE)
-		{
-			MessageOut(SDL_GetError(), false, true, "255,0,0");
-		}
-		std::vector<const char*>sdlExts(eCount);
-		if (SDL_Vulkan_GetInstanceExtensions(&eCount, sdlExts.data()) != SDL_TRUE)
-		{
-			MessageOut(SDL_GetError(), false, true, "255,0,0");
-		}
-		extensions.insert(extensions.end(), sdlExts.begin(), sdlExts.end());
+		extensions.push_back(sdl_extensions[i]);
 	}
 	
 	uint32_t apiVersion = VK_API_VERSION_1_3;
@@ -824,8 +821,8 @@ void VulkanManager::ReCreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSur
 		newSurface = VK_NULL_HANDLE;
 	}
 	//SDL2
-	auto result = SDL_Vulkan_CreateSurface(handle, _instance, &newSurface);
-	if (result != SDL_TRUE)
+	auto result = SDL_Vulkan_CreateSurface(handle, _instance, nullptr, &newSurface);
+	if (result != 0)
 	{
 		MessageOut("sdl Create Window Surface Failed.", false, true);
 	}
@@ -1845,17 +1842,17 @@ void VulkanManager::CreateDescripotrPool(VkDescriptorPool& pool)
 {
 	VkDescriptorPoolSize pool_sizes[] =
 	{
-		{ VK_DESCRIPTOR_TYPE_SAMPLER, 100 },
-		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },	//这是一个image和sampler的组合descriptor
-		{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },			//纯image,不带sampler
+		//{ VK_DESCRIPTOR_TYPE_SAMPLER, 20 },
+		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2000 },	//这是一个image和sampler的组合descriptor
+		{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 100 },				//纯image,不带sampler
 		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 100 },
 		//{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
 		//{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 100 },
-		//{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-		//{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-		{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 80 }
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 100 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 2000 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 100 },
+		{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 100 }
 	};
 	VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
 	descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -1863,6 +1860,7 @@ void VulkanManager::CreateDescripotrPool(VkDescriptorPool& pool)
 	descriptorPoolCreateInfo.maxSets = 10000;
 	descriptorPoolCreateInfo.poolSizeCount = (uint32_t)std::size(pool_sizes);
 	descriptorPoolCreateInfo.pPoolSizes = pool_sizes;
+	descriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 	vkCreateDescriptorPool(_device, &descriptorPoolCreateInfo, VK_NULL_HANDLE, &pool);
 }
 
@@ -2379,6 +2377,15 @@ bool VulkanManager::CreateShaderModule(std::vector<char> data, VkShaderModule& s
 	return result == VK_SUCCESS;
 }
 
+static void check_vk_result(VkResult err)
+{
+	if (err == 0)
+		return;
+	fprintf(stderr, "[vulkan] Error: VkResult = %d\n", err);
+	if (err < 0)
+		abort();
+}
+
 ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, uint32_t subPassIndex)
 {
 #if ENABLE_IMGUI
@@ -2393,6 +2400,14 @@ ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass rend
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	if (_enableImguiDock)
+	{
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+	}
+	if (_enableImguiMultiViewports)
+	{
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	}
 	#ifdef __ANDROID__
 		ImFontConfig font_cfg;
 		font_cfg.SizePixels = 22.0f;
@@ -2418,24 +2433,13 @@ ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass rend
 	init_info.MinImageCount = _swapchainBufferCount;
 	init_info.Subpass = subPassIndex;
 	init_info.CheckVkResultFn = VK_NULL_HANDLE;
+	init_info.RenderPass = renderPass;
+	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+	init_info.CheckVkResultFn = check_vk_result;
 	//init_info.UseDynamicRendering = true;
 
-	ImGui_ImplVulkan_EnableLoadFunctions();
-	ImGui_ImplVulkan_Init(&init_info, renderPass, {
-		ImVec4(1,0,0,0),
-		ImVec4(0,1,0,0),
-		ImVec4(0,0,1,0),
-		ImVec4(0,0,0,1)
-		});
-
-	VkCommandBuffer buf;
-	AllocateCommandBuffer(_commandPool, buf);
-	BeginCommandBuffer(buf, 0);
-	ImGui_ImplVulkan_CreateFontsTexture(buf);
-	EndCommandBuffer(buf);
-	SubmitQueueImmediate({ buf });
-	FreeCommandBuffer(_commandPool, buf);
-	ImGui_ImplVulkan_DestroyFontUploadObjects();
+	ImGui_ImplVulkan_Init(&init_info);
+	ImGui_ImplVulkan_CreateFontsTexture();
 
 	return newContent;
 #endif
@@ -2459,25 +2463,12 @@ void VulkanManager::ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassInd
 	init_info.MinImageCount = _swapchainBufferCount;
 	init_info.Subpass = subPassIndex;
 	init_info.CheckVkResultFn = VK_NULL_HANDLE;
+	init_info.RenderPass = renderPass;
 	//init_info.UseDynamicRendering = true;
 
-	Imgui_Uniform_VS vsU = {};
-	vsU.ProjectionMatrixX = ImVec4(projMat[0].x, projMat[0].y, projMat[0].z, projMat[0].w);
-	vsU.ProjectionMatrixY = ImVec4(projMat[1].x, projMat[1].y, projMat[1].z, projMat[1].w);
-	vsU.ProjectionMatrixZ = ImVec4(projMat[2].x, projMat[2].y, projMat[2].z, projMat[2].w);
-	vsU.ProjectionMatrixW = ImVec4(projMat[3].x, projMat[3].y, projMat[3].z, projMat[3].w);
+	ImGui_ImplVulkan_Init(&init_info);
 
-	ImGui_ImplVulkan_Init(&init_info, renderPass, vsU);
-
-	VkCommandBuffer buf;
-	AllocateCommandBuffer(_commandPool, buf);
-	BeginCommandBuffer(buf, 0);
-	ImGui_ImplVulkan_CreateFontsTexture(buf);
-	EndCommandBuffer(buf);
-	SubmitQueueImmediate({ buf });
-	vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
-	FreeCommandBuffer(_commandPool, buf);
-	ImGui_ImplVulkan_DestroyFontUploadObjects();
+	//ImGui_ImplVulkan_CreateFontsTexture();
 #endif
 }
 
@@ -2718,7 +2709,7 @@ VkDeviceSize VulkanManager::GetMinSboAlignmentSize(VkDeviceSize realSize)
 	return outSize;
 }
 
-VkDeviceSize VulkanManager::GetTimestampPeriod()
+float VulkanManager::GetTimestampPeriod()
 {
 	return _gpuProperties.limits.timestampPeriod;
 }

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -36,13 +36,9 @@ extern "C" {
    saves a system-dependent thread id in thread->id, and returns 0
    on success.
 */
-#ifdef SDL_PASSED_BEGINTHREAD_ENDTHREAD
 extern int SDL_SYS_CreateThread(SDL_Thread *thread,
-                                pfnSDL_CurrentBeginThread pfnBeginThread,
-                                pfnSDL_CurrentEndThread pfnEndThread);
-#else
-extern int SDL_SYS_CreateThread(SDL_Thread *thread);
-#endif
+                                SDL_FunctionPointer pfnBeginThread,
+                                SDL_FunctionPointer pfnEndThread);
 
 /* This function does any necessary setup in the child thread */
 extern void SDL_SYS_SetupThread(const char *name);
@@ -58,16 +54,20 @@ extern void SDL_SYS_WaitThread(SDL_Thread *thread);
 /* Mark thread as cleaned up as soon as it exits, without joining. */
 extern void SDL_SYS_DetachThread(SDL_Thread *thread);
 
+/* Initialize the global TLS data */
+extern void SDL_SYS_InitTLSData(void);
+
 /* Get the thread local storage for this thread */
 extern SDL_TLSData *SDL_SYS_GetTLSData(void);
 
 /* Set the thread local storage for this thread */
 extern int SDL_SYS_SetTLSData(SDL_TLSData *data);
 
-/* This is for internal SDL use, so we don't need #ifdefs everywhere. */
-extern SDL_Thread *
-SDL_CreateThreadInternal(int(SDLCALL *fn)(void *), const char *name,
-                         const size_t stacksize, void *data);
+/* Quit the global TLS data */
+extern void SDL_SYS_QuitTLSData(void);
+
+/* A helper function for setting up a thread with a stack size. */
+extern SDL_Thread *SDL_CreateThreadWithStackSize(SDL_ThreadFunction fn, const char *name, size_t stacksize, void *data);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

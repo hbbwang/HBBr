@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -26,7 +26,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "../SDL_audio_c.h"
 #include "../SDL_audiodev_c.h"
 #include "../SDL_sysaudio.h"
 #include "SDL_pspaudio.h"
@@ -42,8 +41,8 @@ static inline SDL_bool isBasicAudioConfig(const SDL_AudioSpec *spec)
 static int PSPAUDIO_OpenDevice(SDL_AudioDevice *device)
 {
     device->hidden = (struct SDL_PrivateAudioData *) SDL_calloc(1, sizeof(*device->hidden));
-    if (device->hidden == NULL) {
-        return SDL_OutOfMemory();
+    if (!device->hidden) {
+        return -1;
     }
 
     // device only natively supports S16LSB
@@ -94,7 +93,7 @@ static int PSPAUDIO_OpenDevice(SDL_AudioDevice *device)
        64, so spec->size should be a multiple of 64 as well. */
     const int mixlen = device->buffer_size * NUM_BUFFERS;
     device->hidden->rawbuf = (Uint8 *)SDL_aligned_alloc(64, mixlen);
-    if (device->hidden->rawbuf == NULL) {
+    if (!device->hidden->rawbuf) {
         return SDL_SetError("Couldn't allocate mixing buffer");
     }
 
@@ -142,7 +141,7 @@ static void PSPAUDIO_CloseDevice(SDL_AudioDevice *device)
             device->hidden->channel = -1;
         }
 
-        if (device->hidden->rawbuf != NULL) {
+        if (device->hidden->rawbuf) {
             SDL_aligned_free(device->hidden->rawbuf);
             device->hidden->rawbuf = NULL;
         }
@@ -171,9 +170,9 @@ static SDL_bool PSPAUDIO_Init(SDL_AudioDriverImpl *impl)
     impl->GetDeviceBuf = PSPAUDIO_GetDeviceBuf;
     impl->CloseDevice = PSPAUDIO_CloseDevice;
     impl->ThreadInit = PSPAUDIO_ThreadInit;
-    impl->OnlyHasDefaultOutputDevice = SDL_TRUE;
-    //impl->HasCaptureSupport = SDL_TRUE;
-    //impl->OnlyHasDefaultCaptureDevice = SDL_TRUE;
+    impl->OnlyHasDefaultPlaybackDevice = SDL_TRUE;
+    //impl->HasRecordingSupport = SDL_TRUE;
+    //impl->OnlyHasDefaultRecordingDevice = SDL_TRUE;
     return SDL_TRUE;
 }
 

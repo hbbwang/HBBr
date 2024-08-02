@@ -68,7 +68,6 @@ LOCAL_C_INCLUDES += $(THIRD_PARTY_PATH)/crossguid/
 LOCAL_C_INCLUDES += $(THIRD_PARTY_PATH)/crossguid/Include/
 LOCAL_C_INCLUDES += $(THIRD_PARTY_PATH)/Imgui/
 LOCAL_C_INCLUDES += $(THIRD_PARTY_PATH)/Imgui/backends/
-LOCAL_C_INCLUDES += $(THIRD_PARTY_PATH)/lodepng/
 LOCAL_C_INCLUDES += $(THIRD_PARTY_PATH)/pugixml/
 LOCAL_C_INCLUDES += $(THIRD_PARTY_PATH)/sdl3/
 LOCAL_C_INCLUDES += $(THIRD_PARTY_PATH)/sdl3/Include/
@@ -100,7 +99,6 @@ $(wildcard $(THIRD_PARTY_PATH)/assimp/include/*.cpp) \
 $(wildcard $(THIRD_PARTY_PATH)/crossguid/Include/crossguid/*.cpp) \
 $(wildcard $(THIRD_PARTY_PATH)/Imgui/*.cpp) \
 $(wildcard $(THIRD_PARTY_PATH)/Imgui/backends/*.cpp) \
-$(wildcard $(THIRD_PARTY_PATH)/lodepng/*.cpp) \
 $(wildcard $(THIRD_PARTY_PATH)/pugixml/*.cpp) \
 $(wildcard $(THIRD_PARTY_PATH)/sdl3/*.cpp) \
 $(wildcard $(THIRD_PARTY_PATH)/sdl3/Include/*.cpp) \

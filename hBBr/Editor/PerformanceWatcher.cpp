@@ -8,7 +8,7 @@
 #include "Pass/PassManager.h"
 #include "Pass/PassBase.h"
 #include "HTime.h"
-#if WIN32
+#if _WIN32
 #include <Psapi.h>
 void ProcessMemoryCounters(size_t& memoryUsage)
 {
@@ -49,7 +49,7 @@ PerformanceWatcher::PerformanceWatcher(QWidget *parent)
 			// 更新内存使用情况
 			{
 				size_t memoryUsage = 0;
-				#if WIN32
+				#if _WIN32
 				ProcessMemoryCounters(memoryUsage);
 				#endif
 				QString text = QString::fromLocal8Bit("内存使用 : ") + QString::number(memoryUsage / 1024);

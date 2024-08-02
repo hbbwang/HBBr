@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -28,10 +28,12 @@
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 #include "../../SDL_hints_c.h"
+#include "../../core/windows/SDL_hid.h"
 
 #include "SDL_windowsvideo.h"
 #include "SDL_windowsframebuffer.h"
-#include "SDL_windowsshape.h"
+#include "SDL_windowsmessagebox.h"
+#include "SDL_windowsrawinput.h"
 #include "SDL_windowsvulkan.h"
 
 #ifdef SDL_GDK_TEXTINPUT
@@ -49,6 +51,13 @@ SDL_bool g_WindowsEnableMessageLoop = SDL_TRUE;
 SDL_bool g_WindowsEnableMenuMnemonics = SDL_FALSE;
 SDL_bool g_WindowFrameUsableWhileCursorHidden = SDL_TRUE;
 
+static void SDLCALL UpdateWindowsRawKeyboard(void *userdata, const char *name, const char *oldValue, const char *newValue)
+{
+    SDL_VideoDevice *_this = (SDL_VideoDevice *)userdata;
+    SDL_bool enabled = SDL_GetStringBoolean(newValue, SDL_FALSE);
+    WIN_SetRawKeyboardEnabled(_this, enabled);
+}
+
 static void SDLCALL UpdateWindowsEnableMessageLoop(void *userdata, const char *name, const char *oldValue, const char *newValue)
 {
     g_WindowsEnableMessageLoop = SDL_GetStringBoolean(newValue, SDL_TRUE);
@@ -64,7 +73,7 @@ static void SDLCALL UpdateWindowFrameUsableWhileCursorHidden(void *userdata, con
     g_WindowFrameUsableWhileCursorHidden = SDL_GetStringBoolean(newValue, SDL_TRUE);
 }
 
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
 static int WIN_SuspendScreenSaver(SDL_VideoDevice *_this)
 {
     if (_this->suspend_screensaver) {
@@ -76,7 +85,7 @@ static int WIN_SuspendScreenSaver(SDL_VideoDevice *_this)
 }
 #endif
 
-#if defined(__XBOXONE__) || defined(__XBOXSERIES__)
+#if defined(SDL_PLATFORM_XBOXONE) || defined(SDL_PLATFORM_XBOXSERIES)
 extern void D3D12_XBOX_GetResolution(Uint32 *width, Uint32 *height);
 #endif
 
@@ -84,10 +93,10 @@ extern void D3D12_XBOX_GetResolution(Uint32 *width, Uint32 *height);
 
 static void WIN_DeleteDevice(SDL_VideoDevice *device)
 {
-    SDL_VideoData *data = device->driverdata;
+    SDL_VideoData *data = device->internal;
 
     SDL_UnregisterApp();
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
     if (data->userDLL) {
         SDL_UnloadObject(data->userDLL);
     }
@@ -95,10 +104,19 @@ static void WIN_DeleteDevice(SDL_VideoDevice *device)
         SDL_UnloadObject(data->shcoreDLL);
     }
 #endif
+#ifdef HAVE_DXGI_H
+    if (data->pDXGIFactory) {
+        IDXGIFactory_Release(data->pDXGIFactory);
+    }
+    if (data->dxgiDLL) {
+        SDL_UnloadObject(data->dxgiDLL);
+    }
+#endif
     if (device->wakeup_lock) {
         SDL_DestroyMutex(device->wakeup_lock);
     }
-    SDL_free(device->driverdata);
+    SDL_free(device->internal->rawinput);
+    SDL_free(device->internal);
     SDL_free(device);
 }
 
@@ -118,14 +136,13 @@ static SDL_VideoDevice *WIN_CreateDevice(void)
     }
     if (!data) {
         SDL_free(device);
-        SDL_OutOfMemory();
         return NULL;
     }
-    device->driverdata = data;
+    device->internal = data;
     device->wakeup_lock = SDL_CreateMutex();
     device->system_theme = WIN_GetSystemTheme();
 
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
     data->userDLL = SDL_LoadObject("USER32.DLL");
     if (data->userDLL) {
         /* *INDENT-OFF* */ /* clang-format off */
@@ -142,6 +159,9 @@ static SDL_VideoDevice *WIN_CreateDevice(void)
         data->GetDpiForWindow = (UINT (WINAPI *)(HWND))SDL_LoadFunction(data->userDLL, "GetDpiForWindow");
         data->AreDpiAwarenessContextsEqual = (BOOL (WINAPI *)(DPI_AWARENESS_CONTEXT, DPI_AWARENESS_CONTEXT))SDL_LoadFunction(data->userDLL, "AreDpiAwarenessContextsEqual");
         data->IsValidDpiAwarenessContext = (BOOL (WINAPI *)(DPI_AWARENESS_CONTEXT))SDL_LoadFunction(data->userDLL, "IsValidDpiAwarenessContext");
+        data->GetDisplayConfigBufferSizes = (LONG (WINAPI *)(UINT32,UINT32*,UINT32* ))SDL_LoadFunction(data->userDLL, "GetDisplayConfigBufferSizes");
+        data->QueryDisplayConfig = (LONG (WINAPI *)(UINT32,UINT32*,DISPLAYCONFIG_PATH_INFO*,UINT32*,DISPLAYCONFIG_MODE_INFO*,DISPLAYCONFIG_TOPOLOGY_ID*))SDL_LoadFunction(data->userDLL, "QueryDisplayConfig");
+        data->DisplayConfigGetDeviceInfo = (LONG (WINAPI *)(DISPLAYCONFIG_DEVICE_INFO_HEADER*))SDL_LoadFunction(data->userDLL, "DisplayConfigGetDeviceInfo");
         /* *INDENT-ON* */ /* clang-format on */
     } else {
         SDL_ClearError();
@@ -156,12 +176,28 @@ static SDL_VideoDevice *WIN_CreateDevice(void)
     } else {
         SDL_ClearError();
     }
-#endif /* #if !defined(__XBOXONE__) && !defined(__XBOXSERIES__) */
+#endif /* #if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES) */
+
+#ifdef HAVE_DXGI_H
+    data->dxgiDLL = SDL_LoadObject("DXGI.DLL");
+    if (data->dxgiDLL) {
+        /* *INDENT-OFF* */ /* clang-format off */
+        typedef HRESULT (WINAPI *CreateDXGI_t)(REFIID riid, void **ppFactory);
+        /* *INDENT-ON* */ /* clang-format on */
+        CreateDXGI_t CreateDXGI;
+
+        CreateDXGI = (CreateDXGI_t)SDL_LoadFunction(data->dxgiDLL, "CreateDXGIFactory");
+        if (CreateDXGI) {
+            GUID dxgiGUID = { 0x7b7166ec, 0x21c7, 0x44ae, { 0xb2, 0x1a, 0xc9, 0xae, 0x32, 0x1a, 0xe3, 0x69 } };
+            CreateDXGI(&dxgiGUID, (void **)&data->pDXGIFactory);
+        }
+    }
+#endif
 
     /* Set the function pointers */
     device->VideoInit = WIN_VideoInit;
     device->VideoQuit = WIN_VideoQuit;
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
     device->RefreshDisplays = WIN_RefreshDisplays;
     device->GetDisplayBounds = WIN_GetDisplayBounds;
     device->GetDisplayUsableBounds = WIN_GetDisplayUsableBounds;
@@ -170,13 +206,12 @@ static SDL_VideoDevice *WIN_CreateDevice(void)
 #endif
     device->PumpEvents = WIN_PumpEvents;
     device->WaitEventTimeout = WIN_WaitEventTimeout;
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
     device->SendWakeupEvent = WIN_SendWakeupEvent;
     device->SuspendScreenSaver = WIN_SuspendScreenSaver;
 #endif
 
     device->CreateSDLWindow = WIN_CreateWindow;
-    device->CreateSDLWindowFrom = WIN_CreateWindowFrom;
     device->SetWindowTitle = WIN_SetWindowTitle;
     device->SetWindowIcon = WIN_SetWindowIcon;
     device->SetWindowPosition = WIN_SetWindowPosition;
@@ -194,15 +229,15 @@ static SDL_VideoDevice *WIN_CreateDevice(void)
     device->SetWindowResizable = WIN_SetWindowResizable;
     device->SetWindowAlwaysOnTop = WIN_SetWindowAlwaysOnTop;
     device->SetWindowFullscreen = WIN_SetWindowFullscreen;
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+    device->SetWindowModalFor = WIN_SetWindowModalFor;
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
     device->GetWindowICCProfile = WIN_GetWindowICCProfile;
     device->SetWindowMouseRect = WIN_SetWindowMouseRect;
     device->SetWindowMouseGrab = WIN_SetWindowMouseGrab;
     device->SetWindowKeyboardGrab = WIN_SetWindowKeyboardGrab;
 #endif
     device->DestroyWindow = WIN_DestroyWindow;
-    device->GetWindowWMInfo = WIN_GetWindowWMInfo;
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
     device->CreateWindowFramebuffer = WIN_CreateWindowFramebuffer;
     device->UpdateWindowFramebuffer = WIN_UpdateWindowFramebuffer;
     device->DestroyWindowFramebuffer = WIN_DestroyWindowFramebuffer;
@@ -212,9 +247,7 @@ static SDL_VideoDevice *WIN_CreateDevice(void)
     device->FlashWindow = WIN_FlashWindow;
     device->ShowWindowSystemMenu = WIN_ShowWindowSystemMenu;
     device->SetWindowFocusable = WIN_SetWindowFocusable;
-
-    device->shape_driver.CreateShaper = Win32_CreateShaper;
-    device->shape_driver.SetWindowShape = Win32_SetWindowShape;
+    device->UpdateWindowShape = WIN_UpdateWindowShape;
 #endif
 
 #ifdef SDL_VIDEO_OPENGL_WGL
@@ -253,14 +286,15 @@ static SDL_VideoDevice *WIN_CreateDevice(void)
     device->Vulkan_UnloadLibrary = WIN_Vulkan_UnloadLibrary;
     device->Vulkan_GetInstanceExtensions = WIN_Vulkan_GetInstanceExtensions;
     device->Vulkan_CreateSurface = WIN_Vulkan_CreateSurface;
+    device->Vulkan_DestroySurface = WIN_Vulkan_DestroySurface;
+    device->Vulkan_GetPresentationSupport = WIN_Vulkan_GetPresentationSupport;
 #endif
 
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
     device->StartTextInput = WIN_StartTextInput;
     device->StopTextInput = WIN_StopTextInput;
-    device->SetTextInputRect = WIN_SetTextInputRect;
+    device->UpdateTextInputArea = WIN_UpdateTextInputArea;
     device->ClearComposition = WIN_ClearComposition;
-    device->IsTextInputShown = WIN_IsTextInputShown;
 
     device->SetClipboardData = WIN_SetClipboardData;
     device->GetClipboardData = WIN_GetClipboardData;
@@ -272,9 +306,8 @@ static SDL_VideoDevice *WIN_CreateDevice(void)
 
     device->StartTextInput = GDK_StartTextInput;
     device->StopTextInput = GDK_StopTextInput;
-    device->SetTextInputRect = GDK_SetTextInputRect;
+    device->UpdateTextInputArea = GDK_UpdateTextInputArea;
     device->ClearComposition = GDK_ClearComposition;
-    device->IsTextInputShown = GDK_IsTextInputShown;
 
     device->HasScreenKeyboardSupport = GDK_HasScreenKeyboardSupport;
     device->ShowScreenKeyboard = GDK_ShowScreenKeyboard;
@@ -284,19 +317,25 @@ static SDL_VideoDevice *WIN_CreateDevice(void)
 
     device->free = WIN_DeleteDevice;
 
-    device->quirk_flags = VIDEO_DEVICE_QUIRK_HAS_POPUP_WINDOW_SUPPORT;
+    device->device_caps = VIDEO_DEVICE_CAPS_HAS_POPUP_WINDOW_SUPPORT |
+                          VIDEO_DEVICE_CAPS_SENDS_FULLSCREEN_DIMENSIONS;
 
     return device;
 }
 
 VideoBootStrap WINDOWS_bootstrap = {
-    "windows", "SDL Windows video driver", WIN_CreateDevice
+    "windows", "SDL Windows video driver", WIN_CreateDevice,
+    #if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+    WIN_ShowMessageBox
+    #else
+    NULL
+    #endif
 };
 
 static BOOL WIN_DeclareDPIAwareUnaware(SDL_VideoDevice *_this)
 {
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
-    SDL_VideoData *data = _this->driverdata;
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+    SDL_VideoData *data = _this->internal;
 
     if (data->SetProcessDpiAwarenessContext) {
         return data->SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_UNAWARE);
@@ -310,8 +349,8 @@ static BOOL WIN_DeclareDPIAwareUnaware(SDL_VideoDevice *_this)
 
 static BOOL WIN_DeclareDPIAwareSystem(SDL_VideoDevice *_this)
 {
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
-    SDL_VideoData *data = _this->driverdata;
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+    SDL_VideoData *data = _this->internal;
 
     if (data->SetProcessDpiAwarenessContext) {
         /* Windows 10, version 1607 */
@@ -329,8 +368,8 @@ static BOOL WIN_DeclareDPIAwareSystem(SDL_VideoDevice *_this)
 
 static BOOL WIN_DeclareDPIAwarePerMonitor(SDL_VideoDevice *_this)
 {
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
-    SDL_VideoData *data = _this->driverdata;
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+    SDL_VideoData *data = _this->internal;
 
     if (data->SetProcessDpiAwarenessContext) {
         /* Windows 10, version 1607 */
@@ -349,10 +388,10 @@ static BOOL WIN_DeclareDPIAwarePerMonitor(SDL_VideoDevice *_this)
 
 static BOOL WIN_DeclareDPIAwarePerMonitorV2(SDL_VideoDevice *_this)
 {
-#if defined(__XBOXONE__) || defined(__XBOXSERIES__)
+#if defined(SDL_PLATFORM_XBOXONE) || defined(SDL_PLATFORM_XBOXSERIES)
     return FALSE;
 #else
-    SDL_VideoData *data = _this->driverdata;
+    SDL_VideoData *data = _this->internal;
 
     /* Declare DPI aware (may have been done in external code or a manifest, as well) */
     if (data->SetProcessDpiAwarenessContext) {
@@ -388,7 +427,7 @@ static BOOL WIN_DeclareDPIAwarePerMonitorV2(SDL_VideoDevice *_this)
 #ifdef HIGHDPI_DEBUG
 static const char *WIN_GetDPIAwareness(SDL_VideoDevice *_this)
 {
-    SDL_VideoData *data = _this->driverdata;
+    SDL_VideoData *data = _this->internal;
 
     if (data->GetThreadDpiAwarenessContext && data->AreDpiAwarenessContextsEqual) {
         DPI_AWARENESS_CONTEXT context = data->GetThreadDpiAwarenessContext();
@@ -414,7 +453,7 @@ static void WIN_InitDPIAwareness(SDL_VideoDevice *_this)
 {
     const char *hint = SDL_GetHint("SDL_WINDOWS_DPI_AWARENESS");
 
-    if (hint == NULL || SDL_strcmp(hint, "permonitorv2") == 0) {
+    if (!hint || SDL_strcmp(hint, "permonitorv2") == 0) {
         WIN_DeclareDPIAwarePerMonitorV2(_this);
     } else if (SDL_strcmp(hint, "permonitor") == 0) {
         WIN_DeclareDPIAwarePerMonitor(_this);
@@ -427,7 +466,22 @@ static void WIN_InitDPIAwareness(SDL_VideoDevice *_this)
 
 int WIN_VideoInit(SDL_VideoDevice *_this)
 {
-    SDL_VideoData *data = _this->driverdata;
+    SDL_VideoData *data = _this->internal;
+    HRESULT hr;
+
+    hr = WIN_CoInitialize();
+    if (SUCCEEDED(hr)) {
+        data->coinitialized = SDL_TRUE;
+
+        hr = OleInitialize(NULL);
+        if (SUCCEEDED(hr)) {
+            data->oleinitialized = SDL_TRUE;
+        } else {
+            SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "OleInitialize() failed: 0x%.8x, using fallback drag-n-drop functionality\n", (unsigned int)hr);
+        }
+    } else {
+        SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "CoInitialize() failed: 0x%.8x, using fallback drag-n-drop functionality\n", (unsigned int)hr);
+    }
 
     WIN_InitDPIAwareness(_this);
 
@@ -435,7 +489,7 @@ int WIN_VideoInit(SDL_VideoDevice *_this)
     SDL_Log("DPI awareness: %s", WIN_GetDPIAwareness(_this));
 #endif
 
-#if defined(__XBOXONE__) || defined(__XBOXSERIES__)
+#if defined(SDL_PLATFORM_XBOXONE) || defined(SDL_PLATFORM_XBOXSERIES)
     /* For Xbox, we just need to create the single display */
     {
         SDL_DisplayMode mode;
@@ -447,20 +501,23 @@ int WIN_VideoInit(SDL_VideoDevice *_this)
 
         SDL_AddBasicVideoDisplay(&mode);
     }
-#else /*!defined(__XBOXONE__) && !defined(__XBOXSERIES__)*/
+#else /*!defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)*/
     if (WIN_InitModes(_this) < 0) {
         return -1;
     }
 
     WIN_InitKeyboard(_this);
     WIN_InitMouse(_this);
+    WIN_InitDeviceNotification();
+    WIN_CheckKeyboardAndMouseHotplug(_this, SDL_TRUE);
 #endif
 
+    SDL_AddHintCallback(SDL_HINT_WINDOWS_RAW_KEYBOARD, UpdateWindowsRawKeyboard, _this);
     SDL_AddHintCallback(SDL_HINT_WINDOWS_ENABLE_MESSAGELOOP, UpdateWindowsEnableMessageLoop, NULL);
     SDL_AddHintCallback(SDL_HINT_WINDOWS_ENABLE_MENU_MNEMONICS, UpdateWindowsEnableMenuMnemonics, NULL);
     SDL_AddHintCallback(SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN, UpdateWindowFrameUsableWhileCursorHidden, NULL);
 
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
     data->_SDL_WAKEUP = RegisterWindowMessageA("_SDL_WAKEUP");
 #endif
 
@@ -469,14 +526,34 @@ int WIN_VideoInit(SDL_VideoDevice *_this)
 
 void WIN_VideoQuit(SDL_VideoDevice *_this)
 {
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+    SDL_VideoData *data = _this->internal;
+
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
     WIN_QuitModes(_this);
+    WIN_QuitDeviceNotification();
     WIN_QuitKeyboard(_this);
     WIN_QuitMouse(_this);
 #endif
+
+    SDL_DelHintCallback(SDL_HINT_WINDOWS_RAW_KEYBOARD, UpdateWindowsRawKeyboard, _this);
+    SDL_DelHintCallback(SDL_HINT_WINDOWS_ENABLE_MESSAGELOOP, UpdateWindowsEnableMessageLoop, NULL);
+    SDL_DelHintCallback(SDL_HINT_WINDOWS_ENABLE_MENU_MNEMONICS, UpdateWindowsEnableMenuMnemonics, NULL);
+    SDL_DelHintCallback(SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN, UpdateWindowFrameUsableWhileCursorHidden, NULL);
+
+    WIN_SetRawMouseEnabled(_this, SDL_FALSE);
+    WIN_SetRawKeyboardEnabled(_this, SDL_FALSE);
+
+    if (data->oleinitialized) {
+        OleUninitialize();
+        data->oleinitialized = SDL_FALSE;
+    }
+    if (data->coinitialized) {
+        WIN_CoUninitialize();
+        data->coinitialized = SDL_FALSE;
+    }
 }
 
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
 #define D3D_DEBUG_INFO
 #include <d3d9.h>
 
@@ -539,7 +616,7 @@ SDL_bool D3D_LoadDLL(void **pD3DDLL, IDirect3D9 **pDirect3D9Interface)
     return SDL_FALSE;
 }
 
-int SDL_Direct3D9GetAdapterIndex(SDL_DisplayID displayID)
+int SDL_GetDirect3D9AdapterIndex(SDL_DisplayID displayID)
 {
     void *pD3DDLL;
     IDirect3D9 *pD3D;
@@ -550,7 +627,7 @@ int SDL_Direct3D9GetAdapterIndex(SDL_DisplayID displayID)
         SDL_DisplayData *pData = SDL_GetDisplayDriverData(displayID);
         int adapterIndex = D3DADAPTER_DEFAULT;
 
-        if (pData == NULL) {
+        if (!pData) {
             SDL_SetError("Invalid display index");
             adapterIndex = -1; /* make sure we return something invalid */
         } else {
@@ -576,44 +653,9 @@ int SDL_Direct3D9GetAdapterIndex(SDL_DisplayID displayID)
         return adapterIndex;
     }
 }
-#endif /* !defined(__XBOXONE__) && !defined(__XBOXSERIES__) */
+#endif /* !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES) */
 
-#ifdef HAVE_DXGI_H
-#define CINTERFACE
-#define COBJMACROS
-#include <dxgi.h>
-
-static SDL_bool DXGI_LoadDLL(void **pDXGIDLL, IDXGIFactory **pDXGIFactory)
-{
-    *pDXGIDLL = SDL_LoadObject("DXGI.DLL");
-    if (*pDXGIDLL) {
-        /* *INDENT-OFF* */ /* clang-format off */
-        typedef HRESULT (WINAPI *CreateDXGI_t)(REFIID riid, void **ppFactory);
-        /* *INDENT-ON* */ /* clang-format on */
-        CreateDXGI_t CreateDXGI;
-
-        CreateDXGI = (CreateDXGI_t)SDL_LoadFunction(*pDXGIDLL, "CreateDXGIFactory");
-        if (CreateDXGI) {
-            GUID dxgiGUID = { 0x7b7166ec, 0x21c7, 0x44ae, { 0xb2, 0x1a, 0xc9, 0xae, 0x32, 0x1a, 0xe3, 0x69 } };
-            if (!SUCCEEDED(CreateDXGI(&dxgiGUID, (void **)pDXGIFactory))) {
-                *pDXGIFactory = NULL;
-            }
-        }
-        if (!*pDXGIFactory) {
-            SDL_UnloadObject(*pDXGIDLL);
-            *pDXGIDLL = NULL;
-            return SDL_FALSE;
-        }
-
-        return SDL_TRUE;
-    } else {
-        *pDXGIFactory = NULL;
-        return SDL_FALSE;
-    }
-}
-#endif
-
-SDL_bool SDL_DXGIGetOutputInfo(SDL_DisplayID displayID, int *adapterIndex, int *outputIndex)
+int SDL_GetDXGIOutputInfo(SDL_DisplayID displayID, int *adapterIndex, int *outputIndex)
 {
 #ifndef HAVE_DXGI_H
     if (adapterIndex) {
@@ -622,53 +664,44 @@ SDL_bool SDL_DXGIGetOutputInfo(SDL_DisplayID displayID, int *adapterIndex, int *
     if (outputIndex) {
         *outputIndex = -1;
     }
-    SDL_SetError("SDL was compiled without DXGI support due to missing dxgi.h header");
-    return SDL_FALSE;
+    return SDL_SetError("SDL was compiled without DXGI support due to missing dxgi.h header");
 #else
+    const SDL_VideoDevice *videodevice = SDL_GetVideoDevice();
+    const SDL_VideoData *videodata = videodevice ? videodevice->internal : NULL;
     SDL_DisplayData *pData = SDL_GetDisplayDriverData(displayID);
-    void *pDXGIDLL;
-    char *displayName;
     int nAdapter, nOutput;
-    IDXGIFactory *pDXGIFactory = NULL;
     IDXGIAdapter *pDXGIAdapter;
     IDXGIOutput *pDXGIOutput;
 
-    if (adapterIndex == NULL) {
-        SDL_InvalidParamError("adapterIndex");
-        return SDL_FALSE;
+    if (!adapterIndex) {
+        return SDL_InvalidParamError("adapterIndex");
     }
 
-    if (outputIndex == NULL) {
-        SDL_InvalidParamError("outputIndex");
-        return SDL_FALSE;
+    if (!outputIndex) {
+        return SDL_InvalidParamError("outputIndex");
     }
 
     *adapterIndex = -1;
     *outputIndex = -1;
 
-    if (pData == NULL) {
-        SDL_SetError("Invalid display index");
-        return SDL_FALSE;
+    if (!pData) {
+        return SDL_SetError("Invalid display index");
     }
 
-    if (!DXGI_LoadDLL(&pDXGIDLL, &pDXGIFactory)) {
-        SDL_SetError("Unable to create DXGI interface");
-        return SDL_FALSE;
+    if (!videodata || !videodata->pDXGIFactory) {
+        return SDL_SetError("Unable to create DXGI interface");
     }
 
-    displayName = WIN_StringToUTF8W(pData->DeviceName);
     nAdapter = 0;
-    while (*adapterIndex == -1 && SUCCEEDED(IDXGIFactory_EnumAdapters(pDXGIFactory, nAdapter, &pDXGIAdapter))) {
+    while (*adapterIndex == -1 && SUCCEEDED(IDXGIFactory_EnumAdapters(videodata->pDXGIFactory, nAdapter, &pDXGIAdapter))) {
         nOutput = 0;
         while (*adapterIndex == -1 && SUCCEEDED(IDXGIAdapter_EnumOutputs(pDXGIAdapter, nOutput, &pDXGIOutput))) {
             DXGI_OUTPUT_DESC outputDesc;
             if (SUCCEEDED(IDXGIOutput_GetDesc(pDXGIOutput, &outputDesc))) {
-                char *outputName = WIN_StringToUTF8W(outputDesc.DeviceName);
-                if (SDL_strcmp(outputName, displayName) == 0) {
+                if (SDL_wcscmp(outputDesc.DeviceName, pData->DeviceName) == 0) {
                     *adapterIndex = nAdapter;
                     *outputIndex = nOutput;
                 }
-                SDL_free(outputName);
             }
             IDXGIOutput_Release(pDXGIOutput);
             nOutput++;
@@ -676,17 +709,11 @@ SDL_bool SDL_DXGIGetOutputInfo(SDL_DisplayID displayID, int *adapterIndex, int *
         IDXGIAdapter_Release(pDXGIAdapter);
         nAdapter++;
     }
-    SDL_free(displayName);
-
-    /* free up the DXGI factory */
-    IDXGIFactory_Release(pDXGIFactory);
-    SDL_UnloadObject(pDXGIDLL);
 
     if (*adapterIndex == -1) {
-        return SDL_FALSE;
-    } else {
-        return SDL_TRUE;
+        return SDL_SetError("Couldn't find matching adapter");
     }
+    return 0;
 #endif
 }
 
@@ -712,13 +739,12 @@ SDL_SystemTheme WIN_GetSystemTheme(void)
 
 SDL_bool WIN_IsPerMonitorV2DPIAware(SDL_VideoDevice *_this)
 {
-#if !defined(__XBOXONE__) && !defined(__XBOXSERIES__)
-    SDL_VideoData *data = _this->driverdata;
+#if !defined(SDL_PLATFORM_XBOXONE) && !defined(SDL_PLATFORM_XBOXSERIES)
+    SDL_VideoData *data = _this->internal;
 
     if (data->AreDpiAwarenessContextsEqual && data->GetThreadDpiAwarenessContext) {
         /* Windows 10, version 1607 */
-        return (SDL_bool)data->AreDpiAwarenessContextsEqual(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2,
-                                                            data->GetThreadDpiAwarenessContext());
+        return data->AreDpiAwarenessContextsEqual(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2, data->GetThreadDpiAwarenessContext());
     }
 #endif
     return SDL_FALSE;

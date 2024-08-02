@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -32,11 +32,10 @@ extern "C" {
 
 void GDK_EnsureHints(void);
 
-void GDK_StartTextInput(SDL_VideoDevice *_this);
-void GDK_StopTextInput(SDL_VideoDevice *_this);
-int GDK_SetTextInputRect(SDL_VideoDevice *_this, const SDL_Rect *rect);
-void GDK_ClearComposition(SDL_VideoDevice *_this);
-SDL_bool GDK_IsTextInputShown(SDL_VideoDevice *_this);
+int GDK_StartTextInput(SDL_VideoDevice *_this, SDL_Window *window);
+int GDK_StopTextInput(SDL_VideoDevice *_this, SDL_Window *window);
+int GDK_UpdateTextInputArea(SDL_VideoDevice *_this, SDL_Window *window);
+int GDK_ClearComposition(SDL_VideoDevice *_this, SDL_Window *window);
 
 SDL_bool GDK_HasScreenKeyboardSupport(SDL_VideoDevice *_this);
 void GDK_ShowScreenKeyboard(SDL_VideoDevice *_this, SDL_Window *window);

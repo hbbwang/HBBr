@@ -26,17 +26,11 @@
     <Filter Include="Editor">
       <UniqueIdentifier>{3d51124d-463a-422d-95b9-3fac762e9c68}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ThirdParty\Imgui\backends">
-      <UniqueIdentifier>{fa303a75-880e-41ba-990f-40520c2ccbd0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Renderer\Form">
       <UniqueIdentifier>{eb1d85df-5f3c-4a67-8ba3-242c5cc2b2d0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Renderer\Core\Pass">
       <UniqueIdentifier>{4d0dd611-afb8-444c-8f92-a917cb95313e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ThirdParty\lodepng">
-      <UniqueIdentifier>{0390f21e-7636-4424-957a-d6637c1a97ae}</UniqueIdentifier>
     </Filter>
     <Filter Include="ThirdParty\GUID">
       <UniqueIdentifier>{e35db4b3-bdf8-449f-baf8-19718adf72f7}</UniqueIdentifier>
@@ -67,6 +61,9 @@
     </Filter>
     <Filter Include="Renderer\Core\Pass\MeshProcessor">
       <UniqueIdentifier>{467189f6-b673-4b9e-a559-8543e92c7b05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\Imgui\backends">
+      <UniqueIdentifier>{78ec89ec-8a72-44c7-82bc-8abd8e9e136f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -105,27 +102,6 @@
     </ClInclude>
     <ClInclude Include="Editor\ShaderCompiler.h">
       <Filter>Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h">
-      <Filter>ThirdParty\Imgui\backends</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\Imgui\imstb_textedit.h">
-      <Filter>ThirdParty\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\Imgui\imstb_truetype.h">
-      <Filter>ThirdParty\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\Imgui\imconfig.h">
-      <Filter>ThirdParty\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\Imgui\imgui.h">
-      <Filter>ThirdParty\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\Imgui\imgui_internal.h">
-      <Filter>ThirdParty\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\Imgui\imstb_rectpack.h">
-      <Filter>ThirdParty\Imgui</Filter>
     </ClInclude>
     <ClInclude Include="Common\FileSystem.h">
       <Filter>Common</Filter>
@@ -175,14 +151,8 @@
     <ClInclude Include="Common\DDSTool.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\ThirdParty\lodepng\lodepng.h">
-      <Filter>ThirdParty\lodepng</Filter>
-    </ClInclude>
     <ClInclude Include="Common\RendererType.h">
       <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h">
-      <Filter>ThirdParty\Imgui\backends</Filter>
     </ClInclude>
     <ClInclude Include="main.h">
       <Filter>Renderer</Filter>
@@ -274,6 +244,30 @@
     <ClInclude Include="Core\VMABuffer.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imconfig.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imgui.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imgui_internal.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_rectpack.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_textedit.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_truetype.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h">
+      <Filter>ThirdParty\Imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h">
+      <Filter>ThirdParty\Imgui\backends</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -305,24 +299,6 @@
     </ClCompile>
     <ClCompile Include="Editor\ShaderCompiler.cpp">
       <Filter>Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp">
-      <Filter>ThirdParty\Imgui\backends</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ThirdParty\Imgui\imgui.cpp">
-      <Filter>ThirdParty\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ThirdParty\Imgui\imgui_demo.cpp">
-      <Filter>ThirdParty\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ThirdParty\Imgui\imgui_draw.cpp">
-      <Filter>ThirdParty\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ThirdParty\Imgui\imgui_tables.cpp">
-      <Filter>ThirdParty\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ThirdParty\Imgui\imgui_widgets.cpp">
-      <Filter>ThirdParty\Imgui</Filter>
     </ClCompile>
     <ClCompile Include="Common\FileSystem.cpp">
       <Filter>Common</Filter>
@@ -362,12 +338,6 @@
     </ClCompile>
     <ClCompile Include="Common\DDSTool.cpp">
       <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ThirdParty\lodepng\lodepng.cpp">
-      <Filter>ThirdParty\lodepng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp">
-      <Filter>ThirdParty\Imgui\backends</Filter>
     </ClCompile>
     <ClCompile Include="..\ThirdParty\crossguid\Include\crossguid\guid.cpp">
       <Filter>ThirdParty\GUID</Filter>
@@ -455,6 +425,27 @@
     </ClCompile>
     <ClCompile Include="Core\VMABuffer.cpp">
       <Filter>Renderer\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_demo.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_draw.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_tables.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_widgets.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp">
+      <Filter>ThirdParty\Imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp">
+      <Filter>ThirdParty\Imgui\backends</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

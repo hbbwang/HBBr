@@ -6,6 +6,13 @@
 /*
 	Imgui buffer pass 
 */
+
+#if ENABLE_IMGUI
+#include "Imgui/imgui.h"
+#include "Imgui/backends/imgui_impl_sdl3.h"
+#include "Imgui/backends/imgui_impl_vulkan.h"
+#endif
+
 #pragma region ImguiPass 
 void ImguiPass::PassInit()
 {

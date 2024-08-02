@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2024 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -33,5 +33,7 @@ extern void SDL_InitTicks(void);
 extern void SDL_QuitTicks(void);
 extern int SDL_InitTimers(void);
 extern void SDL_QuitTimers(void);
+
+extern void SDL_SYS_DelayNS(Uint64 ns);
 
 #endif /* SDL_timer_c_h_ */
