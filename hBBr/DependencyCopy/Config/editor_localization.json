@@ -18,24 +18,16 @@
         "CancelButton": "关闭窗口",
         "ClearButton": "清空(不保存)",
         "Name": "名字",
-        "PosX": 0,
-        "PosY": 0,
         "Repository": "仓库",
         "SaveButton": "保存选中",
         "Type": "类型",
-        "VirtualPath": "路径",
-        "WindowHeight": 247,
-        "WindowWidth": 367
+        "VirtualPath": "路径"
     },
     "MainWindow": {
         "ContentBrowserTitle": "内容浏览器",
         "Inspector": "细节编辑器",
         "MainTitle": "HBB渲染编辑器",
-        "PosX": 224,
-        "PosY": 34,
         "SceneOutlineTitle": "场景大纲",
-        "WindowHeight": 796,
-        "WindowWidth": 1096,
         "bWindowed": true
     },
     "MaterialEditor": {
@@ -45,14 +37,10 @@
         "MaterialTextureTitle": "Texture",
         "MaterialUniformBufferTitle": "Uniform Buffer",
         "PixelUniformBuffer": "像素着色器",
-        "PosX": 323,
-        "PosY": 395,
         "RefreshShader": "刷新Shader:[vs:%s][ps:%s]",
         "RefreshShaderButton": "刷新Shader",
         "SaveButton": "保存",
-        "VertexUniformBuffer": "顶点着色器",
-        "WindowHeight": 637,
-        "WindowWidth": 692
+        "VertexUniformBuffer": "顶点着色器"
     },
     "PerformanceWatcher": {
         "AssetWatch-Ttile": "资产引用",
@@ -62,11 +50,7 @@
         "AssetWatch-Header3": "GUID",
         "RenderingTimeWatch-Ttile":"渲染耗时",
         "RenderingTimeWatch-Header0":"名字",
-        "RenderingTimeWatch-Header1":"耗时(ms)",
-        "PosX": 1066,
-        "PosY": 607,
-        "WindowHeight": 481,
-        "WindowWidth": 822
+        "RenderingTimeWatch-Header1":"耗时(ms)"
     },
     "RenderView": {
         "SpawnGameObject": "目前没有场景开启编辑状态!"
@@ -94,10 +78,6 @@
     },
     "TextureEditor": {
         "ParameterTitle": "细节面板",
-        "PosX": 350,
-        "PosY": 404,
-        "RendererTitle": "纹理预览视口",
-        "WindowHeight": 768,
-        "WindowWidth": 1024
+        "RendererTitle": "纹理预览视口"
     }
 }

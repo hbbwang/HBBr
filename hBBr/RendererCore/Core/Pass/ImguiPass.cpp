@@ -71,7 +71,7 @@ void ImguiPass::PassUpdate(std::vector<VkImageView> frameBuffers)
 	//ImGui::ShowDemoWindow((bool*)1);
 	for (auto& i : _gui_extensions)
 	{
-		i();
+		i(_imguiContent);
 	}
 	ShowPerformance();
 	//End
@@ -79,7 +79,7 @@ void ImguiPass::PassUpdate(std::vector<VkImageView> frameBuffers)
 	EndRenderPass();
 }
 
-void ImguiPass::AddGui(std::function<void()> fun)
+void ImguiPass::AddGui(std::function<void(struct ImGuiContext*)> fun)
 {
 	_gui_extensions.push_back(fun);
 }

@@ -149,6 +149,8 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	//Set sdl hints
 	SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "0");
 
+	LoadRendererConfig(); 
+
 #if __ANDROID__
 	Android_Init();
 #endif
@@ -158,8 +160,39 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 
 	Texture2D::GlobalInitialize();
 
+	
+
 	//Create Main Window
-	auto win = CreateNewWindow(128, 128, "MainRenderer", false, parent);
+	auto win = CreateNewWindow(256, 256, "MainRenderer", false, parent);
+
+	//初始化窗口大小
+	auto x = GetRendererConfigInt("Default", win->name + "_WindowPosX");
+	auto y = GetRendererConfigInt("Default", win->name + "_WindowPosY");
+	auto w = GetRendererConfigInt("Default", win->name + "_WindowWidth");
+	auto h = GetRendererConfigInt("Default", win->name + "_WindowHeight");
+	SDL_DisplayID displayIndex = SDL_GetDisplayForWindow(win->window);
+	SDL_Rect screenRect = {};
+	if (SDL_GetDisplayBounds(displayIndex, &screenRect) == 0)
+	{
+		if (w > screenRect.w)
+		{
+			w = screenRect.w;
+		}
+		if (h > screenRect.h)
+		{
+			h = screenRect.h;
+		}
+		if (x >= screenRect.x + screenRect.w - w / 2)
+		{
+			x = screenRect.x + screenRect.w - w;
+		}
+		if (y >= screenRect.y + screenRect.h - h / 2)
+		{
+			y = screenRect.y + screenRect.h - h;
+		}
+	}
+	SDL_SetWindowSize(win->window, w, h);
+	SDL_SetWindowPosition(win->window, x, y);
 
 #if IS_EDITOR
 	VulkanApp::_editorVulkanInit();
@@ -234,10 +267,6 @@ void VulkanApp::DeInitVulkanManager()
 //DISABLE_CODE_OPTIMIZE
 bool VulkanApp::UpdateForm()
 {
-	//窗口数量 == 0, 直接结束 
-	if (_forms.size() <= 0)
-		return false;
-
 	if (_mainForm == nullptr || _mainForm->renderer == nullptr)
 	{
 		return false;
@@ -260,6 +289,11 @@ bool VulkanApp::UpdateForm()
 			}
 			windowIndex++;
 		}
+
+		//窗口数量 == 0, 直接结束 
+		if (_forms.size() <= 0)
+			return false;
+
 		if (winForm == nullptr)
 		{
 			winForm = *_forms.begin();
@@ -281,6 +315,14 @@ bool VulkanApp::UpdateForm()
 		{
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED: //窗口关闭事件
 		{
+			int x, y, w, h;
+			SDL_GetWindowPosition(winForm->window, &x, &y);
+			SDL_GetWindowSize(winForm->window, &w, &h);
+			RenderConfig::_renderer_json["Default"][(winForm->name + "_WindowPosX").c_str()] = x;
+			RenderConfig::_renderer_json["Default"][(winForm->name + "_WindowPosY").c_str()] = y;
+			RenderConfig::_renderer_json["Default"][(winForm->name + "_WindowWidth").c_str()] = w;
+			RenderConfig::_renderer_json["Default"][(winForm->name + "_WindowHeight").c_str()] = h;
+
 			CloseCallBack(winForm->window);
 			SDL_DestroyWindow(winForm->window);
 			RemoveWindow(winForm);

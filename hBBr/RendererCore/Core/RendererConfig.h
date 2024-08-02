@@ -11,10 +11,19 @@ class RenderConfig
 public:
 	static nlohmann::json _renderer_json;
 	static nlohmann::json _internationalzation_json;
+	static nlohmann::json _editor_json;
+	static nlohmann::json _editor_internationalzation_json;
+	static std::map<HString, std::map<HString, HString>> _rendererConfigDatas;
 };
 
-HString GetRendererConfig(HString Group, HString name);
-void SaveRendererConfig();
+HBBR_API HString GetRendererConfig(HString Group, HString name);
+
+HBBR_API int GetRendererConfigInt(HString Group, HString name);
+
+HBBR_API void LoadRendererConfig();
+
+HBBR_API void SaveRendererConfig(); 
+
 template<class T>
 void UpdateRendererConfig(HString Group, HString name,T &value)
 {
@@ -28,4 +37,12 @@ void UpdateRendererConfig(HString Group, HString name,T &value)
 	}
 }
 
-HString GetInternationalizationText(HString Group, HString name);
+HBBR_API HString GetInternationalizationText(HString Group, HString name);
+
+HBBR_API HString GetEditorInternationalizationText(HString Group, HString name);
+
+HBBR_API int GetEditorInternationalizationInt(HString Group, HString name);
+
+HBBR_API HString GetEditorConfig(HString Group, HString name);
+
+HBBR_API int GetEditorConfigInt(HString Group, HString name);

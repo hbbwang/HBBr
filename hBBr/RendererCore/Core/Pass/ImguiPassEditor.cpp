@@ -70,14 +70,14 @@ void ImguiPassEditor::PassUpdate(std::vector<VkImageView> frameBuffers)
 	//ImGui::ShowDemoWindow((bool*)1);
 	for (auto& i : _gui_extensions)
 	{
-		i();
+		i(_imguiContent);
 	}
 	//End
 	vkManager->ImguiEndFrame(cmdBuf);
 	EndRenderPass();
 }
 
-void ImguiPassEditor::AddGui(std::function<void()> fun)
+void ImguiPassEditor::AddGui(std::function<void(struct ImGuiContext*)> fun)
 {
 	_gui_extensions.push_back(fun);
 }

@@ -2412,7 +2412,7 @@ ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass rend
 		io.Fonts->AddFontDefault(&font_cfg);
 		ImGui::GetStyle().ScaleAllSizes(3.0f);
 	#endif
-	io.IniFilename = nullptr;
+	io.IniFilename = "Config/GuiConfig.ini";
 
 	if (!ImGui_ImplSDL3_InitForVulkan(handle))
 		MessageOut("Error,ImGui_ImplSDL3_InitForVulkan return false!", false, true, "255,0,0");
