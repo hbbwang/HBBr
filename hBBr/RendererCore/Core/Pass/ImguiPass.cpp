@@ -6,8 +6,8 @@
 /*
 	Imgui buffer pass 
 */
-#pragma region ImguiScreenPass 
-void ImguiScreenPass::PassInit()
+#pragma region ImguiPass 
+void ImguiPass::PassInit()
 {
 	//Swapchain
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
@@ -24,7 +24,7 @@ void ImguiScreenPass::PassInit()
 	_passName = "Imgui Render Pass";
 }
 
-ImguiScreenPass::~ImguiScreenPass()
+ImguiPass::~ImguiPass()
 {
 	ImGui::SetCurrentContext(_imguiContent);
 	VulkanManager::GetManager()->ShutdownImgui();
@@ -32,14 +32,14 @@ ImguiScreenPass::~ImguiScreenPass()
 		ImGui::DestroyContext(_imguiContent);
 }
 
-void ImguiScreenPass::PassReset()
+void ImguiPass::PassReset()
 {
 	const auto manager = VulkanManager::GetManager();
 	glm::mat4 pre_rotate_mat = glm::mat4(1);
 	manager->ResetImgui_SDL(_renderPass, 0, pre_rotate_mat);
 }
 
-void ImguiScreenPass::PassUpdate()
+void ImguiPass::PassUpdate()
 {
 	if (ImGui::GetCurrentContext() != _imguiContent)
 	{
@@ -57,14 +57,14 @@ void ImguiScreenPass::PassUpdate()
 	BeginRenderPass({ 0,0,0,0 });
 	manager->ImguiNewFrame();
 	//Begin
-	ImGui::ShowDemoWindow((bool*)1);
+	//ImGui::ShowDemoWindow((bool*)1);
 	ShowPerformance();
 	//End
 	manager->ImguiEndFrame(cmdBuf);
 	EndRenderPass();
 }
 
-void ImguiScreenPass::ShowPerformance()
+void ImguiPass::ShowPerformance()
 {
 	if (ImGui::Begin("Performance", nullptr,
 		ImGuiWindowFlags_NoResize |
@@ -84,4 +84,4 @@ void ImguiScreenPass::ShowPerformance()
 		ImGui::End();
 	}
 }
-#pragma endregion ImguiScreenPass 
+#pragma endregion ImguiPass 

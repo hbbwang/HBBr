@@ -19,7 +19,7 @@ PassManager::PassManager(VulkanRenderer* renderer)
 		AddPass(precommand, "PreCommand");
 		//Opaque Pass
 		std::shared_ptr<BasePass> basePass = std::make_shared<BasePass>(this);
-		AddPass(basePass, "Base Pass");
+		AddPass(basePass, "Base Pass"); 
 		//Deferred Lighting Pass
 		std::shared_ptr<DeferredLightingPass> deferredLighting = std::make_shared<DeferredLightingPass>(this);
 		AddPass(deferredLighting, "Deferred Lighting");
@@ -27,7 +27,7 @@ PassManager::PassManager(VulkanRenderer* renderer)
 		std::shared_ptr<PostProcessPass> postProcess = std::make_shared<PostProcessPass>(this);
 		AddPass(postProcess, "Post Process");
 		//Imgui Pass(暂时作为主要UI使用，可惜不知道如何支持多渲染窗口绘制)
-		std::shared_ptr<ImguiScreenPass> imgui = std::make_shared<ImguiScreenPass>(this);
+		std::shared_ptr<ImguiPass> imgui = std::make_shared<ImguiPass>(this);
 		AddPass(imgui, "Imgui");
 	}
 	for (auto p : _passes)

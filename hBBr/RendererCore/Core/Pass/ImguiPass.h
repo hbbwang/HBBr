@@ -2,11 +2,11 @@
 #include <memory>
 #include "PassBase.h"
 /* Imgui pass define */
-class ImguiScreenPass :public GraphicsPass
+class ImguiPass :public GraphicsPass
 {
 public:
-	ImguiScreenPass(class PassManager* manager) :GraphicsPass(manager) {}
-	virtual ~ImguiScreenPass();
+	ImguiPass(class PassManager* manager) :GraphicsPass(manager) {}
+	virtual ~ImguiPass();
 	virtual void PassInit()override;
 	virtual void PassUpdate()override;
 	virtual void PassReset()override;
