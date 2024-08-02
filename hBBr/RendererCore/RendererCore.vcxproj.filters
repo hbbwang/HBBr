@@ -268,6 +268,9 @@
     <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h">
       <Filter>ThirdParty\Imgui\backends</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Pass\ImguiPassEditor.h">
+      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -446,6 +449,9 @@
     </ClCompile>
     <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp">
       <Filter>ThirdParty\Imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Pass\ImguiPassEditor.cpp">
+      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

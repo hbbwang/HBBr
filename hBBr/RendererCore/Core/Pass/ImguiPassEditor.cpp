@@ -1,4 +1,4 @@
-﻿#include "ImguiPass.h"
+﻿#include "ImguiPassEditor.h"
 #include "VulkanRenderer.h"
 #include "imgui.h"
 #include "SceneTexture.h"
@@ -14,15 +14,14 @@
 #endif
 
 #pragma region ImguiPass 
-void ImguiPass::PassInit()
+void ImguiPassEditor::PassInit()
 {
 	//Swapchain
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	AddSubpass({}, { 0 }, -1);
 	CreateRenderPass();
-	_imguiContent = VulkanManager::GetManager()->InitImgui_SDL(_renderer->GetWindowHandle(), _renderPass, false, false);
-	auto& forms = VulkanApp::GetForms();
-	for (auto& i : forms)
+	_imguiContent = VulkanManager::GetManager()->InitImgui_SDL(_renderer->GetWindowHandle(), _renderPass, true, true);
+	for (auto& i : VulkanApp::GetForms())
 	{
 		if (i->renderer == _renderer)
 		{
@@ -32,13 +31,13 @@ void ImguiPass::PassInit()
 	_passName = "Imgui Render Pass";
 }
 
-ImguiPass::ImguiPass(VulkanRenderer* renderer)
+ImguiPassEditor::ImguiPassEditor(VulkanRenderer* renderer)
 	:GraphicsPass(nullptr)
 {
 	_renderer = renderer;
 }
 
-ImguiPass::~ImguiPass()
+ImguiPassEditor::~ImguiPassEditor()
 {
 	ImGui::SetCurrentContext(_imguiContent);
 	VulkanManager::GetManager()->ShutdownImgui();
@@ -46,14 +45,14 @@ ImguiPass::~ImguiPass()
 		ImGui::DestroyContext(_imguiContent);
 }
 
-void ImguiPass::PassReset()
+void ImguiPassEditor::PassReset()
 {
 	const auto& vkManager = VulkanManager::GetManager();
 	glm::mat4 pre_rotate_mat = glm::mat4(1);
 	vkManager->ResetImgui_SDL(_renderPass, 0, pre_rotate_mat);
 }
 
-void ImguiPass::PassUpdate(std::vector<VkImageView> frameBuffers)
+void ImguiPassEditor::PassUpdate(std::vector<VkImageView> frameBuffers)
 {
 	if (ImGui::GetCurrentContext() != _imguiContent)
 	{
@@ -73,40 +72,19 @@ void ImguiPass::PassUpdate(std::vector<VkImageView> frameBuffers)
 	{
 		i();
 	}
-	ShowPerformance();
 	//End
 	vkManager->ImguiEndFrame(cmdBuf);
 	EndRenderPass();
 }
 
-void ImguiPass::AddGui(std::function<void()> fun)
+void ImguiPassEditor::AddGui(std::function<void()> fun)
 {
 	_gui_extensions.push_back(fun);
 }
 
-void ImguiPass::PassUpdate()
+void ImguiPassEditor::PassUpdate()
 {
 	
 }
 
-void ImguiPass::ShowPerformance()
-{
-	if (ImGui::Begin("Performance", nullptr,
-		ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoScrollbar |
-		ImGuiWindowFlags_NoBackground |
-		ImGuiWindowFlags_NoTitleBar |
-		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs))
-	{
-		double frameRate = VulkanApp::GetFrameRate();
-		HString frameString = HString::FromFloat(frameRate, 2) + " ms";
-		HString fpsString = HString::FromUInt((uint32_t)(1.0f / (float)(frameRate / 1000.0)));
-		ImVec2 newPos = { (float)_currentFrameBufferSize.width - 80.f , (float)_currentFrameBufferSize.height * 0.0002f };
-		ImGui::SetWindowPos(newPos);
-		ImGui::Text("%s", frameString.c_str());
-		ImGui::NextColumn();
-		ImGui::Text("%s" , fpsString.c_str());
-		ImGui::End();
-	}
-}
 #pragma endregion ImguiPass 

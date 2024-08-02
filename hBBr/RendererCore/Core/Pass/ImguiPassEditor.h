@@ -3,11 +3,11 @@
 #include "PassBase.h"
 #include "functional"
 /* Imgui pass define */
-class ImguiPass :public GraphicsPass
+class ImguiPassEditor :public GraphicsPass
 {
 public:
-	ImguiPass(class VulkanRenderer* renderer);
-	virtual ~ImguiPass();
+	ImguiPassEditor(class VulkanRenderer* renderer);
+	virtual ~ImguiPassEditor();
 	virtual void PassInit()override;
 	virtual void PassReset()override;
 	void PassUpdate(std::vector<VkImageView> frameBuffers);
@@ -15,7 +15,6 @@ public:
 protected:
 	virtual void PassUpdate()override;
 private:
-	void ShowPerformance();
 	struct ImGuiContext* _imguiContent = nullptr;
 	std::vector<std::function<void()>> _gui_extensions;
 };

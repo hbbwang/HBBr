@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Common.h"
 #include <memory>
 #include <map>
 
@@ -24,7 +25,8 @@ public:
 		_sceneTexture.clear();
 	}
 	void UpdateTextures();
-	inline std::shared_ptr<Texture2D> GetTexture(SceneTextureDesc desc)
+
+	HBBR_API inline std::shared_ptr<Texture2D> GetTexture(SceneTextureDesc desc)
 	{
 		auto it = _sceneTexture.find(desc);
 		if (it != _sceneTexture.end())
@@ -33,7 +35,11 @@ public:
 		}
 		return nullptr;
 	}
+
 private:
+
 	std::map<SceneTextureDesc, std::shared_ptr<Texture2D>> _sceneTexture;
+
 	class VulkanRenderer* _renderer;
+
 };

@@ -11,7 +11,8 @@
 #include "Pass/PassManager.h"
 #include "Pass/PassBase.h"
 #include "Pass/BasePass.h"
-
+#include "Pass/ImguiPass.h"
+#include "Pass/ImguiPassEditor.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -63,6 +64,10 @@ void VulkanRenderer::Release()
 		}
 	}
 	//
+	_imguiPass.reset();
+#if IS_EDITOR
+	_imguiPassEditor.reset();
+#endif
 	_vulkanManager->FreeCommandBuffers(_vulkanManager->GetCommandPool(), _cmdBuf);
 	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
 	_vulkanManager->DestroyRenderFences(_executeFence);
@@ -117,7 +122,6 @@ void VulkanRenderer::Init()
 	ConsoleDebug::print_endl(HString("Create Renderer : ") + _rendererName);
 	_renderThreadFuncsOnce.reserve(10);
 	_renderThreadFuncs.reserve(10);
-
 }
 
 void VulkanRenderer::ReleaseWorld()
@@ -206,6 +210,8 @@ void VulkanRenderer::Render()
 	_cpuTimer.Start();
 	if (!_bInit) //Render loop Init.
 	{
+		_bInit = true;
+
 		if (_bIsMainRenderer)
 		{
 			auto defaultWorldGUID = GetRendererConfig("Default", "DefaultWorld");
@@ -217,7 +223,15 @@ void VulkanRenderer::Render()
 			CreateEmptyWorld();
 		}
 
-		_bInit = true;
+		_imguiPass.reset(new ImguiPass(this));
+		_imguiPass->SetPassName("GUI Pass");
+		_imguiPass->PassInit();
+
+		#if IS_EDITOR
+		_imguiPassEditor.reset(new ImguiPassEditor(this));
+		_imguiPassEditor->SetPassName("Editor GUI Pass");
+		_imguiPassEditor->PassInit();
+		#endif
 	}
 	else if (!_bRendererRelease && _bInit)
 	{
@@ -267,11 +281,25 @@ void VulkanRenderer::Render()
 			if (_world)
 			{
 				CameraComponent* mainCamera = _world->_mainCamera;
+
 				#if IS_EDITOR
 				if (mainCamera == nullptr) //编辑器内，主相机无效的情况下,强制切换到编辑器相机
 					mainCamera = _world->_editorCamera;
 				#endif
 				auto& mainPassManager = _passManagers[mainCamera];
+
+				//GUI Pass
+				_imguiPass->PassUpdate({
+					mainPassManager->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor)->GetTextureView()
+				});
+
+				//Editor GUI Pass
+				#if IS_EDITOR
+				_imguiPassEditor->PassUpdate({
+					mainPassManager->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor)->GetTextureView()
+				});
+				#endif
+
 				mainPassManager->CmdCopyFinalColorToSwapchain();
 			}
 

@@ -20,20 +20,20 @@ class PassBase
 	friend class PassManager;
 public:
 	PassBase(class PassManager* manager);
-	virtual ~PassBase();
-	HBBR_INLINE HString GetName()const { return _passName; }
-	HBBR_INLINE double GetPassCPURenderingTime()const { return _cpuTime; }
-	HBBR_INLINE double GetPassGPURenderingTime()const { return _gpuTime; }
-	HBBR_INLINE void SetPassName(HString name) { _passName = name; }
+	HBBR_API virtual ~PassBase();
+	HBBR_API HBBR_INLINE HString GetName()const { return _passName; }
+	HBBR_API HBBR_INLINE double GetPassCPURenderingTime()const { return _cpuTime; }
+	HBBR_API HBBR_INLINE double GetPassGPURenderingTime()const { return _gpuTime; }
+	HBBR_API HBBR_INLINE void SetPassName(HString name) { _passName = name; }
 protected:
-	virtual void PassInit() {}
-	virtual void PassUpdate() {}
-	virtual void Reset() {}
-	virtual void PassReset() {}
-	virtual void PassBeginUpdate();
-	virtual void PassEndUpdate();
-	std::shared_ptr<Texture2D> GetSceneTexture(uint32_t descIndex);
-	std::shared_ptr<Texture2D> GetSceneTexture(SceneTextureDesc desc); 
+	HBBR_API virtual void PassInit() {}
+	HBBR_API virtual void PassUpdate() {}
+	HBBR_API virtual void Reset() {}
+	HBBR_API virtual void PassReset() {}
+	HBBR_API virtual void PassBeginUpdate();
+	HBBR_API virtual void PassEndUpdate();
+	HBBR_API std::shared_ptr<Texture2D> GetSceneTexture(uint32_t descIndex);
+	HBBR_API std::shared_ptr<Texture2D> GetSceneTexture(SceneTextureDesc desc);
 	class PassManager* _manager = nullptr;
 	VulkanRenderer* _renderer = nullptr;
 	HString _passName = "PassBase";
@@ -51,38 +51,40 @@ class GraphicsPass : public PassBase
 {
 public:
 	GraphicsPass(class PassManager* manager) :PassBase(manager) {}
-	virtual ~GraphicsPass();
+	HBBR_API virtual ~GraphicsPass();
 	//Step 1 , Can add multiple attachments.
-	virtual void AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, VkFormat attachmentFormat, VkImageLayout initLayout, VkImageLayout finalLayout);
+	HBBR_API virtual void AddAttachment(VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, VkFormat attachmentFormat, VkImageLayout initLayout, VkImageLayout finalLayout);
 	//Step 2 , Setup subpass by attachments.
-	virtual void AddSubpass(std::vector<uint32_t> inputAttachments, std::vector<uint32_t> colorAttachments, int depthStencilAttachments = -1);
-	virtual void AddSubpass(std::vector<uint32_t> inputAttachments, std::vector<uint32_t> colorAttachments, int depthStencilAttachments ,
+	HBBR_API virtual void AddSubpass(std::vector<uint32_t> inputAttachments, std::vector<uint32_t> colorAttachments, int depthStencilAttachments = -1);
+	HBBR_API virtual void AddSubpass(std::vector<uint32_t> inputAttachments, std::vector<uint32_t> colorAttachments, int depthStencilAttachments ,
 		VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask,VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask);
 
 	//Step the last,custom.
-	virtual void PassInit()override {}
-	virtual void PassUpdate()override;
-	virtual void PassReset()override {} 
-	void Reset() override {
+	HBBR_API virtual void PassInit()override {}
+	HBBR_API virtual void PassUpdate()override;
+	HBBR_API virtual void PassReset()override {}
+	HBBR_API void Reset() override {
 		_currentFrameBufferSize = { 1 , 1 };//Force update
 		PassReset();
 	}
 	//该函数不需要指定swapchain image，已经包含在内
-	virtual void ResetFrameBuffer(VkExtent2D size,std::vector<VkImageView> imageViews);
+	HBBR_API virtual void ResetFrameBuffer(VkExtent2D size,std::vector<VkImageView> imageViews);
 	//该函数需要手动指定所有images
-	virtual void ResetFrameBufferCustom(VkExtent2D size, std::vector<VkImageView> imageViews);
+	HBBR_API virtual void ResetFrameBufferCustom(VkExtent2D size, std::vector<VkImageView> imageViews);
 
-	void CreateRenderPass();
-	HBBR_INLINE VkRenderPass GetRenderPass()const
+	HBBR_API void CreateRenderPass();
+
+	HBBR_API HBBR_INLINE VkRenderPass GetRenderPass()const
 	{
 		return _renderPass;
 	}
 protected:
-	virtual void PassRender() {}
-	void BeginRenderPass(std::array<float, 4> clearColor = { 0.0f, 0.0f, 0.0f, 0.0f }, VkExtent2D areaSize = {});
-	void EndRenderPass();
-	void SetViewport(VkExtent2D viewportSize);
-	VkFramebuffer GetFrameBuffer()const;
+	HBBR_API virtual void PassRender() {}
+	HBBR_API void BeginRenderPass(std::array<float, 4> clearColor = { 0.0f, 0.0f, 0.0f, 0.0f }, VkExtent2D areaSize = {});
+	HBBR_API void EndRenderPass();
+	HBBR_API void SetViewport(VkExtent2D viewportSize);
+	HBBR_API VkFramebuffer GetFrameBuffer()const;
+
 	VkRenderPass _renderPass = VK_NULL_HANDLE;
 	std::vector<VkAttachmentDescription>_attachmentDescs;
 	std::vector<VkSubpassDependency>_subpassDependencys;

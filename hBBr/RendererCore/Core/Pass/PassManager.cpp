@@ -26,15 +26,16 @@ PassManager::PassManager(VulkanRenderer* renderer)
 		//Post Process Pass
 		std::shared_ptr<PostProcessPass> postProcess = std::make_shared<PostProcessPass>(this);
 		AddPass(postProcess, "Post Process");
-		//Imgui Pass(暂时作为主要UI使用，可惜不知道如何支持多渲染窗口绘制)
-		std::shared_ptr<ImguiPass> imgui = std::make_shared<ImguiPass>(this);
-		AddPass(imgui, "Imgui");
+		////Imgui Pass(暂时作为主要UI使用，可惜不知道如何支持多渲染窗口绘制)
+		//std::shared_ptr<ImguiPass> imgui = std::make_shared<ImguiPass>(this);
+		//AddPass(imgui, "Imgui");
+
+		for (auto& i : _passes)
+		{
+			i->PassInit();
+		}
+		_executePasses.reserve(_passes.size());
 	}
-	for (auto p : _passes)
-	{
-		p->PassInit();
-	}
-	_executePasses.reserve(_passes.size());
 }
 
 void PassManager::PassesUpdate()
@@ -87,6 +88,7 @@ void PassManager::PassesUpdate()
 		_executePasses.push_back(p);
 
 		p->PassEndUpdate();
+		
 	}
 }
 

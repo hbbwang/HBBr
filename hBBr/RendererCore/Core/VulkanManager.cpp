@@ -46,9 +46,6 @@ PFN_vkCmdDebugMarkerBeginEXT VulkanManager::vkCmdDebugMarkerBegin = VK_NULL_HAND
 PFN_vkCmdDebugMarkerEndEXT VulkanManager::vkCmdDebugMarkerEnd = VK_NULL_HANDLE;
 PFN_vkCmdDebugMarkerInsertEXT VulkanManager::vkCmdDebugMarkerInsert = VK_NULL_HANDLE;
 
-bool VulkanManager::_enableImguiDock = false;
-bool VulkanManager::_enableImguiMultiViewports = false;
-
 VKAPI_ATTR VkBool32 VKAPI_CALL
 VulkanDebugCallback(
 	VkDebugReportFlagsEXT	flags,
@@ -2386,7 +2383,7 @@ static void check_vk_result(VkResult err)
 		abort();
 }
 
-ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, uint32_t subPassIndex)
+ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, bool enableImguiDock, bool enableImguiMultiViewports, uint32_t subPassIndex)
 {
 #if ENABLE_IMGUI
 	//Imgui
@@ -2400,11 +2397,12 @@ ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass rend
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-	if (_enableImguiDock)
+
+	if (enableImguiDock)
 	{
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
 	}
-	if (_enableImguiMultiViewports)
+	if (enableImguiMultiViewports)
 	{
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 	}
@@ -2435,7 +2433,7 @@ ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass rend
 	init_info.CheckVkResultFn = VK_NULL_HANDLE;
 	init_info.RenderPass = renderPass;
 	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-	init_info.CheckVkResultFn = check_vk_result;
+	init_info.CheckVkResultFn = nullptr;
 	//init_info.UseDynamicRendering = true;
 
 	ImGui_ImplVulkan_Init(&init_info);
@@ -2495,6 +2493,15 @@ void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf)
 #if ENABLE_IMGUI
 	ImGui::Render();
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuf);
+
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	{
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+		// TODO for OpenGL: restore current GL context.
+	}
+
 #endif
 }
 

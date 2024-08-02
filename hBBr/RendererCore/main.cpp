@@ -266,15 +266,13 @@ bool VulkanApp::UpdateForm()
 			windowIndex = 0;
 		}
 		#if ENABLE_IMGUI
-		if (winForm->imguiContent)
+		for(auto& i: winForm->imguiContents)
 		{
-			if (winForm == GetFocusForm())
+			if (i)
 			{
-				if (_forms.back() != _forms[windowIndex])
-					std::swap(_forms[windowIndex], _forms.back());
+				ImGui::SetCurrentContext(i);
+				ImGui_ImplSDL3_ProcessEvent(&event);
 			}
-			//ImGui::SetCurrentContext(winForm->imguiContent);
-			ImGui_ImplSDL3_ProcessEvent(&event);
 		}
 		#endif
 

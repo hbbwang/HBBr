@@ -292,6 +292,7 @@
     <ClInclude Include="Core\Component\ModelComponent.h" />
     <ClInclude Include="Core\Component\Transform.h" />
     <ClInclude Include="Core\DescriptorSet.h" />
+    <ClInclude Include="Core\Pass\ImguiPassEditor.h" />
     <ClInclude Include="Core\VMABuffer.h" />
     <ClInclude Include="Core\VulkanObjectManager.h" />
     <ClInclude Include="Core\Pass\HDRI2Cube.h" />
@@ -356,6 +357,7 @@
     <ClCompile Include="Core\Component\ModelComponent.cpp" />
     <ClCompile Include="Core\Component\Transform.cpp" />
     <ClCompile Include="Core\DescriptorSet.cpp" />
+    <ClCompile Include="Core\Pass\ImguiPassEditor.cpp" />
     <ClCompile Include="Core\VMABuffer.cpp" />
     <ClCompile Include="Core\VulkanObjectManager.cpp" />
     <ClCompile Include="Core\Pass\HDRI2Cube.cpp" />

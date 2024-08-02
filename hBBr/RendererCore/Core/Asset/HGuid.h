@@ -3,6 +3,8 @@
 #include "HString.h"
 #include "crossguid/Include/crossguid/guid.hpp"
 
+#include <string_view>
+
 #ifdef _WIN32
 #ifdef _DEBUG
 #pragma comment(lib ,"crossguid-dgb.lib")

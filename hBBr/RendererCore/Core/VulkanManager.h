@@ -132,7 +132,7 @@ public:
 		}
 	}
 
-	HBBR_INLINE VkQueue GetGraphicsQueue() {
+	HBBR_API  HBBR_INLINE VkQueue GetGraphicsQueue() {
 		return _graphicsQueue;
 	}
 
@@ -146,30 +146,30 @@ public:
 
 	/* 初始化Vulkan */
 
-	void InitInstance(bool bEnableDebug);
+	HBBR_API void InitInstance(bool bEnableDebug);
 
-	void InitDevice();
+	HBBR_API void InitDevice();
 
-	void InitDebug();
+	HBBR_API void InitDebug();
 
-	void InitVMA();
+	HBBR_API void InitVMA();
 
 	/* 创建Surface */
-	void ReCreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurface);
+	HBBR_API void ReCreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurface);
 
 	/* 释放Surface */
-	void DestroySurface(VkSurfaceKHR& surface);
+	HBBR_API void DestroySurface(VkSurfaceKHR& surface);
 
 	/* 获取Surface的大小 */
-	void GetSurfaceSize(VkSurfaceKHR surface, VkExtent2D& surfaceSize);
+	HBBR_API void GetSurfaceSize(VkSurfaceKHR surface, VkExtent2D& surfaceSize);
 
 	/* 检查Surface支持 */
-	void CheckSurfaceFormat(VkSurfaceKHR surface, VkSurfaceFormatKHR& surfaceFormat);
+	HBBR_API void CheckSurfaceFormat(VkSurfaceKHR surface, VkSurfaceFormatKHR& surfaceFormat);
 
-	bool GetSurfaceCapabilities(VkSurfaceKHR& surface, VkSurfaceCapabilitiesKHR* surfaceCapabilities);
+	HBBR_API bool GetSurfaceCapabilities(VkSurfaceKHR& surface, VkSurfaceCapabilitiesKHR* surfaceCapabilities);
 
 	/* 创建Swapchain */
-	VkExtent2D CreateSwapchain(
+	HBBR_API VkExtent2D CreateSwapchain(
 		SDL_Window* window,
 		VkExtent2D surfaceSize,
 		VkSurfaceKHR surface,
@@ -187,143 +187,143 @@ public:
 	);
 
 	/* 释放Swapchain */
-	void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImageView>& swapchainImageViews);
+	HBBR_API void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImageView>& swapchainImageViews);
 
 	/* 创建Vulkan image ,但是不带 mipmaps */
-	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image ,uint32_t miplevel = 1, uint32_t layerCount = 1);
+	HBBR_API void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image ,uint32_t miplevel = 1, uint32_t layerCount = 1);
 
 	/* 根据VkImageView ,创建Vulkan image view*/
-	void CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags,  VkImageView& imageView, uint32_t miplevel = 1, uint32_t layerCount = 1);
+	HBBR_API void CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags,  VkImageView& imageView, uint32_t miplevel = 1, uint32_t layerCount = 1);
 
 	/* 创建Vulkan image view memory*/
-	VkDeviceSize CreateImageMemory(VkImage image, VkDeviceMemory& imageViewMemory, VkMemoryPropertyFlags memoryPropertyFlag = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	HBBR_API VkDeviceSize CreateImageMemory(VkImage image, VkDeviceMemory& imageViewMemory, VkMemoryPropertyFlags memoryPropertyFlag = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-	bool CheckImageProperties(VkFormat format, VkImageType type, VkImageTiling tiling, VkImageUsageFlags usages ,VkImageCreateFlags flags, VkImageFormatProperties* out = nullptr);
+	HBBR_API bool CheckImageProperties(VkFormat format, VkImageType type, VkImageTiling tiling, VkImageUsageFlags usages ,VkImageCreateFlags flags, VkImageFormatProperties* out = nullptr);
 
-	void DestroyImage(VkImage& inImage);
+	HBBR_API void DestroyImage(VkImage& inImage);
 
-	void DestroyImageView(VkImageView& imageView);
+	HBBR_API void DestroyImageView(VkImageView& imageView);
 
-	void CreateSampler(VkSampler& sampler, VkFilter filter = VK_FILTER_LINEAR, VkSamplerAddressMode address = VK_SAMPLER_ADDRESS_MODE_REPEAT, float minMipLeve = 0, float maxMipLevel = 16);
+	HBBR_API void CreateSampler(VkSampler& sampler, VkFilter filter = VK_FILTER_LINEAR, VkSamplerAddressMode address = VK_SAMPLER_ADDRESS_MODE_REPEAT, float minMipLeve = 0, float maxMipLevel = 16);
 
 	/* 创建Frame buffer */
-	void CreateFrameBuffers(VkExtent2D FrameBufferSize, VkRenderPass renderPass, std::vector<VkImageView> attachments, std::vector<VkFramebuffer>& frameBuffers);
+	HBBR_API void CreateFrameBuffers(VkExtent2D FrameBufferSize, VkRenderPass renderPass, std::vector<VkImageView> attachments, std::vector<VkFramebuffer>& frameBuffers);
 
-	void DestroyFrameBuffers(std::vector<VkFramebuffer>& frameBuffers);
+	HBBR_API void DestroyFrameBuffers(std::vector<VkFramebuffer>& frameBuffers);
 
-	void CreateCommandPool();
+	HBBR_API void CreateCommandPool();
 
-	void ResetCommandPool();
+	HBBR_API void ResetCommandPool();
 
-	void DestroyCommandPool();
+	HBBR_API void DestroyCommandPool();
 
-	void CreateCommandPool(VkCommandPool& commandPool , VkCommandPoolCreateFlags flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+	HBBR_API void CreateCommandPool(VkCommandPool& commandPool , VkCommandPoolCreateFlags flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 
-	void ResetCommandPool(VkCommandPool& commandPool);
+	HBBR_API void ResetCommandPool(VkCommandPool& commandPool);
 
-	void DestroyCommandPool(VkCommandPool commandPool);
+	HBBR_API void DestroyCommandPool(VkCommandPool commandPool);
 
-	void AllocateCommandBuffer(VkCommandPool commandPool , VkCommandBuffer& cmdBuf);
+	HBBR_API void AllocateCommandBuffer(VkCommandPool commandPool , VkCommandBuffer& cmdBuf);
 
-	void FreeCommandBuffers(VkCommandPool commandPool, std::vector<VkCommandBuffer>& cmdBufs);
+	HBBR_API void FreeCommandBuffers(VkCommandPool commandPool, std::vector<VkCommandBuffer>& cmdBufs);
 
-	void FreeCommandBuffer(VkCommandPool commandPool, VkCommandBuffer& cmdBuf);
+	HBBR_API void FreeCommandBuffer(VkCommandPool commandPool, VkCommandBuffer& cmdBuf);
 
-	void ResetCommandBuffer(VkCommandBuffer& cmdBuf);
+	HBBR_API void ResetCommandBuffer(VkCommandBuffer& cmdBuf);
 
-	void BeginCommandBuffer(VkCommandBuffer& cmdBuf , VkCommandBufferUsageFlags flag = 0);
+	HBBR_API void BeginCommandBuffer(VkCommandBuffer& cmdBuf , VkCommandBufferUsageFlags flag = 0);
 
-	void EndCommandBuffer(VkCommandBuffer& cmdBuf);
+	HBBR_API void EndCommandBuffer(VkCommandBuffer& cmdBuf);
 
-	void BeginRenderPass(VkCommandBuffer& cmdBuf, VkFramebuffer framebuffer, VkRenderPass renderPass, VkExtent2D areaSize, std::vector<VkAttachmentDescription>_attachmentDescs, std::array<float, 4> clearColor = { 0.0f, 0.0f, 0.0f, 0.0f });
+	HBBR_API void BeginRenderPass(VkCommandBuffer& cmdBuf, VkFramebuffer framebuffer, VkRenderPass renderPass, VkExtent2D areaSize, std::vector<VkAttachmentDescription>_attachmentDescs, std::array<float, 4> clearColor = { 0.0f, 0.0f, 0.0f, 0.0f });
 
-	void EndRenderPass(VkCommandBuffer& cmdBuf);
+	HBBR_API void EndRenderPass(VkCommandBuffer& cmdBuf);
 
 	/* return the swapchain is normal (not out of data). */
-	bool GetNextSwapchainIndex(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, VkFence* fence , uint32_t* swapchainIndex);
+	HBBR_API bool GetNextSwapchainIndex(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, VkFence* fence , uint32_t* swapchainIndex);
 
-	bool Present(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, uint32_t& swapchainImageIndex);
+	HBBR_API bool Present(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, uint32_t& swapchainImageIndex);
 
-	void ReCreatePipelineLayout(std::vector <VkDescriptorSetLayout> descriptorSetLayout, VkPipelineLayout& pipelineLayout);
+	HBBR_API void ReCreatePipelineLayout(std::vector <VkDescriptorSetLayout> descriptorSetLayout, VkPipelineLayout& pipelineLayout);
 
-	void CreatePipelineLayout(std::vector <VkDescriptorSetLayout> descriptorSetLayout , VkPipelineLayout& pipelineLayout);
+	HBBR_API void CreatePipelineLayout(std::vector <VkDescriptorSetLayout> descriptorSetLayout , VkPipelineLayout& pipelineLayout);
 
-	void DestroyPipelineLayout(VkPipelineLayout& pipelineLayout);
+	HBBR_API void DestroyPipelineLayout(VkPipelineLayout& pipelineLayout);
 
-	void CreateDescripotrPool(VkDescriptorPool& pool);
+	HBBR_API void CreateDescripotrPool(VkDescriptorPool& pool);
 
-	void DestroyDescriptorPool(VkDescriptorPool& pool);
+	HBBR_API void DestroyDescriptorPool(VkDescriptorPool& pool);
 
-	void CreateDescripotrSetLayout(VkDescriptorType type, uint32_t bindingCount ,  VkDescriptorSetLayout& descriptorSetLayout , VkShaderStageFlags shaderStageFlags);
+	HBBR_API void CreateDescripotrSetLayout(VkDescriptorType type, uint32_t bindingCount ,  VkDescriptorSetLayout& descriptorSetLayout , VkShaderStageFlags shaderStageFlags);
 
-	void CreateDescripotrSetLayout(std::vector<VkDescriptorType> types, VkDescriptorSetLayout& descriptorSetLayout, VkShaderStageFlags shaderStageFlags);
+	HBBR_API void CreateDescripotrSetLayout(std::vector<VkDescriptorType> types, VkDescriptorSetLayout& descriptorSetLayout, VkShaderStageFlags shaderStageFlags);
 
-	void CreateDescripotrSetLayout(std::vector<VkDescriptorType> types, std::vector<VkShaderStageFlags> shaderStageFlags, VkDescriptorSetLayout& descriptorSetLayout);
+	HBBR_API void CreateDescripotrSetLayout(std::vector<VkDescriptorType> types, std::vector<VkShaderStageFlags> shaderStageFlags, VkDescriptorSetLayout& descriptorSetLayout);
 
-	void DestroyDescriptorSetLayout(VkDescriptorSetLayout& descriptorSetLayout);
+	HBBR_API void DestroyDescriptorSetLayout(VkDescriptorSetLayout& descriptorSetLayout);
 
 	/* width and height must be same as attachments(ImageViews) size. */
-	void CreateFrameBuffer(uint32_t width, uint32_t height, VkRenderPass renderPass, std::vector<VkImageView>attachments, VkFramebuffer& framebuffer);
+	HBBR_API void CreateFrameBuffer(uint32_t width, uint32_t height, VkRenderPass renderPass, std::vector<VkImageView>attachments, VkFramebuffer& framebuffer);
 
-	void DestroyFrameBuffer(VkFramebuffer& framebuffer);
+	HBBR_API void DestroyFrameBuffer(VkFramebuffer& framebuffer);
 
 	/* Allocate a new descriptorSet ,attention,we should be free the old or unuseful descriptorSet for save memory. */
-	void AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptorSet);
+	HBBR_API void AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptorSet);
 
-	void AllocateDescriptorSets(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSet);
+	HBBR_API void AllocateDescriptorSets(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, std::vector<VkDescriptorSet>& descriptorSet);
 
-	void AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, uint32_t newDescriptorSetCount, std::vector<VkDescriptorSet>& descriptorSet);
+	HBBR_API void AllocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout descriptorSetLayout, uint32_t newDescriptorSetCount, std::vector<VkDescriptorSet>& descriptorSet);
 
 	/* Pool must created setting VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT */
-	void FreeDescriptorSet(VkDescriptorPool pool, std::vector<VkDescriptorSet>& descriptorSet);
+	HBBR_API void FreeDescriptorSet(VkDescriptorPool pool, std::vector<VkDescriptorSet>& descriptorSet);
 
-	void FreeDescriptorSet(VkDescriptorPool pool, VkDescriptorSet& descriptorSet);
+	HBBR_API void FreeDescriptorSet(VkDescriptorPool pool, VkDescriptorSet& descriptorSet);
 
 	/* Image 布局转换 */
-	void Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
+	HBBR_API void Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
 
-	void CreateVkSemaphore(VkSemaphore& semaphore);
+	HBBR_API void CreateVkSemaphore(VkSemaphore& semaphore);
 
-	void DestroySemaphore(VkSemaphore& semaphore);
+	HBBR_API void DestroySemaphore(VkSemaphore& semaphore);
 
-	void CreateRenderSemaphores(std::vector<VkSemaphore>& semaphore);
+	HBBR_API void CreateRenderSemaphores(std::vector<VkSemaphore>& semaphore);
 
-	void DestroyRenderSemaphores(std::vector<VkSemaphore>& semaphore);
+	HBBR_API void DestroyRenderSemaphores(std::vector<VkSemaphore>& semaphore);
 
-	void CreateFence(VkFence& fence, VkFenceCreateFlags createFlags = VK_FENCE_CREATE_SIGNALED_BIT);
+	HBBR_API void CreateFence(VkFence& fence, VkFenceCreateFlags createFlags = VK_FENCE_CREATE_SIGNALED_BIT);
 
-	void RecreateFences(std::vector<VkFence>& fences , uint32_t number);
+	HBBR_API void RecreateFences(std::vector<VkFence>& fences , uint32_t number);
 
-	void DestroyFence(VkFence& fence);
+	HBBR_API void DestroyFence(VkFence& fence);
 
-	void ResetFence(VkFence& fence);
+	HBBR_API void ResetFence(VkFence& fence);
 
-	bool IsFenceFinish(VkFence& fence);
+	HBBR_API bool IsFenceFinish(VkFence& fence);
 
-	void CreateRenderFences(std::vector<VkFence>& fences);
+	HBBR_API void CreateRenderFences(std::vector<VkFence>& fences);
 
-	void DestroyRenderFences(std::vector<VkFence>& fences);
+	HBBR_API void DestroyRenderFences(std::vector<VkFence>& fences);
 
-	void WaitForFences(std::vector<VkFence> fences, bool bReset = true, uint64_t timeOut = UINT64_MAX);
+	HBBR_API void WaitForFences(std::vector<VkFence> fences, bool bReset = true, uint64_t timeOut = UINT64_MAX);
 
 	//Android 不支持...？
 	//void WaitSemaphores(std::vector<VkSemaphore> semaphores , uint64_t timeOut = UINT64_MAX);
 
-	void CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info , VkPipeline& pipeline);
+	HBBR_API void CreateGraphicsPipeline(VkGraphicsPipelineCreateInfo& info , VkPipeline& pipeline);
 
-	void CreateComputePipeline(VkComputePipelineCreateInfo& info, VkPipeline& pipeline);
+	HBBR_API void CreateComputePipeline(VkComputePipelineCreateInfo& info, VkPipeline& pipeline);
 
-	void DestroyPipeline(VkPipeline& pipeline);
+	HBBR_API void DestroyPipeline(VkPipeline& pipeline);
 
-	void CreateRenderPass(std::vector<VkAttachmentDescription>attachmentDescs, std::vector<VkSubpassDependency>subpassDependencys, std::vector<VkSubpassDescription>subpassDescs, VkRenderPass& renderPass);
+	HBBR_API void CreateRenderPass(std::vector<VkAttachmentDescription>attachmentDescs, std::vector<VkSubpassDependency>subpassDependencys, std::vector<VkSubpassDescription>subpassDescs, VkRenderPass& renderPass);
 
-	void DestroyRenderPass(VkRenderPass& renderPass);
+	HBBR_API void DestroyRenderPass(VkRenderPass& renderPass);
 
-	void CreateBuffer(VkBufferUsageFlags usage, VkDeviceSize bufferSize, VkBuffer& buffer);
+	HBBR_API void CreateBuffer(VkBufferUsageFlags usage, VkDeviceSize bufferSize, VkBuffer& buffer);
 
-	void AllocateBufferMemory(VkBuffer buffer , VkDeviceMemory& bufferMemory, VkMemoryPropertyFlags propertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	HBBR_API void AllocateBufferMemory(VkBuffer buffer , VkDeviceMemory& bufferMemory, VkMemoryPropertyFlags propertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-	void CreateBufferAndAllocateMemory(size_t bufferSize, uint32_t bufferUsage, uint32_t bufferMemoryProperty, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+	HBBR_API void CreateBufferAndAllocateMemory(size_t bufferSize, uint32_t bufferUsage, uint32_t bufferMemoryProperty, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
 	//VMA_MEMORY_USAGE_UNKNOWN					
 	// 没有预设的内存使用，可以使用VmaAllocationCreateInfo当中的其他字段来对内存进行规范（比如preferrableFlags或者requiredFlags)
@@ -346,22 +346,21 @@ public:
 	//VMA_MEMORY_USAGE_GPU_LAZILY_ALLOCATED		
 	// 懒惰分配的内存，也就是及说GPU端Memory在分配的时候使用了VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT标识符，也就是按需分配，如果内存不被访问，即便是调用了接口也不会申请内存分配。注意：如果是没有这种标识符对应类型的内存，就会分配失败哦。用途：临时的图片等，比如MSAA抗锯齿的时候会用到，因为可能关掉抗锯齿。此类图片内存一定有关键字：VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT
 	//
-	void VMACraeteBufferAndAllocateMemory(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo* vmaInfo = nullptr, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bAlwayMapping = false, bool bFocusCreateDedicatedMemory = false);
+	HBBR_API void VMACraeteBufferAndAllocateMemory(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo* vmaInfo = nullptr, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bAlwayMapping = false, bool bFocusCreateDedicatedMemory = false);
 
-	void VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation, HString debugName = "VMABuffer", VkDeviceSize debugSize = 0
-	);
+	HBBR_API void VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation, HString debugName = "VMABuffer", VkDeviceSize debugSize = 0);
 
-	void DestroyBufferAndMemory(VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+	HBBR_API void DestroyBufferAndMemory(VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
-	void FreeBufferMemory(VkDeviceMemory& bufferMemory);
+	HBBR_API void FreeBufferMemory(VkDeviceMemory& bufferMemory);
 
-	void DestroyBuffer(VkBuffer& buffer);
+	HBBR_API void DestroyBuffer(VkBuffer& buffer);
 
-	bool CreateShaderModule(std::vector<char> data , VkShaderModule& shaderModule);
+	HBBR_API bool CreateShaderModule(std::vector<char> data , VkShaderModule& shaderModule);
 
-	struct ImGuiContext* InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, uint32_t subPassIndex = 0 );
+	HBBR_API struct ImGuiContext* InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, bool enableImguiDock, bool enableImguiMultiViewports, uint32_t subPassIndex = 0);
 
-	void ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex = 0 , glm::mat4 projMat = 
+	HBBR_API void ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex = 0 , glm::mat4 projMat =
 		glm::mat4(
 			glm::vec4(1, 0, 0, 0),
 			glm::vec4(0, 1, 0, 0),
@@ -370,116 +369,116 @@ public:
 		)
 	);
 
-	void ShutdownImgui();
+	HBBR_API void ShutdownImgui();
 
-	void ImguiNewFrame();
+	HBBR_API void ImguiNewFrame();
 
-	void ImguiEndFrame(VkCommandBuffer cmdBuf);
+	HBBR_API void ImguiEndFrame(VkCommandBuffer cmdBuf);
 
 	/* 立刻序列提交,为保证运行安全,会执行一次等待运行结束 */
-	void SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
+	HBBR_API void SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
 
-	void SubmitQueue(std::vector<VkCommandBuffer> cmdBufs, std::vector <VkSemaphore> lastSemaphore, std::vector <VkSemaphore> newSemaphore, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
+	HBBR_API void SubmitQueue(std::vector<VkCommandBuffer> cmdBufs, std::vector <VkSemaphore> lastSemaphore, std::vector <VkSemaphore> newSemaphore, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
 
-	VkViewport GetViewport(float w,float h);
+	HBBR_API VkViewport GetViewport(float w,float h);
 
-	void SubmitQueueForPasses(VkCommandBuffer& cmdBuf, VkSemaphore& presentSemaphore, VkSemaphore& submitFinishSemaphore, VkFence& executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkQueue queue = VK_NULL_HANDLE);
+	HBBR_API void SubmitQueueForPasses(VkCommandBuffer& cmdBuf, VkSemaphore& presentSemaphore, VkSemaphore& submitFinishSemaphore, VkFence& executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkQueue queue = VK_NULL_HANDLE);
 
-	void UpdateBufferDescriptorSet(VkBuffer buffer, VkDescriptorSet descriptorSet, VkDescriptorType type,  uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
+	HBBR_API void UpdateBufferDescriptorSet(VkBuffer buffer, VkDescriptorSet descriptorSet, VkDescriptorType type,  uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
 
-	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<std::shared_ptr<Texture2D>> texs, std::vector<VkSampler>samplers, int beginBindingIndex = 0);
+	HBBR_API void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<std::shared_ptr<Texture2D>> texs, std::vector<VkSampler>samplers, int beginBindingIndex = 0);
 
-	void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<TextureUpdateInfo> updateInfo, int beginBindingIndex = 0);
+	HBBR_API void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<TextureUpdateInfo> updateInfo, int beginBindingIndex = 0);
 
-	void UpdateStoreTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture2D*> textures, int beginBindingIndex = 0);
+	HBBR_API void UpdateStoreTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture2D*> textures, int beginBindingIndex = 0);
 
-	VkDeviceSize GetMinUboAlignmentSize(VkDeviceSize realSize);
+	HBBR_API VkDeviceSize GetMinUboAlignmentSize(VkDeviceSize realSize);
 
-	VkDeviceSize GetMinTboAlignmentSize(VkDeviceSize realSize);
+	HBBR_API VkDeviceSize GetMinTboAlignmentSize(VkDeviceSize realSize);
 
-	VkDeviceSize GetMinSboAlignmentSize(VkDeviceSize realSize);
+	HBBR_API VkDeviceSize GetMinSboAlignmentSize(VkDeviceSize realSize);
 
-	float GetTimestampPeriod();
+	HBBR_API float GetTimestampPeriod();
 
-	inline uint32_t GetMaxUniformBufferSize()const {
+	HBBR_API inline uint32_t GetMaxUniformBufferSize()const {
 		return _gpuProperties.limits.maxUniformBufferRange;
 	}
 
-	inline VkPhysicalDeviceProperties GetPhysicalDeviceProperties()const {
+	HBBR_API inline VkPhysicalDeviceProperties GetPhysicalDeviceProperties()const {
 		return _gpuProperties;
 	}
 
 	/* CMD */
-	void CmdSetViewport(VkCommandBuffer cmdbuf, std::vector<VkExtent2D> viewports);
+	HBBR_API void CmdSetViewport(VkCommandBuffer cmdbuf, std::vector<VkExtent2D> viewports);
 
-	void CmdNextSubpass(VkCommandBuffer cmdbuf, VkSubpassContents subpassContents = VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
+	HBBR_API void CmdNextSubpass(VkCommandBuffer cmdbuf, VkSubpassContents subpassContents = VkSubpassContents::VK_SUBPASS_CONTENTS_INLINE);
 
-	void CmdCmdBindPipeline(VkCommandBuffer cmdbuf ,VkPipeline pipelineObject, VkPipelineBindPoint bindPoint);
+	HBBR_API void CmdCmdBindPipeline(VkCommandBuffer cmdbuf ,VkPipeline pipelineObject, VkPipelineBindPoint bindPoint);
 
-	void CmdColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D targetSize);
+	HBBR_API void CmdColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D targetSize);
 
-	void CmdBufferCopyToBuffer(VkCommandBuffer cmdBuf, VkBuffer src, VkBuffer dst, VkDeviceSize copySize, VkDeviceSize srcOffset = 0, VkDeviceSize dstOffset = 0);
+	HBBR_API void CmdBufferCopyToBuffer(VkCommandBuffer cmdBuf, VkBuffer src, VkBuffer dst, VkDeviceSize copySize, VkDeviceSize srcOffset = 0, VkDeviceSize dstOffset = 0);
 
 	//RenderDoc debug
-	static void SetObjectName(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name);
-	static void SetObjectTag(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag);
-	static void BeginRegion(VkCommandBuffer cmdbuf, const char* pMarkerName, glm::vec4 color);
-	static void InsertRegion(VkCommandBuffer cmdbuf, std::string markerName, glm::vec4 color);
-	static void EndRegion(VkCommandBuffer cmdbuf);
+	HBBR_API static void SetObjectName(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name);
+	HBBR_API static void SetObjectTag(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag);
+	HBBR_API static void BeginRegion(VkCommandBuffer cmdbuf, const char* pMarkerName, glm::vec4 color);
+	HBBR_API static void InsertRegion(VkCommandBuffer cmdbuf, std::string markerName, glm::vec4 color);
+	HBBR_API static void EndRegion(VkCommandBuffer cmdbuf);
 
 	/*-----------------*/
 
 	/* 获取平台 */
-	HBBR_INLINE EPlatform GetPlatform()const {
+	HBBR_API HBBR_INLINE EPlatform GetPlatform()const {
 		return _currentPlatform;
 	}
 
-	HBBR_INLINE VkInstance GetInstance()const {
+	HBBR_API HBBR_INLINE VkInstance GetInstance()const {
 		return _instance;
 	}
 
-	HBBR_INLINE uint32_t GetSwapchainBufferCount()const {
+	HBBR_API HBBR_INLINE uint32_t GetSwapchainBufferCount()const {
 		return _swapchainBufferCount;
 	}
 
-	HBBR_INLINE VkDevice GetDevice()const {
+	HBBR_API HBBR_INLINE VkDevice GetDevice()const {
 		return _device;
 	}
 
-	HBBR_INLINE VkPhysicalDevice GetPhysicalDevice()const {
+	HBBR_API HBBR_INLINE VkPhysicalDevice GetPhysicalDevice()const {
 		return _gpuDevice;
 	}
 
-	HBBR_INLINE VkCommandPool GetCommandPool()const {
+	HBBR_API HBBR_INLINE VkCommandPool GetCommandPool()const {
 		return _commandPool;
 	}
 
-	HBBR_INLINE VkDescriptorPool GetDescriptorPool()const {
+	HBBR_API HBBR_INLINE VkDescriptorPool GetDescriptorPool()const {
 		return _descriptorPool;
 	}
 
-	HBBR_INLINE VkPhysicalDeviceFeatures GetPhysicalDeviceFeatures()const {
+	HBBR_API HBBR_INLINE VkPhysicalDeviceFeatures GetPhysicalDeviceFeatures()const {
 		return _gpuFeatures;
 	}
 
 	//计算出来的是纳秒,转毫秒需要 (double)/1000000.0
-	HBBR_INLINE double CalculateTimestampQuery(uint32_t firstIndex, uint32_t CalculateCount)const {
+	HBBR_API HBBR_INLINE double CalculateTimestampQuery(uint32_t firstIndex, uint32_t CalculateCount)const {
 		uint64_t timestamps[2];
 		vkGetQueryPoolResults(_device, _queryTimeStamp, firstIndex, CalculateCount, sizeof(timestamps), timestamps, sizeof(uint64_t), VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
 		uint64_t elapsedTime = timestamps[1] - timestamps[0];
 		return (double)elapsedTime * (double)_gpuProperties.limits.timestampPeriod;
 	}
 
-	void CreateQueryPool(uint32_t queryCount, VkQueryPool& poolInOut, VkQueryType type = VK_QUERY_TYPE_TIMESTAMP);
+	HBBR_API void CreateQueryPool(uint32_t queryCount, VkQueryPool& poolInOut, VkQueryType type = VK_QUERY_TYPE_TIMESTAMP);
 
-	void DestroyQueryPool(VkQueryPool& poolInOut);
+	HBBR_API void DestroyQueryPool(VkQueryPool& poolInOut);
 
 	
-	VkQueryPool GetQueryTimestamp()const {
+	HBBR_API VkQueryPool GetQueryTimestamp()const {
 		return _queryTimeStamp;
 	}
 
-	static bool _bDebugEnable;
+	HBBR_API static bool _bDebugEnable;
 
 private:
 
@@ -524,10 +523,6 @@ private:
 	int _graphicsQueueFamilyIndex;
 
 	uint32_t _swapchainBufferCount;
-
-	static bool _enableImguiDock;
-
-	static bool _enableImguiMultiViewports;
 
 #ifdef _WIN32
 	bool _enable_VK_KHR_display;
