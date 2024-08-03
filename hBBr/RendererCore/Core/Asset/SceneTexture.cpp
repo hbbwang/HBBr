@@ -2,12 +2,13 @@
 #include "VulkanManager.h"
 #include "VulkanRenderer.h"
 #include "Texture2D.h"
-
+#include "ConsoleDebug.h"
 SceneTexture::SceneTexture(VulkanRenderer* renderer)
 {
 	auto manager = VulkanManager::GetManager();
 
 	_renderer = renderer;
+	//Final Color
 	auto finalColor =	Texture2D::CreateTexture2D(1, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, "FinalColor");
 	//SceneDepth
 	auto sceneDepth =	Texture2D::CreateTexture2D(1, 1, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, "SceneDepth");
@@ -44,21 +45,33 @@ SceneTexture::SceneTexture(VulkanRenderer* renderer)
 	_sceneTexture.insert(std::make_pair(SceneTextureDesc::GBuffer2, gBuffer2));
 }
 
-void SceneTexture::UpdateTextures()
+bool SceneTexture::UpdateTextures()
 {
 	if (_sceneTexture.size() <= 0)
 	{
-		return;
+		return false;
 	}
+
+	bool bUpdate = false;
+
 	auto size = _renderer->GetRenderSize();
 	for (auto& i : _sceneTexture)
 	{
 		if (i.second->GetTextureSize().width != size.width ||
 			i.second->GetTextureSize().height != size.height)
 		{
-			i.second->Resize(size.width, size.height);
+			//VulkanManager::GetManager()->DeviceWaitIdle();
+			i.second->Resize(size.width, size.height, false);
+			VulkanObjectManager::Get()->RefreshTexture(i.second);
+			bUpdate = true;
 		}
 	}
+
+	if (bUpdate)
+	{
+		//ConsoleDebug::printf_endl("Test");
+	}
+	return bUpdate;
 	//auto sceneDepth = _sceneTexture[SceneTextureDesc::SceneDepth];
 	//if (sceneDepth->GetTextureSize().width != size.width ||
 	//	sceneDepth->GetTextureSize().height != size.height)

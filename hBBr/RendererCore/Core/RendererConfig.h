@@ -13,14 +13,11 @@ public:
 	static nlohmann::json _internationalzation_json;
 	static nlohmann::json _editor_json;
 	static nlohmann::json _editor_internationalzation_json;
-	static std::map<HString, std::map<HString, HString>> _rendererConfigDatas;
 };
 
 HBBR_API HString GetRendererConfig(HString Group, HString name);
 
 HBBR_API int GetRendererConfigInt(HString Group, HString name);
-
-HBBR_API void LoadRendererConfig();
 
 HBBR_API void SaveRendererConfig(); 
 

@@ -127,10 +127,6 @@ EditorMain::EditorMain(QWidget *parent)
     LoadEditorWindowSetting(this, "MainWindow");
 }
 
-EditorMain::~EditorMain()
-{
-}
-
 void EditorMain::showEvent(QShowEvent* event)
 {
     QMainWindow::showEvent(event);

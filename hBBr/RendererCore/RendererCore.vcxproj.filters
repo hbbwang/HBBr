@@ -115,7 +115,7 @@
     <ClInclude Include="Core\Thread.h">
       <Filter>Renderer\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Form\GLFWInclude.h">
+    <ClInclude Include="Form\SDLInclude.h">
       <Filter>Renderer\Form</Filter>
     </ClInclude>
     <ClInclude Include="Form\FormMain.h">
@@ -269,7 +269,7 @@
       <Filter>ThirdParty\Imgui\backends</Filter>
     </ClInclude>
     <ClInclude Include="Core\Pass\ImguiPassEditor.h">
-      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+      <Filter>Editor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -451,7 +451,7 @@
       <Filter>ThirdParty\Imgui\backends</Filter>
     </ClCompile>
     <ClCompile Include="Core\Pass\ImguiPassEditor.cpp">
-      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
+      <Filter>Editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

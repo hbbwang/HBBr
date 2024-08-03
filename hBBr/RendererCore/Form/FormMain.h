@@ -12,6 +12,7 @@ struct VulkanForm
 	bool bMinimized = false;
 	bool bStopRender = false;
 	std::vector<struct ImGuiContext*> imguiContents;
+	std::vector<std::function<void(VulkanForm*)>> closeCallbacks;
 	~VulkanForm();
 };
 

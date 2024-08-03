@@ -4,6 +4,7 @@
 #include "Texture2D.h"
 #include <vector>
 #include "VulkanObjectManager.h"
+#include "ConsoleDebug.h"
 
 DescriptorSet::DescriptorSet(class VulkanRenderer* renderer)
 {
@@ -129,7 +130,16 @@ void DescriptorSet::UpdateDescriptorSetWholeBuffer(uint32_t bindingIndex)
 
 void DescriptorSet::UpdateTextureDescriptorSet(std::vector<TextureUpdateInfo> texs, int beginBindingIndex)
 {
-	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] == 1)
+	bool bTextureReset = false;
+	for (auto& i : texs)
+	{
+		if (i.texture->_bReset)
+		{
+			bTextureReset = true;
+			break;
+		}
+	}
+	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] == 1 || bTextureReset)
 	{
 		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();
@@ -139,7 +149,16 @@ void DescriptorSet::UpdateTextureDescriptorSet(std::vector<TextureUpdateInfo> te
 
 void DescriptorSet::UpdateTextureDescriptorSet(std::vector<std::shared_ptr<Texture2D>> texs, std::vector<VkSampler> samplers, int beginBindingIndex)
 {
-	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] == 1)
+	bool bTextureReset = false;
+	for (auto& i : texs)
+	{
+		if (i->_bReset)
+		{
+			bTextureReset = true;
+			break;
+		}
+	}
+	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] == 1 || bTextureReset)
 	{
 		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();
@@ -149,7 +168,16 @@ void DescriptorSet::UpdateTextureDescriptorSet(std::vector<std::shared_ptr<Textu
 
 void DescriptorSet::UpdateStoreTextureDescriptorSet(std::vector<class Texture2D*> textures, int beginBindingIndex)
 {
-	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] == 1)
+	bool bTextureReset = false;
+	for (auto& i : textures)
+	{
+		if (i->_bReset)
+		{
+			bTextureReset = true;
+			break;
+		}
+	}
+	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] == 1  || bTextureReset)
 	{
 		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();

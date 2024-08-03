@@ -8,16 +8,11 @@ void wrapText(HString& msg, size_t lineWidth)
 {
 	size_t fontCount = 0;
 	std::string str = msg.c_str();
-	auto it = str.begin();
 	while (1) {
 		fontCount += lineWidth;
 		if (str.length() > fontCount)
 		{
-			it += lineWidth;
-			if (it != str.end())
-			{
-				str.insert(it, '\n');
-			}
+			str.insert(fontCount, "\n");
 		}
 		else
 			break;

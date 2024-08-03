@@ -1,6 +1,7 @@
 ﻿#include "VulkanObjectManager.h"
 #include "AssetObject.h"
 #include "DescriptorSet.h"
+#include "Texture2D.h"
 
 std::unique_ptr<VulkanObjectManager> VulkanObjectManager::_ptr = nullptr;
 
@@ -14,6 +15,7 @@ VulkanObjectManager::VulkanObjectManager() :
 {
 	_vmaBufferObjects.reserve(20);
 	_vkBufferObjects.reserve(20);
+
 }
 
 void VulkanObjectManager::SafeReleaseVkBuffer(VkBuffer buffer, VkDeviceMemory memory)
@@ -40,10 +42,46 @@ void VulkanObjectManager::SafeReleaseVMABuffer(VkBuffer buffer, VmaAllocation al
 
 void VulkanObjectManager::AssetLinkGC(std::weak_ptr<class AssetObject> asset, bool bImmediate)
 {
-	VkAssetObject obj = {};
-	obj.asset = asset;
-	obj.bImmediate = bImmediate;
+	VkAssetObject obj = {
+		asset,
+		0,
+		bImmediate
+	};
 	_vulkanObjects.push_back(obj);
+	_numRequestObjects++;
+}
+
+void VulkanObjectManager::RefreshTexture(std::weak_ptr<class Texture2D> texture, uint8_t bFocusWaitIdle)
+{
+	texture.lock()->_bReset = true;
+	VkTextureRefreshObject obj = {
+		texture,
+		0,
+		bFocusWaitIdle
+	};
+	//用map的原因是它会覆盖掉已经有的，并重置frameCount
+	auto it = _textureRefresh.find(texture.lock().get());
+	if (it != _textureRefresh.end())
+	{
+		it->second.frameCount = 0;
+	}
+	else
+		_textureRefresh.emplace(texture.lock().get(), obj);
+}
+
+void VulkanObjectManager::SafeReleaseTexture(VkImage image, VkImageView imageView, VkDeviceMemory memory, HString tag)
+{
+	VkTextureDestroyObject obj = {
+		memory,
+		image,
+		imageView,
+		0
+		#if _DEBUG
+		,tag
+		#endif
+	};
+
+	_textureDestroy.push_back(obj);
 	_numRequestObjects++;
 }
 
@@ -171,6 +209,58 @@ void VulkanObjectManager::Update()
 			it++;
 		}
 	}
+
+	//标记需要刷新纹理
+	//重置纹理的时候，会把纹理的_bReset设置为true并且发送到此处进行循环
+	//循环判断4帧之后会自动设置回false，这段时间，DescriptorSet如何引用了对应纹理，会强制进行更新
+	if (_textureRefresh.size() > 0)
+	{
+		for (auto it = _textureRefresh.begin(); it != _textureRefresh.end();)
+		{
+			bool bErase = false;
+			if (it->second.texture.expired())
+			{
+				bErase = true;
+			}
+			else if (it->second.frameCount > swapchainBufferCount)
+			{
+				if (it->second.bFocusWaitIdle)
+				{
+					manager->DeviceWaitIdle();
+				}
+				it->second.texture.lock()->_bReset = false;
+				bErase = true;
+			}
+			if (bErase)
+			{
+				it = _textureRefresh.erase(it);
+				continue;
+			}
+			it->second.frameCount++;
+			it++;
+		}
+	}
+
+	if (_textureDestroy.size() > 0)
+	{
+		for (auto it = _textureDestroy.begin(); it != _textureDestroy.end();)
+		{
+			if (it->frameCount > swapchainBufferCount)
+			{
+				if (it->memory != VK_NULL_HANDLE)
+				{
+					manager->FreeBufferMemory(it->memory);
+				}
+				manager->DestroyImageView(it->imageView);
+				manager->DestroyImage(it->image);
+				_numRequestObjects--;
+				it = _textureDestroy.erase(it);
+				continue;
+			}
+			it->frameCount++;
+			it++;
+		}
+	}	
 
 	//到时间重新计时
 	if (_gcCurrentSecond > _gcMaxSecond)

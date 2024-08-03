@@ -22,8 +22,12 @@ enum TextureSampler
 	TextureSampler_Nearest_Mirror = 5,
 	TextureSampler_Nearest_Clamp = 6,
 	TextureSampler_Nearest_Border = 7,
+	TextureSampler_Cubic_Wrap = 8,
+	TextureSampler_Cubic_Mirror = 9,
+	TextureSampler_Cubic_Clamp = 10,
+	TextureSampler_Cubic_Border = 11,
 
-	TextureSampler_Max = 8,
+	TextureSampler_Max = 12,
 };
 
 class Texture2D : public AssetObject
@@ -68,6 +72,17 @@ public:
 		return _upload_textures;
 	}
 	HBBR_API HBBR_INLINE static VkSampler GetSampler(TextureSampler sampler) {
+		if (VulkanManager::GetManager()->GetDeviceExt().HasExtFilter_Cubic == 0)
+		{
+			if (sampler == TextureSampler::TextureSampler_Cubic_Wrap)
+				return _samplers[TextureSampler::TextureSampler_Linear_Wrap];
+			else if (sampler == TextureSampler::TextureSampler_Cubic_Mirror)
+				return _samplers[TextureSampler::TextureSampler_Linear_Mirror];
+			else if (sampler == TextureSampler::TextureSampler_Cubic_Clamp)
+				return _samplers[TextureSampler::TextureSampler_Linear_Clamp];
+			else if (sampler == TextureSampler::TextureSampler_Cubic_Border)
+				return _samplers[TextureSampler::TextureSampler_Linear_Border];
+		}
 		return _samplers[(uint32_t)sampler];
 	}
 	HBBR_API HBBR_INLINE static uint64_t GetTextureStreamingSize() {
@@ -88,7 +103,7 @@ public:
 
 	HBBR_API void CopyTextureToBufferImmediate(VkBuffer buffer, VkDeviceSize offset = 0);
 
-	HBBR_API void Resize(uint32_t width, uint32_t height);
+	HBBR_API void Resize(uint32_t width, uint32_t height, bool bDestroyImmediately = false);
 
 	HBBR_API HBBR_INLINE bool IsValid()const {
 		return _bUploadToGPU > VulkanManager::GetManager()->GetSwapchainBufferCount();
@@ -119,6 +134,8 @@ public:
 
 	//Image data, Read only
 	ImageData _imageData;
+
+	uint8_t _bReset;
 
 protected:
 

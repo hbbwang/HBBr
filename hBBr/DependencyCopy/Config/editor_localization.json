@@ -26,9 +26,16 @@
     "MainWindow": {
         "ContentBrowserTitle": "内容浏览器",
         "Inspector": "细节编辑器",
-        "MainTitle": "HBB渲染编辑器",
+        "MainTitle": "编辑器",
+        "RenderView": "渲染窗口",
         "SceneOutlineTitle": "场景大纲",
-        "bWindowed": true
+        "MainMenu_File_Title" : "文件",
+        "MainMenu_File_NewWorld" : "新建世界",
+        "MainMenu_File_OpenWorld" : "打开世界",
+        "MainMenu_File_SaveWorld" : "保存世界",
+        "MainMenu_Edit_Title" : "编辑",
+        "MainMenu_Tool_Title" : "工具"
+        
     },
     "MaterialEditor": {
         "MaterialAttrbuteTitle": "材质属性",

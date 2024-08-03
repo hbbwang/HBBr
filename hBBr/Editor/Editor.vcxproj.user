@@ -10,7 +10,7 @@
     <LocalDebuggerWorkingDirectory>$(SolutionDir)$(Platform)\$(Configuration)\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseGame_GLFW|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Game|x64'">
     <LocalDebuggerWorkingDirectory>$(SolutionDir)$(Platform)\$(Configuration)\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
@@ -24,7 +24,7 @@
     <QtTouchProperty>
     </QtTouchProperty>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseGame_GLFW|x64'" Label="QtSettings">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Game|x64'" Label="QtSettings">
     <QtLastBackgroundBuild>2024-06-15T10:34:22.9876863Z</QtLastBackgroundBuild>
     <QtTouchProperty>
     </QtTouchProperty>

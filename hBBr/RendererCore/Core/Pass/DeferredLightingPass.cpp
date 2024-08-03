@@ -69,7 +69,7 @@ void DeferredLightingPass::PassUpdate()
 	//Update FrameBuffer
 	ResetFrameBufferCustom(_renderer->GetRenderSize(),
 		{
-			GetSceneTexture(SceneTextureDesc::SceneColor)->GetTextureView()
+			GetSceneTexture(SceneTextureDesc::SceneColor)
 		});
 	SetViewport(_renderer->GetRenderSize());
 
@@ -138,7 +138,7 @@ void DeferredLightingPass::PassUpdate()
 
 void DeferredLightingPass::PassReset()
 {
-	_tex_descriptorSet->RefreshDescriptorSet(0);
+	_tex_descriptorSet->RefreshDescriptorSetAllBinding();
 }
 
 PipelineIndex DeferredLightingPass::CreatePipeline(HString shaderName)

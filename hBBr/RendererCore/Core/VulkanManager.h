@@ -22,7 +22,7 @@
 #include "vulkan_wrapper/vulkan_wrapper.h"
 #endif
 
-#include "GLFWInclude.h"
+#include "SDLInclude.h"
 #include <vulkan/vulkan.h>
 #include "../Common/Common.h"
 #include <memory>
@@ -79,6 +79,7 @@ struct OptionalVulkanDeviceExtensions
 	uint8_t HasKHRSeparateDepthStencilLayouts = 0;
 	uint8_t HasEXTFullscreenExclusive = 0;
 	uint8_t HasKHRShaderFloatControls = 0;
+	uint8_t HasExtFilter_Cubic = 0;
 };
 
 struct BufferUpdateInfo
@@ -98,6 +99,10 @@ struct TextureUpdateInfo
 {
 	std::shared_ptr<class Texture2D>texture;
 	VkSampler sampler;
+	TextureUpdateInfo() {
+		texture = nullptr;
+		sampler = nullptr;
+	}
 	TextureUpdateInfo(
 		std::shared_ptr<class Texture2D>_texture,
 		VkSampler _sampler)
@@ -360,20 +365,13 @@ public:
 
 	HBBR_API struct ImGuiContext* InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, bool enableImguiDock, bool enableImguiMultiViewports, uint32_t subPassIndex = 0);
 
-	HBBR_API void ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex = 0 , glm::mat4 projMat =
-		glm::mat4(
-			glm::vec4(1, 0, 0, 0),
-			glm::vec4(0, 1, 0, 0),
-			glm::vec4(0, 0, 1, 0),
-			glm::vec4(0, 0, 0, 1)
-		)
-	);
-
 	HBBR_API void ShutdownImgui();
 
 	HBBR_API void ImguiNewFrame();
 
-	HBBR_API void ImguiEndFrame(VkCommandBuffer cmdBuf);
+	HBBR_API void ImguiEndDraw(VkCommandBuffer cmdBuf);
+
+	HBBR_API void ImguiEndFrame();
 
 	/* 立刻序列提交,为保证运行安全,会执行一次等待运行结束 */
 	HBBR_API void SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
@@ -415,7 +413,7 @@ public:
 
 	HBBR_API void CmdCmdBindPipeline(VkCommandBuffer cmdbuf ,VkPipeline pipelineObject, VkPipelineBindPoint bindPoint);
 
-	HBBR_API void CmdColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D targetSize);
+	HBBR_API void CmdColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D targetSize, VkFilter filter = VK_FILTER_LINEAR);
 
 	HBBR_API void CmdBufferCopyToBuffer(VkCommandBuffer cmdBuf, VkBuffer src, VkBuffer dst, VkDeviceSize copySize, VkDeviceSize srcOffset = 0, VkDeviceSize dstOffset = 0);
 
@@ -476,6 +474,10 @@ public:
 	
 	HBBR_API VkQueryPool GetQueryTimestamp()const {
 		return _queryTimeStamp;
+	}
+
+	HBBR_API OptionalVulkanDeviceExtensions GetDeviceExt()const{
+		return _deviceExtensionOptionals;
 	}
 
 	HBBR_API static bool _bDebugEnable;

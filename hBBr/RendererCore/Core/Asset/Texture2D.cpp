@@ -20,6 +20,18 @@ uint64_t Texture2D::_maxTextureStreamingSize = (uint64_t)4 * (uint64_t)1024 * (u
 
 Texture2D::Texture2D()
 {
+	_bReset = false;
+	 _image = nullptr;
+	_imageView = nullptr;
+	_imageViewMemory = nullptr;
+	_format = VK_FORMAT_UNDEFINED;
+	_usageFlags = 0;
+	_imageAspectFlags = 0;
+	_mipCount = 1;
+	_imageSize = VkExtent3D{0,0,0};
+	_textureMemorySize = 0;
+	_mipBias = 0;
+	_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 }
 
 Texture2D::~Texture2D()
@@ -55,7 +67,7 @@ void Texture2D::TransitionImmediate(VkImageLayout oldLayout, VkImageLayout newLa
 	manager->FreeCommandBuffer(manager->GetCommandPool(), cmdbuf);
 }
 
-void Texture2D::Resize(uint32_t width, uint32_t height)
+void Texture2D::Resize(uint32_t width, uint32_t height, bool bDestroyImmediately)
 {
 	auto manager = VulkanManager::GetManager();
 	if (_image == VK_NULL_HANDLE)
@@ -63,11 +75,22 @@ void Texture2D::Resize(uint32_t width, uint32_t height)
 
 	if (_imageViewMemory != VK_NULL_HANDLE)
 	{
-		manager->FreeBufferMemory(_imageViewMemory);
 		_textureStreamingSize = std::max((uint64_t)0, _textureStreamingSize - _textureMemorySize);
 	}
-	manager->DestroyImageView(_imageView);
-	manager->DestroyImage(_image);
+
+	if (bDestroyImmediately)
+	{
+		if (_imageViewMemory != VK_NULL_HANDLE)
+		{
+			manager->FreeBufferMemory(_imageViewMemory);
+		}
+		manager->DestroyImageView(_imageView);
+		manager->DestroyImage(_image);
+	}
+	else
+	{
+		VulkanObjectManager::Get()->SafeReleaseTexture(_image, _imageView, _imageViewMemory, _textureName);
+	}
 	//
 	manager->CreateImage(width, height, _format, _usageFlags, _image);
 
@@ -91,7 +114,11 @@ void Texture2D::Resize(uint32_t width, uint32_t height)
 	manager->SubmitQueueImmediate({ cmdbuf });
 	std::vector<VkCommandBuffer> bufs = { cmdbuf };
 	manager->FreeCommandBuffers(manager->GetCommandPool(), bufs);
-
+	_bReset = true;
+	if (!_assetInfo.expired())
+	{
+		VulkanObjectManager::Get()->RefreshTexture(_assetInfo.lock()->GetAssetObject<Texture2D>());
+	}
 	_imageSize = { width,height };
 }
 
@@ -116,6 +143,11 @@ std::shared_ptr<Texture2D> Texture2D::CreateTexture2D(
 	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView, miplevel, layerCount);
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
+	newTexture->_bReset = true;
+	if (!newTexture->_assetInfo.expired())
+	{
+		VulkanObjectManager::Get()->RefreshTexture(newTexture);
+	}
 	return newTexture;
 }
 
@@ -208,8 +240,13 @@ std::shared_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags us
 	//标记为需要CopyBufferToImage
 	newTexture->UploadToGPU();
 
-	dataPtr->SetData(newTexture);
+	newTexture->_bReset = true;
+	if (!newTexture->_assetInfo.expired())
+	{
+		VulkanObjectManager::Get()->RefreshTexture(newTexture);
+	}
 
+	dataPtr->SetData(newTexture);
 	return dataPtr->GetData();
 }
 
@@ -237,31 +274,6 @@ void Texture2D::GlobalInitialize()
 
 	//Create Sampler
 	VkSampler sampler = VK_NULL_HANDLE;
-	VkSamplerCreateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-	info.magFilter = VK_FILTER_LINEAR;
-	info.minFilter = VK_FILTER_LINEAR;
-	info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-	info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info.minLod = -100; 
-	info.maxLod = VK_LOD_CLAMP_NONE;
-	info.compareEnable = false;
-	//info.anisotropyEnable = VK_FALSE;
-	//info.maxAnisotropy = 1.0f;
-	//各项异性采样
-	if (manager->GetPhysicalDeviceFeatures().samplerAnisotropy == VK_TRUE)
-	{
-		info.anisotropyEnable = VK_TRUE;
-		info.maxAnisotropy = 16.0f;
-	}
-	else
-	{
-		info.anisotropyEnable = VK_FALSE;
-		info.maxAnisotropy = 1.0f;
-	}
-
 	_samplers.reserve((uint32_t)TextureSampler_Max);
 	{
 		manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 16);
@@ -294,6 +306,26 @@ void Texture2D::GlobalInitialize()
 	{
 		manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, 0, 16);
 		_samplers.push_back(std::move(sampler));
+	}
+	auto gpuExt = manager->GetDeviceExt();
+	if (gpuExt.HasExtFilter_Cubic == 1)
+	{
+		{
+			manager->CreateSampler(sampler, VK_FILTER_CUBIC_EXT, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 16);
+			_samplers.push_back(std::move(sampler));
+		}
+		{
+			manager->CreateSampler(sampler, VK_FILTER_CUBIC_EXT, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0, 16);
+			_samplers.push_back(std::move(sampler));
+		}
+		{
+			manager->CreateSampler(sampler, VK_FILTER_CUBIC_EXT, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 16);
+			_samplers.push_back(std::move(sampler));
+		}
+		{
+			manager->CreateSampler(sampler, VK_FILTER_CUBIC_EXT, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, 0, 16);
+			_samplers.push_back(std::move(sampler));
+		}
 	}
 
 	//Create BaseTexture

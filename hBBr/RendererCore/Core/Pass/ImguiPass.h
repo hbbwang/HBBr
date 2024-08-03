@@ -10,7 +10,8 @@ public:
 	virtual ~ImguiPass();
 	virtual void PassInit()override;
 	virtual void PassReset()override;
-	void PassUpdate(std::vector<VkImageView> frameBuffers);
+	void EndFrame();
+	void PassUpdate(std::vector<std::shared_ptr<class Texture2D>> frameBuffers);
 	HBBR_API void AddGui(std::function<void(struct ImGuiContext*)> fun);
 protected:
 	virtual void PassUpdate()override;

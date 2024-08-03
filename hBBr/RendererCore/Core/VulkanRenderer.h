@@ -64,6 +64,10 @@ public:
 		return _renderSize;
 	}
 
+	HBBR_API HBBR_INLINE void SetRenderSize(VkExtent2D newSize) {
+		_renderSize = newSize;
+	}
+
 	HBBR_INLINE VkSemaphore* GetPresentSemaphore() {
 		return &_presentSemaphore[_currentFrameIndex];
 	}
@@ -152,7 +156,7 @@ public:
 	/* 帧渲染函数 */
 	HBBR_API void Render();
 
-	HBBR_API void RendererResize(uint32_t w,uint32_t h);
+	HBBR_API void RendererResize(uint32_t w, uint32_t h);
 
 	HBBR_API void Release();
 
@@ -161,11 +165,13 @@ public:
 	HBBR_API HBBR_INLINE class ImguiPass* GetGuiPass()const {
 		return _imguiPass.get();
 	}
-
+	
 #if IS_EDITOR
+	
 	HBBR_API HBBR_INLINE class ImguiPassEditor* GetEditorGuiPass()const {
 		return _imguiPassEditor.get();
 	}
+
 #endif
 
 	void Init();
@@ -195,7 +201,7 @@ private:
 
 	VkExtent2D _renderSize{};
 
-	VkExtent2D _windowSize{};
+	VkExtent2D _cacheSurfaceSize{};
 
 	std::vector<VkImage>	_swapchainImages;
 

@@ -48,12 +48,19 @@ ImguiPass::~ImguiPass()
 
 void ImguiPass::PassReset()
 {
-	const auto& vkManager = VulkanManager::GetManager();
-	glm::mat4 pre_rotate_mat = glm::mat4(1);
-	vkManager->ResetImgui_SDL(_renderPass, 0, pre_rotate_mat);
 }
 
-void ImguiPass::PassUpdate(std::vector<VkImageView> frameBuffers)
+void ImguiPass::EndFrame()
+{
+	const auto& vkManager = VulkanManager::GetManager();
+	if (ImGui::GetCurrentContext() != _imguiContent)
+	{
+		ImGui::SetCurrentContext(_imguiContent);
+	}
+	vkManager->ImguiEndFrame();
+}
+
+void ImguiPass::PassUpdate(std::vector<std::shared_ptr<class Texture2D>> frameBuffers)
 {
 	if (ImGui::GetCurrentContext() != _imguiContent)
 	{
@@ -74,8 +81,9 @@ void ImguiPass::PassUpdate(std::vector<VkImageView> frameBuffers)
 		i(_imguiContent);
 	}
 	ShowPerformance();
+
 	//End
-	vkManager->ImguiEndFrame(cmdBuf);
+	vkManager->ImguiEndDraw(cmdBuf);
 	EndRenderPass();
 }
 

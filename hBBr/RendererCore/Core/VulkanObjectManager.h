@@ -22,6 +22,24 @@ struct VkBufferObject
 	uint8_t frameCount = 0;
 };
 
+struct VkTextureRefreshObject
+{
+	std::weak_ptr<class Texture2D> texture;
+	uint8_t frameCount = 0;
+	uint8_t bFocusWaitIdle = 0;
+};
+
+struct VkTextureDestroyObject
+{
+	VkDeviceMemory memory = nullptr;
+	VkImage image = nullptr;
+	VkImageView imageView = nullptr;
+	uint8_t frameCount = 0;
+#if _DEBUG
+	HString tag = "";
+#endif
+};
+
 struct VMABufferObject
 {
 	VkBuffer buffer;
@@ -67,6 +85,10 @@ public:
 
 	void AssetLinkGC(std::weak_ptr<class AssetObject> asset,bool bImmediate = false);
 
+	void RefreshTexture(std::weak_ptr<class Texture2D> texture, uint8_t bFocusWaitIdle = 0);
+
+	void SafeReleaseTexture(VkImage image, VkImageView imageView, VkDeviceMemory memory, HString tag = "");
+
 protected:
 
 	void Update();
@@ -82,8 +104,14 @@ private:
 
 	std::vector<VMABufferObject*>_vmaBufferObjects;
 
+	std::map<class Texture2D*, VkTextureRefreshObject> _textureRefresh;
+
+	std::list<VkTextureDestroyObject> _textureDestroy;
+
 	std::list<VkAssetObject> _vulkanObjects;
+
 	std::list<VkAssetObject> _vulkanObjectsRelease;
+
 	uint32_t _assetCheckCount;
 	uint32_t _maxAssetCheckCount;
 	bool _bStartCheckAsset;

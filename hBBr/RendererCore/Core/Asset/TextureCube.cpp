@@ -32,6 +32,11 @@ std::shared_ptr<TextureCube> TextureCube::CreateTextureCube(uint32_t width, uint
 	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView, miplevel, 6);
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
+	newTexture->_bReset = true;
+	if (!newTexture->_assetInfo.expired())
+	{
+		VulkanObjectManager::Get()->RefreshTexture(newTexture);
+	}
 	return newTexture;
 }
 
@@ -124,6 +129,12 @@ std::shared_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlag
 
 	//标记为需要CopyBufferToImage
 	newTexture->UploadToGPU();
+
+	newTexture->_bReset = true;
+	if (!newTexture->_assetInfo.expired())
+	{
+		VulkanObjectManager::Get()->RefreshTexture(newTexture);
+	}
 
 	dataPtr->SetData(newTexture);
 	return dataPtr->GetData();

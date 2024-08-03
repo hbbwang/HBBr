@@ -7,7 +7,7 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <qmimedata.h>
-#include "GLFWInclude.h"
+#include "SDLInclude.h"
 #include "ConsoleDebug.h"
 #include "Component/GameObject.h"
 #include "Component/ModelComponent.h"

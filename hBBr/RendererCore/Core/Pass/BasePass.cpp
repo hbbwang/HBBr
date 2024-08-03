@@ -72,14 +72,14 @@ void BasePass::PassUpdate()
 		gbuffer2->Transition(cmdBuf,	VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	}
 	//Update FrameBuffer
-	ResetFrameBufferCustom(_renderer->GetRenderSize(), 
-		{ 
-			GetSceneTexture(SceneTextureDesc::SceneDepth)->GetTextureView(),
-			GetSceneTexture(SceneTextureDesc::SceneColor)->GetTextureView(),
-			GetSceneTexture(SceneTextureDesc::GBuffer0)->GetTextureView(),
-			GetSceneTexture(SceneTextureDesc::GBuffer1)->GetTextureView(),
-			GetSceneTexture(SceneTextureDesc::GBuffer2)->GetTextureView(),
-		});
+	ResetFrameBufferCustom(_renderer->GetRenderSize(),
+		{
+			GetSceneTexture(SceneTextureDesc::SceneDepth),
+			GetSceneTexture(SceneTextureDesc::SceneColor),
+			GetSceneTexture(SceneTextureDesc::GBuffer0),
+			GetSceneTexture(SceneTextureDesc::GBuffer1),
+			GetSceneTexture(SceneTextureDesc::GBuffer2)
+		}, false);
 	SetViewport(_currentFrameBufferSize);
 
 	_pass_descriptorSet->UpdateDescriptorSetWholeBuffer(0);

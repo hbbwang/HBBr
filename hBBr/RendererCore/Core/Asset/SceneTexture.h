@@ -24,7 +24,7 @@ public:
 	{
 		_sceneTexture.clear();
 	}
-	void UpdateTextures();
+	bool UpdateTextures();
 
 	HBBR_API inline std::shared_ptr<Texture2D> GetTexture(SceneTextureDesc desc)
 	{

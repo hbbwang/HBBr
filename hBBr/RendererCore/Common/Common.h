@@ -11,18 +11,22 @@
 
 //#ifdef SHARED_LIBRARY
 #ifdef __ANDROID__
-#include <jni.h>
-//#ifdef _USRDLL
-#define HBBR_API __attribute__((visibility("default")))
-//#else
-//#define HBBR_API 
-//#endif
+	#include <jni.h>
+	//#ifdef _USRDLL
+	#define HBBR_API __attribute__((visibility("default")))
+	//#else
+	//#define HBBR_API 
+	//#endif
 #else
-#ifdef _USRDLL
-#define HBBR_API __declspec(dllexport)
-#else
-#define HBBR_API __declspec(dllimport)
-#endif
+	//#if _USE_STATIC
+		#define HBBR_API 
+	//#else
+	//	#ifdef _USE_DLL
+	//		#define HBBR_API __declspec(dllexport)
+	//	#else
+	//		#define HBBR_API __declspec(dllimport)
+	//	#endif
+	//#endif
 #endif
 //#else
 //#define HBBR_API 

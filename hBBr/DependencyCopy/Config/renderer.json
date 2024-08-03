@@ -1,9 +1,11 @@
 {
     "Default": {
         "DefaultWorld": "a1f072fa-cdc0-e64a-ef7c-aebfcfa2afa4",
-        "MainRenderer_WindowHeight": "539",
-        "MainRenderer_WindowPosX": "536",
-        "MainRenderer_WindowPosY": "310",
-        "MainRenderer_WindowWidth": "820"
+        "ImguiFontPath": "Config/Fonts/simhei.ttf",
+        "MainRenderer_DisplayMode": 0,
+        "MainRenderer_WindowHeight": 894,
+        "MainRenderer_WindowPosX": 386,
+        "MainRenderer_WindowPosY": 362,
+        "MainRenderer_WindowWidth": 1227
     }
 }

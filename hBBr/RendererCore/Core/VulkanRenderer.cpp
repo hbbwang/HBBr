@@ -95,7 +95,19 @@ void VulkanRenderer::Init()
 	ConsoleDebug::print_endl("hBBr:Start Check Surface Format.");
 	_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
 	ConsoleDebug::print_endl("hBBr:Start Create Swapchain.");
-	_renderSize =  _surfaceSize = _vulkanManager->CreateSwapchain(_windowHandle, _windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore ,&_queueSubmitSemaphore,&_executeFence);
+	_renderSize = _surfaceSize = _vulkanManager->CreateSwapchain(
+		_windowHandle,
+		{ 1,1 },
+		_surface,
+		_surfaceFormat,
+		_swapchain,
+		_swapchainImages,
+		_swapchainImageViews,
+		_surfaceCapabilities,
+		&_cmdBuf,
+		&_presentSemaphore,
+		&_queueSubmitSemaphore,
+		& _executeFence);
 
 	//Set renderer map , Add new renderer
 	vkDeviceWaitIdle(_vulkanManager->GetDevice());
@@ -245,14 +257,6 @@ void VulkanRenderer::Render()
 			//这个 _swapchainIndex 和 _currentFrameIndex 不是一个东西，前者是有效交换链的index，后者只是帧Index
 			uint32_t swapchainIndex = 0;
 
-			_vulkanManager->WaitForFences({ _executeFence[_currentFrameIndex] });
-
-			if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], nullptr, &swapchainIndex))
-			{
-				ResizeBuffer();
-				return;
-			}
-			
 			for (auto& func : _renderThreadFuncsOnce)
 			{
 				func();
@@ -266,6 +270,14 @@ void VulkanRenderer::Render()
 
 			if (_world)
 				_world->WorldUpdate();
+
+			_vulkanManager->WaitForFences({ _executeFence[_currentFrameIndex] });
+
+			if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], nullptr, &swapchainIndex))
+			{
+				ResizeBuffer();
+				return;
+			}
 
 			auto& cmdBuf = _cmdBuf[_currentFrameIndex];
 			//_vulkanManager->ResetCommandBuffer(cmdBuf);
@@ -290,22 +302,23 @@ void VulkanRenderer::Render()
 
 				//GUI Pass
 				_imguiPass->PassUpdate({
-					mainPassManager->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor)->GetTextureView()
+					mainPassManager->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor)
 				});
 
 				//Editor GUI Pass
 				#if IS_EDITOR
-				_imguiPassEditor->PassUpdate({
-					mainPassManager->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor)->GetTextureView()
-				});
-				#endif
-
+				_imguiPassEditor->PassUpdate(mainPassManager->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor));
+				#else
+				//编辑器使用Imgui制作，ImguiPassEditor会传递最后结果到Swapchain，不需要复制。
 				mainPassManager->CmdCopyFinalColorToSwapchain();
+				#endif		
 			}
 
 			_vulkanManager->EndCommandBuffer(cmdBuf);
 			_vulkanManager->SubmitQueueForPasses(cmdBuf, _presentSemaphore[_currentFrameIndex], _queueSubmitSemaphore[_currentFrameIndex], _executeFence[_currentFrameIndex]);
-
+			//Imgui如果开启了多视口模式，当控件离开窗口之后，会自动生成一套绘制流程，放在此处执行最后的处理会安全很多。
+			_imguiPass->EndFrame();
+			_imguiPassEditor->EndFrame();
 			//Present swapchain.
 			if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], swapchainIndex))
 			{
@@ -322,19 +335,12 @@ void VulkanRenderer::Render()
 
 void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
 {
-	_windowSize.width = w;
-	_windowSize.height = h;
 	bResizeBuffer = true;
-	ResizeBuffer();
 }
 
 bool VulkanRenderer::ResizeBuffer()
 {
-	if (_windowSize.width<=0 && _windowSize.height <= 0)
-	{
-		_vulkanManager->GetSurfaceSize(_surface, _windowSize);
-	}
-	if (!_bRendererRelease && _windowSize.width > 0 && _windowSize.height > 0)
+	if (!_bRendererRelease)
 	{
 		_vulkanManager->DeviceWaitIdle();
 
@@ -351,13 +357,29 @@ bool VulkanRenderer::ResizeBuffer()
 			return false;
 		}
 
-		_renderSize = _surfaceSize = _vulkanManager->CreateSwapchain(_windowHandle, _windowSize, _surface, _surfaceFormat, _swapchain, _swapchainImages, _swapchainImageViews, _surfaceCapabilities, &_cmdBuf, &_presentSemaphore, &_queueSubmitSemaphore
-		, &_executeFence, false, true);
+		_renderSize = _cacheSurfaceSize = _surfaceSize = _vulkanManager->CreateSwapchain(
+			_windowHandle, 
+			{ 1,1 }, 
+			_surface, 
+			_surfaceFormat, 
+			_swapchain, 
+			_swapchainImages, 
+			_swapchainImageViews, 
+			_surfaceCapabilities, 
+			&_cmdBuf, 
+			&_presentSemaphore, 
+			&_queueSubmitSemaphore, 
+			&_executeFence, 
+			false, 
+			true);
 
 		for (auto& p : _passManagers)
 		{
 			p.second->PassesReset();
 		}
+		_imguiPass->PassReset();
+		_imguiPassEditor->PassReset();
+
 		bResizeBuffer = false;
 
 		//重置buffer会导致画面丢失，我们要在这一瞬间重新把buffer绘制回去，缓解缩放卡顿。

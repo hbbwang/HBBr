@@ -42,7 +42,7 @@ void PassManager::PassesUpdate()
 {
 	const uint32_t& frameIndex =_renderer->_currentFrameIndex;
 
-	_sceneTextures->UpdateTextures();
+	bool bFrameBufferNeedReset = _sceneTextures->UpdateTextures();
 
 	//Update lighting uniform buffer
 	_lightUniformBuffer.validLightCount = (uint32_t)_lightings.size();
@@ -82,13 +82,12 @@ void PassManager::PassesUpdate()
 			p->_gpuTime = vkManager->CalculateTimestampQuery(queryFirstIndex, 2) / 1000000.0;
 		}
 
-		p->PassBeginUpdate();
+		//ConsoleDebug::printf_endl(p->GetName());
 
+		p->PassBeginUpdate();
 		p->PassUpdate();
 		_executePasses.push_back(p);
-
 		p->PassEndUpdate();
-		
 	}
 }
 

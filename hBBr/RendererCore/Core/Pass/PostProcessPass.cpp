@@ -63,7 +63,7 @@ void PostProcessPass::PassUpdate()
 	//Update FrameBuffer
 	ResetFrameBufferCustom(_renderer->GetRenderSize(), 
 		{
-			GetSceneTexture(SceneTextureDesc::FinalColor)->GetTextureView()
+			GetSceneTexture(SceneTextureDesc::FinalColor)
 		});
 	SetViewport(_renderer->GetRenderSize());
 

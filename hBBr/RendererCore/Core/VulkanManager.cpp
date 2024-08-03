@@ -626,6 +626,12 @@ void VulkanManager::InitDevice()
 					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasEXTFullscreenExclusive = 1;
 				}
+				else if (strcmp(availableExts[i].extensionName, VK_EXT_FILTER_CUBIC_EXTENSION_NAME) == 0)
+				{
+					extensions.push_back(VK_EXT_FILTER_CUBIC_EXTENSION_NAME);
+					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_FILTER_CUBIC_EXTENSION_NAME ext.");
+					_deviceExtensionOptionals.HasExtFilter_Cubic = 1;
+				}
 			}
 		}
 
@@ -1574,7 +1580,14 @@ void VulkanManager::CreateSampler(VkSampler& sampler, VkFilter filter, VkSampler
 	info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 	info.magFilter = filter;
 	info.minFilter = filter;
-	info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	if (filter == VK_FILTER_NEAREST)
+	{
+		info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+	}
+	else
+	{
+		info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	}
 	info.addressModeU = address;
 	info.addressModeV = address;
 	info.addressModeW = address;
@@ -2383,6 +2396,26 @@ static void check_vk_result(VkResult err)
 		abort();
 }
 
+const ImWchar* GetGlyphRangesChineseFull()
+{
+	static const ImWchar ranges[] =
+	{
+		0x20, 0xFF, // Basic Latin + Latin Supplement
+		0xff01, 0xff5e, // General Punctuation
+		0x3000, 0x30FF, // CJK Symbols and Punctuations, Hiragana, Katakana
+		0x31F0, 0x31FF, // Katakana Phonetic Extensions
+		0xFF00, 0xFFEF, // Half-width characters
+		0xFFFD, 0xFFFD, // Invalid
+		0x4e00, 0x9FFF, // CJK Ideograms
+		0x3400, 0x4DBF,
+		0x2000, 0x20FF,
+		0x3000,0x30FF,
+		0x2100,0x21FF,
+		0,
+	};
+	return &ranges[0];
+}
+
 ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass renderPass, bool enableImguiDock, bool enableImguiMultiViewports, uint32_t subPassIndex)
 {
 #if ENABLE_IMGUI
@@ -2414,6 +2447,15 @@ ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass rend
 	#endif
 	io.IniFilename = "Config/GuiConfig.ini";
 
+	// 设置字体大小
+	io.Fonts->Clear();
+	auto fontPath = FileSystem::Append(FileSystem::GetProgramPath(), GetRendererConfig("Default", "ImguiFontPath"));
+
+	ImFontGlyphRangesBuilder fontBuilder = {};
+
+	ImFont* font = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 16.0f, nullptr,
+		GetGlyphRangesChineseFull());
+
 	if (!ImGui_ImplSDL3_InitForVulkan(handle))
 		MessageOut("Error,ImGui_ImplSDL3_InitForVulkan return false!", false, true, "255,0,0");
 
@@ -2443,33 +2485,6 @@ ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass rend
 #endif
 }
 
-void VulkanManager::ResetImgui_SDL( VkRenderPass renderPass, uint32_t subPassIndex, glm::mat4 projMat)
-{
-#if ENABLE_IMGUI
-	ImGui_ImplVulkan_Shutdown();
-	ImGui_ImplVulkan_InitInfo init_info = {};
-	init_info.Instance = _instance;
-	init_info.PhysicalDevice = _gpuDevice;
-	init_info.Device = _device;
-	init_info.QueueFamily = _graphicsQueueFamilyIndex;
-	init_info.Queue = _graphicsQueue;
-	init_info.PipelineCache = VK_NULL_HANDLE;
-	init_info.DescriptorPool = _descriptorPool;
-	init_info.Allocator = VK_NULL_HANDLE;
-	init_info.MinImageCount = 2;
-	init_info.ImageCount = _swapchainBufferCount;
-	init_info.MinImageCount = _swapchainBufferCount;
-	init_info.Subpass = subPassIndex;
-	init_info.CheckVkResultFn = VK_NULL_HANDLE;
-	init_info.RenderPass = renderPass;
-	//init_info.UseDynamicRendering = true;
-
-	ImGui_ImplVulkan_Init(&init_info);
-
-	//ImGui_ImplVulkan_CreateFontsTexture();
-#endif
-}
-
 void VulkanManager::ShutdownImgui()
 {
 #if ENABLE_IMGUI
@@ -2488,12 +2503,17 @@ void VulkanManager::ImguiNewFrame()
 #endif
 }
 
-void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf)
+void VulkanManager::ImguiEndDraw(VkCommandBuffer cmdBuf)
 {
 #if ENABLE_IMGUI
 	ImGui::Render();
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuf);
+#endif
+}
 
+void VulkanManager::ImguiEndFrame()
+{
+#if ENABLE_IMGUI
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
@@ -2501,7 +2521,6 @@ void VulkanManager::ImguiEndFrame(VkCommandBuffer cmdBuf)
 		ImGui::RenderPlatformWindowsDefault();
 		// TODO for OpenGL: restore current GL context.
 	}
-
 #endif
 }
 
@@ -2744,7 +2763,7 @@ void VulkanManager::CmdCmdBindPipeline(VkCommandBuffer cmdbuf, VkPipeline pipeli
 	vkCmdBindPipeline(cmdbuf, bindPoint, pipelineObject);
 }
 
-void VulkanManager::CmdColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D targetSize)
+void VulkanManager::CmdColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D targetSize, VkFilter filter)
 {
 	VkImageBlit region;
 	region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -2770,7 +2789,7 @@ void VulkanManager::CmdColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImag
 	region.dstOffsets[1].y = targetSize.height;
 	region.dstOffsets[1].z = 1;
 	//vkCmdBlitImage(_renderer->GetCommandBuffer(), src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1, &region, VK_FILTER_LINEAR);
-	vkCmdBlitImage(cmdBuf, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region, VK_FILTER_LINEAR);
+	vkCmdBlitImage(cmdBuf, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region, filter);
 }
 
 void VulkanManager::CmdBufferCopyToBuffer(VkCommandBuffer cmdBuf, VkBuffer src, VkBuffer dst, VkDeviceSize copySize, VkDeviceSize srcOffset, VkDeviceSize dstOffset)

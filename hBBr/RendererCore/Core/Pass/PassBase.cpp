@@ -50,9 +50,18 @@ std::shared_ptr<Texture2D> PassBase::GetSceneTexture(SceneTextureDesc desc)
 	return _manager->GetSceneTexture()->GetTexture(desc);
 }
 
-void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> imageViews)
+void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<std::shared_ptr<class Texture2D>> imageViews, bool bFocus)
 {
-	if (_currentFrameBufferSize.width != size.width || _currentFrameBufferSize.height != size.height)
+	bool bImageReset = false;
+	for (auto& i : imageViews)
+	{
+		if (i->_bReset)
+		{
+			bImageReset = true;
+			break;
+		}
+	}
+	if (_currentFrameBufferSize.width != size.width || _currentFrameBufferSize.height != size.height || bFocus || bImageReset)
 	{
 		_currentFrameBufferSize = size;
 		const auto manager = VulkanManager::GetManager();
@@ -69,18 +78,36 @@ void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<VkImageView> im
 		for (int i = 0; i < (int)VulkanManager::GetManager()->GetSwapchainBufferCount(); i++)
 		{
 			std::vector<VkImageView> ivs = { _renderer->GetSwapchainImageViews()[i] };
+			ivs.reserve(12);
 			if (imageViews.size() > 0)
 			{
-				ivs.insert(ivs.end(), imageViews.begin(), imageViews.end());
+				for (auto& i : imageViews)
+				{
+					ivs.push_back(i->GetTextureView());
+				}
 			}
 			VulkanManager::GetManager()->CreateFrameBuffer(size.width, size.height, _renderPass, ivs, _framebuffers[i]);
 		}
 	}
 }
 
-void GraphicsPass::ResetFrameBufferCustom(VkExtent2D size, std::vector<VkImageView> imageViews)
+void GraphicsPass::ResetFrameBufferCustom(VkExtent2D size, std::vector<std::shared_ptr<class Texture2D>> imageViews, bool bFocus)
 {
-	if (_currentFrameBufferSize.width != size.width || _currentFrameBufferSize.height != size.height)
+	bool bImageReset = false;
+	std::vector<VkImageView> ivs(imageViews.size());
+	{
+		int index = 0;
+		for (auto& i : imageViews)
+		{
+			if (i->_bReset)
+			{
+				bImageReset = true;
+			}
+			ivs[index] = i->GetTextureView();
+			index++;
+		}
+	}
+	if (_currentFrameBufferSize.width != size.width || _currentFrameBufferSize.height != size.height || bImageReset)
 	{
 		_currentFrameBufferSize = size;
 		const auto manager = VulkanManager::GetManager();
@@ -94,7 +121,7 @@ void GraphicsPass::ResetFrameBufferCustom(VkExtent2D size, std::vector<VkImageVi
 		_framebuffers.resize(manager->GetSwapchainBufferCount());
 		for (int i = 0; i < _framebuffers.size(); i++)
 		{
-			VulkanManager::GetManager()->CreateFrameBuffer(size.width, size.height, _renderPass, imageViews, _framebuffers[i]);
+			VulkanManager::GetManager()->CreateFrameBuffer(size.width, size.height, _renderPass, ivs, _framebuffers[i]);
 		}
 	}
 }
@@ -105,7 +132,7 @@ void GraphicsPass::PassUpdate()
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.3, 1.0, 0.1, 0.7));
 	//Update FrameBuffer
-	ResetFrameBuffer(_renderer->GetRenderSize(), { GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth)->GetTextureView() });
+	ResetFrameBuffer(_renderer->GetRenderSize(), { GetSceneTexture((uint32_t)SceneTextureDesc::SceneDepth) }, false);
 	SetViewport(_currentFrameBufferSize);
 	BeginRenderPass({ 0,0,0,0 });
 	//Begin...
