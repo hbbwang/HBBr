@@ -57,7 +57,7 @@ void ImguiPass::EndFrame()
 	{
 		ImGui::SetCurrentContext(_imguiContent);
 	}
-	vkManager->ImguiEndFrame();
+	vkManager->ImguiEndFrame(nullptr);
 }
 
 void ImguiPass::PassUpdate(std::vector<std::shared_ptr<class Texture2D>> frameBuffers)

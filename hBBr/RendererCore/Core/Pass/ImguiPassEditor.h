@@ -10,6 +10,7 @@ public:
 	ImguiPassEditor(class VulkanRenderer* renderer);
 	virtual ~ImguiPassEditor();
 	virtual void PassInit()override;
+	void CheckWindowValid();
 	virtual void PassReset()override;
 	void EndFrame();
 	void PassUpdate(std::shared_ptr<Texture2D> finalColor);

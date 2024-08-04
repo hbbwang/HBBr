@@ -185,6 +185,7 @@
       <PreprocessorDefinitions>IS_EDITOR;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)RendererCore;$(SolutionDir)RendererCore\Common;$(SolutionDir)RendererCore\Core;$(SolutionDir)RendererCore\Editor;$(SolutionDir)RendererCore\Form;$(SolutionDir)ThirdParty;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir);$(SolutionDir)ThirdParty\Imgui\;$(SolutionDir)RendererCore\Core\Pass;$(SolutionDir)RendererCore\Core\Asset;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)ThirdParty\crossguid\;$(SolutionDir)ThirdParty\crossguid\Include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -192,7 +193,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)DependencyCopy\$(Configuration);$(SolutionDir)ThirdParty\crossguid;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir)ThirdParty\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>crossguid-dgb.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crossguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /c /f /y $(SolutionDir)ThirdParty\nvtt\*.dll $(solutiondir)$(Platform)\$(Configuration)\</Command>

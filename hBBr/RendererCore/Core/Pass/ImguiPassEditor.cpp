@@ -41,6 +41,26 @@ void ImguiPassEditor::PassInit()
 		"EditorFinalColor");
 }
 
+void ImguiPassEditor::CheckWindowValid()
+{
+	static bool main_window_minimized;
+	Uint32 windowFlags = SDL_GetWindowFlags(_renderer->GetWindowHandle());
+	bool minimized = (windowFlags & SDL_WINDOW_MINIMIZED) != 0;
+	if (minimized != main_window_minimized)
+	{
+		main_window_minimized = minimized;
+		const auto& io = ImGui::GetPlatformIO();
+		for (int i = 1; i < io.Viewports.Size; i++)
+		{
+			ImGuiViewport* viewport = io.Viewports[i];
+			if (minimized)
+				SDL_HideWindow((SDL_Window*)viewport->PlatformHandle);
+			else
+				SDL_ShowWindow((SDL_Window*)viewport->PlatformHandle);
+		}
+	}
+}
+
 ImguiPassEditor::ImguiPassEditor(VulkanRenderer* renderer)
 	:GraphicsPass(nullptr)
 {
@@ -69,8 +89,10 @@ void ImguiPassEditor::EndFrame()
 	{
 		ImGui::SetCurrentContext(_imguiContent);
 	}
-	vkManager->ImguiEndFrame();
+	vkManager->ImguiEndFrame(nullptr);
 }
+
+
 
 void ImguiPassEditor::PassUpdate(std::shared_ptr<Texture2D> finalColor)
 {
@@ -84,8 +106,6 @@ void ImguiPassEditor::PassUpdate(std::shared_ptr<Texture2D> finalColor)
 	}
 
 	auto renderSize = _renderer->GetRenderSize();
-	finalColor->Transition(cmdBuf, finalColor->GetLayout(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-	_renderViewTexture->Transition(cmdBuf, _renderViewTexture->GetLayout(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	if (_renderViewTexture == nullptr || renderSize.width != _renderViewTexture->GetTextureSize().width ||
 		renderSize.height != _renderViewTexture->GetTextureSize().height)
 	{
@@ -94,6 +114,8 @@ void ImguiPassEditor::PassUpdate(std::shared_ptr<Texture2D> finalColor)
 		_renderViewTexture->Resize(renderSize.width, renderSize.height);
 		VulkanObjectManager::Get()->RefreshTexture(_renderViewTexture);
 	}	
+	finalColor->Transition(cmdBuf, finalColor->GetLayout(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	_renderViewTexture->Transition(cmdBuf, _renderViewTexture->GetLayout(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	vkManager->CmdColorBitImage(cmdBuf, finalColor->GetTexture(), _renderViewTexture->GetTexture(), 
 		{ renderSize.width,renderSize.height },
 		{ renderSize.width,renderSize.height },

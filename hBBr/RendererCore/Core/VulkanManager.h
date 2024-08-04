@@ -249,6 +249,8 @@ public:
 
 	HBBR_API bool Present(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, uint32_t& swapchainImageIndex);
 
+	HBBR_API bool Present(VkSwapchainKHR& swapchain, std::vector<VkSemaphore> semaphores, uint32_t& swapchainImageIndex);
+
 	HBBR_API void ReCreatePipelineLayout(std::vector <VkDescriptorSetLayout> descriptorSetLayout, VkPipelineLayout& pipelineLayout);
 
 	HBBR_API void CreatePipelineLayout(std::vector <VkDescriptorSetLayout> descriptorSetLayout , VkPipelineLayout& pipelineLayout);
@@ -371,16 +373,16 @@ public:
 
 	HBBR_API void ImguiEndDraw(VkCommandBuffer cmdBuf);
 
-	HBBR_API void ImguiEndFrame();
+	HBBR_API bool ImguiEndFrame(VkSemaphore NeedWait);
 
 	/* 立刻序列提交,为保证运行安全,会执行一次等待运行结束 */
 	HBBR_API void SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
 
-	HBBR_API void SubmitQueue(std::vector<VkCommandBuffer> cmdBufs, std::vector <VkSemaphore> lastSemaphore, std::vector <VkSemaphore> newSemaphore, VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkQueue queue = VK_NULL_HANDLE);
-
 	HBBR_API VkViewport GetViewport(float w,float h);
 
-	HBBR_API void SubmitQueueForPasses(VkCommandBuffer& cmdBuf, VkSemaphore& presentSemaphore, VkSemaphore& submitFinishSemaphore, VkFence& executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkQueue queue = VK_NULL_HANDLE);
+	HBBR_API void SubmitQueueForPasses(VkCommandBuffer& cmdBuf, VkSemaphore waitSemaphore, VkSemaphore signalSemaphore, VkFence executeFence , VkPipelineStageFlags waitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkQueue queue = VK_NULL_HANDLE);
+
+	HBBR_API void SubmitQueue(VkCommandBuffer& cmdBuf, std::vector<VkSemaphore> waitSemaphores, std::vector<VkSemaphore> signalSemaphores, VkFence executeFence, std::vector<VkPipelineStageFlags> waitStageMask , VkQueue queue = VK_NULL_HANDLE);
 
 	HBBR_API void UpdateBufferDescriptorSet(VkBuffer buffer, VkDescriptorSet descriptorSet, VkDescriptorType type,  uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range);
 

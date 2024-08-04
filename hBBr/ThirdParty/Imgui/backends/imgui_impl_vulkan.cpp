@@ -1725,7 +1725,7 @@ static void ImGui_ImplVulkan_SetWindowSize(ImGuiViewport* viewport, ImVec2 size)
     ImGui_ImplVulkanH_CreateOrResizeWindow(v->Instance, v->PhysicalDevice, v->Device, &vd->Window, v->QueueFamily, v->Allocator, (int)size.x, (int)size.y, v->MinImageCount);
 }
 
-static void ImGui_ImplVulkan_RenderWindow(ImGuiViewport* viewport, void*)
+static void ImGui_ImplVulkan_RenderWindow(ImGuiViewport* viewport, void* VkSemaphoresNeedWait)
 {
     ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
     ImGui_ImplVulkan_ViewportData* vd = (ImGui_ImplVulkan_ViewportData*)viewport->RendererUserData;
@@ -1849,12 +1849,27 @@ static void ImGui_ImplVulkan_RenderWindow(ImGuiViewport* viewport, void*)
             vkCmdEndRenderPass(fd->CommandBuffer);
         }
         {
-            VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+            VkPipelineStageFlags wait_stage[2] = { 
+                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT ,
+                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+            VkSemaphore waits[2] = { 
+                fsd->ImageAcquiredSemaphore ,
+                (VkSemaphore)VkSemaphoresNeedWait };
+
             VkSubmitInfo info = {};
             info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-            info.waitSemaphoreCount = 1;
-            info.pWaitSemaphores = &fsd->ImageAcquiredSemaphore;
-            info.pWaitDstStageMask = &wait_stage;
+
+            if ((VkSemaphore)VkSemaphoresNeedWait != nullptr)
+            {
+                info.waitSemaphoreCount = IM_ARRAYSIZE(waits);
+            }
+            else
+            {
+                info.waitSemaphoreCount = 1;
+            }
+
+            info.pWaitSemaphores = waits;
+            info.pWaitDstStageMask = wait_stage;
             info.commandBufferCount = 1;
             info.pCommandBuffers = &fd->CommandBuffer;
             info.signalSemaphoreCount = 1;

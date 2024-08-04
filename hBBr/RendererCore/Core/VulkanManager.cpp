@@ -1189,26 +1189,29 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		// Swap to get identity width and height
 		std::swap(info.imageExtent.width, info.imageExtent.height);
 	}
+
+	VkSurfaceFullScreenExclusiveInfoEXT FullScreenInfo = {};
+	#ifdef _WIN32
+	VkSurfaceFullScreenExclusiveWin32InfoEXT fullScreenExclusiveWin32Info = {};
+	#endif
 	if (_deviceExtensionOptionals.HasEXTFullscreenExclusive)
 	{
-#ifdef _WIN32
-    //fullscreen support
-    VkSurfaceFullScreenExclusiveInfoEXT FullScreenInfo = {};
-	HWND hWnd = (HWND)VulkanApp::GetWindowHandle(window);
-	//dwFlags：一个 DWORD 类型的值，表示如何选择与窗口关联的显示器。可能的值包括：
-	//MONITOR_DEFAULTTONULL：如果窗口没有与显示器重叠，则返回 NULL。
-	//MONITOR_DEFAULTTOPRIMARY：如果窗口没有与显示器重叠，则返回主显示器。
-	//MONITOR_DEFAULTTONEAREST：如果窗口没有与显示器重叠，则返回最接近窗口的显示器。
-	HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-	VkSurfaceFullScreenExclusiveWin32InfoEXT fullScreenExclusiveWin32Info = {};
-	fullScreenExclusiveWin32Info.sType = VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_WIN32_INFO_EXT;
-	fullScreenExclusiveWin32Info.hmonitor = hMonitor;
+		#ifdef _WIN32
+			//fullscreen support
+			HWND hWnd = (HWND)VulkanApp::GetWindowHandle(window);
+			//dwFlags：一个 DWORD 类型的值，表示如何选择与窗口关联的显示器。可能的值包括：
+			//MONITOR_DEFAULTTONULL：如果窗口没有与显示器重叠，则返回 NULL。
+			//MONITOR_DEFAULTTOPRIMARY：如果窗口没有与显示器重叠，则返回主显示器。
+			//MONITOR_DEFAULTTONEAREST：如果窗口没有与显示器重叠，则返回最接近窗口的显示器。
+			HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+			fullScreenExclusiveWin32Info.sType = VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_WIN32_INFO_EXT;
+			fullScreenExclusiveWin32Info.hmonitor = hMonitor;
 
-    FullScreenInfo.sType = VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_INFO_EXT;
-    FullScreenInfo.fullScreenExclusive = bIsFullScreen ? VK_FULL_SCREEN_EXCLUSIVE_ALLOWED_EXT : VK_FULL_SCREEN_EXCLUSIVE_DISALLOWED_EXT;
-    FullScreenInfo.pNext = &fullScreenExclusiveWin32Info;
-    info.pNext = &FullScreenInfo;
-#endif
+			FullScreenInfo.sType = VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_INFO_EXT;
+			FullScreenInfo.fullScreenExclusive = bIsFullScreen ? VK_FULL_SCREEN_EXCLUSIVE_ALLOWED_EXT : VK_FULL_SCREEN_EXCLUSIVE_DISALLOWED_EXT;
+			FullScreenInfo.pNext = &fullScreenExclusiveWin32Info;
+			info.pNext = &FullScreenInfo;
+		#endif
 	}
 	auto result = vkCreateSwapchainKHR(_device, &info, VK_NULL_HANDLE, &newSwapchain);
 	if (result != VK_SUCCESS)
@@ -1460,6 +1463,10 @@ void VulkanManager::Transition(
 	uint32_t baseArrayLayer, 
 	uint32_t layerCount)
 {
+	if (oldLayout == newLayout)
+	{
+		return;
+	}
 	VkImageMemoryBarrier imageBarrier = {};
 	imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	imageBarrier.pNext = nullptr;
@@ -1787,6 +1794,32 @@ bool VulkanManager::Present(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, u
 	presentInfo.pResults = &infoResult; // Optional
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = &semaphore;
+	auto result = vkQueuePresentKHR(_graphicsQueue, &presentInfo);
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+	{
+		//MessageOut("VK_ERROR_OUT_OF_DATE_KHR or VK_SUBOPTIMAL_KHR.Swapchain need to reset.", false, false);//太烦人了,不影响
+		return false;
+	}
+	else if (result != VK_SUCCESS || infoResult != VK_SUCCESS)
+	{
+		MessageOut(GetInternationalizationText("Renderer", "A000011"), false, true);
+		return false;
+	}
+	return true;
+}
+
+bool VulkanManager::Present(VkSwapchainKHR& swapchain, std::vector<VkSemaphore> semaphores, uint32_t& swapchainImageIndex)
+{
+	VkResult infoResult = VK_SUCCESS;
+	VkPresentInfoKHR presentInfo = {};
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	presentInfo.pNext = nullptr;
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = &swapchain;
+	presentInfo.pImageIndices = &swapchainImageIndex;
+	presentInfo.pResults = &infoResult; // Optional
+	presentInfo.waitSemaphoreCount = (uint32_t)semaphores.size();
+	presentInfo.pWaitSemaphores = semaphores.data();
 	auto result = vkQueuePresentKHR(_graphicsQueue, &presentInfo);
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 	{
@@ -2511,16 +2544,33 @@ void VulkanManager::ImguiEndDraw(VkCommandBuffer cmdBuf)
 #endif
 }
 
-void VulkanManager::ImguiEndFrame()
+bool VulkanManager::ImguiEndFrame(VkSemaphore NeedWait)
 {
 #if ENABLE_IMGUI
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	bool bHasViewports = true;
+	ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
 		ImGui::UpdatePlatformWindows();
-		ImGui::RenderPlatformWindowsDefault();
-		// TODO for OpenGL: restore current GL context.
+		ImGui::RenderPlatformWindowsDefault(nullptr, NeedWait);
+		if (platform_io.Viewports.Size <= 1)
+		{
+			bHasViewports = false;
+		}
 	}
+	else
+	{
+		bHasViewports = false;
+	}
+
+	//没有多视口的模式下，Imgui是不会创建新的SubmitQueue和Swapchain
+	if (NeedWait != nullptr && bHasViewports == false)
+	{
+
+
+	}
+	return bHasViewports;
 #endif
 }
 
@@ -2555,30 +2605,6 @@ void VulkanManager::SubmitQueueImmediate(std::vector<VkCommandBuffer> cmdBufs, V
 	DestroyFence(fence);
 }
 
-void VulkanManager::SubmitQueue(std::vector<VkCommandBuffer> cmdBufs, std::vector <VkSemaphore> lastSemaphore, std::vector <VkSemaphore> newSemaphore, VkPipelineStageFlags waitStageMask, VkQueue queue)
-{
-	if (cmdBufs.size() <= 0)
-	{
-		MessageOut(GetInternationalizationText("Renderer", "A000013"), false, true);
-	}
-	VkSubmitInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	info.pWaitDstStageMask = &waitStageMask;
-	info.waitSemaphoreCount = (uint32_t)lastSemaphore.size();
-	info.pWaitSemaphores = lastSemaphore.data();
-	info.signalSemaphoreCount = (uint32_t)newSemaphore.size();
-	info.pSignalSemaphores = newSemaphore.data();
-	info.commandBufferCount = static_cast<uint32_t>(cmdBufs.size());
-	info.pCommandBuffers = cmdBufs.data();
-	VkResult result;
-	if (queue == VK_NULL_HANDLE)
-		result = vkQueueSubmit(_graphicsQueue, 1, &info, VK_NULL_HANDLE);
-	else
-		result = vkQueueSubmit(queue, 1, &info, VK_NULL_HANDLE);
-	if (result != VK_SUCCESS)
-		MessageOut((HString("[Submit Queue]vkQueueSubmit error : ")+ GetVkResult(result)), false, true);
-}
-
 VkViewport VulkanManager::GetViewport(float w, float h)
 {
 	VkViewport viewport = {};
@@ -2591,15 +2617,35 @@ VkViewport VulkanManager::GetViewport(float w, float h)
 	return viewport;
 }
 
-void VulkanManager::SubmitQueueForPasses(VkCommandBuffer& cmdBuf, VkSemaphore& presentSemaphore, VkSemaphore& submitFinishSemaphore, VkFence& executeFence, VkPipelineStageFlags waitStageMask, VkQueue queue)
+void VulkanManager::SubmitQueueForPasses(VkCommandBuffer& cmdBuf, VkSemaphore wait, VkSemaphore signal, VkFence executeFence, VkPipelineStageFlags waitStageMask, VkQueue queue)
 {
 	VkSubmitInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	info.pWaitDstStageMask = &waitStageMask;
 	info.waitSemaphoreCount = 1;
-	info.pWaitSemaphores = &presentSemaphore;
+	info.pWaitSemaphores = &wait;
 	info.signalSemaphoreCount = 1;
-	info.pSignalSemaphores = &submitFinishSemaphore;
+	info.pSignalSemaphores = &signal;
+	info.commandBufferCount = 1;
+	info.pCommandBuffers = &cmdBuf;
+	VkResult result;
+	if (queue == VK_NULL_HANDLE)
+		result = vkQueueSubmit(_graphicsQueue, (uint32_t)1, &info, executeFence);
+	else
+		result = vkQueueSubmit(queue, (uint32_t)1, &info, executeFence);
+	if (result != VK_SUCCESS)
+		MessageOut((HString("[Submit Queue]vkQueueSubmit error : ") + GetVkResult(result)), false, true);
+}
+
+void VulkanManager::SubmitQueue(VkCommandBuffer& cmdBuf, std::vector<VkSemaphore> waits, std::vector<VkSemaphore> signals, VkFence executeFence, std::vector<VkPipelineStageFlags> waitStageMask, VkQueue queue)
+{
+	VkSubmitInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	info.pWaitDstStageMask = waitStageMask.data();
+	info.waitSemaphoreCount = (uint32_t)waits.size();
+	info.pWaitSemaphores = waits.data();
+	info.signalSemaphoreCount = (uint32_t)signals.size();;
+	info.pSignalSemaphores = signals.data();
 	info.commandBufferCount = 1;
 	info.pCommandBuffers = &cmdBuf;
 	VkResult result;

@@ -60,10 +60,13 @@ void PostProcessPass::PassUpdate()
 	const auto& manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.7, 0.6, 0.6, 0.4));
+
+	auto finalColor = GetSceneTexture(SceneTextureDesc::FinalColor);
+	finalColor->Transition(cmdBuf, finalColor->GetLayout(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	//Update FrameBuffer
 	ResetFrameBufferCustom(_renderer->GetRenderSize(), 
 		{
-			GetSceneTexture(SceneTextureDesc::FinalColor)
+			finalColor
 		});
 	SetViewport(_renderer->GetRenderSize());
 

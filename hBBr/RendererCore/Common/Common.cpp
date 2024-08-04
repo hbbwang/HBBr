@@ -53,7 +53,7 @@ void MessageOut(HString msg, bool bExit, bool bMessageBox, const char* textColor
 		}
 		else if (buttonid == 2)
 		{
-			VulkanApp::AppQuit();
+			exit(0);
 		}
 		#endif
     }

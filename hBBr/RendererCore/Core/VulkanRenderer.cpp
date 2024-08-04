@@ -357,6 +357,14 @@ bool VulkanRenderer::ResizeBuffer()
 			return false;
 		}
 
+		_vulkanManager->GetSurfaceSize(_surface, _cacheSurfaceSize);
+		_imguiPassEditor->CheckWindowValid();
+		if (_cacheSurfaceSize.width <= 0 || _cacheSurfaceSize.height <= 0)
+		{
+			bResizeBuffer = true;
+			return false;
+		}
+
 		_renderSize = _cacheSurfaceSize = _surfaceSize = _vulkanManager->CreateSwapchain(
 			_windowHandle, 
 			{ 1,1 }, 
