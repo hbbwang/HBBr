@@ -7,7 +7,7 @@
 class DescriptorSet
 {
 	friend class VulkanObjectManager;
-
+	friend class VulkanRenderer;
 public:
 
 	DescriptorSet(class VulkanRenderer* renderer);

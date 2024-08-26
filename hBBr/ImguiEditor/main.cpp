@@ -59,10 +59,12 @@ int main(int argc, char* argv[])
 	}
 	SDL_SetWindowSize(mainForm->window, w, h);
 	SDL_SetWindowPosition(mainForm->window, x, y);
+	//´´½¨±à¼­Æ÷´°¿Ú
+	auto editorForm = VulkanApp::CreateNewWindow(w, h, GetEditorInternationalizationText("MainWindow", "MainTitle").c_str(), true);
 	//
 	while (VulkanApp::UpdateForm())
 	{
-		if (!_bInit && mainForm->renderer->GetEditorGuiPass())
+		if (!_bInit)
 		{
 			_bInit = true;
 			_mainEditor = new EditorMain;

@@ -30,6 +30,7 @@ void ImguiPass::PassInit()
 		}
 	}
 	_passName = "Imgui Render Pass";
+
 }
 
 ImguiPass::ImguiPass(VulkanRenderer* renderer)
@@ -78,7 +79,7 @@ void ImguiPass::PassUpdate(std::vector<std::shared_ptr<class Texture2D>> frameBu
 	//ImGui::ShowDemoWindow((bool*)1);
 	for (auto& i : _gui_extensions)
 	{
-		i(_imguiContent);
+		i(this);
 	}
 	ShowPerformance();
 
@@ -87,7 +88,7 @@ void ImguiPass::PassUpdate(std::vector<std::shared_ptr<class Texture2D>> frameBu
 	EndRenderPass();
 }
 
-void ImguiPass::AddGui(std::function<void(struct ImGuiContext*)> fun)
+void ImguiPass::AddGui(std::function<void(ImguiPass*)> fun)
 {
 	_gui_extensions.push_back(fun);
 }

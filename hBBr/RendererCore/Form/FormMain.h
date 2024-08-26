@@ -3,7 +3,7 @@
 #include "VulkanManager.h"
 #include "FileSystem.h"
 #include "HTime.h"
-
+#include "HRect.h"
 struct VulkanForm
 {
 	HString name;
@@ -13,6 +13,7 @@ struct VulkanForm
 	bool bStopRender = false;
 	std::vector<struct ImGuiContext*> imguiContents;
 	std::vector<std::function<void(VulkanForm*)>> closeCallbacks;
+	HRect inputContentRect;
 	~VulkanForm();
 };
 
