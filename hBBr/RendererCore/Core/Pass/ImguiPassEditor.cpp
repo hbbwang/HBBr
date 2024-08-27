@@ -144,7 +144,7 @@ void ImguiPassEditor::PassUpdate(std::shared_ptr<Texture2D> finalColor)
 	{
 		i(this);
 	}
-	ShowPerformance();
+	//ShowPerformance();
 	vkManager->ImguiEndDraw(cmdBuf);
 	//End
 	//vkManager->ImguiEndFrame(cmdBuf);

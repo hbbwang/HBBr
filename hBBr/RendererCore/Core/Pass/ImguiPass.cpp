@@ -3,6 +3,7 @@
 #include "imgui.h"
 #include "SceneTexture.h"
 #include "FormMain.h"
+#include "PassManager.h"
 /*
 	Imgui buffer pass 
 */
@@ -32,12 +33,6 @@ void ImguiPass::PassInit()
 	_passName = "Imgui Render Pass";
 }
 
-ImguiPass::ImguiPass(VulkanRenderer* renderer)
-	:GraphicsPass(nullptr)
-{
-	_renderer = renderer;
-}
-
 ImguiPass::~ImguiPass()
 {
 	ImGui::SetCurrentContext(_imguiContent);
@@ -60,7 +55,12 @@ void ImguiPass::EndFrame()
 	vkManager->ImguiEndFrame(nullptr);
 }
 
-void ImguiPass::PassUpdate(std::vector<std::shared_ptr<class Texture2D>> frameBuffers)
+void ImguiPass::AddGui(std::function<void(struct ImGuiContext*)> fun)
+{
+	_gui_extensions.push_back(fun);
+}
+
+void ImguiPass::PassUpdate()
 {
 	if (ImGui::GetCurrentContext() != _imguiContent)
 	{
@@ -70,7 +70,7 @@ void ImguiPass::PassUpdate(std::vector<std::shared_ptr<class Texture2D>> frameBu
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.1, 0.4, 0.2, 0.2));
 	//Update FrameBuffer
-	ResetFrameBufferCustom(_renderer->GetRenderSize(), frameBuffers);
+	ResetFrameBufferCustom(_renderer->GetRenderSize(), { GetSceneTexture(SceneTextureDesc::FinalColor) });
 	SetViewport(_renderer->GetRenderSize());
 	BeginRenderPass({ 0,0,0,0 });
 	vkManager->ImguiNewFrame();
@@ -85,16 +85,6 @@ void ImguiPass::PassUpdate(std::vector<std::shared_ptr<class Texture2D>> frameBu
 	//End
 	vkManager->ImguiEndDraw(cmdBuf);
 	EndRenderPass();
-}
-
-void ImguiPass::AddGui(std::function<void(struct ImGuiContext*)> fun)
-{
-	_gui_extensions.push_back(fun);
-}
-
-void ImguiPass::PassUpdate()
-{
-	
 }
 
 void ImguiPass::ShowPerformance()

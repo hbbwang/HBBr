@@ -63,8 +63,6 @@ void VulkanRenderer::Release()
 			m->_materialPrimitiveGroups.erase(this);
 		}
 	}
-	//
-	_imguiPass.reset();
 #if IS_EDITOR
 	_imguiPassEditor.reset();
 #endif
@@ -235,10 +233,6 @@ void VulkanRenderer::Render()
 			CreateEmptyWorld();
 		}
 
-		_imguiPass.reset(new ImguiPass(this));
-		_imguiPass->SetPassName("GUI Pass");
-		_imguiPass->PassInit();
-
 		#if IS_EDITOR
 		_imguiPassEditor.reset(new ImguiPassEditor(this));
 		_imguiPassEditor->SetPassName("Editor GUI Pass");
@@ -300,15 +294,11 @@ void VulkanRenderer::Render()
 				#endif
 				auto& mainPassManager = _passManagers[mainCamera];
 
-				//GUI Pass
-				_imguiPass->PassUpdate({
-					mainPassManager->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor)
-				});
-
 				//Editor GUI Pass
 				#if IS_EDITOR
 				_imguiPassEditor->PassUpdate(mainPassManager->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor));
 				#else
+
 				//编辑器使用Imgui制作，ImguiPassEditor会传递最后结果到Swapchain，不需要复制。
 				mainPassManager->CmdCopyFinalColorToSwapchain();
 				#endif		
@@ -317,7 +307,6 @@ void VulkanRenderer::Render()
 			_vulkanManager->EndCommandBuffer(cmdBuf);
 			_vulkanManager->SubmitQueueForPasses(cmdBuf, _presentSemaphore[_currentFrameIndex], _queueSubmitSemaphore[_currentFrameIndex], _executeFence[_currentFrameIndex]);
 			//Imgui如果开启了多视口模式，当控件离开窗口之后，会自动生成一套绘制流程，放在此处执行最后的处理会安全很多。
-			_imguiPass->EndFrame();
 			_imguiPassEditor->EndFrame();
 			//Present swapchain.
 			if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], swapchainIndex))
@@ -385,7 +374,6 @@ bool VulkanRenderer::ResizeBuffer()
 		{
 			p.second->PassesReset();
 		}
-		_imguiPass->PassReset();
 		_imguiPassEditor->PassReset();
 
 		bResizeBuffer = false;

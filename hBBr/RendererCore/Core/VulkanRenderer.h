@@ -162,10 +162,6 @@ public:
 
 	HBBR_INLINE double GetCPURenderingTime()const { return _cpuTime; }
 
-	HBBR_API HBBR_INLINE class ImguiPass* GetGuiPass()const {
-		return _imguiPass.get();
-	}
-	
 #if IS_EDITOR
 	
 	HBBR_API HBBR_INLINE class ImguiPassEditor* GetEditorGuiPass()const {
@@ -229,9 +225,6 @@ private:
 
 	//Passes，多少个相机，就有多少组passes需要渲染
 	std::map<class CameraComponent*, std::shared_ptr<class PassManager>> _passManagers;
-
-	//GUI pass
-	std::shared_ptr<class ImguiPass> _imguiPass;
 
 	#if IS_EDITOR
 	//GUI pass(Editor)

@@ -6,12 +6,12 @@
 class ImguiPass :public GraphicsPass
 {
 public:
-	ImguiPass(class VulkanRenderer* renderer);
+	ImguiPass(class VulkanRenderer* renderer) :GraphicsPass(nullptr) { _renderer = renderer; }
+	ImguiPass(class PassManager* manager) :GraphicsPass(manager) {}
 	virtual ~ImguiPass();
 	virtual void PassInit()override;
 	virtual void PassReset()override;
 	void EndFrame();
-	void PassUpdate(std::vector<std::shared_ptr<class Texture2D>> frameBuffers);
 	HBBR_API void AddGui(std::function<void(struct ImGuiContext*)> fun);
 protected:
 	virtual void PassUpdate()override;
