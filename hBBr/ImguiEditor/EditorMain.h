@@ -9,8 +9,6 @@ public:
 
 	VulkanForm* _mainForm = nullptr;
 
-	VulkanForm* _editorForm = nullptr;
-
 	class ImguiPassEditor* _editorGui = nullptr;
 
 	VkExtent2D _renderViewSize;

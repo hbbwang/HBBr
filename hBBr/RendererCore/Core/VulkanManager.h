@@ -388,8 +388,6 @@ public:
 
 	HBBR_API void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<std::shared_ptr<Texture2D>> texs, std::vector<VkSampler>samplers, int beginBindingIndex = 0);
 
-	HBBR_API void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<VkImageView> imageViews, std::vector<VkSampler>samplers, int beginBindingIndex = 0);
-
 	HBBR_API void UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<TextureUpdateInfo> updateInfo, int beginBindingIndex = 0);
 
 	HBBR_API void UpdateStoreTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<class Texture2D*> textures, int beginBindingIndex = 0);

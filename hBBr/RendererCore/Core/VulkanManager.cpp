@@ -2701,31 +2701,6 @@ void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, st
 	vkUpdateDescriptorSets(_device, (uint32_t)descriptorWrite.size(), descriptorWrite.data(), 0, VK_NULL_HANDLE);
 }
 
-void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<VkImageView> imageViews, std::vector<VkSampler> samplers, int beginBindingIndex)
-{
-	const uint32_t count = (uint32_t)imageViews.size();
-	std::vector<VkWriteDescriptorSet> descriptorWrite(count);
-	std::vector<VkDescriptorImageInfo> imageInfo(count);
-	for (uint32_t o = 0; o < count; o++)
-	{
-		imageInfo[o] = {};
-		imageInfo[o].sampler = samplers[o];
-		imageInfo[o].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		imageInfo[o].imageView = imageViews[o];
-		descriptorWrite[o] = {};
-		descriptorWrite[o].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrite[o].dstSet = descriptorSet;
-		descriptorWrite[o].dstBinding = beginBindingIndex + o;
-		descriptorWrite[o].dstArrayElement = 0;
-		descriptorWrite[o].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorWrite[o].descriptorCount = 1;
-		descriptorWrite[o].pBufferInfo = VK_NULL_HANDLE;
-		descriptorWrite[o].pImageInfo = &imageInfo[o];
-		descriptorWrite[o].pTexelBufferView = VK_NULL_HANDLE;
-	}
-	vkUpdateDescriptorSets(_device, (uint32_t)descriptorWrite.size(), descriptorWrite.data(), 0, VK_NULL_HANDLE);
-}
-
 void VulkanManager::UpdateTextureDescriptorSet(VkDescriptorSet descriptorSet, std::vector<TextureUpdateInfo> updateInfo, int beginBindingIndex)
 {
 	const uint32_t count = (uint32_t)updateInfo.size();

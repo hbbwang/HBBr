@@ -44,7 +44,7 @@ void ImguiPassEditor::PassInit()
 void ImguiPassEditor::CheckWindowValid()
 {
 	static bool main_window_minimized;
-	SDL_WindowFlags windowFlags = SDL_GetWindowFlags(_renderer->GetWindowHandle());
+	Uint32 windowFlags = SDL_GetWindowFlags(_renderer->GetWindowHandle());
 	bool minimized = (windowFlags & SDL_WINDOW_MINIMIZED) != 0;
 	if (minimized != main_window_minimized)
 	{

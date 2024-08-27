@@ -12,8 +12,7 @@
 EditorMain::EditorMain()
 {
 	_mainForm = VulkanApp::GetMainForm();
-	_editorForm = VulkanApp::GetForms()[1];
-	//_editorGui = _mainForm->renderer->GetEditorGuiPass();
+	_editorGui = _mainForm->renderer->GetEditorGuiPass();
 
 	MainMenu_File_Title = GetEditorInternationalizationText("MainWindow", "MainMenu_File_Title").c_str();
 	MainMenu_File_NewWorld = GetEditorInternationalizationText("MainWindow", "MainMenu_File_NewWorld").c_str();
@@ -26,7 +25,7 @@ EditorMain::EditorMain()
 	ContentBrowserTitle = GetEditorInternationalizationText("MainWindow", "ContentBrowserTitle").c_str();
 	RenderView = GetEditorInternationalizationText("MainWindow", "RenderView").c_str();
 
-	auto mainEditorWidget = [this](ImguiPass* pass) {
+	auto mainEditorWidget = [this](ImguiPassEditor* pass) {
 		ImGuiID mainEditorDock = ImGui::GetID("MainEditorDock");
 		ImGui::DockSpaceOverViewport(mainEditorDock);	
 
@@ -86,28 +85,19 @@ EditorMain::EditorMain()
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
 		if (ImGui::Begin(RenderView.c_str()))
 		{
-			ImVec2 windowMin = ImGui::GetWindowContentRegionMin();
-			ImVec2 windowMax = ImGui::GetWindowContentRegionMax();
-			ImVec2 windowSize = {
-				(windowMax.x - windowMin.x),
-				(windowMax.y - windowMin.y)
-			};
+			ImVec2 windowSize = ImGui::GetContentRegionAvail();
+
 			// 获取当前 ImGui 样式
 			const ImGuiStyle& style = ImGui::GetStyle();
 			// 获取窗口边框大小
 			float windowBorderSize = style.WindowBorderSize;
 
-			_mainForm->inputContentRect.x = (int)windowMin.x;
-			_mainForm->inputContentRect.y = (int)windowMin.y;
-			_mainForm->inputContentRect.w = (int)windowSize.x;
-			_mainForm->inputContentRect.h = (int)windowSize.y;
-
-			_renderViewSize.width = (uint32_t)windowSize.x;
-			_renderViewSize.height = (uint32_t)windowSize.y;
+			_renderViewSize.width = windowSize.x;
+			_renderViewSize.height = windowSize.y;
 			//_renderViewSize.width += 14;
 			//_renderViewSize.height += 15;
 
-			ImGui::Image(pass->GetRenderer()->GetRenderView(), windowSize);
+			ImGui::Image(pass->GetRenderView(), windowSize);
 
 			if (_renderViewSize.width <= 0 || _renderViewSize.height <= 0)
 			{
@@ -120,5 +110,5 @@ EditorMain::EditorMain()
 		ImGui::PopStyleVar();
 		ImGui::PopStyleColor();
 	};
-	_editorForm->renderer->GetGuiPass()->AddGui(mainEditorWidget);
+	_editorGui->AddGui(mainEditorWidget);
 }

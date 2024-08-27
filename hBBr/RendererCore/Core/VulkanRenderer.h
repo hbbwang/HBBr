@@ -174,10 +174,6 @@ public:
 
 #endif
 
-	HBBR_API VkDescriptorSet GetRenderView();
-
-	void UpdateRenderView();
-
 	void Init();
 
 	//Renderer map
@@ -186,7 +182,7 @@ public:
 	VkSurfaceCapabilitiesKHR _surfaceCapabilities{};
 
 	std::vector<std::function<void(std::weak_ptr<World>)>> _spwanNewWorld;
-	 
+
 	bool bResizeBuffer;
 
 private:
@@ -236,10 +232,6 @@ private:
 
 	//GUI pass
 	std::shared_ptr<class ImguiPass> _imguiPass;
-
-	std::shared_ptr<class DescriptorSet> _renderView;
-
-	VkDescriptorSet _renderViewSet = nullptr;
 
 	#if IS_EDITOR
 	//GUI pass(Editor)

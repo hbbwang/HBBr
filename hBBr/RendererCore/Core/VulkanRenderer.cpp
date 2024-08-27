@@ -13,7 +13,6 @@
 #include "Pass/BasePass.h"
 #include "Pass/ImguiPass.h"
 #include "Pass/ImguiPassEditor.h"
-#include "DescriptorSet.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -65,8 +64,10 @@ void VulkanRenderer::Release()
 		}
 	}
 	//
-	_renderView.reset();
 	_imguiPass.reset();
+#if IS_EDITOR
+	_imguiPassEditor.reset();
+#endif
 	_vulkanManager->FreeCommandBuffers(_vulkanManager->GetCommandPool(), _cmdBuf);
 	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
 	_vulkanManager->DestroyRenderFences(_executeFence);
@@ -77,30 +78,6 @@ void VulkanRenderer::Release()
 	VulkanRenderer::_renderers.erase(GetName());
 	ConsoleDebug::print_endl(HString("Release Renderer : ") + _rendererName);
 	delete this;
-}
-
-VkDescriptorSet VulkanRenderer::GetRenderView()
-{
-	return _renderViewSet;
-}
-
-void VulkanRenderer::UpdateRenderView()
-{
-	if (!_renderView)
-	{
-		_renderView.reset(new DescriptorSet(this));
-		_renderView->CreateBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
-		_renderView->BuildDescriptorSetLayout();
-	}
-	{
-		const auto& manager = VulkanManager::GetManager();
-		manager->UpdateTextureDescriptorSet(
-			_renderView->GetDescriptorSet(),
-			{ _swapchainImageViews[GetCurrentFrameIndex()] },
-			{ Texture2D::GetSampler(TextureSampler_Nearest_Clamp) },
-			0);
-	}
-	_renderViewSet = _renderView->GetDescriptorSet();
 }
 
 void VulkanRenderer::Init()
@@ -157,8 +134,6 @@ void VulkanRenderer::Init()
 	ConsoleDebug::print_endl(HString("Create Renderer : ") + _rendererName);
 	_renderThreadFuncsOnce.reserve(10);
 	_renderThreadFuncs.reserve(10);
-
-	_imguiPass.reset(new ImguiPass(this));
 }
 
 void VulkanRenderer::ReleaseWorld()
@@ -260,8 +235,15 @@ void VulkanRenderer::Render()
 			CreateEmptyWorld();
 		}
 
+		_imguiPass.reset(new ImguiPass(this));
 		_imguiPass->SetPassName("GUI Pass");
 		_imguiPass->PassInit();
+
+		#if IS_EDITOR
+		_imguiPassEditor.reset(new ImguiPassEditor(this));
+		_imguiPassEditor->SetPassName("Editor GUI Pass");
+		_imguiPassEditor->PassInit();
+		#endif
 	}
 	else if (!_bRendererRelease && _bInit)
 	{
@@ -301,8 +283,6 @@ void VulkanRenderer::Render()
 			//_vulkanManager->ResetCommandBuffer(cmdBuf);
 			_vulkanManager->BeginCommandBuffer(cmdBuf);
 
-			UpdateRenderView();
-
 			for (auto& p : _passManagers)
 			{
 				p.second->SetupPassUniformBuffer(p.first, _renderSize);
@@ -325,12 +305,20 @@ void VulkanRenderer::Render()
 					mainPassManager->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor)
 				});
 
+				//Editor GUI Pass
+				#if IS_EDITOR
+				_imguiPassEditor->PassUpdate(mainPassManager->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor));
+				#else
+				//编辑器使用Imgui制作，ImguiPassEditor会传递最后结果到Swapchain，不需要复制。
 				mainPassManager->CmdCopyFinalColorToSwapchain();
+				#endif		
 			}
 
 			_vulkanManager->EndCommandBuffer(cmdBuf);
 			_vulkanManager->SubmitQueueForPasses(cmdBuf, _presentSemaphore[_currentFrameIndex], _queueSubmitSemaphore[_currentFrameIndex], _executeFence[_currentFrameIndex]);
 			//Imgui如果开启了多视口模式，当控件离开窗口之后，会自动生成一套绘制流程，放在此处执行最后的处理会安全很多。
+			_imguiPass->EndFrame();
+			_imguiPassEditor->EndFrame();
 			//Present swapchain.
 			if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], swapchainIndex))
 			{
@@ -370,7 +358,7 @@ bool VulkanRenderer::ResizeBuffer()
 		}
 
 		_vulkanManager->GetSurfaceSize(_surface, _cacheSurfaceSize);
-
+		_imguiPassEditor->CheckWindowValid();
 		if (_cacheSurfaceSize.width <= 0 || _cacheSurfaceSize.height <= 0)
 		{
 			bResizeBuffer = true;
@@ -397,8 +385,8 @@ bool VulkanRenderer::ResizeBuffer()
 		{
 			p.second->PassesReset();
 		}
-
 		_imguiPass->PassReset();
+		_imguiPassEditor->PassReset();
 
 		bResizeBuffer = false;
 
