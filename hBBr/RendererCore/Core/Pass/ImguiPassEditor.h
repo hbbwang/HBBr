@@ -7,7 +7,7 @@
 class ImguiPassEditor :public GraphicsPass
 {
 public:
-	ImguiPassEditor(class VulkanRenderer* renderer);
+	ImguiPassEditor(class VulkanSwapchain* swapchain);
 	virtual ~ImguiPassEditor();
 	virtual void PassInit()override;
 	void CheckWindowValid();
@@ -25,4 +25,5 @@ private:
 	std::shared_ptr<Texture2D> _renderViewTexture_old;
 	std::shared_ptr<DescriptorSet> _renderView;
 	uint32_t _currentImguiFrameIndex = 0;
+	VulkanSwapchain* _swapchain = nullptr;
 };

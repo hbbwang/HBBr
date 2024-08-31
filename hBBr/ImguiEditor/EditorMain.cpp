@@ -12,7 +12,7 @@
 EditorMain::EditorMain()
 {
 	_mainForm = VulkanApp::GetMainForm();
-	_editorGui = _mainForm->renderer->GetEditorGuiPass();
+	_editorGui = _mainForm->swapchain->GetEditorGuiPass();
 
 	MainMenu_File_Title = GetEditorInternationalizationText("MainWindow", "MainMenu_File_Title").c_str();
 	MainMenu_File_NewWorld = GetEditorInternationalizationText("MainWindow", "MainMenu_File_NewWorld").c_str();
@@ -81,8 +81,8 @@ EditorMain::EditorMain()
 		ImGui::End();
 
 		//主渲染窗口
-		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		//ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
+		//ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
 		if (ImGui::Begin(RenderView.c_str()))
 		{
 			ImVec2 windowSize = ImGui::GetContentRegionAvail();
@@ -92,8 +92,8 @@ EditorMain::EditorMain()
 			// 获取窗口边框大小
 			float windowBorderSize = style.WindowBorderSize;
 
-			_renderViewSize.width = windowSize.x;
-			_renderViewSize.height = windowSize.y;
+			_renderViewSize.width = (uint32_t)windowSize.x;
+			_renderViewSize.height = (uint32_t)windowSize.y;
 			//_renderViewSize.width += 14;
 			//_renderViewSize.height += 15;
 
@@ -104,11 +104,11 @@ EditorMain::EditorMain()
 				_renderViewSize = {2,2};
 			}
 			//调整渲染纹理大小
-			_mainForm->renderer->SetRenderSize(_renderViewSize);
+			_mainForm->swapchain->GetRenderers().begin()->second->SetRenderSize(_renderViewSize);
 		}
 		ImGui::End();
-		ImGui::PopStyleVar();
-		ImGui::PopStyleColor();
+		//ImGui::PopStyleVar();
+		//ImGui::PopStyleColor();
 	};
 	_editorGui->AddGui(mainEditorWidget);
 }

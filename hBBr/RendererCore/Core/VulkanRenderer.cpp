@@ -17,19 +17,12 @@
 #include "ShaderCompiler.h"
 #endif
 
-std::map<HString, VulkanRenderer*>		VulkanRenderer::_renderers;
-std::map<void*, std::function<void(VulkanRenderer* renderer, KeyCode key, KeyMod mod, Action action)>> VulkanRenderer::_key_inputs;
-std::map<void*, std::function<void(VulkanRenderer* renderer, MouseButton mouse, Action action)>> VulkanRenderer::_mouse_inputs;
-
-VulkanRenderer::VulkanRenderer(SDL_Window* windowHandle, const char* rendererName):
+VulkanRenderer::VulkanRenderer(VulkanSwapchain* swapchain, const char* rendererName):
 	_vulkanManager(VulkanManager::GetManager()),
-	_currentFrameIndex(0),
 	_bRendererRelease(false),
-	_windowHandle(windowHandle),
 	_rendererName(rendererName),
-	_swapchain(nullptr),
-	_surface(nullptr),
-	_bInit(false)
+	_bInit(false),
+	_swapchain(swapchain)
 {
 	Init();
 }
@@ -63,17 +56,10 @@ void VulkanRenderer::Release()
 			m->_materialPrimitiveGroups.erase(this);
 		}
 	}
-#if IS_EDITOR
-	_imguiPassEditor.reset();
-#endif
-	_vulkanManager->FreeCommandBuffers(_vulkanManager->GetCommandPool(), _cmdBuf);
-	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
-	_vulkanManager->DestroyRenderFences(_executeFence);
-	_vulkanManager->DestroyRenderSemaphores(_presentSemaphore);
-	_vulkanManager->DestroyRenderSemaphores(_queueSubmitSemaphore);
-	//_vulkanManager->DestroyRenderFences(_imageAcquiredFences);
-	_vulkanManager->DestroySurface(_surface);
-	VulkanRenderer::_renderers.erase(GetName());
+
+	//_vulkanManager->FreeCommandBuffers(_vulkanManager->GetCommandPool(), _cmdBuf);
+	//_vulkanManager->DestroyRenderFences(_executeFence);
+	//_vulkanManager->DestroyRenderSemaphores(_queueSubmitSemaphore);
 	ConsoleDebug::print_endl(HString("Release Renderer : ") + _rendererName);
 	delete this;
 }
@@ -84,54 +70,67 @@ void VulkanRenderer::Init()
 		_bIsInGame = true;
 	#endif
 
-	//Surface
-	ConsoleDebug::print_endl("hBBr:Start init Surface.");
-	_vulkanManager->ReCreateSurface_SDL(_windowHandle, _surface);
-	_vulkanManager->GetSurfaceCapabilities(_surface, &_surfaceCapabilities);
-
-	//Swapchain
-	ConsoleDebug::print_endl("hBBr:Start Check Surface Format.");
-	_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
-	ConsoleDebug::print_endl("hBBr:Start Create Swapchain.");
-	_renderSize = _surfaceSize = _vulkanManager->CreateSwapchain(
-		_windowHandle,
-		{ 1,1 },
-		_surface,
-		_surfaceFormat,
-		_swapchain,
-		_swapchainImages,
-		_swapchainImageViews,
-		_surfaceCapabilities,
-		&_cmdBuf,
-		&_presentSemaphore,
-		&_queueSubmitSemaphore,
-		& _executeFence);
-
-	//Set renderer map , Add new renderer
-	vkDeviceWaitIdle(_vulkanManager->GetDevice());
-	if (_renderers.size() <= 0)
-	{
-		_bIsMainRenderer = true;
-	}
-	auto rendererName = _rendererName;
-	for (int nameIndex = -1;;)
-	{
-		auto it = _renderers.find(_rendererName);
-		if (it == _renderers.end())
-		{
-			_renderers.emplace(std::make_pair(_rendererName, this));
-			break;
-		}
-		else
-		{
-			nameIndex++;
-			_rendererName = HString(rendererName) + "_" + HString::FromInt(nameIndex);
-			MessageOut((HString("Has the same name of renderer.Random a new name is [") + _rendererName + "]"), false, false);
-		}
-	}
-	ConsoleDebug::print_endl(HString("Create Renderer : ") + _rendererName);
 	_renderThreadFuncsOnce.reserve(10);
 	_renderThreadFuncs.reserve(10);
+
+	ResetResource();
+}
+
+void VulkanRenderer::ResetRenderer()
+{
+	ResetResource();
+	for (auto& p : _passManagers)
+	{
+		p.second->PassesReset();
+	}
+}
+
+void VulkanRenderer::ResetResource()
+{
+	auto swapchainCount = _vulkanManager->GetSwapchainBufferCount();
+	//init semaphores & fences
+	//if (_queueSubmitSemaphore.size() != swapchainCount)
+	//{
+	//	//ConsoleDebug::print_endl("hBBr:Swapchain: Queue Submit Semaphore.");
+	//	for (int i = 0; i < (int)_queueSubmitSemaphore.size(); i++)
+	//	{
+	//		_vulkanManager->DestroySemaphore(_queueSubmitSemaphore.at(i));
+	//		_queueSubmitSemaphore.at(i) = nullptr;
+	//	}
+	//	_queueSubmitSemaphore.resize(swapchainCount);
+	//	for (int i = 0; i < (int)swapchainCount; i++)
+	//	{
+	//		_vulkanManager->CreateVkSemaphore(_queueSubmitSemaphore.at(i));
+	//	}
+	//}
+	//if (_executeFence.size() != swapchainCount)
+	//{
+	//	//ConsoleDebug::print_endl("hBBr:Swapchain: image acquired fences.");
+	//	for (int i = 0; i < (int)_executeFence.size(); i++)
+	//	{
+	//		_vulkanManager->DestroyFence(_executeFence.at(i));
+	//		_executeFence.at(i) = nullptr;
+	//	}
+	//	_executeFence.resize(swapchainCount);
+	//	for (int i = 0; i < (int)swapchainCount; i++)
+	//	{
+	//		_vulkanManager->CreateFence(_executeFence.at(i));
+	//	}
+	//}
+	//if (_cmdBuf.size() != _vulkanManager->GetSwapchainBufferCount())
+	//{
+	//	//ConsoleDebug::print_endl("hBBr:Swapchain: Allocate Main CommandBuffers.");
+	//	for (int i = 0; i < (int)_cmdBuf.size(); i++)
+	//	{
+	//		_vulkanManager->FreeCommandBuffer(_vulkanManager->GetCommandPool(), _cmdBuf.at(i));
+	//		_cmdBuf.at(i) = nullptr;
+	//	}
+	//	_cmdBuf.resize(_vulkanManager->GetSwapchainBufferCount());
+	//	for (int i = 0; i < (int)_vulkanManager->GetSwapchainBufferCount(); i++)
+	//	{
+	//		_vulkanManager->AllocateCommandBuffer(_vulkanManager->GetCommandPool(), _cmdBuf.at(i));
+	//	}
+	//}
 }
 
 void VulkanRenderer::ReleaseWorld()
@@ -215,9 +214,9 @@ void VulkanRenderer::CreateEmptyWorld()
 	_world = World::CreateNewWorld("NewWorld");
 	_world->Load(this);
 }
-void VulkanRenderer::Render()
+
+VkSemaphore VulkanRenderer::Render(VkSemaphore wait)
 {
-	_cpuTimer.Start();
 	if (!_bInit) //Render loop Init.
 	{
 		_bInit = true;
@@ -232,24 +231,20 @@ void VulkanRenderer::Render()
 		{
 			CreateEmptyWorld();
 		}
-
-		#if IS_EDITOR
-		_imguiPassEditor.reset(new ImguiPassEditor(this));
-		_imguiPassEditor->SetPassName("Editor GUI Pass");
-		_imguiPassEditor->PassInit();
-		#endif
+		return nullptr;
 	}
 	else if (!_bRendererRelease && _bInit)
 	{
-		if (bResizeBuffer)
-		{
-			ResizeBuffer();
-			return;
-		}
+		_cpuTimer.Start();
+
+		uint32_t frameIndex = _swapchain->GetCurrentFrameIndex();
+
 		if(_swapchain)
 		{
-			//这个 _swapchainIndex 和 _currentFrameIndex 不是一个东西，前者是有效交换链的index，后者只是帧Index
-			uint32_t swapchainIndex = 0;
+			//_vulkanManager->WaitForFences({ _executeFence[_currentFrameIndex] });
+
+			//auto& cmdBuf = _cmdBuf[frameIndex];
+			//_vulkanManager->BeginCommandBuffer(cmdBuf);
 
 			for (auto& func : _renderThreadFuncsOnce)
 			{
@@ -265,124 +260,19 @@ void VulkanRenderer::Render()
 			if (_world)
 				_world->WorldUpdate();
 
-			_vulkanManager->WaitForFences({ _executeFence[_currentFrameIndex] });
-
-			if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _presentSemaphore[_currentFrameIndex], nullptr, &swapchainIndex))
-			{
-				ResizeBuffer();
-				return;
-			}
-
-			auto& cmdBuf = _cmdBuf[_currentFrameIndex];
-			//_vulkanManager->ResetCommandBuffer(cmdBuf);
-			_vulkanManager->BeginCommandBuffer(cmdBuf);
-
 			for (auto& p : _passManagers)
 			{
 				p.second->SetupPassUniformBuffer(p.first, _renderSize);
 				p.second->PassesUpdate();
 			}
 
-			//把MainCamera绘制完的图像复制到swapchain
-			if (_world)
-			{
-				CameraComponent* mainCamera = _world->_mainCamera;
+			//_vulkanManager->EndCommandBuffer(cmdBuf);
+			//_vulkanManager->SubmitQueueForPasses(cmdBuf, wait, _queueSubmitSemaphore[frameIndex], _executeFence[frameIndex]);
 
-				#if IS_EDITOR
-				if (mainCamera == nullptr) //编辑器内，主相机无效的情况下,强制切换到编辑器相机
-					mainCamera = _world->_editorCamera;
-				#endif
-				auto& mainPassManager = _passManagers[mainCamera];
-
-				//Editor GUI Pass
-				#if IS_EDITOR
-				_imguiPassEditor->PassUpdate(mainPassManager->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor));
-				#else
-
-				//编辑器使用Imgui制作，ImguiPassEditor会传递最后结果到Swapchain，不需要复制。
-				mainPassManager->CmdCopyFinalColorToSwapchain();
-				#endif		
-			}
-
-			_vulkanManager->EndCommandBuffer(cmdBuf);
-			_vulkanManager->SubmitQueueForPasses(cmdBuf, _presentSemaphore[_currentFrameIndex], _queueSubmitSemaphore[_currentFrameIndex], _executeFence[_currentFrameIndex]);
-			//Imgui如果开启了多视口模式，当控件离开窗口之后，会自动生成一套绘制流程，放在此处执行最后的处理会安全很多。
-			_imguiPassEditor->EndFrame();
-			//Present swapchain.
-			if (!_vulkanManager->Present(_swapchain, _queueSubmitSemaphore[_currentFrameIndex], swapchainIndex))
-			{
-				ResizeBuffer();
-				return;
-			}
-
-			//Get next frame index.
-			_currentFrameIndex = (_currentFrameIndex + 1) % _vulkanManager->GetSwapchainBufferCount();
 		}
+		_cpuTime = _cpuTimer.End_ms();
+		// return _queueSubmitSemaphore[frameIndex];
 	}
-	_cpuTime = _cpuTimer.End_ms();
-}
 
-void VulkanRenderer::RendererResize(uint32_t w, uint32_t h)
-{
-	bResizeBuffer = true;
-}
-
-bool VulkanRenderer::ResizeBuffer()
-{
-	if (!_bRendererRelease)
-	{
-		_vulkanManager->DeviceWaitIdle();
-
-		_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
-#if __ANDROID__
-		_Sleep(200);
-#endif
-		//部分情况下重置窗口会出现Surface被销毁的问题，最好Surface也重新创建一个
-		_vulkanManager->ReCreateSurface_SDL(_windowHandle, _surface);
-
-		//获取surfaceCapabilities，顺便检查一下Surface是否已经丢失了
-		if (!_vulkanManager->GetSurfaceCapabilities(_surface, &_surfaceCapabilities))
-		{
-			return false;
-		}
-
-		_vulkanManager->GetSurfaceSize(_surface, _cacheSurfaceSize);
-		_imguiPassEditor->CheckWindowValid();
-		if (_cacheSurfaceSize.width <= 0 || _cacheSurfaceSize.height <= 0)
-		{
-			bResizeBuffer = true;
-			return false;
-		}
-
-		_renderSize = _cacheSurfaceSize = _surfaceSize = _vulkanManager->CreateSwapchain(
-			_windowHandle, 
-			{ 1,1 }, 
-			_surface, 
-			_surfaceFormat, 
-			_swapchain, 
-			_swapchainImages, 
-			_swapchainImageViews, 
-			_surfaceCapabilities, 
-			&_cmdBuf, 
-			&_presentSemaphore, 
-			&_queueSubmitSemaphore, 
-			&_executeFence, 
-			false, 
-			true);
-
-		for (auto& p : _passManagers)
-		{
-			p.second->PassesReset();
-		}
-		_imguiPassEditor->PassReset();
-
-		bResizeBuffer = false;
-
-		//重置buffer会导致画面丢失，我们要在这一瞬间重新把buffer绘制回去，缓解缩放卡顿。
-		_currentFrameIndex = 0;
-		Render();
-
-		return true;
-	}
-	return false;
+	return nullptr;
 }

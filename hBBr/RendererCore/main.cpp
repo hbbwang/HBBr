@@ -1,6 +1,7 @@
 ﻿
 #include "./Core/VulkanManager.h"
 #include "./Core/VulkanRenderer.h"
+#include "./Core/VulkanSwapchain.h"
 #include "./Form/FormMain.h"
 #include "./Core/Shader.h"
 #include "./Core/Pipeline.h"
@@ -54,9 +55,9 @@ void ResizeCallBack(SDL_Window* window, int width, int height)
 	{
 		return form->window == window;
 	});
-	if (it != VulkanApp::GetForms().end() && (*it)->renderer)
+	if (it != VulkanApp::GetForms().end() && (*it)->swapchain)
 	{
-		(*it)->renderer->RendererResize((uint32_t)width, (uint32_t)height);
+		(*it)->swapchain->ResizeBuffer();
 	}
 }
 
@@ -68,10 +69,10 @@ void CloseCallBack(SDL_Window* window)
 	});
 	if (it != VulkanApp::GetForms().end())
 	{
-		if ((*it)->renderer)
+		if ((*it)->swapchain)
 		{
-			(*it)->renderer->Release();
-			(*it)->renderer = nullptr;
+			(*it)->swapchain->Release();
+			(*it)->swapchain = nullptr;
 		}
 	}
 }
@@ -204,10 +205,10 @@ void VulkanApp::DeInitVulkanManager()
 	{
 		for (auto& i : _forms)
 		{
-			if (i->renderer)
+			if (i->swapchain)
 			{
-				i->renderer->Release();
-				i->renderer = nullptr;
+				i->swapchain->Release();
+				i->swapchain = nullptr;
 			}
 			if (i->window)
 			{
@@ -234,7 +235,7 @@ void VulkanApp::DeInitVulkanManager()
 //DISABLE_CODE_OPTIMIZE
 bool VulkanApp::UpdateForm()
 {
-	if (_mainForm == nullptr || _mainForm->renderer == nullptr)
+	if (_mainForm == nullptr || _mainForm->swapchain == nullptr)
 	{
 		return false;
 	}
@@ -335,9 +336,13 @@ bool VulkanApp::UpdateForm()
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 		{
 			MouseButtonCallBack(winForm, event.button.button, event.button.state);
-			for (auto& func : VulkanRenderer::_mouse_inputs)
+
+			for (auto& renderer : winForm->swapchain->GetRenderers())
 			{
-				func.second(winForm->renderer, (MouseButton)event.button.button, (Action)event.button.state);
+				for (auto& func : renderer.second->_mouse_inputs)
+				{
+					func.second(renderer.second, (MouseButton)event.button.button, (Action)event.button.state);
+				}	
 			}
 			break;
 		}
@@ -345,9 +350,12 @@ bool VulkanApp::UpdateForm()
 		case SDL_EVENT_KEY_UP:
 		{
 			KeyBoardCallBack(winForm, event.key.key, event.key.scancode, event.key.state, event.key.mod);
-			for (auto& func :VulkanRenderer::_key_inputs)
+			for (auto& renderer : winForm->swapchain->GetRenderers())
 			{
-				func.second(winForm->renderer, (KeyCode)event.key.key, (KeyMod)event.key.mod, (Action)event.key.state);
+				for (auto& func : renderer.second->_key_inputs)
+				{
+					func.second(renderer.second, (KeyCode)event.key.key, (KeyMod)event.key.mod, (Action)event.key.state);
+				}
 			}
 			break;
 		}
@@ -440,8 +448,8 @@ void VulkanApp::UpdateRender()
 	{
 		Texture2D::GlobalUpdate();
 		VulkanObjectManager::Get()->Update();
-		if(w->renderer != nullptr && !w->bMinimized && !w->bStopRender)
-			w->renderer->Render();
+		if(w->swapchain != nullptr && !w->bMinimized && !w->bStopRender)
+			w->swapchain->Update();
 	}
 }
 //ENABLE_CODE_OPTIMIZE
@@ -500,9 +508,14 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 
 void VulkanApp::CreateRenderer(VulkanForm* form)
 {
-	if (form != nullptr)
+	//Create Swapchain
+	if (form != nullptr && form->swapchain == nullptr)
 	{
-		form->renderer = new VulkanRenderer(form->window, form->name.c_str());
+		form->swapchain = new VulkanSwapchain(form->window);
+	}
+	if (form != nullptr && form->swapchain != nullptr)
+	{
+		form->swapchain->CreateRenderer(form->name.c_str());
 		//Try Refresh focus
 		SetFormVisiable(form, false);
 		SetFormVisiable(form, true);
@@ -529,10 +542,10 @@ void VulkanApp::RemoveWindow(VulkanForm* form)
 			{
 				auto form = _forms[i];
 				_forms.erase(_forms.begin() + i);
-				if (form->renderer)
+				if (form->swapchain)
 				{
-					form->renderer->Release();
-					form->renderer = nullptr;
+					form->swapchain->Release();
+					form->swapchain = nullptr;
 				}
 				delete form;
 				form = nullptr;

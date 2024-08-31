@@ -23,7 +23,7 @@ class PassManager
 	friend class VulkanRenderer;
 	friend class DirectionalLightComponent;
 public:
-	PassManager(VulkanRenderer* renderer);
+	PassManager(class CameraComponent* camera);
 	~PassManager() 
 	{
 		PassesRelease();
@@ -40,7 +40,7 @@ public:
 		return _executePasses;
 	}
 
-	HBBR_API HBBR_INLINE std::vector<std::shared_ptr<PassBase>> GetInitPasses()const {
+	HBBR_API HBBR_INLINE std::unordered_map<Pass, std::shared_ptr<PassBase>> GetInitPasses()const {
 		return _passes;
 	}
 
@@ -50,6 +50,10 @@ public:
 
 	HBBR_API HBBR_INLINE PostProcessUniformBuffer* GetPostProcessUniformBuffer() {
 		return &_postProcessUniformBuffer;
+	}
+
+	HBBR_API HBBR_INLINE CameraComponent* GetCamera()const {
+		return _camera;
 	}
 
 	HBBR_API HBBR_INLINE void BindLightingParameter(DirectionalLightComponent* lightComp) {
@@ -65,7 +69,7 @@ public:
 	}
 
 	/* 初始化Pass添加,passName最好唯一 */
-	void AddPass(std::shared_ptr<PassBase> newPass, const char* passName);
+	void AddPass(std::shared_ptr<PassBase> newPass, Pass pass);
 
 	void CmdCopyFinalColorToSwapchain();
 
@@ -79,9 +83,11 @@ public:
 
 private:
 
+	class CameraComponent* _camera;
+
 	std::shared_ptr <SceneTexture> _sceneTextures;
 
-	std::vector<std::shared_ptr<PassBase>> _passes;
+	std::unordered_map<Pass, std::shared_ptr<PassBase>> _passes;
 
 	std::vector<std::shared_ptr<PassBase>> _executePasses;
 

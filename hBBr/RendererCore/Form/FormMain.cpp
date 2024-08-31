@@ -4,10 +4,10 @@
 
 VulkanForm::~VulkanForm()
 {
-	if (renderer)
+	if (swapchain)
 	{
-		renderer->Release();
-		renderer = nullptr;
+		swapchain->Release();
+		swapchain = nullptr;
 	}
 	if (window)
 	{

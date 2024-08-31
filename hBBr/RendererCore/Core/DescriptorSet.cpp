@@ -101,9 +101,9 @@ void DescriptorSet::BufferMapping(uint32_t bindingIndex, void* data, VkDeviceSiz
 void DescriptorSet::UpdateBufferDescriptorSet(uint32_t bindingIndex, VkDeviceSize offset, VkDeviceSize range)
 {
 	auto it = _buffers.find(bindingIndex);
-	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][bindingIndex] == 1 && _buffers.end() != it)
+	if (_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][bindingIndex] == 1 && _buffers.end() != it)
 	{
-		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][bindingIndex] = 0;
+		_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][bindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();
 		manager->UpdateBufferDescriptorSet(
 			it->second->GetBuffer(),
@@ -116,9 +116,9 @@ void DescriptorSet::UpdateBufferDescriptorSet(uint32_t bindingIndex, VkDeviceSiz
 void DescriptorSet::UpdateDescriptorSetWholeBuffer(uint32_t bindingIndex)
 {
 	auto it = _buffers.find(bindingIndex);
-	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][bindingIndex] == 1 && _buffers.end() != it)
+	if (_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][bindingIndex] == 1 && _buffers.end() != it)
 	{
-		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][bindingIndex] = 0;
+		_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][bindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();
 		manager->UpdateBufferDescriptorSet(
 			_buffers[bindingIndex]->GetBuffer(),
@@ -139,9 +139,9 @@ void DescriptorSet::UpdateTextureDescriptorSet(std::vector<TextureUpdateInfo> te
 			break;
 		}
 	}
-	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] == 1 || bTextureReset)
+	if (_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][beginBindingIndex] == 1 || bTextureReset)
 	{
-		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] = 0;
+		_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][beginBindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();
 		manager->UpdateTextureDescriptorSet(GetDescriptorSet(), texs , beginBindingIndex);
 	}
@@ -158,9 +158,9 @@ void DescriptorSet::UpdateTextureDescriptorSet(std::vector<std::shared_ptr<Textu
 			break;
 		}
 	}
-	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] == 1 || bTextureReset)
+	if (_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][beginBindingIndex] == 1 || bTextureReset)
 	{
-		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] = 0;
+		_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][beginBindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();
 		manager->UpdateTextureDescriptorSet(GetDescriptorSet(), texs, samplers, beginBindingIndex);
 	}
@@ -177,9 +177,9 @@ void DescriptorSet::UpdateStoreTextureDescriptorSet(std::vector<class Texture2D*
 			break;
 		}
 	}
-	if (_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] == 1  || bTextureReset)
+	if (_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][beginBindingIndex] == 1  || bTextureReset)
 	{
-		_bNeedUpdate[_renderer->GetCurrentFrameIndex()][beginBindingIndex] = 0;
+		_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][beginBindingIndex] = 0;
 		const auto& manager = VulkanManager::GetManager();
 		manager->UpdateStoreTextureDescriptorSet(GetDescriptorSet(), textures, beginBindingIndex);
 	}
@@ -199,10 +199,10 @@ void DescriptorSet::RefreshDescriptorSetAllBinding()
 
 const VkDescriptorSet& DescriptorSet::GetDescriptorSet()
 {
-	if (_descriptorSets[_renderer->GetCurrentFrameIndex()] == nullptr)
+	if (_descriptorSets[_renderer->GetSwapchain()->GetCurrentFrameIndex()] == nullptr)
 	{
 		const auto& manager = VulkanManager::GetManager();
-		manager->AllocateDescriptorSet(manager->GetDescriptorPool(), _layout, _descriptorSets[_renderer->GetCurrentFrameIndex()]);
+		manager->AllocateDescriptorSet(manager->GetDescriptorPool(), _layout, _descriptorSets[_renderer->GetSwapchain()->GetCurrentFrameIndex()]);
 	}
-	return _descriptorSets[_renderer->GetCurrentFrameIndex()];
+	return _descriptorSets[_renderer->GetSwapchain()->GetCurrentFrameIndex()];
 }

@@ -7,32 +7,34 @@
 #include "Pass/PreCommandPass.h"
 #include "Pass/PostProcessPass.h"
 #include "Component/CameraComponent.h"
-PassManager::PassManager(VulkanRenderer* renderer)
+#include "Asset/World.h"
+PassManager::PassManager(CameraComponent* camera)
 {
-	_renderer = renderer;
+	_renderer = camera->GetWorld()->GetRenderer();
+	_camera = camera;
 	_lightings.reserve(MaxLightingNum);
 	_lightUniformBuffer = {};
-	_sceneTextures.reset(new SceneTexture(renderer));
+	_sceneTextures.reset(new SceneTexture(_renderer));
 	{
 		//Precommand Pass
 		std::shared_ptr<PreCommandPass> precommand = std::make_shared<PreCommandPass>(this);
-		AddPass(precommand, "PreCommand");
-		//Opaque Pass
+		AddPass(precommand, Pass::PreCommand);
+		//Base Pass
 		std::shared_ptr<BasePass> basePass = std::make_shared<BasePass>(this);
-		AddPass(basePass, "Base Pass"); 
+		AddPass(basePass, Pass::BasePass); 
 		//Deferred Lighting Pass
 		std::shared_ptr<DeferredLightingPass> deferredLighting = std::make_shared<DeferredLightingPass>(this);
-		AddPass(deferredLighting, "Deferred Lighting");
+		AddPass(deferredLighting, Pass::DeferredLighting);
 		//Post Process Pass
 		std::shared_ptr<PostProcessPass> postProcess = std::make_shared<PostProcessPass>(this);
-		AddPass(postProcess, "Post Process");
+		AddPass(postProcess, Pass::PostProcess);
 		//Imgui Pass
 		std::shared_ptr<ImguiPass> imgui = std::make_shared<ImguiPass>(this);
-		AddPass(imgui, "Imgui");
+		AddPass(imgui, Pass::Imgui);
 
 		for (auto& i : _passes)
 		{
-			i->PassInit();
+			i.second->PassInit();
 		}
 		_executePasses.reserve(_passes.size());
 	}
@@ -40,7 +42,7 @@ PassManager::PassManager(VulkanRenderer* renderer)
 
 void PassManager::PassesUpdate()
 {
-	const uint32_t& frameIndex =_renderer->_currentFrameIndex;
+	const uint32_t& frameIndex =_renderer->_swapchain->GetCurrentFrameIndex();
 
 	bool bFrameBufferNeedReset = _sceneTextures->UpdateTextures();
 
@@ -72,22 +74,21 @@ void PassManager::PassesUpdate()
 	_executePasses.clear();
 
 	const auto queryFrameIndex = frameIndex * (uint32_t)_passes.size() * 2;
-	vkCmdResetQueryPool(_renderer->GetCommandBuffer(), vkManager->GetQueryTimestamp(), queryFrameIndex, (uint32_t)_passes.size() * 2);
+	//vkCmdResetQueryPool(_renderer->GetCommandBuffer(), vkManager->GetQueryTimestamp(), queryFrameIndex, (uint32_t)_passes.size() * 2);
 	for (auto p : _passes)
 	{
-		const auto queryFirstIndex = queryFrameIndex + p->passIndex * 2;
-		if (p->bStartQuery[frameIndex])
-		{
-			p->bStartQuery[frameIndex] = false;
-			p->_gpuTime = vkManager->CalculateTimestampQuery(queryFirstIndex, 2) / 1000000.0;
-		}
+		auto& pass = p.second;
 
-		//ConsoleDebug::printf_endl(p->GetName());
-
-		p->PassBeginUpdate();
-		p->PassUpdate();
-		_executePasses.push_back(p);
-		p->PassEndUpdate();
+		//const auto queryFirstIndex = queryFrameIndex + pass->passIndex * 2;
+		//if (pass->bStartQuery[frameIndex])
+		//{
+		//	pass->bStartQuery[frameIndex] = false;
+		//	pass->_gpuTime = vkManager->CalculateTimestampQuery(queryFirstIndex, 2) / 1000000.0;
+		//}
+		pass->PassBeginUpdate();
+		pass->PassUpdate();
+		_executePasses.push_back(pass);
+		pass->PassEndUpdate();
 	}
 }
 
@@ -104,38 +105,36 @@ void PassManager::PassesReset()
 	_sceneTextures->UpdateTextures();
 	for (auto& p : _passes)
 	{
-		p->Reset();
+		p.second->Reset();
 	}
 }
 
-void PassManager::AddPass(std::shared_ptr<PassBase> newPass, const char* passName)
+void PassManager::AddPass(std::shared_ptr<PassBase> newPass, Pass pass)
 {
 	if (newPass == nullptr)
 	{
 		MessageOut("Add Pass Failed.The New Pass Is Null.", true, true);
 	}
-	auto it = std::find_if(_passes.begin(), _passes.end(), [newPass](std::shared_ptr<PassBase> &inPass) {
-		return inPass->GetName() == newPass->GetName();
-	});
+	auto it = _passes.find(pass);
 	if (it != _passes.end())
 	{
 		MessageOut("Add Pass Failed.Pass Name Has Been Exist.", true, true);
 	}
-	newPass->_passName = passName;
+	newPass->_passName = GetPassName(pass);
 	newPass->passIndex = (int)_passes.size();
-	_passes.push_back(newPass);
+	_passes.emplace(pass, newPass);
 }
 
 void PassManager::CmdCopyFinalColorToSwapchain()
 {
 	const auto& manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
-	int swapchainIndex = _renderer->GetCurrentFrameIndex();
-	auto swapchainImage = _renderer->_swapchainImages[swapchainIndex];
+	int swapchainIndex = _renderer->_swapchain->GetCurrentFrameIndex();
+	auto swapchainImage = _renderer->_swapchain->GetSwapchainImages()[swapchainIndex];
 	auto finalRT = this->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor);
 	manager->Transition(cmdBuf, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	finalRT->Transition(cmdBuf, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-	manager->CmdColorBitImage(cmdBuf, finalRT->GetTexture(), swapchainImage, _renderer->GetRenderSize(), _renderer->GetWindowSurfaceSize());
+	manager->CmdColorBitImage(cmdBuf, finalRT->GetTexture(), swapchainImage, _renderer->GetRenderSize(), _renderer->_swapchain->GetWindowSurfaceSize());
 	finalRT->Transition(cmdBuf, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	manager->Transition(cmdBuf, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 }
@@ -157,7 +156,7 @@ void PassManager::SetupPassUniformBuffer(CameraComponent* camera, VkExtent2D ren
 			(float)renderSize.height,
 			camera->GetNearClipPlane(), 
 			camera->GetFarClipPlane(), 
-			_renderer->_surfaceCapabilities.currentTransform
+			_renderer->_swapchain->_surfaceCapabilities.currentTransform
 		);
 
 		_passUniformBuffer.Projection_Inv = glm::inverse(_passUniformBuffer.Projection);

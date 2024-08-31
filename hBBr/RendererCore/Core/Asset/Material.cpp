@@ -526,7 +526,7 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 			//Pass分类
 			if (mat->_primitive->_graphicsIndex.blendMode == BlendMode::Opaque)
 			{
-				mat->_primitive->_passUsing = Pass::OpaquePass;
+				mat->_primitive->_passUsing = Pass::BasePass;
 			}
 
 		}

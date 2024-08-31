@@ -10,6 +10,7 @@
 #include "Asset/HGuid.h"
 #include "HTime.h"
 #include "HInput.h"
+#include "VulkanSwapchain.h"
 
 class Texture2D;
 class Scene;
@@ -19,44 +20,18 @@ class VulkanRenderer
 	friend class PassManager;
 	friend class VulkanApp;
 	friend class CameraComponent;
+	friend class VulkanSwapchain;
 public:
-	HBBR_API VulkanRenderer(SDL_Window* windowHandle, const char* rendererName);
+	HBBR_API VulkanRenderer(VulkanSwapchain* swapchain, const char* rendererName);
 
 	HBBR_API ~VulkanRenderer();
-
-	/* Get current Frame buffer index. It is frequent use in the passes. */
-	HBBR_API HBBR_INLINE uint32_t GetCurrentFrameIndex() {
-		return _currentFrameIndex;
-	}
 
 	HBBR_INLINE bool IsRendererWantRelease() {
 		return _bRendererRelease;
 	}
 
-	HBBR_API HBBR_INLINE SDL_Window* GetWindowHandle() {
-		return _windowHandle;
-	}
-
 	HBBR_API HBBR_INLINE std::map<class CameraComponent*, std::shared_ptr<class PassManager>> GetPassManagers() {
 		return _passManagers;
-	}
-
-	HBBR_INLINE VkSurfaceFormatKHR GetSurfaceFormat()const {
-		return _surfaceFormat;
-	}
-
-	/* Get swapchain imageViews for render attachments */
-	HBBR_INLINE std::vector<VkImageView> GetSwapchainImageViews() {
-		return _swapchainImageViews;
-	}
-
-	HBBR_INLINE std::vector<VkImage> GetSwapchainImages() {
-		return _swapchainImages;
-	}
-
-	//窗口分辨率
-	HBBR_API HBBR_INLINE VkExtent2D GetWindowSurfaceSize()const {
-		return _surfaceSize;
 	}
 
 	//渲染分辨率
@@ -68,14 +43,6 @@ public:
 		_renderSize = newSize;
 	}
 
-	HBBR_INLINE VkSemaphore* GetPresentSemaphore() {
-		return &_presentSemaphore[_currentFrameIndex];
-	}
-
-	HBBR_INLINE VkSemaphore* GetSubmitSemaphore() {
-		return &_queueSubmitSemaphore[_currentFrameIndex];
-	}
-
 	HBBR_API HBBR_INLINE bool IsInit() {
 		return _bInit;
 	}
@@ -85,7 +52,7 @@ public:
 	}
 
 	HBBR_INLINE VkCommandBuffer& GetCommandBuffer(){
-		return _cmdBuf[_currentFrameIndex];
+		return _swapchain->_cmdBuf[_swapchain->_currentFrameIndex];
 	}
 
 	HBBR_API HBBR_INLINE bool IsWorldValid()const{
@@ -102,10 +69,6 @@ public:
 		else{
 			return std::weak_ptr<class World>();
 		}
-	}
-
-	HBBR_API HBBR_INLINE bool HasFocus() {
-		return VulkanApp::IsWindowFocus(_windowHandle);
 	}
 
 	HBBR_API HBBR_INLINE void ExecFunctionOnRenderThread(std::function<void()> func)
@@ -128,22 +91,22 @@ public:
 
 	HBBR_API void CreateEmptyWorld();
 
-	HBBR_INLINE static void SetupKeyInput(void* ptr , std::function<void(class VulkanRenderer* renderer, KeyCode key, KeyMod mod, Action action)>func)
+	HBBR_INLINE void SetupKeyInput(void* ptr , std::function<void(class VulkanRenderer* renderer, KeyCode key, KeyMod mod, Action action)>func)
 	{
 		_key_inputs.emplace(ptr, func);
 	}
 
-	HBBR_INLINE static void SetupMouseInput(void* ptr, std::function<void(class VulkanRenderer* renderer, MouseButton mouse, Action action)>func)
+	HBBR_INLINE void SetupMouseInput(void* ptr, std::function<void(class VulkanRenderer* renderer, MouseButton mouse, Action action)>func)
 	{
 		_mouse_inputs.emplace(ptr, func);
 	}
 
-	HBBR_INLINE static void RemoveKeyInput(void* ptr)
+	HBBR_INLINE void RemoveKeyInput(void* ptr)
 	{
 		_key_inputs.erase(ptr);
 	}
 
-	HBBR_INLINE static void RemoveMouseInput(void* ptr)
+	HBBR_INLINE void RemoveMouseInput(void* ptr)
 	{
 		_mouse_inputs.erase(ptr);
 	}
@@ -153,83 +116,49 @@ public:
 		return _bIsMainRenderer;
 	}
 
-	/* 帧渲染函数 */
-	HBBR_API void Render();
+	HBBR_API HBBR_INLINE bool HasInputFocus()
+	{
+		return bHasInputFocus;
+	}
 
-	HBBR_API void RendererResize(uint32_t w, uint32_t h);
+	HBBR_API HBBR_INLINE VulkanSwapchain* GetSwapchain()
+	{
+		return _swapchain;
+	}
+
+	/* 帧渲染函数 */
+	HBBR_API VkSemaphore Render(VkSemaphore wait);
 
 	HBBR_API void Release();
 
 	HBBR_INLINE double GetCPURenderingTime()const { return _cpuTime; }
 
-#if IS_EDITOR
-	
-	HBBR_API HBBR_INLINE class ImguiPassEditor* GetEditorGuiPass()const {
-		return _imguiPassEditor.get();
-	}
-
-#endif
-
 	void Init();
-
-	//Renderer map
-	static std::map<HString, VulkanRenderer*> _renderers;
-
-	VkSurfaceCapabilitiesKHR _surfaceCapabilities{};
 
 	std::vector<std::function<void(std::weak_ptr<World>)>> _spwanNewWorld;
 
-	bool bResizeBuffer;
-
 private:
 
-	bool ResizeBuffer();
+	void ResetRenderer();
+
+	void ResetResource();
 
 	HString _rendererName;
 
-	VkSurfaceKHR _surface = VK_NULL_HANDLE;
-
-	VkSurfaceFormatKHR _surfaceFormat{};
-
-	VkSwapchainKHR _swapchain = VK_NULL_HANDLE;
-
-	VkExtent2D _surfaceSize{};
-
 	VkExtent2D _renderSize{};
 
-	VkExtent2D _cacheSurfaceSize{};
+	// std::vector<VkFence> _executeFence;
 
-	std::vector<VkImage>	_swapchainImages;
+	// std::vector<VkSemaphore> _queueSubmitSemaphore;
 
-	std::vector<VkImageView>_swapchainImageViews;
-
-	std::vector<VkFence> _executeFence;
-
-	std::vector<VkSemaphore> _presentSemaphore;
-
-	std::vector<VkSemaphore> _queueSubmitSemaphore;
-
-	//std::vector<VkFence> _imageAcquiredFences;
-
-	uint32_t _currentFrameIndex;
-
-	uint32_t _maxSwapchainImages = 0;
+	// std::vector<VkCommandBuffer> _cmdBuf;
 
 	bool _bRendererRelease;
 
 	bool _bInit;
 
-	std::vector<VkCommandBuffer> _cmdBuf;
-
-	SDL_Window* _windowHandle = nullptr;
-
 	//Passes，多少个相机，就有多少组passes需要渲染
 	std::map<class CameraComponent*, std::shared_ptr<class PassManager>> _passManagers;
-
-	#if IS_EDITOR
-	//GUI pass(Editor)
-	std::shared_ptr<class ImguiPassEditor> _imguiPassEditor;
-	#endif
 
 	//World
 	std::shared_ptr<class World> _world;
@@ -244,8 +173,11 @@ private:
 	bool _bIsMainRenderer;
 
 	//Input
-	static std::map < void*, std::function<void(class VulkanRenderer* renderer, KeyCode key, KeyMod mod, Action action)>> _key_inputs;
-	static std::map < void*, std::function<void(class VulkanRenderer* renderer, MouseButton mouse, Action action)>> _mouse_inputs;
+	bool bHasInputFocus;
+	std::map <void*, std::function<void(class VulkanRenderer* renderer, KeyCode key, KeyMod mod, Action action)>> _key_inputs;
+	std::map <void*, std::function<void(class VulkanRenderer* renderer, MouseButton mouse, Action action)>> _mouse_inputs;
+
+	VulkanSwapchain* _swapchain;
 
 	VulkanManager* _vulkanManager;
 

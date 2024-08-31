@@ -27,7 +27,7 @@ bool HDRI2Cube::PassExecute(HString hdrImagePath, HString ddsOutputPath, bool bG
 
 	//Init
 	_hdrImagePath = hdrImagePath;
-	_renderer = VulkanApp::GetMainForm()->renderer;
+	_renderer = VulkanApp::GetMainForm()->swapchain->GetRenderers().begin()->second;
 
 	//Load hdr image
 	auto imageData = ImageTool::LoadImage32Bit(hdrImagePath.c_str());

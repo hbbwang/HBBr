@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 	//
 	while (VulkanApp::UpdateForm())
 	{
-		if (!_bInit && mainForm->renderer->GetEditorGuiPass())
+		if (!_bInit && mainForm->swapchain->GetEditorGuiPass())
 		{
 			_bInit = true;
 			_mainEditor = new EditorMain;

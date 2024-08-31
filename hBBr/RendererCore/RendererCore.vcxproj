@@ -313,6 +313,7 @@
     <ClInclude Include="Core\VertexFactory.h" />
     <ClInclude Include="Core\VulkanManager.h" />
     <ClInclude Include="Core\VulkanRenderer.h" />
+    <ClInclude Include="Core\VulkanSwapchain.h" />
     <ClInclude Include="Editor\NvidiaTextureTools.h" />
     <ClInclude Include="Editor\ShaderCompiler.h" />
     <ClInclude Include="Form\FormMain.h" />
@@ -358,6 +359,7 @@
     <ClCompile Include="Core\Component\Transform.cpp" />
     <ClCompile Include="Core\DescriptorSet.cpp" />
     <ClCompile Include="Core\Pass\ImguiPassEditor.cpp" />
+    <ClCompile Include="Core\Pass\PassType.cpp" />
     <ClCompile Include="Core\VMABuffer.cpp" />
     <ClCompile Include="Core\VulkanObjectManager.cpp" />
     <ClCompile Include="Core\Pass\HDRI2Cube.cpp" />
@@ -376,6 +378,7 @@
     <ClCompile Include="Core\VertexFactory.cpp" />
     <ClCompile Include="Core\VulkanManager.cpp" />
     <ClCompile Include="Core\VulkanRenderer.cpp" />
+    <ClCompile Include="Core\VulkanSwapchain.cpp" />
     <ClCompile Include="Editor\NvidiaTextureTools.cpp" />
     <ClCompile Include="Editor\ShaderCompiler.cpp" />
     <ClCompile Include="Form\FormMain.cpp" />

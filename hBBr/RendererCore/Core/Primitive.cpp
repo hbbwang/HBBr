@@ -198,7 +198,7 @@ MaterialPrimitive::MaterialPrimitive()
 	_graphicsIndex = {};
 	int priority = 0;
 	HString graphicsName = "";
-	Pass passUsing = Pass::OpaquePass;
+	Pass passUsing = Pass::BasePass;
 	_uniformBufferSize_vs = 0;
 	_uniformBufferSize_ps = 0;
 	_inputLayout.reset(new VertexInputLayout);
@@ -209,7 +209,7 @@ MaterialPrimitive::~MaterialPrimitive()
 {
 	_inputLayout.reset();
 	_graphicsIndex = {};
-	Pass passUsing = Pass::OpaquePass;
+	Pass passUsing = Pass::BasePass;
 	_uniformBuffer_vs.clear();
 	_uniformBuffer_ps.clear();
 	_paramterInfos_vs.clear();
@@ -598,7 +598,7 @@ void MaterialPrimitive::SetTextureSampler(HString textureName, VkSampler sampler
 void MaterialPrimitiveGroup::ResetDecriptorSet(uint8_t numTextures, bool& bNeedUpdateVSUniformBuffer, bool& bNeedUpdatePSUniformBuffer, bool& bNeedUpdateTextures)
 {
 	auto vkManager = VulkanManager::GetManager();
-	const auto frameIndex = renderer->GetCurrentFrameIndex();
+	const auto frameIndex = renderer->GetSwapchain()->GetCurrentFrameIndex();
 
 	if (!descriptorSet_uniformBufferVS)
 	{
@@ -666,7 +666,7 @@ void MaterialPrimitiveGroup::ResetDecriptorSet(uint8_t numTextures, bool& bNeedU
 void MaterialPrimitiveGroup::UpdateDecriptorSet(bool bNeedUpdateVSUniformBuffer, bool bNeedUpdatePSUniformBuffer, bool bNeedUpdateTextures)
 {
 	const auto& vkManager = VulkanManager::GetManager();
-	const auto frameIndex = renderer->GetCurrentFrameIndex();
+	const auto frameIndex = renderer->GetSwapchain()->GetCurrentFrameIndex();
 	if (bNeedUpdateVSUniformBuffer)
 		descriptorSet_uniformBufferVS->RefreshDescriptorSet(0);
 	if (bNeedUpdatePSUniformBuffer)

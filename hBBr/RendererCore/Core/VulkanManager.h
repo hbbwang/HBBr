@@ -183,10 +183,6 @@ public:
 		std::vector<VkImage>& swapchainImages,
 		std::vector<VkImageView>& swapchainImageViews,
 		VkSurfaceCapabilitiesKHR& surfaceCapabilities,
-		std::vector<VkCommandBuffer>* cmdBuf,
-		std::vector<VkSemaphore>* acquireImageSemaphore ,
-		std::vector<VkSemaphore>* queueSubmitSemaphore,
-		std::vector<VkFence>* fences = nullptr,
 		bool bIsFullScreen = false,
 		bool bVSync = true
 	);

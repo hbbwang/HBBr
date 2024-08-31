@@ -59,9 +59,6 @@
     <Filter Include="Renderer\Core\Pass\ComputePass">
       <UniqueIdentifier>{fcdb0014-75c7-4719-b5f6-a81cc0eb85a6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderer\Core\Pass\MeshProcessor">
-      <UniqueIdentifier>{467189f6-b673-4b9e-a559-8543e92c7b05}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ThirdParty\Imgui\backends">
       <UniqueIdentifier>{78ec89ec-8a72-44c7-82bc-8abd8e9e136f}</UniqueIdentifier>
     </Filter>
@@ -271,6 +268,9 @@
     <ClInclude Include="Core\Pass\ImguiPassEditor.h">
       <Filter>Editor</Filter>
     </ClInclude>
+    <ClInclude Include="Core\VulkanSwapchain.h">
+      <Filter>Renderer\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -452,6 +452,12 @@
     </ClCompile>
     <ClCompile Include="Core\Pass\ImguiPassEditor.cpp">
       <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Pass\PassType.cpp">
+      <Filter>Renderer\Core\Pass</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\VulkanSwapchain.cpp">
+      <Filter>Renderer\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

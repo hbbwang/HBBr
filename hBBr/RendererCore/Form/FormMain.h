@@ -8,7 +8,7 @@ struct VulkanForm
 {
 	HString name;
 	SDL_Window* window = nullptr;
-	class VulkanRenderer* renderer = nullptr;
+	class VulkanSwapchain* swapchain = nullptr;
 	bool bMinimized = false;
 	bool bStopRender = false;
 	std::vector<struct ImGuiContext*> imguiContents;

@@ -4,6 +4,7 @@
 #include "SceneTexture.h"
 #include "FormMain.h"
 #include "PassManager.h"
+#include "VulkanSwapchain.h"
 /*
 	Imgui buffer pass 
 */
@@ -18,24 +19,34 @@
 void ImguiPass::PassInit()
 {
 	//Swapchain
-	AddAttachment(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSwapchain()->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	AddSubpass({}, { 0 }, -1);
 	CreateRenderPass();
-	_imguiContent = VulkanManager::GetManager()->InitImgui_SDL(_renderer->GetWindowHandle(), _renderPass, false, false);
+	_imguiContent = VulkanManager::GetManager()->InitImgui_SDL(_renderer->GetSwapchain()->GetWindowHandle(), _renderPass, false, false);
 	auto& forms = VulkanApp::GetForms();
-	for (auto& i : forms)
+	for (auto& i : VulkanApp::GetForms())
 	{
-		if (i->renderer == _renderer)
+		if (i->swapchain == _swapchain)
 		{
 			i->imguiContents.push_back(_imguiContent);
 		}
 	}
 	_passName = "Imgui Render Pass";
+
+	bSpawnOutputRT = false;
+}
+
+
+ImguiPass::ImguiPass(PassManager* manager) :GraphicsPass(manager) 
+{
+	_swapchain = _renderer->GetSwapchain();
 }
 
 ImguiPass::~ImguiPass()
 {
 	ImGui::SetCurrentContext(_imguiContent);
+	_renderView.reset();
+	_renderViewTexture.reset();
 	VulkanManager::GetManager()->ShutdownImgui();
 	if (_imguiContent != nullptr)
 		ImGui::DestroyContext(_imguiContent);
@@ -60,6 +71,21 @@ void ImguiPass::AddGui(std::function<void(struct ImGuiContext*)> fun)
 	_gui_extensions.push_back(fun);
 }
 
+void ImguiPass::EnableOutputRT(bool bEnable)
+{
+	bSpawnOutputRT = bEnable;
+	if (!bSpawnOutputRT)
+	{
+		_renderView.reset();
+		_renderViewTexture.reset();
+	}
+}
+
+VkDescriptorSet ImguiPass::GetRenderView() const
+{
+	return _renderView->GetDescriptorSet();
+}
+
 void ImguiPass::PassUpdate()
 {
 	if (ImGui::GetCurrentContext() != _imguiContent)
@@ -69,9 +95,52 @@ void ImguiPass::PassUpdate()
 	const auto& vkManager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.1, 0.4, 0.2, 0.2));
+	//
+	auto renderSize = _renderer->GetRenderSize();
+	if (bSpawnOutputRT)
+	{
+		auto finalColor = GetSceneTexture(SceneTextureDesc::FinalColor);
+		if (!_renderView)
+		{
+			_renderView.reset(new DescriptorSet(_renderer));
+			_renderView->CreateBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
+			_renderView->BuildDescriptorSetLayout();
+		}
+		if (!_renderViewTexture)
+		{
+			_renderViewTexture = Texture2D::CreateTexture2D(
+				1,
+				1,
+				VK_FORMAT_R8G8B8A8_UNORM,
+				VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+				"RenderOutputFromImguiPass");
+		}
+		else if (
+			renderSize.width != _renderViewTexture->GetTextureSize().width ||
+			renderSize.height != _renderViewTexture->GetTextureSize().height
+			)
+		{
+			vkManager->DeviceWaitIdle();
+			_renderViewTexture->Resize(renderSize.width, renderSize.height);
+			VulkanObjectManager::Get()->RefreshTexture(_renderViewTexture);
+		}
+		finalColor->Transition(cmdBuf, finalColor->GetLayout(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		_renderViewTexture->Transition(cmdBuf, _renderViewTexture->GetLayout(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		vkManager->CmdColorBitImage(cmdBuf, finalColor->GetTexture(), _renderViewTexture->GetTexture(),
+			{ renderSize.width,renderSize.height },
+			{ renderSize.width,renderSize.height },
+			VK_FILTER_NEAREST);
+		finalColor->Transition(cmdBuf, finalColor->GetLayout(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		_renderViewTexture->Transition(cmdBuf, _renderViewTexture->GetLayout(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+		_renderView->UpdateTextureDescriptorSet({ {
+			_renderViewTexture,
+			Texture2D::GetSampler(TextureSampler_Nearest_Clamp)
+		} });
+	}
 	//Update FrameBuffer
-	ResetFrameBufferCustom(_renderer->GetRenderSize(), { GetSceneTexture(SceneTextureDesc::FinalColor) });
-	SetViewport(_renderer->GetRenderSize());
+	ResetFrameBufferCustom(renderSize, { GetSceneTexture(SceneTextureDesc::FinalColor) });
+	SetViewport(renderSize);
 	BeginRenderPass({ 0,0,0,0 });
 	vkManager->ImguiNewFrame();
 	//Begin

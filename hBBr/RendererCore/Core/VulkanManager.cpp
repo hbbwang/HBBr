@@ -935,10 +935,6 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	std::vector<VkImage>& swapchainImages, 
 	std::vector<VkImageView>& swapchainImageViews, 
 	VkSurfaceCapabilitiesKHR& surfaceCapabilities,
-	std::vector<VkCommandBuffer>* cmdBuf,
-	std::vector<VkSemaphore>* acquireImageSemaphore,
-	std::vector<VkSemaphore>* queueSubmitSemaphore,
-	std::vector<VkFence>* fences,
 	bool bIsFullScreen,
 	bool bVSync
 )
@@ -1262,64 +1258,6 @@ VkExtent2D VulkanManager::CreateSwapchain(
 
 	_swapchainBufferCount = numSwapchainImages;
 
-	//init semaphores & fences
-	if (acquireImageSemaphore != nullptr && acquireImageSemaphore->size() != _swapchainBufferCount)
-	{
-		//ConsoleDebug::print_endl("hBBr:Swapchain: Present Semaphore.");
-		for (int i = 0; i < (int)acquireImageSemaphore->size(); i++)
-		{
-			DestroySemaphore(acquireImageSemaphore->at(i));		
-			acquireImageSemaphore->at(i) = nullptr;
-		}
-		acquireImageSemaphore->resize(_swapchainBufferCount);
-		for (int i = 0; i < (int)_swapchainBufferCount; i++)
-		{
-			CreateVkSemaphore(acquireImageSemaphore->at(i));
-		}
-	}
-	if (queueSubmitSemaphore != nullptr && queueSubmitSemaphore->size() != _swapchainBufferCount)
-	{
-		//ConsoleDebug::print_endl("hBBr:Swapchain: Queue Submit Semaphore.");
-		for (int i = 0; i < (int)queueSubmitSemaphore->size(); i++)
-		{
-			DestroySemaphore(queueSubmitSemaphore->at(i));
-			queueSubmitSemaphore->at(i) = nullptr;
-		}
-		queueSubmitSemaphore->resize(_swapchainBufferCount);
-		for (int i = 0; i < (int)_swapchainBufferCount; i++)
-		{
-			CreateVkSemaphore(queueSubmitSemaphore->at(i));
-		}
-	}
-	if (fences != nullptr && fences->size() != _swapchainBufferCount)
-	{
-		//ConsoleDebug::print_endl("hBBr:Swapchain: image acquired fences.");
-		for (int i = 0; i < (int)fences->size(); i++)
-		{
-			DestroyFence(fences->at(i));
-			fences->at(i) = nullptr;
-		}
-		fences->resize(_swapchainBufferCount);
-		for (int i = 0; i < (int)_swapchainBufferCount; i++)
-		{
-			CreateFence(fences->at(i));
-		}
-	}
-
-	if (cmdBuf != nullptr && cmdBuf->size() != _swapchainBufferCount)
-	{
-		//ConsoleDebug::print_endl("hBBr:Swapchain: Allocate Main CommandBuffers.");
-		for (int i = 0; i < (int)cmdBuf->size(); i++)
-		{
-			FreeCommandBuffer(_commandPool, cmdBuf->at(i));
-			cmdBuf->at(i) = nullptr;
-		}
-		cmdBuf->resize(_swapchainBufferCount);
-		for (int i = 0; i < (int)_swapchainBufferCount; i++)
-		{
-			AllocateCommandBuffer(_commandPool, cmdBuf->at(i));
-		}
-	}
 	return info.imageExtent;
 }
 
@@ -2831,8 +2769,8 @@ void VulkanManager::CmdColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImag
 	region.dstOffsets[0].x = 0;
 	region.dstOffsets[0].y = 0;
 	region.dstOffsets[0].z = 0;
-	region.dstOffsets[1].x = targetSize.width;
-	region.dstOffsets[1].y = targetSize.height;
+	region.dstOffsets[1].x = std::min(targetSize.width, srcSize.width);
+	region.dstOffsets[1].y = std::min(targetSize.height, srcSize.height);
 	region.dstOffsets[1].z = 1;
 	//vkCmdBlitImage(_renderer->GetCommandBuffer(), src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1, &region, VK_FILTER_LINEAR);
 	vkCmdBlitImage(cmdBuf, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region, filter);

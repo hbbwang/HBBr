@@ -23,21 +23,21 @@ PassBase::~PassBase()
 
 void PassBase::PassBeginUpdate()
 {
-	const auto& cmdBuf = _renderer->GetCommandBuffer();
-	const auto& vkManager = VulkanManager::GetManager();
-	_cpuTimer.Start();
-	vkCmdWriteTimestamp(cmdBuf, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, vkManager->GetQueryTimestamp(),
-		(_renderer->GetCurrentFrameIndex() * (uint32_t)_manager->GetInitPasses().size() * 2) + (passIndex * 2));
+	//const auto& cmdBuf = _renderer->GetCommandBuffer();
+	//const auto& vkManager = VulkanManager::GetManager();
+	//_cpuTimer.Start();
+	//vkCmdWriteTimestamp(cmdBuf, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, vkManager->GetQueryTimestamp(),
+	//	(_renderer->GetSwapchain()->GetCurrentFrameIndex() * (uint32_t)_manager->GetInitPasses().size() * 2) + (passIndex * 2));
 }
 
 void PassBase::PassEndUpdate()
 {
-	const auto& cmdBuf = _renderer->GetCommandBuffer();
-	const auto& vkManager = VulkanManager::GetManager();
-	vkCmdWriteTimestamp(cmdBuf, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, vkManager->GetQueryTimestamp(), 
-		(_renderer->GetCurrentFrameIndex() * (uint32_t)_manager->GetInitPasses().size() * 2) + (passIndex * 2) + 1);
-	_cpuTime = _cpuTimer.End_ms();
-	bStartQuery[_renderer->GetCurrentFrameIndex()] = true;
+	//const auto& cmdBuf = _renderer->GetCommandBuffer();
+	//const auto& vkManager = VulkanManager::GetManager();
+	//vkCmdWriteTimestamp(cmdBuf, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, vkManager->GetQueryTimestamp(), 
+	//	(_renderer->GetSwapchain()->GetCurrentFrameIndex() * (uint32_t)_manager->GetInitPasses().size() * 2) + (passIndex * 2) + 1);
+	//_cpuTime = _cpuTimer.End_ms();
+	//bStartQuery[_renderer->GetSwapchain()->GetCurrentFrameIndex()] = true;
 }
 
 std::shared_ptr<Texture2D> PassBase::GetSceneTexture(uint32_t descIndex)
@@ -77,7 +77,7 @@ void GraphicsPass::ResetFrameBuffer(VkExtent2D size, std::vector<std::shared_ptr
 		//VulkanManager::GetManager()->CreateFrameBuffers({ size.width, size.height }, _renderPass, imageViews, _framebuffers);
 		for (int i = 0; i < (int)VulkanManager::GetManager()->GetSwapchainBufferCount(); i++)
 		{
-			std::vector<VkImageView> ivs = { _renderer->GetSwapchainImageViews()[i] };
+			std::vector<VkImageView> ivs = { _renderer->GetSwapchain()->GetSwapchainImageViews()[i] };
 			ivs.reserve(12);
 			if (imageViews.size() > 0)
 			{
@@ -269,5 +269,5 @@ void GraphicsPass::SetViewport(VkExtent2D viewportSize)
 
 VkFramebuffer GraphicsPass::GetFrameBuffer()const
 {
-	return _framebuffers[_renderer->GetCurrentFrameIndex()];
+	return _framebuffers[_renderer->GetSwapchain()->GetCurrentFrameIndex()];
 }

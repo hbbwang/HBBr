@@ -26,7 +26,7 @@ CameraComponent::CameraComponent(GameObject* parent)
 
 	//为当前相机生成passes
 	std::shared_ptr<PassManager>newPassManager;
-	newPassManager.reset(new PassManager(_renderer));
+	newPassManager.reset(new PassManager(this));
 	_renderer->_passManagers.emplace(this, newPassManager);
 
 }
@@ -65,9 +65,9 @@ void CameraComponent::Update()
 		{
 			if (GetMouse(Button_Right))
 			{
-				glm::vec2 mouseAxis = lastMousePos - currentMousePos;
-				SetMousePos(lockMousePos);
-				lastMousePos = HInput::GetMousePos();
+				glm::vec2 mouseAxis = _lastMousePos - currentMousePos;
+				SetMousePos(_lockMousePos);
+				_lastMousePos = HInput::GetMousePos();
 
 				double frameRate = VulkanApp::GetFrameRateS() * (double)_editorMoveSpeed;
 				worldRot.y -= mouseAxis.x * _editorMouseSpeed;
@@ -102,8 +102,8 @@ void CameraComponent::Update()
 			//ConsoleDebug::print_endl(HString::FromVec2(mouseAxis));
 			else
 			{
-				lastMousePos = currentMousePos;
-				lockMousePos = currentMousePos;
+				_lastMousePos = currentMousePos;
+				_lockMousePos = currentMousePos;
 			}
 			_cameraPos = worldPos;
 			_cameraTarget = _cameraPos + trans->GetForwardVector();
@@ -116,9 +116,9 @@ void CameraComponent::Update()
 		{
 			if (GetMouse(Button_Left) || GetMouse(Button_Right))
 			{
-				glm::vec2 mouseAxis = lastMousePos - currentMousePos;
-				SetMousePos(lockMousePos);
-				lastMousePos = HInput::GetMousePos();
+				glm::vec2 mouseAxis = _lastMousePos - currentMousePos;
+				SetMousePos(_lockMousePos);
+				_lastMousePos = HInput::GetMousePos();
 				if (GetMouse(Button_Left))
 				{
 					worldRot.y -= mouseAxis.x * _editorMouseSpeed;
@@ -132,8 +132,8 @@ void CameraComponent::Update()
 			}
 			else
 			{
-				lastMousePos = currentMousePos;
-				lockMousePos = currentMousePos;
+				_lastMousePos = currentMousePos;
+				_lockMousePos = currentMousePos;
 			}
 
 			trans->SetWorldRotation(worldRot);

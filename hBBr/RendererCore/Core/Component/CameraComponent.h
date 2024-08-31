@@ -101,9 +101,10 @@ private:
 
 	float _editorMouseSpeed = 0.25f;
 
-	glm::vec2 lastMousePos;
+	glm::vec2 _lastMousePos;
 
-	glm::vec2 lockMousePos;
+	glm::vec2 _lockMousePos;
 
 	float _targetLength = 1.75f;
+
 };

@@ -4,9 +4,16 @@
 
 enum class Pass : uint32_t
 {
-	OpaquePass = 0,
+	PreCommand = 0,
+	BasePass = 1,
+	DeferredLighting = 2,
+	PostProcess = 3,
+	Imgui = 4,
+
 	MaxNum = 32
 };
+
+HString GetPassName(Pass& pass);
 
 struct VertexInputLayout
 {

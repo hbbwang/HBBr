@@ -1,7 +1,6 @@
 ﻿#include "ImguiPassEditor.h"
 #include "VulkanRenderer.h"
 #include "imgui.h"
-#include "SceneTexture.h"
 #include "FormMain.h"
 /*
 	Imgui buffer pass 
@@ -13,16 +12,32 @@
 #include "Imgui/backends/imgui_impl_vulkan.h"
 #endif
 
+ImguiPassEditor::ImguiPassEditor(VulkanSwapchain* swapchain)
+	:GraphicsPass(nullptr)
+{
+	_swapchain = swapchain;
+	_renderer = _swapchain->GetMainRenderer();
+}
+
+ImguiPassEditor::~ImguiPassEditor()
+{
+	_renderView.reset();
+	ImGui::SetCurrentContext(_imguiContent);
+	VulkanManager::GetManager()->ShutdownImgui();
+	if (_imguiContent != nullptr)
+		ImGui::DestroyContext(_imguiContent);
+}
+
 void ImguiPassEditor::PassInit()
 {
 	//Swapchain
-	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, _renderer->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, _swapchain->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	AddSubpass({}, { 0 }, -1);
 	CreateRenderPass();
-	_imguiContent = VulkanManager::GetManager()->InitImgui_SDL(_renderer->GetWindowHandle(), _renderPass, true, true);
+	_imguiContent = VulkanManager::GetManager()->InitImgui_SDL(_swapchain->GetWindowHandle(), _renderPass, true, true);
 	for (auto& i : VulkanApp::GetForms())
 	{
-		if (i->renderer == _renderer)
+		if (i->swapchain == _swapchain)
 		{
 			i->imguiContents.push_back(_imguiContent);
 		}
@@ -44,7 +59,7 @@ void ImguiPassEditor::PassInit()
 void ImguiPassEditor::CheckWindowValid()
 {
 	static bool main_window_minimized;
-	Uint32 windowFlags = SDL_GetWindowFlags(_renderer->GetWindowHandle());
+	SDL_WindowFlags windowFlags = SDL_GetWindowFlags(_swapchain->GetWindowHandle());
 	bool minimized = (windowFlags & SDL_WINDOW_MINIMIZED) != 0;
 	if (minimized != main_window_minimized)
 	{
@@ -61,24 +76,10 @@ void ImguiPassEditor::CheckWindowValid()
 	}
 }
 
-ImguiPassEditor::ImguiPassEditor(VulkanRenderer* renderer)
-	:GraphicsPass(nullptr)
-{
-	_renderer = renderer;
-}
-
-ImguiPassEditor::~ImguiPassEditor()
-{
-	_renderView.reset();
-	ImGui::SetCurrentContext(_imguiContent);
-	VulkanManager::GetManager()->ShutdownImgui();
-	if (_imguiContent != nullptr)
-		ImGui::DestroyContext(_imguiContent);
-}
 
 void ImguiPassEditor::PassReset()
 {
-	auto surfaceSize = _renderer->GetWindowSurfaceSize();
+	auto surfaceSize = _swapchain->GetWindowSurfaceSize();
 	ResetFrameBuffer(surfaceSize, {}, true);
 }
 
@@ -117,8 +118,8 @@ void ImguiPassEditor::PassUpdate(std::shared_ptr<Texture2D> finalColor)
 	finalColor->Transition(cmdBuf, finalColor->GetLayout(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	_renderViewTexture->Transition(cmdBuf, _renderViewTexture->GetLayout(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	vkManager->CmdColorBitImage(cmdBuf, finalColor->GetTexture(), _renderViewTexture->GetTexture(), 
-		{ renderSize.width,renderSize.height },
-		{ renderSize.width,renderSize.height },
+		{ finalColor->GetTextureSize().width,finalColor->GetTextureSize().height },
+		{ _renderViewTexture->GetTextureSize().width,_renderViewTexture->GetTextureSize().height },
 		VK_FILTER_NEAREST);
 	finalColor->Transition(cmdBuf, finalColor->GetLayout(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	_renderViewTexture->Transition(cmdBuf, _renderViewTexture->GetLayout(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -129,7 +130,7 @@ void ImguiPassEditor::PassUpdate(std::shared_ptr<Texture2D> finalColor)
 	} });
 
 	//Update FrameBuffer
-	auto surfaceSize = _renderer->GetWindowSurfaceSize();
+	auto surfaceSize = _swapchain->GetWindowSurfaceSize();
 	if (surfaceSize.width <= 0 || surfaceSize.height <= 0)
 	{
 		surfaceSize = { 4,4 };

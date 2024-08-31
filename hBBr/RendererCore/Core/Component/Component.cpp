@@ -20,11 +20,11 @@ Component::~Component()
 {
 	if (_bEnableKeyInput)
 	{
-		VulkanRenderer::RemoveKeyInput(this);
+		_renderer->RemoveKeyInput(this);
 	}
 	if (_bEnableMouseInput)
 	{
-		VulkanRenderer::RemoveMouseInput(this);
+		_renderer->RemoveMouseInput(this);
 	}
 }
 
@@ -53,7 +53,7 @@ void Component::Init()
 		_keys_repeat.reserve(10);
 		auto func = [this](VulkanRenderer* ptr, KeyCode key, KeyMod mod, Action action)
 			{		
-				if (VulkanApp::GetFocusForm() == nullptr ||  VulkanApp::GetFocusForm()->renderer != ptr)
+				if (ptr->HasInputFocus())
 					return;
 				KeyCallBack callBack;
 				callBack.key = key;
@@ -94,7 +94,7 @@ void Component::Init()
 
 				KeyInput(key, mod, action);
 			};
-		VulkanRenderer::SetupKeyInput(this, func);
+		_renderer->SetupKeyInput(this, func);
 	}
 	if (_bEnableMouseInput)
 	{
@@ -102,7 +102,7 @@ void Component::Init()
 		_mouses_repeat.reserve(5);
 		auto func = [this](VulkanRenderer* ptr, MouseButton mouse, Action action)
 			{
-				if (VulkanApp::GetFocusForm() == nullptr || VulkanApp::GetFocusForm()->renderer != ptr)
+				if (ptr->HasInputFocus())
 					return;
 				MouseCallBack callBack;
 				callBack.button = mouse;
@@ -144,7 +144,7 @@ void Component::Init()
 
 				MouseInput(mouse, action);
 			};
-		VulkanRenderer::SetupMouseInput(this, func);
+		_renderer->SetupMouseInput(this, func);
 	}
 }
 
@@ -186,6 +186,55 @@ nlohmann::json Component::Serialization()
 	}
 	sub["Properties"] = subPros;
 	return sub;
+}
+
+bool Component::GetKey(KeyCode key)
+{
+	if (_renderer->HasInputFocus())
+		return false;
+	return FindRepeatKey(key) != nullptr;
+}
+
+bool Component::GetKeyDown(KeyCode key)
+{
+	if (_renderer->HasInputFocus())
+		return false;
+	return FindDefaultKeyDown(key, Action::PRESS) != nullptr;
+}
+
+bool Component::GetKeyUp(KeyCode key)
+{
+	if (_renderer->HasInputFocus())
+		return false;
+	return FindDefaultKey(key, Action::RELEASE) != nullptr;
+}
+
+bool Component::GetMouse(MouseButton button)
+{
+	if (_renderer->HasInputFocus())
+		return false;
+	return FindRepeatMouse(button) != nullptr;
+}
+
+bool Component::GetMouseDown(MouseButton button)
+{
+	if (_renderer->HasInputFocus())
+		return false;
+	return FindDefaultMouseDown(button, Action::PRESS) != nullptr;
+}
+
+inline bool Component::GetMouseUp(MouseButton button)
+{
+	if (_renderer->HasInputFocus())
+		return false;
+	return FindDefaultMouse(button, Action::RELEASE) != nullptr;
+}
+
+void Component::SetMousePos(glm::vec2 pos)
+{
+	if (_renderer->HasInputFocus())
+		return;
+	return HInput::SetMousePos(pos);
 }
 
 void Component::CompUpdate()
