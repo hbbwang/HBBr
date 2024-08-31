@@ -31,7 +31,7 @@ public:
 	HBBR_API static void DeInitVulkanManager();
 	HBBR_API static bool UpdateForm();
 	HBBR_API static void UpdateRender();
-	HBBR_API static VulkanForm* CreateNewWindow(uint32_t w = 512, uint32_t h = 512, const char* title = "Renderer",bool bCreateRenderer = false ,void* parent = nullptr);
+	HBBR_API static VulkanForm* CreateNewWindow(uint32_t x = 0, uint32_t y = 0, uint32_t w = 512, uint32_t h = 512, const char* title = "Renderer",bool bCreateRenderer = false ,void* parent = nullptr);
 	HBBR_API static void CreateRenderer(VulkanForm* form);
 	HBBR_API static bool IsWindowFocus(SDL_Window* windowHandle);
 	HBBR_API static std::vector<VulkanForm*>& GetForms() { return _forms; }

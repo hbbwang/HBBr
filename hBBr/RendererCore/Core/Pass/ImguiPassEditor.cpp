@@ -30,8 +30,9 @@ ImguiPassEditor::~ImguiPassEditor()
 
 void ImguiPassEditor::PassInit()
 {
-	//Swapchain
+	//Swapchain  VK_FORMAT_B8G8R8A8_UNORM?
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, _swapchain->GetSurfaceFormat().format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	//AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	AddSubpass({}, { 0 }, -1);
 	CreateRenderPass();
 	_imguiContent = VulkanManager::GetManager()->InitImgui_SDL(_swapchain->GetWindowHandle(), _renderPass, true, true);

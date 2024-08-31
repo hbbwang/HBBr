@@ -122,7 +122,9 @@ void Android_Init()
 
 VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDebug, void* parent)
 {
+#if _WIN32
 	SetConsoleOutputCP(65001); // 设置控制台输出代码页为 UTF-8
+#endif
 
 	CallStack();
 
@@ -160,7 +162,9 @@ VulkanForm* VulkanApp::InitVulkanManager(bool bCustomRenderLoop , bool bEnableDe
 	Texture2D::GlobalInitialize();
 
 	//Create Main Window
-	auto win = CreateNewWindow(256, 256, "MainRenderer", false, parent);
+	auto win = CreateNewWindow(-0, -0, 130, 130, "MainRenderer", false, parent);
+
+	SDL_HideWindow(win->window);
 
 #if IS_EDITOR
 	VulkanApp::_editorVulkanInit();
@@ -454,7 +458,7 @@ void VulkanApp::UpdateRender()
 }
 //ENABLE_CODE_OPTIMIZE
 
-VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* title, bool bCreateRenderer, void* parent)
+VulkanForm* VulkanApp::CreateNewWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h , const char* title, bool bCreateRenderer, void* parent)
 {
 	SDL_Window* window = nullptr;
 	if (parent != nullptr)
@@ -463,6 +467,8 @@ VulkanForm* VulkanApp::CreateNewWindow(uint32_t w, uint32_t h , const char* titl
 		props = SDL_CreateProperties();
 		SDL_SetNumberProperty(props, "width", h);
 		SDL_SetNumberProperty(props, "height", w);
+		SDL_SetNumberProperty(props, "x", x);
+		SDL_SetNumberProperty(props, "y", y);
 		SDL_SetStringProperty(props, "title", title); 
 		SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_VULKAN_BOOLEAN, SDL_TRUE);
 		SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, SDL_TRUE);	

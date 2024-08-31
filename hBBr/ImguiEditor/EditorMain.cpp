@@ -81,23 +81,30 @@ EditorMain::EditorMain()
 		ImGui::End();
 
 		//主渲染窗口
-		//ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
-		//ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
 		if (ImGui::Begin(RenderView.c_str()))
 		{
-			ImVec2 windowSize = ImGui::GetContentRegionAvail();
+			// 获取内容区域的最小和最大坐标（相对于窗口的坐标）
+			ImVec2 contentRegionMin = ImGui::GetWindowContentRegionMin();
+			ImVec2 contentRegionMax = ImGui::GetWindowContentRegionMax();
+
+			// 计算内容区域的大小
+			ImVec2 contentRegionSize;
+			contentRegionSize.x = contentRegionMax.x - contentRegionMin.x;
+			contentRegionSize.y = contentRegionMax.y - contentRegionMin.y;
 
 			// 获取当前 ImGui 样式
 			const ImGuiStyle& style = ImGui::GetStyle();
 			// 获取窗口边框大小
 			float windowBorderSize = style.WindowBorderSize;
 
-			_renderViewSize.width = (uint32_t)windowSize.x;
-			_renderViewSize.height = (uint32_t)windowSize.y;
+			_renderViewSize.width = (uint32_t)std::max(2.0f, contentRegionSize.x);
+			_renderViewSize.height = (uint32_t)std::max(2.0f, contentRegionSize.y);
 			//_renderViewSize.width += 14;
 			//_renderViewSize.height += 15;
 
-			ImGui::Image(pass->GetRenderView(), windowSize);
+			ImGui::Image(pass->GetRenderView(), contentRegionSize);
 
 			if (_renderViewSize.width <= 0 || _renderViewSize.height <= 0)
 			{
@@ -107,8 +114,8 @@ EditorMain::EditorMain()
 			_mainForm->swapchain->GetRenderers().begin()->second->SetRenderSize(_renderViewSize);
 		}
 		ImGui::End();
-		//ImGui::PopStyleVar();
-		//ImGui::PopStyleColor();
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor();
 	};
 	_editorGui->AddGui(mainEditorWidget);
 }

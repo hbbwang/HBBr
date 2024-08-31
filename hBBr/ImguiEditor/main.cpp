@@ -18,7 +18,6 @@ int main(int argc, char* argv[])
 	//ConsoleDebug::CreateConsole("");
 	//Enable custom loop
 	auto mainForm = VulkanApp::InitVulkanManager(false, true);
-	//
 	mainForm->closeCallbacks.push_back(
 		[](VulkanForm* form) {
 			int x, y, w, h;

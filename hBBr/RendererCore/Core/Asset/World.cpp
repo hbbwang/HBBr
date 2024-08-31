@@ -3,6 +3,7 @@
 #include "Component/GameObject.h"
 #include "Component/ModelComponent.h"
 #include "Component/CameraComponent.h"
+#include "Component/DirectionalLightComponent.h"
 #include "FileSystem.h"
 #include "ConsoleDebug.h"
 #include "FormMain.h"
@@ -261,11 +262,20 @@ void World::Load(class VulkanRenderer* renderer)
 	cameraComp->OverrideMainCamera();
 #endif
 
-	////-----model--test
-	//auto testModel = GameObject::CreateGameObject("Test", _levels[0].get());
-	//auto modelComp = testModel->AddComponent<ModelComponent>();
-	//modelComp->SetModel(HGUID("c51a01e8-9349-660a-d2df-353a310db461"));
-	//ConsoleDebug::printf_endl("Test Model Spawn......");
+	//-----model--test
+	auto testModel = GameObject::CreateGameObject("Test", _levels[0].get());
+	auto modelComp = testModel->AddComponent<ModelComponent>();
+	modelComp->SetModel(HGUID("c51a01e8-9349-660a-d2df-353a310db461"));
+	ConsoleDebug::printf_endl("Test Model Spawn......");
+
+	auto tex = ContentManager::Get()->GetAsset<Texture2D>(HGUID("eb8ac147-e469-f5a3-c48a-5daec8880f1f"));
+	AssetObject::Cast<Material>(modelComp->GetMaterial().asset)->GetPrimitive()->SetTexture(0, tex);
+
+	//------light--test
+	auto testLight = GameObject::CreateGameObject("Light", _levels[0].get());
+	auto lightComp = testLight->AddComponent<DirectionalLightComponent>();
+	testLight->GetTransform()->SetWorldRotation(glm::vec3(50,0,0));
+	ConsoleDebug::printf_endl("Test DirLight Spawn......");
 }
 
 void World::WorldUpdate()
@@ -330,7 +340,7 @@ void World::SetCurrentSelectionLevel(std::weak_ptr<Level> level)
 
 void World::MarkDirty()
 {
-		AddDirtyWorld(this->_renderer->GetWorld());
+	AddDirtyWorld(this->_renderer->GetWorld());
 }
 
 #endif

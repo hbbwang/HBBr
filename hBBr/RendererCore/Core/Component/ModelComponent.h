@@ -22,6 +22,10 @@ public:
 
 	HBBR_API virtual void SetMaterial(std::shared_ptr<class Material>mat, int index = 0);
 
+	HBBR_API AssetRef& GetMaterial(int index = 0){
+		return _materials[index];
+	}
+
 	HBBR_API int GetMaterialNum()const {
 		return (int)_materials.size();
 	}
