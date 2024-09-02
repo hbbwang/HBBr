@@ -1309,7 +1309,7 @@ void VulkanManager::CreateImage(uint32_t width , uint32_t height, VkFormat forma
 	}
 }
 
-void VulkanManager::CreateImageView(VkImage inImage, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView& imageView, uint32_t miplevel, uint32_t layerCount)
+void VulkanManager::CreateImageView(VkImage inImage, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView& imageView, uint32_t miplevel, uint32_t layerCount, VkComponentMapping componentMapping)
 {
 	VkImageViewCreateInfo image_view_create_info{};
 	image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -1321,10 +1321,7 @@ void VulkanManager::CreateImageView(VkImage inImage, VkFormat format, VkImageAsp
 		image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
 	}
 	image_view_create_info.format = format;
-	image_view_create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-	image_view_create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-	image_view_create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-	image_view_create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+	image_view_create_info.components = componentMapping;
 	image_view_create_info.subresourceRange.aspectMask = aspectFlags;
 	image_view_create_info.subresourceRange.baseArrayLayer = 0;
 	image_view_create_info.subresourceRange.baseMipLevel = 0;

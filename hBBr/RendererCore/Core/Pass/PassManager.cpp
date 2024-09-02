@@ -31,6 +31,7 @@ PassManager::PassManager(CameraComponent* camera)
 		//Imgui Pass
 		std::shared_ptr<ImguiPass> imgui = std::make_shared<ImguiPass>(this);
 		AddPass(imgui, Pass::Imgui);
+		_imguiPass = imgui.get();
 
 		for (auto& i : _passes)
 		{
@@ -192,4 +193,9 @@ glm::mat4 PassManager::GetPerspectiveProjectionMatrix(float FOV, float w, float 
 	}
 	//DirectX Left hand.
 	return pre_rotate_mat * flipYMatrix * glm::perspectiveLH(glm::radians(FOV), aspect, nearPlane, farPlane);
+}
+
+ ImguiPass* PassManager::GetImguiPass() const
+{
+	return _imguiPass;
 }

@@ -54,7 +54,12 @@ void ImguiPassEditor::PassInit()
 		1,
 		VK_FORMAT_R8G8B8A8_UNORM,
 		VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-		"EditorFinalColor");
+		"EditorFinalColor", 1, 1, 1, {
+			VK_COMPONENT_SWIZZLE_IDENTITY,
+			VK_COMPONENT_SWIZZLE_IDENTITY,
+			VK_COMPONENT_SWIZZLE_IDENTITY,
+			VK_COMPONENT_SWIZZLE_ONE		//忽略Alpha的采样,显示到编辑器上的最终纹理不需要Alpha
+		});
 }
 
 void ImguiPassEditor::CheckWindowValid()

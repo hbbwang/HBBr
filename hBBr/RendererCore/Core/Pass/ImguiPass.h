@@ -2,6 +2,7 @@
 #include <memory>
 #include "PassBase.h"
 #include "functional"
+#include "HRect.h"
 /* Imgui pass define */
 class ImguiPass :public GraphicsPass
 {
@@ -14,6 +15,10 @@ public:
 	HBBR_API void AddGui(std::function<void(struct ImGuiContext*)> fun);
 	HBBR_API void EnableOutputRT(bool bEnable);
 	HBBR_API VkDescriptorSet GetRenderView()const;
+	HBBR_API void UpdateImguiFocusContentRect(HRect rect)
+	{
+		_focusRect = rect;
+	}
 protected:
 	virtual void PassUpdate()override;
 private:
@@ -24,4 +29,5 @@ private:
 	std::shared_ptr<Texture2D> _renderViewTexture;
 	std::shared_ptr<DescriptorSet> _renderView;
 	class VulkanSwapchain* _swapchain = nullptr;
+	HRect _focusRect;
 };

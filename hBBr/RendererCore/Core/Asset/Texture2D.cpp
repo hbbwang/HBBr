@@ -102,8 +102,8 @@ void Texture2D::Resize(uint32_t width, uint32_t height, bool bDestroyImmediately
 		MessageOut((HString("Max texture streaming size is ") + HString::FromSize_t(_maxTextureStreamingSize) + ", but current texture streaming size is  " + HString::FromSize_t(_textureStreamingSize)), false, false, "255,255,0");
 	}
 
-	manager->CreateImageView(_image, _format, _imageAspectFlags, _imageView);
-	//
+	manager->CreateImageView(_image, _format, _imageAspectFlags, _imageView, _mipCount, _layerCount, _componentMapping);
+
 	VkCommandBuffer cmdbuf;
 	manager ->AllocateCommandBuffer(manager ->GetCommandPool(), cmdbuf);
 	manager->BeginCommandBuffer(cmdbuf);
@@ -125,12 +125,14 @@ void Texture2D::Resize(uint32_t width, uint32_t height, bool bDestroyImmediately
 std::shared_ptr<Texture2D> Texture2D::CreateTexture2D(
 	uint32_t width, uint32_t height, VkFormat format, 
 	VkImageUsageFlags usageFlags, HString textureName,
-	uint32_t miplevel, uint32_t layerCount, VkMemoryPropertyFlags memoryPropertyFlag)
+	uint32_t miplevel, uint32_t layerCount, VkMemoryPropertyFlags memoryPropertyFlag,
+	VkComponentMapping componentMapping)
 {
 	std::shared_ptr<Texture2D> newTexture = std::make_shared<Texture2D>();
 	newTexture->_textureName = textureName;
 	newTexture->_imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	newTexture->_imageSize = {width,height};
+	newTexture->_componentMapping = componentMapping;
 	VulkanManager::GetManager()->CreateImage(width, height, format, usageFlags, newTexture->_image, miplevel, layerCount);
 	if (format == VK_FORMAT_R32_SFLOAT || format == VK_FORMAT_D32_SFLOAT || format == VK_FORMAT_D24_UNORM_S8_UINT)
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
@@ -140,7 +142,7 @@ std::shared_ptr<Texture2D> Texture2D::CreateTexture2D(
 		newTexture->_imageAspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 	newTexture->_textureMemorySize = VulkanManager::GetManager()->CreateImageMemory(newTexture->_image, newTexture->_imageViewMemory, memoryPropertyFlag);
 	_textureStreamingSize += newTexture->_textureMemorySize;
-	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView, miplevel, layerCount);
+	VulkanManager::GetManager()->CreateImageView(newTexture->_image, format, newTexture->_imageAspectFlags, newTexture->_imageView, miplevel, layerCount, componentMapping);
 	newTexture->_format = format;
 	newTexture->_usageFlags = usageFlags;
 	newTexture->_bReset = true;

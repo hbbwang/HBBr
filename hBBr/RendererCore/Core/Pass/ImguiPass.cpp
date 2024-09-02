@@ -34,6 +34,10 @@ void ImguiPass::PassInit()
 	_passName = "Imgui Render Pass";
 
 	bSpawnOutputRT = false;
+
+	_focusRect = {
+		-1,-1,-1,-1
+	};
 }
 
 
@@ -92,6 +96,7 @@ void ImguiPass::PassUpdate()
 	{
 		ImGui::SetCurrentContext(_imguiContent);
 	}
+
 	const auto& vkManager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.1, 0.4, 0.2, 0.2));
@@ -142,9 +147,17 @@ void ImguiPass::PassUpdate()
 	ResetFrameBufferCustom(renderSize, { GetSceneTexture(SceneTextureDesc::FinalColor) });
 	SetViewport(renderSize);
 	BeginRenderPass({ 0,0,0,0 });
+
+	//ImVec2 transformedMousePos;
+	//transformedMousePos.x = HInput::GetMousePos().x - _focusRect.x;
+	//transformedMousePos.y = HInput::GetMousePos().y - _focusRect.y;
+	//ImGuiIO& io = ImGui::GetIO();
+	//io.MousePos = transformedMousePos;
+
 	vkManager->ImguiNewFrame();
 	//Begin
-	//ImGui::ShowDemoWindow((bool*)1);
+
+	ImGui::ShowDemoWindow((bool*)1);
 	for (auto& i : _gui_extensions)
 	{
 		i(_imguiContent);
@@ -163,16 +176,18 @@ void ImguiPass::ShowPerformance()
 		ImGuiWindowFlags_NoScrollbar |
 		ImGuiWindowFlags_NoBackground |
 		ImGuiWindowFlags_NoTitleBar |
-		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs))
+		ImGuiWindowFlags_NoMove | 
+		ImGuiWindowFlags_NoInputs |
+		ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		double frameRate = VulkanApp::GetFrameRate();
-		HString frameString = HString::FromFloat(frameRate, 2) + " ms";
-		HString fpsString = HString::FromUInt((uint32_t)(1.0f / (float)(frameRate / 1000.0)));
-		ImVec2 newPos = { (float)_currentFrameBufferSize.width - 80.f , (float)_currentFrameBufferSize.height * 0.0002f };
+		auto frameRate = VulkanApp::GetFrameRate();
+		uint32_t fps = (uint32_t)(1.0f / (float)(frameRate / 1000.0));
+		ImVec2 newPos = { 4.0f , 4.0f };
 		ImGui::SetWindowPos(newPos);
-		ImGui::Text("%s", frameString.c_str());
+		ImGui::Text("%.2f ms", frameRate);
 		ImGui::NextColumn();
-		ImGui::Text("%s" , fpsString.c_str());
+		ImGui::Text("%d" , fps);
+		ImGui::Text("MousePos: %d, %d", ImGui::GetMousePos().x, ImGui::GetMousePos().y);
 		ImGui::End();
 	}
 }

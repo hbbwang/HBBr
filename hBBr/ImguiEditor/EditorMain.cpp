@@ -2,6 +2,7 @@
 #include "SDLInclude.h"
 #include "EditorMain.h"
 #include "VulkanRenderer.h"
+#include "Pass/PassManager.h"
 #include "Pass/ImguiPass.h"
 #include "Pass/ImguiPassEditor.h"
 #include "Imgui/imgui.h"
@@ -13,6 +14,7 @@ EditorMain::EditorMain()
 {
 	_mainForm = VulkanApp::GetMainForm();
 	_editorGui = _mainForm->swapchain->GetEditorGuiPass();
+	_mainRnederer = _mainForm->swapchain->GetRenderers().begin()->second;
 
 	MainMenu_File_Title = GetEditorInternationalizationText("MainWindow", "MainMenu_File_Title").c_str();
 	MainMenu_File_NewWorld = GetEditorInternationalizationText("MainWindow", "MainMenu_File_NewWorld").c_str();
@@ -81,8 +83,8 @@ EditorMain::EditorMain()
 		ImGui::End();
 
 		//主渲染窗口
-		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0)); // 设置透明背景颜色
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0)); // 移除窗口内边距
 		if (ImGui::Begin(RenderView.c_str()))
 		{
 			// 获取内容区域的最小和最大坐标（相对于窗口的坐标）
@@ -104,6 +106,20 @@ EditorMain::EditorMain()
 			//_renderViewSize.width += 14;
 			//_renderViewSize.height += 15;
 
+			//ImGui::SetCursorPos({ ImGui::GetWindowContentRegionMin().x - x, ImGui::GetWindowContentRegionMin().y - y });
+
+			for (auto& i : _mainRnederer->GetPassManagers())
+			{
+				i.second->GetImguiPass()->UpdateImguiFocusContentRect(
+					{
+						(int)ImGui::GetWindowContentRegionMin().x,
+						(int)ImGui::GetWindowContentRegionMin().y,
+						(int)contentRegionSize.x,
+						(int)contentRegionSize.y
+					}
+				);
+			}
+
 			ImGui::Image(pass->GetRenderView(), contentRegionSize);
 
 			if (_renderViewSize.width <= 0 || _renderViewSize.height <= 0)
@@ -111,7 +127,7 @@ EditorMain::EditorMain()
 				_renderViewSize = {2,2};
 			}
 			//调整渲染纹理大小
-			_mainForm->swapchain->GetRenderers().begin()->second->SetRenderSize(_renderViewSize);
+			_mainRnederer->SetRenderSize(_renderViewSize);
 		}
 		ImGui::End();
 		ImGui::PopStyleVar();

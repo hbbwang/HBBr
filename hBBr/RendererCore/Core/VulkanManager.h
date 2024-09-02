@@ -191,10 +191,22 @@ public:
 	HBBR_API void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImageView>& swapchainImageViews);
 
 	/* 创建Vulkan image ,但是不带 mipmaps */
-	HBBR_API void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image ,uint32_t miplevel = 1, uint32_t layerCount = 1);
+	HBBR_API void CreateImage(
+		uint32_t width, uint32_t height, VkFormat format, 
+		VkImageUsageFlags usageFlags, VkImage& image ,
+		uint32_t miplevel = 1, uint32_t layerCount = 1);
 
 	/* 根据VkImageView ,创建Vulkan image view*/
-	HBBR_API void CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags,  VkImageView& imageView, uint32_t miplevel = 1, uint32_t layerCount = 1);
+	HBBR_API void CreateImageView(
+		VkImage image, VkFormat format, 
+		VkImageAspectFlags aspectFlags,  VkImageView& imageView, 
+		uint32_t miplevel = 1, uint32_t layerCount = 1, 
+		VkComponentMapping componentMapping = { 
+		VK_COMPONENT_SWIZZLE_IDENTITY ,
+		VK_COMPONENT_SWIZZLE_IDENTITY ,
+		VK_COMPONENT_SWIZZLE_IDENTITY ,
+		VK_COMPONENT_SWIZZLE_IDENTITY }
+		);
 
 	/* 创建Vulkan image view memory*/
 	HBBR_API VkDeviceSize CreateImageMemory(VkImage image, VkDeviceMemory& imageViewMemory, VkMemoryPropertyFlags memoryPropertyFlag = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);

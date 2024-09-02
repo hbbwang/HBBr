@@ -11,6 +11,8 @@ public:
 
 	class ImguiPassEditor* _editorGui = nullptr;
 
+	class VulkanRenderer* _mainRnederer = nullptr;
+
 	VkExtent2D _renderViewSize;
 
 	int _displayMode = 0;

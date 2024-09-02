@@ -56,6 +56,8 @@ public:
 		return _camera;
 	}
 
+	HBBR_API class ImguiPass* GetImguiPass()const;
+
 	HBBR_API HBBR_INLINE void BindLightingParameter(DirectionalLightComponent* lightComp) {
 		_lightings.push_back(lightComp);
 	}
@@ -100,4 +102,5 @@ private:
 
 	PostProcessUniformBuffer _postProcessUniformBuffer;
 
+	ImguiPass* _imguiPass;
 };
