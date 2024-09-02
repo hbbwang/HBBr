@@ -85,7 +85,7 @@ EditorMain::EditorMain()
 		//主渲染窗口
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0)); // 设置透明背景颜色
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0)); // 移除窗口内边距
-		if (ImGui::Begin(RenderView.c_str()))
+		if (ImGui::Begin(RenderView.c_str(),0))
 		{
 			// 获取内容区域的最小和最大坐标（相对于窗口的坐标）
 			ImVec2 contentRegionMin = ImGui::GetWindowContentRegionMin();
@@ -107,15 +107,15 @@ EditorMain::EditorMain()
 			//_renderViewSize.height += 15;
 
 			//ImGui::SetCursorPos({ ImGui::GetWindowContentRegionMin().x - x, ImGui::GetWindowContentRegionMin().y - y });
-
+			
 			for (auto& i : _mainRnederer->GetPassManagers())
 			{
 				i.second->GetImguiPass()->UpdateImguiFocusContentRect(
 					{
-						(int)ImGui::GetWindowContentRegionMin().x,
-						(int)ImGui::GetWindowContentRegionMin().y,
-						(int)contentRegionSize.x,
-						(int)contentRegionSize.y
+						(int)(ImGui::GetWindowPos().x + contentRegionMin.x),
+						(int)(ImGui::GetWindowPos().y + contentRegionMin.y),
+						(int)ImGui::GetWindowSize().x,
+						(int)ImGui::GetWindowSize().y
 					}
 				);
 			}

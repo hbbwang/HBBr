@@ -148,22 +148,22 @@ void ImguiPass::PassUpdate()
 	SetViewport(renderSize);
 	BeginRenderPass({ 0,0,0,0 });
 
-	//ImVec2 transformedMousePos;
-	//transformedMousePos.x = HInput::GetMousePos().x - _focusRect.x;
-	//transformedMousePos.y = HInput::GetMousePos().y - _focusRect.y;
-	//ImGuiIO& io = ImGui::GetIO();
-	//io.MousePos = transformedMousePos;
+	ImGuiIO& io = ImGui::GetIO();
+	ImVec2 transformedMousePos;
+	transformedMousePos.x = (HInput::GetMousePos().x - _focusRect.x);
+	transformedMousePos.y = (HInput::GetMousePos().y - _focusRect.y);
+	io.MousePos = transformedMousePos;
+	io.WantOffsetMousePos = true;//偏移光标位置
 
 	vkManager->ImguiNewFrame();
 	//Begin
-
+	
 	ImGui::ShowDemoWindow((bool*)1);
 	for (auto& i : _gui_extensions)
 	{
 		i(_imguiContent);
 	}
 	ShowPerformance();
-
 	//End
 	vkManager->ImguiEndDraw(cmdBuf);
 	EndRenderPass();
@@ -182,12 +182,11 @@ void ImguiPass::ShowPerformance()
 	{
 		auto frameRate = VulkanApp::GetFrameRate();
 		uint32_t fps = (uint32_t)(1.0f / (float)(frameRate / 1000.0));
-		ImVec2 newPos = { 4.0f , 4.0f };
+		ImVec2 newPos = { 2.0f , 2.0f };
 		ImGui::SetWindowPos(newPos);
 		ImGui::Text("%.2f ms", frameRate);
 		ImGui::NextColumn();
 		ImGui::Text("%d" , fps);
-		ImGui::Text("MousePos: %d, %d", ImGui::GetMousePos().x, ImGui::GetMousePos().y);
 		ImGui::End();
 	}
 }

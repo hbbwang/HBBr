@@ -8,16 +8,20 @@ class VulkanSwapchain
 	friend class VulkanRenderer;
 	friend class VulkanApp;
 public:
-	HBBR_API VulkanSwapchain(SDL_Window* windowHandle);
+	HBBR_API VulkanSwapchain(VulkanForm* form);
 
 	HBBR_API ~VulkanSwapchain();
 
+	HBBR_API HBBR_INLINE VulkanForm* GetSwapchainForm() {
+		return _form;
+	}
+
 	HBBR_API HBBR_INLINE SDL_Window* GetWindowHandle() {
-		return _windowHandle;
+		return _form->window;
 	}
 
 	HBBR_API HBBR_INLINE bool HasFocus() {
-		return VulkanApp::IsWindowFocus(_windowHandle);
+		return VulkanApp::IsWindowFocus(_form->window);
 	}
 
 	HBBR_INLINE VkSurfaceFormatKHR GetSurfaceFormat()const {
@@ -91,7 +95,7 @@ private:
 
 	VulkanManager* _vulkanManager = nullptr;
 
-	SDL_Window* _windowHandle = nullptr;
+	struct VulkanForm* _form = nullptr;
 
 	VkSurfaceKHR _surface = VK_NULL_HANDLE;
 

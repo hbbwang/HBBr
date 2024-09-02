@@ -2396,8 +2396,9 @@ ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass rend
 
 	ImGui::StyleColorsDark();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controls
+	io.ConfigWindowsMoveFromTitleBarOnly = true;			// Windows move only press window title can
 
 	if (enableImguiDock)
 	{

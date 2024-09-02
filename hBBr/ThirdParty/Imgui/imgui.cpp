@@ -10237,7 +10237,10 @@ void ImGui::UpdateInputEvents(bool trickle_fast_inputs)
             ImVec2 event_pos(e->MousePos.PosX, e->MousePos.PosY);
             if (trickle_fast_inputs && (mouse_button_changed != 0 || mouse_wheeled || key_changed || text_inputted))
                 break;
-            io.MousePos = event_pos;
+            if (!g.IO.WantOffsetMousePos)
+            {
+                io.MousePos = event_pos;
+            }
             io.MouseSource = e->MousePos.MouseSource;
             mouse_moved = true;
         }

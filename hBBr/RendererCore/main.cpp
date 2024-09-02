@@ -272,13 +272,11 @@ bool VulkanApp::UpdateForm()
 			windowIndex = 0;
 		}
 		#if ENABLE_IMGUI
-		for(auto& i: winForm->imguiContents)
+		for (int i = 0; i < winForm->imguiContents.size(); i++)
 		{
-			if (i)
-			{
-				ImGui::SetCurrentContext(i);
-				ImGui_ImplSDL3_ProcessEvent(&event);
-			}
+			ImGui::SetCurrentContext(winForm->imguiContents[i]);
+			ImGui_ImplSDL3_ProcessEvent(&event);
+			//ConsoleDebug::printf_endl_warning("%d", i);
 		}
 		#endif
 
@@ -517,7 +515,7 @@ void VulkanApp::CreateRenderer(VulkanForm* form)
 	//Create Swapchain
 	if (form != nullptr && form->swapchain == nullptr)
 	{
-		form->swapchain = new VulkanSwapchain(form->window);
+		form->swapchain = new VulkanSwapchain(form);
 	}
 	if (form != nullptr && form->swapchain != nullptr)
 	{

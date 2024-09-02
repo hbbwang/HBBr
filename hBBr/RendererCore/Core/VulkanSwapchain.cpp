@@ -18,13 +18,13 @@
 #include "ShaderCompiler.h"
 #endif
 
-VulkanSwapchain::VulkanSwapchain(SDL_Window* windowHandle)
+VulkanSwapchain::VulkanSwapchain(VulkanForm* form)
 {
-	_windowHandle = windowHandle;
+	_form = form;
 	_vulkanManager = VulkanManager::GetManager();
 	//Surface
 	ConsoleDebug::print_endl("hBBr:Start init Surface.");
-	_vulkanManager->ReCreateSurface_SDL(_windowHandle, _surface);
+	_vulkanManager->ReCreateSurface_SDL(_form->window, _surface);
 	_vulkanManager->GetSurfaceCapabilities(_surface, &_surfaceCapabilities);
 
 	//Swapchain
@@ -32,7 +32,7 @@ VulkanSwapchain::VulkanSwapchain(SDL_Window* windowHandle)
 	_vulkanManager->CheckSurfaceFormat(_surface, _surfaceFormat);
 	ConsoleDebug::print_endl("hBBr:Start Create Swapchain.");
 	_surfaceSize = _vulkanManager->CreateSwapchain(
-		_windowHandle,
+		_form->window,
 		{ 1,1 },
 		_surface,
 		_surfaceFormat,
@@ -228,7 +228,7 @@ bool VulkanSwapchain::ResizeBuffer()
 	_Sleep(200);
 #endif
 	//部分情况下重置窗口会出现Surface被销毁的问题，最好Surface也重新创建一个
-	_vulkanManager->ReCreateSurface_SDL(_windowHandle, _surface);
+	_vulkanManager->ReCreateSurface_SDL(_form->window, _surface);
 
 	//获取surfaceCapabilities，顺便检查一下Surface是否已经丢失了
 	if (!_vulkanManager->GetSurfaceCapabilities(_surface, &_surfaceCapabilities))
@@ -245,7 +245,7 @@ bool VulkanSwapchain::ResizeBuffer()
 	}
 
 	_cacheSurfaceSize = _surfaceSize = _vulkanManager->CreateSwapchain(
-		_windowHandle,
+		_form->window,
 		{ 1,1 },
 		_surface,
 		_surfaceFormat,

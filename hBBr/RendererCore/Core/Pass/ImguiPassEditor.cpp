@@ -41,6 +41,7 @@ void ImguiPassEditor::PassInit()
 		if (i->swapchain == _swapchain)
 		{
 			i->imguiContents.push_back(_imguiContent);
+			break;
 		}
 	}
 	_passName = "Imgui Editor Render Pass";
