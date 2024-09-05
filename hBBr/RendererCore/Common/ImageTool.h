@@ -44,7 +44,7 @@ enum class ESampler
 	POINT_CLAMP_ANISO = 3,
 };
 
-typedef struct tagImageData
+struct ImageData
 {
 	ImageHeader data_header;
 	HString fileName;
@@ -58,7 +58,7 @@ typedef struct tagImageData
 	uint8_t blockSize = 0;
 	bool	isCubeMap = false;
 	bool	isArray = false;
-}ImageData, * LPImage;
+};
 
 
 class ImageTool

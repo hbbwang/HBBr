@@ -39,7 +39,7 @@ public:
 	//创建VkDescriptorSetLayer
 	void BuildDescriptorSetLayout();
 
-	void BufferMapping(uint32_t bindingIndex, void* data, VkDeviceSize offset, VkDeviceSize dataSize, VkCommandBuffer cmdBuf = nullptr);
+	void BufferMapping(uint32_t bindingIndex, void* data, VkDeviceSize offset, VkDeviceSize dataSize);
 
 	VMABuffer* GetBuffer(uint32_t bindingIndex)const {
 		auto it = _buffers.find(bindingIndex);

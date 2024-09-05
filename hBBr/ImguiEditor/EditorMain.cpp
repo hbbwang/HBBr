@@ -9,6 +9,8 @@
 #include "Imgui/backends/imgui_impl_vulkan.h"
 #include "RendererConfig.h"
 #include "DescriptorSet.h"
+#include "World.h"
+#include "EditorResource.h"
 
 EditorMain::EditorMain()
 {
@@ -55,7 +57,6 @@ EditorMain::EditorMain()
 			}
 			if (ImGui::BeginMenu(MainMenu_Tool_Title.c_str()))
 			{
-
 				ImGui::EndMenu();
 			}
 			ImGui::EndMainMenuBar();
@@ -63,8 +64,76 @@ EditorMain::EditorMain()
 
 		if (ImGui::Begin(SceneOutlineTitle.c_str()))
 		{
+			if (!_mainRnederer->GetWorld().expired())
+			{
+				ImGuiTreeNodeFlags treeNodeFlags = 
+					ImGuiTreeNodeFlags_OpenOnArrow | 
+					ImGuiTreeNodeFlags_OpenOnDoubleClick | 
+					ImGuiTreeNodeFlags_SpanFullWidth;
+				auto world = _mainRnederer->GetWorld().lock();
 
-	
+				auto clearSelection = [&]() {
+					if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
+					{
+						for (auto& l : world->GetLevels())
+						{
+							l->_bSelected = false;
+							for (auto& g : l->GetAllGameObjects())
+							{
+								g->_bSelected = false;
+							}
+						}
+					}
+				};
+				if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
+				{
+					clearSelection();
+				}
+				for (auto& l : world->GetLevels())
+				{
+					ImGui::Image(
+						(ImTextureID)EditorResource::Get()->_icon_levelIcon->descriptorSet,
+						ImVec2(20, 20));
+					ImGui::SameLine();
+					bool level = ImGui::TreeNodeEx(l->GetLevelName().c_str(), treeNodeFlags | (l->_bSelected ? ImGuiTreeNodeFlags_Selected : 0));
+					if (ImGui::IsItemClicked())
+					{
+						if (ImGui::GetIO().KeyCtrl)
+						{
+							l->_bSelected = true;
+						}
+						else
+						{
+							clearSelection();
+							l->_bSelected = true;
+						}
+					}
+					if (level)
+					{
+						for (auto& g : l->GetAllGameObjects())
+						{
+							bool object = ImGui::TreeNodeEx(g->GetObjectName().c_str(), treeNodeFlags | (g->_bSelected ? ImGuiTreeNodeFlags_Selected : 0));
+							if (ImGui::IsItemClicked())
+							{
+								if (ImGui::GetIO().KeyCtrl)
+								{
+									g->_bSelected = true;
+								}
+								else
+								{
+									clearSelection();
+									g->_bSelected = true;
+								}
+							}
+							if (object)
+							{
+								ImGui::TreePop();
+							}
+						}
+						ImGui::TreePop();
+					}
+				}
+			}
 		}
 		ImGui::End();
 
@@ -106,8 +175,6 @@ EditorMain::EditorMain()
 			//_renderViewSize.width += 14;
 			//_renderViewSize.height += 15;
 
-			//ImGui::SetCursorPos({ ImGui::GetWindowContentRegionMin().x - x, ImGui::GetWindowContentRegionMin().y - y });
-			
 			for (auto& i : _mainRnederer->GetPassManagers())
 			{
 				i.second->GetImguiPass()->UpdateImguiFocusContentRect(
@@ -132,6 +199,10 @@ EditorMain::EditorMain()
 		ImGui::End();
 		ImGui::PopStyleVar();
 		ImGui::PopStyleColor();
+
+
+		ImGui::ShowDemoWindow((bool*)1);
+
 	};
 	_editorGui->AddGui(mainEditorWidget);
 }

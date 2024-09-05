@@ -25,7 +25,7 @@ VMABuffer::VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, Vm
 		_bufferUsage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT; //为了支持Copy和Resize
 	}
 
-	manager->VMACraeteBufferAndAllocateMemory(bufferSize, _bufferUsage, _buffer, _allocation, &_allocationInfo, _memoryUsage, _bAlwayMapping, _bFocusCreateDedicatedMemory);
+	manager->VMACreateBufferAndAllocateMemory(bufferSize, _bufferUsage, _buffer, _allocation, &_allocationInfo, _memoryUsage, _bAlwayMapping, _bFocusCreateDedicatedMemory);
 
 	vmaGetAllocationMemoryProperties(manager->GetVMA(), _allocation, &_memFlags);
 
@@ -40,26 +40,36 @@ VMABuffer::~VMABuffer()
 	manager->VMADestroyBufferAndFreeMemory(_buffer, _allocation, _debugName, _allocationInfo.size);
 }
 
-void VMABuffer::Mapping(void* data, VkDeviceSize offset, VkDeviceSize dataSize, VkCommandBuffer cmdBuf)
+void VMABuffer::Mapping(void* data, VkDeviceSize offset, VkDeviceSize dataSize)
 {
 	AlignmentSize(dataSize);
 	if (_memoryUsage == VMA_MEMORY_USAGE_GPU_ONLY)//仅GPU可见的内存，是不能从CPU复制数据的，必须通过"媒介"
 	{
 		const auto& manager = VulkanManager::GetManager();
+		VkCommandBuffer cmdBuf;
+		manager->AllocateCommandBuffer(manager->GetCommandPool(), cmdBuf);
+		manager->BeginCommandBuffer(cmdBuf);
 		VkBuffer stagingBuffer;
 		VmaAllocation stagingAllocation;
-		manager->VMACraeteBufferAndAllocateMemory(dataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer, stagingAllocation, nullptr, VMA_MEMORY_USAGE_CPU_TO_GPU, false, true);
-		#if IS_EDITOR
-		ConsoleDebug::printf_endl_succeed(GetInternationalizationText("Renderer", "CreateBuffer"), (_debugName + "_Staging").c_str(), _allocationInfo.size, (double)_allocationInfo.size / (double)1024.0 / (double)1024.0);
-		#endif
-		// 将数据写入到 "staging" 缓冲区
-		void* mappedData;
-		vmaMapMemory(manager->GetVMA(), stagingAllocation, &mappedData);
-		void* bufBegin = (uint8_t*)(mappedData)+offset;
-		memcpy(bufBegin, data, dataSize);
-		vmaUnmapMemory(manager->GetVMA(), stagingAllocation);
-		//将数据从"staging" 缓冲区复制到目标缓冲区
-		manager->CmdBufferCopyToBuffer(cmdBuf, stagingBuffer, _buffer, dataSize);
+		{
+			manager->VMACreateBufferAndAllocateMemory(dataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer, stagingAllocation, nullptr, VMA_MEMORY_USAGE_CPU_TO_GPU, false, true);
+			#if IS_EDITOR
+			ConsoleDebug::printf_endl_succeed(GetInternationalizationText("Renderer", "CreateBuffer"), (_debugName + "_Staging").c_str(), _allocationInfo.size, (double)_allocationInfo.size / (double)1024.0 / (double)1024.0);
+			#endif
+			// 将数据写入到 "staging" 缓冲区
+			void* mappedData;
+			vmaMapMemory(manager->GetVMA(), stagingAllocation, &mappedData);
+			void* bufBegin = (uint8_t*)(mappedData)+offset;
+			memcpy(bufBegin, data, dataSize);
+			vmaUnmapMemory(manager->GetVMA(), stagingAllocation);
+			//将数据从"staging" 缓冲区复制到目标缓冲区
+			manager->CmdBufferCopyToBuffer(cmdBuf, stagingBuffer, _buffer, dataSize);
+		}
+		manager->EndCommandBuffer(cmdBuf);
+		manager->SubmitQueueImmediate({ cmdBuf });
+		vkQueueWaitIdle(manager->GetGraphicsQueue());
+		manager->FreeCommandBuffer(manager->GetCommandPool(), cmdBuf);
+
 		//销毁"staging" 缓冲区
 		manager->VMADestroyBufferAndFreeMemory(stagingBuffer, stagingAllocation, _debugName + "_Staging", _allocationInfo.size);
 		if (_gpuOnlyDataCopy)
@@ -113,7 +123,7 @@ bool VMABuffer::Resize(VkDeviceSize newSize, VkCommandBuffer cmdBuf)
 	VkBuffer newBuffer;
 	VmaAllocation newAllocation;
 	VmaAllocationInfo newAllocationInfo;
-	manager->VMACraeteBufferAndAllocateMemory(newSize, _bufferUsage, newBuffer, newAllocation, &newAllocationInfo, _memoryUsage, _bAlwayMapping, _bFocusCreateDedicatedMemory);
+	manager->VMACreateBufferAndAllocateMemory(newSize, _bufferUsage, newBuffer, newAllocation, &newAllocationInfo, _memoryUsage, _bAlwayMapping, _bFocusCreateDedicatedMemory);
 	vmaGetAllocationMemoryProperties(manager->GetVMA(), newAllocation, &_memFlags);
 	//把旧Buffer数据复制到新的上面
 	{

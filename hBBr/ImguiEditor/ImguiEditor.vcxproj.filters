@@ -51,6 +51,9 @@
     <ClCompile Include="CommonFunctionLibrary.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="EditorResource.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ThirdParty\Imgui\imconfig.h">
@@ -77,5 +80,11 @@
     <ClInclude Include="CommonFunctionLibrary.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="EditorResource.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

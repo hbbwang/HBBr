@@ -86,6 +86,8 @@ public:
 		_dirtyLevels.clear();
 	}
 
+	bool _bSelected = false;
+
 #endif
 
 private:

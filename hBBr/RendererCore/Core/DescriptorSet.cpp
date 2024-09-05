@@ -89,12 +89,12 @@ void DescriptorSet::BuildDescriptorSetLayout()
 	RefreshDescriptorSetAllBinding();
 }
 
-void DescriptorSet::BufferMapping(uint32_t bindingIndex, void* data, VkDeviceSize offset, VkDeviceSize dataSize, VkCommandBuffer cmdBuf)
-{
+void DescriptorSet::BufferMapping(uint32_t bindingIndex, void* data, VkDeviceSize offset, VkDeviceSize dataSize)
+{ 
 	auto it = _buffers.find(bindingIndex);
 	if (_buffers.end() != it)
 	{
-		it->second->Mapping(data, offset, dataSize, cmdBuf);
+		it->second->Mapping(data, offset, dataSize);
 	}
 }
 

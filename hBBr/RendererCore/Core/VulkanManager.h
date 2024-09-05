@@ -190,7 +190,7 @@ public:
 	/* 释放Swapchain */
 	HBBR_API void DestroySwapchain(VkSwapchainKHR& swapchain, std::vector<VkImageView>& swapchainImageViews);
 
-	/* 创建Vulkan image ,但是不带 mipmaps */
+	/* 创建Vulkan image */
 	HBBR_API void CreateImage(
 		uint32_t width, uint32_t height, VkFormat format, 
 		VkImageUsageFlags usageFlags, VkImage& image ,
@@ -207,6 +207,14 @@ public:
 		VK_COMPONENT_SWIZZLE_IDENTITY ,
 		VK_COMPONENT_SWIZZLE_IDENTITY }
 		);
+
+	/* 创建Vulkan image */
+	HBBR_API void VMACreateImage(
+		uint32_t width, uint32_t height, VkFormat format,
+		VkImageUsageFlags usageFlags, VkImage& image, VmaAllocation& allocation, VmaAllocationInfo* vmaInfo = nullptr,
+		uint32_t miplevel = 1, uint32_t layerCount = 1, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY);
+
+	HBBR_API void VMADestroyImage(VkImage& image, VmaAllocation& allocation);
 
 	/* 创建Vulkan image view memory*/
 	HBBR_API VkDeviceSize CreateImageMemory(VkImage image, VkDeviceMemory& imageViewMemory, VkMemoryPropertyFlags memoryPropertyFlag = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -361,7 +369,7 @@ public:
 	//VMA_MEMORY_USAGE_GPU_LAZILY_ALLOCATED		
 	// 懒惰分配的内存，也就是及说GPU端Memory在分配的时候使用了VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT标识符，也就是按需分配，如果内存不被访问，即便是调用了接口也不会申请内存分配。注意：如果是没有这种标识符对应类型的内存，就会分配失败哦。用途：临时的图片等，比如MSAA抗锯齿的时候会用到，因为可能关掉抗锯齿。此类图片内存一定有关键字：VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT
 	//
-	HBBR_API void VMACraeteBufferAndAllocateMemory(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo* vmaInfo = nullptr, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bAlwayMapping = false, bool bFocusCreateDedicatedMemory = false);
+	HBBR_API void VMACreateBufferAndAllocateMemory(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo* vmaInfo = nullptr, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bAlwayMapping = false, bool bFocusCreateDedicatedMemory = false);
 
 	HBBR_API void VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation, HString debugName = "VMABuffer", VkDeviceSize debugSize = 0);
 
@@ -426,6 +434,8 @@ public:
 	HBBR_API void CmdColorBitImage(VkCommandBuffer cmdBuf, VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D targetSize, VkFilter filter = VK_FILTER_LINEAR);
 
 	HBBR_API void CmdBufferCopyToBuffer(VkCommandBuffer cmdBuf, VkBuffer src, VkBuffer dst, VkDeviceSize copySize, VkDeviceSize srcOffset = 0, VkDeviceSize dstOffset = 0);
+
+	HBBR_API void CmdCopyImageDataToTexture(VkCommandBuffer cmdbuf, class VMABuffer* src, VkImage image, VkImageAspectFlags imageAspectFlags,VkImageLayout imageInputLayout, struct ImageData* imageData);
 
 	//RenderDoc debug
 	HBBR_API static void SetObjectName(VkDevice device, uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name);

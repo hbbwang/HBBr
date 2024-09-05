@@ -158,7 +158,7 @@ void ImguiPass::PassUpdate()
 	vkManager->ImguiNewFrame();
 	//Begin
 	
-	ImGui::ShowDemoWindow((bool*)1);
+	//ImGui::ShowDemoWindow((bool*)1);
 	for (auto& i : _gui_extensions)
 	{
 		i(_imguiContent);

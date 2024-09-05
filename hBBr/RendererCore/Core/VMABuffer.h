@@ -17,8 +17,8 @@ public:
 	~VMABuffer();
 
 	//最后的VkCommandBuffer是给VMA_MEMORY_USAGE_GPU_ONLY准备的
-	//如果是nullptr，会自动创建一个，并且强行等待执行完成，效率较低。
-	void Mapping(void* data, VkDeviceSize offset, VkDeviceSize dataSize, VkCommandBuffer cmdBuf = VK_NULL_HANDLE);
+	//如果是nullptr，会自动创建一个，并且强行等待执行完成，效率较低。  
+	void Mapping(void* data, VkDeviceSize offset, VkDeviceSize dataSize);  
 
 	//Buffer大小重置,如果是从大的重置成小的,原来的数据将会丢失
 	bool Resize(VkDeviceSize newSize, VkCommandBuffer cmdBuf = VK_NULL_HANDLE);

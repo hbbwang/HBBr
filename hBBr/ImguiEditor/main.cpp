@@ -7,6 +7,7 @@
 #include "VulkanRenderer.h"
 #include "EditorMain.h"
 #include "RendererConfig.h"
+#include "EditorResource.h"
 
 int _bInit = false;
 
@@ -65,9 +66,11 @@ int main(int argc, char* argv[])
 		{
 			_bInit = true;
 			_mainEditor = new EditorMain;
+			EditorResource::Get()->Init();
 		}
 	}
 	delete _mainEditor;
+	EditorResource::Get()->Release();
 	VulkanApp::DeInitVulkanManager();
 	return 0;
 }

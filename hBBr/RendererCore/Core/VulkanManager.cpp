@@ -25,7 +25,9 @@
 #include "Primitive.h"
 #include "Pass/PassBase.h"
 #include "FormMain.h"
-
+#include "ImageTool.h"
+#include "DDSTool.h"
+#include "VMABuffer.h"
 // --------- IMGUI
 #if ENABLE_IMGUI
 #include "Imgui/imgui.h"
@@ -1327,7 +1329,57 @@ void VulkanManager::CreateImageView(VkImage inImage, VkFormat format, VkImageAsp
 	image_view_create_info.subresourceRange.baseMipLevel = 0;
 	image_view_create_info.subresourceRange.layerCount = layerCount;
 	image_view_create_info.subresourceRange.levelCount = miplevel;
-	vkCreateImageView(_device, &image_view_create_info, VK_NULL_HANDLE, &imageView);
+
+	VkResult result = vkCreateImageView(_device, &image_view_create_info, nullptr, &imageView);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut("Create vulkan image view failed.", false, false);
+	}
+}
+
+void VulkanManager::VMACreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, VkImage& image, VmaAllocation& allocation, VmaAllocationInfo* vmaInfo, uint32_t miplevel, uint32_t layerCount, VmaMemoryUsage memoryUsage)
+{
+	VkExtent2D texSize = {};
+	texSize.width = width;
+	texSize.height = height;
+	VkImageCreateInfo	create_info{};
+	create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+	create_info.flags = 0;
+	if (layerCount == 6)
+	{
+		create_info.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+	}
+	create_info.format = format;
+	create_info.imageType = VK_IMAGE_TYPE_2D;
+	create_info.usage = usageFlags;
+	create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+	create_info.arrayLayers = layerCount;
+	create_info.mipLevels = miplevel;
+	create_info.extent.depth = 1;
+	create_info.extent.width = texSize.width;
+	create_info.extent.height = texSize.height;
+	create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	create_info.queueFamilyIndexCount = VK_QUEUE_FAMILY_IGNORED;
+	create_info.pQueueFamilyIndices = VK_NULL_HANDLE;
+	create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	create_info.samples = VK_SAMPLE_COUNT_1_BIT;
+
+	VmaAllocationCreateInfo alloc_info = {};
+	alloc_info.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+
+	VkResult result = vmaCreateImage(_vma_allocator, &create_info, &alloc_info, &image, &allocation, vmaInfo);
+	if (result != VK_SUCCESS)
+	{
+		MessageOut("Create vulkan image failed.", false, false);
+	}
+}
+
+void VulkanManager::VMADestroyImage(VkImage& image, VmaAllocation& allocation)
+{
+	if(image != nullptr)
+		vmaDestroyImage(_vma_allocator, image, allocation);
+	image = nullptr;
+	allocation = nullptr;
 }
 
 VkDeviceSize VulkanManager::CreateImageMemory(VkImage inImage, VkDeviceMemory& imageViewMemory, VkMemoryPropertyFlags memoryPropertyFlag)
@@ -1398,6 +1450,18 @@ void VulkanManager::Transition(
 	uint32_t baseArrayLayer, 
 	uint32_t layerCount)
 {
+	bool bImm = false;
+	if (cmdBuffer == nullptr)
+	{
+		bImm = true;
+	}
+
+	if (bImm)
+	{
+		AllocateCommandBuffer(GetCommandPool(), cmdBuffer);
+		BeginCommandBuffer(cmdBuffer);
+	}
+
 	if (oldLayout == newLayout)
 	{
 		return;
@@ -1498,6 +1562,14 @@ void VulkanManager::Transition(
 	
 	vkCmdPipelineBarrier(cmdBuffer, srcFlags, dstFlags, 0, 0, nullptr, 0, nullptr, 1,
 		&imageBarrier);
+
+	if (bImm)
+	{
+		EndCommandBuffer(cmdBuffer);
+		SubmitQueueImmediate({ cmdBuffer });
+		vkQueueWaitIdle(GetGraphicsQueue());
+		FreeCommandBuffer(GetCommandPool(), cmdBuffer);
+	}
 }
 
 void VulkanManager::DestroyImage(VkImage& image)
@@ -2289,7 +2361,7 @@ void VulkanManager::CreateBufferAndAllocateMemory(size_t bufferSize, uint32_t bu
 	AllocateBufferMemory(buffer, bufferMemory, bufferMemoryProperty);
 }
 
-void VulkanManager::VMACraeteBufferAndAllocateMemory(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo* vmaInfo, VmaMemoryUsage memoryUsage, bool bAlwayMapping, bool bFocusCreateDedicatedMemory)
+void VulkanManager::VMACreateBufferAndAllocateMemory(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo* vmaInfo, VmaMemoryUsage memoryUsage, bool bAlwayMapping, bool bFocusCreateDedicatedMemory)
 {
 	VkBufferCreateInfo bufferInfo{};
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -2795,6 +2867,81 @@ void VulkanManager::CmdBufferCopyToBuffer(VkCommandBuffer cmdBuf, VkBuffer src, 
 		SubmitQueueImmediate({ cmdBuf });
 		vkQueueWaitIdle(VulkanManager::GetManager()->GetGraphicsQueue());
 		FreeCommandBuffer(_commandPool, cmdBuf);
+	}
+}
+
+void VulkanManager::CmdCopyImageDataToTexture(VkCommandBuffer cmdbuf, VMABuffer* src, VkImage image, VkImageAspectFlags imageAspectFlags, VkImageLayout imageInputLayout, ImageData* imageData)
+{
+	if ((imageData->imageData.size() > 0 || imageData->imageDataF.size() > 0) && src != nullptr)
+	{
+		//Copy image data to upload memory
+		uint64_t imageSize = imageData->imageSize;
+
+		//Cube 有6面
+		uint32_t faceNum = 1;
+		if (imageData->isCubeMap)
+		{
+			faceNum = 6;
+		}
+		imageSize *= faceNum;
+		//创建Buffer储存Image data
+		src->BeginMapping();
+		if (imageData->imageData.size() > 0)
+		{
+			//char 只有一个字节，所以数组大小和imageSize一致
+			src->Mapping(imageData->imageData.data(), 0, imageSize);
+		}
+		else if (imageData->imageDataF.size() > 0)
+		{
+			//float 有4个字节，所以size = 数组大小 * sizeof(float)
+			src->Mapping(imageData->imageDataF.data(), 0, imageSize);
+		}
+		src->EndMapping();
+
+		//从Buffer copy到Vkimage
+		//if (_imageData->blockSize > 0)
+		{
+			if (imageData->isCubeMap)
+				Transition(cmdbuf, image, imageAspectFlags, imageInputLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, imageData->mipLevel, 0, 6);
+			else
+				Transition(cmdbuf, image, imageAspectFlags, imageInputLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, imageData->mipLevel);
+
+			std::vector<VkBufferImageCopy>region(imageData->mipLevel * faceNum);
+			int regionIndex = 0;
+			uint32_t bufferOffset = 0;
+			for (uint32_t face = 0; face < faceNum; face++)
+			{
+				uint32_t mipWidth = imageData->data_header.width;
+				uint32_t mipHeight = imageData->data_header.height;
+				for (uint32_t i = 0; i < imageData->mipLevel; i++)
+				{
+					region[regionIndex] = {};
+					region[regionIndex].bufferOffset = bufferOffset;
+					region[regionIndex].bufferRowLength = 0;
+					region[regionIndex].bufferImageHeight = 0;
+					region[regionIndex].imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+					region[regionIndex].imageSubresource.mipLevel = i;
+					region[regionIndex].imageSubresource.baseArrayLayer = face;
+					region[regionIndex].imageSubresource.layerCount = 1;
+					region[regionIndex].imageOffset = { 0,0,0 };
+					region[regionIndex].imageExtent = { mipWidth ,mipHeight,1 };
+					if (imageData->blockSize > 0)
+						bufferOffset += SIZE_OF_BC((int32_t)mipWidth, (int32_t)mipHeight, imageData->blockSize);
+					else
+						bufferOffset += mipWidth * mipHeight;
+					if (mipWidth > 1) mipWidth /= 2;
+					if (mipHeight > 1) mipHeight /= 2;
+					regionIndex++;
+				}
+			}
+			vkCmdCopyBufferToImage(cmdbuf, src->GetBuffer(), image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, (uint32_t)region.size(), region.data());
+
+			//复制完成后,把Layout转换到Shader read only,给shader采样使用
+			if (imageData->isCubeMap)
+				Transition(cmdbuf, image, imageAspectFlags, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, imageData->mipLevel, 0, 6);
+			else
+				Transition(cmdbuf, image, imageAspectFlags, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, imageData->mipLevel);
+		}
 	}
 }
 

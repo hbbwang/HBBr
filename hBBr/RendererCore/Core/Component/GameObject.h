@@ -117,6 +117,7 @@ public:
 	void* _editorObject = nullptr;
 	bool _bEditorNeedUpdate = false;
 	bool _sceneEditorHide = false;
+	bool _bSelected = false;
 #endif
 	bool _IsEditorObject = false;
 
