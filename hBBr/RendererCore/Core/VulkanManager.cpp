@@ -2494,7 +2494,7 @@ ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass rend
 
 	ImFontGlyphRangesBuilder fontBuilder = {};
 
-	ImFont* font = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 16.0f, nullptr,
+	ImFont* font = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 18.0f, nullptr,
 		GetGlyphRangesChineseFull());
 
 	if (!ImGui_ImplSDL3_InitForVulkan(handle))

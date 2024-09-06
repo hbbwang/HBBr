@@ -69,7 +69,8 @@ EditorMain::EditorMain()
 				ImGuiTreeNodeFlags treeNodeFlags = 
 					ImGuiTreeNodeFlags_OpenOnArrow | 
 					ImGuiTreeNodeFlags_OpenOnDoubleClick | 
-					ImGuiTreeNodeFlags_SpanFullWidth;
+					ImGuiTreeNodeFlags_SpanFullWidth |
+					ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
 				auto world = _mainRnederer->GetWorld().lock();
 
 				auto clearSelection = [&]() {
@@ -89,13 +90,26 @@ EditorMain::EditorMain()
 				{
 					clearSelection();
 				}
+				int id = 0;
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(FLT_MIN, 4.f));
 				for (auto& l : world->GetLevels())
 				{
-					ImGui::Image(
-						(ImTextureID)EditorResource::Get()->_icon_levelIcon->descriptorSet,
-						ImVec2(20, 20));
-					ImGui::SameLine();
-					bool level = ImGui::TreeNodeEx(l->GetLevelName().c_str(), treeNodeFlags | (l->_bSelected ? ImGuiTreeNodeFlags_Selected : 0));
+					static bool checkBox = true;
+					float levelItemXPos = ImGui::GetCursorPosX();
+					ImGui::SetCursorPosX(levelItemXPos + 30);
+					//Level Icon
+					//ImGui::Image(
+					//	(ImTextureID)EditorResource::Get()->_icon_levelIcon->descriptorSet,
+					//	ImVec2(26, 26));
+					//ImGui::SameLine();
+					//Level TreeNode
+					bool isLevelOpen = ImGui::TreeNodeEx(l->GetLevelName().c_str(), (ImTextureID)EditorResource::Get()->_icon_levelIcon->descriptorSet, treeNodeFlags | (l->_bSelected ? ImGuiTreeNodeFlags_Selected : 0));
+					/*if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) 
+					{
+						ImGui::SetDragDropPayload((l->GetLevelName() + "Drag").c_str(), l->GetLevelName().c_str(), sizeof(const char*));
+						ImGui::Text("Dragging %s", l->GetLevelName().c_str());
+						ImGui::EndDragDropSource();
+					}*/
 					if (ImGui::IsItemClicked())
 					{
 						if (ImGui::GetIO().KeyCtrl)
@@ -108,11 +122,25 @@ EditorMain::EditorMain()
 							l->_bSelected = true;
 						}
 					}
-					if (level)
+					//Level CheckBox
+					ImGui::SameLine();
+					ImGui::PushID(id);
+					ImGui::SetCursorPosX(levelItemXPos);
+					ImGui::Checkbox("", &checkBox);
+					ImGui::PopID();
+					if (isLevelOpen)
 					{
 						for (auto& g : l->GetAllGameObjects())
 						{
-							bool object = ImGui::TreeNodeEx(g->GetObjectName().c_str(), treeNodeFlags | (g->_bSelected ? ImGuiTreeNodeFlags_Selected : 0));
+							float objectlItemXPos = ImGui::GetCursorPosX();
+							ImGui::SetCursorPosX(objectlItemXPos + 30);
+							//Object Icon
+							//ImGui::Image(
+							//	(ImTextureID)EditorResource::Get()->_icon_objectIcon->descriptorSet,
+							//	ImVec2(26, 26));
+							//ImGui::SameLine();
+							//Object TreeNode
+							bool isObjectOpen = ImGui::TreeNodeEx(g->GetObjectName().c_str(), (ImTextureID)EditorResource::Get()->_icon_objectIcon->descriptorSet,treeNodeFlags | (g->_bSelected ? ImGuiTreeNodeFlags_Selected : 0));
 							if (ImGui::IsItemClicked())
 							{
 								if (ImGui::GetIO().KeyCtrl)
@@ -125,14 +153,23 @@ EditorMain::EditorMain()
 									g->_bSelected = true;
 								}
 							}
-							if (object)
+							if (isObjectOpen)
 							{
 								ImGui::TreePop();
 							}
+							//Object CheckBox
+							ImGui::SameLine();
+							ImGui::PushID(id);
+							ImGui::SetCursorPosX(levelItemXPos);
+							ImGui::Checkbox("", &checkBox);
+							ImGui::PopID();
+							id++;
 						}
 						ImGui::TreePop();
 					}
+					id++;
 				}
+				ImGui::PopStyleVar();
 			}
 		}
 		ImGui::End();

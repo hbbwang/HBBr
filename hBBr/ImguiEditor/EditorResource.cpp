@@ -24,7 +24,7 @@ void EditorResource::Init()
 		_icon_eyeOpen = LoadTexture(32, 32, FileSystem::Append(FileSystem::GetConfigAbsPath(), "Theme/Icons/Icon_eye_open.png"), cmdbuf);
 		_icon_eyeClose = LoadTexture(32, 32, FileSystem::Append(FileSystem::GetConfigAbsPath(), "Theme/Icons/Icon_eye_close.png"), cmdbuf);
 		_icon_levelIcon = LoadTexture(32, 32, FileSystem::Append(FileSystem::GetConfigAbsPath(), "Theme/Icons/Icon_level.png"), cmdbuf);
-
+		_icon_objectIcon = LoadTexture(32, 32, FileSystem::Append(FileSystem::GetConfigAbsPath(), "Theme/Icons/Icon_object.png"), cmdbuf);
 	}
 	manager->EndCommandBuffer(cmdbuf);
 	manager->SubmitQueueImmediate({ cmdbuf });
