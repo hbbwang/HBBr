@@ -28,5 +28,8 @@ public:
 	std::string ContentBrowserTitle;
 	std::string RenderView;
 
+private:
+	void GlobalSetting();
+
 };
 

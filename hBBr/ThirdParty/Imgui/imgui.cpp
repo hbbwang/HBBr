@@ -6956,6 +6956,9 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
     IM_ASSERT(g.WithinFrameScope);                  // Forgot to call ImGui::NewFrame()
     IM_ASSERT(g.FrameCountEnded != g.FrameCount);   // Called ImGui::Render() or ImGui::EndFrame() and haven't called ImGui::NewFrame() again yet
 
+    float oldHeight = g.Style.FramePadding.y;
+    g.Style.FramePadding.y = g.Style.WindowTitleHeight > 2 ? g.Style.WindowTitleHeight : oldHeight;
+
     // Find or create
     ImGuiWindow* window = FindWindowByName(name);
     const bool window_just_created = (window == NULL);
@@ -7254,7 +7257,7 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
         window->DC.MenuBarOffset.x = ImMax(ImMax(window->WindowPadding.x, style.ItemSpacing.x), g.NextWindowData.MenuBarOffsetMinVal.x);
         window->DC.MenuBarOffset.y = g.NextWindowData.MenuBarOffsetMinVal.y;
         window->TitleBarHeight = (flags & ImGuiWindowFlags_NoTitleBar) ? 0.0f : g.FontSize + g.Style.FramePadding.y * 2.0f;
-        window->MenuBarHeight = (flags & ImGuiWindowFlags_MenuBar) ? window->DC.MenuBarOffset.y + g.FontSize + g.Style.FramePadding.y * 2.0f : 0.0f;
+        window->MenuBarHeight = (flags & ImGuiWindowFlags_MenuBar) ? window->DC.MenuBarOffset.y + g.FontSize + oldHeight * 2.0f : 0.0f;
 
         // Depending on condition we use previous or current window size to compare against contents size to decide if a scrollbar should be visible.
         // Those flags will be altered further down in the function depending on more conditions.
@@ -7860,6 +7863,8 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
             return false;
         }
 #endif
+
+    g.Style.FramePadding.y = oldHeight;
 
     return !window->SkipItems;
 }
@@ -17691,6 +17696,9 @@ static void ImGui::DockNodeUpdateTabBar(ImGuiDockNode* node, ImGuiWindow* host_w
     ImGuiContext& g = *GImGui;
     ImGuiStyle& style = g.Style;
 
+    float oldHeight = g.Style.FramePadding.y;
+    g.Style.FramePadding.y = g.Style.WindowTitleHeight > 2 ? g.Style.WindowTitleHeight : oldHeight;
+
     const bool node_was_active = (node->LastFrameActive + 1 == g.FrameCount);
     const bool closed_all = node->WantCloseAll && node_was_active;
     const ImGuiID closed_one = node->WantCloseTabId && node_was_active;
@@ -17965,6 +17973,8 @@ static void ImGui::DockNodeUpdateTabBar(ImGuiDockNode* node, ImGuiWindow* host_w
         host_window->DC.NavLayerCurrent = ImGuiNavLayer_Main;
         host_window->SkipItems = backup_skip_item;
     }
+
+    g.Style.FramePadding.y = oldHeight;
 }
 
 static void ImGui::DockNodeAddTabBar(ImGuiDockNode* node)
