@@ -18,15 +18,15 @@
 	//#define HBBR_API 
 	//#endif
 #else
-	//#if _USE_STATIC
+	#if _USE_STATIC
 		#define HBBR_API 
-	//#else
-	//	#ifdef _USE_DLL
-	//		#define HBBR_API __declspec(dllexport)
-	//	#else
-	//		#define HBBR_API __declspec(dllimport)
-	//	#endif
-	//#endif
+	#else
+		#ifdef _USE_DLL
+			#define HBBR_API __declspec(dllexport)
+		#else
+			#define HBBR_API __declspec(dllimport)
+		#endif
+	#endif
 #endif
 //#else
 //#define HBBR_API 

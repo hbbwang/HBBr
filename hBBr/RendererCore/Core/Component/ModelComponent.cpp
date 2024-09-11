@@ -5,6 +5,7 @@
 #include "FileSystem.h"
 #include "ContentManager.h"
 #include "World.h"
+// 
 COMPONENT_IMPLEMENT(ModelComponent)
 
 void ModelComponent::OnConstruction()
@@ -35,7 +36,7 @@ void ModelComponent::UpdateMaterial()
 
 void ModelComponent::SetModelByAssetPath(HString virtualPath)
 {
-	if (!_bActive || !_gameObject->IsActive())
+	if (!_bActive || !_gameObject->IsActive() || !_gameObject->GetLevel()->IsActive())
 		return;
 	auto info = ContentManager::Get()->GetAssetInfo(virtualPath);
 	if (info.expired())
@@ -49,7 +50,7 @@ void ModelComponent::SetModelByAssetPath(HString virtualPath)
 
 void ModelComponent::SetModel(HGUID guid)
 {
-	if (!guid.isValid() || !_bActive || !_gameObject->IsActive() )
+	if (!guid.isValid() || !_bActive || !_gameObject->IsActive() || !_gameObject->GetLevel()->IsActive())
 		return;
 	//create
 	SetModel(Model::LoadAsset(guid));
@@ -57,7 +58,7 @@ void ModelComponent::SetModel(HGUID guid)
 
 void ModelComponent::SetModel(std::shared_ptr<class Model> model, std::vector<std::shared_ptr<class Material>> *mats)
 {
-	if (!_bActive || !_gameObject->IsActive())
+	if (!_bActive || !_gameObject->IsActive() || !_gameObject->GetLevel()->IsActive())
 		return;
 	if (model)
 	{
@@ -108,7 +109,7 @@ void ModelComponent::SetMaterial(std::shared_ptr<class Material> mat, int index)
 
 void ModelComponent::GameObjectActiveChanged(bool objActive)
 {
-	if ( _bActive && objActive )
+	if ( _bActive && objActive && _gameObject->GetLevel()->IsActive())
 	{
 		UpdateData();
 	}

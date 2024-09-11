@@ -159,9 +159,9 @@ void ImguiPassEditor::PassUpdate(std::shared_ptr<Texture2D> finalColor)
 	EndRenderPass();
 }
 
-void ImguiPassEditor::AddGui(std::function<void(ImguiPassEditor*)> fun)
+void ImguiPassEditor::AddGui(std::function<void(ImguiPassEditor*)> func)
 {
-	_gui_extensions.push_back(fun);
+	_gui_extensions.push_back(func);
 }
 
 VkDescriptorSet ImguiPassEditor::GetRenderView() const

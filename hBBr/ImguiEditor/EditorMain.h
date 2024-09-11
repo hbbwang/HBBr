@@ -27,9 +27,17 @@ public:
 	std::string Inspector;
 	std::string ContentBrowserTitle;
 	std::string RenderView;
+	std::string LoadLevel;
+	std::string UnloadLevel;
+
+	std::vector<class Level*> _selectionLevels;
 
 private:
+
 	void GlobalSetting();
+	bool& GetLevelActive(class Level* level);
+	bool& GetGameObjectActive(class GameObject* obj);
+	void BuildSceneOutlineTreeNode(class GameObject* obj, float levelItemXPos);
 
 };
 

@@ -456,7 +456,7 @@ void VulkanApp::UpdateRender()
 }
 //ENABLE_CODE_OPTIMIZE
 
-VulkanForm* VulkanApp::CreateNewWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h , const char* title, bool bCreateRenderer, void* parent)
+VulkanForm* VulkanApp::CreateNewWindow(int x, int y, int w, int h , const char* title, bool bCreateRenderer, void* parent)
 {
 	SDL_Window* window = nullptr;
 	if (parent != nullptr)
@@ -521,8 +521,8 @@ void VulkanApp::CreateRenderer(VulkanForm* form)
 	{
 		form->swapchain->CreateRenderer(form->name.c_str());
 		//Try Refresh focus
-		SetFormVisiable(form, false);
-		SetFormVisiable(form, true);
+		SetWindowVisible(form->window, false);
+		SetWindowVisible(form->window, true);
 	}
 }
 
@@ -559,20 +559,20 @@ void VulkanApp::RemoveWindow(VulkanForm* form)
 	}
 }
 
-void VulkanApp::ResizeWindow(VulkanForm* form, uint32_t w, uint32_t h)
+void VulkanApp::ResizeWindow(SDL_Window* window, int w, int h)
 {
 	if (w < 1 || h < 1)
 	{
 		return;
 	}
-	if (form && form->window)
-		SDL_SetWindowSize(form->window, (int)w, (int)h);
+	if (window)
+		SDL_SetWindowSize(window, (int)w, (int)h);
 }
 
-void VulkanApp::SetWindowPos(VulkanForm* form, uint32_t x, uint32_t y)
+void VulkanApp::SetWindowPos(SDL_Window* window, int x, int y)
 {
-	if (form && form->window)
-		SDL_SetWindowPosition(form->window, (int)x, (int)y);
+	if (window)
+		SDL_SetWindowPosition(window, (int)x, (int)y);
 }
 
 void* VulkanApp::GetWindowHandle(SDL_Window* window)
@@ -614,23 +614,47 @@ void* VulkanApp::GetWindowHandle(SDL_Window* window)
 	return nullptr;
 }
 
+void VulkanApp::GetWindowSize(SDL_Window* window, int& w, int& h)
+{
+	if (window)
+	{
+		SDL_GetWindowSize(window, &w, &h);
+	}
+}
+
+void VulkanApp::GetWindowPos(SDL_Window* window, int& x, int& y)
+{
+	if (window)
+	{
+		SDL_GetWindowPosition(window, &x, &y);
+	}
+}
+
 void VulkanApp::SetFocusForm(VulkanForm* form)
 {
 	_focusForm = form;
 }
 
-void VulkanApp::SetFormVisiable(VulkanForm* form, bool bShow)
+void VulkanApp::SetWindowVisible(SDL_Window* window, bool bShow)
 {
-	if (form && form->window)
+	if (window)
 	{
 		if (bShow)
 		{
-			SDL_ShowWindow(form->window);
+			SDL_ShowWindow(window);
 		}
 		else
 		{
-			SDL_HideWindow(form->window);
+			SDL_HideWindow(window);
 		}
+	}
+}
+
+void VulkanApp::SetWindowTitle(SDL_Window* window, HString newTitle)
+{
+	if (window)
+	{
+		SDL_SetWindowTitle(window, newTitle.c_str());
 	}
 }
 

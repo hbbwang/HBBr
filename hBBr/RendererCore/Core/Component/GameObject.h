@@ -14,6 +14,8 @@ class GameObject
 	friend class VulkanRenderer;
 	friend class Component;
 	friend class Inspector;
+	friend class EditorMain;
+
 	GameObject(HString objectName = "NewGameObject", class Level* level = nullptr, bool SceneEditorHide = false);
 	GameObject(class Level* level = nullptr, bool SceneEditorHide = false);
 	GameObject(HString objectName, HString guidStr, class Level* level = nullptr);
@@ -85,10 +87,7 @@ public:
 		return !obj.expired() && !obj.lock()->_bWantDestroy && obj.lock()->_transform != nullptr;
 	}
 
-	HBBR_INLINE static std::map<HString, std::function<class Component* (class GameObject*)>>& GetCompSpawnMap()	{
-		static std::map<HString, std::function<class Component* (class GameObject*)>> _componentSpawnFunctions;
-		return _componentSpawnFunctions;
-	}
+	static std::map<HString, std::function<class Component* (class GameObject*)>>& GetCompSpawnMap();
 
 	template<typename T, typename ...Args>
 	T* AddComponent(Args... args)
@@ -102,16 +101,7 @@ public:
 		return result;
 	}
 
-	HBBR_API class Component* AddComponent(HString className)
-	{
-		auto it = GetCompSpawnMap().find(className);
-		if (it != GetCompSpawnMap().end())
-		{
-			auto newComp = it->second(this);
-			return newComp;
-		}
-		return nullptr;
-	}
+	class Component* AddComponentByClassName(HString className);
 
 #if IS_EDITOR
 	void* _editorObject = nullptr;
@@ -119,7 +109,13 @@ public:
 	bool _sceneEditorHide = false;
 	bool _bSelected = false;
 #endif
+
 	bool _IsEditorObject = false;
+
+	bool _bEditorOpen = false;
+
+	//嵌套层级
+	int _attachmentDepth;
 
 private:
 
@@ -136,6 +132,8 @@ private:
 	class Level* _level = nullptr;
 
 	bool _bActive = true;
+
+	bool _bOldActive = true;
 
 	bool _bWantDestroy = false;
 

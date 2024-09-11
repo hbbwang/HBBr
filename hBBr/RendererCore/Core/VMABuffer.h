@@ -13,29 +13,29 @@
 class VMABuffer
 {
 public:
-	VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bAlwayMapping = false, bool bFocusCreateDedicatedMemory = false, HString debugName = "VMABuffer");
-	~VMABuffer();
+	HBBR_API VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bAlwayMapping = false, bool bFocusCreateDedicatedMemory = false, HString debugName = "VMABuffer");
+	HBBR_API ~VMABuffer();
 
 	//最后的VkCommandBuffer是给VMA_MEMORY_USAGE_GPU_ONLY准备的
 	//如果是nullptr，会自动创建一个，并且强行等待执行完成，效率较低。  
-	void Mapping(void* data, VkDeviceSize offset, VkDeviceSize dataSize);  
+	HBBR_API void Mapping(void* data, VkDeviceSize offset, VkDeviceSize dataSize);
 
 	//Buffer大小重置,如果是从大的重置成小的,原来的数据将会丢失
-	bool Resize(VkDeviceSize newSize, VkCommandBuffer cmdBuf = VK_NULL_HANDLE);
+	HBBR_API bool Resize(VkDeviceSize newSize, VkCommandBuffer cmdBuf = VK_NULL_HANDLE);
 
-	void* BeginMapping();
+	HBBR_API void* BeginMapping();
 
-	void EndMapping();
+	HBBR_API void EndMapping();
 
-	static inline VkDeviceSize GetMaxAlignmentSize(VkDeviceSize targetSize, VkDeviceSize AlignSize) {
+	HBBR_API static inline VkDeviceSize GetMaxAlignmentSize(VkDeviceSize targetSize, VkDeviceSize AlignSize) {
 		return (targetSize + AlignSize - 1) & ~(AlignSize - 1);
 	}
 
-	inline VkBuffer GetBuffer()const {
+	HBBR_API inline VkBuffer GetBuffer()const {
 		return _buffer;
 	}
 
-	inline VkDeviceSize GetBufferSize()const {
+	HBBR_API inline VkDeviceSize GetBufferSize()const {
 		return _allocationInfo.size;
 	}
 

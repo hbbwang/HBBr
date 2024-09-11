@@ -21,19 +21,19 @@ public:
 };
 //自定义序列化
 //HString
-void to_json(nlohmann::json& j, const HString& s);
-void from_json(const nlohmann::json& j, HString& s);
+HBBR_API void to_json(nlohmann::json& j, const HString& s);
+HBBR_API void from_json(const nlohmann::json& j, HString& s);
 //GUID
-void to_json(nlohmann::json& j, const HGUID& s);
-void from_json(const nlohmann::json& j, HGUID& s);
+HBBR_API void to_json(nlohmann::json& j, const HGUID& s);
+HBBR_API void from_json(const nlohmann::json& j, HGUID& s);
 //Vec2
-void to_json(nlohmann::json& j, const glm::vec2& v);
-void from_json(const nlohmann::json& j, glm::vec2& v);
+HBBR_API void to_json(nlohmann::json& j, const glm::vec2& v);
+HBBR_API void from_json(const nlohmann::json& j, glm::vec2& v);
 //Vec3
-void to_json(nlohmann::json& j, const glm::vec3& v);
-void from_json(const nlohmann::json& j, glm::vec3& v);
+HBBR_API void to_json(nlohmann::json& j, const glm::vec3& v);
+HBBR_API void from_json(const nlohmann::json& j, glm::vec3& v);
 //Vec4
-void to_json(nlohmann::json& j, const glm::vec4& v);
-void from_json(const nlohmann::json& j, glm::vec4& v);
+HBBR_API void to_json(nlohmann::json& j, const glm::vec4& v);
+HBBR_API void from_json(const nlohmann::json& j, glm::vec4& v);
 
 HBBR_API std::string gbk_to_utf8(const std::string& in);

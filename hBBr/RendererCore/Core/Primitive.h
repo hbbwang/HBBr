@@ -40,8 +40,6 @@ struct ModelPrimitive
 {
 	uint8_t						bNeedUpdate = true;
 
-	//uint8_t						bActive = true;
-
 	HString						modelPrimitiveName;
 
 	struct FaceData*			faceData = nullptr;

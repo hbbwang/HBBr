@@ -21,10 +21,10 @@ int main(int argc, char* argv[])
 		int x, y, w, h;
 		SDL_GetWindowPosition(form->window, &x, &y);
 		SDL_GetWindowSize(form->window, &w, &h);
-		RenderConfig::_renderer_json["Default"][(form->name + "_WindowPosX").c_str()] = x;
-		RenderConfig::_renderer_json["Default"][(form->name + "_WindowPosY").c_str()] = y;
-		RenderConfig::_renderer_json["Default"][(form->name + "_WindowWidth").c_str()] = w;
-		RenderConfig::_renderer_json["Default"][(form->name + "_WindowHeight").c_str()] = h;
+		RenderConfig::GetRendererConfig()["Default"][(form->name + "_WindowPosX").c_str()] = x;
+		RenderConfig::GetRendererConfig()["Default"][(form->name + "_WindowPosY").c_str()] = y;
+		RenderConfig::GetRendererConfig()["Default"][(form->name + "_WindowWidth").c_str()] = w;
+		RenderConfig::GetRendererConfig()["Default"][(form->name + "_WindowHeight").c_str()] = h;
 		}
 	);
 	//初始化窗口大小

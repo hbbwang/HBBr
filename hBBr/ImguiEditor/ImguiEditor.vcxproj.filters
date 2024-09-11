@@ -54,6 +54,12 @@
     <ClCompile Include="EditorResource.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ThirdParty\Imgui\imconfig.h">
@@ -82,6 +88,12 @@
     </ClInclude>
     <ClInclude Include="EditorResource.h">
       <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h">
+      <Filter>ThirdParty\Imgui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

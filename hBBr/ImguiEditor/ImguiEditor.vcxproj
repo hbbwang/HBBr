@@ -163,7 +163,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>IS_EDITOR;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore;$(SolutionDir)RendererCore\Common;$(SolutionDir)RendererCore\Core;$(SolutionDir)RendererCore\Editor;$(SolutionDir)RendererCore\Form;$(SolutionDir)ThirdParty;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir);$(SolutionDir)ThirdParty\Imgui\;$(SolutionDir)RendererCore\Core\Pass;$(SolutionDir)RendererCore\Core\Asset;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)ThirdParty\crossguid\;$(SolutionDir)ThirdParty\crossguid\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore;$(SolutionDir)RendererCore\Common;$(SolutionDir)RendererCore\Core;$(SolutionDir)RendererCore\Editor;$(SolutionDir)RendererCore\Form;$(SolutionDir)ThirdParty;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir);$(SolutionDir)ThirdParty\Imgui\;$(SolutionDir)RendererCore\Core\Pass;$(SolutionDir)RendererCore\Core\Asset;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)ThirdParty\crossguid\;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir)ThirdParty\nlohmann</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -184,7 +184,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>IS_EDITOR;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore;$(SolutionDir)RendererCore\Common;$(SolutionDir)RendererCore\Core;$(SolutionDir)RendererCore\Editor;$(SolutionDir)RendererCore\Form;$(SolutionDir)ThirdParty;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir);$(SolutionDir)ThirdParty\Imgui\;$(SolutionDir)RendererCore\Core\Pass;$(SolutionDir)RendererCore\Core\Asset;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)ThirdParty\crossguid\;$(SolutionDir)ThirdParty\crossguid\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RendererCore;$(SolutionDir)RendererCore\Common;$(SolutionDir)RendererCore\Core;$(SolutionDir)RendererCore\Editor;$(SolutionDir)RendererCore\Form;$(SolutionDir)ThirdParty;$(SolutionDir)ThirdParty\vulkan;$(SolutionDir)ThirdParty\sdl3;$(SolutionDir)ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\vulkan\Include;$(SolutionDir);$(SolutionDir)ThirdParty\Imgui\;$(SolutionDir)RendererCore\Core\Pass;$(SolutionDir)RendererCore\Core\Asset;$(SolutionDir)RendererCore\Core\Component;$(SolutionDir)ThirdParty\crossguid\;$(SolutionDir)ThirdParty\crossguid\Include;$(SolutionDir)ThirdParty\nlohmann</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -222,6 +222,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp" />
     <ClCompile Include="..\ThirdParty\Imgui\imgui.cpp" />
     <ClCompile Include="..\ThirdParty\Imgui\imgui_demo.cpp" />
     <ClCompile Include="..\ThirdParty\Imgui\imgui_draw.cpp" />
@@ -241,6 +243,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h" />
     <ClInclude Include="..\ThirdParty\Imgui\imconfig.h" />
     <ClInclude Include="..\ThirdParty\Imgui\imgui.h" />
     <ClInclude Include="..\ThirdParty\Imgui\imgui_internal.h" />

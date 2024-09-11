@@ -61,6 +61,11 @@ GameObject* Level::FindGameObjectByGUID(HGUID guid)
 	return nullptr;
 }
 
+void Level::SetActive(bool newActive)
+{
+	_bActive = newActive;
+}
+
 void Level::Load()
 {
 	if (_world)
@@ -68,6 +73,7 @@ void Level::Load()
 		if (!_bLoad)
 		{
 			_bLoad = true;
+			_bActive = true;
 			bool bLoadFileSucceed = false;
 			if(!_isEditorLevel)
 				bLoadFileSucceed = LoadJson(_levelAbsPath);
@@ -151,7 +157,7 @@ void Level::Load()
 						for (auto& c : comps)
 						{
 							HString className = c["Class"];
-							auto component = object->AddComponent(className);
+							auto component = object->AddComponentByClassName(className);
 							component->Deserialization(c);
 							component->UpdateData();
 						}
@@ -170,7 +176,7 @@ void Level::Load()
 void Level::UnLoad()
 {
 	_bLoad = false;
-
+	_bActive = false;
 	for (auto& i : this->_gameObjects)
 	{
 		i->Destroy();
@@ -212,6 +218,15 @@ void Level::LevelUpdate()
 	_gameObjectNeedDestroy.clear();
 
 	//Update Objecets
+	if (_bOldActive != _bActive)
+	{
+		_bOldActive = _bActive;
+		if (!_bActive)//When object disable, what's going to happen?
+		{
+
+		}
+	}
+
 	for (int i = 0; i < _gameObjects.size(); i++)
 	{
 		if (!_gameObjects[i]->Update())
@@ -349,7 +364,6 @@ void Level::SaveGameObjectTransform(GameObject* g)
 	nlohmann::json sca;		to_json(sca, g->_transform->GetScale3D());
 	tran["Position"] = pos;		tran["Rotation"] = rot;		tran["Scale"] = sca;
 	g->_levelNode["Transform"] = tran;
-
 }
 
 void Level::SaveGameObjectComponents(GameObject* g)

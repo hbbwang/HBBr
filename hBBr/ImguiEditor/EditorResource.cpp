@@ -17,6 +17,13 @@ void EditorResource::Init()
 	HString configPath = FileSystem::GetConfigAbsPath();
 
 	const auto& manager = VulkanManager::GetManager();
+
+	manager->CreateDescripotrSetLayout(
+		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 
+		1, 
+		_img_descriptorSetLayout, 
+		VK_SHADER_STAGE_FRAGMENT_BIT);
+
 	VkCommandBuffer cmdbuf;
 	manager->AllocateCommandBuffer(manager->GetCommandPool(), cmdbuf);
 	manager->BeginCommandBuffer(cmdbuf); 
@@ -130,8 +137,28 @@ EditorImage* EditorResource::LoadTexture(uint32_t w, uint32_t h, HString path, V
 		manager->CreateImageView(result.image, result.imageData->texFormat, VK_IMAGE_ASPECT_COLOR_BIT, result.imageView);
 
 	}
-
-	result.descriptorSet = ImGui_ImplVulkan_AddTexture(Texture2D::GetSampler(TextureSampler_Linear_Clamp), result.imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	//result.descriptorSet = ImGui_ImplVulkan_AddTexture(Texture2D::GetSampler(TextureSampler_Linear_Clamp), result.imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	{
+		VkDescriptorSetAllocateInfo alloc_info = {};
+		alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		alloc_info.descriptorPool = manager->GetDescriptorPool();
+		alloc_info.descriptorSetCount = 1;
+		alloc_info.pSetLayouts = &_img_descriptorSetLayout;
+		VkResult err = vkAllocateDescriptorSets(manager->GetDevice(), &alloc_info, &result.descriptorSet);
+	}
+	{
+		VkDescriptorImageInfo desc_image[1] = {};
+		desc_image[0].sampler = Texture2D::GetSampler(TextureSampler_Linear_Clamp);
+		desc_image[0].imageView = result.imageView;
+		desc_image[0].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		VkWriteDescriptorSet write_desc[1] = {};
+		write_desc[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_desc[0].dstSet = result.descriptorSet;
+		write_desc[0].descriptorCount = 1;
+		write_desc[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		write_desc[0].pImageInfo = desc_image;
+		vkUpdateDescriptorSets(manager->GetDevice(), 1, write_desc, 0, nullptr);
+	}
 
 	_all_images.push_back(result);
 

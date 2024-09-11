@@ -22,16 +22,17 @@ int main(int argc, char* argv[])
 	mainForm->closeCallbacks.push_back(
 		[](VulkanForm* form) {
 			int x, y, w, h;
-			SDL_GetWindowPosition(form->window, &x, &y);
-			SDL_GetWindowSize(form->window, &w, &h);
-			RenderConfig::_renderer_json["Default"][(form->name + "_WindowPosX").c_str()] = x;
-			RenderConfig::_renderer_json["Default"][(form->name + "_WindowPosY").c_str()] = y;
-			RenderConfig::_renderer_json["Default"][(form->name + "_WindowWidth").c_str()] = w;
-			RenderConfig::_renderer_json["Default"][(form->name + "_WindowHeight").c_str()] = h;
+			VulkanApp::GetWindowPos(form->window, x, y);
+			VulkanApp::GetWindowSize(form->window, w, h);
+			RenderConfig::GetRendererConfig()["Default"][(form->name + "_WindowPosX").c_str()] = x;
+			RenderConfig::GetRendererConfig()["Default"][(form->name + "_WindowPosY").c_str()] = y;
+			RenderConfig::GetRendererConfig()["Default"][(form->name + "_WindowWidth").c_str()] = w;
+			RenderConfig::GetRendererConfig()["Default"][(form->name + "_WindowHeight").c_str()] = h;
+			SaveRendererConfig();
 		}
 	);
 	//³õÊ¼»¯´°¿Ú
-	SDL_SetWindowTitle(mainForm->window, GetEditorInternationalizationText("MainWindow", "MainTitle").c_str());
+	VulkanApp::SetWindowTitle(mainForm->window, GetEditorInternationalizationText("MainWindow", "MainTitle").c_str());
 	auto x = GetRendererConfigInt("Default", mainForm->name + "_WindowPosX");
 	auto y = GetRendererConfigInt("Default", mainForm->name + "_WindowPosY");
 	auto w = GetRendererConfigInt("Default", mainForm->name + "_WindowWidth");
@@ -57,8 +58,8 @@ int main(int argc, char* argv[])
 			y = screenRect.y + screenRect.h - h;
 		}
 	}
-	SDL_SetWindowSize(mainForm->window, w, h);
-	SDL_SetWindowPosition(mainForm->window, x, y);
+	VulkanApp::SetWindowPos(mainForm->window, x, y);
+	VulkanApp::ResizeWindow(mainForm->window, w, h);
 	//
 	while (VulkanApp::UpdateForm())
 	{

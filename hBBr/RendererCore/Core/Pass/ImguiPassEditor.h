@@ -16,10 +16,10 @@ public:
 	void PassUpdate(std::shared_ptr<Texture2D> finalColor);
 	HBBR_API void AddGui(std::function<void(ImguiPassEditor*)> fun);
 	HBBR_API VkDescriptorSet GetRenderView()const;
+	struct ImGuiContext* _imguiContent = nullptr;
 protected:
 	void ShowPerformance();
 private:
-	struct ImGuiContext* _imguiContent = nullptr;
 	std::vector<std::function<void(ImguiPassEditor*)>> _gui_extensions;
 	std::shared_ptr<Texture2D> _renderViewTexture;
 	std::shared_ptr<Texture2D> _renderViewTexture_old;

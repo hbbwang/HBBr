@@ -31,6 +31,7 @@ GameObject::~GameObject()
 
 void GameObject::ObjectInit(HString objectName, Level* level, bool SceneEditorHide)
 {
+	_attachmentDepth = 0;
 	bool FromXmlNode = false;
 	if (!_guid.isValid())
 	{
@@ -87,13 +88,6 @@ GameObject* GameObject::CreateGameObjectWithGUID(HString objectName, HString gui
 void GameObject::SetActive(bool newActive)
 {
 	_bActive = newActive;
-	for (auto c : _comps)
-	{
-		c->GameObjectActiveChanged(_bActive);
-	}
-	if (!newActive)//When object disable,what's going to happen?
-	{
-	}
 }
 
 void GameObject::SetObjectName(HString newName)
@@ -137,6 +131,7 @@ void GameObject::SetParent(GameObject* newParent)
 		ConsoleDebug::print_endl("GameObject " + _name + " attach to  : " + newParent->GetObjectName());
 		_level->GetWorld()->_editorGameObjectSetParentFunc(this->_selfWeak.lock(),this->_parent->_selfWeak.lock());
 		#endif
+		_attachmentDepth = _parent->_attachmentDepth + 1;
 	}
 	else
 	{
@@ -154,6 +149,7 @@ void GameObject::SetParent(GameObject* newParent)
 			#if IS_EDITOR
 			ConsoleDebug::print_endl("GameObject " + _name + " detach");
 			#endif
+			_attachmentDepth = 0;
 		}
 		_parent = nullptr;
 
@@ -187,6 +183,23 @@ void GameObject::ChangeLevel(HString newLevel)
 	}
 }
 
+std::map<HString, std::function<class Component* (class GameObject*)>>& GameObject::GetCompSpawnMap()
+{
+	static std::map<HString, std::function<class Component* (class GameObject*)>> _componentSpawnFunctions;
+	return _componentSpawnFunctions;
+}
+
+Component* GameObject::AddComponentByClassName(HString className)
+{
+	auto it = GetCompSpawnMap().find(className);
+	if (it != GetCompSpawnMap().end())
+	{
+		auto newComp = it->second(this);
+		return newComp;
+	}
+	return nullptr;
+}
+
 void GameObject::Init()
 {
 	#if IS_EDITOR
@@ -208,7 +221,19 @@ bool GameObject::Update()
 	}
 	else
 	{
-		if (_bActive)
+		if (_bOldActive != _bActive)
+		{
+			_bOldActive = _bActive;
+			for (auto c : _comps)
+			{
+				c->GameObjectActiveChanged(_bActive);
+			}
+			if (!_bActive)//When object disable, what's going to happen?
+			{
+
+			}
+		}
+		if (_bActive && _level->_bActive)
 		{
 			if (!_bInit)//Init
 			{

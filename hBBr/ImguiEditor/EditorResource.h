@@ -47,6 +47,6 @@ public:
 
 private:
 	static std::unique_ptr<EditorResource> _ptr;
-
+	VkDescriptorSetLayout _img_descriptorSetLayout;
 };
 

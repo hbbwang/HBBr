@@ -31,18 +31,21 @@ public:
 	HBBR_API static void DeInitVulkanManager();
 	HBBR_API static bool UpdateForm();
 	HBBR_API static void UpdateRender();
-	HBBR_API static VulkanForm* CreateNewWindow(uint32_t x = 0, uint32_t y = 0, uint32_t w = 512, uint32_t h = 512, const char* title = "Renderer",bool bCreateRenderer = false ,void* parent = nullptr);
+	HBBR_API static VulkanForm* CreateNewWindow(int x = 0, int y = 0, int w = 512, int h = 512, const char* title = "Renderer",bool bCreateRenderer = false ,void* parent = nullptr);
 	HBBR_API static void CreateRenderer(VulkanForm* form);
 	HBBR_API static bool IsWindowFocus(SDL_Window* windowHandle);
 	HBBR_API static std::vector<VulkanForm*>& GetForms() { return _forms; }
 	HBBR_API static void RemoveWindow(VulkanForm* form);
-	HBBR_API static void ResizeWindow(VulkanForm* form, uint32_t w, uint32_t h);
-	HBBR_API static void SetWindowPos(VulkanForm* form, uint32_t x, uint32_t y);
+	HBBR_API static void ResizeWindow(SDL_Window* form, int w, int h);
+	HBBR_API static void SetWindowPos(SDL_Window* form, int x, int y);
 	HBBR_API static void* GetWindowHandle(SDL_Window* window);
+	HBBR_API static void GetWindowSize(SDL_Window* window, int& w, int& h);
+	HBBR_API static void GetWindowPos(SDL_Window* window, int& x, int& y);
 	HBBR_API static inline VulkanForm* GetMainForm() { return _mainForm; }
 	HBBR_API static void SetFocusForm(VulkanForm* form);
 	HBBR_API static VulkanForm* GetFocusForm() { return _focusForm; }
-	HBBR_API static void SetFormVisiable(VulkanForm* form, bool bShow);
+	HBBR_API static void SetWindowVisible(SDL_Window* window, bool bShow);
+	HBBR_API static void SetWindowTitle(SDL_Window* form, HString newTitle);
 	HBBR_API static void AppQuit();
 	HBBR_API static void RecompileAllShader();
 	HBBR_API static void AddDropCallback(FormDropFun func)

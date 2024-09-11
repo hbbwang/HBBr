@@ -11,6 +11,7 @@
 #include "DescriptorSet.h"
 #include "World.h"
 #include "EditorResource.h"
+#include "GameObject.h"
 
 EditorMain::EditorMain()
 {
@@ -28,13 +29,13 @@ EditorMain::EditorMain()
 	Inspector = GetEditorInternationalizationText("MainWindow", "Inspector").c_str();
 	ContentBrowserTitle = GetEditorInternationalizationText("MainWindow", "ContentBrowserTitle").c_str();
 	RenderView = GetEditorInternationalizationText("MainWindow", "RenderView").c_str();
+	LoadLevel = GetEditorInternationalizationText("SceneOutline", "LoadLevel").c_str();
+	UnloadLevel = GetEditorInternationalizationText("SceneOutline", "UnloadLevel").c_str();
 
 	auto mainEditorWidget = [this](ImguiPassEditor* pass) {
+		ImGui::SetCurrentContext(pass->_imguiContent);
 		ImGuiID mainEditorDock = ImGui::GetID("MainEditorDock");
 		ImGui::DockSpaceOverViewport(mainEditorDock);
-
-		//GlobalSetting
-		GlobalSetting();
 
 		if (ImGui::BeginMainMenuBar())
 		{
@@ -73,7 +74,8 @@ EditorMain::EditorMain()
 					ImGuiTreeNodeFlags_OpenOnArrow |
 					ImGuiTreeNodeFlags_OpenOnDoubleClick |
 					ImGuiTreeNodeFlags_SpanFullWidth |
-					ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
+					ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding
+					;
 				auto world = _mainRnederer->GetWorld().lock();
 
 				auto clearSelection = [&]() {
@@ -82,11 +84,12 @@ EditorMain::EditorMain()
 						for (auto& l : world->GetLevels())
 						{
 							l->_bSelected = false;
-							for (auto& g : l->GetAllGameObjects())
-							{
-								g->_bSelected = false;
-							}
+							//for (auto& g : l->GetAllGameObjects())
+							//{
+							//	g->_bSelected = false;
+							//}
 						}
+						_selectionLevels.clear();
 					}
 					};
 				if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
@@ -100,17 +103,42 @@ EditorMain::EditorMain()
 				{
 					for (auto& l : world->GetLevels())
 					{
-						static bool checkBox = true;
+						const auto& allObjects = l->GetAllGameObjects();
+
 						float levelItemXPos = ImGui::GetCursorPosX();
 						ImGui::SetCursorPosX(levelItemXPos + 30);
+
 						//Level TreeNode
-						bool isLevelOpen = ImGui::TreeNodeEx(l->GetLevelName().c_str(), (ImTextureID)EditorResource::Get()->_icon_levelIcon->descriptorSet, treeNodeFlags | (l->_bSelected ? ImGuiTreeNodeFlags_Selected : 0));
+						l->_bEditorOpen = ImGui::TreeNodeEx(l->GetLevelName().c_str(),
+							(ImTextureID)EditorResource::Get()->_icon_levelIcon->descriptorSet,
+							treeNodeFlags | (l->_bSelected ? ImGuiTreeNodeFlags_Selected : 0) |
+							(l->IsLoaded() ? ImGuiTreeNodeFlags_None : ImGuiTreeNodeFlags_CustomArrow));
 						/*if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 						{
 							ImGui::SetDragDropPayload((l->GetLevelName() + "Drag").c_str(), l->GetLevelName().c_str(), sizeof(const char*));
 							ImGui::Text("Dragging %s", l->GetLevelName().c_str());
 							ImGui::EndDragDropSource();
 						}*/
+
+						if (ImGui::BeginPopupContextItem())
+						{
+							if (ImGui::MenuItem(LoadLevel.c_str()))
+							{
+								for (auto& l : _selectionLevels)
+								{
+									l->Load();
+								}
+							}
+							if (ImGui::MenuItem(UnloadLevel.c_str()))
+							{
+								for (auto& l : _selectionLevels)
+								{
+									l->UnLoad();
+								}
+							}
+							ImGui::EndPopup();
+						}
+
 						if (ImGui::IsItemClicked())
 						{
 							if (ImGui::GetIO().KeyCtrl)
@@ -122,49 +150,27 @@ EditorMain::EditorMain()
 								clearSelection();
 								l->_bSelected = true;
 							}
+							_selectionLevels.push_back(l.get());
 						}
+
 						//Level CheckBox
+						if(l->IsLoaded())
 						{
 							auto framePadding = ImGui::GetStyle().FramePadding;
-							//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(framePadding.x * 0.8, framePadding.y * 0.8));
 							ImGui::SameLine();
 							ImGui::PushID(id);
 							ImGui::SetCursorPosX(levelItemXPos);
-							ImGui::Checkbox("", &checkBox);
+							ImGui::Checkbox("", &GetLevelActive(l.get()));
 							ImGui::PopID();
-							//ImGui::PopStyleVar();
 						}
-						if (isLevelOpen)
+						if (l->_bEditorOpen)
 						{
-							for (auto& g : l->GetAllGameObjects())
+							if (l->IsLoaded())
 							{
-								float objectlItemXPos = ImGui::GetCursorPosX();
-								ImGui::SetCursorPosX(objectlItemXPos + 30);
-								//Object TreeNode
-								bool isObjectOpen = ImGui::TreeNodeEx(g->GetObjectName().c_str(), (ImTextureID)EditorResource::Get()->_icon_objectIcon->descriptorSet, treeNodeFlags | (g->_bSelected ? ImGuiTreeNodeFlags_Selected : 0));
-								if (ImGui::IsItemClicked())
+								for (auto& o : allObjects)
 								{
-									if (ImGui::GetIO().KeyCtrl)
-									{
-										g->_bSelected = true;
-									}
-									else
-									{
-										clearSelection();
-										g->_bSelected = true;
-									}
+									BuildSceneOutlineTreeNode(o.get(), levelItemXPos);
 								}
-								if (isObjectOpen)
-								{
-									ImGui::TreePop();
-								}
-								//Object CheckBox
-								ImGui::SameLine();
-								ImGui::PushID(id);
-								ImGui::SetCursorPosX(levelItemXPos);
-								ImGui::Checkbox("", &checkBox);
-								ImGui::PopID();
-								id++;
 							}
 							ImGui::TreePop();
 						}
@@ -246,6 +252,20 @@ EditorMain::EditorMain()
 
 		};
 	_editorGui->AddGui(mainEditorWidget);
+
+	auto editorWidgetBegin = [this](ImguiPassEditor* pass) {
+		ImGui::SetCurrentContext(pass->_imguiContent);
+
+		static bool bOK = false;
+
+		//GlobalSetting
+		if (!bOK)
+		{
+			bOK = true;
+			GlobalSetting();
+		}
+	};
+	_editorGui->AddGui(editorWidgetBegin);
 }
 
 void EditorMain::GlobalSetting()
@@ -287,4 +307,59 @@ void EditorMain::GlobalSetting()
 	style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.0f, 1.0f, 1.0f, 0.4f);
 	style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.0f, 1.0f, 1.0f, 0.65f);
 	style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.0f, 1.0f, 1.0f, 0.5f);
+}
+
+bool& EditorMain::GetLevelActive(class Level* level)
+{
+	return level->_bActive;
+}
+
+bool& EditorMain::GetGameObjectActive(GameObject* obj)
+{
+	return obj->_bActive;
+}
+
+void EditorMain::BuildSceneOutlineTreeNode(class GameObject* obj, float levelItemXPos)
+{
+	ImGuiTreeNodeFlags treeNodeFlags =
+		ImGuiTreeNodeFlags_OpenOnArrow |
+		ImGuiTreeNodeFlags_OpenOnDoubleClick |
+		ImGuiTreeNodeFlags_SpanFullWidth |
+		ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding |
+		(obj->_children.size() <= 0 ? ImGuiTreeNodeFlags_CustomArrow : ImGuiTreeNodeFlags_None);
+		;
+	{
+		float objectlItemXPos = ImGui::GetCursorPosX();
+		ImGui::SetCursorPosX(objectlItemXPos + 30);
+		//Object TreeNode
+		obj->_bEditorOpen = ImGui::TreeNodeEx(obj->GetObjectName().c_str(),
+			(ImTextureID)EditorResource::Get()->_icon_objectIcon->descriptorSet, 
+			treeNodeFlags | (obj->_bSelected ? ImGuiTreeNodeFlags_Selected : 0));
+		if (ImGui::IsItemClicked())
+		{
+			if (ImGui::GetIO().KeyCtrl)
+			{
+				obj->_bSelected = true;
+			}
+			else
+			{
+				obj->_bSelected = true;
+			}
+		}
+		if (obj->_bEditorOpen)
+		{
+			for (auto& o : obj->GetChildren())
+			{
+				BuildSceneOutlineTreeNode(o, levelItemXPos);
+			}	
+			ImGui::TreePop();
+		}
+
+		//Object CheckBox
+		ImGui::SameLine();
+		ImGui::PushID(obj->GetGUID().str().c_str());
+		ImGui::SetCursorPosX(levelItemXPos);
+		ImGui::Checkbox("", &GetGameObjectActive(obj));
+		ImGui::PopID();
+	}
 }
