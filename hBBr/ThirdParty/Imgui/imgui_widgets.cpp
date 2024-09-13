@@ -6157,7 +6157,7 @@ void ImGui::ColorEditOptionsPopup(const float* col, ImGuiColorEditFlags flags)
 void ImGui::ColorPickerOptionsPopup(const float* ref_col, ImGuiColorEditFlags flags)
 {
     bool allow_opt_picker = !(flags & ImGuiColorEditFlags_PickerMask_);
-    bool allow_opt_alpha_bar = !(flags & ImGuiColorEditFlags_NoAlpha) && !(flags & ImGuiColorEditFlags_AlphaBar);
+    bool allow_opt_alpha_bar = !(flags & ImGuiColorEditFlags_NoAlpha) && !(flags & ImGuiColorEditFlags_AlphaBar); 
     if ((!allow_opt_picker && !allow_opt_alpha_bar) || !BeginPopup("context"))
         return;
     ImGuiContext& g = *GImGui;
@@ -6507,7 +6507,7 @@ bool ImGui::TreeNodeEx(const char* label, ImTextureID nodeTexture, ImGuiTreeNode
             if (hovered || selected)
             {
                 // const ImU32 bg_col = GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : hovered ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
-                // selected±ÈhoveredÓÅÏÈ
+                // selectedï¿½ï¿½hoveredï¿½ï¿½ï¿½ï¿½
                 const ImU32 bg_col = GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : selected ? ImGuiCol_Header : ImGuiCol_HeaderHovered);
                 RenderFrame(frame_bb.Min, frame_bb.Max, bg_col, false);
             }

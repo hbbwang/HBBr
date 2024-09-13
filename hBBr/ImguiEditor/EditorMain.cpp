@@ -297,9 +297,9 @@ void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, flo
 		ImGuiTreeNodeFlags_OpenOnArrow |
 		ImGuiTreeNodeFlags_OpenOnDoubleClick |
 		ImGuiTreeNodeFlags_SpanFullWidth |
-		ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding |
-		(obj->_children.size() <= 0 ? ImGuiTreeNodeFlags_CustomArrow : ImGuiTreeNodeFlags_None);
-	;
+		ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding 
+		| (obj->_children.size() <= 0 ? ImGuiTreeNodeFlags_CustomArrow : ImGuiTreeNodeFlags_None)
+		;
 	{
 		if (obj->_attachmentDepth == depth)
 		{
@@ -323,6 +323,13 @@ void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, flo
 				}
 			}
 
+			//Object CheckBox
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(levelItemXPos);
+			ImGui::PushID(obj->GetGUID().str().c_str());
+			ImGui::Checkbox("", &GetGameObjectActive(obj));
+			ImGui::PopID();
+
 			if (obj->_bEditorOpen)
 			{
 				for (auto& o : obj->GetChildren())
@@ -331,13 +338,6 @@ void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, flo
 				}
 				ImGui::TreePop();
 			}
-
-			//Object CheckBox
-			ImGui::SameLine();
-			ImGui::SetCursorPosX(levelItemXPos);
-			ImGui::PushID(obj->GetGUID().str().c_str());
-			ImGui::Checkbox("", &GetGameObjectActive(obj));
-			ImGui::PopID();
 		}
 	}
 }
