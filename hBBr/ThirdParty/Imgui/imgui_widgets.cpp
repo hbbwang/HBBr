@@ -6507,6 +6507,7 @@ bool ImGui::TreeNodeEx(const char* label, ImTextureID nodeTexture, ImGuiTreeNode
             if (hovered || selected)
             {
                 // const ImU32 bg_col = GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : hovered ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
+                // selected±»hovered”≈œ»
                 const ImU32 bg_col = GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : selected ? ImGuiCol_Header : ImGuiCol_HeaderHovered);
                 RenderFrame(frame_bb.Min, frame_bb.Max, bg_col, false);
             }

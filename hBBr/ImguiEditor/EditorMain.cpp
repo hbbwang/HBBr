@@ -208,7 +208,7 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 					const auto& allObjects = l->GetAllGameObjects();
 
 					float levelItemXPos = ImGui::GetCursorPosX();
-					ImGui::SetCursorPosX(levelItemXPos + 30);
+					ImGui::SetCursorPosX(levelItemXPos + ImGui::GetFrameHeight());
 
 					//Level TreeNode
 					l->_bEditorOpen = ImGui::TreeNodeEx(l->GetLevelName().c_str(),
@@ -276,7 +276,7 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 						{
 							for (auto& o : allObjects)
 							{
-								BuildSceneOutlineTreeNode_GameObject(o.get(), levelItemXPos);
+								BuildSceneOutlineTreeNode_GameObject(o.get(), levelItemXPos, 0);
 							}
 						}
 						ImGui::TreePop();
@@ -291,7 +291,7 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 	ImGui::End();
 }
 
-void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, float levelItemXPos)
+void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, float levelItemXPos, int depth)
 {
 	ImGuiTreeNodeFlags treeNodeFlags =
 		ImGuiTreeNodeFlags_OpenOnArrow |
@@ -301,40 +301,44 @@ void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, flo
 		(obj->_children.size() <= 0 ? ImGuiTreeNodeFlags_CustomArrow : ImGuiTreeNodeFlags_None);
 	;
 	{
-		float objectlItemXPos = ImGui::GetCursorPosX();
-		ImGui::SetCursorPosX(objectlItemXPos + 30);
-		//Object TreeNode
-		obj->_bEditorOpen = ImGui::TreeNodeEx(obj->GetObjectName().c_str(),
-			(ImTextureID)EditorResource::Get()->_icon_objectIcon->descriptorSet,
-			treeNodeFlags | (obj->_bSelected ? ImGuiTreeNodeFlags_Selected : 0));
-
-		if (ImGui::IsItemClicked(0))
+		if (obj->_attachmentDepth == depth)
 		{
-			if (ImGui::GetIO().KeyCtrl)
-			{
-				obj->_bSelected = true;
-			}
-			else
-			{
-				obj->_bSelected = true;
-			}
-		}
+			float objectlItemXPos = ImGui::GetCursorPosX();
+			ImGui::SetCursorPosX(objectlItemXPos + (obj->_children.size() <= 0 ? ImGui::GetFrameHeight() * 2 : ImGui::GetFrameHeight()));
 
-		if (obj->_bEditorOpen)
-		{
-			for (auto& o : obj->GetChildren())
-			{
-				BuildSceneOutlineTreeNode_GameObject(o, levelItemXPos);
-			}
-			ImGui::TreePop();
-		}
+			//Object TreeNode
+			obj->_bEditorOpen = ImGui::TreeNodeEx(obj->GetObjectName().c_str(),
+				(ImTextureID)EditorResource::Get()->_icon_objectIcon->descriptorSet,
+				treeNodeFlags | (obj->_bSelected ? ImGuiTreeNodeFlags_Selected : 0));
 
-		//Object CheckBox
-		ImGui::SameLine();
-		ImGui::PushID(obj->GetGUID().str().c_str());
-		ImGui::SetCursorPosX(levelItemXPos);
-		ImGui::Checkbox("", &GetGameObjectActive(obj));
-		ImGui::PopID();
+			if (ImGui::IsItemClicked(0))
+			{
+				if (ImGui::GetIO().KeyCtrl)
+				{
+					obj->_bSelected = !obj->_bSelected;
+				}
+				else
+				{
+					obj->_bSelected = true;
+				}
+			}
+
+			if (obj->_bEditorOpen)
+			{
+				for (auto& o : obj->GetChildren())
+				{
+					BuildSceneOutlineTreeNode_GameObject(o, levelItemXPos, depth + 1);
+				}
+				ImGui::TreePop();
+			}
+
+			//Object CheckBox
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(levelItemXPos);
+			ImGui::PushID(obj->GetGUID().str().c_str());
+			ImGui::Checkbox("", &GetGameObjectActive(obj));
+			ImGui::PopID();
+		}
 	}
 }
 
