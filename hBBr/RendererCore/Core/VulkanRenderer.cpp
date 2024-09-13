@@ -237,6 +237,11 @@ VkSemaphore VulkanRenderer::Render(VkSemaphore wait)
 	{
 		_cpuTimer.Start();
 
+		int winPosX = 0;
+		int winPosY = 0;
+		VulkanApp::GetWindowPos(_swapchain->GetWindowHandle(), winPosX, winPosY);
+		_rendererRegion = HBox2D(glm::vec2(winPosX, winPosY), glm::vec2(winPosX + _renderSize.width, winPosY + _renderSize.height));
+
 		uint32_t frameIndex = _swapchain->GetCurrentFrameIndex();
 
 		if(_swapchain)

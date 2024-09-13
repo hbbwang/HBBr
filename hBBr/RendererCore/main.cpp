@@ -341,6 +341,7 @@ bool VulkanApp::UpdateForm()
 
 			for (auto& renderer : winForm->swapchain->GetRenderers())
 			{
+				//if(renderer.second->GetRendererRegion())
 				for (auto& func : renderer.second->_mouse_inputs)
 				{
 					func.second(renderer.second, (MouseButton)event.button.button, (Action)event.button.state);

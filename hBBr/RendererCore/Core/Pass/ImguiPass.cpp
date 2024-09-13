@@ -34,10 +34,6 @@ void ImguiPass::PassInit()
 	_passName = "Imgui Render Pass";
 
 	bSpawnOutputRT = false;
-
-	_focusRect = {
-		-1,-1,-1,-1
-	};
 }
 
 
@@ -150,15 +146,15 @@ void ImguiPass::PassUpdate()
 
 	ImGuiIO& io = ImGui::GetIO();
 	ImVec2 transformedMousePos;
-	transformedMousePos.x = (HInput::GetMousePos().x - _focusRect.x);
-	transformedMousePos.y = (HInput::GetMousePos().y - _focusRect.y);
+	transformedMousePos.x = (HInput::GetMousePos().x - _focusRect._min.x);
+	transformedMousePos.y = (HInput::GetMousePos().y - _focusRect._min.y);
 	io.MousePos = transformedMousePos;
 	io.WantOffsetMousePos = true;//偏移光标位置
 
 	vkManager->ImguiNewFrame();
 	//Begin
 	
-	//ImGui::ShowDemoWindow((bool*)1);
+	ImGui::ShowDemoWindow((bool*)1);
 	for (auto& i : _gui_extensions)
 	{
 		i(_imguiContent);

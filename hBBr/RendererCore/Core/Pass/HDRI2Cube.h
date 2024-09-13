@@ -4,7 +4,7 @@
 #include <map>
 #include "PassBase.h"
 #include "HGuid.h"
-#include "HRect.h"
+#include "HBox.h"
 #include "TextureCube.h"
 
 struct HDRI2CubeUnifrom

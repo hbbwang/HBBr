@@ -55,6 +55,7 @@ void EditorResource::Init()
 void EditorResource::Release()
 {
 	const auto& manager = VulkanManager::GetManager();
+	manager->DestroyDescriptorSetLayout(_img_descriptorSetLayout);
 	for (auto& i : _all_images)
 	{
 		//ImGui_ImplVulkan_RemoveTexture(i.descriptorSet);

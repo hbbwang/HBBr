@@ -224,12 +224,10 @@ EditorMain::EditorMain()
 			for (auto& i : _mainRnederer->GetPassManagers())
 			{
 				i.second->GetImguiPass()->UpdateImguiFocusContentRect(
-					{
-						(int)(ImGui::GetWindowPos().x + contentRegionMin.x),
-						(int)(ImGui::GetWindowPos().y + contentRegionMin.y),
-						(int)ImGui::GetWindowSize().x,
-						(int)ImGui::GetWindowSize().y
-					}
+					HBox2D(
+						glm::vec2(ImGui::GetWindowPos().x + contentRegionMin.x, ImGui::GetWindowPos().y + contentRegionMin.y),
+						glm::vec2(ImGui::GetWindowSize().x , ImGui::GetWindowSize().y)
+					)
 				);
 			}
 

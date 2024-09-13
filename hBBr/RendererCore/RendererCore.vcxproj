@@ -267,7 +267,7 @@
     <ClInclude Include="Common\DDSTool.h" />
     <ClInclude Include="Common\FileSystem.h" />
     <ClInclude Include="Common\HInput.h" />
-    <ClInclude Include="Common\HRect.h" />
+    <ClInclude Include="Common\HBox.h" />
     <ClInclude Include="Common\HString.h" />
     <ClInclude Include="Common\HTime.h" />
     <ClInclude Include="Common\ImageTool.h" />
@@ -335,7 +335,7 @@
     <ClCompile Include="Common\DDSTool.cpp" />
     <ClCompile Include="Common\FileSystem.cpp" />
     <ClCompile Include="Common\HInput.cpp" />
-    <ClCompile Include="Common\HRect.cpp" />
+    <ClCompile Include="Common\HBox.cpp" />
     <ClCompile Include="Common\HTime.cpp" />
     <ClCompile Include="Common\ImageTool.cpp" />
     <ClCompile Include="Common\TypeConversion.cpp" />

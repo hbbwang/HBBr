@@ -10,6 +10,7 @@
 #include "Asset/HGuid.h"
 #include "HTime.h"
 #include "HInput.h"
+#include "HBox.h"
 #include "VulkanSwapchain.h"
 
 class Texture2D;
@@ -53,6 +54,10 @@ public:
 
 	HBBR_INLINE VkCommandBuffer& GetCommandBuffer(){
 		return _swapchain->_cmdBuf[_swapchain->_currentFrameIndex];
+	}
+
+	HBBR_INLINE const HBox2D GetRendererRegion() const{
+		return _rendererRegion;
 	}
 
 	HBBR_API HBBR_INLINE bool IsWorldValid()const{
@@ -180,6 +185,8 @@ private:
 	VulkanSwapchain* _swapchain;
 
 	VulkanManager* _vulkanManager;
+
+	HBox2D _rendererRegion;
 
 	//性能测试
 	HTime _cpuTimer;

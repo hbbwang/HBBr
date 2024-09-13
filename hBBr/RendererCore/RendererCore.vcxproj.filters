@@ -160,7 +160,7 @@
     <ClInclude Include="Common\AndroidCommon.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="Common\HRect.h">
+    <ClInclude Include="Common\HBox.h">
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="Core\Component\GameObject.h">
@@ -348,7 +348,7 @@
     <ClCompile Include="Common\TypeConversion.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="Common\HRect.cpp">
+    <ClCompile Include="Common\HBox.cpp">
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Core\Component\GameObject.cpp">
