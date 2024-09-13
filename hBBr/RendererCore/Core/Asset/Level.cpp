@@ -221,6 +221,13 @@ void Level::LevelUpdate()
 	if (_bOldActive != _bActive)
 	{
 		_bOldActive = _bActive;
+		for (auto& g : _gameObjects)
+		{
+			for (auto c : g->_comps)
+			{
+				c->GameObjectActiveChanged(g->_bActive);
+			}
+		}
 		if (!_bActive)//When object disable, what's going to happen?
 		{
 

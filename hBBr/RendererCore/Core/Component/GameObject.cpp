@@ -228,9 +228,9 @@ bool GameObject::Update()
 			{
 				c->GameObjectActiveChanged(_bActive);
 			}
-			if (!_bActive)//When object disable, what's going to happen?
+			for (auto& child : _children)
 			{
-
+				child->_bActive = _bActive;
 			}
 		}
 		if (_bActive && _level->_bActive)

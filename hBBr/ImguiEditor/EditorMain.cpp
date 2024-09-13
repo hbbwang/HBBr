@@ -198,7 +198,6 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 			{
 				clearSelection();
 			}
-			int id = 0;
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(FLT_MIN, 4.f));
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 0.f));
 			//Tree Node Begin
@@ -260,16 +259,6 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 						changedSelection();
 					}	
 
-					//Level CheckBox
-					if (l->IsLoaded())
-					{
-						auto framePadding = ImGui::GetStyle().FramePadding;
-						ImGui::SameLine();
-						ImGui::PushID(id);
-						ImGui::SetCursorPosX(levelItemXPos);
-						ImGui::Checkbox("", &GetLevelActive(l.get()));
-						ImGui::PopID();
-					}
 					if (l->_bEditorOpen)
 					{
 						if (l->IsLoaded())
@@ -281,7 +270,17 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 						}
 						ImGui::TreePop();
 					}
-					id++;
+
+					//Level CheckBox
+					if (l->IsLoaded())
+					{
+						auto framePadding = ImGui::GetStyle().FramePadding;
+						ImGui::SameLine();
+						ImGui::PushID(l->_guid.str().c_str());
+						ImGui::SetCursorPosX(levelItemXPos);
+						ImGui::Checkbox("", &GetLevelActive(l.get()));
+						ImGui::PopID();
+					}
 				}
 			}//Tree Node End
 			ImGui::PopStyleVar();
@@ -323,13 +322,6 @@ void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, flo
 				}
 			}
 
-			//Object CheckBox
-			ImGui::SameLine();
-			ImGui::SetCursorPosX(levelItemXPos);
-			ImGui::PushID(obj->GetGUID().str().c_str());
-			ImGui::Checkbox("", &GetGameObjectActive(obj));
-			ImGui::PopID();
-
 			if (obj->_bEditorOpen)
 			{
 				for (auto& o : obj->GetChildren())
@@ -338,6 +330,13 @@ void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, flo
 				}
 				ImGui::TreePop();
 			}
+
+			//Object CheckBox
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(levelItemXPos);
+			ImGui::PushID(obj->GetGUID().str().c_str());
+			ImGui::Checkbox("", &GetGameObjectActive(obj));
+			ImGui::PopID();
 		}
 	}
 }
