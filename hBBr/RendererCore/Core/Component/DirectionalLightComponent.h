@@ -15,6 +15,8 @@ protected:
 	//不是每帧执行,一般用于编辑器的对象数据刷新
 	virtual void UpdateData()override;
 
+	virtual void GameObjectActiveChanged(bool gameObjectActive)override;
+
 public: 
 	virtual void Update()override;
 

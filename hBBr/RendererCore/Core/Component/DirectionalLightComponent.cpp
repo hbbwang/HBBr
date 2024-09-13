@@ -24,14 +24,26 @@ void DirectionalLightComponent::OnConstruction()
 	_bCastShadow = true;
 	_lightType = LightType_DirectionalLight;
 	for (auto& i : _renderer->GetPassManagers())
-	{
 		i.second->BindLightingParameter(this);
-	}
 }
 
 void DirectionalLightComponent::UpdateData()
 {
 
+}
+
+void DirectionalLightComponent::GameObjectActiveChanged(bool gameObjectActive)
+{
+	if (gameObjectActive && _bActive && _gameObject->GetLevel()->IsActive())
+	{
+		for (auto& i : _renderer->GetPassManagers())
+			i.second->BindLightingParameter(this);
+	}
+	else
+	{
+		for (auto& i : _renderer->GetPassManagers())
+			i.second->UnBindLightingParameter(this);
+	}
 }
 
 void DirectionalLightComponent::Update()
@@ -41,7 +53,5 @@ void DirectionalLightComponent::Update()
 void DirectionalLightComponent::ExecuteDestroy()
 {
 	for (auto& i : _renderer->GetPassManagers())
-	{
 		i.second->UnBindLightingParameter(this);
-	}
 }

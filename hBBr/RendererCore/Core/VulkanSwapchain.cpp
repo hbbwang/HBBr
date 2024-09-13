@@ -171,6 +171,7 @@ void VulkanSwapchain::Update()
 			_vulkanManager->BeginCommandBuffer(cmdBuf);
 
 			VkSemaphore wait = _acquireSemaphore[_currentFrameIndex];
+
 			for (auto& i : _renderers)
 			{
 				auto nextWait = i.second->Render(wait);
@@ -190,6 +191,7 @@ void VulkanSwapchain::Update()
 				if (mainCamera == nullptr) //编辑器内，主相机无效的情况下,强制切换到编辑器相机
 					mainCamera = world->_editorCamera;
 				#endif
+
 				auto& mainPassManager = _renderers.begin()->second->_passManagers[mainCamera];
 
 				//Editor GUI Pass
@@ -201,7 +203,9 @@ void VulkanSwapchain::Update()
 				#endif
 
 				_vulkanManager->EndCommandBuffer(cmdBuf);
+
 				_vulkanManager->SubmitQueueForPasses(cmdBuf, wait, _queueSemaphore[_currentFrameIndex], _executeFence[_currentFrameIndex]);
+
 				//Imgui如果开启了多视口模式，当控件离开窗口之后，会自动生成一套绘制流程，放在此处执行最后的处理会安全很多。
 				_imguiPassEditor->EndFrame();
 			}
@@ -224,9 +228,11 @@ bool VulkanSwapchain::ResizeBuffer()
 	_vulkanManager->DeviceWaitIdle();
 
 	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
-#if __ANDROID__
-	_Sleep(200);
-#endif
+
+	#if __ANDROID__
+		_Sleep(200);
+	#endif
+
 	//部分情况下重置窗口会出现Surface被销毁的问题，最好Surface也重新创建一个
 	_vulkanManager->ReCreateSurface_SDL(_form->window, _surface);
 
