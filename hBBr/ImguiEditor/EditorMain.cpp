@@ -198,52 +198,7 @@ EditorMain::EditorMain()
 		ImGui::End();
 
 		//主渲染窗口
-		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		if (ImGui::Begin(RenderView.c_str(), 0))
-		{
-			// 获取内容区域的最小和最大坐标（相对于窗口的坐标）
-			ImVec2 contentRegionMin = ImGui::GetWindowContentRegionMin();
-			ImVec2 contentRegionMax = ImGui::GetWindowContentRegionMax();
-
-			// 计算内容区域的大小
-			ImVec2 contentRegionSize;
-			contentRegionSize.x = contentRegionMax.x - contentRegionMin.x;
-			contentRegionSize.y = contentRegionMax.y - contentRegionMin.y;
-
-			// 获取当前 ImGui 样式
-			const ImGuiStyle& style = ImGui::GetStyle();
-			// 获取窗口边框大小
-			float windowBorderSize = style.WindowBorderSize;
-
-			_renderViewSize.width = (uint32_t)std::max(2.0f, contentRegionSize.x);
-			_renderViewSize.height = (uint32_t)std::max(2.0f, contentRegionSize.y);
-			//_renderViewSize.width += 14;
-			//_renderViewSize.height += 15;
-
-			for (auto& i : _mainRnederer->GetPassManagers())
-			{
-				i.second->GetImguiPass()->UpdateImguiFocusContentRect(
-					HBox2D(
-						glm::vec2(ImGui::GetWindowPos().x + contentRegionMin.x, ImGui::GetWindowPos().y + contentRegionMin.y),
-						glm::vec2(ImGui::GetWindowSize().x , ImGui::GetWindowSize().y)
-					)
-				);
-			}
-
-			ImGui::Image(pass->GetRenderView(), contentRegionSize);
-
-			if (_renderViewSize.width <= 0 || _renderViewSize.height <= 0)
-			{
-				_renderViewSize = { 2,2 };
-			}
-			//调整渲染纹理大小
-			_mainRnederer->SetRenderSize(_renderViewSize);
-		}
-		ImGui::End();
-		ImGui::PopStyleVar();
-		ImGui::PopStyleColor();
-
+		BuildRenderer(pass);
 
 		//ImGui::ShowDemoWindow((bool*)1);
 		ImGui::ShowStyleEditor();
@@ -315,6 +270,60 @@ bool& EditorMain::GetLevelActive(class Level* level)
 bool& EditorMain::GetGameObjectActive(GameObject* obj)
 {
 	return obj->_bActive;
+}
+
+void EditorMain::BuildRenderer(ImguiPassEditor* pass)
+{
+	ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+	if (ImGui::Begin(RenderView.c_str(), 0))
+	{
+		// 获取内容区域的最小和最大坐标（相对于窗口的坐标）
+		ImVec2 contentRegionMin = ImGui::GetWindowContentRegionMin();
+		ImVec2 contentRegionMax = ImGui::GetWindowContentRegionMax();
+
+		// 计算内容区域的大小
+		ImVec2 contentRegionSize;
+		contentRegionSize.x = contentRegionMax.x - contentRegionMin.x;
+		contentRegionSize.y = contentRegionMax.y - contentRegionMin.y;
+
+		// 获取当前 ImGui 样式
+		const ImGuiStyle& style = ImGui::GetStyle();
+		// 获取窗口边框大小
+		float windowBorderSize = style.WindowBorderSize;
+
+		_renderViewSize.width = (uint32_t)std::max(2.0f, contentRegionSize.x);
+		_renderViewSize.height = (uint32_t)std::max(2.0f, contentRegionSize.y);
+		//_renderViewSize.width += 14;
+		//_renderViewSize.height += 15;
+
+		HBox2D rendererRegion = HBox2D(
+			glm::vec2(ImGui::GetWindowPos().x + contentRegionMin.x, ImGui::GetWindowPos().y + contentRegionMin.y),
+			glm::vec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y)
+		);
+
+		for (auto& i : _mainRnederer->GetPassManagers())
+		{
+			i.second->GetImguiPass()->UpdateImguiFocusContentRect(rendererRegion);
+		}
+
+		_mainRnederer->EnableRendererRegion(true);
+		rendererRegion._max = glm::vec2(rendererRegion._min.x + ImGui::GetWindowSize().x, rendererRegion._min.y + ImGui::GetWindowSize().y);
+		_mainRnederer->SetRendererRegion(rendererRegion);
+		//ConsoleDebug::printf_endl("RG=(%s) ,\n MousePos=(%s)", rendererRegion.ToString().c_str(), HString::FromVec2(HInput::GetMousePos()).c_str());
+
+		ImGui::Image(pass->GetRenderView(), contentRegionSize);
+
+		if (_renderViewSize.width <= 0 || _renderViewSize.height <= 0)
+		{
+			_renderViewSize = { 2,2 };
+		}
+		//调整渲染纹理大小
+		_mainRnederer->SetRenderSize(_renderViewSize);
+	}
+	ImGui::End();
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor();
 }
 
 void EditorMain::BuildSceneOutlineTreeNode(class GameObject* obj, float levelItemXPos)

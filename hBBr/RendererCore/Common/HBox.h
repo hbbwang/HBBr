@@ -23,6 +23,25 @@ public:
 		, _max(inMax)
 	{ }
 
+	HBox2<T>(const HBox2<T>& other)
+		: _min(other._min)
+		, _max(other._max)
+	{ }
+
+	//HBox2<T>& operator=(const HBox2<T> other)
+	//{
+	//	_min = other._min;
+	//	_max = other._max;
+	//	return *this;
+	//}
+
+	//HBox2<T>& operator=(const HBox2<T>& other)
+	//{
+	//	_min = other._min;
+	//	_max = other._max;
+	//	return *this;
+	//}
+
 	bool operator==(const HBox2<T>& other) const
 	{
 		return (_min == other._min) && (_max == other._max);
@@ -92,6 +111,18 @@ public:
 			return false;
 		}
 		return true;
+	}
+
+	bool Contain(const HBox2Vec2(T)& other) const
+	{
+		if (
+			other.x > _min.x && other.y > _min.y &&
+			other.x < _max.x && other.y < _max.y
+			)
+		{
+			return true;
+		}
+		return false;
 	}
 
 	HBox2<T> Overlap(const HBox2<T>& other) const

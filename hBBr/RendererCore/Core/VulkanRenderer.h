@@ -52,12 +52,24 @@ public:
 		return _rendererName;
 	}
 
-	HBBR_INLINE VkCommandBuffer& GetCommandBuffer(){
+	HBBR_API HBBR_INLINE VkCommandBuffer& GetCommandBuffer(){
 		return _swapchain->_cmdBuf[_swapchain->_currentFrameIndex];
 	}
 
-	HBBR_INLINE const HBox2D GetRendererRegion() const{
+	HBBR_API HBBR_INLINE const HBox2D GetRendererRegion() const{
 		return _rendererRegion;
+	}
+
+	HBBR_API HBBR_INLINE const bool IsEnableRendererRegion() const {
+		return _bEnableRendererRegion;
+	}
+
+	HBBR_API HBBR_INLINE void SetRendererRegion(HBox2D & newRegion) {
+		_rendererRegion = newRegion;
+	}
+
+	HBBR_API HBBR_INLINE void EnableRendererRegion(bool bEnable) {
+		_bEnableRendererRegion = bEnable;
 	}
 
 	HBBR_API HBBR_INLINE bool IsWorldValid()const{
@@ -187,6 +199,8 @@ private:
 	VulkanManager* _vulkanManager;
 
 	HBox2D _rendererRegion;
+
+	bool _bEnableRendererRegion;
 
 	//性能测试
 	HTime _cpuTimer;

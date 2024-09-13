@@ -37,6 +37,7 @@ private:
 	void GlobalSetting();
 	bool& GetLevelActive(class Level* level);
 	bool& GetGameObjectActive(class GameObject* obj);
+	void BuildRenderer(ImguiPassEditor* pass);
 	void BuildSceneOutlineTreeNode(class GameObject* obj, float levelItemXPos);
 
 };

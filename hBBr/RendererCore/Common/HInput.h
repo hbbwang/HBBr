@@ -335,40 +335,13 @@ struct MouseCallBack
 class HInput 
 {
 public:
-    static inline void SetMousePos(glm::vec2 pos)
-    {
-        SDL_WarpMouseGlobal(pos.x, pos.y);
-    }
+    HBBR_API static void SetMousePos(glm::vec2 pos);
 
-    static inline void SetMousePosClient(glm::vec2 pos)
-    {
-        if (VulkanApp::GetFocusForm() && VulkanApp::GetFocusForm()->window)
-        {
-            SDL_WarpMouseInWindow(VulkanApp::GetFocusForm()->window, pos.x, pos.y);
-        }
-    }
+    HBBR_API static void SetMousePosClient(glm::vec2 pos);
 
-    static inline void ShowCursor(bool bShow)
-    {
-        if (bShow)
-            SDL_ShowCursor();
-        else
-            SDL_HideCursor();
-    }
+    HBBR_API static void ShowCursor(bool bShow);
 
-    static inline glm::vec2 GetMousePos()
-    {
-        glm::vec2 result(0);
-        SDL_GetGlobalMouseState(&result.x, &result.y);
-        //return _mousePos;
-        return result;
-    }
+    HBBR_API  static glm::vec2 GetMousePos();
 
-    static inline glm::vec2 GetMousePosClient()
-    {
-        glm::vec2 result(0);
-        SDL_GetMouseState(&result.x, &result.y);
-        //return _mousePosInWindow;
-        return result;
-    }
+    HBBR_API  static glm::vec2 GetMousePosClient();
 };
