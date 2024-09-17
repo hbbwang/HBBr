@@ -12,28 +12,28 @@ public:
 
 	HBBR_API HBBR_INLINE static nlohmann::json& GetRendererConfig()
 	{
+		static nlohmann::json _renderer_json;
 		return _renderer_json;
 	}
 
 	HBBR_API HBBR_INLINE static nlohmann::json& GetInternationalzationConfig()
 	{
+		static nlohmann::json _internationalzation_json;
 		return _internationalzation_json;
 	}
 
 	HBBR_API HBBR_INLINE static nlohmann::json& GetEditorConfig()
 	{
+		static nlohmann::json _editor_json;
 		return _editor_json;
 	}
 
 	HBBR_API HBBR_INLINE static nlohmann::json& GetEditorInternationalzationConfig()
 	{
+		static nlohmann::json _editor_internationalzation_json;
 		return _editor_internationalzation_json;
 	}
 
-	static nlohmann::json _renderer_json;
-	static nlohmann::json _internationalzation_json;
-	static nlohmann::json _editor_json;
-	static nlohmann::json _editor_internationalzation_json;
 };
 
 HBBR_API HString GetRendererConfig(HString Group, HString name);

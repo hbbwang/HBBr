@@ -13,7 +13,7 @@ DeferredLightingPass::~DeferredLightingPass()
 
 void DeferredLightingPass::PassInit()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	AddAttachment(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE, GetSceneTexture(SceneTextureDesc::SceneColor)->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	AddSubpass({}, { 0 }, -1,
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
@@ -63,7 +63,7 @@ void DeferredLightingPass::PassInit()
 
 void DeferredLightingPass::PassUpdate()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.5, 0.6, 0.7, 0.3));
 	//Update FrameBuffer
@@ -143,7 +143,7 @@ void DeferredLightingPass::PassReset()
 
 PipelineIndex DeferredLightingPass::CreatePipeline(HString shaderName)
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	//CraetePipeline..
 	VkPipeline pipeline = VK_NULL_HANDLE;
 	auto vsCache = Shader::_vsShader[shaderName];

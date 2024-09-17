@@ -117,7 +117,7 @@ void BasePass::SetupPassAndDraw(Pass p)
 	auto &obj = _object_descriptorSet;
 	auto &vb = _opaque_vertexBuffer;
 	auto &ib = _opaque_indexBuffer;
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	const auto& cmdBuf = _renderer->GetCommandBuffer();
 	uint32_t matOffset_vs = 0;
 	uint32_t matOffset_ps = 0;

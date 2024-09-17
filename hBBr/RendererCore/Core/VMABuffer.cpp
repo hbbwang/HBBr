@@ -18,7 +18,7 @@ VMABuffer::VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, Vm
 
 	AlignmentSize(bufferSize);
 
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 
 	if (_memoryUsage == VMA_MEMORY_USAGE_GPU_ONLY)//仅GPU可见，复制数据需要媒介
 	{
@@ -36,7 +36,7 @@ VMABuffer::VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, Vm
 
 VMABuffer::~VMABuffer()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	manager->VMADestroyBufferAndFreeMemory(_buffer, _allocation, _debugName, _allocationInfo.size);
 }
 
@@ -45,7 +45,7 @@ void VMABuffer::Mapping(void* data, VkDeviceSize offset, VkDeviceSize dataSize)
 	AlignmentSize(dataSize);
 	if (_memoryUsage == VMA_MEMORY_USAGE_GPU_ONLY)//仅GPU可见的内存，是不能从CPU复制数据的，必须通过"媒介"
 	{
-		const auto& manager = VulkanManager::GetManager();
+		auto* manager = VulkanManager::GetManager();
 		VkCommandBuffer cmdBuf;
 		manager->AllocateCommandBuffer(manager->GetCommandPool(), cmdBuf);
 		manager->BeginCommandBuffer(cmdBuf);
@@ -82,7 +82,7 @@ void VMABuffer::Mapping(void* data, VkDeviceSize offset, VkDeviceSize dataSize)
 	{
 		if (!_bAlwayMapping)
 		{
-			const auto& manager = VulkanManager::GetManager();
+			auto* manager = VulkanManager::GetManager();
 			if ((_memFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) != 0)
 			{
 				//if ((memFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0)
@@ -117,7 +117,7 @@ bool VMABuffer::Resize(VkDeviceSize newSize, VkCommandBuffer cmdBuf)
 		return false;
 	}
 
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 
 	//创建新Buffer
 	VkBuffer newBuffer;
@@ -166,7 +166,7 @@ bool VMABuffer::Resize(VkDeviceSize newSize, VkCommandBuffer cmdBuf)
 
 void* VMABuffer::BeginMapping()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	if (_memoryUsage == VMA_MEMORY_USAGE_GPU_ONLY)
 		return nullptr;
 	if ((_memFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) != 0)
@@ -180,7 +180,7 @@ void* VMABuffer::BeginMapping()
 
 void VMABuffer::EndMapping()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	if (_memoryUsage == VMA_MEMORY_USAGE_GPU_ONLY)
 		return;
 	if ((_memFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) != 0)

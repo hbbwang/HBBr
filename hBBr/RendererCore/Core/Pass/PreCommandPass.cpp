@@ -3,7 +3,7 @@
 
 PreCommandPass::~PreCommandPass()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	manager->FreeCommandBuffer(manager->GetCommandPool(), _cmdBuf);
 }
 
@@ -12,13 +12,13 @@ void PreCommandPass::PassInit()
 	_passName = "Precommand Pass";
 	_markColor = glm::vec4(1, 1, 0, 0.5);
 
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	manager->AllocateCommandBuffer(manager->GetCommandPool(), _cmdBuf);
 }
 
 void PreCommandPass::PassUpdate()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	bool bNeedSubmitQueue = false;
 	if (Texture2D::GetUploadTextures().size() > 0)
 	{

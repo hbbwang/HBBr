@@ -70,7 +70,7 @@ void PassManager::PassesUpdate()
 	_postProcessUniformBuffer.passUniform = _passUniformBuffer;
 	_postProcessUniformBuffer.debugMode = 0;
 
-	const auto& vkManager = VulkanManager::GetManager();
+	auto* vkManager = VulkanManager::GetManager();
 	//Collect render setting (Commandbuffer record)
 	_executePasses.clear();
 
@@ -128,7 +128,7 @@ void PassManager::AddPass(std::shared_ptr<PassBase> newPass, Pass pass)
 
 void PassManager::CmdCopyFinalColorToSwapchain()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	int swapchainIndex = _renderer->_swapchain->GetCurrentFrameIndex();
 	auto swapchainImage = _renderer->_swapchain->GetSwapchainImages()[swapchainIndex];

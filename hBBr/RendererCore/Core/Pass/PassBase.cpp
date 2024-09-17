@@ -24,7 +24,7 @@ PassBase::~PassBase()
 void PassBase::PassBeginUpdate()
 {
 	//const auto& cmdBuf = _renderer->GetCommandBuffer();
-	//const auto& vkManager = VulkanManager::GetManager();
+	//auto* vkManager = VulkanManager::GetManager();
 	//_cpuTimer.Start();
 	//vkCmdWriteTimestamp(cmdBuf, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, vkManager->GetQueryTimestamp(),
 	//	(_renderer->GetSwapchain()->GetCurrentFrameIndex() * (uint32_t)_manager->GetInitPasses().size() * 2) + (passIndex * 2));
@@ -33,7 +33,7 @@ void PassBase::PassBeginUpdate()
 void PassBase::PassEndUpdate()
 {
 	//const auto& cmdBuf = _renderer->GetCommandBuffer();
-	//const auto& vkManager = VulkanManager::GetManager();
+	//auto* vkManager = VulkanManager::GetManager();
 	//vkCmdWriteTimestamp(cmdBuf, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, vkManager->GetQueryTimestamp(), 
 	//	(_renderer->GetSwapchain()->GetCurrentFrameIndex() * (uint32_t)_manager->GetInitPasses().size() * 2) + (passIndex * 2) + 1);
 	//_cpuTime = _cpuTimer.End_ms();

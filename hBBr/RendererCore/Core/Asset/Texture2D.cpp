@@ -14,7 +14,6 @@
 #include  "VMABuffer.h"
 std::vector<Texture2D*> Texture2D::_upload_textures;
 std::unordered_map<HString, std::weak_ptr<Texture2D>> Texture2D::_system_textures;
-std::vector<VkSampler>Texture2D::_samplers;
 uint64_t Texture2D::_textureStreamingSize = 0;
 uint64_t Texture2D::_maxTextureStreamingSize = (uint64_t)4 * (uint64_t)1024 * (uint64_t)1024 * (uint64_t)1024; //4 GB
 
@@ -272,61 +271,61 @@ void Texture2D::UploadToGPU()
 
 void Texture2D::GlobalInitialize()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 
 	//Create Sampler
 	VkSampler sampler = VK_NULL_HANDLE;
-	_samplers.reserve((uint32_t)TextureSampler_Max);
+	GetSamplers().reserve((uint32_t)TextureSampler_Max);
 	{
 		manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 16);
-		_samplers.push_back(std::move(sampler));
+		GetSamplers().push_back(std::move(sampler));
 	}
 	{
 		manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0, 16);
-		_samplers.push_back(std::move(sampler));
+		GetSamplers().push_back(std::move(sampler));
 	}
 	{
 		manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 16);
-		_samplers.push_back(std::move(sampler));
+		GetSamplers().push_back(std::move(sampler));
 	}
 	{
 		manager->CreateSampler(sampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, 0, 16);
-		_samplers.push_back(std::move(sampler));
+		GetSamplers().push_back(std::move(sampler));
 	}
 	{
 		manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 16);
-		_samplers.push_back(std::move(sampler));
+		GetSamplers().push_back(std::move(sampler));
 	}
 	{
 		manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0, 16);
-		_samplers.push_back(std::move(sampler));
+		GetSamplers().push_back(std::move(sampler));
 	}
 	{
 		manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 16);
-		_samplers.push_back(std::move(sampler));
+		GetSamplers().push_back(std::move(sampler));
 	}
 	{
 		manager->CreateSampler(sampler, VK_FILTER_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, 0, 16);
-		_samplers.push_back(std::move(sampler));
+		GetSamplers().push_back(std::move(sampler));
 	}
 	auto gpuExt = manager->GetDeviceExt();
 	if (gpuExt.HasExtFilter_Cubic == 1)
 	{
 		{
 			manager->CreateSampler(sampler, VK_FILTER_CUBIC_EXT, VK_SAMPLER_ADDRESS_MODE_REPEAT, 0, 16);
-			_samplers.push_back(std::move(sampler));
+			GetSamplers().push_back(std::move(sampler));
 		}
 		{
 			manager->CreateSampler(sampler, VK_FILTER_CUBIC_EXT, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, 0, 16);
-			_samplers.push_back(std::move(sampler));
+			GetSamplers().push_back(std::move(sampler));
 		}
 		{
 			manager->CreateSampler(sampler, VK_FILTER_CUBIC_EXT, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, 0, 16);
-			_samplers.push_back(std::move(sampler));
+			GetSamplers().push_back(std::move(sampler));
 		}
 		{
 			manager->CreateSampler(sampler, VK_FILTER_CUBIC_EXT, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, 0, 16);
-			_samplers.push_back(std::move(sampler));
+			GetSamplers().push_back(std::move(sampler));
 		}
 	}
 
@@ -376,12 +375,12 @@ void Texture2D::GlobalUpdate()
 
 void Texture2D::GlobalRelease()
 {
-	const auto& manager = VulkanManager::GetManager();
-	for (auto i : _samplers)
+	auto* manager = VulkanManager::GetManager();
+	for (auto i : GetSamplers())
 	{
 		vkDestroySampler(manager->GetDevice(), i, nullptr);
 	}
-	_samplers.clear();
+	GetSamplers().clear();
 	_system_textures.clear();
 }
 
@@ -405,7 +404,7 @@ std::shared_ptr<Texture2D> Texture2D::GetSystemTexture(HString tag)
 
 bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	{
 		//上一帧已经复制完成了,可以删除Upload buffer 和Memory了
 		if (IsValid())
@@ -514,7 +513,7 @@ bool Texture2D::CopyBufferToTexture(VkCommandBuffer cmdbuf)
 
 void Texture2D::CopyBufferToTextureImmediate()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	VkCommandBuffer buf;
 	manager->AllocateCommandBuffer(manager->GetCommandPool(), buf);
 	manager->BeginCommandBuffer(buf, 0);
@@ -547,7 +546,7 @@ void Texture2D::CopyBufferToTextureImmediate()
 
 void Texture2D::DestoryUploadBuffer()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	if (_uploadBuffer != VK_NULL_HANDLE)
 	{
 		vkDestroyBuffer(manager->GetDevice(), _uploadBuffer, nullptr);
@@ -576,7 +575,7 @@ bool Texture2D::CopyTextureToBuffer(VkCommandBuffer cmdbuf, VkBuffer buffer, VkD
 
 void Texture2D::CopyTextureToBufferImmediate(VkBuffer buffer, VkDeviceSize offset)
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	VkCommandBuffer buf;
 	manager->AllocateCommandBuffer(manager->GetCommandPool(), buf);
 	manager->BeginCommandBuffer(buf, 0);

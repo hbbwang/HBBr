@@ -14,7 +14,7 @@ HDRI2Cube::HDRI2Cube()
 
 HDRI2Cube::~HDRI2Cube()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	ReleasePass();
 	_hdriTexture.reset();
 	manager->DestroyPipelineLayout(_pipelineLayout);
@@ -23,7 +23,7 @@ HDRI2Cube::~HDRI2Cube()
 
 bool HDRI2Cube::PassExecute(HString hdrImagePath, HString ddsOutputPath, bool bGenerateMips, int cubeMapSize)
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 
 	//Init
 	_hdrImagePath = hdrImagePath;

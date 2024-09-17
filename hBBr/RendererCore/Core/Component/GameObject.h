@@ -108,6 +108,8 @@ public:
 	bool _bEditorNeedUpdate = false;
 	bool _sceneEditorHide = false;
 	bool _bSelected = false;
+	bool _bSceneOutlineVisible = true;
+	bool _bSceneOutlineSearchResult = false;
 #endif
 
 	bool _IsEditorObject = false;

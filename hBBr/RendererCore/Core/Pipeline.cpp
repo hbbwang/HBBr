@@ -338,7 +338,7 @@ std::vector<VkDescriptorSetLayout> PipelineManager::_descriptorSetLayout_tex;
 void PipelineManager::GlobalInit()
 {
 	_maxTextureBinding = 16;
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, { VK_SHADER_STAGE_VERTEX_BIT }, _descriptorSetLayout_vs_ubd);
 	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, { VK_SHADER_STAGE_FRAGMENT_BIT }, _descriptorSetLayout_ps_ubd);
 	manager->CreateDescripotrSetLayout({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC }, { VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT }, _descriptorSetLayout_vsps_ubd);
@@ -417,7 +417,7 @@ void PipelineManager::GlobalInit()
 
 void PipelineManager::GlobalRelease()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	manager->DestroyDescriptorSetLayout(_descriptorSetLayout_vs_ubd);
 	manager->DestroyDescriptorSetLayout(_descriptorSetLayout_ps_ubd);
 	manager->DestroyDescriptorSetLayout(_descriptorSetLayout_vsps_ubd);

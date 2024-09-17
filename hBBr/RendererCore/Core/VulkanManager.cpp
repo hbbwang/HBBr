@@ -35,9 +35,7 @@
 #include "Imgui/backends/imgui_impl_vulkan.h"
 #endif
 
-std::unique_ptr<VulkanManager> VulkanManager::_vulkanManager;
-
-PFN_vkCreateDebugReportCallbackEXT  fvkCreateDebugReportCallbackEXT = VK_NULL_HANDLE;
+PFN_vkCreateDebugReportCallbackEXT  fvkCreateDebugReportCallbackEXT = VK_NULL_HANDLE; 
 PFN_vkDestroyDebugReportCallbackEXT  fvkDestroyDebugReportCallbackEXT = VK_NULL_HANDLE;
 bool VulkanManager::_bDebugEnable= false;
 bool VulkanManager::debugMarkerActive = false;
@@ -117,6 +115,12 @@ FILE* pFileOut;
 FILE* pFileErr;
 #endif
 
+std::unique_ptr<VulkanManager>& VulkanManager::GetManagerPtr()
+{
+	static std::unique_ptr<VulkanManager> _vulkanManager;
+	return _vulkanManager;
+}
+
 VulkanManager::VulkanManager(bool bDebug)
 {
 #if defined(_WIN32)
@@ -193,6 +197,22 @@ VulkanManager::~VulkanManager()
 		fclose(pFileErr);
 	#endif
 
+}
+
+void VulkanManager::InitManager(bool bDebug)
+{
+	if (GetManagerPtr() == nullptr)
+	{
+		GetManagerPtr().reset(new VulkanManager(bDebug));
+	}
+}
+
+void VulkanManager::ReleaseManager()
+{
+	if (GetManagerPtr())
+	{
+		GetManagerPtr().reset();
+	}
 }
 
 void VulkanManager::InitInstance(bool bEnableDebug)

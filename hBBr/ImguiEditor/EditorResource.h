@@ -42,6 +42,7 @@ public:
 	EditorImage* _icon_eyeClose;
 	EditorImage* _icon_levelIcon;
 	EditorImage* _icon_objectIcon;
+	EditorImage* _icon_search;
 
 	std::vector<EditorImage> _all_images;
 

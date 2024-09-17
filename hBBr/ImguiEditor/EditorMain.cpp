@@ -183,6 +183,68 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 				;
 			auto world = _mainRnederer->GetWorld().lock();
 
+			static char searchInput[1024];
+			static int length = 0;
+			struct Funcs
+			{
+				static int SearchCallback(ImGuiInputTextCallbackData* data)
+				{
+					length = data->BufTextLen;
+					VulkanRenderer* mainRenderer = (VulkanRenderer*)data->UserData;
+					if (!mainRenderer->GetWorld().expired())
+					{
+						auto world = mainRenderer->GetWorld().lock();
+						for (auto& l : world->GetLevels())
+						{
+							for (auto& g : l->GetAllGameObjects())
+							{
+								g->_bSceneOutlineVisible = true;
+								g->_bSceneOutlineSearchResult = false;
+								if (length > 0)
+								{
+									auto bContains = g->GetObjectName().Contains(data->Buf, false);
+									if (!bContains)
+									{
+										g->_bSceneOutlineVisible = false;
+									}
+									else
+									{
+										g->_bSceneOutlineSearchResult = true;
+									}
+								}
+							}
+							if (length > 0)
+							{
+								for (auto& g : l->GetAllGameObjects())
+								{
+									// 从最后一层级开始往回找
+									if (g->GetChildrenNum() <= 0 && g->_bSceneOutlineVisible)
+									{
+										auto parent = g->GetParent();
+										while (parent != nullptr)
+										{
+											parent->_bSceneOutlineVisible = true;
+											parent = parent->GetParent();
+										}
+									}
+								}
+							}
+						}
+					}
+					return 0;
+				}
+			};
+
+			//Search input
+			{
+				ImGui::Image((ImTextureID)EditorResource::Get()->_icon_search->descriptorSet, ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()));
+				ImGui::SameLine();
+				ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+				ImGui::InputText("##SceneOutlineSearch", searchInput, 1023, ImGuiInputTextFlags_CallbackEdit | ImGuiInputTextFlags_CallbackCharFilter, Funcs::SearchCallback, _mainRnederer);
+				ImGui::PopItemWidth();
+				ImGui::Separator();
+			}
+
 			auto clearSelection = [&]()
 				{
 					for (auto& l : world->GetLevels())
@@ -259,18 +321,6 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 						changedSelection();
 					}	
 
-					if (l->_bEditorOpen)
-					{
-						if (l->IsLoaded())
-						{
-							for (auto& o : allObjects)
-							{
-								BuildSceneOutlineTreeNode_GameObject(o.get(), levelItemXPos, 0);
-							}
-						}
-						ImGui::TreePop();
-					}
-
 					//Level CheckBox
 					if (l->IsLoaded())
 					{
@@ -281,6 +331,19 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 						ImGui::Checkbox("", &GetLevelActive(l.get()));
 						ImGui::PopID();
 					}
+
+					if (l->_bEditorOpen)
+					{
+						if (l->IsLoaded())
+						{
+							for (auto& o : allObjects)
+							{
+								BuildSceneOutlineTreeNode_GameObject(o.get(), levelItemXPos, 0, searchInput, length);
+							}
+						}
+						ImGui::TreePop();
+					}
+					//ImGui::Separator();
 				}
 			}//Tree Node End
 			ImGui::PopStyleVar();
@@ -290,7 +353,7 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 	ImGui::End();
 }
 
-void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, float levelItemXPos, int depth)
+void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, float levelItemXPos, int depth, char* searchInput, int searchInputLength)
 {
 	ImGuiTreeNodeFlags treeNodeFlags =
 		ImGuiTreeNodeFlags_OpenOnArrow |
@@ -300,10 +363,10 @@ void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, flo
 		| (obj->_children.size() <= 0 ? ImGuiTreeNodeFlags_CustomArrow : ImGuiTreeNodeFlags_None)
 		;
 	{
-		if (obj->_attachmentDepth == depth)
+		if (obj->_attachmentDepth == depth && obj->_bSceneOutlineVisible)
 		{
 			float objectlItemXPos = ImGui::GetCursorPosX();
-			ImGui::SetCursorPosX(objectlItemXPos + (obj->_children.size() <= 0 ? ImGui::GetFrameHeight() * 2 : ImGui::GetFrameHeight()));
+			ImGui::SetCursorPosX(objectlItemXPos + ImGui::GetFontSize());
 
 			//Object TreeNode
 			obj->_bEditorOpen = ImGui::TreeNodeEx(obj->GetObjectName().c_str(),
@@ -322,21 +385,34 @@ void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, flo
 				}
 			}
 
+			if (obj->_bSceneOutlineSearchResult && !obj->_bSelected)
+			{
+				ImVec2 min = ImGui::GetItemRectMin();
+				ImVec2 max = ImGui::GetItemRectMax();
+				ImGui::GetForegroundDrawList()->AddRectFilled(
+					min,
+					max,
+					ImGui::GetColorU32(ImGuiCol_TreeNodeItemSearchResult));
+			}
+
+			//Object CheckBox
+			{
+				ImGui::SameLine();
+				ImGui::SetCursorPosX(levelItemXPos);
+				ImGui::PushID(obj->GetGUID().str().c_str());
+				ImGui::Checkbox("", &GetGameObjectActive(obj));
+				ImGui::PopID();
+			}
+
 			if (obj->_bEditorOpen)
 			{
 				for (auto& o : obj->GetChildren())
 				{
-					BuildSceneOutlineTreeNode_GameObject(o, levelItemXPos, depth + 1);
+					BuildSceneOutlineTreeNode_GameObject(o, levelItemXPos, depth + 1, searchInput, searchInputLength);
 				}
 				ImGui::TreePop();
 			}
 
-			//Object CheckBox
-			ImGui::SameLine();
-			ImGui::SetCursorPosX(levelItemXPos);
-			ImGui::PushID(obj->GetGUID().str().c_str());
-			ImGui::Checkbox("", &GetGameObjectActive(obj));
-			ImGui::PopID();
 		}
 	}
 }
@@ -364,7 +440,7 @@ void EditorMain::BuildContentBrowser(ImguiPassEditor* pass)
 void EditorMain::GlobalSetting()
 {
 	auto& style = ImGui::GetStyle();
-	style.FrameRounding = 5.0f;
+	style.FrameRounding = 4.0f; //圆角
 	style.CircleTessellationMaxError = 2.0f;
 	style.FrameBorderSize = 1.0f;
 	style.WindowMenuButtonPosition = ImGuiDir::ImGuiDir_Right;
@@ -377,7 +453,8 @@ void EditorMain::GlobalSetting()
 	style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0784f, 0.0784f, 0.0784f, 1.0f);
 	style.Colors[ImGuiCol_Header] = ImVec4(1.0f, 1.0f, 1.0f, 0.35f);
 	style.Colors[ImGuiCol_HeaderActive] = ImVec4(1.0f, 1.0f, 1.0f, 0.1f);
-	style.Colors[ImGuiCol_HeaderHovered] = ImVec4(1.0f, 1.0f, 1.0f, 0.2f);
+	style.Colors[ImGuiCol_HeaderHovered] = ImVec4(1.0f, 1.0f, 1.0f, 0.1f);
+	style.Colors[ImGuiCol_TreeNodeItemSearchResult] = ImVec4(0.2f, 0.3f, 0.4f, 0.3f);
 	style.Colors[ImGuiCol_Border] = ImVec4(1.0f, 1.0f, 1.0f, 0.25f);
 	style.Colors[ImGuiCol_CheckMark] = ImVec4(1.0f, 1.0f, 1.0f, 0.65f);
 	style.Colors[ImGuiCol_FrameBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -394,9 +471,9 @@ void EditorMain::GlobalSetting()
 	style.Colors[ImGuiCol_Button] = ImVec4(0.25f, 0.35f, 0.45f, 0.55f);
 	style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.3f, 0.4f, 0.45f, 0.75f);
 	style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.3f, 0.4f, 0.5f, 0.65f);
-	style.Colors[ImGuiCol_Separator] = ImVec4(1.0f, 1.0f, 1.0f, 0.5f);
-	style.Colors[ImGuiCol_SeparatorActive] = ImVec4(1.0f, 1.0f, 1.0f, 0.6f);
-	style.Colors[ImGuiCol_SeparatorHovered] = ImVec4(1.0f, 1.0f, 1.0f, 0.7f);
+	style.Colors[ImGuiCol_Separator] = ImVec4(1.0f, 1.0f, 1.0f, 0.3f);
+	style.Colors[ImGuiCol_SeparatorActive] = ImVec4(1.0f, 1.0f, 1.0f, 0.45f);
+	style.Colors[ImGuiCol_SeparatorHovered] = ImVec4(1.0f, 1.0f, 1.0f, 0.55f);
 	style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.0f, 1.0f, 1.0f, 0.4f);
 	style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.0f, 1.0f, 1.0f, 0.65f);
 	style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.0f, 1.0f, 1.0f, 0.5f);

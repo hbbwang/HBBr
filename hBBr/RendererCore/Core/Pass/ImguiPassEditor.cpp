@@ -92,7 +92,7 @@ void ImguiPassEditor::PassReset()
 
 void ImguiPassEditor::EndFrame()
 {
-	const auto& vkManager = VulkanManager::GetManager();
+	auto* vkManager = VulkanManager::GetManager();
 	if (ImGui::GetCurrentContext() != _imguiContent)
 	{
 		ImGui::SetCurrentContext(_imguiContent);
@@ -104,7 +104,7 @@ void ImguiPassEditor::EndFrame()
 
 void ImguiPassEditor::PassUpdate(std::shared_ptr<Texture2D> finalColor)
 {
-	const auto& vkManager = VulkanManager::GetManager();
+	auto* vkManager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.1, 0.4, 0.2, 0.2));
 

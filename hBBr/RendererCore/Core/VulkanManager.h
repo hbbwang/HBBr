@@ -114,30 +114,21 @@ struct TextureUpdateInfo
 
 class VulkanManager
 {
-
+private:
+	HBBR_API static std::unique_ptr<VulkanManager>& GetManagerPtr();
 public:
 	VulkanManager(bool bDebug);
-	~VulkanManager();
-
-	HBBR_API HBBR_INLINE static void InitManager(bool bDebug) {
-		if (_vulkanManager == nullptr)
-		{
-			_vulkanManager.reset(new VulkanManager(bDebug));
-		}
-	}
+	HBBR_API ~VulkanManager();
 
 	HBBR_API HBBR_INLINE static VulkanManager* GetManager() {
-		return _vulkanManager.get();
+		return GetManagerPtr().get();
 	}
 
-	HBBR_API static void ReleaseManager() {
-		if (_vulkanManager)
-		{
-			_vulkanManager.reset();
-		}
-	}
+	HBBR_API static void InitManager(bool bDebug);
 
-	HBBR_API  HBBR_INLINE VkQueue GetGraphicsQueue() {
+	HBBR_API static void ReleaseManager();
+
+	HBBR_API HBBR_INLINE VkQueue GetGraphicsQueue() {
 		return _graphicsQueue;
 	}
 
@@ -564,5 +555,5 @@ private:
 	static PFN_vkCmdDebugMarkerBeginEXT vkCmdDebugMarkerBegin;
 	static PFN_vkCmdDebugMarkerEndEXT vkCmdDebugMarkerEnd;
 	static PFN_vkCmdDebugMarkerInsertEXT vkCmdDebugMarkerInsert;
-	static std::unique_ptr<VulkanManager> _vulkanManager;
+
 };

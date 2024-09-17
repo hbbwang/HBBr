@@ -13,7 +13,7 @@ DescriptorSet::DescriptorSet(class VulkanRenderer* renderer)
 
 DescriptorSet::~DescriptorSet()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	for (auto& i : _descriptorSets)
 	{
 		manager->FreeDescriptorSet(manager->GetDescriptorPool(), i);
@@ -45,7 +45,7 @@ void DescriptorSet::CreateBindings(uint32_t bindingCount, VkDescriptorType type,
 
 VMABuffer* DescriptorSet::CreateBuffer(uint32_t bindingIndex, VkDeviceSize initSize, VmaMemoryUsage memoryUsage, bool bAlwayMapping, bool bFocusCreateDedicatedMemory, HString debugName)
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	auto it = _buffers.find(bindingIndex);
 	if (it != _buffers.end())
 	{
@@ -78,7 +78,7 @@ VMABuffer* DescriptorSet::CreateBuffer(uint32_t bindingIndex, VkDeviceSize initS
 
 void DescriptorSet::BuildDescriptorSetLayout()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	
 	for (auto& i : _bNeedUpdate)
 	{
@@ -104,7 +104,7 @@ void DescriptorSet::UpdateBufferDescriptorSet(uint32_t bindingIndex, VkDeviceSiz
 	if (_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][bindingIndex] == 1 && _buffers.end() != it)
 	{
 		_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][bindingIndex] = 0;
-		const auto& manager = VulkanManager::GetManager();
+		auto* manager = VulkanManager::GetManager();
 		manager->UpdateBufferDescriptorSet(
 			it->second->GetBuffer(),
 			GetDescriptorSet(),
@@ -119,7 +119,7 @@ void DescriptorSet::UpdateDescriptorSetWholeBuffer(uint32_t bindingIndex)
 	if (_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][bindingIndex] == 1 && _buffers.end() != it)
 	{
 		_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][bindingIndex] = 0;
-		const auto& manager = VulkanManager::GetManager();
+		auto* manager = VulkanManager::GetManager();
 		manager->UpdateBufferDescriptorSet(
 			_buffers[bindingIndex]->GetBuffer(),
 			GetDescriptorSet(),
@@ -142,7 +142,7 @@ void DescriptorSet::UpdateTextureDescriptorSet(std::vector<TextureUpdateInfo> te
 	if (_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][beginBindingIndex] == 1 || bTextureReset)
 	{
 		_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][beginBindingIndex] = 0;
-		const auto& manager = VulkanManager::GetManager();
+		auto* manager = VulkanManager::GetManager();
 		manager->UpdateTextureDescriptorSet(GetDescriptorSet(), texs , beginBindingIndex);
 	}
 }
@@ -161,7 +161,7 @@ void DescriptorSet::UpdateTextureDescriptorSet(std::vector<std::shared_ptr<Textu
 	if (_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][beginBindingIndex] == 1 || bTextureReset)
 	{
 		_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][beginBindingIndex] = 0;
-		const auto& manager = VulkanManager::GetManager();
+		auto* manager = VulkanManager::GetManager();
 		manager->UpdateTextureDescriptorSet(GetDescriptorSet(), texs, samplers, beginBindingIndex);
 	}
 }
@@ -180,7 +180,7 @@ void DescriptorSet::UpdateStoreTextureDescriptorSet(std::vector<class Texture2D*
 	if (_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][beginBindingIndex] == 1  || bTextureReset)
 	{
 		_bNeedUpdate[_renderer->GetSwapchain()->GetCurrentFrameIndex()][beginBindingIndex] = 0;
-		const auto& manager = VulkanManager::GetManager();
+		auto* manager = VulkanManager::GetManager();
 		manager->UpdateStoreTextureDescriptorSet(GetDescriptorSet(), textures, beginBindingIndex);
 	}
 }
@@ -201,7 +201,7 @@ const VkDescriptorSet& DescriptorSet::GetDescriptorSet()
 {
 	if (_descriptorSets[_renderer->GetSwapchain()->GetCurrentFrameIndex()] == nullptr)
 	{
-		const auto& manager = VulkanManager::GetManager();
+		auto* manager = VulkanManager::GetManager();
 		manager->AllocateDescriptorSet(manager->GetDescriptorPool(), _layout, _descriptorSets[_renderer->GetSwapchain()->GetCurrentFrameIndex()]);
 	}
 	return _descriptorSets[_renderer->GetSwapchain()->GetCurrentFrameIndex()];

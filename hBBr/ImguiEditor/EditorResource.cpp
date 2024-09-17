@@ -16,7 +16,7 @@ void EditorResource::Init()
 
 	HString configPath = FileSystem::GetConfigAbsPath();
 
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 
 	manager->CreateDescripotrSetLayout(
 		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 
@@ -32,6 +32,7 @@ void EditorResource::Init()
 		_icon_eyeClose = LoadTexture(32, 32, FileSystem::Append(FileSystem::GetConfigAbsPath(), "Theme/Icons/Icon_eye_close.png"), cmdbuf);
 		_icon_levelIcon = LoadTexture(32, 32, FileSystem::Append(FileSystem::GetConfigAbsPath(), "Theme/Icons/Icon_level.png"), cmdbuf);
 		_icon_objectIcon = LoadTexture(32, 32, FileSystem::Append(FileSystem::GetConfigAbsPath(), "Theme/Icons/Icon_object.png"), cmdbuf);
+		_icon_search = LoadTexture(32, 32, FileSystem::Append(FileSystem::GetConfigAbsPath(), "Theme/Icons/ICON_SEARCH.png"), cmdbuf);
 	}
 	manager->EndCommandBuffer(cmdbuf);
 	manager->SubmitQueueImmediate({ cmdbuf });
@@ -54,7 +55,7 @@ void EditorResource::Init()
 
 void EditorResource::Release()
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	manager->DestroyDescriptorSetLayout(_img_descriptorSetLayout);
 	for (auto& i : _all_images)
 	{
@@ -69,7 +70,7 @@ void EditorResource::Release()
 
 EditorImage* EditorResource::LoadTexture(uint32_t w, uint32_t h, HString path, VkCommandBuffer cmdBuf)
 {
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	EditorImage result;
 	result.imageData = ImageTool::LoadImage8Bit(path.c_str());
 	

@@ -1,20 +1,17 @@
 ﻿#include "RendererConfig.h"
 #include "Common.h"
 #include "FormMain.h"
-nlohmann::json RenderConfig::_renderer_json;
-nlohmann::json RenderConfig::_internationalzation_json;
-nlohmann::json RenderConfig::_editor_internationalzation_json;
-nlohmann::json RenderConfig::_editor_json;
+
 HString GetRendererConfig(HString Group, HString name)
 {
-	if (RenderConfig::_renderer_json.is_null())
+	if (RenderConfig::GetRendererConfig().is_null())
 	{
-		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "renderer.json", RenderConfig::_renderer_json);
+		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "renderer.json", RenderConfig::GetRendererConfig());
 	}
-	if (!RenderConfig::_renderer_json.is_null())
+	if (!RenderConfig::GetRendererConfig().is_null())
 	{
-		auto git = RenderConfig::_renderer_json.find(Group.c_str());
-		if (git != RenderConfig::_renderer_json.end())
+		auto git = RenderConfig::GetRendererConfig().find(Group.c_str());
+		if (git != RenderConfig::GetRendererConfig().end())
 		{
 			nlohmann::json group = git.value();
 			auto tit = group.find(name.c_str());
@@ -29,14 +26,14 @@ HString GetRendererConfig(HString Group, HString name)
 
 int GetRendererConfigInt(HString Group, HString name)
 {
-	if (RenderConfig::_renderer_json.is_null())
+	if (RenderConfig::GetRendererConfig().is_null())
 	{
-		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "renderer.json", RenderConfig::_renderer_json);
+		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "renderer.json", RenderConfig::GetRendererConfig());
 	}
-	if (!RenderConfig::_renderer_json.is_null())
+	if (!RenderConfig::GetRendererConfig().is_null())
 	{
-		auto it = RenderConfig::_renderer_json.find(Group.c_str());
-		if (it != RenderConfig::_renderer_json.end())
+		auto it = RenderConfig::GetRendererConfig().find(Group.c_str());
+		if (it != RenderConfig::GetRendererConfig().end())
 		{
 			auto va_it = it.value().find(name.c_str());
 			if (va_it != it.value().end())
@@ -51,19 +48,19 @@ int GetRendererConfigInt(HString Group, HString name)
 
 void SaveRendererConfig()
 {
-	Serializable::SaveJson(RenderConfig::_renderer_json, FileSystem::GetConfigAbsPath() + "renderer.json");
+	Serializable::SaveJson(RenderConfig::GetRendererConfig(), FileSystem::GetConfigAbsPath() + "renderer.json");
 }
 
 HString GetInternationalizationText(HString Group, HString name)
 {
-	if (RenderConfig::_internationalzation_json.is_null())
+	if (RenderConfig::GetInternationalzationConfig().is_null())
 	{
-		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "localization.json", RenderConfig::_internationalzation_json);
+		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "localization.json", RenderConfig::GetInternationalzationConfig());
 	}
-	if (!RenderConfig::_internationalzation_json.is_null())
+	if (!RenderConfig::GetInternationalzationConfig().is_null())
 	{
-		auto git = RenderConfig::_internationalzation_json.find(Group.c_str());
-		if (git != RenderConfig::_internationalzation_json.end())
+		auto git = RenderConfig::GetInternationalzationConfig().find(Group.c_str());
+		if (git != RenderConfig::GetInternationalzationConfig().end())
 		{
 			nlohmann::json group= git.value();
 			auto tit = group.find(name.c_str());
@@ -78,14 +75,14 @@ HString GetInternationalizationText(HString Group, HString name)
 
 HString GetEditorInternationalizationText(HString Group, HString name)
 {
-	if (RenderConfig::_editor_internationalzation_json.is_null())
+	if (RenderConfig::GetEditorInternationalzationConfig().is_null())
 	{
-		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor_localization.json", RenderConfig::_editor_internationalzation_json);
+		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor_localization.json", RenderConfig::GetEditorInternationalzationConfig());
 	}
-	if (!RenderConfig::_editor_internationalzation_json.is_null())
+	if (!RenderConfig::GetEditorInternationalzationConfig().is_null())
 	{
-		auto git = RenderConfig::_editor_internationalzation_json.find(Group.c_str());
-		if (git != RenderConfig::_editor_internationalzation_json.end())
+		auto git = RenderConfig::GetEditorInternationalzationConfig().find(Group.c_str());
+		if (git != RenderConfig::GetEditorInternationalzationConfig().end())
 		{
 			nlohmann::json group = git.value();
 			auto tit = group.find(name.c_str());
@@ -100,14 +97,14 @@ HString GetEditorInternationalizationText(HString Group, HString name)
 
 int GetEditorInternationalizationInt(HString Group, HString name)
 {
-	if (RenderConfig::_editor_internationalzation_json.is_null())
+	if (RenderConfig::GetEditorInternationalzationConfig().is_null())
 	{
-		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor_localization.json", RenderConfig::_editor_internationalzation_json);
+		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor_localization.json", RenderConfig::GetEditorInternationalzationConfig());
 	}
-	if (!RenderConfig::_editor_internationalzation_json.is_null())
+	if (!RenderConfig::GetEditorInternationalzationConfig().is_null())
 	{
-		auto it = RenderConfig::_editor_internationalzation_json.find(Group.c_str());
-		if (it != RenderConfig::_editor_internationalzation_json.end())
+		auto it = RenderConfig::GetEditorInternationalzationConfig().find(Group.c_str());
+		if (it != RenderConfig::GetEditorInternationalzationConfig().end())
 		{
 			auto va_it = it.value().find(name.c_str());
 			if (va_it != it.value().end())
@@ -122,14 +119,14 @@ int GetEditorInternationalizationInt(HString Group, HString name)
 
 HString GetEditorConfig(HString Group, HString name)
 {
-	if (RenderConfig::_editor_json.is_null())
+	if (RenderConfig::GetEditorConfig().is_null())
 	{
-		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor.json", RenderConfig::_editor_json);
+		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor.json", RenderConfig::GetEditorConfig());
 	}
-	if (!RenderConfig::_editor_json.is_null())
+	if (!RenderConfig::GetEditorConfig().is_null())
 	{
-		auto git = RenderConfig::_editor_json.find(Group.c_str());
-		if (git != RenderConfig::_editor_json.end())
+		auto git = RenderConfig::GetEditorConfig().find(Group.c_str());
+		if (git != RenderConfig::GetEditorConfig().end())
 		{
 			nlohmann::json group = git.value();
 			auto tit = group.find(name.c_str());
@@ -144,14 +141,14 @@ HString GetEditorConfig(HString Group, HString name)
 
 int GetEditorConfigInt(HString Group, HString name)
 {
-	if (RenderConfig::_editor_json.is_null())
+	if (RenderConfig::GetEditorConfig().is_null())
 	{
-		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor.json", RenderConfig::_editor_json);
+		Serializable::LoadJson(FileSystem::GetConfigAbsPath() + "editor.json", RenderConfig::GetEditorConfig());
 	}
-	if (!RenderConfig::_editor_json.is_null())
+	if (!RenderConfig::GetEditorConfig().is_null())
 	{
-		auto it = RenderConfig::_editor_json.find(Group.c_str());
-		if (it != RenderConfig::_editor_json.end())
+		auto it = RenderConfig::GetEditorConfig().find(Group.c_str());
+		if (it != RenderConfig::GetEditorConfig().end())
 		{
 			auto va_it = it.value().find(name.c_str());
 			if (va_it != it.value().end())

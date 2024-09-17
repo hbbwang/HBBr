@@ -71,19 +71,23 @@ public:
 	HBBR_API HBBR_INLINE static std::vector<Texture2D*>& GetUploadTextures(){
 		return _upload_textures;
 	}
-	HBBR_API HBBR_INLINE static VkSampler GetSampler(TextureSampler sampler) {
+	HBBR_API HBBR_INLINE static std::vector<VkSampler>& GetSamplers() {
+		static std::vector<VkSampler> _samplers;
+		return _samplers;
+	}
+	HBBR_API HBBR_INLINE static VkSampler& GetSampler(TextureSampler sampler) {
 		if (VulkanManager::GetManager()->GetDeviceExt().HasExtFilter_Cubic == 0)
 		{
 			if (sampler == TextureSampler::TextureSampler_Cubic_Wrap)
-				return _samplers[TextureSampler::TextureSampler_Linear_Wrap];
+				return GetSamplers()[TextureSampler::TextureSampler_Linear_Wrap];
 			else if (sampler == TextureSampler::TextureSampler_Cubic_Mirror)
-				return _samplers[TextureSampler::TextureSampler_Linear_Mirror];
+				return GetSamplers()[TextureSampler::TextureSampler_Linear_Mirror];
 			else if (sampler == TextureSampler::TextureSampler_Cubic_Clamp)
-				return _samplers[TextureSampler::TextureSampler_Linear_Clamp];
+				return GetSamplers()[TextureSampler::TextureSampler_Linear_Clamp];
 			else if (sampler == TextureSampler::TextureSampler_Cubic_Border)
-				return _samplers[TextureSampler::TextureSampler_Linear_Border];
+				return GetSamplers()[TextureSampler::TextureSampler_Linear_Border];
 		}
-		return _samplers[(uint32_t)sampler];
+		return GetSamplers()[(uint32_t)sampler];
 	}
 	HBBR_API HBBR_INLINE static uint64_t GetTextureStreamingSize() {
 		return _textureStreamingSize;
@@ -191,8 +195,6 @@ protected:
 
 	//Global variable
 	static std::unordered_map<HString, std::weak_ptr<Texture2D>> _system_textures;
-	//<sampler>
-	static std::vector<VkSampler> _samplers;
 
 	//Texture2D streaming
 	static uint64_t _textureStreamingSize;

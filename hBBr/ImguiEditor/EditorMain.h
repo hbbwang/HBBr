@@ -42,7 +42,7 @@ private:
 	void BuildSceneOutline(ImguiPassEditor* pass);
 	void BuildInspector(ImguiPassEditor* pass);
 	void BuildContentBrowser(ImguiPassEditor* pass);
-	void BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, float levelItemXPos, int depth);
+	void BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, float levelItemXPos, int depth, char* searchInput, int searchInputLength);
 
 };
 

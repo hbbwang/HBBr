@@ -665,7 +665,7 @@ void MaterialPrimitiveGroup::ResetDecriptorSet(uint8_t numTextures, bool& bNeedU
 
 void MaterialPrimitiveGroup::UpdateDecriptorSet(bool bNeedUpdateVSUniformBuffer, bool bNeedUpdatePSUniformBuffer, bool bNeedUpdateTextures)
 {
-	const auto& vkManager = VulkanManager::GetManager();
+	auto* vkManager = VulkanManager::GetManager();
 	const auto frameIndex = renderer->GetSwapchain()->GetCurrentFrameIndex();
 	if (bNeedUpdateVSUniformBuffer)
 		descriptorSet_uniformBufferVS->RefreshDescriptorSet(0);
@@ -730,7 +730,7 @@ MaterialPrimitiveGroup::~MaterialPrimitiveGroup()
 	descriptorSet_texture.clear();
 	primFrom = nullptr;
 	needUpdateTextures.clear();
-	const auto& manager = VulkanManager::GetManager();
+	auto* manager = VulkanManager::GetManager();
 	for (auto& i : descriptorSet_texture)
 	{
 		manager->FreeDescriptorSet(manager->GetDescriptorPool(), i);

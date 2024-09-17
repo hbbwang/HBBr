@@ -58,7 +58,7 @@ void ImguiPass::PassReset()
 
 void ImguiPass::EndFrame()
 {
-	const auto& vkManager = VulkanManager::GetManager();
+	auto* vkManager = VulkanManager::GetManager();
 	if (ImGui::GetCurrentContext() != _imguiContent)
 	{
 		ImGui::SetCurrentContext(_imguiContent);
@@ -93,7 +93,7 @@ void ImguiPass::PassUpdate()
 		ImGui::SetCurrentContext(_imguiContent);
 	}
 
-	const auto& vkManager = VulkanManager::GetManager();
+	auto* vkManager = VulkanManager::GetManager();
 	const auto cmdBuf = _renderer->GetCommandBuffer();
 	COMMAND_MAKER(cmdBuf, BasePass, _passName.c_str(), glm::vec4(0.1, 0.4, 0.2, 0.2));
 	//
