@@ -207,7 +207,9 @@ void VulkanSwapchain::Update()
 				_vulkanManager->SubmitQueueForPasses(cmdBuf, wait, _queueSemaphore[_currentFrameIndex], _executeFence[_currentFrameIndex]);
 
 				//Imgui如果开启了多视口模式，当控件离开窗口之后，会自动生成一套绘制流程，放在此处执行最后的处理会安全很多。
+				#if IS_EDITOR
 				_imguiPassEditor->EndFrame();
+				#endif
 			}
 		}
 
@@ -263,14 +265,19 @@ bool VulkanSwapchain::ResizeBuffer()
 		true);
 
 	ResetResource();
-
+	#if IS_EDITOR	
 	_imguiPassEditor->CheckWindowValid();
+	#endif
+	
 	for (auto& i : _renderers)
 	{
 		i.second->ResetRenderer();
 	}
+	
+	#if IS_EDITOR
 	_imguiPassEditor->PassReset();
-
+	#endif
+	
 	bResizeBuffer = false;
 
 	//重置buffer会导致画面丢失，我们要在这一瞬间重新把buffer绘制回去，缓解缩放卡顿。

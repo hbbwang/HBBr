@@ -48,6 +48,12 @@ public:
 
 	HBBR_API HGUID GetGUID()const { return _guid; }
 
+	HBBR_API HBBR_INLINE bool IsActive() const {
+		return _bActive;
+	}
+
+	HBBR_API void SetActive(bool newActive = true);
+
 #if IS_EDITOR
 
 	HBBR_API void DeleteLevel(bool bImmediately = false);
@@ -92,12 +98,6 @@ public:
 	{
 		_dirtyLevels.clear();
 	}
-
-	HBBR_API HBBR_INLINE bool IsActive() const {
-		return _bActive;
-	}
-
-	HBBR_API void SetActive(bool newActive = true);
 
 	bool _bSelected = false;
 

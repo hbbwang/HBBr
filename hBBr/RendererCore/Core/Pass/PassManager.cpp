@@ -135,7 +135,13 @@ void PassManager::CmdCopyFinalColorToSwapchain()
 	auto finalRT = this->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor);
 	manager->Transition(cmdBuf, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	finalRT->Transition(cmdBuf, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-	manager->CmdColorBitImage(cmdBuf, finalRT->GetTexture(), swapchainImage, _renderer->GetRenderSize(), _renderer->_swapchain->GetWindowSurfaceSize());
+	manager->CmdColorBitImage(cmdBuf, finalRT->GetTexture(), 
+		swapchainImage, 
+		{ 
+			glm::min(_renderer->GetRenderSize().width, finalRT->GetTextureSize().width) ,
+			glm::min(_renderer->GetRenderSize().height, finalRT->GetTextureSize().height)
+		},
+		_renderer->_swapchain->GetWindowSurfaceSize());
 	finalRT->Transition(cmdBuf, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	manager->Transition(cmdBuf, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 }
