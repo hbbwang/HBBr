@@ -169,6 +169,18 @@ void EditorMain::BuildRenderer(ImguiPassEditor* pass)
 	ImGui::PopStyleColor();
 }
 
+void EditorMain::ClearSelection(class World* world)
+{
+	for (auto& l : world->GetLevels())
+	{
+		l->_bSelected = false;
+		for (auto& g : l->GetAllGameObjects())
+			g->_bSelected = false;
+	}
+	_selectionLevels.clear();
+	_sceneOutlineTreeNodeData.clear();
+}
+
 void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 {
 	if (ImGui::Begin(SceneOutlineTitle.c_str()))
@@ -245,21 +257,6 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 				ImGui::Separator();
 			}
 
-			auto clearSelection = [&]()
-				{
-					for (auto& l : world->GetLevels())
-					{
-						l->_bSelected = false;
-						for (auto& g : l->GetAllGameObjects())
-							g->_bSelected = false;
-					}
-					_selectionLevels.clear();
-				};
-
-			if ((ImGui::IsMouseClicked(0)) && ImGui::IsWindowHovered() && !ImGui::GetIO().KeyCtrl && !ImGui::GetIO().KeyShift)
-			{
-				clearSelection();
-			}
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(FLT_MIN, 4.f));
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 0.f));
 			//Tree Node Begin
@@ -276,12 +273,6 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 						(ImTextureID)EditorResource::Get()->_icon_levelIcon->descriptorSet,
 						treeNodeFlags | (l->_bSelected ? ImGuiTreeNodeFlags_Selected : 0) |
 						(l->IsLoaded() ? ImGuiTreeNodeFlags_None : ImGuiTreeNodeFlags_CustomArrow));
-					/*if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
-					{
-						ImGui::SetDragDropPayload((l->GetLevelName() + "Drag").c_str(), l->GetLevelName().c_str(), sizeof(const char*));
-						ImGui::Text("Dragging %s", l->GetLevelName().c_str());
-						ImGui::EndDragDropSource();
-					}*/
 
 					auto changedSelection = [&]() {
 						if (ImGui::GetIO().KeyCtrl)
@@ -290,8 +281,11 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 						}
 						else
 						{
-							clearSelection();
-							l->_bSelected = true;
+							if (!l->_bSelected)
+							{
+								ClearSelection(world.get());
+								l->_bSelected = true;
+							}
 						}
 						_selectionLevels.push_back(l.get());
 					};
@@ -338,7 +332,7 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 						{
 							for (auto& o : allObjects)
 							{
-								BuildSceneOutlineTreeNode_GameObject(o.get(), levelItemXPos, 0, searchInput, length);
+								BuildSceneOutlineTreeNode_GameObject(o, levelItemXPos, 0, searchInput, length);
 							}
 						}
 						ImGui::TreePop();
@@ -346,6 +340,12 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 					//ImGui::Separator();
 				}
 			}//Tree Node End
+
+			if ((ImGui::IsMouseClicked(0)) && ImGui::IsWindowHovered() && !ImGui::IsAnyItemActive() && !ImGui::GetIO().KeyCtrl && !ImGui::GetIO().KeyShift)
+			{
+				ClearSelection(world.get());
+			}
+
 			ImGui::PopStyleVar();
 			ImGui::PopStyleVar();
 		}
@@ -353,7 +353,7 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 	ImGui::End();
 }
 
-void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, float levelItemXPos, int depth, char* searchInput, int searchInputLength)
+void EditorMain::BuildSceneOutlineTreeNode_GameObject(std::shared_ptr<class GameObject> obj, float levelItemXPos, int depth, char* searchInput, int searchInputLength)
 {
 	ImGuiTreeNodeFlags treeNodeFlags =
 		ImGuiTreeNodeFlags_OpenOnArrow |
@@ -373,15 +373,61 @@ void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, flo
 				(ImTextureID)EditorResource::Get()->_icon_objectIcon->descriptorSet,
 				treeNodeFlags | (obj->_bSelected ? ImGuiTreeNodeFlags_Selected : 0));
 
-			if (ImGui::IsItemClicked(0))
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+			{
+				ImGui::SetDragDropPayload("SceneOutline_GameObject", &_sceneOutlineTreeNodeData, sizeof(_sceneOutlineTreeNodeData));
+				ImGui::Text("Dragging %s", obj->GetObjectName().c_str());
+				ImGui::EndDragDropSource();
+			}
+
+			if (ImGui::BeginDragDropTarget()) 
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SceneOutline_GameObject")) 
+				{
+					std::vector<SceneOutlineTreeNodeData>* receivedNodes = static_cast<std::vector<SceneOutlineTreeNodeData>*>(payload->Data);
+					if (receivedNodes)
+					{
+						for (int i = 0; i < receivedNodes->size(); i++)
+						{
+							GameObject* node = receivedNodes->at(i).object;
+							if (node != obj.get())
+							{
+								node->SetParent(obj.get());
+							}
+						}
+						_sceneOutlineTreeNodeData.clear();
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			//ËÉ¿ª×ó¼ü
+			if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 			{
 				if (ImGui::GetIO().KeyCtrl)
 				{
 					obj->_bSelected = !obj->_bSelected;
+					if (obj->_bSelected == false)
+					{
+						_sceneOutlineTreeNodeData.erase(std::remove_if(
+							_sceneOutlineTreeNodeData.begin(), _sceneOutlineTreeNodeData.end(),
+							[&](SceneOutlineTreeNodeData& data) {
+								return data.object == obj.get();
+							}));
+					}
+
 				}
 				else
 				{
+					ClearSelection(obj->GetWorld());
 					obj->_bSelected = true;
+				}
+
+				if(obj->_bSelected)
+				{
+					SceneOutlineTreeNodeData newData;
+					newData.object = obj.get();
+					_sceneOutlineTreeNodeData.push_back(newData);
 				}
 			}
 
@@ -400,7 +446,7 @@ void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, flo
 				ImGui::SameLine();
 				ImGui::SetCursorPosX(levelItemXPos);
 				ImGui::PushID(obj->GetGUID().str().c_str());
-				ImGui::Checkbox("", &GetGameObjectActive(obj));
+				ImGui::Checkbox("", &GetGameObjectActive(obj.get()));
 				ImGui::PopID();
 			}
 
@@ -408,7 +454,7 @@ void EditorMain::BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, flo
 			{
 				for (auto& o : obj->GetChildren())
 				{
-					BuildSceneOutlineTreeNode_GameObject(o, levelItemXPos, depth + 1, searchInput, searchInputLength);
+					BuildSceneOutlineTreeNode_GameObject(o->GetSelfWeekPtr().lock(), levelItemXPos, depth + 1, searchInput, searchInputLength);
 				}
 				ImGui::TreePop();
 			}
@@ -427,11 +473,57 @@ void EditorMain::BuildInspector(ImguiPassEditor* pass)
 	ImGui::End();
 }
 
+void DrawSplitter(bool split_vertically, float thickness, float* size0, float* size1, float min_size0, float min_size1)
+{
+	ImVec2 backup_pos = ImGui::GetCursorPos();
+	if (split_vertically)
+		ImGui::SetCursorPosY(backup_pos.y + *size0);
+	else
+		ImGui::SetCursorPosX(backup_pos.x + *size0);
+
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));          // We don't draw while active/pressed because as we move the panes the splitter button will be 1 frame late
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 0.6f, 0.6f, 0.10f));
+	ImGui::Button("##Splitter", ImVec2(!split_vertically ? thickness : -1.0f, split_vertically ? thickness : -1.0f));
+	ImGui::PopStyleColor(3);
+
+	ImGui::SetItemAllowOverlap(); // This is to allow having other buttons OVER our splitter. 
+
+	if (ImGui::IsItemActive())
+	{
+		float mouse_delta = split_vertically ? ImGui::GetIO().MouseDelta.y : ImGui::GetIO().MouseDelta.x;
+
+		// Minimum pane size
+		if (mouse_delta < min_size0 - *size0)
+			mouse_delta = min_size0 - *size0;
+		if (mouse_delta > *size1 - min_size1)
+			mouse_delta = *size1 - min_size1;
+
+		// Apply resize
+		*size0 += mouse_delta;
+		*size1 -= mouse_delta;
+	}
+	ImGui::SetCursorPos(backup_pos);
+}
+
 void EditorMain::BuildContentBrowser(ImguiPassEditor* pass)
 {
+	static float size1 = 100, size2 = 200;
 	if (ImGui::Begin(ContentBrowserTitle.c_str()))
 	{
-
+		static float w = 200.0f;
+		float h = ImGui::GetContentRegionAvail().y;
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+		ImGui::BeginChild("Folders", ImVec2(w, h), true);
+		ImGui::EndChild();
+		ImGui::SameLine();
+		ImGui::InvisibleButton("vsplitter", ImVec2(6.0f, h));
+		if (ImGui::IsItemActive())
+			w += ImGui::GetIO().MouseDelta.x;
+		ImGui::SameLine();
+		ImGui::BeginChild("Files", ImVec2(0, h), true);
+		ImGui::EndChild();
+		ImGui::PopStyleVar();
 
 	}
 	ImGui::End();

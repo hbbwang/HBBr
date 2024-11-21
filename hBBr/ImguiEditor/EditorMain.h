@@ -31,10 +31,16 @@ public:
 	std::string UnloadLevel;
 
 	std::vector<class Level*> _selectionLevels;
+	struct SceneOutlineTreeNodeData 
+	{
+		class GameObject* object;
+	};
+	std::vector<SceneOutlineTreeNodeData> _sceneOutlineTreeNodeData;
 
 private:
 
 	void GlobalSetting();
+	void ClearSelection(class World*world);
 	bool& GetLevelActive(class Level* level);
 	bool& GetGameObjectActive(class GameObject* obj);
 	void BuildMainMenu(ImguiPassEditor* pass);
@@ -42,7 +48,7 @@ private:
 	void BuildSceneOutline(ImguiPassEditor* pass);
 	void BuildInspector(ImguiPassEditor* pass);
 	void BuildContentBrowser(ImguiPassEditor* pass);
-	void BuildSceneOutlineTreeNode_GameObject(class GameObject* obj, float levelItemXPos, int depth, char* searchInput, int searchInputLength);
+	void BuildSceneOutlineTreeNode_GameObject(std::shared_ptr<class GameObject> obj, float levelItemXPos, int depth, char* searchInput, int searchInputLength);
 
 };
 
