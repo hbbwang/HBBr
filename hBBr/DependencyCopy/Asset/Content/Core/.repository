@@ -4,21 +4,21 @@
         "Name": "HDRI-Skies-Sky_0043_2k",
         "RPath": "TextureCube/",
         "Type": 4,
-        "VPath": "/Content/Core/CubeMap"
+        "VPath": "Content/Core/CubeMap/"
     },
     "0a13c94b-ff3a-4786-bc1b-10e420a23bf4": {
         "Format": "fbx",
         "Name": "UnknowMesh",
         "RPath": "Model/",
         "Type": 1,
-        "VPath": "/Content/Core/Model"
+        "VPath": "Content/Core/Model/"
     },
     "154b8403-03f3-4623-a723-ad0d491f9713": {
         "Format": "fbx",
         "Name": "SoftCube_3Mat",
         "RPath": "Model/",
         "Type": 1,
-        "VPath": "/Content/Core/Model"
+        "VPath": "Content/Core/Model/"
     },
     "22d44cd6-68c3-4997-ad5f-3d52c45ef8fe": {
         "Dep": [],
@@ -27,7 +27,7 @@
         "RPath": "Material/",
         "Ref": [],
         "Type": 2,
-        "VPath": "/Content/Core/Material"
+        "VPath": "Content/Core/Material/"
     },
     "38c42242-404c-b372-fac8-d0441f2100f8": {
         "Dep": [],
@@ -37,7 +37,7 @@
         "RPath": "Texture2D/",
         "Ref": [],
         "Type": 3,
-        "VPath": "Content/Core/Texture"
+        "VPath": "Content/Core/Texture/"
     },
     "6146e15a-0632-b197-b6f9-b12fc8a16b05": {
         "Dep": [
@@ -52,7 +52,7 @@
         "RPath": "Model/",
         "Ref": [],
         "Type": 1,
-        "VPath": "Content/Core/Model"
+        "VPath": "Content/Core/Model/"
     },
     "69056105-8b40-a3b2-65d4-95ebf2fe28fb": {
         "Dep": [],
@@ -62,7 +62,7 @@
         "RPath": "Texture2D/",
         "Ref": [],
         "Type": 3,
-        "VPath": "Content/Core/Texture"
+        "VPath": "Content/Core/Texture/"
     },
     "7e5e05bb-aa1a-f8c0-b08d-b5dde955807b": {
         "Dep": [
@@ -77,7 +77,7 @@
         "RPath": "Model/",
         "Ref": [],
         "Type": 1,
-        "VPath": "Content/Core/Model"
+        "VPath": "Content/Core/Model/"
     },
     "8b5fc385-2f6e-611e-415e-d5fa39875e50": {
         "Dep": [
@@ -92,7 +92,7 @@
         "RPath": "Model/",
         "Ref": [],
         "Type": 1,
-        "VPath": "Content/Core/Model"
+        "VPath": "Content/Core/Model/"
     },
     "9eb473e5-6ef2-d6a8-9a31-8f4b26eb9f12": {
         "Dep": [],
@@ -102,7 +102,7 @@
         "RPath": "Texture2D/",
         "Ref": [],
         "Type": 3,
-        "VPath": "Content/Core/Texture"
+        "VPath": "Content/Core/Texture/"
     },
     "b51e2e9a-0985-75e8-6138-fa95efcbab57": {
         "Dep": [],
@@ -128,7 +128,7 @@
             }
         ],
         "Type": 2,
-        "VPath": "Content/Core/Material"
+        "VPath": "Content/Core/Material/"
     },
     "c51a01e8-9349-660a-d2df-353a310db461": {
         "Dep": [
@@ -143,7 +143,7 @@
         "RPath": "Model/",
         "Ref": [],
         "Type": 1,
-        "VPath": "Content/Core/Model"
+        "VPath": "Content/Core/Model/"
     },
     "eb8ac147-e469-f5a3-c48a-5daec8880f1f": {
         "Dep": [],
@@ -153,7 +153,7 @@
         "RPath": "Texture2D/",
         "Ref": [],
         "Type": 3,
-        "VPath": "Content/Core/Texture"
+        "VPath": "Content/Core/Texture/"
     },
     "f1490ebb-c873-4baa-b4bf-e8292af28cf5": {
         "Dep": [],
@@ -162,7 +162,7 @@
         "RPath": "TextureCube/",
         "Ref": [],
         "Type": 4,
-        "VPath": "/Content/Core/CubeMap"
+        "VPath": "/Content/Core/CubeMap/"
     },
     "fa3e3e63-872f-99e3-a126-6ce5b8fedfae": {
         "Dep": [],
@@ -172,6 +172,6 @@
         "RPath": "Texture2D/",
         "Ref": [],
         "Type": 3,
-        "VPath": "Content/Core/Texture"
+        "VPath": "Content/Core/Texture/"
     }
 }

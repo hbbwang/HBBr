@@ -196,7 +196,7 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				newItem["Type"] = (int)type;
 				newItem["Name"] = baseName;
 				newItem["Format"] = suffix;
-				newItem["VPath"] = i.virtualPath;
+				newItem["VPath"] = i.virtualPath + "/";
 				newItem["RPath"] = (assetTypeName + "/");
 				json[guid] = newItem;
 				Serializable::SaveJson(json, repositoryFilePath);
@@ -441,8 +441,8 @@ void ContentManager::SaveAssetInfo(std::weak_ptr<AssetInfoBase>& assetInfo)
 			nlohmann::json target;
 			target["Type"] = (int)assetInfo.lock()->type;
 			target["Name"] = assetInfo.lock()->displayName;
-			target["VPath"] = assetInfo.lock()->virtualPath;
 			target["Format"] = assetInfo.lock()->suffix;
+			target["VPath"] = assetInfo.lock()->virtualPath + "/";
 			target["RPath"] = (assetTypeName + "/");
 			//保存引用
 			std::vector<nlohmann::json> deps,refs;
