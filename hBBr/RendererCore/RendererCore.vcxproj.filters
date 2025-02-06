@@ -73,9 +73,6 @@
     <ClInclude Include="..\ThirdParty\pugixml\pugiconfig.hpp">
       <Filter>ThirdParty\pugixml</Filter>
     </ClInclude>
-    <ClInclude Include="Common\HString.h">
-      <Filter>Common</Filter>
-    </ClInclude>
     <ClInclude Include="Common\ConsoleDebug.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -270,6 +267,9 @@
     </ClInclude>
     <ClInclude Include="Core\VulkanSwapchain.h">
       <Filter>Renderer\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\StringTools.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

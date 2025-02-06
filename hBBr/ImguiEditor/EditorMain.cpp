@@ -153,7 +153,6 @@ void EditorMain::BuildRenderer(ImguiPassEditor* pass)
 		_mainRnederer->EnableRendererRegion(true);
 		rendererRegion._max = glm::vec2(rendererRegion._min.x + ImGui::GetWindowSize().x, rendererRegion._min.y + ImGui::GetWindowSize().y);
 		_mainRnederer->SetRendererRegion(rendererRegion);
-		//ConsoleDebug::printf_endl("RG=(%s) ,\n MousePos=(%s)", rendererRegion.ToString().c_str(), HString::FromVec2(HInput::GetMousePos()).c_str());
 
 		ImGui::Image(pass->GetRenderView(), contentRegionSize);
 
@@ -214,7 +213,7 @@ void EditorMain::BuildSceneOutline(ImguiPassEditor* pass)
 								g->_bSceneOutlineSearchResult = false;
 								if (length > 0)
 								{
-									auto bContains = g->GetObjectName().Contains(data->Buf, false);
+									auto bContains = StringTool::Contains(g->GetObjectName(), data->Buf, false);
 									if (!bContains)
 									{
 										g->_bSceneOutlineVisible = false;

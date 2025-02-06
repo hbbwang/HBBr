@@ -18,16 +18,16 @@ class Level :public Serializable
 	
 public:
 
-	Level(class World* world, HString name);
+	Level(class World* world, std::string name);
 	~Level();
 
-	HBBR_INLINE HBBR_API HString GetLevelName()const { return _levelName; }
+	HBBR_INLINE HBBR_API std::string GetLevelName()const { return _levelName; }
 
-	HBBR_API void Rename(HString newName);
+	HBBR_API void Rename(std::string newName);
 
 	HBBR_API GameObject* FindGameObjectByGUID(HGUID guid);
 
-	HBBR_API HString GetLevelAbsPath()const { return _levelAbsPath; }
+	HBBR_API std::string GetLevelAbsPath()const { return _levelAbsPath; }
 
 	//Load level
 	HBBR_API void Load();
@@ -117,9 +117,9 @@ private:
 
 	class World* _world = nullptr;
 
-	HString _levelName = "NewLevel";
+	std::string _levelName = "NewLevel";
 
-	HString _levelAbsPath = "";
+	std::string _levelAbsPath = "";
 
 	//更新或者创建GameObject的Xml数据在level文档里
 	//bUpdateParameters是否写入参数

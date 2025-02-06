@@ -13,7 +13,7 @@
 class VMABuffer
 {
 public:
-	HBBR_API VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bAlwayMapping = false, bool bFocusCreateDedicatedMemory = false, HString debugName = "VMABuffer");
+	HBBR_API VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bAlwayMapping = false, bool bFocusCreateDedicatedMemory = false, std::string debugName = "VMABuffer");
 	HBBR_API ~VMABuffer();
 
 	//最后的VkCommandBuffer是给VMA_MEMORY_USAGE_GPU_ONLY准备的
@@ -55,7 +55,7 @@ private:
 
 	VmaMemoryUsage _memoryUsage;
 
-	HString _debugName;
+	std::string _debugName;
 
 	bool _bFocusCreateDedicatedMemory;
 

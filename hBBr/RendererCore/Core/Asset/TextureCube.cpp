@@ -11,7 +11,7 @@ TextureCube::~TextureCube()
 {
 }
 
-std::shared_ptr<TextureCube> TextureCube::CreateTextureCube(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, HString textureName, uint32_t miplevel)
+std::shared_ptr<TextureCube> TextureCube::CreateTextureCube(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usageFlags, std::string textureName, uint32_t miplevel)
 {
 	std::shared_ptr<TextureCube> newTexture = std::make_shared<TextureCube>();
 	newTexture->_textureName = textureName;
@@ -43,13 +43,13 @@ std::shared_ptr<TextureCube> TextureCube::CreateTextureCube(uint32_t width, uint
 std::shared_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlags usageFlags)
 {
 	const auto texAssets = ContentManager::Get()->GetAssets(AssetType::TextureCube);
-	HString guidStr = GUIDToString(guid);
+	std::string guidStr = GUIDToString(guid);
 	//从内容管理器查找资产
 	auto it = texAssets.find(guid);
 	{
 		if (it == texAssets.end())
 		{
-			MessageOut(HString("Can not find [" + guidStr + "] cube texture in content manager."), false, false, "255,255,0");
+			MessageOut(std::string("Can not find [" + guidStr + "] cube texture in content manager."), false, false, "255,255,0");
 			return nullptr;
 		}
 	}
@@ -67,7 +67,7 @@ std::shared_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlag
 	}
 
 	//获取实际路径
-	HString filePath = it->second->absFilePath;
+	std::string filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
 		return nullptr;
@@ -140,7 +140,7 @@ std::shared_ptr<TextureCube> TextureCube::LoadAsset(HGUID guid, VkImageUsageFlag
 	return dataPtr->GetData();
 }
 #if IS_EDITOR
-void TextureCube::SaveAsset(HString path)
+void TextureCube::SaveAsset(std::string path)
 {
 
 }

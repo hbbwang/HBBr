@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "Common.h"
 #include "TypeConversion.h"
-#include "HString.h"
 #include <algorithm>
 #include "Asset/HGuid.h"
 #include "VulkanManager.h"
@@ -47,8 +46,8 @@ enum class ESampler
 struct ImageData
 {
 	ImageHeader data_header;
-	HString fileName;
-	HString filePath;
+	std::string fileName;
+	std::string filePath;
 	std::vector<unsigned char> imageData;
 	std::vector<float> imageDataF;
 	//float* imageDataF = nullptr;

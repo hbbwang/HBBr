@@ -174,8 +174,8 @@ void ImguiPassEditor::ShowPerformance()
 	if (ImGui::Begin("Performance", nullptr,ImGuiWindowFlags_NoBackground))
 	{
 		double frameRate = VulkanApp::GetFrameRate();
-		HString frameString = HString::FromFloat(frameRate, 2) + " ms";
-		HString fpsString = HString::FromUInt((uint32_t)(1.0f / (float)(frameRate / 1000.0)));
+		std::string frameString = StringTool::FromFloat(frameRate, 2) + " ms";
+		std::string fpsString = StringTool::FromUInt((uint32_t)(1.0f / (float)(frameRate / 1000.0)));
 		ImGui::Text("%s", frameString.c_str());
 		ImGui::NextColumn();
 		ImGui::Text("%s", fpsString.c_str());

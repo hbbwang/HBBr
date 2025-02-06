@@ -1,12 +1,12 @@
 ﻿#include "XMLStream.h"
 #include "FileSystem.h"
 
-bool XMLStream::LoadXML(const wchar_t* path, pugi::xml_document& doc)
+bool XMLStream::LoadXML(const char* path, pugi::xml_document& doc)
 {
 	auto result = doc.load_file(path, pugi::parse_default, pugi::encoding_utf8);
 	if (result.status != pugi::status_ok)
 	{
-		HString errorMsg = "Load XML Failed:";
+		std::string errorMsg = "Load XML Failed:";
 		errorMsg += path;
 		errorMsg += "\n\t";
 		using namespace pugi;
@@ -69,15 +69,15 @@ bool XMLStream::LoadXML(const wchar_t* path, pugi::xml_document& doc)
 	return true;
 }
 
-bool XMLStream::SaveXML(HString path, pugi::xml_document& doc)
+bool XMLStream::SaveXML(std::string path, pugi::xml_document& doc)
 {
 	return CreateXMLDocument(path,doc);
 }
 
-bool XMLStream::LoadXMLNode(pugi::xml_document& doc, const wchar_t* nodeName, pugi::xml_node& node)
+bool XMLStream::LoadXMLNode(pugi::xml_document& doc, const char* nodeName, pugi::xml_node& node)
 {
-	HString nodeStr = nodeName;
-	auto nodeArray = nodeStr.Split("/");
+	std::string nodeStr = nodeName;
+	auto nodeArray = StringTool::split(nodeStr, "/");
 	if (!doc.empty() && doc)
 	{
 		for (int i = 0; i < nodeArray.size(); i++)
@@ -89,7 +89,7 @@ bool XMLStream::LoadXMLNode(pugi::xml_document& doc, const wchar_t* nodeName, pu
 			}
 			else if (i == 0)
 				node = doc.first_child();
-			node = node.child(nodeArray[i].c_wstr());
+			node = node.child(nodeArray[i].c_str());
 		}
 	}
 	else
@@ -100,7 +100,7 @@ bool XMLStream::LoadXMLNode(pugi::xml_document& doc, const wchar_t* nodeName, pu
 		return true;
 }
 
-bool XMLStream::LoadXMLAttributeString(pugi::xml_node& node, const wchar_t* attributeName, HString& attri)
+bool XMLStream::LoadXMLAttributeString(pugi::xml_node& node, const char* attributeName, std::string& attri)
 {
 	if (!node || node.empty())
 		return false;
@@ -113,7 +113,7 @@ bool XMLStream::LoadXMLAttributeString(pugi::xml_node& node, const wchar_t* attr
 	return false;
 }
 
-bool XMLStream::LoadXMLAttributeInt(pugi::xml_node& node, const wchar_t* attributeName, int& attri)
+bool XMLStream::LoadXMLAttributeInt(pugi::xml_node& node, const char* attributeName, int& attri)
 {
 	if (!node || node.empty())
 		return false;
@@ -126,7 +126,7 @@ bool XMLStream::LoadXMLAttributeInt(pugi::xml_node& node, const wchar_t* attribu
 	return false;
 }
 
-bool XMLStream::LoadXMLAttributeUInt(pugi::xml_node& node, const wchar_t* attributeName, uint32_t& attri)
+bool XMLStream::LoadXMLAttributeUInt(pugi::xml_node& node, const char* attributeName, uint32_t& attri)
 {
 	if (!node|| node.empty())
 		return false;
@@ -139,7 +139,7 @@ bool XMLStream::LoadXMLAttributeUInt(pugi::xml_node& node, const wchar_t* attrib
 	return false;
 }
 
-bool XMLStream::LoadXMLAttributeUint64(pugi::xml_node& node, const wchar_t* attributeName, uint64_t& attri)
+bool XMLStream::LoadXMLAttributeUint64(pugi::xml_node& node, const char* attributeName, uint64_t& attri)
 {
 	if (!node || node.empty())
 		return false;
@@ -152,7 +152,7 @@ bool XMLStream::LoadXMLAttributeUint64(pugi::xml_node& node, const wchar_t* attr
 	return false;
 }
 
-bool XMLStream::LoadXMLAttributeInt64(pugi::xml_node& node, const wchar_t* attributeName, int64_t& attri)
+bool XMLStream::LoadXMLAttributeInt64(pugi::xml_node& node, const char* attributeName, int64_t& attri)
 {
 	if (!node|| node.empty())
 		return false;
@@ -165,7 +165,7 @@ bool XMLStream::LoadXMLAttributeInt64(pugi::xml_node& node, const wchar_t* attri
 	return false;
 }
 
-bool XMLStream::LoadXMLAttributeBool(pugi::xml_node& node, const wchar_t* attributeName, bool& attri)
+bool XMLStream::LoadXMLAttributeBool(pugi::xml_node& node, const char* attributeName, bool& attri)
 {
 	if (!node || node.empty())
 		return false;
@@ -178,7 +178,7 @@ bool XMLStream::LoadXMLAttributeBool(pugi::xml_node& node, const wchar_t* attrib
 	return false;
 }
 
-bool XMLStream::LoadXMLAttributeFloat(pugi::xml_node& node, const wchar_t* attributeName, float& attri)
+bool XMLStream::LoadXMLAttributeFloat(pugi::xml_node& node, const char* attributeName, float& attri)
 {
 	if (!node || node.empty())
 		return false;
@@ -191,27 +191,27 @@ bool XMLStream::LoadXMLAttributeFloat(pugi::xml_node& node, const wchar_t* attri
 	return false;
 }
 
-bool XMLStream::FindNodeByPath(pugi::xml_node& node, HString path, pugi::xml_node& result, bool bCreateEmpty)
+bool XMLStream::FindNodeByPath(pugi::xml_node& node, std::string path, pugi::xml_node& result, bool bCreateEmpty)
 {
-	path = path.ClearSpace();
+	path = StringTool::ClearSpace(path);
 	if (path[0] == '/')
 	{
-		path = path.Right(1);
+		path = StringTool::Right(path, 1);
 	}
-	std::vector<HString>paths = path.Split("/");
+	std::vector<std::string>paths = StringTool::split(path, "/");
 	result = pugi::xml_node();
 
 	pugi::xml_node current = node;
 	bool bFound = true;
 	for (int  i = 0 ; i < paths.size() ;i++)
 	{
-		auto next = current.child(paths[i].c_wstr());
+		auto next = current.child(paths[i].c_str());
 		if (!next)
 		{
 			bFound = false;
 			if (bCreateEmpty)
 			{
-				next = current.append_child(paths[i].c_wstr());
+				next = current.append_child(paths[i].c_str());
 			}
 			else
 				break;
@@ -228,9 +228,9 @@ bool XMLStream::FindNodeByPath(pugi::xml_node& node, HString path, pugi::xml_nod
 		return false;
 }
 
-pugi::xml_node XMLStream::FindNodeByPath(pugi::xml_node& node, HString path)
+pugi::xml_node XMLStream::FindNodeByPath(pugi::xml_node& node, std::string path)
 {
-	pugi::xpath_query xQuery(path.c_wstr());
+	pugi::xpath_query xQuery(path.c_str());
 	if (xQuery)
 	{
 		auto xNodeSet = node.select_node(xQuery);
@@ -242,15 +242,15 @@ pugi::xml_node XMLStream::FindNodeByPath(pugi::xml_node& node, HString path)
 	return pugi::xml_node();
 }
 
-bool XMLStream::CreateXMLDocument(HString path, pugi::xml_document& doc)
+bool XMLStream::CreateXMLDocument(std::string path, pugi::xml_document& doc)
 {
 	pugi::xml_node decl = doc.prepend_child(pugi::node_declaration);
-	decl.append_attribute(L"version") = L"1.0";
-	decl.append_attribute(L"encoding") = L"UTF-8";
+	decl.append_attribute("version") = "1.0";
+	decl.append_attribute("encoding") = "UTF-8";
 	auto dirPath = FileSystem::GetFilePath(path);
 	if (FileSystem::IsDir(dirPath))
 	{
-		return doc.save_file(path.c_wstr());
+		return doc.save_file(path.c_str());
 	}
 	return false;
 }

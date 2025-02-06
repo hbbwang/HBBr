@@ -29,22 +29,22 @@ int ConsoleDebug::err;
 bool ConsoleDebug::bConnectedConsole = false;
 bool ConsoleDebug::bConnectedFailed = false;
 std::thread ConsoleDebug::socketAcceptThread;
-HString LogFileName = "";
-std::function<void(HString,  float, float, float, HString)> ConsoleDebug::printFuncAdd = [](HString, float, float, float, HString) {};
+std::string LogFileName = "";
+std::function<void(std::string,  float, float, float, std::string)> ConsoleDebug::printFuncAdd = [](std::string, float, float, float, std::string) {};
 
 FILE* log_file = nullptr;
 std::mutex g_num_mutex;
 
-HString rgb2hex(int r, int g, int b, bool with_head)
+std::string rgb2hex(int r, int g, int b, bool with_head)
 {
     std::stringstream ss;
     if (with_head)
         ss << "##";
     ss << std::hex << (r << 16 | g << 8 | b);
-    return HString(ss.str().c_str());
+    return std::string(ss.str().c_str());
 }
 
-std::map<HString, std::function<void()>> ConsoleDebug::commandLists;
+std::map<std::string, std::function<void()>> ConsoleDebug::commandLists;
 void ReadConsoleMsgThreadFunc()
 {
     while (true)
@@ -73,26 +73,28 @@ void  SocketAcceptThreadFunc()
     }
 }
 
-void WriteToLogFile(FILE* &log_file , HString log)
+void WriteToLogFile(FILE* &log_file , std::string log)
 {
-    if(LogFileName.Length() <= 2)
+    if(LogFileName.size() <= 2)
     {
-        LogFileName = FileSystem::GetProgramPath() + (HString("log_") + HTime::CurrentDateAndTime() + ".txt");
+        LogFileName = FileSystem::GetProgramPath() + (std::string("log_") + HTime::CurrentDateAndTime() + ".txt");
     }
     #ifdef _WIN32
-        auto err_src_name = fopen_s(&log_file, LogFileName.c_str(), "a+");
+        auto cstr = LogFileName;
+        auto err_src_name = fopen_s(&log_file, cstr.c_str(), "a+");
     #else
         log_file = fopen(LogFileName.c_str(), "a+");
     #endif
     if (log_file)
     {
-        fwrite(log.c_str(), strlen(log.c_str()), 1, log_file);
+        auto log_cstr = log;
+        fwrite(log_cstr.c_str(), strlen(log_cstr.c_str()), 1, log_file);
         fclose(log_file);
         log_file = nullptr;
     }
 }
 
-void ConsoleDebug::CreateConsole(HString consolePath ,bool bNoClient)
+void ConsoleDebug::CreateConsole(std::string consolePath ,bool bNoClient)
 {
     if (ConsoleDebug::bConnectedConsole == true && ConsoleDebug::bConnectedFailed == false)
         return;
@@ -158,7 +160,7 @@ void ConsoleDebug::CreateConsole(HString consolePath ,bool bNoClient)
         si.cb = sizeof(si);
         ZeroMemory(&pi, sizeof(pi));
         CreateProcess(nullptr,   // No module name (use command line)
-            (TCHAR*)consolePath.c_wstr(),        // Command line
+            (TCHAR*)consolePath.c_str(),        // Command line
             nullptr,           // Process handle not inheritable
             nullptr,           // Thread handle not inheritable
             FALSE,          // Set handle inheritance to FALSE
@@ -182,7 +184,7 @@ void ConsoleDebug::CreateConsole(HString consolePath ,bool bNoClient)
     ReadMessageThread.detach();
 
     //Create Log file
-    LogFileName = FileSystem::GetProgramPath() + (HString("log_") + HTime::CurrentDateAndTime() + ".txt");
+    LogFileName = FileSystem::GetProgramPath() + (std::string("log_") + HTime::CurrentDateAndTime() + ".txt");
     WriteToLogFile(log_file,"");
 }
 
@@ -208,10 +210,10 @@ void ConsoleDebug::CleanupConsole()
 
 void ConsoleDebug::ReadMsgFromConsole()
 {
-    char buffer[4096];
+    char  buffer[4096];
     memset(buffer, '\0', sizeof(buffer));
     for (int i = 0; i < consoleSockets.size(); i++) {
-        int rec = recv(consoleSockets[i], buffer, 4096, 0);
+        int rec = recv(consoleSockets[i], reinterpret_cast<char*>(buffer), 4096, 0);
         buffer[4095] = '\0';
         if (rec > 0)
         {
@@ -220,31 +222,19 @@ void ConsoleDebug::ReadMsgFromConsole()
         }
     }
 }
-#ifdef _WIN32
-char* UnicodeToUtf8(const wchar_t* unicode)
-{
 
-        int len;
-        len = WideCharToMultiByte(CP_UTF8, 0, unicode, -1, nullptr, 0, nullptr, nullptr);
-        char* szUtf8 = (char*)malloc(len + 1);
-        memset(szUtf8, 0, len + 1);
-        WideCharToMultiByte(CP_UTF8, 0, unicode, -1, szUtf8, len, nullptr, nullptr);
-    return szUtf8;
-}
-#endif
-
-void ConsoleDebug::print(HString in, HString color, HString background, HString type)
+void ConsoleDebug::print(std::string in, std::string color, std::string background, std::string type)
 {
     std::lock_guard<std::mutex> lock(g_num_mutex);
-    if (in.Length() > 0 )
+    if (in.size() > 0 )
     {
-        HString Data = HTime::CurrentDateAndTimeH();
+        std::string Data = HTime::CurrentDateAndTimeH();
 
-        std::vector<HString> colorArray = color.Split(",");
+        std::vector<std::string> colorArray = StringTool::split(color, ",");
         float r, g, b;
-        r = (float)HString::ToDouble(colorArray[0]);
-        g = (float)HString::ToDouble(colorArray[1]);
-        b = (float)HString::ToDouble(colorArray[2]);
+        r = (float)StringTool::ToDouble(colorArray[0]);
+        g = (float)StringTool::ToDouble(colorArray[1]);
+        b = (float)StringTool::ToDouble(colorArray[2]);
         #ifdef _WIN32
                 HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // ��ȡ��׼����豸���
                 WORD wr2 = 0 ;//��������ϵͳ�궨����ɫ����
@@ -263,7 +253,7 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
                 SetConsoleTextAttribute(hOut, wr2);
         #endif
         Data = "[" + Data + "]";
-        HString nIn = Data + in;
+        std::string nIn = Data + in;
         if (r == 255 && g < 100 && b < 100)
         {
             SDL_LogError(0, "%s", nIn.c_str());
@@ -283,48 +273,48 @@ void ConsoleDebug::print(HString in, HString color, HString background, HString 
 
         if (bConnectedConsole == true)
         {
-            HString out = nIn;
+            std::string out = nIn;
             //memset(buffer, 0, sizeof(buffer));
             out += "||//||" + color + "||//||" + background + "||//||" + Data;
-            #ifdef _WIN32
-                char* buffer = UnicodeToUtf8(out.c_wstr());
-            #else
-                auto buf_temp = std::string(out.c_str());
-                auto buffer = buf_temp.c_str();
-            #endif
-            //sprintf(buffer, UnicodeToUtf8(out.c_wstr()));
+
+            //#ifdef _WIN32
+            //    char* buffer = UnicodeToUtf8(out.c_str());
+            //#else
+            //    auto buf_temp = std::string(out.c_str());
+            //    auto buffer = buf_temp.c_str();
+            //#endif
 
             for (int i = 0; i < consoleSockets.size(); i++) 
             {
-                if (send(consoleSockets[i], buffer, 4096, 0) < 0)
+                if (send(consoleSockets[i], (char*)(out.c_str()), 4096, 0) < 0)
                 {
 #ifdef _DEBUG
-                    HString cs = "消息发送失败...";
-                    cs += HString::FromUInt(::GetLastError());
+                    std::string cs = "消息发送失败...";
+                    cs += StringTool::FromUInt(::GetLastError());
                     printf(cs.c_str());
                     printf("\n");
 #endif
                 }
             }
             #ifdef _WIN32
-                free(buffer);
+                //free(buffer);
             #endif
         }
     }
 }
 
-void ConsoleDebug::print_endl(HString in, HString color, HString background, HString type)
+void ConsoleDebug::print_endl(std::string in, std::string color, std::string background, std::string type)
 {
     std::lock_guard<std::mutex> lock(g_num_mutex);
-    if (in.Length() > 0 )
+    if (in.length() > 0 )
     {
-        HString Data = HTime::CurrentDateAndTimeH();
+        std::string Data = HTime::CurrentDateAndTimeH();
 
-        std::vector<HString> colorArray = color.Split(",");
+        std::vector<std::string> colorArray = StringTool::split(color, ",");
         float r, g, b;
-        r = (float)HString::ToDouble(colorArray[0]);
-        g = (float)HString::ToDouble(colorArray[1]);
-        b = (float)HString::ToDouble(colorArray[2]);
+        r = (float)StringTool::ToDouble(colorArray[0]);
+        g = (float)StringTool::ToDouble(colorArray[1]);
+        b = (float)StringTool::ToDouble(colorArray[2]);
         #ifdef _WIN32
         HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // ��ȡ��׼����豸���
         WORD wr2 = 0;//��������ϵͳ�궨����ɫ����
@@ -346,18 +336,18 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
 
         if (r == 255 && g < 100 && b < 100)
         {
-            SDL_LogError(0, "%s", (Data + in).c_str());
+            SDL_LogError(0, "%s", ((Data + in)).c_str());
         }
         else if (r > 200 && g > 200 && b < 100)
         {
-            SDL_LogWarn(0, "%s", (Data + in).c_str());
+            SDL_LogWarn(0, "%s", ((Data + in)).c_str());
         }
         else
         {
-            SDL_Log("%s", (Data + in).c_str());
+            SDL_Log("%s", ((Data + in)).c_str());
         }
 
-        HString nIn = (Data + in) + "\n";
+        std::string nIn = (Data + in) + "\n";
 
         printFuncAdd(nIn, r / 255.0f, g / 255, b / 255, Data);
 
@@ -365,53 +355,53 @@ void ConsoleDebug::print_endl(HString in, HString color, HString background, HSt
 
         if (bConnectedConsole == true)
         {
-            HString out = (Data + in);
+            std::string out = (Data + in);
             //memset(buffer, 0, sizeof(buffer));
             out += "\n||//||" + color + "||//||" + background + "||//||" + Data;
-            #ifdef _WIN32
-                char* buffer = UnicodeToUtf8(out.c_wstr());
-            #else
-                auto buf_temp = std::string(out.c_str());
-                auto buffer = buf_temp.c_str();
-            #endif
-            //sprintf(buffer, UnicodeToUtf8(out.c_wstr()));
+            //#ifdef _WIN32
+            //    char* buffer = UnicodeToUtf8(out.c_str());
+            //#else
+            //    auto buf_temp = std::string(out.c_str());
+            //    auto buffer = buf_temp.c_str();
+            //#endif
 
             for (int i = 0; i < consoleSockets.size(); i++)
             {
-                if (send(consoleSockets[i], buffer, 4096, 0) < 0)
+                if (send(consoleSockets[i], (char*)(out.c_str()), 4096, 0) < 0)
                 {
 #ifdef _DEBUG
-                    HString cs = "消息发送失败...";
-                    cs += HString::FromUInt(::GetLastError());
+                    std::string cs = "消息发送失败...";
+                    cs += StringTool::FromUInt(::GetLastError());
                     printf(cs.c_str());
                     printf("\n");
 #endif
                 }
             }
             #ifdef _WIN32
-                free(buffer);
+                //free(buffer);
             #endif
         }
     }
 }
 
-void ConsoleDebug::AddNewCommand(HString newCommand, std::function<void()> func, int ParamerterCount, ...)
+void ConsoleDebug::AddNewCommand(std::string newCommand, std::function<void()> func, int ParamerterCount, ...)
 {
-    std::map<HString, std::function<void()>>::iterator it;
+    std::map<std::string, std::function<void()>>::iterator it;
     for (it = commandLists.begin(); it != commandLists.end(); it++)
     {
-        if (it->first.IsSame(newCommand, false))
+        //if (it->first.IsSame(newCommand, false))
+        if (StringTool::IsEqual(it->first, newCommand, false))
         {
             print_endl("Failed to add command [" + newCommand + "].This command has been existed.", "255,255,10");
             return;
         }
     }
 
-    commandLists.insert(std::pair<HString, std::function<void()>>(newCommand, func));
+    commandLists.insert(std::pair<std::string, std::function<void()>>(newCommand, func));
 }
 
 /* ����ִ�� */
-void ConsoleDebug::execCommand(HString key)
+void ConsoleDebug::execCommand(std::string key)
 {
 
 }

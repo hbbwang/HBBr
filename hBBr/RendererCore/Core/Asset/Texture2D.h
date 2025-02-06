@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <iostream>
 #include "./Asset/HGuid.h"
-#include "HString.h"
 #include "ImageTool.h"
 #include "AssetObject.h"
 //Vulkan api
@@ -121,7 +120,7 @@ public:
 	
 	HBBR_API static std::shared_ptr<Texture2D> CreateTexture2D(
 		uint32_t width, uint32_t height, VkFormat format, 
-		VkImageUsageFlags usageFlags, HString textureName = "Texture2D", 
+		VkImageUsageFlags usageFlags, std::string textureName = "Texture2D", 
 		uint32_t miplevel = 1, uint32_t layerCount = 1, 
 		VkMemoryPropertyFlags memoryPropertyFlag = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		VkComponentMapping componentMapping = {
@@ -134,7 +133,7 @@ public:
 	HBBR_API static std::shared_ptr<Texture2D> LoadAsset(HGUID guid , VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
 #if IS_EDITOR
-	HBBR_API virtual void SaveAsset(HString path)override;
+	HBBR_API virtual void SaveAsset(std::string path)override;
 #endif
 
 	void UploadToGPU();
@@ -145,12 +144,12 @@ public:
 
 	static void GlobalRelease();
 
-	HBBR_API static void AddSystemTexture(HString tag, std::weak_ptr<Texture2D> tex);
+	HBBR_API static void AddSystemTexture(std::string tag, std::weak_ptr<Texture2D> tex);
 
 	//获取渲染系统纹理,如果查找失败则返回第一张
-	HBBR_API static std::shared_ptr<Texture2D> GetSystemTexture(HString tag);
+	HBBR_API static std::shared_ptr<Texture2D> GetSystemTexture(std::string tag);
 
-	HString _textureName;
+	std::string _textureName;
 
 	//Image data, Read only
 	ImageData _imageData;
@@ -194,7 +193,7 @@ protected:
 	static std::vector<Texture2D*> _upload_textures;
 
 	//Global variable
-	static std::unordered_map<HString, std::weak_ptr<Texture2D>> _system_textures;
+	static std::unordered_map<std::string, std::weak_ptr<Texture2D>> _system_textures;
 
 	//Texture2D streaming
 	static uint64_t _textureStreamingSize;

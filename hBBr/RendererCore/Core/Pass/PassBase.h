@@ -5,7 +5,6 @@
 #include <vector>
 #include <memory>
 #include <map>
-#include "HString.h"
 #include "DescriptorSet.h"
 #include "VertexFactory.h"
 #include "Primitive.h"
@@ -21,10 +20,10 @@ class PassBase
 public:
 	PassBase(class PassManager* manager);
 	HBBR_API virtual ~PassBase();
-	HBBR_API HBBR_INLINE HString GetName()const { return _passName; }
+	HBBR_API HBBR_INLINE std::string GetName()const { return _passName; }
 	HBBR_API HBBR_INLINE double GetPassCPURenderingTime()const { return _cpuTime; }
 	HBBR_API HBBR_INLINE double GetPassGPURenderingTime()const { return _gpuTime; }
-	HBBR_API HBBR_INLINE void SetPassName(HString name) { _passName = name; }
+	HBBR_API HBBR_INLINE void SetPassName(std::string name) { _passName = name; }
 	HBBR_API HBBR_INLINE VulkanRenderer* GetRenderer()const {return _renderer;}
 protected:
 	HBBR_API virtual void PassInit() {}
@@ -37,7 +36,7 @@ protected:
 	HBBR_API std::shared_ptr<Texture2D> GetSceneTexture(SceneTextureDesc desc);
 	class PassManager* _manager = nullptr;
 	VulkanRenderer* _renderer = nullptr;
-	HString _passName = "PassBase";
+	std::string _passName = "PassBase";
 	glm::vec4 _markColor = glm::vec4(1,1,1,0.5);
 	//性能测试
 	uint32_t passIndex = 0;

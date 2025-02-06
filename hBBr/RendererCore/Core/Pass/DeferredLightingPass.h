@@ -31,7 +31,7 @@ private:
 	std::shared_ptr<class DescriptorSet> _ub_descriptorSet;
 	std::shared_ptr<class DescriptorSet> _tex_descriptorSet;
 
-	PipelineIndex CreatePipeline(HString shaderName);
+	PipelineIndex CreatePipeline(std::string shaderName);
 
 	std::vector<LightingVertexData> vertices;
 

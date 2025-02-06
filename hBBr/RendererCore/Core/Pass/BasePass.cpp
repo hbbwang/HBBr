@@ -156,8 +156,8 @@ void BasePass::SetupPassAndDraw(Pass p)
 			{
 				if (pipelineObj == nullptr)
 				{
-					HString vsShaderFullName = m->_graphicsIndex.GetVSShaderFullName();
-					HString psShaderFullName = m->_graphicsIndex.GetPSShaderFullName();
+					std::string vsShaderFullName = m->_graphicsIndex.GetVSShaderFullName();
+					std::string psShaderFullName = m->_graphicsIndex.GetPSShaderFullName();
 					//auto vsCacheIt = Shader::_vsShader.find(vsShaderFullName);
 					//auto psCacheIt = Shader::_psShader.find(psShaderFullName);
 

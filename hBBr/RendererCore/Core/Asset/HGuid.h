@@ -1,6 +1,4 @@
 ﻿#pragma once
-
-#include "HString.h"
 #include "crossguid/Include/crossguid/guid.hpp"
 
 #include <string_view>
@@ -30,9 +28,9 @@ inline std::string GUIDToStdString(const HGUID& guid)
 	return guid.str();
 }
 
-inline HString GUIDToString(const HGUID& guid)
+inline std::string GUIDToString(const HGUID& guid)
 {
-	return guid.str().c_str();
+	return (guid.str().c_str());
 }
 
 inline bool StringToGUID(const char* guidString, HGUID* guid)
@@ -41,10 +39,10 @@ inline bool StringToGUID(const char* guidString, HGUID* guid)
 	return guid->isValid();
 }
 
-inline HString CreateGUIDAndString(HGUID& emptyGuid)
+inline std::string CreateGUIDAndString(HGUID& emptyGuid)
 {
 	emptyGuid = xg::newGuid();
-	return emptyGuid.str().c_str();
+	return (emptyGuid.str().c_str());
 }
 
 //#include <string>
@@ -56,7 +54,6 @@ inline HString CreateGUIDAndString(HGUID& emptyGuid)
 //#include <uuid/uuid.h>
 //#endif
 //
-//#include "HString.h"
 //
 //struct HGUID
 //{
@@ -85,7 +82,7 @@ inline HString CreateGUIDAndString(HGUID& emptyGuid)
 //
 //HGUID CreateGUID();
 //
-//inline HString GUIDToString(const HGUID& guid)
+//inline std::string GUIDToString(const HGUID& guid)
 //{
 //    char buf[64] = { 0 };
 //#ifdef __GNUC__
@@ -113,7 +110,7 @@ inline HString CreateGUIDAndString(HGUID& emptyGuid)
 //        &guid->Data4[4], &guid->Data4[5], &guid->Data4[6], &guid->Data4[7]) == 11;
 //}
 //
-//inline HString CreateGUIDString()
+//inline std::string CreateGUIDString()
 //{
 //    return GUIDToString(CreateGUID());
 //}

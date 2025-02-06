@@ -5,48 +5,47 @@
 #include <memory>
 #include <string>
 #include "pugixml/pugixml.hpp"
-#include "HString.h"
 class XMLStream
 {
 public:
 
 	/* 读取xml文档 */
-	static bool LoadXML(const wchar_t* path, pugi::xml_document& doc);
+	static bool LoadXML(const char* path, pugi::xml_document& doc);
 
 	/* 保存xml文档UTF-8格式 */
-	static bool SaveXML(HString path, pugi::xml_document& doc);
+	static bool SaveXML(std::string path, pugi::xml_document& doc);
 
 	/* 读取xml节点,必须使用完整的路径形式,例如:root/aa/bb */
-	static bool LoadXMLNode(pugi::xml_document& doc, const wchar_t* nodeName, pugi::xml_node& node);
+	static bool LoadXMLNode(pugi::xml_document& doc, const char* nodeName, pugi::xml_node& node);
 
 	/* 读取xml节点的String属性 */
-	static bool LoadXMLAttributeString(pugi::xml_node& node, const wchar_t* attributeName, HString& attri);
+	static bool LoadXMLAttributeString(pugi::xml_node& node, const char* attributeName, std::string& attri);
 
 	/* 读取xml节点的Int32属性 */
-	static bool LoadXMLAttributeInt(pugi::xml_node& node, const wchar_t* attributeName, int& attri);
+	static bool LoadXMLAttributeInt(pugi::xml_node& node, const char* attributeName, int& attri);
 
 	/* 读取xml节点的uint属性 */
-	static bool LoadXMLAttributeUInt(pugi::xml_node& node, const wchar_t* attributeName, uint32_t& attri);
+	static bool LoadXMLAttributeUInt(pugi::xml_node& node, const char* attributeName, uint32_t& attri);
 
 	/* 读取xml节点的Size_t属性 */
-	static bool LoadXMLAttributeUint64(pugi::xml_node& node, const wchar_t* attributeName, uint64_t& attri);
+	static bool LoadXMLAttributeUint64(pugi::xml_node& node, const char* attributeName, uint64_t& attri);
 
 	/* 读取xml节点的Size_t属性 */
-	static bool LoadXMLAttributeInt64(pugi::xml_node& node, const wchar_t* attributeName, int64_t& attri);
+	static bool LoadXMLAttributeInt64(pugi::xml_node& node, const char* attributeName, int64_t& attri);
 
 	/* 读取xml节点的Bool属性 */
-	static bool LoadXMLAttributeBool(pugi::xml_node& node, const wchar_t* attributeName, bool& attri);
+	static bool LoadXMLAttributeBool(pugi::xml_node& node, const char* attributeName, bool& attri);
 
 	/* 读取xml节点的Float属性 */
-	static bool LoadXMLAttributeFloat(pugi::xml_node& node, const wchar_t* attributeName, float& attri);
+	static bool LoadXMLAttributeFloat(pugi::xml_node& node, const char* attributeName, float& attri);
 
 	/* 通过路径格式查找节点，bCreateEmpty 如果查找失败，是否创建，如果找不到，还不让创建，就返回空节点 */
-	static bool FindNodeByPath(pugi::xml_node& node, HString path, pugi::xml_node& result,bool bCreateEmpty);
+	static bool FindNodeByPath(pugi::xml_node& node, std::string path, pugi::xml_node& result,bool bCreateEmpty);
 
 	/* 通过X路径格式查找节点，但无法创建，不过效率会高一点 */
-	static pugi::xml_node FindNodeByPath(pugi::xml_node& node, HString path);
+	static pugi::xml_node FindNodeByPath(pugi::xml_node& node, std::string path);
 
-	static pugi::xml_node GetXMLNode(pugi::xml_node& node, const wchar_t* name)
+	static pugi::xml_node GetXMLNode(pugi::xml_node& node, const char* name)
 	{
 		if (node)
 		{
@@ -61,7 +60,7 @@ public:
 	}
 
 	template<class T>
-	static void SetXMLAttribute(pugi::xml_node& node, const wchar_t* attributeName, T value)
+	static void SetXMLAttribute(pugi::xml_node& node, const char* attributeName, T value)
 	{
 		if (node)
 		{
@@ -74,7 +73,7 @@ public:
 		}
 	}
 
-	static pugi::xml_node CreateXMLNode(pugi::xml_node& node, const wchar_t* name , bool bOverride = true)
+	static pugi::xml_node CreateXMLNode(pugi::xml_node& node, const char* name , bool bOverride = true)
 	{
 		if (node)
 		{
@@ -95,6 +94,6 @@ public:
 		return pugi::xml_node();
 	}
 
-	static bool CreateXMLDocument(HString path , pugi::xml_document& doc);
+	static bool CreateXMLDocument(std::string path , pugi::xml_document& doc);
 
 };

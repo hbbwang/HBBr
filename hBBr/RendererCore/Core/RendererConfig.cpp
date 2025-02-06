@@ -2,7 +2,7 @@
 #include "Common.h"
 #include "FormMain.h"
 
-HString GetRendererConfig(HString Group, HString name)
+std::string GetRendererConfig(std::string Group, std::string name)
 {
 	if (RenderConfig::GetRendererConfig().is_null())
 	{
@@ -17,14 +17,15 @@ HString GetRendererConfig(HString Group, HString name)
 			auto tit = group.find(name.c_str());
 			if (tit != group.end())
 			{
-				return tit.value();
+				std::string output = tit.value();
+				return (output);
 			}
 		}
 	}
 	return "????";
 }
 
-int GetRendererConfigInt(HString Group, HString name)
+int GetRendererConfigInt(std::string Group, std::string name)
 {
 	if (RenderConfig::GetRendererConfig().is_null())
 	{
@@ -51,7 +52,7 @@ void SaveRendererConfig()
 	Serializable::SaveJson(RenderConfig::GetRendererConfig(), FileSystem::GetConfigAbsPath() + "renderer.json");
 }
 
-HString GetInternationalizationText(HString Group, HString name)
+std::string GetInternationalizationText(std::string Group, std::string name)
 {
 	if (RenderConfig::GetInternationalzationConfig().is_null())
 	{
@@ -66,14 +67,15 @@ HString GetInternationalizationText(HString Group, HString name)
 			auto tit = group.find(name.c_str());
 			if (tit != group.end())
 			{
-				return tit.value();
+				std::string output = tit.value();
+				return (output);
 			}
 		}
 	}
 	return "????";
 }
 
-HString GetEditorInternationalizationText(HString Group, HString name)
+std::string GetEditorInternationalizationText(std::string Group, std::string name)
 {
 	if (RenderConfig::GetEditorInternationalzationConfig().is_null())
 	{
@@ -95,7 +97,7 @@ HString GetEditorInternationalizationText(HString Group, HString name)
 	return "????";
 }
 
-int GetEditorInternationalizationInt(HString Group, HString name)
+int GetEditorInternationalizationInt(std::string Group, std::string name)
 {
 	if (RenderConfig::GetEditorInternationalzationConfig().is_null())
 	{
@@ -117,7 +119,7 @@ int GetEditorInternationalizationInt(HString Group, HString name)
 	return 0;
 }
 
-HString GetEditorConfig(HString Group, HString name)
+std::string GetEditorConfig(std::string Group, std::string name)
 {
 	if (RenderConfig::GetEditorConfig().is_null())
 	{
@@ -139,7 +141,7 @@ HString GetEditorConfig(HString Group, HString name)
 	return "????";
 }
 
-int GetEditorConfigInt(HString Group, HString name)
+int GetEditorConfigInt(std::string Group, std::string name)
 {
 	if (RenderConfig::GetEditorConfig().is_null())
 	{
@@ -161,7 +163,7 @@ int GetEditorConfigInt(HString Group, HString name)
 	return 0;
 }
 
-void SaveInternationalizationText(HString Group, HString name)
+void SaveInternationalizationText(std::string Group, std::string name)
 {
 
 }

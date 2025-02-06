@@ -15,10 +15,10 @@ public:
 
 	//继承了AssetObject的资产类，必须重写以下函数：
 	//		1.HBBR_API static std::shared_ptr<Material> LoadAsset(HGUID guid)
-	//		2.HBBR_API virtual void SaveAsset(HString path) = 0;
+	//		2.HBBR_API virtual void SaveAsset(std::string path) = 0;
 
 #if IS_EDITOR
-	HBBR_API virtual void SaveAsset(HString path) = 0;
+	HBBR_API virtual void SaveAsset(std::string path) = 0;
 #endif
 
 	std::weak_ptr<AssetInfoBase> _assetInfo;

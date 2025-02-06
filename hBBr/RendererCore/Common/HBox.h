@@ -140,9 +140,9 @@ public:
 		return HBox2<T>(minVector, maxVector);
 	}
 
-	HString ToString() const
+	std::string ToString() const
 	{
-		return HString::printf("Min=(%s), Max=(%s)", HString::FromVec2(_min).c_str(), HString::FromVec2(_max).c_str());
+		return std::string::printf("Min=(%s), Max=(%s)", std::string::FromVec2(_min).c_str(), std::string::FromVec2(_max).c_str());
 	}
 
 

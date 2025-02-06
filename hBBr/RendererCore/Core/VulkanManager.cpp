@@ -15,7 +15,6 @@
 #include "VulkanManager.h"
 #include <vector>
 #include <array>
-#include "HString.h"
 #include "ConsoleDebug.h"
 #include "RendererConfig.h"
 #include "Texture2D.h"
@@ -58,8 +57,8 @@ VulkanDebugCallback(
 	void* user_data
 )
 {
-	HString title;
-	HString color;
+	std::string title;
+	std::string color;
 	bool bInformation = false;
 	bool bDebug = false;
 	bool bError = false;
@@ -84,28 +83,28 @@ VulkanDebugCallback(
 		title = "DEBUG: \n"; color = "200,200,200";
 		bDebug = true;
 	}
-	title = title + HString("@[") + layer_prefix + "]";
+	title = title + std::string("@[") + layer_prefix + "]";
 	if (bError)
 	{
 		try {
-			MessageOut(HString(title + msg), false, true, "255,0,0");
+			MessageOut(std::string(title + msg), false, true, "255,0,0");
 		}
 		catch(const std::system_error& e)
 		{
-			ConsoleDebug::print_endl(HString("Error: ")+ e.what());
+			ConsoleDebug::print_endl(std::string("Error: ")+ e.what());
 		}
 	}
 	else if (bDebug)
 	{
-		MessageOut(HString(title + msg), false, false, "255,255,0");
+		MessageOut(std::string(title + msg), false, false, "255,255,0");
 	}
 	else if (bInformation)
 	{
-		MessageOut(HString(title + msg), false, false, "255,255,0");
+		MessageOut(std::string(title + msg), false, false, "255,255,0");
 	}
 	else if(bWarning)
 	{
-		MessageOut(HString(title + msg), false, false, "255,255,0");
+		MessageOut(std::string(title + msg), false, false, "255,255,0");
 	}
 	return false;
 }
@@ -232,7 +231,7 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 		ConsoleDebug::print_endl("");
 		ConsoleDebug::print_endl("");
 		ConsoleDebug::print_endl("----------Enumerate Instance Layer Properties---------");
-		std::vector<HString> layerLogs;
+		std::vector<std::string> layerLogs;
 
 		for (uint32_t i = 0; i < count; i++)
 		{
@@ -249,11 +248,11 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 			//RenderDoc支持
 			//layers.push_back("VK_LAYER_RENDERDOC_Capture");//
 			//_instance_layers.push_back(layerName);
-			ConsoleDebug::print_endl(availableLaters[i].layerName + HString("  |  ") + availableLaters[i].description, "150,150,150");
+			ConsoleDebug::print_endl(availableLaters[i].layerName + std::string("  |  ") + availableLaters[i].description, "150,150,150");
 			ConsoleDebug::print_endl("\t------------------");
 		}
 		ConsoleDebug::print_endl("\t---------End Enumerate Instance Layer Properties------");
-		ConsoleDebug::print_endl("Found Instance Layers number:" + HString::FromSize_t(availableLaters.size()));
+		ConsoleDebug::print_endl("Found Instance Layers number:" + StringTool::FromSize_t(availableLaters.size()));
 		//
 		ConsoleDebug::print_endl("");
 		ConsoleDebug::print_endl("");
@@ -264,7 +263,7 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 		vkEnumerateInstanceExtensionProperties(nullptr, &ecount, availableExts.data());
 		for (uint32_t i = 0; i < ecount; i++)
 		{
-			ConsoleDebug::print_endl(HString("\t") + availableExts[i].extensionName, "150,150,150");
+			ConsoleDebug::print_endl(std::string("\t") + availableExts[i].extensionName, "150,150,150");
 #ifdef _WIN32
 			if (strcmp(availableExts[i].extensionName, VK_KHR_DISPLAY_EXTENSION_NAME) == 0)
 			{
@@ -394,14 +393,14 @@ void VulkanManager::InitDevice()
 		std::vector<VkPhysicalDevice> gpu_list(devicesCount);
 		vkEnumeratePhysicalDevices(_instance, &devicesCount, gpu_list.data());
 		ConsoleDebug::print_endl("-----------GPU List-----------", "0,255,0");
-		ConsoleDebug::print_endl("Found " + HString::FromUInt(devicesCount) + " GPU(s)", "222,255,255");
+		ConsoleDebug::print_endl("Found " + StringTool::FromUInt(devicesCount) + " GPU(s)", "222,255,255");
 		//_gpuProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
 		for (uint32_t i = 0; i < devicesCount; i++)
 		{
 			//vkGetPhysicalDeviceProperties2(gpu_list[i], &_gpuProperties);
 			vkGetPhysicalDeviceProperties(gpu_list[i], &_gpuProperties);
-			ConsoleDebug::print_endl("Device Name:" + HString(_gpuProperties.deviceName), "200,255,255");
-			ConsoleDebug::print_endl("Device ID:" + HString::FromUInt(_gpuProperties.deviceID), "150,150,150");
+			ConsoleDebug::print_endl("Device Name:" + std::string(_gpuProperties.deviceName), "200,255,255");
+			ConsoleDebug::print_endl("Device ID:" + StringTool::FromUInt(_gpuProperties.deviceID), "150,150,150");
 
 			if (IsGPUDeviceSuitable(gpu_list[i]))
 			{
@@ -468,7 +467,7 @@ void VulkanManager::InitDevice()
 	std::vector <const char*> extensions;
 	//列举Device支持的Layers和Extensions
 	{
-		std::vector<HString> layerLogs;
+		std::vector<std::string> layerLogs;
 		uint32_t count = 0;
 		vkEnumerateDeviceLayerProperties(_gpuDevice, &count, VK_NULL_HANDLE);
 		std::vector<VkLayerProperties> availableLaters(count);
@@ -486,7 +485,7 @@ void VulkanManager::InitDevice()
 					layerLogs.push_back("hBBr:[Vulkan Device layer] Add VK_LAYER_KHRONOS_validation layer.");
 				}
 			}
-			ConsoleDebug::print_endl(availableLaters[i].layerName + HString("  |  ") + availableLaters[i].description, "150,150,150");
+			ConsoleDebug::print_endl(availableLaters[i].layerName + std::string("  |  ") + availableLaters[i].description, "150,150,150");
 			ConsoleDebug::print_endl("\t------------------");
 		}
 		ConsoleDebug::print_endl("----------End Enumerate Device Layer Properties---------");
@@ -502,7 +501,7 @@ void VulkanManager::InitDevice()
 		bool bHasRenderPass2Ext = false;
 		for (uint32_t i = 0; i < ecount; i++)
 		{
-			ConsoleDebug::print_endl(HString("\t") + availableExts[i].extensionName, "150,150,150");
+			ConsoleDebug::print_endl(std::string("\t") + availableExts[i].extensionName, "150,150,150");
 			//Debug Marker
 			{
 				if (_bDebugEnable && strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME) == 0)
@@ -728,17 +727,17 @@ void VulkanManager::InitDevice()
 		ConsoleDebug::print_endl("-----------Display info-----------", "0,255,0");
 		for (uint32_t i = 0; i < displayCount; i++)
 		{
-			ConsoleDebug::print_endl(HString("-----------Display ") + HString::FromInt(i) + " -----------", "200,255,255");
-			ConsoleDebug::print_endl("Display Name:" + HString(displayPro[i].displayName), "200,255,255");
-			ConsoleDebug::print_endl("Display Width:" + HString::FromInt(displayPro[i].physicalResolution.width), "200,255,255");
-			ConsoleDebug::print_endl("Display Height:" + HString::FromInt(displayPro[i].physicalResolution.height), "200,255,255");
+			ConsoleDebug::print_endl(std::string("-----------Display ") + StringTool::FromInt(i) + " -----------", "200,255,255");
+			ConsoleDebug::print_endl("Display Name:" + std::string(displayPro[i].displayName), "200,255,255");
+			ConsoleDebug::print_endl("Display Width:" + StringTool::FromInt(displayPro[i].physicalResolution.width), "200,255,255");
+			ConsoleDebug::print_endl("Display Height:" + StringTool::FromInt(displayPro[i].physicalResolution.height), "200,255,255");
 			uint32_t count = 0;
 			vkGetDisplayModePropertiesKHR(_gpuDevice, displayPro[i].display, &count, VK_NULL_HANDLE);
 			std::vector<VkDisplayModePropertiesKHR> displayMode(count);
 			vkGetDisplayModePropertiesKHR(_gpuDevice, displayPro[i].display, &count, displayMode.data());
 			for (uint32_t i = 0; i < count; i++)
 			{
-				ConsoleDebug::print_endl("Display Refresh Rate:" + HString::FromInt(displayMode[i].parameters.refreshRate), "200,255,255");
+				ConsoleDebug::print_endl("Display Refresh Rate:" + StringTool::FromInt(displayMode[i].parameters.refreshRate), "200,255,255");
 			}
 		}
 	}
@@ -986,7 +985,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		bool bFoundPresentModeFIFORelaxed = false;
 		bool bFoundPresentModeSharedDemandRefresh = false;
 		bool bFoundPresentModeSharedContinuous = false;
-		HString CurrentPresentMode = "";
+		std::string CurrentPresentMode = "";
 		for (size_t i = 0; i < present_mode_count; i++)
 		{
 			switch (presentModes[i])
@@ -2155,7 +2154,7 @@ void VulkanManager::CreateVkSemaphore(VkSemaphore& semaphore)
 	auto result = vkCreateSemaphore(_device, &semaphoreCreateInfo, VK_NULL_HANDLE, &semaphore);
 	if (result != VK_SUCCESS)
 	{
-		MessageOut((HString("Vulkan ERROR: Create Semaphore Failed : ")+ GetVkResult(result)), false, true);
+		MessageOut((std::string("Vulkan ERROR: Create Semaphore Failed : ")+ GetVkResult(result)), false, true);
 	}
 }
 
@@ -2409,7 +2408,7 @@ void VulkanManager::VMACreateBufferAndAllocateMemory(VkDeviceSize bufferSize, Vk
 	vmaCreateBuffer(_vma_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, vmaInfo);
 }
 
-void VulkanManager::VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation, HString debugName, VkDeviceSize debugSize)
+void VulkanManager::VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation, std::string debugName, VkDeviceSize debugSize)
 {
 	if (buffer != VK_NULL_HANDLE && allocation != VK_NULL_HANDLE)
 	{
@@ -2662,7 +2661,7 @@ void VulkanManager::SubmitQueueForPasses(VkCommandBuffer& cmdBuf, VkSemaphore wa
 	else
 		result = vkQueueSubmit(queue, (uint32_t)1, &info, executeFence);
 	if (result != VK_SUCCESS)
-		MessageOut((HString("[Submit Queue]vkQueueSubmit error : ") + GetVkResult(result)), false, true);
+		MessageOut((std::string("[Submit Queue]vkQueueSubmit error : ") + GetVkResult(result)), false, true);
 }
 
 void VulkanManager::SubmitQueue(VkCommandBuffer& cmdBuf, std::vector<VkSemaphore> waits, std::vector<VkSemaphore> signals, VkFence executeFence, std::vector<VkPipelineStageFlags> waitStageMask, VkQueue queue)
@@ -2682,7 +2681,7 @@ void VulkanManager::SubmitQueue(VkCommandBuffer& cmdBuf, std::vector<VkSemaphore
 	else
 		result = vkQueueSubmit(queue, (uint32_t)1, &info, executeFence);
 	if (result != VK_SUCCESS)
-		MessageOut((HString("[Submit Queue]vkQueueSubmit error : ") + GetVkResult(result)), false, true);
+		MessageOut((std::string("[Submit Queue]vkQueueSubmit error : ") + GetVkResult(result)), false, true);
 }
 
 void VulkanManager::UpdateBufferDescriptorSet(VkBuffer buffer, VkDescriptorSet descriptorSet, VkDescriptorType type, uint32_t dstBinding, VkDeviceSize offset, VkDeviceSize Range)
@@ -3025,9 +3024,9 @@ void VulkanManager::EndRegion(VkCommandBuffer cmdbuf)
 	}
 }
 
-HString VulkanManager::GetVkResult(VkResult code)
+std::string VulkanManager::GetVkResult(VkResult code)
 {
-	HString text = "Code: ";
+	std::string text = "Code: ";
 	switch (code)
 	{
 	case VK_SUCCESS:

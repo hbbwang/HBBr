@@ -13,8 +13,8 @@
 struct MaterialParameterInfo
 {
 	MPType type;
-	HString name, ui;
-	HString group = "Default";
+	std::string name, ui;
+	std::string group = "Default";
 	//shader uniform buffer 以vec4数组储存,这个索引用来读取数组对应的vec4
 	uint32_t arrayIndex = 0;
 	//配合上面索引获取到的vec4,该索引用来表示该参数处于vec4的什么位置
@@ -27,12 +27,12 @@ struct MaterialParameterInfo
 struct MaterialTextureInfo
 {
 	MTType type;
-	HString group = "Default";
+	std::string group = "Default";
 	MSAddress samplerAddress = MSAddress::Wrap;
 	MSFilter samplerFilter = MSFilter::Linear;
-	HString name, ui;
+	std::string name, ui;
 	uint32_t index = 0;
-	HString value;
+	std::string value;
 };
 
 //每个面的数据
@@ -40,7 +40,7 @@ struct ModelPrimitive
 {
 	uint8_t						bNeedUpdate = true;
 
-	HString						modelPrimitiveName;
+	std::string						modelPrimitiveName;
 
 	struct FaceData*			faceData = nullptr;
 
@@ -140,36 +140,36 @@ public:
 	}
 
 	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
-	HBBR_API float GetScalarParameter_VS(HString name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
+	HBBR_API float GetScalarParameter_VS(std::string name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
 
 	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
-	HBBR_API glm::vec2 GetVector2Parameter_VS(HString name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
+	HBBR_API glm::vec2 GetVector2Parameter_VS(std::string name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
 
 	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
-	HBBR_API glm::vec3 GetVector3Parameter_VS(HString name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
+	HBBR_API glm::vec3 GetVector3Parameter_VS(std::string name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
 
 	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
-	HBBR_API glm::vec4 GetVector4Parameter_VS(HString name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
+	HBBR_API glm::vec4 GetVector4Parameter_VS(std::string name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
 
 	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
-	HBBR_API float GetScalarParameter_PS(HString name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
+	HBBR_API float GetScalarParameter_PS(std::string name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
 
 	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
-	HBBR_API glm::vec2 GetVector2Parameter_PS(HString name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
+	HBBR_API glm::vec2 GetVector2Parameter_PS(std::string name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
 
 	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
-	HBBR_API glm::vec3 GetVector3Parameter_PS(HString name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
+	HBBR_API glm::vec3 GetVector3Parameter_PS(std::string name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
 
 	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
-	HBBR_API glm::vec4 GetVector4Parameter_PS(HString name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
+	HBBR_API glm::vec4 GetVector4Parameter_PS(std::string name, int* arrayIndex = nullptr, int* vec4Index = nullptr);
 
-	HBBR_API void SetScalarParameter_PS(HString name, float value);
+	HBBR_API void SetScalarParameter_PS(std::string name, float value);
 
-	HBBR_API void SetVec2Parameter_PS(HString name, glm::vec2 value);
+	HBBR_API void SetVec2Parameter_PS(std::string name, glm::vec2 value);
 
-	HBBR_API void SetVec3Parameter_PS(HString name, glm::vec3 value);
+	HBBR_API void SetVec3Parameter_PS(std::string name, glm::vec3 value);
 
-	HBBR_API void SetVec4Parameter_PS(HString name, glm::vec4 value);
+	HBBR_API void SetVec4Parameter_PS(std::string name, glm::vec4 value);
 
 	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
 	HBBR_API void SetScalarParameter_PS(int arrayIndex, int vec4Index, float value);
@@ -183,13 +183,13 @@ public:
 	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
 	HBBR_API void SetVec4Parameter_PS(int arrayIndex, int vec4Index, glm::vec4 value);
 
-	HBBR_API void SetScalarParameter_VS(HString name, float value);
+	HBBR_API void SetScalarParameter_VS(std::string name, float value);
 
-	HBBR_API void SetVec2Parameter_VS(HString name, glm::vec2 value);
+	HBBR_API void SetVec2Parameter_VS(std::string name, glm::vec2 value);
 
-	HBBR_API void SetVec3Parameter_VS(HString name, glm::vec3 value);
+	HBBR_API void SetVec3Parameter_VS(std::string name, glm::vec3 value);
 
-	HBBR_API void SetVec4Parameter_VS(HString name, glm::vec4 value);
+	HBBR_API void SetVec4Parameter_VS(std::string name, glm::vec4 value);
 
 	//arrayIndex和arrayCount可选，是用来快速定位修改参数用的
 	HBBR_API void SetScalarParameter_VS(int arrayIndex, int vec4Index, float value);
@@ -205,11 +205,11 @@ public:
 
 	HBBR_API void SetTextureSampler(int index, VkSampler sampler);
 
-	HBBR_API void SetTextureSampler(HString textureName, VkSampler sampler);
+	HBBR_API void SetTextureSampler(std::string textureName, VkSampler sampler);
 
 	HBBR_API void SetTexture(int index, std::shared_ptr<class Texture2D> newTexture);
 
-	HBBR_API void SetTexture(HString textureName, std::shared_ptr<class Texture2D> newTexture);
+	HBBR_API void SetTexture(std::string textureName, std::shared_ptr<class Texture2D> newTexture);
 
 	HBBR_API void UpdateUniformBufferVS();
 
@@ -227,7 +227,7 @@ public:
 	int					_priority = 0;
 
 	//其实就是材质名字
-	HString				_graphicsName;
+	std::string				_graphicsName;
 
 	//使用的是哪个pass
 	Pass				_passUsing;
@@ -264,7 +264,7 @@ public:
 
 	static void AddMaterialPrimitive( MaterialPrimitive* prim);
 
-	static void GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim ,HString vsFullName = "",HString psFullName = "");
+	static void GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim ,std::string vsFullName = "",std::string psFullName = "");
 
 	static void GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, std::weak_ptr<ShaderCache> vs, std::weak_ptr<ShaderCache> ps);
 

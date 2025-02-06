@@ -19,22 +19,22 @@
 
 HBBR_API bool ImageTool::SaveImage8Bit(const char* filename, int w, int h, int channels, const void* data, int jpgQuality)
 {
-	HString savePath = filename;
-	HString suffix = savePath.GetSuffix();
-	if (suffix.IsSame("png", false))
+	std::string savePath = filename;
+	std::string suffix = FileSystem::GetFileExt(savePath);
+	if (StringTool::IsEqual(suffix, "png", false))
 	{
 		int stride_bytes = w * channels;
 		return stbi_write_png(filename, w, h, channels, data, stride_bytes);
 	}
-	else if(suffix.IsSame("tga", false))
+	else if(StringTool::IsEqual(suffix, "tga", false))
 	{
 		return stbi_write_tga(filename, w, h, channels, data);
 	}
-	else if (suffix.IsSame("jpg", false))
+	else if (StringTool::IsEqual(suffix, "jpg", false))
 	{
 		return stbi_write_jpg(filename, w, h, channels, data, jpgQuality);
 	}
-	else if (suffix.IsSame("bmp", false))
+	else if (StringTool::IsEqual(suffix, "bmp", false))
 	{
 		return stbi_write_bmp(filename, w, h, channels, data);
 	}
@@ -43,9 +43,9 @@ HBBR_API bool ImageTool::SaveImage8Bit(const char* filename, int w, int h, int c
 
 bool ImageTool::SaveImage32Bit(const char* filename, int w, int h, int channels, const float* data)
 {
-	HString savePath = filename;
-	HString suffix = savePath.GetSuffix();
-	if (suffix.IsSame("hdr", false))
+	std::string savePath = filename;
+	std::string suffix = FileSystem::GetFileExt(savePath);
+	if (StringTool::IsEqual(suffix, "hdr", false))
 	{
 		return stbi_write_hdr(filename, w, h, channels, data);
 	}
@@ -114,7 +114,7 @@ std::shared_ptr<ImageData> ImageTool::LoadImage8Bit(const char* filename, bool b
 		out->data_header.height = height;
 		out->imageData = std::move(imageData);
 		out->data_header.bitsPerPixel = channels * 8;
-		out->fileName = HString(filename).GetBaseName();
+		out->fileName = FileSystem::GetBaseName(std::string(filename));
 		out->filePath = filename;
 		if (channels > 2)
 		{
@@ -187,7 +187,7 @@ std::shared_ptr<ImageData> ImageTool::LoadImage32Bit(const char* filename)
 		out->imageDataF = std::move(imageData);
 		//out->imageDataF = data;
 		out->data_header.bitsPerPixel = channels * 32;
-		out->fileName = HString(filename).GetBaseName();
+		out->fileName = FileSystem::GetBaseName(std::string(filename));
 		out->filePath = filename;
 		out->texFormat = VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT;
 		out->imageSize = size * sizeof(float);

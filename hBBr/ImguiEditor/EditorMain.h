@@ -2,7 +2,7 @@
 #include "FormMain.h"
 #include <memory>
 #include "HGuid.h"
-#incldue <map>
+#include <map>
 
 class EditorMain
 {

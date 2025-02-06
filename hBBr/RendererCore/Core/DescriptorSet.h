@@ -34,7 +34,7 @@ public:
 		VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_CPU_TO_GPU,
 		bool bAlwayMapping = true,
 		bool bFocusCreateDedicatedMemory = false,
-		HString debugName = "VMABuffer");
+		std::string debugName = "VMABuffer");
 
 	//创建VkDescriptorSetLayer
 	void BuildDescriptorSetLayout();

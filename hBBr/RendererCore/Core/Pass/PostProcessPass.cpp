@@ -138,7 +138,7 @@ void PostProcessPass::PassReset()
 	_tex_descriptorSet->RefreshDescriptorSet(0);
 }
 
-PipelineIndex PostProcessPass::CreatePipeline(HString shaderName)
+PipelineIndex PostProcessPass::CreatePipeline(std::string shaderName)
 {
 	//CraetePipeline..
 	VkPipeline pipeline = VK_NULL_HANDLE;

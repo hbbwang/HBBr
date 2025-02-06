@@ -266,22 +266,22 @@ class PipelineIndex
 	friend class Material;
 public:
 
-	HBBR_INLINE HString GetVSShaderFullName()
+	HBBR_INLINE std::string GetVSShaderFullName()
 	{
 		return vsShaderCacheFullName;
 	}
 
-	HBBR_INLINE HString GetPSShaderFullName()
+	HBBR_INLINE std::string GetPSShaderFullName()
 	{
 		return psShaderCacheFullName;
 	}
 
-	HBBR_INLINE HString GetVSShaderName()
+	HBBR_INLINE std::string GetVSShaderName()
 	{
 		return vsShaderName;
 	}
 
-	HBBR_INLINE HString GetPSShaderName()
+	HBBR_INLINE std::string GetPSShaderName()
 	{
 		return psShaderName;
 	}
@@ -299,13 +299,13 @@ public:
 	HBBR_INLINE void SetVSVarient(uint32_t new_vs_varient)
 	{
 		vs_varients = new_vs_varient;
-		vsShaderCacheFullName = vsShaderName + "@" + HString::FromUInt(new_vs_varient);
+		vsShaderCacheFullName = vsShaderName + "@" + StringTool::FromUInt(new_vs_varient);
 	}
 
 	HBBR_INLINE void SetPSVarient(uint32_t new_ps_varient)
 	{
 		ps_varients = new_ps_varient;
-		psShaderCacheFullName = psShaderName + "@" + HString::FromUInt(new_ps_varient);
+		psShaderCacheFullName = psShaderName + "@" + StringTool::FromUInt(new_ps_varient);
 	}
 
 	HBBR_INLINE void SetVarient(uint32_t new_vs_varient, uint32_t new_ps_varient)
@@ -377,10 +377,10 @@ private:
 	PipelineType type = PipelineType::Graphics;
 	uint32_t vs_varients = 0;//变体 32bit 相当于32个bool
 	uint32_t ps_varients = 0;
-	HString vsShaderCacheFullName = "";
-	HString psShaderCacheFullName = "";
-	HString vsShaderName = "";
-	HString psShaderName = "";
+	std::string vsShaderCacheFullName = "";
+	std::string psShaderCacheFullName = "";
+	std::string vsShaderName = "";
+	std::string psShaderName = "";
 };
 
 class PipelineManager

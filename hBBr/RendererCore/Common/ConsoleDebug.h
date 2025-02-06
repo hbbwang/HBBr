@@ -10,7 +10,6 @@
 #define SOCKET int
 #endif
 
-#include "HString.h"
 //
 #include "Common.h"
 #include <thread>
@@ -27,7 +26,7 @@
 
 namespace ConsoleDebug
 {
-    extern void CreateConsole(HString consolePath, bool bNoClient = false);
+    extern void CreateConsole(std::string consolePath, bool bNoClient = false);
     extern void CleanupConsole();
     extern void ReadMsgFromConsole();
 
@@ -41,45 +40,37 @@ namespace ConsoleDebug
     extern bool bConnectedFailed;
     extern struct sockaddr_in consoleAddr;
     extern struct sockaddr_in addr;
-    extern std::function<void(HString,float ,float,float, HString)> printFuncAdd;
+    extern std::function<void(std::string,float ,float,float, std::string)> printFuncAdd;
 
 
     //自定义控制台命令：
-    extern std::map<HString, std::function<void()>> commandLists;
-    extern void AddNewCommand(HString newCommand, std::function<void()>func, int ParamerterCount = 0, ...);
-    extern void execCommand(HString key);
+    extern std::map<std::string, std::function<void()>> commandLists;
+    extern void AddNewCommand(std::string newCommand, std::function<void()>func, int ParamerterCount = 0, ...);
+    extern void execCommand(std::string key);
 
     /* 输出信息到控制台,带字体颜色，带自动换行 */
-    HBBR_API extern void print_endl(HString in, HString color = "255,255,255", HString background = "0,0,0", HString type = " ");
-    HBBR_API extern void print(HString in, HString color = "255,255,255", HString background = "0,0,0", HString type = " ");
+    HBBR_API extern void print_endl(std::string in, std::string color = "255,255,255", std::string background = "0,0,0", std::string type = " ");
+    HBBR_API extern void print(std::string in, std::string color = "255,255,255", std::string background = "0,0,0", std::string type = " ");
 
     template<typename ...Arg>
-    extern void printf_endl(HString in , Arg...args)
+    extern void printf_endl(std::string in , Arg...args)
     {
-        char* formattedString = nullptr;
-        SDL_asprintf(&formattedString, in.c_str(), args...);
-        print_endl(formattedString);
+        print_endl(StringTool::vformat(in.c_str(), args...));
     }
     template<typename ...Arg>
-    extern void printf_endl_warning(HString in, Arg...args)
+    extern void printf_endl_warning(std::string in, Arg...args)
     {
-        char* formattedString = nullptr;
-        SDL_asprintf(&formattedString, in.c_str(), args...);
-        print_endl(formattedString, "255,255,0");
+        print_endl(StringTool::vformat(in.c_str(), args...), "255,255,0"); 
     }
     template<typename ...Arg>
-    extern void printf_endl_error(HString in, Arg...args)
+    extern void printf_endl_error(std::string in, Arg...args)
     {
-        char* formattedString = nullptr;
-        SDL_asprintf(&formattedString, in.c_str(), args...);
-        print_endl(formattedString, "255,0,0");
+        print_endl(StringTool::vformat(in.c_str(), args...), "255,50,0");
     }
     template<typename ...Arg>
-    extern void printf_endl_succeed(HString in, Arg...args)
+    extern void printf_endl_succeed(std::string in, Arg...args)
     {
-        char* formattedString = nullptr;
-        SDL_asprintf(&formattedString, in.c_str(), args...);
-        print_endl(formattedString, "0,255,0");
+        print_endl(StringTool::vformat(in.c_str(), args...), "50,255,60");
     }
 
     extern std::thread socketAcceptThread;

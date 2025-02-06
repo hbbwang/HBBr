@@ -33,25 +33,25 @@ public:
 
 	HBBR_API HBBR_INLINE std::vector<std::shared_ptr<Level>> GetLevels()const { return _levels; }
 
-	HBBR_API Level* GetLevel(HString name);
+	HBBR_API Level* GetLevel(std::string name);
 
-	HBBR_API void AddNewLevel(HString name);
+	HBBR_API void AddNewLevel(std::string name);
 
 #if IS_EDITOR
-	HBBR_API void DeleteLevel(HString levelName);
+	HBBR_API void DeleteLevel(std::string levelName);
 #endif
 
 	HBBR_API const HGUID GetGUID()const { return _guid; }
 
-	HBBR_API static std::shared_ptr<World>  CreateNewWorld(HString newWorldName);
+	HBBR_API static std::shared_ptr<World>  CreateNewWorld(std::string newWorldName);
 
-	HBBR_API void SetWorldName(HString name);
+	HBBR_API void SetWorldName(std::string name);
 
-	HBBR_API HString GetWorldName()const { return _worldName; }
+	HBBR_API std::string GetWorldName()const { return _worldName; }
 
 	//保存世界,路径都是固定在Asset/World里
 	//文件夹内储存的则是level后缀
-	HBBR_API void SaveWorld(HString newWorldName = "");
+	HBBR_API void SaveWorld(std::string newWorldName = "");
 
 	// 创建/保存 世界设置，世界的属性和参数都在这里
 	HBBR_API void SaveWorldSetting();
@@ -59,7 +59,7 @@ public:
 	//重新读取世界设置
 	HBBR_API void ReloadWorldSetting();
 
-	HBBR_API GameObject* SpawnGameObject(HString name, class Level* level = nullptr);
+	HBBR_API GameObject* SpawnGameObject(std::string name, class Level* level = nullptr);
 
 #if IS_EDITOR
 
@@ -142,17 +142,17 @@ private:
 
 	std::vector<std::shared_ptr<Level>> _levels;
 
-	HString _worldName = "NewWorld";
+	std::string _worldName = "NewWorld";
 
-	HString _worldAbsPath = "";
+	std::string _worldAbsPath = "";
 
-	HString _worldSettingAbsPath = "";
+	std::string _worldSettingAbsPath = "";
 
 	bool _bLoad = false;
 
 	HGUID _guid;
 
-	HString _guidStr;
+	std::string _guidStr;
 
 	//World Setting
 	public:

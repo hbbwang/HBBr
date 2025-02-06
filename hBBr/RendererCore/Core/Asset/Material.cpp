@@ -45,13 +45,13 @@ std::weak_ptr<Material> Material::GetErrorMaterial()
 std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 {
 	const auto matAssets = ContentManager::Get()->GetAssets(AssetType::Material);
-	HString guidStr = GUIDToString(guid);
+	std::string guidStr = GUIDToString(guid);
 	//从内容管理器查找资产
 	auto it = matAssets.find(guid);
 	{
 		if (it == matAssets.end())
 		{
-			MessageOut(HString("Can not find [" + guidStr + "] material in content manager."), false, false, "255,255,0");
+			MessageOut(std::string("Can not find [" + guidStr + "] material in content manager."), false, false, "255,255,0");
 			return nullptr;
 		}
 	}
@@ -69,15 +69,15 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 	}
 
 	//获取实际路径
-	HString filePath = it->second->absFilePath;
+	std::string filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
 		return nullptr;
 	}
 
 	nlohmann::json json;
-	HString vsFullName;
-	HString psFullName;
+	std::string vsFullName;
+	std::string psFullName;
 	if (Serializable::LoadJson(filePath, json))
 	{
 		std::shared_ptr<Material> mat;
@@ -99,10 +99,10 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 		uint32_t ps_varient = 0;
 		vs_varient = json["vsVarient"];
 		ps_varient = json["psVarient"];
-		HString vsShaderName = json["vsShader"];
-		HString psShaderName = json["psShader"];
-		vsFullName = vsShaderName + "@" + HString::FromUInt(vs_varient);
-		psFullName = psShaderName + "@" + HString::FromUInt(ps_varient);
+		std::string vsShaderName = json["vsShader"];
+		std::string psShaderName = json["psShader"];
+		vsFullName = vsShaderName + "@" + StringTool::FromUInt(vs_varient);
+		psFullName = psShaderName + "@" + StringTool::FromUInt(ps_varient);
 
 		//根据变体查找ShaderCache
 		std::shared_ptr<ShaderCache> vsCache;
@@ -147,7 +147,7 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 				{
 					mat->_primitive->_paramterInfos_vs[i] = *vsCache->pi_vs[i];
 					auto oldMatParamIt = std::find_if(old_vs_ub_Info.begin(), old_vs_ub_Info.end(), [&](MaterialParameterInfo& oldMatParam) {
-						return oldMatParam.name.IsSame(vsCache->pi_vs[i]->name) && oldMatParam.type == vsCache->pi_vs[i]->type;
+						return StringTool::IsEqual(oldMatParam.name, vsCache->pi_vs[i]->name) && oldMatParam.type == vsCache->pi_vs[i]->type;
 					});
 					if (oldMatParamIt != old_vs_ub_Info.end())
 					{
@@ -205,7 +205,7 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 					int paramIndex = 0;
 					for (auto& i : params_it.value().items())
 					{
-						HString matParamName = i.key();
+						std::string matParamName = i.key();
 						int type = i.value()["type"];
 						//从shader中查找是否存在相同参数(名字&类型)
 						auto it = std::find_if(mat->_primitive->_paramterInfos_vs.begin(), mat->_primitive->_paramterInfos_vs.end(), [type, matParamName](MaterialParameterInfo& info) {
@@ -277,7 +277,7 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 				{
 					mat->_primitive->_paramterInfos_ps[i] = *psCache->pi_ps[i];
 					auto oldMatParamIt = std::find_if(old_ps_ub_Info.begin(), old_ps_ub_Info.end(), [&](MaterialParameterInfo& oldMatParam) {
-						return oldMatParam.name.IsSame(psCache->pi_ps[i]->name) && oldMatParam.type == psCache->pi_ps[i]->type;
+						return StringTool::IsEqual(oldMatParam.name, psCache->pi_ps[i]->name) && oldMatParam.type == psCache->pi_ps[i]->type;
 						});
 					if (oldMatParamIt != old_ps_ub_Info.end())
 					{
@@ -335,7 +335,7 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 					int paramIndex = 0;
 					for (auto& i : params_it.value().items())
 					{
-						HString matParamName = i.key();
+						std::string matParamName = i.key();
 						int type = i.value()["type"];
 						//从shader中查找是否存在相同参数(名字&类型)
 						auto it = std::find_if(mat->_primitive->_paramterInfos_ps.begin(), mat->_primitive->_paramterInfos_ps.end(), [type, matParamName](MaterialParameterInfo& info) {
@@ -408,7 +408,7 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 					//Set textures
 					//查找刷新之后，新的shader里，是否有刷新之前的材质绑定的纹理信息，有就直接用
 					auto oldMatParamIt = std::find_if(old_texs_info.begin(), old_texs_info.end(), [&](MaterialTextureInfo& oldMatParam) {
-							return oldMatParam.name.IsSame(psCache->pi_ps[i]->name) && oldMatParam.type == psCache->ti[i]->type;
+							return StringTool::IsEqual(oldMatParam.name, psCache->pi_ps[i]->name) && oldMatParam.type == psCache->ti[i]->type;
 						});
 					if (oldMatParamIt != old_texs_info.end())
 					{
@@ -462,7 +462,7 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 				for (auto& i : texs_it.value().items())
 				{
 					int type = i.value()["type"];
-					HString matParamName = i.key();
+					std::string matParamName = i.key();
 					//从shader中查找是否存在相同参数(名字&类型)
 					auto it = std::find_if(mat->_primitive->_textureInfos.begin(), mat->_primitive->_textureInfos.end(), [type, matParamName](MaterialTextureInfo& info) {
 						return matParamName == info.name && type == (int)info.type;
@@ -471,7 +471,7 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 					{
 						auto& info = *it;
 						//value
-						HString value = i.value()["value"];
+						std::string value = i.value()["value"];
 						HGUID guid;
 						StringToGUID(value.c_str(), &guid);
 						if (!guid.isValid())
@@ -482,7 +482,7 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 							{
 								tex = Texture2D::GetSystemTexture("Black");
 							}
-							else if ((info.type == MTType::TextureCube && !tex->_imageData.isCubeMap) || (info.type == MTType::TextureCube && info.value.IsSame("Black", false)))
+							else if ((info.type == MTType::TextureCube && !tex->_imageData.isCubeMap) || (info.type == MTType::TextureCube && StringTool::IsEqual(info.value, "Black", false)))
 							{
 								tex = Texture2D::GetSystemTexture("CubeMapBalck");
 							}
@@ -543,26 +543,26 @@ std::shared_ptr<Material> Material::LoadAsset(HGUID guid)
 	return nullptr;
 }
 #if IS_EDITOR
-void Material::SaveAsset(HString path)
+void Material::SaveAsset(std::string path)
 {
 	ToJson();
 	SaveJson(path);
 	ContentManager::Get()->SaveAssetInfo(this->_assetInfo);
 }
 
-std::weak_ptr<AssetInfoBase> Material::CreateMaterial(HString repository, HString virtualPath)
+std::weak_ptr<AssetInfoBase> Material::CreateMaterial(std::string repository, std::string virtualPath)
 {
-	HString repositoryPath = FileSystem::GetRepositoryAbsPath(repository);
+	std::string repositoryPath = FileSystem::GetRepositoryAbsPath(repository);
 	//生成材质xml文件
-	HString savePath = FileSystem::Append(repositoryPath, "Material");
-	HString saveFilePath = FileSystem::Append(savePath, "NewMaterial");
+	std::string savePath = FileSystem::Append(repositoryPath, "Material");
+	std::string saveFilePath = FileSystem::Append(savePath, "NewMaterial");
 	int index = -1;
 	while (true)
 	{
 		if (FileSystem::FileExist(saveFilePath))
 		{
 			index++;
-			saveFilePath = FileSystem::Append(savePath, HString("NewMaterial_") + HString::FromInt(index));
+			saveFilePath = FileSystem::Append(savePath, std::string("NewMaterial_") + StringTool::FromInt(index));
 		}
 		else
 		{

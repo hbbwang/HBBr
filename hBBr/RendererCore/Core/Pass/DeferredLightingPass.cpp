@@ -141,7 +141,7 @@ void DeferredLightingPass::PassReset()
 	_tex_descriptorSet->RefreshDescriptorSetAllBinding();
 }
 
-PipelineIndex DeferredLightingPass::CreatePipeline(HString shaderName)
+PipelineIndex DeferredLightingPass::CreatePipeline(std::string shaderName)
 {
 	auto* manager = VulkanManager::GetManager();
 	//CraetePipeline..

@@ -2,7 +2,6 @@
 //Json序列化接口类
 #include "Common.h"
 #include "HGuid.h"
-#include "HString.h"
 #include <vector>
 #include <any>
 #include <map>
@@ -13,16 +12,16 @@ public:
 
     HBBR_API virtual nlohmann::json ToJson() {return _json;}
     HBBR_API virtual void FromJson() {}
-    HBBR_API virtual void SaveJson(HString path);
-    HBBR_API virtual bool LoadJson(HString path);
-    HBBR_API static bool SaveJson(nlohmann::json& json, HString path);
-    HBBR_API static bool LoadJson(HString path, nlohmann::json& json);
+    HBBR_API virtual void SaveJson(std::string path);
+    HBBR_API virtual bool LoadJson(std::string path);
+    HBBR_API static bool SaveJson(nlohmann::json& json, std::string path);
+    HBBR_API static bool LoadJson(std::string path, nlohmann::json& json);
     nlohmann::json _json;
 };
 //自定义序列化
-//HString
-HBBR_API void to_json(nlohmann::json& j, const HString& s);
-HBBR_API void from_json(const nlohmann::json& j, HString& s);
+//std::string
+HBBR_API void to_json(nlohmann::json& j, const std::string& s);
+HBBR_API void from_json(const nlohmann::json& j, std::string& s);
 //GUID
 HBBR_API void to_json(nlohmann::json& j, const HGUID& s);
 HBBR_API void from_json(const nlohmann::json& j, HGUID& s);

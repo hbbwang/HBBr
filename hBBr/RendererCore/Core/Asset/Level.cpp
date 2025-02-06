@@ -7,9 +7,9 @@
 std::vector<std::weak_ptr<Level>> Level::_dirtyLevels;
 #endif
 
-Level::Level(class World* world, HString name)
+Level::Level(class World* world, std::string name)
 {
-	_levelName = name.ClearSpace();
+	_levelName = StringTool::ClearSpace(name);
 	_levelAbsPath = FileSystem::Append(world->_worldAbsPath, _levelName) + ".level";
 	_world = world;
 }
@@ -28,14 +28,14 @@ Level::~Level()
 	_world = nullptr;
 }
 
-void Level::Rename(HString newName)
+void Level::Rename(std::string newName)
 {
-	_levelName = newName.ClearSpace();
+	_levelName = StringTool::ClearSpace(newName);
 	auto func = [this]() 
 	{
 		if (FileSystem::FileExist(_levelAbsPath))
 		{
-			HString newFilePath = FileSystem::Append(_world->_worldAbsPath, _levelName) + ".level";
+			std::string newFilePath = FileSystem::Append(_world->_worldAbsPath, _levelName) + ".level";
 			FileSystem::FileRename(_levelAbsPath.c_str() , newFilePath.c_str());
 			_levelAbsPath = newFilePath;
 			SaveLevel();
@@ -87,8 +87,8 @@ void Level::Load()
 			{
 				struct PickObject {
 					GameObject* obj = nullptr;
-					HString type;
-					HString name;
+					std::string type;
+					std::string name;
 					nlohmann::json item;
 				};
 				std::vector<PickObject> objs;
@@ -99,7 +99,7 @@ void Level::Load()
 					{
 						HGUID guid(item.key());
 						auto i = item.value();
-						HString name = "none";
+						std::string name = "none";
 						bool obj_active = true;
 						auto name_it = i.find("Name");
 						auto obj_active_it = i.find("bActive");
@@ -156,7 +156,7 @@ void Level::Load()
 						std::vector<nlohmann::json>comps = i.item["Components"];
 						for (auto& c : comps)
 						{
-							HString className = c["Class"];
+							std::string className = c["Class"];
 							auto component = object->AddComponentByClassName(className);
 							component->Deserialization(c);
 							component->UpdateData();

@@ -153,9 +153,9 @@ void Component::Deserialization(nlohmann::json input)
 	nlohmann::json compPros = input["Properties"];
 	for (auto& p : compPros.items())
 	{
-		HString proName = p.key();
-		HString proType = p.value()["Type"];
-		HString proValue = p.value()["Value"];
+		std::string proName = p.key();
+		std::string proType = p.value()["Type"];
+		std::string proValue = p.value()["Value"];
 		for (auto& pp : _compProperties)
 		{
 			if (pp.name == proName && pp.type == proType)
@@ -177,7 +177,7 @@ nlohmann::json Component::Serialization()
 	{
 		nlohmann::json subPro;
 		auto valueStr = Component::PropertyValueToString(p);
-		if (valueStr.Length() > 0)
+		if (valueStr.length() > 0)
 		{
 			subPro["Type"] = p.type;
 			subPro["Value"] = valueStr;
@@ -282,14 +282,14 @@ void Component::Destroy()
 	this->ExecuteDestroy();
 }
 
-HString Component::PropertyValueToString(ComponentProperty& p)
+std::string Component::PropertyValueToString(ComponentProperty& p)
 {
-	if (p.type.IsSame("bool", false))
+	if (StringTool::IsEqual(p.type, "bool", false))
 	{
 		if (p.bArray)
 		{
 			auto value = (std::vector<bool>*)p.value;
-			HString result;
+			std::string result;
 			for (auto i : *value) {
 				result += (i == true) ? "1;" : "0;";
 			}
@@ -301,80 +301,80 @@ HString Component::PropertyValueToString(ComponentProperty& p)
 			return (*value == true) ? "1" : "0";
 		}
 	}
-	else if (p.type.IsSame("float", false))
+	else if (StringTool::IsEqual(p.type, "float", false))
 	{
 		if (p.bArray)
 		{
 			auto value = (std::vector<float>*)p.value;
-			HString result;
+			std::string result;
 			for (auto i : *value) {
-				result += HString::FromFloat(i) + ";";
+				result += StringTool::FromFloat(i) + ";";
 			}
 			return result;
 		}
 		else
 		{
 			auto value = (float*)p.value;
-			return HString::FromFloat(*value);
+			return StringTool::FromFloat(*value);
 		}
 	}
-	else if (p.type.IsSame("Vector2", false))
+	else if (StringTool::IsEqual(p.type, "Vector2", false))
 	{
 		if (p.bArray)
 		{
 			auto value = (std::vector<glm::vec2>*)p.value;
-			HString result;
+			std::string result;
 			for (auto i : *value) {
-				result += HString::FromVec2(i) + ";";
+				result += StringTool::FromVec2(i) + ";";
 			}
 			return result;
 		}
 		else
 		{
 			auto value = (glm::vec2*)p.value;
-			return HString::FromVec2(*value);
+			return StringTool::FromVec2(*value);
 		}
 	}
-	else if (p.type.IsSame("Vector3", false))
+	else if (StringTool::IsEqual(p.type, "Vector3", false))
 	{
 		if (p.bArray)
 		{
 			auto value = (std::vector<glm::vec3>*)p.value;
-			HString result;
+			std::string result;
 			for (auto i : *value) {
-				result += HString::FromVec3(i) + ";";
+				result += StringTool::FromVec3(i) + ";";
 			}
 			return result;
 		}
 		else
 		{
 			auto value = (glm::vec3*)p.value;
-			return HString::FromVec3(*value);
+			return StringTool::FromVec3(*value);
 		}
 	}
-	else if (p.type.IsSame("Vector4", false))
+	else if (StringTool::IsEqual(p.type, "Vector4", false))
 	{
 		if (p.bArray)
 		{
 			auto value = (std::vector<glm::vec4>*)p.value;
-			HString result;
+			std::string result;
 			for (auto i : *value) {
-				result += HString::FromVec4(i) + ";";
+				result += StringTool::FromVec4(i) + ";";
 			}
 			return result;
 		}
 		else
 		{
 			auto value = (glm::vec4*)p.value;
-			return HString::FromVec4(*value);
+			return StringTool::FromVec4(*value);
 		}
 	}
-	else if (p.type.IsSame("AssetRef", false))
+	else if (StringTool::IsEqual(p.type, "AssetRef", false))
 	{
 		if (p.bArray)
 		{
 			auto value = (std::vector<AssetRef>*)p.value;
-			HString result;
+			std::string result;
 			for (auto i : *value) {
 				result += i.path + ";";
 			}
@@ -390,98 +390,98 @@ HString Component::PropertyValueToString(ComponentProperty& p)
 }
 
 
-void Component::StringToPropertyValue(ComponentProperty& p, HString& valueStr)
+void Component::StringToPropertyValue(ComponentProperty& p, std::string& valueStr)
 {
-	if (p.type.IsSame("bool", false))
+	if (StringTool::IsEqual(p.type, "bool", false))
 	{
 		if (p.bArray)
 		{
-			auto bools = valueStr.Split(";");
+			auto bools = StringTool::split(valueStr, ";");
 			auto valuePtr = ((std::vector<bool>*)p.value);
 			valuePtr->resize(bools.size());
 			for (int i = 0; i < bools.size(); i++)
 			{
-				valuePtr->push_back(HString::ToInt(bools[i]) == 1 ? true : false);
+				valuePtr->push_back(StringTool::ToInt(bools[i]) == 1 ? true : false);
 			}
 		}
 		else
 		{
-			*((bool*)p.value) = HString::ToInt(valueStr) == 1 ? true : false;
+			*((bool*)p.value) = StringTool::ToInt(valueStr) == 1 ? true : false;
 		}
 	}
-	else if (p.type.IsSame("float", false))
+	else if (StringTool::IsEqual(p.type, "float", false))
 	{
 		if (p.bArray)
 		{
-			auto values = valueStr.Split(";");
+			auto values = StringTool::split(valueStr, ";");
 			auto valuePtr = ((std::vector<float>*)p.value);
 			valuePtr->resize(values.size());
 			for (int i = 0; i < values.size(); i++)
 			{
-				valuePtr->push_back((float)HString::ToDouble(values[i]));
+				valuePtr->push_back((float)StringTool::ToDouble(values[i]));
 			}
 		} 
 		else
 		{
-			*((float*)p.value) = (float)HString::ToDouble(valueStr);
+			*((float*)p.value) = (float)StringTool::ToDouble(valueStr);
 		}
 	}
-	else if (p.type.IsSame("Vector2", false))
+	else if (StringTool::IsEqual(p.type, "Vector2", false))
 	{
 		if (p.bArray)
 		{
-			auto values = valueStr.Split(";");
+			auto values = StringTool::split(valueStr, ";");
 			auto valuePtr = ((std::vector<glm::vec2>*)p.value);
 			valuePtr->resize(values.size());
 			for (int i = 0; i < values.size(); i++)
 			{
-				valuePtr->push_back(HString::ToVec2(values[i]));
+				valuePtr->push_back(StringTool::ToVec2(values[i]));
 			}
 		}
 		else
 		{
-			*((glm::vec2*)p.value) = HString::ToVec2(valueStr);
+			*((glm::vec2*)p.value) = StringTool::ToVec2(valueStr);
 		}
 	}
-	else if (p.type.IsSame("Vector3", false))
+	else if (StringTool::IsEqual(p.type, "Vector3", false))
 	{
 		if (p.bArray)
 		{
-			auto values = valueStr.Split(";");
+			auto values = StringTool::split(valueStr, ";");
 			auto valuePtr = ((std::vector<glm::vec3>*)p.value);
 			valuePtr->resize(values.size());
 			for (int i = 0; i < values.size(); i++)
 			{
-				valuePtr->push_back(HString::ToVec3(values[i]));
+				valuePtr->push_back(StringTool::ToVec3(values[i]));
 			}
 		}
 		else
 		{
-			*((glm::vec3*)p.value) = HString::ToVec3(valueStr);
+			*((glm::vec3*)p.value) = StringTool::ToVec3(valueStr);
 		}
 	}
-	else if (p.type.IsSame("Vector4", false))
+	else if (StringTool::IsEqual(p.type, "Vector4", false))
 	{
 		if (p.bArray)
 		{
-			auto values = valueStr.Split(";");
+			auto values = StringTool::split(valueStr, ";");
 			auto valuePtr = ((std::vector<glm::vec4>*)p.value);
 			valuePtr->resize(values.size());
 			for (int i = 0; i < values.size(); i++)
 			{
-				valuePtr->push_back(HString::ToVec4(values[i]));
+				valuePtr->push_back(StringTool::ToVec4(values[i]));
 			}
 		}
 		else
 		{
-			*((glm::vec4*)p.value) = HString::ToVec4(valueStr);
+			*((glm::vec4*)p.value) = StringTool::ToVec4(valueStr);
 		}
 	}
-	else if (p.type.IsSame("AssetRef", false))
+	else if (StringTool::IsEqual(p.type, "AssetRef", false))
 	{
 		if (p.bArray)
 		{
-			auto values = valueStr.Split(";");
+			auto values = StringTool::split(valueStr, ";");
 			auto valuePtr = ((std::vector<AssetRef>*)p.value);
 			valuePtr->resize(values.size());
 			for (int i = 0; i < values.size(); i++)

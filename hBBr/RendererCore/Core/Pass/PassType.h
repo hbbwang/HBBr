@@ -13,7 +13,7 @@ enum class Pass : uint32_t
 	MaxNum = 32
 };
 
-HString GetPassName(Pass& pass);
+std::string GetPassName(Pass& pass);
 
 struct VertexInputLayout
 {

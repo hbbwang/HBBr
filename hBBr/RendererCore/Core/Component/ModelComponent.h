@@ -2,7 +2,6 @@
 #include <memory>
 #include <vector>
 #include "Component.h"
-#include "HString.h"
 #include "Material.h"
 
 class ModelComponent :public Component
@@ -12,7 +11,7 @@ class ModelComponent :public Component
 public:
 
 	//path = virtual path (Content/...)
-	HBBR_API void SetModelByAssetPath(HString virtualPath);
+	HBBR_API void SetModelByAssetPath(std::string virtualPath);
 
 	//这个在未知assetInfo但是又清楚知道实际的资产guid的时候使用
 	//写Hard code之类的就比较适合。
@@ -51,7 +50,7 @@ private:
 
 	std::vector<AssetRef> _materials;
 
-	HString  _errorModelPath;
+	std::string  _errorModelPath;
 
 	std::vector<ModelPrimitive*> _primitives;
 

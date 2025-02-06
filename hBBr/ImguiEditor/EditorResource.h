@@ -36,7 +36,7 @@ public:
 	void Release();
 
 	//Imgui images
-	EditorImage* LoadTexture(uint32_t w, uint32_t h, HString path, VkCommandBuffer cmdBuf);
+	EditorImage* LoadTexture(uint32_t w, uint32_t h, std::string path, VkCommandBuffer cmdBuf);
 
 	EditorImage* _icon_eyeOpen;
 	EditorImage* _icon_eyeClose;

@@ -1,8 +1,6 @@
 ﻿#pragma once
-
 //Shader编译类
 #include "Common.h"
-#include "HString.h"
 #include <vector>
 #include "Shader.h"
 //32bit

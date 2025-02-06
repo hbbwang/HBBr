@@ -55,7 +55,7 @@ VulkanSwapchain::~VulkanSwapchain()
 {
 }
 
-VulkanRenderer* VulkanSwapchain::CreateRenderer(HString rendererName)
+VulkanRenderer* VulkanSwapchain::CreateRenderer(std::string rendererName)
 {
 	VulkanRenderer* newRenderer = nullptr;
 	newRenderer = new VulkanRenderer(this, rendererName.c_str());
@@ -76,18 +76,18 @@ VulkanRenderer* VulkanSwapchain::CreateRenderer(HString rendererName)
 		else
 		{
 			nameIndex++;
-			rendererName = HString(rendererName) + "_" + HString::FromInt(nameIndex);
-			MessageOut((HString("Has the same name of renderer.Random a new name is [") + rendererName + "]"), false, false);
+			rendererName = std::string(rendererName) + "_" + StringTool::FromInt(nameIndex);
+			MessageOut((std::string("Has the same name of renderer.Random a new name is [") + rendererName + "]"), false, false);
 		}
 	}
-	ConsoleDebug::print_endl(HString("Create Renderer : ") + rendererName);
+	ConsoleDebug::print_endl(std::string("Create Renderer : ") + rendererName);
 
 	newRenderer->_renderSize = _surfaceSize;
 
 	return newRenderer;
 }
 
-void VulkanSwapchain::DestroyRenderer(HString rendererName)
+void VulkanSwapchain::DestroyRenderer(std::string rendererName)
 {
 	auto it = _renderers.find(rendererName);
 	if (it != _renderers.end())

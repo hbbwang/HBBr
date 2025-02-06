@@ -27,7 +27,7 @@
 #include "../Common/Common.h"
 #include <memory>
 #include <array>
-#include "HString.h"
+#include <string>
 #include "Thread.h"
 
 #include <vma/vk_mem_alloc.h>
@@ -362,7 +362,7 @@ public:
 	//
 	HBBR_API void VMACreateBufferAndAllocateMemory(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkBuffer& buffer, VmaAllocation& allocation, VmaAllocationInfo* vmaInfo = nullptr, VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY, bool bAlwayMapping = false, bool bFocusCreateDedicatedMemory = false);
 
-	HBBR_API void VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation, HString debugName = "VMABuffer", VkDeviceSize debugSize = 0);
+	HBBR_API void VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocation& allocation, std::string debugName = "VMABuffer", VkDeviceSize debugSize = 0);
 
 	HBBR_API void DestroyBufferAndMemory(VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
@@ -503,7 +503,7 @@ private:
 	/* Get Suitable GPU Device */
 	bool IsGPUDeviceSuitable(VkPhysicalDevice device);
 
-	HString GetVkResult(VkResult code);
+	std::string GetVkResult(VkResult code);
 
 //Vulkan var
 	

@@ -43,7 +43,7 @@ void DescriptorSet::CreateBindings(uint32_t bindingCount, VkDescriptorType type,
 	_shaderStageFlags.insert(_shaderStageFlags.end(), new_shaderStageFlags.begin(), new_shaderStageFlags.end());
 }
 
-VMABuffer* DescriptorSet::CreateBuffer(uint32_t bindingIndex, VkDeviceSize initSize, VmaMemoryUsage memoryUsage, bool bAlwayMapping, bool bFocusCreateDedicatedMemory, HString debugName)
+VMABuffer* DescriptorSet::CreateBuffer(uint32_t bindingIndex, VkDeviceSize initSize, VmaMemoryUsage memoryUsage, bool bAlwayMapping, bool bFocusCreateDedicatedMemory, std::string debugName)
 {
 	auto* manager = VulkanManager::GetManager();
 	auto it = _buffers.find(bindingIndex);

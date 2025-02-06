@@ -22,12 +22,12 @@ public:
 
 	virtual ~HDRI2Cube();
 
-	bool PassExecute(HString hdrImagePath, HString ddsOutputPath, bool bGenerateMips, int cubeMapSize = -1);
+	bool PassExecute(std::string hdrImagePath, std::string ddsOutputPath, bool bGenerateMips, int cubeMapSize = -1);
 
 	void ReleasePass();
 
 private:
-	HString _hdrImagePath;
+	std::string _hdrImagePath;
 
 	VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
 

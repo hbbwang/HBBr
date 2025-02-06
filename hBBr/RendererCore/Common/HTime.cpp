@@ -41,7 +41,7 @@ double HTime::FrameRate_ms()
 	return (0.000001 * (double)duration);
 }
 
-HString HTime::CurrentDateAndTime()
+std::string HTime::CurrentDateAndTime()
 {
 	// 获取当前时间点
 	auto now = std::chrono::system_clock::now();
@@ -66,7 +66,7 @@ HString HTime::CurrentDateAndTime()
 	return datetime_str.c_str();
 }
 
-HString HTime::CurrentDateAndTimeH(bool setW)
+std::string HTime::CurrentDateAndTimeH(bool setW)
 {
 	// 获取当前时间点
 	auto now = std::chrono::system_clock::now();

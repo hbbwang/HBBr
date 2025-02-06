@@ -3,7 +3,6 @@
 #include"Common.h"
 #include <vector>
 #include <map>
-#include "HString.h"
 #include "VertexFactory.h"
 #include "Primitive.h"
 #include "HGuid.h"
@@ -140,7 +139,7 @@ public:
 	HBBR_API static bool BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prims,class VulkanRenderer* renderer);
 
 #if IS_EDITOR
-	HBBR_API void SaveAsset(HString path)override;
+	HBBR_API void SaveAsset(std::string path)override;
 #endif
 
 	//根据材质区分面

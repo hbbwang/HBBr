@@ -13,7 +13,7 @@
 #include "VulkanObjectManager.h"
 #include  "VMABuffer.h"
 std::vector<Texture2D*> Texture2D::_upload_textures;
-std::unordered_map<HString, std::weak_ptr<Texture2D>> Texture2D::_system_textures;
+std::unordered_map<std::string, std::weak_ptr<Texture2D>> Texture2D::_system_textures;
 uint64_t Texture2D::_textureStreamingSize = 0;
 uint64_t Texture2D::_maxTextureStreamingSize = (uint64_t)4 * (uint64_t)1024 * (uint64_t)1024 * (uint64_t)1024; //4 GB
 
@@ -98,7 +98,7 @@ void Texture2D::Resize(uint32_t width, uint32_t height, bool bDestroyImmediately
 
 	if (_textureStreamingSize > _maxTextureStreamingSize)
 	{
-		MessageOut((HString("Max texture streaming size is ") + HString::FromSize_t(_maxTextureStreamingSize) + ", but current texture streaming size is  " + HString::FromSize_t(_textureStreamingSize)), false, false, "255,255,0");
+		MessageOut((std::string("Max texture streaming size is ") + StringTool::FromSize_t(_maxTextureStreamingSize) + ", but current texture streaming size is  " + StringTool::FromSize_t(_textureStreamingSize)), false, false, "255,255,0");
 	}
 
 	manager->CreateImageView(_image, _format, _imageAspectFlags, _imageView, _mipCount, _layerCount, _componentMapping);
@@ -123,7 +123,7 @@ void Texture2D::Resize(uint32_t width, uint32_t height, bool bDestroyImmediately
 
 std::shared_ptr<Texture2D> Texture2D::CreateTexture2D(
 	uint32_t width, uint32_t height, VkFormat format, 
-	VkImageUsageFlags usageFlags, HString textureName,
+	VkImageUsageFlags usageFlags, std::string textureName,
 	uint32_t miplevel, uint32_t layerCount, VkMemoryPropertyFlags memoryPropertyFlag,
 	VkComponentMapping componentMapping)
 {
@@ -155,13 +155,13 @@ std::shared_ptr<Texture2D> Texture2D::CreateTexture2D(
 std::shared_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags usageFlags)
 {
 	const auto texAssets = ContentManager::Get()->GetAssets(AssetType::Texture2D);
-	HString guidStr = GUIDToString(guid);
+	std::string guidStr = GUIDToString(guid);
 	//从内容管理器查找资产
 	auto it = texAssets.find(guid);
 	{
 		if (it == texAssets.end())
 		{
-			MessageOut(HString("Can not find [" + guidStr + "] texture in content manager."), false, false, "255,255,0");
+			MessageOut(std::string("Can not find [" + guidStr + "] texture in content manager."), false, false, "255,255,0");
 			return nullptr;
 		}
 	}
@@ -179,7 +179,7 @@ std::shared_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags us
 	}
 
 	//获取实际路径
-	HString filePath = it->second->absFilePath;
+	std::string filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
 		return nullptr;
@@ -252,7 +252,7 @@ std::shared_ptr<Texture2D> Texture2D::LoadAsset(HGUID guid, VkImageUsageFlags us
 }
 
 #if IS_EDITOR
-void Texture2D::SaveAsset(HString path)
+void Texture2D::SaveAsset(std::string path)
 {
 }
 #endif
@@ -384,14 +384,14 @@ void Texture2D::GlobalRelease()
 	_system_textures.clear();
 }
 
-void Texture2D::AddSystemTexture(HString tag, std::weak_ptr<Texture2D> tex)
+void Texture2D::AddSystemTexture(std::string tag, std::weak_ptr<Texture2D> tex)
 {
 	//系统纹理是渲染器底层预设纹理，需要直接准备就绪
 	tex.lock()->CopyBufferToTextureImmediate();
 	_system_textures.emplace(tag, tex);
 }
 
-std::shared_ptr<Texture2D> Texture2D::GetSystemTexture(HString tag)
+std::shared_ptr<Texture2D> Texture2D::GetSystemTexture(std::string tag)
 {
 	//_system_textures[tag];
 	auto it = _system_textures.find(tag);

@@ -34,7 +34,7 @@ void ModelComponent::UpdateMaterial()
 	}
 }
 
-void ModelComponent::SetModelByAssetPath(HString virtualPath)
+void ModelComponent::SetModelByAssetPath(std::string virtualPath)
 {
 	if (!_bActive || !_gameObject->IsActive() || !_gameObject->GetLevel()->IsActive())
 		return;
@@ -142,6 +142,10 @@ void ModelComponent::UpdateData()
 			{
 				mats[i] = info.lock()->GetAssetObject<Material>();
 			}
+			else
+			{
+				mats[i] = Material::GetErrorMaterial().lock();
+			}
 		}
 		SetModel(AssetObject::Cast<Model>(_model.asset), &mats);
 	}
@@ -190,9 +194,9 @@ void ModelComponent::Deserialization(nlohmann::json input)
 	nlohmann::json compPros = input["Properties"];
 	for (auto& p : compPros.items())
 	{
-		HString proName = p.key();
-		HString proType = p.value()["Type"];
-		HString proValue = p.value()["Value"];
+		std::string proName = p.key();
+		std::string proType = p.value()["Type"];
+		std::string proValue = p.value()["Value"];
 		for (auto& pp : _compProperties)
 		{
 			if (pp.name == proName && pp.type == proType)
@@ -214,7 +218,7 @@ nlohmann::json ModelComponent::Serialization()
 	{
 		nlohmann::json subPro;
 		auto valueStr = Component::PropertyValueToString(p);
-		if (valueStr.Length() > 0)
+		if (valueStr.length() > 0)
 		{
 			subPro["Type"] = p.type;
 			subPro["Value"] = valueStr;

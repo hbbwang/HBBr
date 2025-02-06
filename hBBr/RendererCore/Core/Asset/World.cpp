@@ -35,10 +35,10 @@ World::~World()
 #endif
 }
 
-Level* World::GetLevel(HString name)
+Level* World::GetLevel(std::string name)
 {
 	auto it = std::find_if(_levels.begin(), _levels.end(), [&](std::shared_ptr<Level>& level) {
-		return level->GetLevelName().IsSame(name);
+		return StringTool::IsEqual(level->GetLevelName(), name);
 	});
 	if (it != _levels.end())
 	{
@@ -47,7 +47,7 @@ Level* World::GetLevel(HString name)
 	return nullptr;
 }
 
-void World::AddNewLevel(HString name)
+void World::AddNewLevel(std::string name)
 {
 	std::shared_ptr<Level> newLevel = nullptr;
 	newLevel.reset(new Level(this, name));
@@ -61,14 +61,14 @@ void World::AddNewLevel(HString name)
 }
 
 #if IS_EDITOR
-void World::DeleteLevel(HString levelName)
+void World::DeleteLevel(std::string levelName)
 {
 	//此操作并不会删除.level文件，只会更改World的_levels，等待DirtyAssetsManager里确认保存了才会真正删除保存
 
 	//移除World里面的内存，保存的时候会根据_levels重新写入json
 	auto it = std::remove_if(_levels.begin(), _levels.end(), 
 		[&](std::shared_ptr<Level>& l) {
-			return l->GetLevelName().IsSame(levelName);
+			return StringTool::IsEqual(l->GetLevelName(), levelName);
 		});
 	if (it != _levels.end())
 	{
@@ -80,17 +80,17 @@ void World::DeleteLevel(HString levelName)
 }
 #endif
 
-std::shared_ptr<World> World::CreateNewWorld(HString newWorldName)
+std::shared_ptr<World> World::CreateNewWorld(std::string newWorldName)
 {
 	std::shared_ptr<World> world;
 	world.reset(new World());
 
-	HString finalName = newWorldName;
+	std::string finalName = newWorldName;
 	/*auto it = _worlds.find(finalName);
 	int index = 0;
 	while (it != _worlds.end())
 	{
-		finalName = newWorldName + "_" +  HString::FromInt(index);
+		finalName = newWorldName + "_" +  std::string::FromInt(index);
 		it = _worlds.find(finalName);
 		index++;
 	}*/
@@ -105,15 +105,15 @@ std::shared_ptr<World> World::CreateNewWorld(HString newWorldName)
 	return world;
 }
 
-void World::SetWorldName(HString name)
+void World::SetWorldName(std::string name)
 {
 	_worldName = name;
 	ConsoleDebug::printf_endl("World rename[%s][%s]", _worldName.c_str(), _guidStr.c_str());
 }
 
-void World::SaveWorld(HString newWorldName)
+void World::SaveWorld(std::string newWorldName)
 {
-	newWorldName.ClearSpace();
+	newWorldName = StringTool::ClearSpace(newWorldName);
 	//创建World目录
 	FileSystem::CreateDir(_worldAbsPath.c_str());
 	for (auto& i : _levels)
@@ -143,7 +143,7 @@ void World::ReloadWorldSetting()
 			_levels.reserve(levels.size());
 			for (auto& i : levels.items())
 			{
-				HString levelName = i.key();
+				std::string levelName = i.key();
 				std::shared_ptr<Level> newLevel;
 
 				auto level_it = std::find_if(_levels.begin(), _levels.end(), [levelName](std::shared_ptr<Level>& l) {
@@ -175,7 +175,7 @@ void World::ReloadWorldSetting()
 	}
 }
 
-GameObject* World::SpawnGameObject(HString name, class Level* level)
+GameObject* World::SpawnGameObject(std::string name, class Level* level)
 {
 #if IS_EDITOR
 	if (level != _editorLevel.get() && this->_levels.size() <= 0)

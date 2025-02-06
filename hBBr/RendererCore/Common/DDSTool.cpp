@@ -392,8 +392,8 @@ DDSLoader::DDSLoader(const char* filePath) : DDSHeader(0), DDS10Header(0)
 	std::ifstream file(filePath, std::ios::ate | std::ios::binary);
 	if (!file.is_open())
 	{
-		//throw std::runtime_error((HString("failed to open file : ") + filePath).c_str());
-		ConsoleDebug::print_endl((HString("failed to open dds file : ") + filePath).c_str(), "255,20,0");
+		//throw std::runtime_error((std::string("failed to open file : ") + filePath).c_str());
+		ConsoleDebug::print_endl((std::string("failed to open dds file : ") + filePath).c_str(), "255,20,0");
 		return;
 	}
 	size_t fileSize = static_cast<size_t>(file.tellg());
@@ -441,7 +441,7 @@ std::shared_ptr<ImageData>  DDSLoader::LoadDDSToImage()
 	//是否导入失败
 	if (!IsValid())
 	{
-		ConsoleDebug::print_endl((HString("load dds file failed.")).c_str(), "255,20,0");
+		ConsoleDebug::print_endl((std::string("load dds file failed.")).c_str(), "255,20,0");
 		return nullptr;
 	}
 
@@ -470,7 +470,7 @@ std::shared_ptr<ImageData>  DDSLoader::LoadDDSToImage()
 	//如果没有获取到格式,就相当于失败了。
 	if(dxgiTextureFormat == DXGI_FORMAT_UNKNOWN)
 	{
-		ConsoleDebug::print_endl((HString("load dds file failed.Unknow texture format.")).c_str(), "255,20,0");
+		ConsoleDebug::print_endl((std::string("load dds file failed.Unknow texture format.")).c_str(), "255,20,0");
 		return nullptr;
 	}
 

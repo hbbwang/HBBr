@@ -32,13 +32,13 @@ Model::~Model()
 std::shared_ptr<Model> Model::LoadAsset(HGUID guid)
 {
 	const auto modelAssets = ContentManager::Get()->GetAssets(AssetType::Model);
-	HString guidStr = GUIDToString(guid);
+	std::string guidStr = GUIDToString(guid);
 	//从内容管理器查找资产
 	auto it = modelAssets.find(guid);
 	{	
 		if (it == modelAssets.end())
 		{
-			MessageOut(HString("Can not find [" + guidStr + "] model in content manager."), false, false, "255,255,0");
+			MessageOut(std::string("Can not find [" + guidStr + "] model in content manager."), false, false, "255,255,0");
 			return nullptr;
 		}
 	}
@@ -56,7 +56,7 @@ std::shared_ptr<Model> Model::LoadAsset(HGUID guid)
 	}
 
 	//获取实际路径
-	HString filePath = it->second->absFilePath;
+	std::string filePath = it->second->absFilePath;
 	if (!FileSystem::FileExist(filePath.c_str()))
 	{
 		return nullptr;
@@ -111,7 +111,7 @@ std::shared_ptr<Model> Model::LoadAsset(HGUID guid)
 	{
 		aiMesh* mesh = scene->mMeshes[nm];
 #if IS_EDITOR
-		ConsoleDebug::print_endl("Found meshes successful.\nThere are " + HString::FromUInt(mesh->mNumVertices) + " vertices have been found.", "160,160,160");
+		ConsoleDebug::print_endl("Found meshes successful.\nThere are " + StringTool::FromUInt(mesh->mNumVertices) + " vertices have been found.", "160,160,160");
 #endif
 		//
 		FaceData* newData = new FaceData;
@@ -272,7 +272,7 @@ bool Model::BuildModelPrimitives(Model* data, std::vector<ModelPrimitive*>& prim
 	return false;
 }
 #if IS_EDITOR
-void Model::SaveAsset(HString path)
+void Model::SaveAsset(std::string path)
 {
 }
 #endif

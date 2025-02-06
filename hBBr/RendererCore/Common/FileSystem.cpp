@@ -4,146 +4,137 @@
 #include <fstream>
 #include "RendererConfig.h"
 #include "AndroidCommon.h"
+#include "StringTools.h"
 
 namespace fs = std::filesystem;
 
-HString FileSystem::_appPath;
-
-HString FileSystem::GetProgramPath()
+std::string FileSystem::GetProgramPath()
 {
     //const char* org = "hBBr";
     //const char* app = "Game";
     //char* prefPath = SDL_GetPrefPath(org, app);
     //SDL_ShowSimpleMessageBox(0, "", prefPath, nullptr);
     //SDL_free(prefPath);
-
-    if (_appPath.Length() <= 2)
-    {
-        #if _WIN32
+    #if _WIN32
         auto path = SDL_GetBasePath();
-        char pathStr[4096];
-        strcpy_s(pathStr, 4096, path);
-        pathStr[strlen(path)] = '\0';
-        _appPath = pathStr;
-        #elif __ANDROID__
-        //获取android/data/ [package] /files路径
-        _appPath = SDL_AndroidGetExternalStoragePath();
-        _appPath += "/";
-        #endif
-    }
-    return _appPath;
+    #elif __ANDROID__
+    //获取android/data/ [package] /files路径
+        auto path = SDL_AndroidGetExternalStoragePath();
+        path += "/";
+    #endif
+    return path;
 }
 
-HString FileSystem::GetShaderCacheAbsPath()
+std::string FileSystem::GetShaderCacheAbsPath()
 {
     fs::path p = GetProgramPath().c_str();
-    HString path = (p / "Asset"/ "ShaderCache").c_str();
+    std::string path = (p / "Asset"/ "ShaderCache").string();
     path += "/";
     FileSystem::CorrectionPath(path);
     return path;
 }
 
-HString FileSystem::GetAssetAbsPath()
+std::string FileSystem::GetAssetAbsPath()
 {
     fs::path p = GetProgramPath().c_str();
-    HString path = (p / "Asset").c_str();
+    std::string path = (p / "Asset").string();
     path += "/";
     FileSystem::CorrectionPath(path);
     return path;
 }
 
-HString FileSystem::GetContentAbsPath()
+std::string FileSystem::GetContentAbsPath()
 {
     fs::path p = GetProgramPath().c_str();
-    HString path = (p / "Asset" / "Content").c_str();
+    std::string path = (p / "Asset" / "Content").string();
     path += "/";
     FileSystem::CorrectionPath(path);
     return path;
 }
 
-HString FileSystem::GetSavedAbsPath()
+std::string FileSystem::GetSavedAbsPath()
 {
     fs::path p = GetProgramPath().c_str();
-    HString path = (p / "Asset" / "Saved").c_str();
+    std::string path = (p / "Asset" / "Saved").string();
     path += "/";
     FileSystem::CorrectionPath(path);
     return path;
 }
 
-HString FileSystem::GetConfigAbsPath()
+std::string FileSystem::GetConfigAbsPath()
 {
     fs::path p = GetProgramPath().c_str();
-    HString path = (p / "Config").c_str();
+    std::string path = (p / "Config").string();
     path += "/";
     FileSystem::CorrectionPath(path);
     return path;
 }
 
-HString FileSystem::GetWorldAbsPath()
+std::string FileSystem::GetWorldAbsPath()
 {
     fs::path p = GetProgramPath().c_str();
-    HString path = (p / "Asset" / "World").c_str();
+    std::string path = (p / "Asset" / "World").string();
     path += "/";
     FileSystem::CorrectionPath(path);
     return path;
 }
 
-HString FileSystem::GetRepositoryConfigAbsPath(HString repositoryName)
+std::string FileSystem::GetRepositoryConfigAbsPath(std::string repositoryName)
 {
-    HString contentPath = FileSystem::GetContentAbsPath();
-    HString repositoryPath = FileSystem::Append(contentPath, repositoryName);
+    std::string contentPath = FileSystem::GetContentAbsPath();
+    std::string repositoryPath = FileSystem::Append(contentPath, repositoryName);
     return FileSystem::Append(repositoryPath, ".repository");
 }
 
-HString FileSystem::GetRepositoryAbsPath(HString repositoryName)
+std::string FileSystem::GetRepositoryAbsPath(std::string repositoryName)
 {
-    HString contentPath = FileSystem::GetContentAbsPath();
+    std::string contentPath = FileSystem::GetContentAbsPath();
     return FileSystem::Append(contentPath, repositoryName);
 }
 
-HString FileSystem::FillUpAssetPath(HString assetPath)
+std::string FileSystem::FillUpAssetPath(std::string assetPath)
 {
     fs::path p = GetProgramPath().c_str();
     fs::path a = assetPath.c_str();
     p = p / a;
     p = p.lexically_normal();
-    return p.c_str();
+    return p.string();
 }
 
-HString FileSystem::GetShaderIncludeAbsPath()
+std::string FileSystem::GetShaderIncludeAbsPath()
 {
     fs::path p = GetProgramPath().c_str();
-    HString path = (p / "Asset" / "ShaderInclude").c_str();
+    std::string path = (p / "Asset" / "ShaderInclude").string();
 	path += "/";
     FileSystem::CorrectionPath(path);
     return path;
 }
 
-HString FileSystem::GetRelativePath(const char* filePath)
+std::string FileSystem::GetRelativePath(const char* filePath)
 {
-    HString programPath = GetProgramPath().c_str();
+    std::string programPath = GetProgramPath().c_str();
     FileSystem::CorrectionPath(programPath);
-    HString path = fs::path(filePath).c_str();
-    FileSystem::CorrectionPath(path);
-    if (path.Contains(programPath))
+    std::string path = fs::path(filePath).string();
+    FileSystem::CorrectionPath(path); 
+    if (StringTool::Contains(path, programPath))
     {
-        path.Remove(0, programPath.Length());
-        path = "." + HString::GetSeparate() +  path;
+        StringTool::Remove(path, 0, programPath.length());
+        path = "." + StringTool::GetSeparate() +  path;
         return path;
     }
     return filePath;
 }
 
-HString FileSystem::GetRelativePath(HString filePath)
+std::string FileSystem::GetRelativePath(std::string filePath)
 {
-    HString programPath = GetProgramPath().c_str();
+    std::string programPath = GetProgramPath().c_str();
     FileSystem::CorrectionPath(programPath);
-    HString path = fs::path(filePath.c_str()).c_str();
+    std::string path = fs::path(filePath.c_str()).string();
     FileSystem::CorrectionPath(path);
-    if (path.Contains(programPath))
+    if (StringTool::Contains(path, programPath))
     {
-        path.Remove(0, programPath.Length());
-        path = "." + HString::GetSeparate() + path;
+        StringTool::Remove(path, 0, programPath.length());
+        path = "." + StringTool::GetSeparate() + path;
         return path;
     }
     return filePath;
@@ -170,12 +161,12 @@ bool FileSystem::FileExist(const char* path)
     return fs::exists(path);
 }
 
-bool FileSystem::FileExist(HString path)
+bool FileSystem::FileExist(std::string path)
 {
     return fs::exists(path.c_str());
 }
 
-HString FileSystem::AssetFileExist(HString path)
+std::string FileSystem::AssetFileExist(std::string path)
 {
     if (!FileExist(path))
     {
@@ -188,7 +179,7 @@ HString FileSystem::AssetFileExist(HString path)
     return path;
 }
 
-bool FileSystem::IsDir(HString& path)
+bool FileSystem::IsDir(std::string& path)
 {
     return  fs::is_directory(path.c_str());
 }
@@ -238,12 +229,12 @@ void FileSystem::FileCopy(const char* srcFile, const char* newPath)
     fs::copy(srcFile, newPath, fs::copy_options::overwrite_existing, error);
     if (error.value())
     {
-        HString copyError = "FileCopy:";
+        std::string copyError = "FileCopy:";
         copyError += srcFile;
         copyError += " [to] \n" ;
         copyError += newPath;
         copyError += " : \n";
-        copyError += error.message().c_str();
+        copyError += (error.message()).c_str();
         MessageOut(copyError, false, false, "255,255,0");
     }
 }
@@ -264,45 +255,45 @@ uint64_t FileSystem::GetFileSize(const char* path)
     return fs::file_size(path);
 }
 
-HString FileSystem::Append(HString a, HString b)
+std::string FileSystem::Append(std::string a, std::string b)
 {
     fs::path pp = a.c_str();
     fs::path aa = b.c_str();
     pp = pp / aa;
     pp = pp.lexically_normal();
-    return pp.c_str();
+    return pp.string();
 }
 
-HString FileSystem::CorrectionPath(const char* path)
+std::string FileSystem::CorrectionPath(const char* path)
 {
     //std::filesystem::path::preferred_separator
-    return fs::path(path).make_preferred().c_str();
+    return fs::path(path).make_preferred().string();
 }
 
-void FileSystem::CorrectionPath(HString& path)
+void FileSystem::CorrectionPath(std::string& path)
 {
-    path = fs::path(path.c_str()).make_preferred().c_str();
+    path = fs::path(path.c_str()).make_preferred().string();
 }
 
-void FileSystem::NormalizePath(HString& path)
+void FileSystem::NormalizePath(std::string& path)
 {
     if (IsDir(path))
     {
-        path = (fs::path((path + "/").c_str())).lexically_normal().c_str();
+        path = (fs::path((path + "/").c_str())).lexically_normal().string();
     }
     else
     {
-        path = fs::path(path.c_str()).lexically_normal().c_str();
+        path = fs::path(path.c_str()).lexically_normal().string();
     }
 }
 
-void FileSystem::FixUpPath(HString& path)
+void FileSystem::FixUpPath(std::string& path)
 {
     NormalizePath(path);
     CorrectionPath(path);
 }
 
-bool FileSystem::ContainsPath(HString A, HString B)
+bool FileSystem::ContainsPath(std::string A, std::string B)
 {
     NormalizePath(A);
     CorrectionPath(A);
@@ -320,27 +311,27 @@ bool FileSystem::ContainsPath(HString A, HString B)
     return a_it == a.end();
 }
 
-HString FileSystem::GetFilePath(HString path)
+std::string FileSystem::GetFilePath(std::string path)
 {
     fs::path fs_path = fs::path(path.c_str());
     std::string result = fs_path.parent_path().string();
     result += fs::path::preferred_separator;
-    return HString(result.c_str());
+    return std::string(result.c_str());
 }
 
-HString FileSystem::GetFileName(HString path)
+std::string FileSystem::GetFileName(std::string path)
 {
-    return fs::path(path.c_str()).filename().c_str();
+    return fs::path(path.c_str()).filename().string();
 }
 
-HString FileSystem::GetBaseName(HString path)
+std::string FileSystem::GetBaseName(std::string path)
 {
     std::string fileName = fs::path(path.c_str()).filename().string();
     fileName = fileName.substr(0, fileName.rfind("."));
     return fileName.c_str();
 }
 
-HString FileSystem::GetFileExt(HString path)
+std::string FileSystem::GetFileExt(std::string path)
 {
     std::string result = fs::path(path.c_str()).extension().string();
     result = result.erase(0, 1);
@@ -359,16 +350,16 @@ std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char
     {
         if (entry.is_regular_file()) //如果是文件
         {
-            HString ext = entry.path().extension().c_str();
-            ext.Remove(".");
-            if (ext.IsSame(suffix,false))
+            std::string ext = entry.path().extension().string();
+            StringTool::Remove(ext, ".");
+            if(StringTool::IsEqual(ext, suffix,false))
             {
                 FileEntry en = {};
-                en.absPath = entry.path().c_str();
+                en.absPath = entry.path().string();
                 en.relativePath = GetRelativePath(en.absPath.c_str());
-                en.fileName = entry.path().filename().c_str();
-                en.suffix = entry.path().extension().c_str();
-                en.baseName = entry.path().stem().c_str();
+                en.fileName = entry.path().filename().string();
+                en.suffix = entry.path().extension().string();
+                en.baseName = entry.path().stem().string();
                 en.type = FileEntryType::File;
                 const size_t vecSize = result.size();
                 if (vecSize >= result.capacity())
@@ -380,7 +371,7 @@ std::vector<FileEntry> FileSystem::GetFilesBySuffix(const char* path, const char
         }
         else if(entry.is_directory()) //文件夹
         {
-            HString newDirPath = entry.path().c_str();
+            std::string newDirPath = entry.path().string();
             auto children = GetFilesBySuffix(newDirPath.c_str(), suffix);
             if (children.size() > 0)
             {
@@ -403,15 +394,15 @@ std::vector<FileEntry> FileSystem::GetAllFilesExceptFolders(const char* path)
     {
         if (entry.is_regular_file()) //如果是文件
         {
-            HString ext = entry.path().extension().c_str();
-            ext.Remove(".");
+            std::string ext = entry.path().extension().string();
+            StringTool::Remove(ext, ".");
             {
                 FileEntry en = {};
-                en.absPath = entry.path().c_str();
+                en.absPath = entry.path().string();
                 en.relativePath = GetRelativePath(en.absPath.c_str());
-                en.fileName = entry.path().filename().c_str();
-                en.suffix = entry.path().extension().c_str();
-                en.baseName = entry.path().stem().c_str();
+                en.fileName = entry.path().filename().string();
+                en.suffix = entry.path().extension().string();
+                en.baseName = entry.path().stem().string();
                 en.type = FileEntryType::File;
                 const size_t vecSize = result.size();
                 if (vecSize >= result.capacity())
@@ -423,7 +414,7 @@ std::vector<FileEntry> FileSystem::GetAllFilesExceptFolders(const char* path)
         }
         else if (entry.is_directory()) //文件夹
         {
-            HString newDirPath = entry.path().c_str();
+            std::string newDirPath = entry.path().string();
             auto children = GetAllFilesExceptFolders(newDirPath.c_str());
             if (children.size() > 0)
             {
@@ -446,15 +437,15 @@ std::vector<FileEntry> FileSystem::GetAllFolders(const char* path, bool currentD
     {
         if (entry.is_directory()) //文件夹
         {
-            HString ext = entry.path().extension().c_str();
-            ext.Remove(".");
+            std::string ext = entry.path().extension().string();
+            StringTool::Remove(ext, ".");
             {
                 FileEntry en = {};
-                en.absPath = entry.path().c_str();
+                en.absPath = entry.path().string();
                 en.relativePath = GetRelativePath(en.absPath.c_str());
-                en.fileName = entry.path().filename().c_str();
-                en.suffix = entry.path().extension().c_str();
-                en.baseName = entry.path().stem().c_str();
+                en.fileName = entry.path().filename().string();
+                en.suffix = entry.path().extension().string();
+                en.baseName = entry.path().stem().string();
                 en.type = FileEntryType::Dir;
                 const size_t vecSize = result.size();
                 if (vecSize >= result.capacity())
@@ -466,7 +457,7 @@ std::vector<FileEntry> FileSystem::GetAllFolders(const char* path, bool currentD
             //
             if (!currentDir)
             {
-                HString newDirPath = entry.path().c_str();
+                std::string newDirPath = entry.path().string();
                 auto children = GetAllFolders(newDirPath.c_str(), currentDir);
                 if (children.size() > 0)
                 {
@@ -484,7 +475,7 @@ std::vector<char> FileSystem::ReadBinaryFile(const char* filePath)
     if (!file.is_open())
     {
         //throw std::runtime_error((DString("failed to open file : ") + filePath).c_str());
-        MessageOut((HString("failed to open file : ") + filePath), false, true, "255,0,0");
+        MessageOut((std::string("failed to open file : ") + filePath), false, true, "255,0,0");
     }
     size_t fileSize = static_cast<size_t>(file.tellg());
     std::vector<char> buffer(fileSize);
@@ -494,7 +485,7 @@ std::vector<char> FileSystem::ReadBinaryFile(const char* filePath)
     return buffer;
 }
 
-void FileSystem::ClearPathSeparation(HString& path)
+void FileSystem::ClearPathSeparation(std::string& path)
 {
     std::string str = path.c_str();
     auto newEnd = std::remove_if(str.begin(), str.end(), [](char c) {

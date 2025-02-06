@@ -3,7 +3,7 @@
 #include <fstream>
 #include "ConsoleDebug.h"
 
-bool Serializable::SaveJson(nlohmann::json& json, HString path)
+bool Serializable::SaveJson(nlohmann::json& json, std::string path)
 {
     // 将 JSON 对象写入文件
     std::ofstream file(path.c_str(), std::ios::out | std::ios::trunc);
@@ -21,13 +21,7 @@ bool Serializable::SaveJson(nlohmann::json& json, HString path)
     }
 }
 
-std::string gbk_to_utf8(const std::string& in) {
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-    std::wstring wide_str = conv.from_bytes(in);
-    return conv.to_bytes(wide_str);
-}
-
-bool Serializable::LoadJson(HString path, nlohmann::json& json)
+bool Serializable::LoadJson(std::string path, nlohmann::json& json)
 {
     std::ifstream file(path.c_str());
     if (file)
@@ -42,8 +36,8 @@ bool Serializable::LoadJson(HString path, nlohmann::json& json)
         }
         catch (const nlohmann::json::parse_error& e)
         {
-            //ConsoleDebug::print_endl(HString("Failed to read JSON data..") + e.what(), "255,0,0");
-            MessageOut(HString(HString("Failed to read JSON data : \n") + path  + "\n"+ e.what()), true, false, "255,0,0");
+            //ConsoleDebug::print_endl(std::string("Failed to read JSON data..") + e.what(), "255,0,0");
+            MessageOut(std::string(std::string("Failed to read JSON data : \n") + path  + "\n"+ e.what()), true, false, "255,0,0");
             return false;
         }
 #endif
@@ -53,27 +47,27 @@ bool Serializable::LoadJson(HString path, nlohmann::json& json)
     }
     else
     {
-        MessageOut(HString(HString("Failed to open JSON file : \n") + path ), false, false, "255,0,0");
+        MessageOut(std::string(std::string("Failed to open JSON file : \n") + path ), false, false, "255,0,0");
         return false;
     }
 }
 
-void Serializable::SaveJson(HString path)
+void Serializable::SaveJson(std::string path)
 {
     SaveJson(_json, path);
 }
 
-bool Serializable::LoadJson(HString path)
+bool Serializable::LoadJson(std::string path)
 {
     return LoadJson(path,_json);
 }
 
-void to_json(nlohmann::json& j, const HString& s) 
+void to_json(nlohmann::json& j, const std::string& s) 
 {
-	j = s.c_strC();
+	j = s.c_str();
 }
 
-void from_json(const nlohmann::json& j, HString& s)
+void from_json(const nlohmann::json& j, std::string& s)
 {
 	s = (j.get<std::string>()).c_str();
 }

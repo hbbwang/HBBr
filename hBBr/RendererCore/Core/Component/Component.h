@@ -62,8 +62,8 @@ ComponentClassName  _component_construct_##ComponentClassName;
 
 struct AssetRef
 {
-	HString path = "";
-	HString displayName = "";
+	std::string path = "";
+	std::string displayName = "";
 	std::shared_ptr<AssetObject> asset;
 	std::function<void()> callBack = []() {};
 };
@@ -72,21 +72,21 @@ struct ComponentProperty
 {
 	class Component* comp = nullptr;
 
-	HString name;
+	std::string name;
 
 	//指向参数的指针
 	void* value = nullptr;
 
 	//分类
-	HString category;
+	std::string category;
 
-	HString condition;
+	std::string condition;
 
 	//排序
 	int sort = 32;
 
 	//Type String
-	HString type = "void";
+	std::string type = "void";
 
 	bool bArray = false;
 
@@ -123,7 +123,7 @@ public:
 		return _compProperties;
 	}
 
-	HBBR_API HBBR_INLINE ComponentProperty* FindProperty(HString name) const {
+	HBBR_API HBBR_INLINE ComponentProperty* FindProperty(std::string name) const {
 		auto it = std::find_if(_compProperties.begin(), _compProperties.end(), [name](const ComponentProperty& p) {
 			return name == p.name;
 		});
@@ -134,7 +134,7 @@ public:
 		return nullptr;
 	}
 
-	HBBR_API HBBR_INLINE HString GetComponentName() const {
+	HBBR_API HBBR_INLINE std::string GetComponentName() const {
 		return _typeName;
 	}
 
@@ -284,7 +284,7 @@ protected:
 
 	bool _bInit;
 
-	HString _typeName = "Component";
+	std::string _typeName = "Component";
 
 	class GameObject* _gameObject = nullptr;
 	
@@ -293,9 +293,9 @@ protected:
 	class World* _world = nullptr;
 
 
-	static HString PropertyValueToString(ComponentProperty& p);
+	static std::string PropertyValueToString(ComponentProperty& p);
 
-	static void StringToPropertyValue(ComponentProperty& p, HString& valueStr);
+	static void StringToPropertyValue(ComponentProperty& p, std::string& valueStr);
 
 	private:
 		void CompUpdate();

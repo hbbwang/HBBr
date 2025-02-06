@@ -99,7 +99,7 @@ void CameraComponent::Update()
 				}
 				trans->SetWorldLocation(worldPos);
 			}
-			//ConsoleDebug::print_endl(HString::FromVec2(mouseAxis));
+			//ConsoleDebug::print_endl(std::string::FromVec2(mouseAxis));
 			else
 			{
 				_lastMousePos = currentMousePos;

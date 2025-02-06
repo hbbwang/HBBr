@@ -55,12 +55,22 @@ struct LightingParameters
 
 	bool operator!=(const LightingParameters& a) const {
 		return LightPosition != a.LightPosition
-			&& LightStrength != a.LightStrength
-			&& LightColor != a.LightColor
-			&& LightSpecular != a.LightSpecular
-			&& LightDirection != a.LightDirection
-			&& LightType != a.LightType
-			&& LightFlags != a.LightFlags;
+			|| LightStrength != a.LightStrength
+			|| LightColor != a.LightColor
+			|| LightSpecular != a.LightSpecular
+			|| LightDirection != a.LightDirection
+			|| LightType != a.LightType
+			|| LightFlags != a.LightFlags;
+	}
+
+	bool operator==(const LightingParameters& a) const {
+		return LightPosition == a.LightPosition
+			&& LightStrength == a.LightStrength
+			&& LightColor == a.LightColor
+			&& LightSpecular == a.LightSpecular
+			&& LightDirection == a.LightDirection
+			&& LightType == a.LightType
+			&& LightFlags == a.LightFlags;
 	}
 }; 
 
@@ -70,8 +80,9 @@ struct LightingUniformBuffer
 	LightingParameters lightParams[MaxLightingNum];
 
 	bool operator!=(const LightingUniformBuffer& a) const {
-		return validLightCount != a.validLightCount
-			&& lightParams != a.lightParams;
+		return 
+				validLightCount != a.validLightCount
+			||	!std::equal(lightParams, lightParams + MaxLightingNum, a.lightParams);
 	}
 };
 

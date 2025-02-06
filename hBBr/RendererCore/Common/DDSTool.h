@@ -1,7 +1,6 @@
 #pragma once
 #include "Common.h"
 #include "ImageTool.h"
-#include "HString.h"
 #pragma region DirectXFormat
 
 typedef enum EDXGI_FORMAT
@@ -254,6 +253,6 @@ public:
 	const FDDS10FileHeader* DDS10Header;
 	bool isCubeMap ;
 	int arraySize;
-	HString path;
+	std::string path;
 };
 

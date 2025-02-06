@@ -28,7 +28,7 @@ void VulkanObjectManager::SafeReleaseVkBuffer(VkBuffer buffer, VkDeviceMemory me
 	_numRequestObjects++;
 }
 
-void VulkanObjectManager::SafeReleaseVMABuffer(VkBuffer buffer, VmaAllocation allocation, HString debugName, VkDeviceSize debugSize)
+void VulkanObjectManager::SafeReleaseVMABuffer(VkBuffer buffer, VmaAllocation allocation, std::string debugName, VkDeviceSize debugSize)
 {
 	VMABufferObject* newObject = new VMABufferObject();
 	newObject->buffer = buffer;
@@ -69,7 +69,7 @@ void VulkanObjectManager::RefreshTexture(std::weak_ptr<class Texture2D> texture,
 		_textureRefresh.emplace(texture.lock().get(), obj);
 }
 
-void VulkanObjectManager::SafeReleaseTexture(VkImage image, VkImageView imageView, VkDeviceMemory memory, HString tag)
+void VulkanObjectManager::SafeReleaseTexture(VkImage image, VkImageView imageView, VkDeviceMemory memory, std::string tag)
 {
 	VkTextureDestroyObject obj = {
 		memory,

@@ -6,9 +6,9 @@
 #include "ShaderCompiler.h"
 #endif
 #include <fstream>
-std::map<HString, std::shared_ptr<ShaderCache>> Shader::_vsShader;
-std::map<HString, std::shared_ptr<ShaderCache>> Shader::_psShader;
-std::map<HString, std::shared_ptr<ShaderCache>> Shader::_csShader;
+std::map<std::string, std::shared_ptr<ShaderCache>> Shader::_vsShader;
+std::map<std::string, std::shared_ptr<ShaderCache>> Shader::_psShader;
+std::map<std::string, std::shared_ptr<ShaderCache>> Shader::_csShader;
 
 void Shader::LoadShaderCache(const char* cachePath)
 {
@@ -24,14 +24,14 @@ void Shader::LoadShaderCacheByShaderName(const char* cachePath, const char* Shad
 	auto allCacheFiles = FileSystem::GetFilesBySuffix(cachePath, "spv");
 	for (auto i : allCacheFiles)
 	{
-		HString name = i.baseName;
-		auto split = name.Split("@");
-		if (split[0].IsSame(ShaderName))
+		std::string name = i.baseName;
+		auto split = StringTool::split(name, "@");
+		if (StringTool::IsEqual(split[0], ShaderName))
 		{
 			if (
-					(split[1].IsSame("vs") && type == ShaderType::VertexShader)
-				||	(split[1].IsSame("ps") && type == ShaderType::PixelShader)
-				||	(split[1].IsSame("cs") && type == ShaderType::ComputeShader)
+					(StringTool::IsEqual(split[1], "vs") && type == ShaderType::VertexShader)
+				||	(StringTool::IsEqual(split[1], "ps") && type == ShaderType::PixelShader)
+				||	(StringTool::IsEqual(split[1], "cs") && type == ShaderType::ComputeShader)
 				)
 			{
 				Shader::LoadShaderCacheFile(i.absPath.c_str());
@@ -42,7 +42,7 @@ void Shader::LoadShaderCacheByShaderName(const char* cachePath, const char* Shad
 
 void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 {
-	HString path = cacheFilePath;
+	std::string path = cacheFilePath;
 	path = FileSystem::GetFilePath(path);
 	auto allCacheFiles = FileSystem::GetFilesBySuffix(path.c_str(), "spv");
 	bool bSucceed = false;
@@ -51,15 +51,15 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 		if (i.absPath != cacheFilePath)
 			continue;
 		bSucceed = true;
-		HString fileName = i.baseName;
-		auto split = fileName.Split("@");
+		std::string fileName = i.baseName;
+		auto split = StringTool::split(fileName, "@");
 		ShaderCache cache = {};
 		//
 		std::ifstream file(i.absPath.c_str(), std::ios::ate | std::ios::binary);
 		size_t fileSize = static_cast<size_t>(file.tellg());
 		if (fileSize <= 1)
 		{
-			MessageOut((HString("Load shader cache failed : ") + i.fileName + " : Small size."), false, false, "255,255,0");
+			MessageOut((std::string("Load shader cache failed : ") + i.fileName + " : Small size."), false, false, "255,255,0");
 			return;
 		}
 		file.seekg(0);
@@ -104,14 +104,14 @@ void Shader::LoadShaderCacheFile(const char* cacheFilePath)
 		file.close();
 		if (!bSuccess)
 		{
-			MessageOut((HString("Load shader cache failed : ") + i.fileName), false, false, "255,255,0");
+			MessageOut((std::string("Load shader cache failed : ") + i.fileName), false, false, "255,255,0");
 			return;
 		}
 		//从cache名字split[2]里获取varient bool value
 		cache.varients = 0;
 		if (split.size() > 2)
 		{
-			cache.varients = HString::ToULong(split[2]);
+			cache.varients = StringTool::ToULong(split[2]);
 		}
 		cache.shaderModule = shaderModule;
 		cache.shaderStageInfo.module = shaderModule;
@@ -420,16 +420,16 @@ void Shader::ReloadMaterialShaderCacheAndPipelineObject(std::weak_ptr<Material> 
 {
 	if (mat.expired())
 		return;
-	HString vs_n = mat.lock()->GetPrimitive()->_graphicsIndex.GetVSShaderFullName();
-	HString ps_n = mat.lock()->GetPrimitive()->_graphicsIndex.GetVSShaderFullName();
+	std::string vs_n = mat.lock()->GetPrimitive()->_graphicsIndex.GetVSShaderFullName();
+	std::string ps_n = mat.lock()->GetPrimitive()->_graphicsIndex.GetVSShaderFullName();
 	std::weak_ptr<ShaderCache> vs = Shader::GetVSCache(vs_n);
 	std::weak_ptr<ShaderCache> ps = Shader::GetPSCache(ps_n);
-	HString vs_shaderSourceName = vs.lock()->shaderName;
-	HString ps_shaderSourceName = ps.lock()->shaderName;
-	HString vs_shaderSourceFileName = vs.lock()->shaderName + ".fx";
-	HString ps_shaderSourceFileName = ps.lock()->shaderName + ".fx";
-	HString vs_cachePath = vs.lock()->shaderAbsPath;
-	HString ps_cachePath = ps.lock()->shaderAbsPath;
+	std::string vs_shaderSourceName = vs.lock()->shaderName;
+	std::string ps_shaderSourceName = ps.lock()->shaderName;
+	std::string vs_shaderSourceFileName = vs.lock()->shaderName + ".fx";
+	std::string ps_shaderSourceFileName = ps.lock()->shaderName + ".fx";
+	std::string vs_cachePath = vs.lock()->shaderAbsPath;
+	std::string ps_cachePath = ps.lock()->shaderAbsPath;
 
 	auto manager = VulkanManager::GetManager();
 	manager->DeviceWaitIdle();

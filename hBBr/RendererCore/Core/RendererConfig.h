@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Common.h"
-#include "HString.h"
+#include "StringTools.h"
 #include <map>
 #include <memory>
 #include "Serializable.h"
@@ -36,14 +36,14 @@ public:
 
 };
 
-HBBR_API HString GetRendererConfig(HString Group, HString name);
+HBBR_API std::string GetRendererConfig(std::string Group, std::string name);
 
-HBBR_API int GetRendererConfigInt(HString Group, HString name);
+HBBR_API int GetRendererConfigInt(std::string Group, std::string name);
 
 HBBR_API void SaveRendererConfig(); 
 
 //template<class T>
-//void UpdateRendererConfig(HString Group, HString name,T &value)
+//void UpdateRendererConfig(std::string Group, std::string name,T &value)
 //{
 //	if (RenderConfig::GetRendererConfig().is_null())
 //	{
@@ -55,12 +55,12 @@ HBBR_API void SaveRendererConfig();
 //	}
 //}
 
-HBBR_API HString GetInternationalizationText(HString Group, HString name);
+HBBR_API std::string GetInternationalizationText(std::string Group, std::string name);
 
-HBBR_API HString GetEditorInternationalizationText(HString Group, HString name);
+HBBR_API std::string GetEditorInternationalizationText(std::string Group, std::string name);
 
-HBBR_API int GetEditorInternationalizationInt(HString Group, HString name);
+HBBR_API int GetEditorInternationalizationInt(std::string Group, std::string name);
 
-HBBR_API HString GetEditorConfig(HString Group, HString name);
+HBBR_API std::string GetEditorConfig(std::string Group, std::string name);
 
-HBBR_API int GetEditorConfigInt(HString Group, HString name);
+HBBR_API int GetEditorConfigInt(std::string Group, std::string name);

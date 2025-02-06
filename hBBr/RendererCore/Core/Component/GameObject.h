@@ -2,7 +2,6 @@
 #include "Common.h"
 #include <vector>
 #include <map>
-#include "HString.h"
 #include "Transform.h"
 #include "HGuid.h"
 #include "Serializable.h"
@@ -16,19 +15,19 @@ class GameObject
 	friend class Inspector;
 	friend class EditorMain;
 
-	GameObject(HString objectName = "NewGameObject", class Level* level = nullptr, bool SceneEditorHide = false);
+	GameObject(std::string objectName = "NewGameObject", class Level* level = nullptr, bool SceneEditorHide = false);
 	GameObject(class Level* level = nullptr, bool SceneEditorHide = false);
-	GameObject(HString objectName, HString guidStr, class Level* level = nullptr);
+	GameObject(std::string objectName, std::string guidStr, class Level* level = nullptr);
 public:
 	~GameObject();
 
-	void ObjectInit(HString objectName = "NewGameObject", class Level* level = nullptr, bool SceneEditorHide = false);
+	void ObjectInit(std::string objectName = "NewGameObject", class Level* level = nullptr, bool SceneEditorHide = false);
 
 	//普通的创建一个新的Object
-	HBBR_API static GameObject* CreateGameObject(HString objectName = "NewGameObject", class Level* level = nullptr);
+	HBBR_API static GameObject* CreateGameObject(std::string objectName = "NewGameObject", class Level* level = nullptr);
 
 	//创建新的Object并且自定义一个固定的GUID
-	HBBR_API static GameObject* CreateGameObjectWithGUID(HString objectName, HString guidStr, class Level* level = nullptr);
+	HBBR_API static GameObject* CreateGameObjectWithGUID(std::string objectName, std::string guidStr, class Level* level = nullptr);
 
 	HBBR_API HBBR_INLINE void Destroy() {
 		SetActive(false);
@@ -41,11 +40,11 @@ public:
 
 	HBBR_API void SetActive(bool newActive = true);
 
-	HBBR_API HBBR_INLINE HString GetObjectName() const {
+	HBBR_API HBBR_INLINE std::string GetObjectName() const {
 		return _name;
 	}
 
-	HBBR_API void SetObjectName(HString newName);
+	HBBR_API void SetObjectName(std::string newName);
 
 	HBBR_API HBBR_INLINE std::vector<GameObject*> GetChildren() {
 		return _children;
@@ -81,13 +80,13 @@ public:
 
 	HBBR_API void SetParent(GameObject* newParent);
 
-	HBBR_API void ChangeLevel(HString newLevel);
+	HBBR_API void ChangeLevel(std::string newLevel);
 
 	HBBR_API static bool IsValid(std::weak_ptr<GameObject> obj){
 		return !obj.expired() && !obj.lock()->_bWantDestroy && obj.lock()->_transform != nullptr;
 	}
 
-	static std::map<HString, std::function<class Component* (class GameObject*)>>& GetCompSpawnMap();
+	static std::map<std::string, std::function<class Component* (class GameObject*)>>& GetCompSpawnMap();
 
 	template<typename T, typename ...Args>
 	T* AddComponent(Args... args)
@@ -101,7 +100,7 @@ public:
 		return result;
 	}
 
-	class Component* AddComponentByClassName(HString className);
+	class Component* AddComponentByClassName(std::string className);
 
 #if IS_EDITOR
 	void* _editorObject = nullptr;
@@ -143,7 +142,7 @@ private:
 
 	std::vector<class Component*> _comps;
 
-	HString _name = "None";
+	std::string _name = "None";
 
 	GameObject* _parent = nullptr;
 
@@ -155,7 +154,7 @@ private:
 
 	HGUID _guid;
 
-	HString _guidStr;
+	std::string _guidStr;
 
 	//记录场景文件里对应guid的属性,默认为空节点
 	nlohmann::json _levelNode;

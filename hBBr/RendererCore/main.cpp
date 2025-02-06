@@ -110,7 +110,7 @@ void DropCallBack(VulkanForm* form, const char* file)
 {
 	for (auto& i : VulkanApp::GetDropCallbacks())
 	{
-		i(form, HString(file));
+		i(form, std::string(file));
 	}
 }
 #if __ANDROID__
@@ -511,7 +511,7 @@ VulkanForm* VulkanApp::CreateNewWindow(int x, int y, int w, int h , const char* 
 
 	if (!window)
 	{
-		MessageOut((HString("Create sdl3 window failed : ")+ SDL_GetError()), true, true, "255,0,0");
+		MessageOut((std::string("Create sdl3 window failed : ")+ SDL_GetError()), true, true, "255,0,0");
 		SDL_Quit();
 	}
 
@@ -666,7 +666,7 @@ void VulkanApp::SetWindowVisible(SDL_Window* window, bool bShow)
 	}
 }
 
-void VulkanApp::SetWindowTitle(SDL_Window* window, HString newTitle)
+void VulkanApp::SetWindowTitle(SDL_Window* window, std::string newTitle)
 {
 	if (window)
 	{

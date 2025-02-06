@@ -3,7 +3,7 @@
 #include "RendererConfig.h"
 #include "VulkanObjectManager.h"
 
-VMABuffer::VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage, bool bAlwayMapping, bool bFocusCreateDedicatedMemory, HString debugName):
+VMABuffer::VMABuffer(VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VmaMemoryUsage memoryUsage, bool bAlwayMapping, bool bFocusCreateDedicatedMemory, std::string debugName):
 	_bufferUsage(bufferUsage),
 	_memoryUsage(memoryUsage),
 	_bAlwayMapping(bAlwayMapping),

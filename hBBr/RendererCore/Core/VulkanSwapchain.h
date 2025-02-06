@@ -47,7 +47,7 @@ public:
 		return _swapchainImages;
 	}
 
-	HBBR_API HBBR_INLINE std::map<HString, class VulkanRenderer*> GetRenderers() {
+	HBBR_API HBBR_INLINE std::map<std::string, class VulkanRenderer*> GetRenderers() {
 		return _renderers;
 	}
 
@@ -55,9 +55,9 @@ public:
 		return _renderers.begin()->second;
 	}
 
-	HBBR_API VulkanRenderer* CreateRenderer(HString rendererName);
+	HBBR_API VulkanRenderer* CreateRenderer(std::string rendererName);
 
-	HBBR_API void DestroyRenderer(HString rendererName);
+	HBBR_API void DestroyRenderer(std::string rendererName);
 
 	HBBR_API void DestroyRenderer(VulkanRenderer* renderer);
 
@@ -124,7 +124,7 @@ private:
 	std::vector<VkCommandBuffer> _cmdBuf;
 
 	//Renderer map
-	std::map<HString, class VulkanRenderer*> _renderers;
+	std::map<std::string, class VulkanRenderer*> _renderers;
 
 #if IS_EDITOR
 	//GUI pass(Editor)

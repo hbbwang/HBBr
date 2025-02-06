@@ -6,7 +6,7 @@
 
 struct VulkanForm
 {
-	HString name;
+	std::string name;
 	SDL_Window* window = nullptr;
 	class VulkanSwapchain* swapchain = nullptr;
 	bool bMinimized = false;
@@ -16,7 +16,7 @@ struct VulkanForm
 	~VulkanForm();
 };
 
-typedef void (*FormDropFun)(VulkanForm* form,  HString file);
+typedef void (*FormDropFun)(VulkanForm* form,  std::string file);
 
 class VulkanApp
 {
@@ -45,7 +45,7 @@ public:
 	HBBR_API static void SetFocusForm(VulkanForm* form);
 	HBBR_API static VulkanForm* GetFocusForm() { return _focusForm; }
 	HBBR_API static void SetWindowVisible(SDL_Window* window, bool bShow);
-	HBBR_API static void SetWindowTitle(SDL_Window* form, HString newTitle);
+	HBBR_API static void SetWindowTitle(SDL_Window* form, std::string newTitle);
 	HBBR_API static void AppQuit();
 	HBBR_API static void RecompileAllShader();
 	HBBR_API static void AddDropCallback(FormDropFun func)

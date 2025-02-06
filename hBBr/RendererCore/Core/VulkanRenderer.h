@@ -48,7 +48,7 @@ public:
 		return _bInit;
 	}
 
-	HBBR_API HBBR_INLINE HString GetName() {
+	HBBR_API HBBR_INLINE std::string GetName() {
 		return _rendererName;
 	}
 
@@ -104,7 +104,7 @@ public:
 
 	HBBR_API void ReleaseWorld();
 
-	HBBR_API bool LoadWorld(HString worldNameOrGUID);
+	HBBR_API bool LoadWorld(std::string worldNameOrGUID);
 
 	HBBR_API void CreateEmptyWorld();
 
@@ -160,7 +160,7 @@ private:
 
 	void ResetResource();
 
-	HString _rendererName;
+	std::string _rendererName;
 
 	VkExtent2D _renderSize{};
 

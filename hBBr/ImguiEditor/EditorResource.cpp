@@ -14,7 +14,7 @@ void EditorResource::Init()
 {
 	_all_images.reserve(1024);
 
-	HString configPath = FileSystem::GetConfigAbsPath();
+	std::string configPath = FileSystem::GetConfigAbsPath();
 
 	auto* manager = VulkanManager::GetManager();
 
@@ -68,7 +68,7 @@ void EditorResource::Release()
 	_ptr.reset();
 }
 
-EditorImage* EditorResource::LoadTexture(uint32_t w, uint32_t h, HString path, VkCommandBuffer cmdBuf)
+EditorImage* EditorResource::LoadTexture(uint32_t w, uint32_t h, std::string path, VkCommandBuffer cmdBuf)
 {
 	auto* manager = VulkanManager::GetManager();
 	EditorImage result;

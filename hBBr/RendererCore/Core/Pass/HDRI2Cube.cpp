@@ -21,7 +21,7 @@ HDRI2Cube::~HDRI2Cube()
 	manager->DestroyDescriptorSetLayout(_storeDescriptorSetLayout);
 }
 
-bool HDRI2Cube::PassExecute(HString hdrImagePath, HString ddsOutputPath, bool bGenerateMips, int cubeMapSize)
+bool HDRI2Cube::PassExecute(std::string hdrImagePath, std::string ddsOutputPath, bool bGenerateMips, int cubeMapSize)
 {
 	auto* manager = VulkanManager::GetManager();
 
@@ -39,7 +39,7 @@ bool HDRI2Cube::PassExecute(HString hdrImagePath, HString ddsOutputPath, bool bG
 		w, h,
 		VK_FORMAT_R32G32B32A32_SFLOAT,
 		VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
-		HString("Provisional HDRI Texture")
+		std::string("Provisional HDRI Texture")
 	);
 	_hdriTexture->_imageData = *imageData;
 	_hdriTexture->CopyBufferToTextureImmediate();
@@ -87,7 +87,7 @@ bool HDRI2Cube::PassExecute(HString hdrImagePath, HString ddsOutputPath, bool bG
 				cubeMapSize, cubeMapSize,
 				VK_FORMAT_R32G32B32A32_SFLOAT,
 				VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
-				HString("Cube Map Store Texture")
+				std::string("Cube Map Store Texture")
 			);
 		}
 
@@ -186,7 +186,7 @@ bool HDRI2Cube::PassExecute(HString hdrImagePath, HString ddsOutputPath, bool bG
 	//Copy GPUBuffer to CPUBuffer
 	manager->CmdBufferCopyToBuffer(nullptr, copyTextureToBuffer->GetBuffer(), copBufferToCPU->GetBuffer(), _storeTexture[0]->GetTextureMemorySize() * 6);
 	void* textureData = copBufferToCPU->BeginMapping();
-	HString hdrCubeMapCachePath = FileSystem::Append(_hdrImagePath.GetFilePath(), _hdrImagePath.GetBaseName() + "_HDRCubeMapCache.hdr");
+	std::string hdrCubeMapCachePath = FileSystem::Append(FileSystem::GetFilePath(_hdrImagePath), FileSystem::GetBaseName(_hdrImagePath) + "_HDRCubeMapCache.hdr");
 	//Export cube map cache
 	{
 		//生成临时HDR图
@@ -232,7 +232,7 @@ bool HDRI2Cube::PassExecute(HString hdrImagePath, HString ddsOutputPath, bool bG
 
 		//导出设置
 		OutputOptions output;
-		FileSystem::CreateDir(ddsOutputPath.GetFilePath().c_str());
+		FileSystem::CreateDir(FileSystem::GetFilePath(ddsOutputPath).c_str());
 		output.setFileName(ddsOutputPath.c_str());
 
 		//设置图像HDR格式

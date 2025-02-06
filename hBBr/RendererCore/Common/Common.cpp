@@ -4,7 +4,7 @@
 #include "FormMain.h"
 #include <SDL3/SDL.h>
 #include "VulkanManager.h"
-void wrapText(HString& msg, size_t lineWidth)
+void wrapText(std::string& msg, size_t lineWidth)
 {
 	size_t fontCount = 0;
 	std::string str = msg.c_str();
@@ -20,7 +20,7 @@ void wrapText(HString& msg, size_t lineWidth)
 	msg = str.c_str();
 }
 
-void MessageOut(HString msg, bool bExit, bool bMessageBox, const char* textColor)
+void MessageOut(std::string msg, bool bExit, bool bMessageBox, const char* textColor)
 {
 	ConsoleDebug::print_endl(msg, textColor);
     if (bMessageBox && VulkanManager::_bDebugEnable)
@@ -34,11 +34,13 @@ void MessageOut(HString msg, bool bExit, bool bMessageBox, const char* textColor
 
 		wrapText(msg, 75);
 
+		std::string cmsg = (msg);
+
 		const SDL_MessageBoxData messageboxdata = {
 			SDL_MESSAGEBOX_WARNING,
 			NULL,
 			"断言",
-			msg.c_str(),
+			cmsg.c_str(),
 			SDL_arraysize(buttons),
 			buttons,
 			NULL

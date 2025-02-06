@@ -7,7 +7,7 @@
 #include "ConsoleDebug.h"
 #include "Component/ModelComponent.h"
 
-GameObject::GameObject(HString objectName, Level* level, bool SceneEditorHide)
+GameObject::GameObject(std::string objectName, Level* level, bool SceneEditorHide)
 {
 	ObjectInit(objectName, level, SceneEditorHide);
 }
@@ -17,7 +17,7 @@ GameObject::GameObject(Level* level, bool SceneEditorHide)
 	ObjectInit("NewGameObject", level, SceneEditorHide);
 }
 
-GameObject::GameObject(HString objectName, HString guidStr, Level* level)
+GameObject::GameObject(std::string objectName, std::string guidStr, Level* level)
 {
 	_guidStr = guidStr;
 	StringToGUID(guidStr.c_str(), &_guid);
@@ -29,7 +29,7 @@ GameObject::~GameObject()
 
 }
 
-void GameObject::ObjectInit(HString objectName, Level* level, bool SceneEditorHide)
+void GameObject::ObjectInit(std::string objectName, Level* level, bool SceneEditorHide)
 {
 	_attachmentDepth = 0;
 	bool FromXmlNode = false;
@@ -67,7 +67,7 @@ void GameObject::ObjectInit(HString objectName, Level* level, bool SceneEditorHi
 	//_level->AddNewObject(sharedPtr);
 }
 
-GameObject* GameObject::CreateGameObject(HString objectName, Level* level)
+GameObject* GameObject::CreateGameObject(std::string objectName, Level* level)
 {
 	std::shared_ptr<GameObject> sharedPtr;
 	sharedPtr.reset(new GameObject(objectName, level));
@@ -76,7 +76,7 @@ GameObject* GameObject::CreateGameObject(HString objectName, Level* level)
 	return sharedPtr.get();
 }
 
-GameObject* GameObject::CreateGameObjectWithGUID(HString objectName, HString guidStr, Level* level)
+GameObject* GameObject::CreateGameObjectWithGUID(std::string objectName, std::string guidStr, Level* level)
 {
 	std::shared_ptr<GameObject> sharedPtr;
 	sharedPtr.reset(new GameObject(objectName, guidStr, level));
@@ -90,7 +90,7 @@ void GameObject::SetActive(bool newActive)
 	_bActive = newActive;
 }
 
-void GameObject::SetObjectName(HString newName)
+void GameObject::SetObjectName(std::string newName)
 {
 #if IS_EDITOR
 	ConsoleDebug::print_endl("GameObject "+ _name +" rename : " + newName);
@@ -160,7 +160,7 @@ void GameObject::SetParent(GameObject* newParent)
 
 }
 
-void GameObject::ChangeLevel(HString newLevel)
+void GameObject::ChangeLevel(std::string newLevel)
 {
 	auto level = this->_world->GetLevel(newLevel);
 	auto oldLevel = _level;
@@ -183,13 +183,13 @@ void GameObject::ChangeLevel(HString newLevel)
 	}
 }
 
-std::map<HString, std::function<class Component* (class GameObject*)>>& GameObject::GetCompSpawnMap()
+std::map<std::string, std::function<class Component* (class GameObject*)>>& GameObject::GetCompSpawnMap()
 {
-	static std::map<HString, std::function<class Component* (class GameObject*)>> _componentSpawnFunctions;
+	static std::map<std::string, std::function<class Component* (class GameObject*)>> _componentSpawnFunctions;
 	return _componentSpawnFunctions;
 }
 
-Component* GameObject::AddComponentByClassName(HString className)
+Component* GameObject::AddComponentByClassName(std::string className)
 {
 	auto it = GetCompSpawnMap().find(className);
 	if (it != GetCompSpawnMap().end())

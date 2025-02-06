@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Common.h"
-#include "HString.h"
 #include <vector>
 
 #if IS_EDITOR

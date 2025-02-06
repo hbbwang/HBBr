@@ -60,7 +60,7 @@ void VulkanRenderer::Release()
 	//_vulkanManager->FreeCommandBuffers(_vulkanManager->GetCommandPool(), _cmdBuf);
 	//_vulkanManager->DestroyRenderFences(_executeFence);
 	//_vulkanManager->DestroyRenderSemaphores(_queueSubmitSemaphore);
-	ConsoleDebug::print_endl(HString("Release Renderer : ") + _rendererName);
+	ConsoleDebug::print_endl(std::string("Release Renderer : ") + _rendererName);
 	delete this;
 }
 
@@ -141,14 +141,14 @@ void VulkanRenderer::ReleaseWorld()
 	}
 }
 
-bool VulkanRenderer::LoadWorld(HString worldNameOrGUID)
+bool VulkanRenderer::LoadWorld(std::string worldNameOrGUID)
 {
 	if (_world)
 	{
 		_world.reset();
 	}
 	//检查GUID
-	HString worldPath = FileSystem::GetWorldAbsPath();
+	std::string worldPath = FileSystem::GetWorldAbsPath();
 	auto worldFolders = FileSystem::GetAllFolders(worldPath.c_str());
 	FileEntry worldFolder;
 	if (HGUID(worldNameOrGUID.c_str()).isValid())
@@ -169,14 +169,14 @@ bool VulkanRenderer::LoadWorld(HString worldNameOrGUID)
 	{
 		for (auto& i : worldFolders)
 		{
-			HString worldSettingPath = FileSystem::Append(i.absPath, ".WorldSettings");
+			std::string worldSettingPath = FileSystem::Append(i.absPath, ".WorldSettings");
 			nlohmann::json j;
 			if (Serializable::LoadJson(worldSettingPath, j))
 			{
 				auto it = j.find("WorldName");
 				if (it != j.end())
 				{
-					HString name = it.value();
+					std::string name = it.value();
 					if (name == worldNameOrGUID)
 					{
 						worldFolder = i;
@@ -239,7 +239,7 @@ VkSemaphore VulkanRenderer::Render(VkSemaphore wait)
 
 		uint32_t frameIndex = _swapchain->GetCurrentFrameIndex();
 
-		//ConsoleDebug::print_endl( HString::FromVec2(HInput::GetMousePosClient()).c_str());
+		//ConsoleDebug::print_endl( std::string::FromVec2(HInput::GetMousePosClient()).c_str());
 
 		if(_swapchain)
 		{

@@ -77,15 +77,15 @@ void ContentManager::Release()
 
 #if IS_EDITOR
 
-bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImportInfo> importFiles, std::vector<std::weak_ptr<AssetInfoBase>>* out)
+bool ContentManager::AssetImport(std::string repositoryName , std::vector<AssetImportInfo> importFiles, std::vector<std::weak_ptr<AssetInfoBase>>* out)
 {
-	HString contentPath = FileSystem::GetContentAbsPath();
-	HString repositoryPath = FileSystem::Append(contentPath, repositoryName);
-	HString repositoryFilePath = FileSystem::Append(repositoryPath,".repository");
+	std::string contentPath = FileSystem::GetContentAbsPath();
+	std::string repositoryPath = FileSystem::Append(contentPath, repositoryName);
+	std::string repositoryFilePath = FileSystem::Append(repositoryPath,".repository");
 	struct resultFind
 	{
 		HGUID guid;
-		HString VirtualPath;
+		std::string VirtualPath;
 	};
 	std::vector<resultFind> guids;
 	const auto importFilesSize = importFiles.size();
@@ -101,17 +101,17 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 		newItems.reserve(importFilesSize);
 		for (auto& i : importFiles)
 		{
-			HString suffix = FileSystem::GetFileExt(i.absAssetFilePath);
-			HString baseName = FileSystem::GetBaseName(i.absAssetFilePath);
-			HString fileName = FileSystem::GetFileName(i.absAssetFilePath);
+			std::string suffix = FileSystem::GetFileExt(i.absAssetFilePath);
+			std::string baseName = FileSystem::GetBaseName(i.absAssetFilePath);
+			std::string fileName = FileSystem::GetFileName(i.absAssetFilePath);
 
 			//查看下当前虚拟目录下有没有相同名字和类型的文件，有就进行覆盖，没有才新增
 			bool bFound = false; 
 			HGUID guid;
-			HString guidStr;
+			std::string guidStr;
 			{
-				HString newVirtualFullPath = FileSystem::Append(i.virtualPath, fileName);
-				HString cVP = i.virtualPath;
+				std::string newVirtualFullPath = FileSystem::Append(i.virtualPath, fileName);
+				std::string cVP = i.virtualPath;
 				FileSystem::ClearPathSeparation(cVP);
 				FileSystem::ClearPathSeparation(newVirtualFullPath); 
 				auto fit = _assets_vf.find(cVP);
@@ -119,9 +119,9 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				{
 					for (auto& fit_i : fit->second.assets)
 					{
-						HString checkFilePath = fit_i.second->virtualFilePath;
+						std::string checkFilePath = fit_i.second->virtualFilePath;
 						FileSystem::ClearPathSeparation(checkFilePath);
-						if (checkFilePath.IsSame(newVirtualFullPath))
+						if (StringTool::IsEqual(checkFilePath, newVirtualFullPath))
 						{
 							bFound = true;
 							guid = fit_i.second->guid;
@@ -137,38 +137,38 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 			//
 
 			AssetType type = AssetType::Unknow;
-			HString assetTypeName = "Unknow";
+			std::string assetTypeName = "Unknow";
 			//----------------------------------------Model
-			if (suffix.IsSame("fbx", false))
+			if (StringTool::IsEqual(suffix,"fbx", false))
 			{
 				type = AssetType::Model;
 				assetTypeName = GetAssetTypeString(type);
-				HString savePath = FileSystem::Append(repositoryPath, assetTypeName);
+				std::string savePath = FileSystem::Append(repositoryPath, assetTypeName);
 				savePath = FileSystem::Append(savePath, guidStr + "." + suffix);
 				//复制fbx到项目目录
 				FileSystem::FileCopy(i.absAssetFilePath.c_str(), savePath.c_str());
 			}
 			//----------------------------------------Texture2D
-			else if (suffix.IsSame("png", false)
-				|| suffix.IsSame("tga", false)
-				|| suffix.IsSame("jpg", false)
-				|| suffix.IsSame("bmp", false)
+			else if (StringTool::IsEqual(suffix, "png", false)
+				|| StringTool::IsEqual(suffix,"tga", false)
+				|| StringTool::IsEqual(suffix,"jpg", false)
+				|| StringTool::IsEqual(suffix,"bmp", false)
 				)
 			{
 				type = AssetType::Texture2D;
 				assetTypeName = GetAssetTypeString(type);
-				HString savePath = FileSystem::Append(repositoryPath, assetTypeName);
+				std::string savePath = FileSystem::Append(repositoryPath, assetTypeName);
 				savePath = FileSystem::Append(savePath, guidStr + ".dds" );
 				suffix = "dds" ;
 				//使用nvtt插件导入image
 				NVTT::CompressionImage2D(i.absAssetFilePath.c_str(), savePath.c_str(),true,nvtt::Format_BC7,false);
 			}
 			//----------------------------------------TextureCube
-			else if (suffix.IsSame("hdr", false))
+			else if (StringTool::IsEqual(suffix, "hdr", false))
 			{
 				type = AssetType::TextureCube;
 				assetTypeName = GetAssetTypeString(type);
-				HString savePath = FileSystem::Append(repositoryPath, assetTypeName);
+				std::string savePath = FileSystem::Append(repositoryPath, assetTypeName);
 				savePath = FileSystem::Append(savePath, guidStr + ".dds");
 				suffix = "dds";
 				//使用nvtt插件导入hdr,转为cubedds(dds)
@@ -179,12 +179,12 @@ bool ContentManager::AssetImport(HString repositoryName , std::vector<AssetImpor
 				}
 			}
 			//----------------------------------------Material
-			else if (suffix.IsSame("mat", false))
+			else if (StringTool::IsEqual(suffix, "mat", false))
 			{
 				//材质球只能在编辑器创建,无法导入
 				type = AssetType::Material;
 				assetTypeName = GetAssetTypeString(type);
-				HString savePath = FileSystem::Append(repositoryPath, assetTypeName);
+				std::string savePath = FileSystem::Append(repositoryPath, assetTypeName);
 				savePath = FileSystem::Append(savePath, guidStr + "." + suffix);
 				//重命名为guid
 				FileSystem::FileRename(i.absAssetFilePath.c_str(), savePath.c_str());
@@ -246,7 +246,7 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 	if (messageBox)
 	{
 		MessageOut(GetInternationalizationText("Renderer", "A000017"));
-		HString msg;
+		std::string msg;
 		for (auto& i : assetInfos)
 		{
 			msg += i->virtualFilePath + "\n";
@@ -279,15 +279,15 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 	if (bSure)
 	{
 		std::vector<std::shared_ptr<AssetInfoBase>> assetInfosPtr;
-		std::vector<HString>repositories;
+		std::vector<std::string>repositories;
 		repositories.reserve(assetInfos.size());
 		for (auto& i : assetInfos)
 		{
 			//资产删除不会帮忙处理资产引用关系(包括场景的)，如果删错了
 			//编辑器会直接告知用户引用错误信息，让用户自行处理(不会崩溃)
 			//所以删除前最好使用 [引用关系查看器] 检查好 
-			HString repository = i->repository;
-			auto ssit = std::find_if(repositories.begin(), repositories.end(), [repository](HString & s) {
+			std::string repository = i->repository;
+			auto ssit = std::find_if(repositories.begin(), repositories.end(), [repository](std::string & s) {
 				return s == repository;
 			});
 			if (ssit == repositories.end())
@@ -297,9 +297,9 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 			//删除实际资产
 			FileSystem::FileRemove(i->absFilePath.c_str());
 			//移除.repository内储存的Item信息
-			HString contentPath = FileSystem::GetContentAbsPath();
-			HString repositoryPath = FileSystem::Append(contentPath, repository);
-			HString repositoryConfigPath = FileSystem::Append(repositoryPath, ".repository");
+			std::string contentPath = FileSystem::GetContentAbsPath();
+			std::string repositoryPath = FileSystem::Append(contentPath, repository);
+			std::string repositoryConfigPath = FileSystem::Append(repositoryPath, ".repository");
 			nlohmann::json json;
 			if (Serializable::LoadJson(repositoryConfigPath, json))
 			{
@@ -333,7 +333,7 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 
 				_assets[(int)i->type].erase(i->guid);
 				_assets_repos[i->repository].erase(i->guid);
-				HString vpvf = i->virtualPath;
+				std::string vpvf = i->virtualPath;
 				FileSystem::ClearPathSeparation(vpvf);
 				_assets_vf[vpvf].assets.erase(i->guid);
 				if (isRemoveTheEmptyVirtualFolder)
@@ -363,9 +363,9 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 	}
 }
 
-void ContentManager::SetNewVirtualPath(std::vector<std::weak_ptr<AssetInfoBase>> assetInfos, HString newVirtualPath, bool bDeleteEmptyFolder)
+void ContentManager::SetNewVirtualPath(std::vector<std::weak_ptr<AssetInfoBase>> assetInfos, std::string newVirtualPath, bool bDeleteEmptyFolder)
 {
-	std::vector<HString> repositories;
+	std::vector<std::string> repositories;
 	for (auto& asset : assetInfos)
 	{
 		if (asset.expired())
@@ -373,14 +373,14 @@ void ContentManager::SetNewVirtualPath(std::vector<std::weak_ptr<AssetInfoBase>>
 
 		auto i = asset.lock();
 
-		HString assetRepository = i->repository;
-		HString oldVirtualPath = i->virtualPath;
+		std::string assetRepository = i->repository;
+		std::string oldVirtualPath = i->virtualPath;
 		//修改info的虚拟路径
 		i->virtualPath = newVirtualPath;
 		i->virtualFilePath = FileSystem::Append(newVirtualPath, i->displayName + "." + i->suffix);
-		i->virtualFilePath.Replace("\\", "/");
-		auto it = std::find_if(repositories.begin(), repositories.end(), [assetRepository](HString & r) {
-			return r.IsSame(assetRepository);
+		StringTool::Replace(i->virtualFilePath, "\\", "/");
+		auto it = std::find_if(repositories.begin(), repositories.end(), [assetRepository](std::string & r) {
+			return StringTool::IsEqual(r, assetRepository);
 			});
 		if (it == repositories.end())
 		{
@@ -393,8 +393,8 @@ void ContentManager::SetNewVirtualPath(std::vector<std::weak_ptr<AssetInfoBase>>
 		SaveAssetInfo(asset);
 		{
 			//添加
-			HString vpf = i->virtualPath;
-			HString vpf_old = oldVirtualPath;
+			std::string vpf = i->virtualPath;
+			std::string vpf_old = oldVirtualPath;
 			FileSystem::ClearPathSeparation(vpf);
 			FileSystem::ClearPathSeparation(vpf_old);
 			auto vfit = _assets_vf.find(vpf);
@@ -432,12 +432,12 @@ void ContentManager::SaveAssetInfo(std::weak_ptr<AssetInfoBase>& assetInfo)
 {
 	if (!assetInfo.expired())
 	{
-		HString repositoryConfigPath = FileSystem::GetRepositoryConfigAbsPath(assetInfo.lock()->repository);
+		std::string repositoryConfigPath = FileSystem::GetRepositoryConfigAbsPath(assetInfo.lock()->repository);
 		nlohmann::json json;
 		if (Serializable::LoadJson(repositoryConfigPath, json))
 		{
 			//保存基本属性
-			HString assetTypeName = GetAssetTypeString(assetInfo.lock()->type);
+			std::string assetTypeName = GetAssetTypeString(assetInfo.lock()->type);
 			nlohmann::json target;
 			target["Type"] = (int)assetInfo.lock()->type;
 			target["Name"] = assetInfo.lock()->displayName;
@@ -482,13 +482,13 @@ void ContentManager::SaveAssetInfo(std::weak_ptr<AssetInfoBase>& assetInfo)
 	}
 }
 
-HString ContentManager::SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo, HString newName, bool bSave)
+std::string ContentManager::SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo, std::string newName, bool bSave)
 {
 	if (!assetInfo.expired())
 	{
 		//规避相同名字的资产
 		{
-			HString cache = newName;
+			std::string cache = newName;
 			int index = 0; 
 			auto assets = GetAssetsByVirtualFolder(assetInfo.lock()->virtualPath);
 			while (true)
@@ -496,10 +496,10 @@ HString ContentManager::SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo, 
 				bool bFound = false;
 				for (auto& i : assets)
 				{
-					if (i.second->displayName.IsSame(cache, false))
+					if (StringTool::IsEqual(i.second->displayName, cache, false))
 					{
 						bFound = true;
-						cache = newName + "_" + HString::FromInt(index);
+						cache = newName + "_" + StringTool::FromInt(index);
 						index++;
 						break;
 					}
@@ -512,7 +512,7 @@ HString ContentManager::SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo, 
 		//更新asset info
 		assetInfo.lock()->displayName = newName;
 		assetInfo.lock()->virtualFilePath = FileSystem::Append(assetInfo.lock()->virtualPath, assetInfo.lock()->displayName + "." + assetInfo.lock()->suffix);
-		assetInfo.lock()->virtualFilePath.Replace("\\", "/");
+		StringTool::Replace(assetInfo.lock()->virtualFilePath, "\\", "/");
 		UpdateToolTips(assetInfo.lock().get());
 		if (bSave)
 		{
@@ -557,9 +557,9 @@ void ContentManager::RemoveDirtyAsset(std::weak_ptr<AssetInfoBase> assetInfo)
 	assetInfo.lock()->bDirty = false;
 }
 
-void ContentManager::CreateNewVirtualFolder(HString folderFullPath)
+void ContentManager::CreateNewVirtualFolder(std::string folderFullPath)
 {
-	HString vpvf = folderFullPath;
+	std::string vpvf = folderFullPath;
 	FileSystem::ClearPathSeparation(vpvf);
 	auto vfit = _assets_vf.find(vpvf);
 	if (vfit == _assets_vf.end())
@@ -577,7 +577,7 @@ void ContentManager::UpdateToolTips(AssetInfoBase* asset)
 	SetToolTip(asset, "资产类型", GetAssetTypeString(asset->type));
 }
 
-void ContentManager::SetToolTip(AssetInfoBase* asset, HString name, HString value)
+void ContentManager::SetToolTip(AssetInfoBase* asset, std::string name, std::string value)
 {
 	auto it = asset->toolTips.find(name);
 	if (it != asset->toolTips.end())
@@ -615,10 +615,10 @@ std::shared_ptr<AssetInfoBase> CreateInfo(AssetType type)
 }
 //------------
 
-void ContentManager::ReloadRepository(HString repositoryName)
+void ContentManager::ReloadRepository(std::string repositoryName)
 {
-	HString fullPath = FileSystem::Append(FileSystem::GetContentAbsPath(), repositoryName);
-	HString repositoryConfigPath = FileSystem::Append(fullPath, ".repository");
+	std::string fullPath = FileSystem::Append(FileSystem::GetContentAbsPath(), repositoryName);
+	std::string repositoryConfigPath = FileSystem::Append(fullPath, ".repository");
 	nlohmann::json json;
 	if (Serializable::LoadJson(repositoryConfigPath, json))
 	{
@@ -631,15 +631,15 @@ void ContentManager::ReloadRepository(HString repositoryName)
 	}
 }
 
-std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(nlohmann::json&input, HString& repositoryName)
+std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(nlohmann::json&input, std::string& repositoryName)
 {
-	HString fullPath = FileSystem::GetRepositoryAbsPath(repositoryName);
+	std::string fullPath = FileSystem::GetRepositoryAbsPath(repositoryName);
 
 	nlohmann::json i = input.items().begin().value();
 
 	HGUID guid; from_json(input.items().begin().key(), guid);
 
-	HString guidStr = guid.str();
+	std::string guidStr = guid.str();
 	StringToGUID(guidStr.c_str(), &guid);
 	AssetType type = (AssetType)i["Type"];
 	//查看下是否已经加载过AssetInfo了,已经加载过就不需要创建了
@@ -671,7 +671,7 @@ std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(nlohmann::json&input, H
 	info->virtualPath = i["VPath"];
 	//FileSystem::FixUpPath(info->virtualPath);
 	info->virtualFilePath = FileSystem::Append(info->virtualPath, info->displayName + "." + info->suffix);
-	info->virtualFilePath.Replace("\\", "/");
+	StringTool::Replace(info->virtualFilePath, "\\", "/");
 
 	//FileSystem::FixUpPath(info->virtualFilePath);
 	info->repository = repositoryName;
@@ -747,7 +747,7 @@ std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(nlohmann::json&input, H
 			it->second.emplace(info->guid, info);
 		}
 		//3
-		HString vpvf = info->virtualPath;
+		std::string vpvf = info->virtualPath;
 		FileSystem::ClearPathSeparation(vpvf);
 		auto vfit = _assets_vf.find(vpvf);
 		if (vfit == _assets_vf.end())
@@ -778,7 +778,7 @@ void ContentManager::UpdateAssetReference(HGUID obj)
 	}
 }
 
-const std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> ContentManager::GetAssetsByVirtualFolder(HString virtualFolder) const
+const std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> ContentManager::GetAssetsByVirtualFolder(std::string virtualFolder) const
 {
 	FileSystem::ClearPathSeparation(virtualFolder);
 	auto it = _assets_vf.find(virtualFolder);
@@ -789,10 +789,10 @@ const std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> ContentManager::
 	return std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>();
 }
 
-const std::weak_ptr<AssetInfoBase> ContentManager::GetAssetByVirtualPath(HString virtualPath) const
+const std::weak_ptr<AssetInfoBase> ContentManager::GetAssetByVirtualPath(std::string virtualPath) const
 {
 	auto name = FileSystem::GetBaseName(virtualPath);
-	auto suffix = virtualPath.GetSuffix();
+	auto suffix = FileSystem::GetFileExt(virtualPath);
 	auto folder = FileSystem::GetFilePath(virtualPath);
 	FileSystem::ClearPathSeparation(folder);
 	auto it = _assets_vf.find(folder);
@@ -800,9 +800,9 @@ const std::weak_ptr<AssetInfoBase> ContentManager::GetAssetByVirtualPath(HString
 	{
 		for (auto& i : it->second.assets)
 		{
-			if (i.second->displayName.Contains(name))
+			if (StringTool::Contains(i.second->displayName, name))
 			{			
-				if(i.second->suffix.IsSame(suffix))
+				if(StringTool::IsEqual(i.second->suffix, suffix))
 				{
 					return i.second;
 				}
@@ -877,7 +877,7 @@ std::weak_ptr<AssetInfoBase> ContentManager::GetAssetInfo(HGUID guid, AssetType 
 	return std::weak_ptr<AssetInfoBase>();
 }
 
-std::weak_ptr<AssetInfoBase> ContentManager::GetAssetInfo(HGUID guid, HString repositoryName) const
+std::weak_ptr<AssetInfoBase> ContentManager::GetAssetInfo(HGUID guid, std::string repositoryName) const
 {
 	auto it = _assets_repos.find(repositoryName);
 	if (it != _assets_repos.end())
@@ -891,14 +891,14 @@ std::weak_ptr<AssetInfoBase> ContentManager::GetAssetInfo(HGUID guid, HString re
 	return std::weak_ptr<AssetInfoBase>();
 }
 
-std::weak_ptr<AssetInfoBase> ContentManager::GetAssetInfo(HString virtualFilePath, AssetType type)const
+std::weak_ptr<AssetInfoBase> ContentManager::GetAssetInfo(std::string virtualFilePath, AssetType type)const
 {
 
 	if (type != AssetType::Unknow && type < AssetType::MaxNum)
 	{
 		for (auto& i : _assets[(int)type])
 		{
-			if (i.second->virtualFilePath.IsSame(virtualFilePath, false))
+			if (StringTool::IsEqual(i.second->virtualFilePath, virtualFilePath, false))
 			{
 				return i.second;
 			}
@@ -910,7 +910,7 @@ std::weak_ptr<AssetInfoBase> ContentManager::GetAssetInfo(HString virtualFilePat
 		{
 			for (auto& i : t)
 			{
-				if (i.second->virtualFilePath.IsSame(virtualFilePath, false))
+				if (StringTool::IsEqual(i.second->virtualFilePath, virtualFilePath, false))
 				{
 					return i.second;
 				}

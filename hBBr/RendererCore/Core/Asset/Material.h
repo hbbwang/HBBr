@@ -24,9 +24,9 @@ public:
 
 #if IS_EDITOR
 
-	HBBR_API void SaveAsset(HString path)override;
+	HBBR_API void SaveAsset(std::string path)override;
 
-	HBBR_API static  std::weak_ptr<AssetInfoBase> CreateMaterial(HString repository,HString virtualPath);
+	HBBR_API static  std::weak_ptr<AssetInfoBase> CreateMaterial(std::string repository,std::string virtualPath);
 
 #endif
 
@@ -38,7 +38,7 @@ public:
 
 private:
 
-	HString _materialName = "Unknow material" ;
+	std::string _materialName = "Unknow material" ;
 
 	std::unique_ptr<MaterialPrimitive> _primitive;
 

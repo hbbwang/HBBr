@@ -1,6 +1,6 @@
 #include "PassType.h"
 
-HString GetPassName(Pass& pass)
+std::string GetPassName(Pass& pass)
 {
 	switch (pass)
 	{

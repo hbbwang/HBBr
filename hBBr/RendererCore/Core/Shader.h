@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "Common.h"
-#include "HString.h"
 #include "VulkanManager.h"
 #include <map>
 #include "./Asset/HGuid.h"
@@ -110,12 +109,12 @@ struct ShaderCache
 	//同名顶点着色器
 	std::weak_ptr<ShaderCache> vsShader;
 	VkShaderModule shaderModule;
-	HString shaderName;
-	HString shaderFullName;
+	std::string shaderName;
+	std::string shaderFullName;
 	//RelativePath
-	HString shaderPath;
+	std::string shaderPath;
 	//AbsPath
-	HString shaderAbsPath;
+	std::string shaderAbsPath;
 	VkPipelineShaderStageCreateInfo shaderStageInfo={};
 	//Default 默认参数模板
 	std::vector<ShaderVarientGroup> vi;
@@ -139,7 +138,7 @@ public:
 
 	HBBR_API static void DestroyAllShaderCache();
 
-	HBBR_API inline static std::weak_ptr<ShaderCache> GetVSCache(HString cacheFullName) {
+	HBBR_API inline static std::weak_ptr<ShaderCache> GetVSCache(std::string cacheFullName) {
 		auto it = _vsShader.find(cacheFullName);
 		if(it != _vsShader.end())
 		{ 
@@ -148,7 +147,7 @@ public:
 		return std::weak_ptr<ShaderCache>();
 	}
 
-	HBBR_API inline static std::weak_ptr<ShaderCache> GetPSCache(HString cacheFullName) {
+	HBBR_API inline static std::weak_ptr<ShaderCache> GetPSCache(std::string cacheFullName) {
 		auto it = _psShader.find(cacheFullName);
 		if (it != _psShader.end())
 		{
@@ -157,11 +156,11 @@ public:
 		return std::weak_ptr<ShaderCache>();
 	}
 
-	HBBR_API inline static  std::map<HString, std::shared_ptr<ShaderCache>> GetPSCaches() {
+	HBBR_API inline static  std::map<std::string, std::shared_ptr<ShaderCache>> GetPSCaches() {
 		return _psShader;
 	}
 
-	HBBR_API inline static std::weak_ptr<ShaderCache> GetCSCache(HString cacheFullName) {
+	HBBR_API inline static std::weak_ptr<ShaderCache> GetCSCache(std::string cacheFullName) {
 		auto it = _csShader.find(cacheFullName);
 		if (it != _csShader.end())
 		{
@@ -169,9 +168,9 @@ public:
 		}
 		return std::weak_ptr<ShaderCache>();
 	}
-	static std::map<HString, std::shared_ptr<ShaderCache>> _vsShader;
-	static std::map<HString, std::shared_ptr<ShaderCache>> _psShader;
-	static std::map<HString, std::shared_ptr<ShaderCache>> _csShader;
+	static std::map<std::string, std::shared_ptr<ShaderCache>> _vsShader;
+	static std::map<std::string, std::shared_ptr<ShaderCache>> _psShader;
+	static std::map<std::string, std::shared_ptr<ShaderCache>> _csShader;
 };
 
 

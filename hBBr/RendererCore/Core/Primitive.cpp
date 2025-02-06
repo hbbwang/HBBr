@@ -43,13 +43,13 @@ void PrimitiveProxy::RemoveMaterialPrimitive(Pass pass, MaterialPrimitive* prim)
 	}
 }
 
-void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, HString vsFullName, HString psFullName)
+void PrimitiveProxy::GetNewMaterialPrimitiveIndex(MaterialPrimitive* prim, std::string vsFullName, std::string psFullName)
 {
-	if (vsFullName.Length() <= 1 || psFullName.Length() <= 1)
+	if (vsFullName.length() <= 1 || psFullName.length() <= 1)
 	{
 		prim->_graphicsIndex = PipelineIndex::GetPipelineIndex(
-			Shader::_vsShader[prim->_graphicsIndex.GetVSShaderName() + "@" + HString::FromUInt(prim->_graphicsIndex.GetVSVarient())],
-			Shader::_psShader[prim->_graphicsIndex.GetPSShaderName() + "@" + HString::FromUInt(prim->_graphicsIndex.GetPSVarient())]);
+			Shader::_vsShader[prim->_graphicsIndex.GetVSShaderName() + "@" + StringTool::FromUInt(prim->_graphicsIndex.GetVSVarient())],
+			Shader::_psShader[prim->_graphicsIndex.GetPSShaderName() + "@" + StringTool::FromUInt(prim->_graphicsIndex.GetPSVarient())]);
 	}
 	else
 	{
@@ -152,10 +152,10 @@ void MaterialPrimitive::SetTexture(int index, std::shared_ptr<class Texture2D> n
 	_textures[index] = newTexture;
 }
 
-void MaterialPrimitive::SetTexture(HString textureName, std::shared_ptr<class Texture2D>newTexture)
+void MaterialPrimitive::SetTexture(std::string textureName, std::shared_ptr<class Texture2D>newTexture)
 {
 	auto it = std::find_if(_textureInfos.begin(), _textureInfos.end(), [textureName](MaterialTextureInfo& info) {
-		return info.name.IsSame(textureName, false);
+		return StringTool::IsEqual(info.name, textureName, false);
 	});
 	if (it != _textureInfos.end())
 	{
@@ -197,7 +197,7 @@ MaterialPrimitive::MaterialPrimitive()
 {
 	_graphicsIndex = {};
 	int priority = 0;
-	HString graphicsName = "";
+	std::string graphicsName = "";
 	Pass passUsing = Pass::BasePass;
 	_uniformBufferSize_vs = 0;
 	_uniformBufferSize_ps = 0;
@@ -225,7 +225,7 @@ MaterialPrimitive::~MaterialPrimitive()
 	_materialPrimitiveGroups.clear();
 }
 
-float MaterialPrimitive::GetScalarParameter_VS(HString name, int* arrayIndex, int* vec4Index)
+float MaterialPrimitive::GetScalarParameter_VS(std::string name, int* arrayIndex, int* vec4Index)
 {
 	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
 		[name](MaterialParameterInfo& info) {
@@ -241,7 +241,7 @@ float MaterialPrimitive::GetScalarParameter_VS(HString name, int* arrayIndex, in
 	return 0;
 }
 
-glm::vec2 MaterialPrimitive::GetVector2Parameter_VS(HString name, int* arrayIndex, int* vec4Index)
+glm::vec2 MaterialPrimitive::GetVector2Parameter_VS(std::string name, int* arrayIndex, int* vec4Index)
 {
 	glm::vec2 result = glm::vec2(0);
 	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
@@ -260,7 +260,7 @@ glm::vec2 MaterialPrimitive::GetVector2Parameter_VS(HString name, int* arrayInde
 	return result;
 }
 
-glm::vec3 MaterialPrimitive::GetVector3Parameter_VS(HString name, int* arrayIndex, int* vec4Index)
+glm::vec3 MaterialPrimitive::GetVector3Parameter_VS(std::string name, int* arrayIndex, int* vec4Index)
 {
 	glm::vec3 result = glm::vec3(0);
 	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
@@ -280,7 +280,7 @@ glm::vec3 MaterialPrimitive::GetVector3Parameter_VS(HString name, int* arrayInde
 	return result;
 }
 
-glm::vec4 MaterialPrimitive::GetVector4Parameter_VS(HString name, int* arrayIndex, int* vec4Index)
+glm::vec4 MaterialPrimitive::GetVector4Parameter_VS(std::string name, int* arrayIndex, int* vec4Index)
 {
 	glm::vec4 result = glm::vec4(0);
 	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
@@ -301,7 +301,7 @@ glm::vec4 MaterialPrimitive::GetVector4Parameter_VS(HString name, int* arrayInde
 	return result;
 }
 
-float MaterialPrimitive::GetScalarParameter_PS(HString name, int* arrayIndex, int* vec4Index)
+float MaterialPrimitive::GetScalarParameter_PS(std::string name, int* arrayIndex, int* vec4Index)
 {
 	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
 		[name](MaterialParameterInfo& info) {
@@ -323,7 +323,7 @@ float MaterialPrimitive::GetScalarParameter_PS(HString name, int* arrayIndex, in
 	return 0;
 }
 
-glm::vec2 MaterialPrimitive::GetVector2Parameter_PS(HString name, int* arrayIndex, int* vec4Index)
+glm::vec2 MaterialPrimitive::GetVector2Parameter_PS(std::string name, int* arrayIndex, int* vec4Index)
 {
 	glm::vec2 result = glm::vec2(0);
 	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
@@ -348,7 +348,7 @@ glm::vec2 MaterialPrimitive::GetVector2Parameter_PS(HString name, int* arrayInde
 	return result;
 }
 
-glm::vec3 MaterialPrimitive::GetVector3Parameter_PS(HString name, int* arrayIndex, int* vec4Index)
+glm::vec3 MaterialPrimitive::GetVector3Parameter_PS(std::string name, int* arrayIndex, int* vec4Index)
 {
 	glm::vec3 result = glm::vec3(0);
 	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
@@ -374,7 +374,7 @@ glm::vec3 MaterialPrimitive::GetVector3Parameter_PS(HString name, int* arrayInde
 	return result;
 }
 
-glm::vec4 MaterialPrimitive::GetVector4Parameter_PS(HString name, int* arrayIndex, int* vec4Index)
+glm::vec4 MaterialPrimitive::GetVector4Parameter_PS(std::string name, int* arrayIndex, int* vec4Index)
 {
 	glm::vec4 result = glm::vec4(0);
 	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
@@ -401,7 +401,7 @@ glm::vec4 MaterialPrimitive::GetVector4Parameter_PS(HString name, int* arrayInde
 	return result;
 }
 
-void MaterialPrimitive::SetScalarParameter_PS(HString name, float value)
+void MaterialPrimitive::SetScalarParameter_PS(std::string name, float value)
 {
 	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
 		[name](MaterialParameterInfo& info) {
@@ -414,7 +414,7 @@ void MaterialPrimitive::SetScalarParameter_PS(HString name, float value)
 	}
 }
 
-void MaterialPrimitive::SetVec2Parameter_PS(HString name, glm::vec2 value)
+void MaterialPrimitive::SetVec2Parameter_PS(std::string name, glm::vec2 value)
 {
 	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
 		[name](MaterialParameterInfo& info) {
@@ -428,7 +428,7 @@ void MaterialPrimitive::SetVec2Parameter_PS(HString name, glm::vec2 value)
 	}
 }
 
-void MaterialPrimitive::SetVec3Parameter_PS(HString name, glm::vec3 value)
+void MaterialPrimitive::SetVec3Parameter_PS(std::string name, glm::vec3 value)
 {
 	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
 		[name](MaterialParameterInfo& info) {
@@ -443,7 +443,7 @@ void MaterialPrimitive::SetVec3Parameter_PS(HString name, glm::vec3 value)
 	}
 }
 
-void MaterialPrimitive::SetVec4Parameter_PS(HString name, glm::vec4 value)
+void MaterialPrimitive::SetVec4Parameter_PS(std::string name, glm::vec4 value)
 {
 	auto it = std::find_if(_paramterInfos_ps.begin(), _paramterInfos_ps.end(),
 		[name](MaterialParameterInfo& info) {
@@ -489,7 +489,7 @@ void MaterialPrimitive::SetVec4Parameter_PS(int arrayIndex, int vec4Index, glm::
 	UpdateUniformBufferPS();
 }
 
-void MaterialPrimitive::SetScalarParameter_VS(HString name, float value)
+void MaterialPrimitive::SetScalarParameter_VS(std::string name, float value)
 {
 	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
 		[name](MaterialParameterInfo& info) {
@@ -502,7 +502,7 @@ void MaterialPrimitive::SetScalarParameter_VS(HString name, float value)
 	}
 }
 
-void MaterialPrimitive::SetVec2Parameter_VS(HString name, glm::vec2 value)
+void MaterialPrimitive::SetVec2Parameter_VS(std::string name, glm::vec2 value)
 {
 	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
 		[name](MaterialParameterInfo& info) {
@@ -516,7 +516,7 @@ void MaterialPrimitive::SetVec2Parameter_VS(HString name, glm::vec2 value)
 	}
 }
 
-void MaterialPrimitive::SetVec3Parameter_VS(HString name, glm::vec3 value)
+void MaterialPrimitive::SetVec3Parameter_VS(std::string name, glm::vec3 value)
 {
 	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
 		[name](MaterialParameterInfo& info) {
@@ -531,7 +531,7 @@ void MaterialPrimitive::SetVec3Parameter_VS(HString name, glm::vec3 value)
 	}
 }
 
-void MaterialPrimitive::SetVec4Parameter_VS(HString name, glm::vec4 value)
+void MaterialPrimitive::SetVec4Parameter_VS(std::string name, glm::vec4 value)
 {
 	auto it = std::find_if(_paramterInfos_vs.begin(), _paramterInfos_vs.end(),
 		[name](MaterialParameterInfo& info) {
@@ -583,10 +583,10 @@ void MaterialPrimitive::SetTextureSampler(int index, VkSampler sampler)
 	_samplers[index] = sampler;
 }
 
-void MaterialPrimitive::SetTextureSampler(HString textureName, VkSampler sampler)
+void MaterialPrimitive::SetTextureSampler(std::string textureName, VkSampler sampler)
 {
 	auto it = std::find_if(_textureInfos.begin(), _textureInfos.end(), [textureName](MaterialTextureInfo& info) {
-		return info.name.IsSame(textureName, false);
+		return StringTool::IsEqual(info.name,textureName, false);
 		});
 	if (it != _textureInfos.end())
 	{

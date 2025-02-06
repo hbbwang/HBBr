@@ -7,8 +7,6 @@
 #include "RendererType.h"
 #include "Asset/Serializable.h"
 #include "Asset/HGuid.h"
-#include "HString.h"
-#include "Asset/HGuid.h"
 #include "VulkanObjectManager.h"
 
 #define StdVectorRemoveIf(stdVector,func)  \
@@ -30,24 +28,24 @@ enum class AssetType : uint32_t
 };
 
 
-inline static AssetType GetAssetTypeBySuffix(HString suffix)
+inline static AssetType GetAssetTypeBySuffix(std::string suffix)
 {
-	if (suffix.IsSame("fbx", false))
+	if (StringTool::IsEqual(suffix, "fbx", false))
 	{
 		return AssetType::Model;
 	}
-	else if (suffix.IsSame("mat", false))
+	else if (StringTool::IsEqual(suffix, "mat", false))
 	{
 		return AssetType::Material;
 	}
-	else if(suffix.IsSame("dds", false))
+	else if(StringTool::IsEqual(suffix, "dds", false))
 	{
 		return AssetType::Texture2D;
 	}
 	return AssetType::Unknow;
 }
 
-inline static HString GetAssetTypeString(AssetType type)
+inline static std::string GetAssetTypeString(AssetType type)
 {
 	switch (type)
 	{
@@ -74,22 +72,22 @@ public:
 	HGUID guid;
 	AssetType type;
 	//虚拟名称,非实际文件名
-	HString displayName;
-	HString suffix;
+	std::string displayName;
+	std::string suffix;
 	//资产所在的真实绝对 [文件] 路径(D:/xxx/xxx/.../abc.fbx)，带完整文件名字和后缀
-	HString absFilePath;
+	std::string absFilePath;
 	//资产所在的真实绝对 [目录] 路径(D:/xxx/xxx/...)
-	HString absPath;
+	std::string absPath;
 	//资产所在的相对 [文件] 路径(Asset/..../abc.fbx),带完整文件名字和后缀
-	HString assetFilePath;
+	std::string assetFilePath;
 	//资产所在的相对 [目录] 路径(Asset/....)
-	HString assetPath;
+	std::string assetPath;
 	//资产的虚拟路径(Content/xxx/...),非实际路径,虚拟路径统一用“/”分割,不存在使用"\\"
-	HString virtualPath;
+	std::string virtualPath;
 	//资产的虚拟文件路径(Content/xxx/...abc.fbx),非实际路径,带名字和后缀,虚拟路径统一用“/”分割,不存在使用"\\"
-	HString virtualFilePath;
+	std::string virtualFilePath;
 	//资产所在的仓库名字,不带.repository后缀
-	HString repository;
+	std::string repository;
 
 	//引用
 	std::vector<std::weak_ptr<AssetInfoBase>> refs;
@@ -102,8 +100,8 @@ public:
 
 #if IS_EDITOR
 	//编辑器ListWidget生成Item图标的时候使用
-	//每个HString为单独一行
-	std::unordered_map<HString, HString> toolTips;
+	//每个std::string为单独一行
+	std::unordered_map<std::string, std::string> toolTips;
 	bool bDirty = false;
 	bool bDirtySelect = true;
 #endif
@@ -187,7 +185,7 @@ public:
 
 struct AssetSaveType
 {
-	HString metaAssetPath;
+	std::string metaAssetPath;
 	HGUID guid;
 	AssetType type;
 	size_t byteSize;
@@ -196,15 +194,15 @@ struct AssetSaveType
 
 struct VirtualFolder
 {
-	HString FolderName;
-	HString Path;
+	std::string FolderName;
+	std::string Path;
 	std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> assets;
 };
 
 struct AssetImportInfo
 {
-	HString absAssetFilePath;
-	HString virtualPath;
+	std::string absAssetFilePath;
+	std::string virtualPath;
 };
 
 class ContentManager
@@ -231,7 +229,7 @@ public:
 	absAssetFilePath:导入的资产的绝对路径
 	virtualPath:导入之后显示在哪个虚拟路径
 	*/
-	HBBR_API bool AssetImport(HString repositoryName,std::vector<AssetImportInfo> importFiles , std::vector<std::weak_ptr<AssetInfoBase>>* out = nullptr);
+	HBBR_API bool AssetImport(std::string repositoryName,std::vector<AssetImportInfo> importFiles , std::vector<std::weak_ptr<AssetInfoBase>>* out = nullptr);
 
 	/*
 	资产删除
@@ -244,7 +242,7 @@ public:
 	资产虚拟目录更改(不会更改仓库)
 	assetInfos:需要更改虚拟路径的资产信息
 	*/
-	HBBR_API void SetNewVirtualPath(std::vector<std::weak_ptr<AssetInfoBase>> assetInfos , HString newVirtualPath , bool bDeleteEmptyFolder = true);
+	HBBR_API void SetNewVirtualPath(std::vector<std::weak_ptr<AssetInfoBase>> assetInfos , std::string newVirtualPath , bool bDeleteEmptyFolder = true);
 
 	/*
 	保存AssetInfo到.repository
@@ -256,7 +254,7 @@ public:
 		bSave:是否直接保存到仓库文件里,默认false
 		返回最终的DisplayName
 	*/
-	HBBR_API HString SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo,HString newName,bool bSave = false);
+	HBBR_API std::string SetVirtualName(std::weak_ptr<AssetInfoBase>& assetInfo,std::string newName,bool bSave = false);
 
 	/*
 		标记已经改动过的资产,告诉用户这些资产可能需要手动保存
@@ -290,11 +288,11 @@ public:
 	/*
 		创建一个新的虚拟文件夹
 	*/
-	HBBR_API void CreateNewVirtualFolder(HString folderFullPath);
+	HBBR_API void CreateNewVirtualFolder(std::string folderFullPath);
 
 	/*  */
 	HBBR_API void UpdateToolTips(AssetInfoBase* asset);
-	HBBR_API void SetToolTip(AssetInfoBase* asset,HString name,HString value);
+	HBBR_API void SetToolTip(AssetInfoBase* asset,std::string name,std::string value);
 
 #endif
 
@@ -312,26 +310,26 @@ public:
 
 	HBBR_API inline const std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>& GetAssets(AssetType type)const { return _assets[(uint32_t)type]; }
 
-	HBBR_API inline const std::unordered_map<HString, std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>>& GetRepositories()const { return _assets_repos; }
+	HBBR_API inline const std::unordered_map<std::string, std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>>& GetRepositories()const { return _assets_repos; }
 
-	HBBR_API const  std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> GetAssetsByVirtualFolder(HString virtualFolder)const;
+	HBBR_API const  std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> GetAssetsByVirtualFolder(std::string virtualFolder)const;
 
-	HBBR_API const  std::weak_ptr<AssetInfoBase> GetAssetByVirtualPath(HString virtualPath)const;
+	HBBR_API const  std::weak_ptr<AssetInfoBase> GetAssetByVirtualPath(std::string virtualPath)const;
 
-	HBBR_API inline const std::map<HString, VirtualFolder>& GetVirtualFolders()const { return _assets_vf; }
+	HBBR_API inline const std::map<std::string, VirtualFolder>& GetVirtualFolders()const { return _assets_vf; }
 
 	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HGUID guid, AssetType type = AssetType::Unknow)const;
 
-	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HGUID guid,HString repositoryName)const;
+	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HGUID guid,std::string repositoryName)const;
 
 	/* 根据内容浏览器显示的文件名(文件的虚拟路径)称查找GUID,不推荐使用 */
-	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(HString virtualFilePath , AssetType type = AssetType::Unknow)const;
+	HBBR_API std::weak_ptr<AssetInfoBase> GetAssetInfo(std::string virtualFilePath , AssetType type = AssetType::Unknow)const;
 
 	/* 重载仓库 */
-	HBBR_API void ReloadRepository(HString repositoryName);
+	HBBR_API void ReloadRepository(std::string repositoryName);
 
 	/* 重载单个资产 */
-	HBBR_API std::weak_ptr<AssetInfoBase> ReloadAsset(nlohmann::json& assetNode, HString& repositoryName);
+	HBBR_API std::weak_ptr<AssetInfoBase> ReloadAsset(nlohmann::json& assetNode, std::string& repositoryName);
 
 	template<class T>
 	HBBR_INLINE std::shared_ptr<T> GetAsset(HGUID guid , AssetType type = AssetType::Unknow)
@@ -366,7 +364,7 @@ private:
 	//根据类型储存对象
 	std::vector<std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>>_assets;
 	//根据仓库储存对象
-	std::unordered_map<HString, std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>> _assets_repos;
+	std::unordered_map<std::string, std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>>> _assets_repos;
 	//根据虚拟路径储存对象<完整虚拟路径,虚拟路径对象>
-	std::map<HString, VirtualFolder> _assets_vf;
+	std::map<std::string, VirtualFolder> _assets_vf;
 };
