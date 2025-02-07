@@ -24,17 +24,17 @@
         "A000020":"[Material::LoadAsset] 材质实力加载纹理失败。",
         "A000021":"[Material::CreateMaterial] 创建新材质实力成功。",
         "A000022":"[Material::CreateMaterial] 创建新材质实力失败。",
-        "A000023":"[Material::LoadAsset] 没有找到对应的ShaderCache:%s ,将应用Error Cache...",
+        "A000023":"[Material::LoadAsset] 没有找到对应的ShaderCache:{} ,将应用Error Cache...",
         "A000024":"[VulkanRenderer::ResizeBuffer] 重置Swapchain失败，Sufrace丢失",
-        "A000025":"[Shader::LoadShaderCacheFile] 导入ShaderCache失败:%s",
-        "A000026":"[MaterialPrimitive] 获取参数失败,找不到该参数:%s,将返回0",
+        "A000025":"[Shader::LoadShaderCacheFile] 导入ShaderCache失败:{}",
+        "A000026":"[MaterialPrimitive] 获取参数失败,找不到该参数:{},将返回0",
         "A000027":"[AssetImport] 导入资产(HDR图像)CubeMap失败",
-        "A000028":"资产[%s]引用为0,正在发送VulkanObbjectManager准备销毁",
+        "A000028":"资产[{}]引用为0,正在发送VulkanObbjectManager准备销毁",
         "A000029":"错误,创建VulkanMemoryAllocator(VMA)失败!正在退出。",
-        "ResizeBuffer":"[ResizeBuffer][%s]重置缓冲区大小: %llu (%lf M)",
-        "CreateBuffer":"[CreateBuffer][%s]创建缓冲区,大小: %llu (%lf M)",
-        "DestroyBuffer":"[DestroyBuffer][%s]释放缓冲区,大小: %llu (%lf M)",
-        "BufferCopyGPUOnly":"[VMABuffer::Mapping][%s]你正在对仅GPU可见的Buffer的数据进行二次拷贝,注意,这可能会降低性能。"
+        "ResizeBuffer":"[ResizeBuffer][{}]重置缓冲区大小: {} ({:.4f} M)",
+        "CreateBuffer":"[CreateBuffer][{}]创建缓冲区,大小: {} ({:.4f} M)",
+        "DestroyBuffer":"[DestroyBuffer][{}]释放缓冲区,大小: {} ({:.4f} M)",
+        "BufferCopyGPUOnly":"[VMABuffer::Mapping][{}]你正在对仅GPU可见的Buffer的数据进行二次拷贝,注意,这可能会降低性能。"
     },
     "ModelComponent":{
         "SetMaterialIndexError": "[ModelComponent::SetMaterial]SetMaterial失败,Index错误."

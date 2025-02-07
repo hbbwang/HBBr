@@ -25,7 +25,7 @@ World::~World()
 	_editorLevel.reset();
 #endif
 
-	ConsoleDebug::printf_endl("Release World[%s][%s]", this->GetWorldName().c_str(), this->GetGUID().str().c_str());
+	ConsoleDebug::printf_endl("Release World[{}][{}]", this->GetWorldName().c_str(), this->GetGUID().str().c_str());
 
 	_renderer = nullptr;
 	_mainCamera = nullptr;
@@ -101,14 +101,14 @@ std::shared_ptr<World> World::CreateNewWorld(std::string newWorldName)
 	world->_worldAbsPath = FileSystem::Append(FileSystem::GetWorldAbsPath(), world->_guidStr) + ".world";
 	world->_worldSettingAbsPath = FileSystem::Append(FileSystem::GetWorldAbsPath(), ".WorldSettings");
 	FileSystem::FixUpPath(world->_worldSettingAbsPath);
-	ConsoleDebug::printf_endl("Create new world[%s][%s]", finalName.c_str(), world->_guidStr.c_str());
+	ConsoleDebug::printf_endl("Create new world[{}][{}]", finalName.c_str(), world->_guidStr.c_str());
 	return world;
 }
 
 void World::SetWorldName(std::string name)
 {
 	_worldName = name;
-	ConsoleDebug::printf_endl("World rename[%s][%s]", _worldName.c_str(), _guidStr.c_str());
+	ConsoleDebug::printf_endl("World rename[{}][{}]", _worldName.c_str(), _guidStr.c_str());
 }
 
 void World::SaveWorld(std::string newWorldName)

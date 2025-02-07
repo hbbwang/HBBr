@@ -171,7 +171,6 @@ void ConsoleDebug::CreateConsole(std::string consolePath ,bool bNoClient)
             &pi);           // Pointer to PROCESS_INFORMATION structure
     }
 #endif
-    //�������Կͻ��˵�����
     printf("TCPServer start...\n");
     socketAcceptThread = std::thread(SocketAcceptThreadFunc);
     socketAcceptThread.detach();
@@ -236,8 +235,8 @@ void ConsoleDebug::print(std::string in, std::string color, std::string backgrou
         g = (float)StringTool::ToDouble(colorArray[1]);
         b = (float)StringTool::ToDouble(colorArray[2]);
         #ifdef _WIN32
-                HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // ��ȡ��׼����豸���
-                WORD wr2 = 0 ;//��������ϵͳ�궨����ɫ����
+                HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); 
+                WORD wr2 = 0 ;
                 if (r > 30)
                 {
                     wr2 |= FOREGROUND_RED;
@@ -316,8 +315,8 @@ void ConsoleDebug::print_endl(std::string in, std::string color, std::string bac
         g = (float)StringTool::ToDouble(colorArray[1]);
         b = (float)StringTool::ToDouble(colorArray[2]);
         #ifdef _WIN32
-        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // ��ȡ��׼����豸���
-        WORD wr2 = 0;//��������ϵͳ�궨����ɫ����
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        WORD wr2 = 0;
         if (r > 30)
         {
             wr2 |= FOREGROUND_RED;
@@ -400,7 +399,6 @@ void ConsoleDebug::AddNewCommand(std::string newCommand, std::function<void()> f
     commandLists.insert(std::pair<std::string, std::function<void()>>(newCommand, func));
 }
 
-/* ����ִ�� */
 void ConsoleDebug::execCommand(std::string key)
 {
 

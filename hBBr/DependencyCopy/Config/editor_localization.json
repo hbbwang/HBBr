@@ -45,7 +45,7 @@
         "MaterialTextureTitle": "Texture",
         "MaterialUniformBufferTitle": "Uniform Buffer",
         "PixelUniformBuffer": "像素着色器",
-        "RefreshShader": "刷新Shader:[vs:%s][ps:%s]",
+        "RefreshShader": "刷新Shader:[vs:{}][ps:{}]",
         "RefreshShaderButton": "刷新Shader",
         "SaveButton": "保存",
         "VertexUniformBuffer": "顶点着色器"
@@ -72,16 +72,16 @@
         "CreateNewLevel": "创建新场景",
         "CreatePlane": "创建Plane",
         "CreateSphere": "创建Sphere",
-        "CurrentEditLevelLog": "当前编辑场景: %s",
+        "CurrentEditLevelLog": "当前编辑场景: {}",
         "DeleteGameObject": "删除",
         "DeleteLevel": "删除场景",
         "LevelSelection": "编辑场景",
         "LoadLevel": "加载场景",
         "RenameGameObject": "重命名",
         "RenameLevel": "重命名场景",
-        "SetGameObjectLevel": "对象[%s]移动到新的场景[%s]",
+        "SetGameObjectLevel": "对象[{}]移动到新的场景[{}]",
         "SetGameObjectLevelFailed": "目标场景未加载",
-        "SetGameObjectParent": "对象[%s]变换Parent[%s]",
+        "SetGameObjectParent": "对象[{}]变换Parent[{}]",
         "UnloadLevel": "卸载场景"
     },
     "TextureEditor": {
