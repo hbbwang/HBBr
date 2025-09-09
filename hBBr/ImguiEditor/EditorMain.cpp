@@ -6,6 +6,7 @@
 #include "Pass/ImguiPass.h"
 #include "Pass/ImguiPassEditor.h"
 #include "Imgui/imgui.h"
+#include "imgui_internal.h"
 #include "Imgui/backends/imgui_impl_vulkan.h"
 #include "RendererConfig.h"
 #include "DescriptorSet.h"
@@ -29,9 +30,13 @@ EditorMain::EditorMain()
 
 	//Widget text
 	SceneOutlineTitle = GetEditorInternationalizationText("MainWindow", "SceneOutlineTitle").c_str();
+	SceneOutlineTitle += "##SceneOutline";
 	InspectorTitle = GetEditorInternationalizationText("MainWindow", "InspectorTitle").c_str();
+	InspectorTitle += "##Inspector";
 	ContentBrowserTitle = GetEditorInternationalizationText("MainWindow", "ContentBrowserTitle").c_str();
+	ContentBrowserTitle += "##ContentBrowser";
 	RenderViewTitle = GetEditorInternationalizationText("MainWindow", "RenderViewTitle").c_str();
+	RenderViewTitle += "##RenderView";
 
 	//Context text
 	LoadLevel = GetEditorInternationalizationText("SceneOutline", "LoadLevel").c_str();
@@ -40,7 +45,83 @@ EditorMain::EditorMain()
 	auto mainEditorWidget = [this](ImguiPassEditor* pass) {
 		ImGui::SetCurrentContext(pass->_imguiContent);
 		ImGuiID mainEditorDock = ImGui::GetID("MainEditorDock");
-		ImGui::DockSpaceOverViewport(mainEditorDock);
+		//ImGui::DockSpaceOverViewport(mainEditorDock);
+
+		int w, h;
+		VulkanApp::GetWindowPos(_mainForm->window, w, h);
+
+		ImGuiID dockspaceID = ImGui::GetID("##ui.dock_space");
+
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		int windowFlags = 
+			ImGuiWindowFlags_NoDecoration            // 无标题栏、不可改变大小、无滚动条、不可折叠
+			| ImGuiWindowFlags_NoMove                // 不可移动
+			| ImGuiWindowFlags_NoBackground          // 无背景（背景透明）
+			| ImGuiWindowFlags_NoDocking             // 不可停靠
+			| ImGuiWindowFlags_NoBringToFrontOnFocus // 无法设置前台和聚焦
+			| ImGuiWindowFlags_NoNavFocus            // 无法通过键盘和手柄聚焦
+			;
+		// ImGui::SetNextWindowBgAlpha(0.0f); // 窗口 alpha 为 0，同样可以不显示背景
+
+		ImGui::Begin("##UI_DOCK_WINDOW", 0, windowFlags); // 开始停靠窗口
+		// 创建停靠空间
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable) 
+		{
+			// 判断是否有根节点，防止一直重建
+			if (!ImGui::DockBuilderGetNode(dockspaceID))
+			{
+				// 移除根节点
+				ImGui::DockBuilderRemoveNode(dockspaceID);
+
+				// 创建根节点
+				ImGuiID root = ImGui::DockBuilderAddNode(dockspaceID, ImGuiDockNodeFlags_None);
+
+				// 设置根节点位置大小
+				ImGui::DockBuilderSetNodePos(root, { 0.0f, 0.0f });
+				ImGui::DockBuilderSetNodeSize(root, ImGui::GetWindowSize());
+
+				// 分割停靠空间
+				// 
+				// 根节点分割下节点
+				ImGuiID bottomNode = ImGui::DockBuilderSplitNode(root, ImGuiDir_Down, 0.25f, nullptr, &root);
+
+				// 根节点分割左节点
+				ImGuiID leftNode = ImGui::DockBuilderSplitNode(root, ImGuiDir_Left, 0.25f, nullptr, &root);
+
+				// 根节点分割右节点
+				ImGuiID rightNode = ImGui::DockBuilderSplitNode(root, ImGuiDir_Right, 0.25f / 0.75f, nullptr, &root);
+
+
+
+				// 设置节点属性
+
+				// 禁止其他窗口/节点分割根节点
+				// ImGui::DockBuilderGetNode(dockspaceID)->LocalFlags |= ImGuiDockNodeFlags_NoDockingSplit;
+
+				// 设置分割到最后的根节点隐藏标签栏
+				ImGui::DockBuilderGetNode(root)->LocalFlags |= ImGuiDockNodeFlags_HiddenTabBar;
+
+				// 设置节点停靠窗口
+				ImGui::DockBuilderDockWindow(ContentBrowserTitle.c_str(), bottomNode);
+				ImGui::DockBuilderDockWindow(SceneOutlineTitle.c_str(), leftNode);          // 右边节点
+				ImGui::DockBuilderDockWindow(InspectorTitle.c_str(), rightNode);          // 右边节点
+				ImGui::DockBuilderDockWindow(RenderViewTitle.c_str(), root); // 观察窗口平铺“客户区”，停靠的节点是 CentralNode
+
+				// 结束停靠设置
+				ImGui::DockBuilderFinish(dockspaceID);
+				// 设置焦点窗口
+				ImGui::SetWindowFocus("##UI_DOCK_WINDOW");
+			}
+
+			// 创建停靠空间
+			ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+		}
+
+		ImGui::End(); // 结束停靠窗口
 
 		BuildMainMenu(pass);
 
@@ -50,10 +131,10 @@ EditorMain::EditorMain()
 
 		BuildContentBrowser(pass);
 
-		BuildRenderer(pass);
+		BuildRenderer(pass,w,h);
 
 		//ImGui::ShowDemoWindow((bool*)1);
-		ImGui::ShowStyleEditor();
+		//ImGui::ShowStyleEditor();
 
 		};
 	_editorGui->AddGui(mainEditorWidget);
@@ -115,12 +196,13 @@ void EditorMain::BuildMainMenu(ImguiPassEditor* pass)
 	}
 }
 
-void EditorMain::BuildRenderer(ImguiPassEditor* pass)
+void EditorMain::BuildRenderer(ImguiPassEditor* pass, float windowX, float windowY)
 {
 	ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-	if (ImGui::Begin(RenderViewTitle.c_str(), 0))
+	if (ImGui::Begin(RenderViewTitle.c_str()))
 	{
+
 		// 获取内容区域的最小和最大坐标（相对于窗口的坐标）
 		ImVec2 contentRegionMin = ImGui::GetWindowContentRegionMin();
 		ImVec2 contentRegionMax = ImGui::GetWindowContentRegionMax();
@@ -140,8 +222,13 @@ void EditorMain::BuildRenderer(ImguiPassEditor* pass)
 		//_renderViewSize.width += 14;
 		//_renderViewSize.height += 15;
 
+		//HBox2D rendererRegion = HBox2D(
+		//	glm::vec2(ImGui::GetWindowPos().x + contentRegionMin.x, ImGui::GetWindowPos().y + contentRegionMin.y),
+		//	glm::vec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y)
+		//);
+
 		HBox2D rendererRegion = HBox2D(
-			glm::vec2(ImGui::GetWindowPos().x + contentRegionMin.x, ImGui::GetWindowPos().y + contentRegionMin.y),
+			glm::vec2(ImGui::GetWindowPos().x + contentRegionMin.x + windowX, ImGui::GetWindowPos().y + contentRegionMin.y + windowY) ,
 			glm::vec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y)
 		);
 

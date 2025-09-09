@@ -35,7 +35,7 @@ void ImguiPassEditor::PassInit()
 	//AddAttachment(VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	AddSubpass({}, { 0 }, -1);
 	CreateRenderPass();
-	_imguiContent = VulkanManager::GetManager()->InitImgui_SDL(_swapchain->GetWindowHandle(), _renderPass, true, true);
+	_imguiContent = VulkanManager::GetManager()->InitImgui_SDL(_swapchain->GetWindowHandle(), _renderPass, true, false);
 	for (auto& i : VulkanApp::GetForms())
 	{
 		if (i->swapchain == _swapchain)

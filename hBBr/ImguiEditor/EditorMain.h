@@ -60,7 +60,7 @@ private:
 	bool& GetLevelActive(class Level* level);
 	bool& GetGameObjectActive(class GameObject* obj);
 	void BuildMainMenu(ImguiPassEditor* pass);
-	void BuildRenderer(ImguiPassEditor* pass);
+	void BuildRenderer(ImguiPassEditor* pass,float windowX,float windowY);
 	void BuildSceneOutline(ImguiPassEditor* pass);
 	void BuildInspector(ImguiPassEditor* pass);
 	void BuildContentBrowser(ImguiPassEditor* pass);
