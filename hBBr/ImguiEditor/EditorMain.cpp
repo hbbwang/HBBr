@@ -549,6 +549,39 @@ void EditorMain::BuildSceneOutlineTreeNode_GameObject(std::shared_ptr<class Game
 	}
 }
 
+void EditorMain::GetContentBrowserFolderNodes()
+{
+	_cb_folders.clear();
+	auto& folders = ContentManager::Get()->GetVirtualFolders();
+	BrowserContentNode mainNode;
+	mainNode.name = "Content";
+	mainNode.bEditorOpen = true;
+	_cb_folders.emplace(0, std::vector<BrowserContentNode>{ mainNode });
+	for (auto& f : folders)
+	{
+		using namespace std;
+		BrowserContentNode newNode;
+		string virtualPath = f.first.c_str();
+		auto depth = std::count(virtualPath.begin(),virtualPath.end(),'/');
+		auto name = f.second.FolderName;
+		newNode.name = name.c_str();
+		newNode.bEditorOpen = false;
+		
+		auto it = _cb_folders.find(depth);
+		if (it == _cb_folders.end())
+		{
+			std::vector<BrowserContentNode> newVec;
+			newVec.push_back(newNode);
+			_cb_folders.emplace(depth, newVec);
+		}
+		else
+		{
+			it->second.push_back(newNode);
+		}
+
+	}
+}
+
 void EditorMain::BuildInspector(ImguiPassEditor* pass)
 {
 	if (ImGui::Begin(InspectorTitle.c_str()))
@@ -600,21 +633,15 @@ void EditorMain::BuildContentBrowser(ImguiPassEditor* pass)
 		static float w = 200.0f;
 		float h = ImGui::GetContentRegionAvail().y;
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+		//Floder Tree View
 		if (ImGui::BeginChild("Folders", ImVec2(w, h), true))
 		{
-			//auto& folders = ContentManager::Get()->GetVirtualFolders();
-			//BrowserContentNode contentNode;
-			//contentNode.name = "Content";
-			//contentNode.attachmentDepth = 0;
-			//contentNode.bEditorOpen = true;
-			//for (auto& f : folders)
-			//{
-			//	BrowserContentNode newNode;
-			//	auto name = f.second.FolderName;
-			//	newNode.name = name.c_str();
-			//	f.second.
-			//}
-			//BuildContentBrowser_Folders(pass);
+			if (_bNeedUpdateContentBrowserFolderNodes)
+			{
+				_bNeedUpdateContentBrowserFolderNodes = false;
+				GetContentBrowserFolderNodes();
+			}
+			BuildContentBrowser_Folders(0);
 		}
 		ImGui::EndChild();
 		ImGui::SameLine();
@@ -632,114 +659,33 @@ void EditorMain::BuildContentBrowser(ImguiPassEditor* pass)
 	ImGui::End();
 }
 
-void EditorMain::BuildContentBrowser_Folders(BrowserContentNode& node, float levelItemXPos, int depth)
+void EditorMain::BuildContentBrowser_Folders(float levelItemXPos)
 {
-	//ImGuiTreeNodeFlags treeNodeFlags =
-	//	ImGuiTreeNodeFlags_OpenOnArrow |
-	//	ImGuiTreeNodeFlags_OpenOnDoubleClick |
-	//	ImGuiTreeNodeFlags_SpanFullWidth |
-	//	ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding
-	//	| (node.children.size() <= 0 ? ImGuiTreeNodeFlags_CustomArrow : ImGuiTreeNodeFlags_None)
-	//	;
-	//{
-	//	if (node.attachmentDepth == depth)
-	//	{
-	//		float objectlItemXPos = ImGui::GetCursorPosX();
-	//		ImGui::SetCursorPosX(objectlItemXPos + ImGui::GetFontSize());
+	ImGuiTreeNodeFlags treeNodeFlags =
+		ImGuiTreeNodeFlags_OpenOnArrow |
+		ImGuiTreeNodeFlags_OpenOnDoubleClick |
+		ImGuiTreeNodeFlags_SpanFullWidth |
+		ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding
+		//| (node.children.size() <= 0 ? ImGuiTreeNodeFlags_CustomArrow : ImGuiTreeNodeFlags_None)
+		;
+	{
+		float objectlItemXPos = ImGui::GetCursorPosX();
+		ImGui::SetCursorPosX(objectlItemXPos + ImGui::GetFontSize());
 
-	//		//Object TreeNode
-	//		node.bEditorOpen = ImGui::TreeNodeEx(node.name.c_str(),
-	//			(ImTextureID)EditorResource::Get()->_icon_objectIcon->descriptorSet,
-	//			treeNodeFlags | (node.bSelected ? ImGuiTreeNodeFlags_Selected : 0));
+		//Object TreeNode
+		node.bEditorOpen = ImGui::TreeNodeEx(node.name.c_str(),
+			(ImTextureID)EditorResource::Get()->_icon_objectIcon->descriptorSet,
+			treeNodeFlags | (node.bSelected ? ImGuiTreeNodeFlags_Selected : 0));
 
-	//		//if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
-	//		//{
-	//		//	ImGui::SetDragDropPayload("SceneOutline_GameObject", &_sceneOutlineTreeNodeData, sizeof(_sceneOutlineTreeNodeData));
-	//		//	ImGui::Text("---Dragging---");
-	//		//	ImGui::EndDragDropSource();
-	//		//}
-
-	//		//if (ImGui::BeginDragDropTarget())
-	//		//{
-	//		//	if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SceneOutline_GameObject"))
-	//		//	{
-	//		//		std::vector<SceneOutlineTreeNodeData>* receivedNodes = static_cast<std::vector<SceneOutlineTreeNodeData>*>(payload->Data);
-	//		//		if (receivedNodes)
-	//		//		{
-	//		//			for (int i = 0; i < receivedNodes->size(); i++)
-	//		//			{
-	//		//				GameObject* node = receivedNodes->at(i).object;
-	//		//				if (node != obj.get())
-	//		//				{
-	//		//					node->SetParent(obj.get());
-	//		//				}
-	//		//			}
-	//		//			_sceneOutlineTreeNodeData.clear();
-	//		//		}
-	//		//	}
-	//		//	ImGui::EndDragDropTarget();
-	//		//}
-
-	//		//ËÉ¿ª×ó¼ü
-	//		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
-	//		{
-	//			if (ImGui::GetIO().KeyCtrl)
-	//			{
-	//				node.bSelected = !node.bSelected;
-	//				if (node.bSelected == false)
-	//				{
-	//					//_sceneOutlineTreeNodeData.erase(std::remove_if(
-	//					//	_sceneOutlineTreeNodeData.begin(), _sceneOutlineTreeNodeData.end(),
-	//					//	[&](SceneOutlineTreeNodeData& data) {
-	//					//		return data.object == obj.get();
-	//					//	}));
-	//				}
-
-	//			}
-	//			else
-	//			{
-	//				ClearSelection(obj->GetWorld());
-	//				obj->_bSelected = true;
-	//			}
-
-	//			if (obj->_bSelected)
-	//			{
-	//				SceneOutlineTreeNodeData newData;
-	//				newData.object = obj.get();
-	//				_sceneOutlineTreeNodeData.push_back(newData);
-	//			}
-	//		}
-
-	//		if (obj->_bSceneOutlineSearchResult && !obj->_bSelected)
-	//		{
-	//			ImVec2 min = ImGui::GetItemRectMin();
-	//			ImVec2 max = ImGui::GetItemRectMax();
-	//			ImGui::GetForegroundDrawList()->AddRectFilled(
-	//				min,
-	//				max,
-	//				ImGui::GetColorU32(ImGuiCol_TreeNodeItemSearchResult));
-	//		}
-
-	//		//Object CheckBox
-	//		{
-	//			ImGui::SameLine();
-	//			ImGui::SetCursorPosX(levelItemXPos);
-	//			ImGui::PushID(obj->GetGUID().str().c_str());
-	//			ImGui::Checkbox("", &GetGameObjectActive(obj.get()));
-	//			ImGui::PopID();
-	//		}
-
-	//		if (obj->_bEditorOpen)
-	//		{
-	//			for (auto& o : obj->GetChildren())
-	//			{
-	//				BuildSceneOutlineTreeNode_GameObject(o->GetSelfWeekPtr().lock(), levelItemXPos, depth + 1, searchInput, searchInputLength);
-	//			}
-	//			ImGui::TreePop();
-	//		}
-
-	//	}
-	//}
+		if (node.bEditorOpen)
+		{
+			for (auto& o : node.children)
+			{
+				BuildContentBrowser_Folders();
+			}
+			ImGui::TreePop();
+		}
+	}
 }
 
 void EditorMain::BuildContentBrowser_Files(BrowserContentNode& node)

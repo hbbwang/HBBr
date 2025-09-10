@@ -44,13 +44,12 @@ public:
 	{
 		bool bSelected;
 		std::string name;
-		HGUID parentGuid;
+		BrowserContentNode* parent;
 		std::vector<BrowserContentNode*> children;
 		class AssetInfoBase* assetInfo;
-		int attachmentDepth = 0;
 		bool bEditorOpen = false;
 	};
-	std::map<HGUID, BrowserContentNode> _cb_folders;
+	std::map<int, std::vector<BrowserContentNode>> _cb_folders;
 	std::vector<BrowserContentNode> _cb_files;
 
 private:
@@ -64,9 +63,11 @@ private:
 	void BuildSceneOutline(ImguiPassEditor* pass);
 	void BuildInspector(ImguiPassEditor* pass);
 	void BuildContentBrowser(ImguiPassEditor* pass);
-	void BuildContentBrowser_Folders(BrowserContentNode& node, float levelItemXPos, int depth);
+	void BuildContentBrowser_Folders(float levelItemXPos);
 	void BuildContentBrowser_Files(BrowserContentNode& node);
 	void BuildSceneOutlineTreeNode_GameObject(std::shared_ptr<class GameObject> obj, float levelItemXPos, int depth, char* searchInput, int searchInputLength);
 
+	void GetContentBrowserFolderNodes();
+	bool _bNeedUpdateContentBrowserFolderNodes = true;
 };
 
