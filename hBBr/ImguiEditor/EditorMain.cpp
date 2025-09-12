@@ -718,6 +718,11 @@ void EditorMain::BuildContentBrowser_Folders(int depth, float levelItemXPos)
 		float objectlItemXPos = ImGui::GetCursorPosX();
 		ImGui::SetCursorPosX(objectlItemXPos + ImGui::GetFontSize());
 
+		//if (depth == 0)
+		//{
+		//	for();
+		//}
+
 		//auto depthFolders = _cb_folders.find(depth);
 		//if (depthFolders != _cb_folders.end())
 		//{
