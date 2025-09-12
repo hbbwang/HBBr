@@ -131,7 +131,7 @@ EditorMain::EditorMain()
 
 		BuildContentBrowser(pass);
 
-		BuildRenderer(pass,w,h);
+		BuildRenderer(pass, (float)w, (float)h);
 
 		//ImGui::ShowDemoWindow((bool*)1);
 		//ImGui::ShowStyleEditor();
@@ -551,34 +551,80 @@ void EditorMain::BuildSceneOutlineTreeNode_GameObject(std::shared_ptr<class Game
 
 void EditorMain::GetContentBrowserFolderNodes()
 {
+	using namespace std;
 	_cb_folders.clear();
-	auto& folders = ContentManager::Get()->GetVirtualFolders();
+	auto folders = ContentManager::Get()->GetVirtualFolders();
 	BrowserContentNode mainNode;
 	mainNode.name = "Content";
+	mainNode.fullVirtualPath = "";
 	mainNode.bEditorOpen = true;
-	_cb_folders.emplace(0, std::vector<BrowserContentNode>{ mainNode });
-	for (auto& f : folders)
+	mainNode.depth = 0;
+	_cb_folders.emplace("", std::vector<BrowserContentNode>{ mainNode });
+	//while (true)
 	{
-		using namespace std;
-		BrowserContentNode newNode;
-		string virtualPath = f.first.c_str();
-		auto depth = std::count(virtualPath.begin(),virtualPath.end(),'/');
-		auto name = f.second.FolderName;
-		newNode.name = name.c_str();
-		newNode.bEditorOpen = false;
-		
-		auto it = _cb_folders.find(depth);
-		if (it == _cb_folders.end())
+		for (auto f = folders.begin(); f!=folders.end();)
 		{
-			std::vector<BrowserContentNode> newVec;
-			newVec.push_back(newNode);
-			_cb_folders.emplace(depth, newVec);
-		}
-		else
-		{
-			it->second.push_back(newNode);
-		}
+			string virtualPath = f->first.c_str();
+			int depth = (int)std::count(virtualPath.begin(), virtualPath.end(), '/');
+			if (virtualPath[virtualPath.length() - 1] == '/')
+			{
+				depth--;
+			}
+			string name = f->second.FolderName;
 
+			BrowserContentNode newNode;
+			newNode.name = name.c_str();
+			newNode.fullVirtualPath = virtualPath;
+			newNode.bEditorOpen = false;
+			newNode.depth = depth;
+
+			//
+			string parentPath = FileSystem::GetFilePath(virtualPath);
+			{
+				{
+					auto it = _cb_folders.find(parentPath);
+					if (it == _cb_folders.end())
+					{
+						_cb_folders.emplace(parentPath, std::vector<BrowserContentNode>{ newNode });
+					}
+					else
+					{
+						it->second.push_back(newNode);
+					}
+				}
+				//Add parent folder node
+				{
+					int parentDepth = depth;
+					while (true)
+					{
+						parentPath = FileSystem::GetFilePath(parentPath);
+						if (parentPath.empty())
+						{
+							break;
+						}
+						auto it = _cb_folders.find(parentPath);
+						if (it == _cb_folders.end())
+						{
+							parentDepth = parentDepth - 1;
+							BrowserContentNode parentNode;
+							parentNode.name = FileSystem::GetFileName(parentPath);
+							parentNode.fullVirtualPath = parentPath;
+							parentNode.bEditorOpen = false;
+							parentNode.depth = parentDepth;
+							_cb_folders.emplace(parentPath, std::vector<BrowserContentNode>{ parentNode });
+						}
+						else
+						{
+							continue;
+						}
+					}
+				}
+
+				auto next_f = std::next(f);//Get next iterator
+				folders.erase(f->first);//remove current iterator
+				f = next_f;
+			}
+		}
 	}
 }
 
@@ -641,7 +687,7 @@ void EditorMain::BuildContentBrowser(ImguiPassEditor* pass)
 				_bNeedUpdateContentBrowserFolderNodes = false;
 				GetContentBrowserFolderNodes();
 			}
-			BuildContentBrowser_Folders(0);
+			BuildContentBrowser_Folders(0,0);
 		}
 		ImGui::EndChild();
 		ImGui::SameLine();
@@ -659,7 +705,7 @@ void EditorMain::BuildContentBrowser(ImguiPassEditor* pass)
 	ImGui::End();
 }
 
-void EditorMain::BuildContentBrowser_Folders(float levelItemXPos)
+void EditorMain::BuildContentBrowser_Folders(int depth, float levelItemXPos)
 {
 	ImGuiTreeNodeFlags treeNodeFlags =
 		ImGuiTreeNodeFlags_OpenOnArrow |
@@ -672,19 +718,24 @@ void EditorMain::BuildContentBrowser_Folders(float levelItemXPos)
 		float objectlItemXPos = ImGui::GetCursorPosX();
 		ImGui::SetCursorPosX(objectlItemXPos + ImGui::GetFontSize());
 
-		//Object TreeNode
-		node.bEditorOpen = ImGui::TreeNodeEx(node.name.c_str(),
-			(ImTextureID)EditorResource::Get()->_icon_objectIcon->descriptorSet,
-			treeNodeFlags | (node.bSelected ? ImGuiTreeNodeFlags_Selected : 0));
-
-		if (node.bEditorOpen)
-		{
-			for (auto& o : node.children)
-			{
-				BuildContentBrowser_Folders();
-			}
-			ImGui::TreePop();
-		}
+		//auto depthFolders = _cb_folders.find(depth);
+		//if (depthFolders != _cb_folders.end())
+		//{
+		//	auto folders = depthFolders->second;
+		//	for(auto& node : folders)
+		//	{
+		//		ImGui::SetCursorPosX(levelItemXPos + ImGui::GetFontSize());
+		//		//Object TreeNode
+		//		node.bEditorOpen = ImGui::TreeNodeEx(node.name.c_str(),
+		//			treeNodeFlags | (node.bSelected ? ImGuiTreeNodeFlags_Selected : 0));
+		//		if (node.bEditorOpen)
+		//		{
+		//			BuildContentBrowser_Folders(depth + 1, levelItemXPos + ImGui::GetFontSize());
+		//			ImGui::TreePop();
+		//		}
+		//	}
+		//	
+		//}
 	}
 }
 

@@ -44,12 +44,13 @@ public:
 	{
 		bool bSelected;
 		std::string name;
-		BrowserContentNode* parent;
-		std::vector<BrowserContentNode*> children;
-		class AssetInfoBase* assetInfo;
+		std::string fullVirtualPath;
 		bool bEditorOpen = false;
+		int depth = 0;
+
 	};
-	std::map<int, std::vector<BrowserContentNode>> _cb_folders;
+	//ParentFolderPath,ChildrenFolders
+	std::map<std::string, std::vector<BrowserContentNode>> _cb_folders;
 	std::vector<BrowserContentNode> _cb_files;
 
 private:
@@ -63,7 +64,7 @@ private:
 	void BuildSceneOutline(ImguiPassEditor* pass);
 	void BuildInspector(ImguiPassEditor* pass);
 	void BuildContentBrowser(ImguiPassEditor* pass);
-	void BuildContentBrowser_Folders(float levelItemXPos);
+	void BuildContentBrowser_Folders(int depth, float levelItemXPos);
 	void BuildContentBrowser_Files(BrowserContentNode& node);
 	void BuildSceneOutlineTreeNode_GameObject(std::shared_ptr<class GameObject> obj, float levelItemXPos, int depth, char* searchInput, int searchInputLength);
 

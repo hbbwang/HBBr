@@ -112,15 +112,12 @@ bool ContentManager::AssetImport(std::string repositoryName , std::vector<AssetI
 			{
 				std::string newVirtualFullPath = FileSystem::Append(i.virtualPath, fileName);
 				std::string cVP = i.virtualPath;
-				FileSystem::ClearPathSeparation(cVP);
-				FileSystem::ClearPathSeparation(newVirtualFullPath); 
 				auto fit = _assets_vf.find(cVP);
 				if (fit != _assets_vf.end())
 				{
 					for (auto& fit_i : fit->second.assets)
 					{
 						std::string checkFilePath = fit_i.second->virtualFilePath;
-						FileSystem::ClearPathSeparation(checkFilePath);
 						if (StringTool::IsEqual(checkFilePath, newVirtualFullPath))
 						{
 							bFound = true;
@@ -334,7 +331,6 @@ void ContentManager::AssetDelete(std::vector<AssetInfoBase*> assetInfos, bool is
 				_assets[(int)i->type].erase(i->guid);
 				_assets_repos[i->repository].erase(i->guid);
 				std::string vpvf = i->virtualPath;
-				FileSystem::ClearPathSeparation(vpvf);
 				_assets_vf[vpvf].assets.erase(i->guid);
 				if (isRemoveTheEmptyVirtualFolder)
 				{
@@ -395,8 +391,6 @@ void ContentManager::SetNewVirtualPath(std::vector<std::weak_ptr<AssetInfoBase>>
 			//添加
 			std::string vpf = i->virtualPath;
 			std::string vpf_old = oldVirtualPath;
-			FileSystem::ClearPathSeparation(vpf);
-			FileSystem::ClearPathSeparation(vpf_old);
 			auto vfit = _assets_vf.find(vpf);
 			if (vfit == _assets_vf.end())
 			{
@@ -560,7 +554,6 @@ void ContentManager::RemoveDirtyAsset(std::weak_ptr<AssetInfoBase> assetInfo)
 void ContentManager::CreateNewVirtualFolder(std::string folderFullPath)
 {
 	std::string vpvf = folderFullPath;
-	FileSystem::ClearPathSeparation(vpvf);
 	auto vfit = _assets_vf.find(vpvf);
 	if (vfit == _assets_vf.end())
 	{
@@ -669,7 +662,11 @@ std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(nlohmann::json&input, s
 	FileSystem::FixUpPath(info->assetPath);
 	//虚拟路径Virtual Path
 	info->virtualPath = i["VPath"];
-	//FileSystem::FixUpPath(info->virtualPath);
+	FileSystem::FixUpPath(info->virtualPath);
+	if (info->virtualPath[info->virtualPath.length() - 1] == '/')
+	{
+		info->virtualPath.pop_back();
+	}
 	info->virtualFilePath = FileSystem::Append(info->virtualPath, info->displayName + "." + info->suffix);
 	StringTool::Replace(info->virtualFilePath, "\\", "/");
 
@@ -748,7 +745,6 @@ std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(nlohmann::json&input, s
 		}
 		//3
 		std::string vpvf = info->virtualPath;
-		FileSystem::ClearPathSeparation(vpvf);
 		auto vfit = _assets_vf.find(vpvf);
 		if (vfit == _assets_vf.end())
 		{
@@ -757,6 +753,7 @@ std::weak_ptr<AssetInfoBase> ContentManager::ReloadAsset(nlohmann::json&input, s
 			newVF.FolderName = FileSystem::GetFileName(info->virtualPath);
 			newVF.Path = info->virtualPath;
 			_assets_vf.emplace(vpvf, newVF);
+			//这里并不会记录没有Asset的虚拟目录
 		}
 		else
 		{
@@ -780,7 +777,6 @@ void ContentManager::UpdateAssetReference(HGUID obj)
 
 const std::unordered_map<HGUID, std::shared_ptr<AssetInfoBase>> ContentManager::GetAssetsByVirtualFolder(std::string virtualFolder) const
 {
-	FileSystem::ClearPathSeparation(virtualFolder);
 	auto it = _assets_vf.find(virtualFolder);
 	if (it != _assets_vf.end())
 	{
@@ -794,7 +790,6 @@ const std::weak_ptr<AssetInfoBase> ContentManager::GetAssetByVirtualPath(std::st
 	auto name = FileSystem::GetBaseName(virtualPath);
 	auto suffix = FileSystem::GetFileExt(virtualPath);
 	auto folder = FileSystem::GetFilePath(virtualPath);
-	FileSystem::ClearPathSeparation(folder);
 	auto it = _assets_vf.find(folder);
 	if (it != _assets_vf.end())
 	{

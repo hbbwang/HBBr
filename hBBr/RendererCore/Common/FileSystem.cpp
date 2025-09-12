@@ -291,6 +291,11 @@ void FileSystem::FixUpPath(std::string& path)
 {
     NormalizePath(path);
     CorrectionPath(path);
+    //所有的\\转换成/
+    std::replace(path.begin(), path.end(), '\\', '/');
+	//路径开头的/去掉
+    if (!path.empty() && path[0] == '/')
+        path = path.substr(1);
 }
 
 bool FileSystem::ContainsPath(std::string A, std::string B)
@@ -315,12 +320,15 @@ std::string FileSystem::GetFilePath(std::string path)
 {
     fs::path fs_path = fs::path(path.c_str());
     std::string result = fs_path.parent_path().string();
-    result += fs::path::preferred_separator;
     return std::string(result.c_str());
 }
 
 std::string FileSystem::GetFileName(std::string path)
 {
+    if (path[path.length() - 1] == '/')
+    {
+		path = path.substr(0, path.length() - 1);
+    }
     return fs::path(path.c_str()).filename().string();
 }
 
