@@ -199,9 +199,6 @@
     <ClInclude Include="Core\Pass\PassManager.h">
       <Filter>Renderer\Core\Pass</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Pass\ImguiPass.h">
-      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Pass\PreCommandPass.h">
       <Filter>Renderer\Core\Pass\Other</Filter>
     </ClInclude>
@@ -261,9 +258,6 @@
     </ClInclude>
     <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h">
       <Filter>ThirdParty\Imgui\backends</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Pass\ImguiPassEditor.h">
-      <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="Core\VulkanSwapchain.h">
       <Filter>Renderer\Core</Filter>
@@ -393,9 +387,6 @@
     <ClCompile Include="Core\Pass\PassManager.cpp">
       <Filter>Renderer\Core\Pass</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Pass\ImguiPass.cpp">
-      <Filter>Renderer\Core\Pass\GraphicsPass</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Pass\PreCommandPass.cpp">
       <Filter>Renderer\Core\Pass\Other</Filter>
     </ClCompile>
@@ -449,9 +440,6 @@
     </ClCompile>
     <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp">
       <Filter>ThirdParty\Imgui\backends</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Pass\ImguiPassEditor.cpp">
-      <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="Core\Pass\PassType.cpp">
       <Filter>Renderer\Core\Pass</Filter>

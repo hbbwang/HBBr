@@ -101,6 +101,4 @@ private:
 	std::vector<DirectionalLightComponent*> _lightings;
 
 	PostProcessUniformBuffer _postProcessUniformBuffer;
-
-	ImguiPass* _imguiPass;
 };

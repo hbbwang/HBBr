@@ -230,8 +230,6 @@
     <ClCompile Include="..\ThirdParty\Imgui\imgui_tables.cpp" />
     <ClCompile Include="..\ThirdParty\Imgui\imgui_widgets.cpp" />
     <ClCompile Include="CommonFunctionLibrary.cpp" />
-    <ClCompile Include="EditorMain.cpp" />
-    <ClCompile Include="EditorResource.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -252,8 +250,6 @@
     <ClInclude Include="..\ThirdParty\Imgui\imstb_textedit.h" />
     <ClInclude Include="..\ThirdParty\Imgui\imstb_truetype.h" />
     <ClInclude Include="CommonFunctionLibrary.h" />
-    <ClInclude Include="EditorMain.h" />
-    <ClInclude Include="EditorResource.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

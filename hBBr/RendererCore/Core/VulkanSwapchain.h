@@ -73,8 +73,6 @@ public:
 
 	VkSurfaceCapabilitiesKHR _surfaceCapabilities{};
 
-	bool bResizeBuffer;
-
 	bool ResizeBuffer();
 
 #if IS_EDITOR
@@ -131,4 +129,9 @@ private:
 	std::shared_ptr<class ImguiPassEditor> _imguiPassEditor;
 #endif
 
+	std::mutex _swapchainMutex;
+	std::atomic<bool> _bResizing = false;
+
+	std::mutex _releaseMutex;
+	std::atomic<bool> _bRelease = false;
 };

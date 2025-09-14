@@ -12,8 +12,6 @@
 #include "Pass/PassManager.h"
 #include "Pass/PassBase.h"
 #include "Pass/BasePass.h"
-#include "Pass/ImguiPass.h"
-#include "Pass/ImguiPassEditor.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -114,6 +112,10 @@ void VulkanSwapchain::DestroyRenderer(VulkanRenderer* renderer)
 
 void VulkanSwapchain::Release()
 {
+	_bRelease = true;
+	//OutputDebugStringA("\n 22222");
+	std::lock_guard<std::mutex> lock(_releaseMutex);
+	//OutputDebugStringA("\n 33333");
 	for (auto& i : _renderers)
 	{
 		i.second->Release();
@@ -129,7 +131,6 @@ void VulkanSwapchain::Release()
 	_vulkanManager->DestroyRenderSemaphores(_acquireSemaphore);
 	_vulkanManager->DestroyRenderSemaphores(_queueSemaphore);
 	_vulkanManager->DestroyRenderFences(_executeFence);
-	delete this;
 }
 
 void VulkanSwapchain::Update()
@@ -137,34 +138,33 @@ void VulkanSwapchain::Update()
 	if (!bInit)
 	{
 		bInit = true;
-		#if IS_EDITOR
-		if (!_imguiPassEditor)
-		{
-			_imguiPassEditor.reset(new ImguiPassEditor(this));
-			_imguiPassEditor->SetPassName("Editor GUI Pass");
-			_imguiPassEditor->PassInit();
-		}
-		#endif
 	}
 	else
 	{
 		//这个 _swapchainIndex 和 _currentFrameIndex 不是一个东西，前者是有效交换链的index，后者只是帧Index
 		uint32_t swapchainIndex = 0;
 
-		if (bResizeBuffer)
-		{
-			ResizeBuffer();
+		if (_bResizing || _bRelease) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			return;
 		}
 
 		_vulkanManager->WaitForFences({ _executeFence[_currentFrameIndex] });
 
-		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _acquireSemaphore[_currentFrameIndex], nullptr, &swapchainIndex))
+		//OutputDebugStringA("\n 00000");
+		std::lock_guard<std::mutex> swapchainLock(_swapchainMutex);
+		std::lock_guard<std::mutex> releaseLock(_releaseMutex);
+		if (_bRelease)
 		{
-			ResizeBuffer();
 			return;
 		}
 
+		//OutputDebugStringA("\n 11111");
+		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _acquireSemaphore[_currentFrameIndex], nullptr, &swapchainIndex))
+		{
+			_bResizing = true;
+		}
+		//OutputDebugStringA("\n 55555");
 		//Update Renderer
 		{
 			auto& cmdBuf = _cmdBuf[_currentFrameIndex];
@@ -194,30 +194,19 @@ void VulkanSwapchain::Update()
 
 				auto& mainPassManager = _renderers.begin()->second->_passManagers[mainCamera];
 
-				//Editor GUI Pass
-				#if IS_EDITOR
-				_imguiPassEditor->PassUpdate(mainPassManager->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor));
-				#else
-				//编辑器使用Imgui制作，ImguiPassEditor会传递最后结果到Swapchain，不需要复制。
 				mainPassManager->CmdCopyFinalColorToSwapchain();
-				#endif
 
 				_vulkanManager->EndCommandBuffer(cmdBuf);
 
 				_vulkanManager->SubmitQueueForPasses(cmdBuf, wait, _queueSemaphore[_currentFrameIndex], _executeFence[_currentFrameIndex]);
 
-				//Imgui如果开启了多视口模式，当控件离开窗口之后，会自动生成一套绘制流程，放在此处执行最后的处理会安全很多。
-				#if IS_EDITOR
-				_imguiPassEditor->EndFrame();
-				#endif
 			}
 		}
 
 		//Present swapchain.
 		if (!_vulkanManager->Present(_swapchain, _queueSemaphore[_currentFrameIndex], swapchainIndex))
 		{
-			ResizeBuffer();
-			return;
+			_bResizing = true;
 		}
 
 		//Get next frame index.
@@ -227,6 +216,10 @@ void VulkanSwapchain::Update()
 
 bool VulkanSwapchain::ResizeBuffer()
 {
+	_bResizing = true;
+
+	std::lock_guard<std::mutex> lock(_swapchainMutex);
+
 	_vulkanManager->DeviceWaitIdle();
 
 	_vulkanManager->DestroySwapchain(_swapchain, _swapchainImageViews);
@@ -248,7 +241,6 @@ bool VulkanSwapchain::ResizeBuffer()
 
 	if (_cacheSurfaceSize.width <= 0 || _cacheSurfaceSize.height <= 0)
 	{
-		bResizeBuffer = true;
 		return false;
 	}
 
@@ -265,24 +257,17 @@ bool VulkanSwapchain::ResizeBuffer()
 		true);
 
 	ResetResource();
-	#if IS_EDITOR	
-	_imguiPassEditor->CheckWindowValid();
-	#endif
 	
 	for (auto& i : _renderers)
 	{
 		i.second->ResetRenderer();
 	}
-	
-	#if IS_EDITOR
-	_imguiPassEditor->PassReset();
-	#endif
-	
-	bResizeBuffer = false;
 
 	//重置buffer会导致画面丢失，我们要在这一瞬间重新把buffer绘制回去，缓解缩放卡顿。
 	_currentFrameIndex = 0;
-	Update();
+	//Update();
+
+	_bResizing = false;
 
 	return true;
 }

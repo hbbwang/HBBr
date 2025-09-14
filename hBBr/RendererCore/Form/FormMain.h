@@ -3,14 +3,16 @@
 #include "VulkanManager.h"
 #include "FileSystem.h"
 #include "HTime.h"
-
+#include <thread>
+#include <functional>
 struct VulkanForm
 {
 	std::string name;
 	SDL_Window* window = nullptr;
 	class VulkanSwapchain* swapchain = nullptr;
+	int width = 0;
+	int height = 0;
 	bool bMinimized = false;
-	bool bStopRender = false;
 	std::vector<struct ImGuiContext*> imguiContents;
 	std::vector<std::function<void(VulkanForm*)>> closeCallbacks;
 	~VulkanForm();
@@ -94,5 +96,6 @@ private:
 
 	static double _frameRate;
 
+	static std::thread _renderThread;
 };
 

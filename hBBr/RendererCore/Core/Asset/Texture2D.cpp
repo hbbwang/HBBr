@@ -369,10 +369,6 @@ void Texture2D::GlobalInitialize()
 	}
 }
 
-void Texture2D::GlobalUpdate()
-{
-}
-
 void Texture2D::GlobalRelease()
 {
 	auto* manager = VulkanManager::GetManager();

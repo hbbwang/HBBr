@@ -5,13 +5,9 @@
 
 #include "FormMain.h"
 #include "VulkanRenderer.h"
-#include "EditorMain.h"
 #include "RendererConfig.h"
-#include "EditorResource.h"
 
 int _bInit = false;
-
-EditorMain* _mainEditor = nullptr;
 
 int main(int argc, char* argv[])
 {
@@ -63,15 +59,8 @@ int main(int argc, char* argv[])
 	//
 	while (VulkanApp::UpdateForm())
 	{
-		if (!_bInit && mainForm->swapchain->GetEditorGuiPass())
-		{
-			_bInit = true;
-			_mainEditor = new EditorMain;
-			EditorResource::Get()->Init();
-		}
 	}
-	delete _mainEditor;
-	EditorResource::Get()->Release();
+	//
 	VulkanApp::DeInitVulkanManager();
 	return 0;
 }

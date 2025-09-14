@@ -45,14 +45,8 @@
     <ClCompile Include="..\ThirdParty\Imgui\imgui_widgets.cpp">
       <Filter>ThirdParty\Imgui</Filter>
     </ClCompile>
-    <ClCompile Include="EditorMain.cpp">
-      <Filter>Editor</Filter>
-    </ClCompile>
     <ClCompile Include="CommonFunctionLibrary.cpp">
       <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="EditorResource.cpp">
-      <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp">
       <Filter>ThirdParty\Imgui</Filter>
@@ -80,14 +74,8 @@
     <ClInclude Include="..\ThirdParty\Imgui\imstb_truetype.h">
       <Filter>ThirdParty\Imgui</Filter>
     </ClInclude>
-    <ClInclude Include="EditorMain.h">
-      <Filter>Editor</Filter>
-    </ClInclude>
     <ClInclude Include="CommonFunctionLibrary.h">
       <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="EditorResource.h">
-      <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h">
       <Filter>ThirdParty\Imgui</Filter>

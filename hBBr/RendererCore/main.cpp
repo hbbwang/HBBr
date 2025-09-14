@@ -49,6 +49,10 @@ HTime VulkanApp::_frameTime;
 HTime VulkanApp::_gameTime;
 double VulkanApp::_frameRate = 0 ;
 
+std::thread VulkanApp::_renderThread;
+bool _bIsRenderThreadRun = false;
+bool _bReleaseRenderer = false;
+
 void ResizeCallBack(SDL_Window* window, int width, int height)
 {
 	auto it = std::find_if(VulkanApp::GetForms().begin(),VulkanApp::GetForms().end(), [window](VulkanForm*&form)
@@ -72,6 +76,7 @@ void CloseCallBack(SDL_Window* window)
 		if ((*it)->swapchain)
 		{
 			(*it)->swapchain->Release();
+			delete (*it)->swapchain;
 			(*it)->swapchain = nullptr;
 		}
 	}
@@ -246,7 +251,6 @@ bool VulkanApp::UpdateForm()
 
 	bool bQuit = false;
 	SDL_Event event;
-	bool bStopRender = false; 
 	while (SDL_PollEvent(&event))
 	{
 		VulkanForm* winForm = nullptr;
@@ -260,11 +264,24 @@ bool VulkanApp::UpdateForm()
 				break;
 			}
 			windowIndex++;
+
+			int w, h;
+			SDL_GetWindowSize(i->window, &w, &h);
+			if (i->width != w || i->height != h || i->swapchain->_bResizing == true)
+			{
+				i->width = w;
+				i->height = h;
+				ResizeCallBack(i->window, w, h);
+			}
+
 		}
 
 		//窗口数量 == 0, 直接结束 
 		if (_forms.size() <= 0)
-			return false;
+		{
+			bQuit = true;
+			break;
+		}
 
 		if (winForm == nullptr)
 		{
@@ -299,8 +316,9 @@ bool VulkanApp::UpdateForm()
 
 			//窗口数量 == 0, 直接结束 
 			if (_forms.size() <= 0)
-				return false;
-
+			{
+				bQuit = true;
+			}
 			break;
 		}
 		case SDL_EVENT_WINDOW_FOCUS_GAINED:
@@ -312,22 +330,17 @@ bool VulkanApp::UpdateForm()
 		{
 			FocusCallBack(winForm, 0);
 #ifdef __ANDROID__
-			bStopRender = true;
 			ResizeWindow(winForm, 1, 1);
 #endif
 			break;
 		}
-		//case SDL_EVENT_WINDOW_ICCPROF_CHANGED:
 		//case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
 		//case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
-
-#if !IS_EDITOR //Editor下咱们窗口缩放不走SDL的逻辑
 		case SDL_EVENT_WINDOW_RESIZED:
 		{
 			ResizeCallBack(winForm->window, event.window.data1, event.window.data2);
 			break;
 		}
-#endif
 
 		case SDL_EVENT_QUIT://窗口完全关闭,SDL即将退出
 		{
@@ -378,7 +391,9 @@ bool VulkanApp::UpdateForm()
 			break;
 		}
 		case SDL_EVENT_MOUSE_WHEEL:
+		{
 			break;
+		}
 		case SDL_EVENT_DROP_FILE:
 		{
 			auto file = event.drop.data;
@@ -411,7 +426,6 @@ bool VulkanApp::UpdateForm()
 			{
 				winForm->bMinimized = true;
 			}
-			bStopRender = true;
 			break;
 		}
 		case SDL_EVENT_FINGER_DOWN:
@@ -421,8 +435,11 @@ bool VulkanApp::UpdateForm()
 		}
 		}
 	}
+
 	if (_bFocusQuit || bQuit)
 	{
+		_bReleaseRenderer = true;
+		_renderThread.join();
 		for (auto w : _forms)
 		{
 			CloseCallBack(w->window);
@@ -430,7 +447,6 @@ bool VulkanApp::UpdateForm()
 			RemoveWindow(w);
 		}
 		MessageOut("SDL quit.", false, false, "255,255,255");
-		bQuit = true;
 	}
 	else if (_bRecompilerShaders)
 	{
@@ -452,9 +468,17 @@ bool VulkanApp::UpdateForm()
 			}
 		}
 	}
-	else if (!bStopRender)
+	if (!_bIsRenderThreadRun && !_bReleaseRenderer)
 	{
-		UpdateRender();
+		_bIsRenderThreadRun = true;
+		_renderThread = std::thread(
+			[]()
+			{			
+				while (!_bReleaseRenderer)
+				{
+					UpdateRender();
+				}
+			});
 	}
 	return !bQuit;
 }
@@ -464,10 +488,11 @@ void VulkanApp::UpdateRender()
 	_frameRate = _frameTime.FrameRate_ms();
 	for (auto w : _forms)
 	{
-		Texture2D::GlobalUpdate();
 		VulkanObjectManager::Get()->Update();
-		if(w->swapchain != nullptr && !w->bMinimized && !w->bStopRender)
+		if (w->swapchain != nullptr && !w->bMinimized && !w->swapchain->_bRelease)
+		{
 			w->swapchain->Update();
+		}
 	}
 }
 //ENABLE_CODE_OPTIMIZE

@@ -140,8 +140,6 @@ public:
 
 	static void GlobalInitialize();
 
-	static void GlobalUpdate();
-
 	static void GlobalRelease();
 
 	HBBR_API static void AddSystemTexture(std::string tag, std::weak_ptr<Texture2D> tex);

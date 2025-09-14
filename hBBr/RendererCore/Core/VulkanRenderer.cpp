@@ -11,8 +11,6 @@
 #include "Pass/PassManager.h"
 #include "Pass/PassBase.h"
 #include "Pass/BasePass.h"
-#include "Pass/ImguiPass.h"
-#include "Pass/ImguiPassEditor.h"
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -88,49 +86,6 @@ void VulkanRenderer::ResetRenderer()
 void VulkanRenderer::ResetResource()
 {
 	auto swapchainCount = _vulkanManager->GetSwapchainBufferCount();
-	//init semaphores & fences
-	//if (_queueSubmitSemaphore.size() != swapchainCount)
-	//{
-	//	//ConsoleDebug::print_endl("hBBr:Swapchain: Queue Submit Semaphore.");
-	//	for (int i = 0; i < (int)_queueSubmitSemaphore.size(); i++)
-	//	{
-	//		_vulkanManager->DestroySemaphore(_queueSubmitSemaphore.at(i));
-	//		_queueSubmitSemaphore.at(i) = nullptr;
-	//	}
-	//	_queueSubmitSemaphore.resize(swapchainCount);
-	//	for (int i = 0; i < (int)swapchainCount; i++)
-	//	{
-	//		_vulkanManager->CreateVkSemaphore(_queueSubmitSemaphore.at(i));
-	//	}
-	//}
-	//if (_executeFence.size() != swapchainCount)
-	//{
-	//	//ConsoleDebug::print_endl("hBBr:Swapchain: image acquired fences.");
-	//	for (int i = 0; i < (int)_executeFence.size(); i++)
-	//	{
-	//		_vulkanManager->DestroyFence(_executeFence.at(i));
-	//		_executeFence.at(i) = nullptr;
-	//	}
-	//	_executeFence.resize(swapchainCount);
-	//	for (int i = 0; i < (int)swapchainCount; i++)
-	//	{
-	//		_vulkanManager->CreateFence(_executeFence.at(i));
-	//	}
-	//}
-	//if (_cmdBuf.size() != _vulkanManager->GetSwapchainBufferCount())
-	//{
-	//	//ConsoleDebug::print_endl("hBBr:Swapchain: Allocate Main CommandBuffers.");
-	//	for (int i = 0; i < (int)_cmdBuf.size(); i++)
-	//	{
-	//		_vulkanManager->FreeCommandBuffer(_vulkanManager->GetCommandPool(), _cmdBuf.at(i));
-	//		_cmdBuf.at(i) = nullptr;
-	//	}
-	//	_cmdBuf.resize(_vulkanManager->GetSwapchainBufferCount());
-	//	for (int i = 0; i < (int)_vulkanManager->GetSwapchainBufferCount(); i++)
-	//	{
-	//		_vulkanManager->AllocateCommandBuffer(_vulkanManager->GetCommandPool(), _cmdBuf.at(i));
-	//	}
-	//}
 }
 
 void VulkanRenderer::ReleaseWorld()
