@@ -1785,6 +1785,10 @@ void VulkanManager::EndRenderPass(VkCommandBuffer& cmdBuf)
 bool VulkanManager::GetNextSwapchainIndex(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, VkFence* fence, uint32_t* swapchainIndex)
 {
 	VkResult result = VK_SUCCESS;
+	if (swapchain == nullptr)
+	{
+		return false;
+	}
 	if (fence == nullptr)
 	{
 		result = vkAcquireNextImageKHR(_device, swapchain, UINT64_MAX, semaphore, nullptr, swapchainIndex);
