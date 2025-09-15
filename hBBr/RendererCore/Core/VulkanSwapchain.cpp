@@ -144,16 +144,10 @@ void VulkanSwapchain::Update()
 		//这个 _swapchainIndex 和 _currentFrameIndex 不是一个东西，前者是有效交换链的index，后者只是帧Index
 		uint32_t swapchainIndex = 0;
 
-		if (_bResizing || _bRelease) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-			return;
-		}
-
-		_vulkanManager->WaitForFences({ _executeFence[_currentFrameIndex] });
-
 		//OutputDebugStringA("\n 00000");
 		std::lock_guard<std::mutex> swapchainLock(_swapchainMutex);
 		std::lock_guard<std::mutex> releaseLock(_releaseMutex);
+
 		if (_bRelease)
 		{
 			return;
@@ -163,7 +157,11 @@ void VulkanSwapchain::Update()
 		if (!_vulkanManager->GetNextSwapchainIndex(_swapchain, _acquireSemaphore[_currentFrameIndex], nullptr, &swapchainIndex))
 		{
 			_bResizing = true;
+			return;
 		}
+
+		_vulkanManager->WaitForFences({ _executeFence[_currentFrameIndex] });
+
 		//OutputDebugStringA("\n 55555");
 		//Update Renderer
 		{
@@ -264,7 +262,7 @@ bool VulkanSwapchain::ResizeBuffer()
 	}
 
 	//重置buffer会导致画面丢失，我们要在这一瞬间重新把buffer绘制回去，缓解缩放卡顿。
-	_currentFrameIndex = 0;
+	//_currentFrameIndex = 0;
 	//Update();
 
 	_bResizing = false;
