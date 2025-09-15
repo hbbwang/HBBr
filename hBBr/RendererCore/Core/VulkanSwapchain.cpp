@@ -135,6 +135,14 @@ void VulkanSwapchain::Release()
 
 void VulkanSwapchain::Update()
 {
+	for (auto& i : _renderers)
+	{
+		i.second->Update();
+	}
+}
+
+void VulkanSwapchain::Render()
+{
 	if (!bInit)
 	{
 		bInit = true;
@@ -189,13 +197,16 @@ void VulkanSwapchain::Update()
 				if (mainCamera == nullptr) //编辑器内，主相机无效的情况下,强制切换到编辑器相机
 					mainCamera = world->_editorCamera;
 				#endif
-
-				auto& mainPassManager = _renderers.begin()->second->_passManagers[mainCamera];
-
-				mainPassManager->CmdCopyFinalColorToSwapchain();
+				if (mainCamera)
+				{
+					auto& mainPassManager = _renderers.begin()->second->_passManagers[mainCamera];
+					if (mainPassManager)
+					{
+						mainPassManager->CmdCopyFinalColorToSwapchain();
+					}
+				}
 
 				_vulkanManager->EndCommandBuffer(cmdBuf);
-
 				_vulkanManager->SubmitQueueForPasses(cmdBuf, wait, _queueSemaphore[_currentFrameIndex], _executeFence[_currentFrameIndex]);
 
 			}

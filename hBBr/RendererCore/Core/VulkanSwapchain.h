@@ -85,7 +85,11 @@ public:
 
 private:
 
+	//MainThread
 	void Update();
+
+	//RenderThread
+	void Render();
 
 	void ResetResource();
 

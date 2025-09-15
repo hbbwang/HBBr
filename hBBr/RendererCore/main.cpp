@@ -480,6 +480,16 @@ bool VulkanApp::UpdateForm()
 				}
 			});
 	}
+
+	//MainThead Update
+	for (auto w : _forms)
+	{
+		if (w->swapchain != nullptr && !w->bMinimized && !w->swapchain->_bRelease)
+		{
+			w->swapchain->Update();
+		}
+	}
+
 	return !bQuit;
 }
 
@@ -491,7 +501,7 @@ void VulkanApp::UpdateRender()
 		VulkanObjectManager::Get()->Update();
 		if (w->swapchain != nullptr && !w->bMinimized && !w->swapchain->_bRelease)
 		{
-			w->swapchain->Update();
+			w->swapchain->Render();
 		}
 	}
 }

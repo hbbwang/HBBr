@@ -25,9 +25,11 @@ CameraComponent::CameraComponent(GameObject* parent)
 	EnableMouseInput(true);
 
 	//为当前相机生成passes
-	std::shared_ptr<PassManager>newPassManager;
-	newPassManager.reset(new PassManager(this));
-	_renderer->_passManagers.emplace(this, newPassManager);
+	_renderer->_renderThreadFuncsOnce.push_back([this]() {
+		std::shared_ptr<PassManager>newPassManager;
+		newPassManager.reset(new PassManager(this));
+		_renderer->_passManagers.emplace(this, newPassManager);
+	});
 
 }
 

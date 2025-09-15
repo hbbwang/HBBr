@@ -170,8 +170,9 @@ void VulkanRenderer::CreateEmptyWorld()
 	_world->Load(this);
 }
 
-VkSemaphore VulkanRenderer::Render(VkSemaphore wait)
+void VulkanRenderer::Update()
 {
+	_cpuTimer.Start();
 	if (!_bInit) //Render loop Init.
 	{
 		_bInit = true;
@@ -186,23 +187,24 @@ VkSemaphore VulkanRenderer::Render(VkSemaphore wait)
 		{
 			CreateEmptyWorld();
 		}
-		return nullptr;
+		
 	}
 	else if (!_bRendererRelease && _bInit)
 	{
-		_cpuTimer.Start();
+		if (_world)
+			_world->WorldUpdate();
+	}
+	_cpuTime = _cpuTimer.End_ms();
+}
 
+VkSemaphore VulkanRenderer::Render(VkSemaphore wait)
+{	
+	if (!_bRendererRelease && _bInit)
+	{
 		uint32_t frameIndex = _swapchain->GetCurrentFrameIndex();
-
-		//ConsoleDebug::print_endl( std::string::FromVec2(HInput::GetMousePosClient()).c_str());
 
 		if(_swapchain)
 		{
-			//_vulkanManager->WaitForFences({ _executeFence[_currentFrameIndex] });
-
-			//auto& cmdBuf = _cmdBuf[frameIndex];
-			//_vulkanManager->BeginCommandBuffer(cmdBuf);
-
 			for (auto& func : _renderThreadFuncsOnce)
 			{
 				func();
@@ -214,21 +216,12 @@ VkSemaphore VulkanRenderer::Render(VkSemaphore wait)
 				func();
 			}
 
-			if (_world)
-				_world->WorldUpdate();
-
 			for (auto& p : _passManagers)
 			{
 				p.second->SetupPassUniformBuffer(p.first, _renderSize);
 				p.second->PassesUpdate();
 			}
-
-			//_vulkanManager->EndCommandBuffer(cmdBuf);
-			//_vulkanManager->SubmitQueueForPasses(cmdBuf, wait, _queueSubmitSemaphore[frameIndex], _executeFence[frameIndex]);
-
 		}
-		_cpuTime = _cpuTimer.End_ms();
-		// return _queueSubmitSemaphore[frameIndex];
 	}
 
 	return nullptr;

@@ -144,9 +144,11 @@ public:
 	}
 
 	/* 帧渲染函数 */
-	HBBR_API VkSemaphore Render(VkSemaphore wait);
+	VkSemaphore Render(VkSemaphore wait);
 
-	HBBR_API void Release();
+	void Update();
+
+	void Release();
 
 	HBBR_INLINE double GetCPURenderingTime()const { return _cpuTime; }
 
