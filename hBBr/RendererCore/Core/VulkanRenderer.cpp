@@ -19,10 +19,8 @@ VulkanRenderer::VulkanRenderer(VulkanSwapchain* swapchain, const char* rendererN
 	_vulkanManager(VulkanManager::GetManager()),
 	_bRendererRelease(false),
 	_rendererName(rendererName),
-	_bInit(false),
 	_swapchain(swapchain)
 {
-	Init();
 }
 
 VulkanRenderer::~VulkanRenderer()
@@ -72,6 +70,17 @@ void VulkanRenderer::Init()
 	_renderThreadFuncs.reserve(10);
 
 	ResetResource();
+
+	if (_bIsMainRenderer)
+	{
+		auto defaultWorldGUID = GetRendererConfig("Default", "DefaultWorld");
+		LoadWorld(defaultWorldGUID);
+	}
+
+	if (!_world)
+	{
+		CreateEmptyWorld();
+	}
 }
 
 void VulkanRenderer::ResetRenderer()
@@ -173,23 +182,7 @@ void VulkanRenderer::CreateEmptyWorld()
 void VulkanRenderer::Update()
 {
 	_cpuTimer.Start();
-	if (!_bInit) //Render loop Init.
-	{
-		_bInit = true;
-
-		if (_bIsMainRenderer)
-		{
-			auto defaultWorldGUID = GetRendererConfig("Default", "DefaultWorld");
-			LoadWorld(defaultWorldGUID);
-		}
-
-		if (!_world)
-		{
-			CreateEmptyWorld();
-		}
-		
-	}
-	else if (!_bRendererRelease && _bInit)
+	if (!_bRendererRelease)
 	{
 		if (_world)
 			_world->WorldUpdate();
@@ -199,7 +192,7 @@ void VulkanRenderer::Update()
 
 VkSemaphore VulkanRenderer::Render(VkSemaphore wait)
 {	
-	if (!_bRendererRelease && _bInit)
+	if (!_bRendererRelease)
 	{
 		uint32_t frameIndex = _swapchain->GetCurrentFrameIndex();
 

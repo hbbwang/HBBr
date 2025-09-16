@@ -62,6 +62,9 @@
     <Filter Include="ThirdParty\Imgui\backends">
       <UniqueIdentifier>{78ec89ec-8a72-44c7-82bc-8abd8e9e136f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderer\Core\Pass\Editor">
+      <UniqueIdentifier>{4e9e518c-74d0-4c79-9c36-c3a52eb0f275}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\VulkanManager.h">
@@ -265,6 +268,12 @@
     <ClInclude Include="Common\StringTools.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Pass\ImguiPass.h">
+      <Filter>Renderer\Core\Pass</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Pass\ImguiPassEditor.h">
+      <Filter>Renderer\Core\Pass\Editor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\VulkanManager.cpp">
@@ -446,6 +455,12 @@
     </ClCompile>
     <ClCompile Include="Core\VulkanSwapchain.cpp">
       <Filter>Renderer\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Pass\ImguiPass.cpp">
+      <Filter>Renderer\Core\Pass</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Pass\ImguiPassEditor.cpp">
+      <Filter>Renderer\Core\Pass\Editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

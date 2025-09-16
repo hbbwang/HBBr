@@ -44,10 +44,6 @@ public:
 		_renderSize = newSize;
 	}
 
-	HBBR_API HBBR_INLINE bool IsInit() {
-		return _bInit;
-	}
-
 	HBBR_API HBBR_INLINE std::string GetName() {
 		return _rendererName;
 	}
@@ -143,9 +139,10 @@ public:
 		return _swapchain;
 	}
 
-	/* 帧渲染函数 */
+	/* 帧渲染函数 Render Thread */
 	VkSemaphore Render(VkSemaphore wait);
 
+	//Main Thread
 	void Update();
 
 	void Release();
@@ -173,8 +170,6 @@ private:
 	// std::vector<VkCommandBuffer> _cmdBuf;
 
 	bool _bRendererRelease;
-
-	bool _bInit;
 
 	//Passes，多少个相机，就有多少组passes需要渲染
 	std::map<class CameraComponent*, std::shared_ptr<class PassManager>> _passManagers;

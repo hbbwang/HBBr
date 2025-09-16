@@ -86,6 +86,9 @@ public:
 private:
 
 	//MainThread
+	void Init();
+
+	//MainThread
 	void Update();
 
 	//RenderThread
@@ -128,7 +131,7 @@ private:
 	//Renderer map
 	std::map<std::string, class VulkanRenderer*> _renderers;
 
-#if IS_EDITOR
+#if IS_EDITOR && ENABLE_IMGUI
 	//GUI pass(Editor)
 	std::shared_ptr<class ImguiPassEditor> _imguiPassEditor;
 #endif

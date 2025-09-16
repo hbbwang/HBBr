@@ -12,6 +12,9 @@
 #include "Pass/PassManager.h"
 #include "Pass/PassBase.h"
 #include "Pass/BasePass.h"
+#if ENABLE_IMGUI
+#include "Pass/ImguiPassEditor.h"
+#endif
 #if IS_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -133,21 +136,38 @@ void VulkanSwapchain::Release()
 	_vulkanManager->DestroyRenderFences(_executeFence);
 }
 
+void VulkanSwapchain::Init()
+{
+	#if IS_EDITOR && ENABLE_IMGUI
+	_imguiPassEditor.reset(new ImguiPassEditor(this));
+	_imguiPassEditor->SetPassName("Editor GUI Pass");
+	_imguiPassEditor->PassInit();
+	#endif
+}
+
 void VulkanSwapchain::Update()
 {
-	for (auto& i : _renderers)
+	if (!bInit)
 	{
-		i.second->Update();
+		Init();
+		for (auto& i : _renderers)
+		{
+			i.second->Init();
+		}
+		bInit = true;
+	}
+	else
+	{
+		for (auto& i : _renderers)
+		{
+			i.second->Update();
+		}
 	}
 }
 
 void VulkanSwapchain::Render()
 {
-	if (!bInit)
-	{
-		bInit = true;
-	}
-	else
+	if (bInit)
 	{
 		//这个 _swapchainIndex 和 _currentFrameIndex 不是一个东西，前者是有效交换链的index，后者只是帧Index
 		uint32_t swapchainIndex = 0;
@@ -202,13 +222,26 @@ void VulkanSwapchain::Render()
 					auto& mainPassManager = _renderers.begin()->second->_passManagers[mainCamera];
 					if (mainPassManager)
 					{
-						mainPassManager->CmdCopyFinalColorToSwapchain();
+						//Editor GUI Pass
+						#if IS_EDITOR && ENABLE_IMGUI
+						//编辑器使用Imgui制作，ImguiPassEditor会传递最后结果到Swapchain，不需要复制。
+							if (_imguiPassEditor)
+								_imguiPassEditor->PassUpdate(mainPassManager->GetSceneTexture()->GetTexture(SceneTextureDesc::FinalColor));
+							else
+								mainPassManager->CmdCopyFinalColorToSwapchain();
+						#else
+							mainPassManager->CmdCopyFinalColorToSwapchain();
+						#endif
 					}
 				}
 
 				_vulkanManager->EndCommandBuffer(cmdBuf);
 				_vulkanManager->SubmitQueueForPasses(cmdBuf, wait, _queueSemaphore[_currentFrameIndex], _executeFence[_currentFrameIndex]);
-
+				//Imgui如果开启了多视口模式，当控件离开窗口之后，会自动生成一套绘制流程，放在此处执行最后的处理会安全很多。
+				#if IS_EDITOR && ENABLE_IMGUI
+				if (_imguiPassEditor)
+					_imguiPassEditor->EndFrame();
+				#endif
 			}
 		}
 
@@ -266,11 +299,21 @@ bool VulkanSwapchain::ResizeBuffer()
 		true);
 
 	ResetResource();
-	
+
+	#if IS_EDITOR && ENABLE_IMGUI
+	if(_imguiPassEditor)
+		_imguiPassEditor->CheckWindowValid();
+	#endif
+
 	for (auto& i : _renderers)
 	{
 		i.second->ResetRenderer();
 	}
+
+	#if IS_EDITOR && ENABLE_IMGUI
+	if(_imguiPassEditor)
+		_imguiPassEditor->PassReset();
+	#endif
 
 	//重置buffer会导致画面丢失，我们要在这一瞬间重新把buffer绘制回去，缓解缩放卡顿。
 	//_currentFrameIndex = 0;
