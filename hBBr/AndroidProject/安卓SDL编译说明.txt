@@ -1,3 +1,0 @@
-1.可以使用gradle-7.5直接生成apk,也可以加载到AndroidStudio里进行调试，gradle的下载路径可以参考AndroidProject\gradle\wrapper\gradle-wrapper.properties。
-2.注意调整local.properties和gradle.properties，根据当前系统修改AndroidSDK目录，NDK版本号，还有Java路径。
-3.部分情况下，NDK的路径似乎要在AndroidSDK/ndk-bundle内才能识别，可以自行创建...
