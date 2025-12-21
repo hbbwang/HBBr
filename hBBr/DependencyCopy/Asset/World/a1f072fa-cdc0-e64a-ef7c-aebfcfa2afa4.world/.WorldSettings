@@ -1,0 +1,23 @@
+{
+    "DefaultCameraPosition": {
+        "x": 1.1145622730255127,
+        "y": 3.5856356620788574,
+        "z": -2.7116525173187256
+    },
+    "DefaultCameraRotation": {
+        "x": 33.25,
+        "y": -19.25,
+        "z": 0.0
+    },
+    "Levels": {
+        "Main": {
+            "Dep": null,
+            "GUID": "7340fb5d-cea2-4090-bc3a-67aadcd4ab92"
+        },
+        "TestLevel": {
+            "Dep": null,
+            "GUID": "4f7c071c-20f2-44cd-964e-e80935017847"
+        }
+    },
+    "WorldName": "TestWorld"
+}

@@ -13,10 +13,197 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="SDL">
+      <UniqueIdentifier>{c5bc7d8d-0571-4520-bac2-ee4e377dec59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{d6431ad3-7927-4903-84bf-7e28b03bf274}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{7548a72d-dab7-4f66-9f18-7b2b90057888}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty">
+      <UniqueIdentifier>{4a362eb2-b54b-42f2-a8fc-7170fe8c0fd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\pugixml">
+      <UniqueIdentifier>{bac4b5e6-41f1-45d0-b6c3-006ee8d13d2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\Imgui">
+      <UniqueIdentifier>{22af44b2-a152-4356-9161-7c29e28f0029}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\Imgui\backends">
+      <UniqueIdentifier>{95f51f38-fded-4e65-b026-c9ed21afdcdd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="SDL3\SDLWindow.cpp">
+      <Filter>SDL</Filter>
     </ClCompile>
+    <ClCompile Include="Common\DDSTool.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\FileSystem.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\HInput.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\HTime.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\ImageTool.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\TypeConversion.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\XMLStream.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\AndroidCommon.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Common.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\ConsoleDebug.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\HGuid.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\RendererConfig.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Serializable.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\VulkanApp.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\pugixml\pugixml.cpp">
+      <Filter>ThirdParty\pugixml</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\VulkanManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_demo.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_draw.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_tables.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_widgets.cpp">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp">
+      <Filter>ThirdParty\Imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp">
+      <Filter>ThirdParty\Imgui\backends</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SDL3\SDLWindow.h">
+      <Filter>SDL</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ConsoleDebug.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\DDSTool.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\FileSystem.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\HBox.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\HInput.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\HTime.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ImageTool.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\StringTools.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\TypeConversion.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\XMLStream.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\AndroidCommon.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Common.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\HGuid.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\RendererConfig.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Serializable.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\VulkanApp.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\pugixml\pugiconfig.hpp">
+      <Filter>ThirdParty\pugixml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\pugixml\pugixml.hpp">
+      <Filter>ThirdParty\pugixml</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\VulkanManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imconfig.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imgui.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imgui_internal.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_rectpack.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_textedit.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_truetype.h">
+      <Filter>ThirdParty\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h">
+      <Filter>ThirdParty\Imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h">
+      <Filter>ThirdParty\Imgui\backends</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\ThirdParty\Imgui\backends\vulkan\glsl_shader.frag">
+      <Filter>ThirdParty\Imgui\backends</Filter>
+    </None>
+    <None Include="..\ThirdParty\Imgui\backends\vulkan\glsl_shader.vert">
+      <Filter>ThirdParty\Imgui\backends</Filter>
+    </None>
+    <None Include="..\ThirdParty\Imgui\backends\vulkan\generate_spv.sh">
+      <Filter>ThirdParty\Imgui\backends</Filter>
+    </None>
   </ItemGroup>
 </Project>

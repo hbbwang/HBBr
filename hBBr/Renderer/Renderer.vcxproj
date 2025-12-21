@@ -18,6 +18,67 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\ThirdParty\Imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\ThirdParty\pugixml\pugixml.cpp" />
+    <ClCompile Include="Common\AndroidCommon.cpp" />
+    <ClCompile Include="Common\Common.cpp" />
+    <ClCompile Include="Common\ConsoleDebug.cpp" />
+    <ClCompile Include="Common\DDSTool.cpp" />
+    <ClCompile Include="Common\FileSystem.cpp" />
+    <ClCompile Include="Common\HGuid.cpp" />
+    <ClCompile Include="Common\HInput.cpp" />
+    <ClCompile Include="Common\HTime.cpp" />
+    <ClCompile Include="Common\ImageTool.cpp" />
+    <ClCompile Include="Common\RendererConfig.cpp" />
+    <ClCompile Include="Common\Serializable.cpp" />
+    <ClCompile Include="Common\TypeConversion.cpp" />
+    <ClCompile Include="Common\XMLStream.cpp" />
+    <ClCompile Include="Core\VulkanApp.cpp" />
+    <ClCompile Include="Core\VulkanManager.cpp" />
+    <ClCompile Include="SDL3\SDLWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_vulkan.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imconfig.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imgui.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imgui_internal.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_textedit.h" />
+    <ClInclude Include="..\ThirdParty\Imgui\imstb_truetype.h" />
+    <ClInclude Include="..\ThirdParty\pugixml\pugiconfig.hpp" />
+    <ClInclude Include="..\ThirdParty\pugixml\pugixml.hpp" />
+    <ClInclude Include="Common\AndroidCommon.h" />
+    <ClInclude Include="Common\Common.h" />
+    <ClInclude Include="Common\ConsoleDebug.h" />
+    <ClInclude Include="Common\DDSTool.h" />
+    <ClInclude Include="Common\FileSystem.h" />
+    <ClInclude Include="Common\HBox.h" />
+    <ClInclude Include="Common\HGuid.h" />
+    <ClInclude Include="Common\HInput.h" />
+    <ClInclude Include="Common\HTime.h" />
+    <ClInclude Include="Common\ImageTool.h" />
+    <ClInclude Include="Common\RendererConfig.h" />
+    <ClInclude Include="Common\Serializable.h" />
+    <ClInclude Include="Common\StringTools.h" />
+    <ClInclude Include="Common\TypeConversion.h" />
+    <ClInclude Include="Common\XMLStream.h" />
+    <ClInclude Include="Core\VulkanApp.h" />
+    <ClInclude Include="Core\VulkanManager.h" />
+    <ClInclude Include="SDL3\SDLWindow.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\ThirdParty\Imgui\backends\vulkan\generate_spv.sh" />
+    <None Include="..\ThirdParty\Imgui\backends\vulkan\glsl_shader.frag" />
+    <None Include="..\ThirdParty\Imgui\backends\vulkan\glsl_shader.vert" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -40,13 +101,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -70,6 +131,14 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>$(SolutionDir)\ThirdParty;$(SolutionDir)\ThirdParty\sdl3;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)DependencyCopy\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LibraryPath>$(SolutionDir)\ThirdParty;$(SolutionDir)\ThirdParty\sdl3;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)DependencyCopy\$(Configuration)\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -100,15 +169,19 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_USE_DLL;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)\ThirdParty;$(SolutionDir)\ThirdParty\sdl3;$(SolutionDir)\ThirdParty\sdl3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)\ThirdParty;$(SolutionDir)\ThirdParty\sdl3;$(SolutionDir)\ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\sdl3\Include\SDL3;$(ProjectDir)\Common;$(ProjectDir)\SDL3;$(SolutionDir)\ThirdParty\Imgui;$(SolutionDir)\ThirdParty\crossguid;$(SolutionDir)\ThirdParty\assimp\include;$(SolutionDir)\ThirdParty\nvtt\include;$(SolutionDir)\ThirdParty\shaderc;$(SolutionDir)\ThirdParty\vld\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)\ThirdParty\crossguid;$(VULKAN_SDK)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /c /f /y $(solutiondir)DependencyCopy\$(Configuration)\*.dll $(solutiondir)$(Platform)\$(Configuration)\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -116,19 +189,20 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_USE_DLL;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)\ThirdParty;$(SolutionDir)\ThirdParty\sdl3;$(SolutionDir)\ThirdParty\sdl3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)\ThirdParty;$(SolutionDir)\ThirdParty\sdl3;$(SolutionDir)\ThirdParty\sdl3\Include;$(SolutionDir)ThirdParty\sdl3\Include\SDL3;$(ProjectDir)\Common;$(ProjectDir)\SDL3;$(SolutionDir)\ThirdParty\Imgui;$(SolutionDir)\ThirdParty\crossguid;$(SolutionDir)\ThirdParty\assimp\include;$(SolutionDir)\ThirdParty\nvtt\include;$(SolutionDir)\ThirdParty\shaderc;$(SolutionDir)\ThirdParty\vld\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)\ThirdParty\crossguid;$(VULKAN_SDK)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /c /f /y $(solutiondir)DependencyCopy\$(Configuration)\*.dll $(solutiondir)$(Platform)\$(Configuration)\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Renderer.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

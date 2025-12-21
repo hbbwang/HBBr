@@ -1,0 +1,38 @@
+{
+    "blendMode": 0,
+    "parameters_ps": {
+        "Metallic": {
+            "type": 4,
+            "value": 0.0
+        },
+        "Roughness": {
+            "type": 4,
+            "value": 0.30000001192092896
+        },
+        "Tint": {
+            "type": 7,
+            "value": {
+                "w": 1.0,
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            }
+        }
+    },
+    "parameters_vs": {
+        "UVSize": {
+            "type": 0,
+            "value": 1.0
+        }
+    },
+    "psShader": "PBR",
+    "psVarient": 0,
+    "textures": {
+        "BaseTexture": {
+            "type": 3,
+            "value": "69056105-8b40-a3b2-65d4-95ebf2fe28fb"
+        }
+    },
+    "vsShader": "PBR",
+    "vsVarient": 0
+}
