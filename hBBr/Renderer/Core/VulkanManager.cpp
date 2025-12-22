@@ -12,8 +12,9 @@
 #endif
 
 //
-#include "SDLWindow.h"
+#include "VulkanWindow.h"
 #include "VulkanManager.h"
+#include "VulkanApp.h"
 #include <vector>
 #include <array>
 #include "ConsoleDebug.h"
@@ -939,8 +940,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	VkSurfaceKHR surface, 
 	VkSurfaceFormatKHR surfaceFormat , 
 	VkSwapchainKHR &newSwapchain, 
-	std::vector<VkImage>& swapchainImages, 
-	std::vector<VkImageView>& swapchainImageViews, 
+	std::vector<VulkanImage>& swapchainImages,
 	VkSurfaceCapabilitiesKHR& surfaceCapabilities,
 	bool bIsFullScreen,
 	bool bVSync
@@ -948,148 +948,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 {
 	//ConsoleDebug::print_endl("Create Swapchain KHR.");
 	VkPresentModeKHR present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-
 	//Vulkan的垂直同步
-#if 0
-	//if (_winInfo.vsync)
-	{
-		uint32_t present_mode_count = 0;
-		vkGetPhysicalDeviceSurfacePresentModesKHR(_gpuDevice, surface, &present_mode_count, VK_NULL_HANDLE);
-		if (present_mode_count <= 0)
-		{
-			MessageOut("Vulkan Error:Can not Find any VkPresentModeKHR!", false,true,"255,0,0");
-			_Sleep(50);
-			return CreateSwapchain(surfaceSize, surface, surfaceFormat, newSwapchain,
-				swapchainImages, swapchainImageViews, surfaceCapabilities, cmdBuf, acquireImageSemaphore, queueSubmitSemaphore, fences, bIsFullScreen);
-		}
-		std::vector<VkPresentModeKHR> presentModes(present_mode_count);
-		vkGetPhysicalDeviceSurfacePresentModesKHR(_gpuDevice, surface, &present_mode_count, presentModes.data());
-
-		bool bFoundPresentModeMailbox = false;
-		bool bFoundPresentModeImmediate = false;
-		bool bFoundPresentModeFIFO = false;
-		bool bFoundPresentModeFIFORelaxed = false;
-		bool bFoundPresentModeSharedDemandRefresh = false;
-		bool bFoundPresentModeSharedContinuous = false;
-		std::string CurrentPresentMode = "";
-		for (size_t i = 0; i < present_mode_count; i++)
-		{
-			switch (presentModes[i])
-			{
-			case VK_PRESENT_MODE_MAILBOX_KHR:
-				bFoundPresentModeMailbox = true;
-				//ConsoleDebug::printf_endl("- VK_PRESENT_MODE_MAILBOX_KHR : (%d)",(int)VK_PRESENT_MODE_MAILBOX_KHR);
-				break;
-			case VK_PRESENT_MODE_IMMEDIATE_KHR:
-				bFoundPresentModeImmediate = true;
-				//ConsoleDebug::printf_endl("- VK_PRESENT_MODE_IMMEDIATE_KHR : (%d)", (int)VK_PRESENT_MODE_IMMEDIATE_KHR);
-				break;
-			case VK_PRESENT_MODE_FIFO_KHR:
-				bFoundPresentModeFIFO = true;
-				//ConsoleDebug::printf_endl("- VK_PRESENT_MODE_FIFO_KHR : (%d)", (int)VK_PRESENT_MODE_FIFO_KHR);
-				break;
-			case VK_PRESENT_MODE_FIFO_RELAXED_KHR:
-				//ConsoleDebug::printf_endl("- VK_PRESENT_MODE_FIFO_RELAXED_KHR : (%d)", (int)VK_PRESENT_MODE_FIFO_RELAXED_KHR);
-				bFoundPresentModeFIFORelaxed = true;
-				break;
-			case VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR:
-				//ConsoleDebug::printf_endl("- VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR : (%d)", (int)VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR);
-				bFoundPresentModeSharedDemandRefresh = true;
-				break;
-			case VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR:
-				//ConsoleDebug::printf_endl("- VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR : (%d)", (int)VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR);
-				bFoundPresentModeSharedContinuous = true;
-				break;
-			default:
-				ConsoleDebug::printf_endl("- Other VkPresentModeKHR : (%d)", (int)presentModes[i]);
-				break;
-			}
-		}
-
-		int RequestedPresentMode = -1;
-		{
-			bool bRequestSuccessful = false;
-			switch (RequestedPresentMode)
-			{
-			case VK_PRESENT_MODE_IMMEDIATE_KHR:
-				if (bFoundPresentModeImmediate)
-				{
-					present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-					CurrentPresentMode = "VK_PRESENT_MODE_IMMEDIATE_KHR";
-					bRequestSuccessful = true;
-				}
-				break;
-			case VK_PRESENT_MODE_MAILBOX_KHR:
-				if (bFoundPresentModeMailbox)
-				{
-					present_mode = VK_PRESENT_MODE_MAILBOX_KHR;
-					CurrentPresentMode = "VK_PRESENT_MODE_MAILBOX_KHR";
-					bRequestSuccessful = true;
-				}
-				break;
-			case VK_PRESENT_MODE_FIFO_KHR:
-				if (bFoundPresentModeFIFO)
-				{
-					present_mode = VK_PRESENT_MODE_FIFO_KHR;
-					CurrentPresentMode = "VK_PRESENT_MODE_FIFO_KHR";
-					bRequestSuccessful = true;
-				}
-				break;
-			case VK_PRESENT_MODE_FIFO_RELAXED_KHR:
-				if (bFoundPresentModeFIFORelaxed)
-				{
-					present_mode = VK_PRESENT_MODE_FIFO_RELAXED_KHR;
-					CurrentPresentMode = "VK_PRESENT_MODE_FIFO_RELAXED_KHR";
-					bRequestSuccessful = true;
-				}
-				break;
-			default:
-				break;
-			}
-
-			if (!bRequestSuccessful)
-			{
-				ConsoleDebug::printf_endl_warning("Requested PresentMode (%d) is not handled or available, ignoring...", RequestedPresentMode);
-				RequestedPresentMode = -1;
-			}
-		}
-
-		if (RequestedPresentMode == -1)
-		{
-			// Until FVulkanViewport::Present honors SyncInterval, we need to disable vsync for the spectator window if using an HMD.
-			if ( !bVSync)
-			{
-				if (bFoundPresentModeImmediate)
-				{
-					present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;//类似双缓冲
-					CurrentPresentMode = "VK_PRESENT_MODE_IMMEDIATE_KHR";
-				}
-				else if (bFoundPresentModeMailbox)
-				{
-					present_mode = VK_PRESENT_MODE_MAILBOX_KHR;//类似三缓冲
-					CurrentPresentMode = "VK_PRESENT_MODE_MAILBOX_KHR";
-				}
-			}
-			else if (bFoundPresentModeFIFO)
-			{
-				present_mode = VK_PRESENT_MODE_FIFO_KHR;//垂直同步
-				CurrentPresentMode = "VK_PRESENT_MODE_FIFO_KHR";
-			}
-			else if (bFoundPresentModeFIFORelaxed)
-			{
-				present_mode = VK_PRESENT_MODE_FIFO_RELAXED_KHR;//垂直同步
-				CurrentPresentMode = "VK_PRESENT_MODE_FIFO_RELAXED_KHR";
-			}
-			else
-			{
-				ConsoleDebug::printf_endl_error("Couldn't find desired PresentMode! Using %d", presentModes[0]);
-				present_mode = presentModes[0];
-			}
-		}
-		ConsoleDebug::printf_endl("Current presene mode is : " + CurrentPresentMode + " :%d ", (int)VK_PRESENT_MODE_MAILBOX_KHR);
-	}
-#else
-
 	//VK_PRESENT_MODE_IMMEDIATE_KHR：
 			// 立即模式。在图像准备好后立即显示，可能会导致撕裂现象。这种模式下，GPU渲染的速度不受显示器刷新率的限制。
 	//VK_PRESENT_MODE_MAILBOX_KHR：
@@ -1098,8 +957,6 @@ VkExtent2D VulkanManager::CreateSwapchain(
 			// 先进先出（FIFO）模式。在显示器完成刷新后，才从交换链中获取新图像并显示。这种模式下，GPU渲染的速度受到显示器刷新率的限制，但可以防止撕裂现象。这是Vulkan API规范中要求必须支持的呈现模式。
 	//VK_PRESENT_MODE_FIFO_RELAXED_KHR：
 			// 宽松的FIFO模式。当图像准备好并且显示器处于垂直同步间隔之外时，立即显示图像。这种模式下，当GPU渲染速度低于显示器刷新率时，可以避免撕裂现象；当GPU渲染速度高于显示器刷新率时，可能会出现撕裂现象。
-	present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-#endif
 
 	VkSurfaceTransformFlagBitsKHR PreTransform;
 	//if(surfaceCapabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
@@ -1239,17 +1096,16 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	//获取交换链Image,注意数量可能与_swapchainBufferCount不一致
 	uint32_t numSwapchainImages = surfaceCapabilities.minImageCount + 1;
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &numSwapchainImages, nullptr);
+	std::vector<VkImage> tempSwapchainImages(numSwapchainImages);
+	vkGetSwapchainImagesKHR(_device, newSwapchain, &numSwapchainImages, tempSwapchainImages.data());
 	swapchainImages.resize(numSwapchainImages);
-	vkGetSwapchainImagesKHR(_device, newSwapchain, &numSwapchainImages, swapchainImages.data());
-
-	//创建ImageView
-	//ConsoleDebug::print_endl("hBBr:Swapchain: Create Swapchain Image View.");
-	swapchainImageViews.resize(numSwapchainImages);
-	for (int i = 0; i < (int)numSwapchainImages; i++)
+	for (int i = 0 ;i < numSwapchainImages ; i++)
 	{
-		CreateImageView(swapchainImages[i], surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, swapchainImageViews[i]);
+		swapchainImages[i].Image = tempSwapchainImages[i];
+		CreateImageView(swapchainImages[i].Image, surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, swapchainImages[i].ImageView);
+		//暂时还不能用，需要转换布局
+		swapchainImages[i].bIsValid = false;
 	}
-	//ConsoleDebug::print_endl("hBBr:Swapchain: Transition Swapchain Image layout to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR.");
 	//Swapchain转换到呈现布局
 	VkCommandBuffer buf;
 	AllocateCommandBuffer(_commandPool, buf);
@@ -1262,7 +1118,6 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	SubmitQueueImmediate({buf});
 	vkQueueWaitIdle(GetGraphicsQueue());
 	FreeCommandBuffer(_commandPool, buf);
-
 	_swapchainBufferCount = numSwapchainImages;
 
 	return info.imageExtent;
@@ -1444,7 +1299,7 @@ bool VulkanManager::CheckImageProperties(VkFormat format, VkImageType type, VkIm
 	return result;
 }
 
-void VulkanManager::Transition(
+void VulkanManager::Transition_RenderThread(
 	VkCommandBuffer cmdBuffer, 
 	VkImage image, 
 	VkImageAspectFlags aspects, 
@@ -1455,6 +1310,15 @@ void VulkanManager::Transition(
 	uint32_t baseArrayLayer, 
 	uint32_t layerCount)
 {
+	if (!bIsRenderThread)
+	{
+		//MessageOut("[VulkanManager::Transition_RenderThread] Must be call in render thread.");
+		//throw std::runtime_error("[VulkanManager::Transition_RenderThread] Must be call in render thread.");
+
+
+		return;
+	}
+
 	bool bImm = false;
 	if (cmdBuffer == nullptr)
 	{

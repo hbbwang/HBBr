@@ -114,6 +114,16 @@ struct TextureUpdateInfo
 	}
 };
 
+//为了适应多线程存在的VulkanImage结构体
+struct VulkanImage
+{
+	VkImage Image;
+	VkImageView ImageView;
+	VkDeviceSize ImageSize;
+	VkImageLayout ImageLayout;
+	uint8_t bIsValid = 0;
+};
+
 class VulkanManager
 {
 private:
@@ -179,8 +189,7 @@ public:
 		VkSurfaceKHR surface,
 		VkSurfaceFormatKHR surfaceFormat,
 		VkSwapchainKHR& newSwapchain,
-		std::vector<VkImage>& swapchainImages,
-		std::vector<VkImageView>& swapchainImageViews,
+		std::vector<VulkanImage>& swapchainImages,
 		VkSurfaceCapabilitiesKHR& surfaceCapabilities,
 		bool bIsFullScreen = false,
 		bool bVSync = true
@@ -301,8 +310,8 @@ public:
 
 	HBBR_API void FreeDescriptorSet(VkDescriptorPool pool, VkDescriptorSet& descriptorSet);
 
-	/* Image 布局转换 */
-	HBBR_API void Transition(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
+	/* Image 布局转换(只在渲染线程执行) */
+	HBBR_API void Transition_RenderThread(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
 
 	HBBR_API void CreateVkSemaphore(VkSemaphore& semaphore);
 

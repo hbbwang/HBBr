@@ -5,6 +5,7 @@
 #include "VulkanManager.h"
 
 //CallStack 程序崩溃的时候跟踪堆栈
+#pragma region CallStack
 #ifdef _WIN32 // SetUnhandledExceptionFilter(ApplicationCrashHandler);
 #include <Windows.h>
 #include <DbgHelp.h>
@@ -79,13 +80,13 @@ void CallStack()
 #else
 #endif
 }
+#pragma endregion
 
 std::unique_ptr<VulkanApp> VulkanApp::Instance;
 
 thread_local bool bIsMianThread = false;
 thread_local bool bIsRenderThread = false;
 thread_local bool bInitialize = false;
-bool bStartRenderThread = false;
 bool bSdlQuit = false;//只在主线程Set,其他线程只读
 bool bIsEnableDebug = false;
 
@@ -118,12 +119,25 @@ void VulkanApp::InitVulkanManager(bool bEnableDebug)
     //Set sdl hints
     SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "0");
     bIsEnableDebug = bEnableDebug;
+    //Init Vulkan Manager (Main Thread)
+    VulkanManager::Get()->InitManager_MainThread(bIsEnableDebug);
+    //Create Render Thread
+    RenderThread = std::thread([this]()
+    {
+        ConsoleDebug::printf_endl("Init RenderThread.");
+        //Init Vulkan Manager (Render Thread)
+        VulkanManager::Get()->InitManager_RenderThread();
+        bIsRenderThread = true;
+        while (RenderLoop())
+        {
+        }
+    });
 }
 
-VKWindow* VulkanApp::CreateVulkanWindow(int w, int h, const char* title)
+VkWindow* VulkanApp::CreateVulkanWindow(int w, int h, const char* title)
 {
 	//Create Vulkan Window
-    auto newWindow = new VKWindow(w, h, title);
+    auto newWindow = new VkWindow(w, h, title);
     newWindow->SetFocus();
     //Create Renderer...
     AllWindows.push_back(newWindow);
@@ -206,26 +220,13 @@ bool VulkanApp::MainLoop()
         {
             ConsoleDebug::printf_endl("Init GameMainLoop.");
             bInitialize = true;
-			//Init Vulkan Manager (Main Thread)
-            VulkanManager::Get()->InitManager_MainThread(bIsEnableDebug);
-			//Create Render Thread
-            if (!bStartRenderThread)
-            {
-                bStartRenderThread = true;
-                RenderThread = std::thread([this]()
-                    {
-                        ConsoleDebug::printf_endl("Init RenderThread.");
-                        bIsRenderThread = true;
-                        while (RenderLoop())
-                        {
-
-                        }
-                    });
-            }
         }
         else
         {
-
+            for (auto& w : AllWindows)
+            {
+				w->Update_MainThread();
+            }
         }
     }
     return bContinueLoop;
@@ -240,12 +241,20 @@ bool VulkanApp::RenderLoop()
         {
             ConsoleDebug::printf_endl("Init RenderMainLoop.");
             bInitialize = true;
-            //Init Vulkan Manager (Render Thread)
-            VulkanManager::Get()->InitManager_RenderThread();
         }
         else
         {
-
+            std::vector<std::function<void()>>funcs;
+            while (RenderThreadFuncs.try_dequeue(funcs))
+            {
+                for (auto& f : funcs)
+                    f();
+                funcs.clear();
+            }
+            for (auto& w : AllWindows)
+            {
+                w->Update_RenderThead();
+            }
         }
 		//Exit render loop.Must be insure render objects are destroyed before quit.务必确保渲染对象在退出前被销毁完毕
         if (bSdlQuit)
@@ -266,7 +275,7 @@ void VulkanApp::Release()
         Instance.reset();
 }
 
-VKWindow* VulkanApp::GetFocusWindow()
+VkWindow* VulkanApp::GetFocusWindow()
 {
     for (auto window : AllWindows)
     {
@@ -279,7 +288,7 @@ VKWindow* VulkanApp::GetFocusWindow()
     return nullptr;
 }
 
-VKWindow* VulkanApp::GetWindowFromID(SDL_WindowID id)
+VkWindow* VulkanApp::GetWindowFromID(SDL_WindowID id)
 {
     for (auto window : AllWindows)
     {
@@ -289,4 +298,9 @@ VKWindow* VulkanApp::GetWindowFromID(SDL_WindowID id)
         }
 	}
     return nullptr;
+}
+
+void VulkanApp::EnqueueRenderFunc(std::function<void()> func)
+{
+    RenderThreadFuncs.enqueue(std::move(func));
 }

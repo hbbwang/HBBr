@@ -3,7 +3,7 @@
 #include "Common.h"
 #include <vector>
 #include <map>
-#include "../SDL3/SDLWindow.h"
+#include "../Core/VulkanWindow.h"
 
 enum class Action : int
 {
@@ -320,7 +320,7 @@ struct KeyCallBack
     KeyCode key;
     Action  action;
     KeyMod  mod;
-    class VKWindow* focusWindowHandle = nullptr;
+    class VulkanWindow* focusWindowHandle = nullptr;
     bool bKeyDown = false;
 };
 
@@ -328,7 +328,7 @@ struct MouseCallBack
 {
     MouseButton button;
     Action  action;
-    class VKWindow* focusWindowHandle = nullptr;
+    class VulkanWindow* focusWindowHandle = nullptr;
     bool bMouseDown = false;
 };
 

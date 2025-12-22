@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Common.h"
-#include "../SDL3/SDLWindow.h"
+#include "../Core/VulkanWindow.h"
 
 //#define HRect SDL_Rect
 
