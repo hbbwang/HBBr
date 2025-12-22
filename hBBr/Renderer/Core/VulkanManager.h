@@ -182,7 +182,7 @@ public:
 
 	HBBR_API bool GetSurfaceCapabilities(VkSurfaceKHR& surface, VkSurfaceCapabilitiesKHR* surfaceCapabilities);
 
-	/* 创建Swapchain */
+	/* 创建Swapchain (但是Image Layout还未修改，需要走一遍渲染线程Transition) */
 	HBBR_API VkExtent2D CreateSwapchain(
 		SDL_Window* window,
 		VkExtent2D surfaceSize,
@@ -310,8 +310,10 @@ public:
 
 	HBBR_API void FreeDescriptorSet(VkDescriptorPool pool, VkDescriptorSet& descriptorSet);
 
-	/* Image 布局转换(只在渲染线程执行) */
-	HBBR_API void Transition_RenderThread(VkCommandBuffer cmdBuffer, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
+	HBBR_API void ExecuteImmediateCommand_RenderThread(std::function<void(VkCommandBuffer cmdBuf)> func, std::function<void()> endFunc = std::function<void()>());
+
+	/* Image 布局转换(只能在渲染线程执行) */
+	HBBR_API void Transition_RenderThread(VkCommandBuffer cmdBuf, VkImage image, VkImageAspectFlags aspects, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevelBegin = 0, uint32_t mipLevelCount = 1, uint32_t baseArrayLayer = 0, uint32_t layerCount = 1);
 
 	HBBR_API void CreateVkSemaphore(VkSemaphore& semaphore);
 

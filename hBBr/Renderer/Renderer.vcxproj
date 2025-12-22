@@ -42,7 +42,8 @@
     <ClCompile Include="Common\XMLStream.cpp" />
     <ClCompile Include="Core\VulkanApp.cpp" />
     <ClCompile Include="Core\VulkanManager.cpp" />
-    <ClCompile Include="SDL3\SDLWindow.cpp" />
+    <ClCompile Include="Core\VulkanSwapchain.cpp" />
+    <ClCompile Include="Core\VulkanWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h" />
@@ -56,7 +57,9 @@
     <ClInclude Include="..\ThirdParty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="..\ThirdParty\pugixml\pugixml.hpp" />
     <ClInclude Include="Common\AndroidCommon.h" />
+    <ClInclude Include="Common\blockingconcurrentqueue.h" />
     <ClInclude Include="Common\Common.h" />
+    <ClInclude Include="Common\concurrentqueue.h" />
     <ClInclude Include="Common\ConsoleDebug.h" />
     <ClInclude Include="Common\DDSTool.h" />
     <ClInclude Include="Common\FileSystem.h" />
@@ -72,7 +75,8 @@
     <ClInclude Include="Common\XMLStream.h" />
     <ClInclude Include="Core\VulkanApp.h" />
     <ClInclude Include="Core\VulkanManager.h" />
-    <ClInclude Include="SDL3\SDLWindow.h" />
+    <ClInclude Include="Core\VulkanSwapchain.h" />
+    <ClInclude Include="Core\VulkanWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\ThirdParty\Imgui\backends\vulkan\generate_spv.sh" />

@@ -56,7 +56,7 @@ void VulkanWindow::Update_MainThread()
 
 void VulkanWindow::Update_RenderThead()
 {
-	if (Swapchain && Swapchain->bIsInitialized)
+	if (Swapchain)
 	{
 		Swapchain->Update_RenderThread();
 	}

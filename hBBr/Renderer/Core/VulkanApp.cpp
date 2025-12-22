@@ -134,10 +134,10 @@ void VulkanApp::InitVulkanManager(bool bEnableDebug)
     });
 }
 
-VkWindow* VulkanApp::CreateVulkanWindow(int w, int h, const char* title)
+VulkanWindow* VulkanApp::CreateVulkanWindow(int w, int h, const char* title)
 {
 	//Create Vulkan Window
-    auto newWindow = new VkWindow(w, h, title);
+    auto newWindow = new VulkanWindow(w, h, title);
     newWindow->SetFocus();
     //Create Renderer...
     AllWindows.push_back(newWindow);
@@ -244,12 +244,10 @@ bool VulkanApp::RenderLoop()
         }
         else
         {
-            std::vector<std::function<void()>>funcs;
-            while (RenderThreadFuncs.try_dequeue(funcs))
+            std::function<void()>func;
+            while (RenderThreadFuncs.try_dequeue(func))
             {
-                for (auto& f : funcs)
-                    f();
-                funcs.clear();
+                func();
             }
             for (auto& w : AllWindows)
             {
@@ -275,7 +273,7 @@ void VulkanApp::Release()
         Instance.reset();
 }
 
-VkWindow* VulkanApp::GetFocusWindow()
+VulkanWindow* VulkanApp::GetFocusWindow()
 {
     for (auto window : AllWindows)
     {
@@ -288,7 +286,7 @@ VkWindow* VulkanApp::GetFocusWindow()
     return nullptr;
 }
 
-VkWindow* VulkanApp::GetWindowFromID(SDL_WindowID id)
+VulkanWindow* VulkanApp::GetWindowFromID(SDL_WindowID id)
 {
     for (auto window : AllWindows)
     {

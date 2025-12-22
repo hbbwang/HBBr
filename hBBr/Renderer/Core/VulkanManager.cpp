@@ -1106,20 +1106,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 		//暂时还不能用，需要转换布局
 		swapchainImages[i].bIsValid = false;
 	}
-	//Swapchain转换到呈现布局
-	VkCommandBuffer buf;
-	AllocateCommandBuffer(_commandPool, buf);
-	BeginCommandBuffer(buf, 0);
-	for (int i = 0; i < (int)numSwapchainImages; i++)
-	{
-		Transition(buf, swapchainImages[i], VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-	}
-	EndCommandBuffer(buf);
-	SubmitQueueImmediate({buf});
-	vkQueueWaitIdle(GetGraphicsQueue());
-	FreeCommandBuffer(_commandPool, buf);
 	_swapchainBufferCount = numSwapchainImages;
-
 	return info.imageExtent;
 }
 
@@ -1300,7 +1287,7 @@ bool VulkanManager::CheckImageProperties(VkFormat format, VkImageType type, VkIm
 }
 
 void VulkanManager::Transition_RenderThread(
-	VkCommandBuffer cmdBuffer, 
+	VkCommandBuffer cmdBuffer,
 	VkImage image, 
 	VkImageAspectFlags aspects, 
 	VkImageLayout oldLayout, 
@@ -1312,25 +1299,21 @@ void VulkanManager::Transition_RenderThread(
 {
 	if (!bIsRenderThread)
 	{
-		//MessageOut("[VulkanManager::Transition_RenderThread] Must be call in render thread.");
-		//throw std::runtime_error("[VulkanManager::Transition_RenderThread] Must be call in render thread.");
-
-
-		return;
+		MessageOut("[VulkanManager::Transition_RenderThread] Must be call in render thread.");
+		throw std::runtime_error("[VulkanManager::Transition_RenderThread] Must be call in render thread.");
 	}
-
 	bool bImm = false;
 	if (cmdBuffer == nullptr)
 	{
+		MessageOut("[VulkanManager::Transition_RenderThread] VkCommandBuffer is nullptr.");
+		throw std::runtime_error("[VulkanManager::Transition_RenderThread] VkCommandBuffer is nullptr.");
 		bImm = true;
 	}
-
 	if (bImm)
 	{
 		AllocateCommandBuffer(GetCommandPool(), cmdBuffer);
 		BeginCommandBuffer(cmdBuffer);
 	}
-
 	if (oldLayout == newLayout)
 	{
 		return;
@@ -1998,6 +1981,21 @@ void VulkanManager::FreeDescriptorSet(VkDescriptorPool pool, VkDescriptorSet& de
 		vkFreeDescriptorSets(_device, pool, 1, &descriptorSet);
 		descriptorSet = VK_NULL_HANDLE;
 	}
+}
+
+void VulkanManager::ExecuteImmediateCommand_RenderThread(
+	std::function<void(VkCommandBuffer cmdBuf)> func,
+	std::function<void()> endFunc)
+{
+	VkCommandBuffer buf;
+	AllocateCommandBuffer(_commandPool, buf);
+	BeginCommandBuffer(buf, 0);
+	func(buf);
+	EndCommandBuffer(buf);
+	SubmitQueueImmediate({ buf });
+	vkQueueWaitIdle(GetGraphicsQueue());
+	FreeCommandBuffer(_commandPool, buf);
+	endFunc();
 }
 
 void VulkanManager::CreateVkSemaphore(VkSemaphore& semaphore)

@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="SDL">
-      <UniqueIdentifier>{c5bc7d8d-0571-4520-bac2-ee4e377dec59}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Common">
       <UniqueIdentifier>{d6431ad3-7927-4903-84bf-7e28b03bf274}</UniqueIdentifier>
     </Filter>
@@ -36,9 +33,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SDL3\SDLWindow.cpp">
-      <Filter>SDL</Filter>
-    </ClCompile>
     <ClCompile Include="Common\DDSTool.cpp">
       <Filter>Common</Filter>
     </ClCompile>
@@ -108,11 +102,14 @@
     <ClCompile Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.cpp">
       <Filter>ThirdParty\Imgui\backends</Filter>
     </ClCompile>
+    <ClCompile Include="Core\VulkanWindow.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\VulkanSwapchain.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SDL3\SDLWindow.h">
-      <Filter>SDL</Filter>
-    </ClInclude>
     <ClInclude Include="Common\ConsoleDebug.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -193,6 +190,18 @@
     </ClInclude>
     <ClInclude Include="..\ThirdParty\Imgui\backends\imgui_impl_sdl3.h">
       <Filter>ThirdParty\Imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\VulkanWindow.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\VulkanSwapchain.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\blockingconcurrentqueue.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\concurrentqueue.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

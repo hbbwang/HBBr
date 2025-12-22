@@ -1,5 +1,5 @@
 #pragma once
-#include "SDLWindow.h"
+#include "VulkanWindow.h"
 #include <thread>
 #include <memory>
 #include <atomic>
@@ -18,16 +18,16 @@ public:
 	}
 	HBBR_API void Release();
 	HBBR_API void InitVulkanManager(bool bEnableDebug = false);
-	HBBR_API class VkWindow* CreateVulkanWindow(int w, int h , const char* title);
+	HBBR_API class VulkanWindow* CreateVulkanWindow(int w, int h , const char* title);
 	HBBR_API bool MainLoop();
-	HBBR_API VkWindow* GetFocusWindow();
-	HBBR_API VkWindow* GetWindowFromID(SDL_WindowID id);
+	HBBR_API VulkanWindow* GetFocusWindow();
+	HBBR_API VulkanWindow* GetWindowFromID(SDL_WindowID id);
 	HBBR_API void EnqueueRenderFunc(std::function<void()>func);
 	bool RenderLoop();
 private:
 	std::thread RenderThread;
 	static std::unique_ptr<VulkanApp> Instance;
-	std::vector<class VkWindow*> AllWindows;
+	std::vector<class VulkanWindow*> AllWindows;
 	moodycamel::ConcurrentQueue<std::function<void()>> RenderThreadFuncs;
 };
 
