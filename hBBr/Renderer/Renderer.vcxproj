@@ -42,7 +42,6 @@
     <ClCompile Include="Common\XMLStream.cpp" />
     <ClCompile Include="Core\VulkanApp.cpp" />
     <ClCompile Include="Core\VulkanManager.cpp" />
-    <ClCompile Include="Core\VulkanSwapchain.cpp" />
     <ClCompile Include="Core\VulkanWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -75,7 +74,6 @@
     <ClInclude Include="Common\XMLStream.h" />
     <ClInclude Include="Core\VulkanApp.h" />
     <ClInclude Include="Core\VulkanManager.h" />
-    <ClInclude Include="Core\VulkanSwapchain.h" />
     <ClInclude Include="Core\VulkanWindow.h" />
   </ItemGroup>
   <ItemGroup>

@@ -4,8 +4,7 @@
 #include <memory>
 #include <atomic>
 #include <functional>
-#include "concurrentqueue.h"
-#include"VulkanSwapchain.h"
+#include "concurrentqueue.h" 
 
 class VulkanApp
 {

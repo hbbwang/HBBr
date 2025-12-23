@@ -167,29 +167,28 @@ void VulkanManager::InitManager_MainThread(bool bDebug)
 		throw std::runtime_error("Vulkan is not support on this device.");
 	}
 #endif
-	ConsoleDebug::print_endl("hBBr:InitVulkan");
 	ConsoleDebug::print_endl(GetInternationalizationText("Renderer", "T000000"));
-
+	ConsoleDebug::print_endl("InitVkManager[MainThread] : InitVulkan");
 	_bDebugEnable = false;
 	_graphicsQueueFamilyIndex = -1;
 	_swapchainBufferCount = 3;
-	ConsoleDebug::print_endl("hBBr:Start init Vulkan Instance.");
+	ConsoleDebug::print_endl("InitVkManager[MainThread] : Start init Vulkan Instance.");
 	//Init global vulkan  
 	InitInstance(bDebug);
-	ConsoleDebug::print_endl("hBBr:Start init Vulkan Device.");
+	ConsoleDebug::print_endl("InitVkManager[MainThread] : Start init Vulkan Device.");
 	InitDevice();
 	InitDebug();
 }
 
 void VulkanManager::InitManager_RenderThread()
 {
-	ConsoleDebug::print_endl("hBBr:Start init Vulkan Memory Allocator(VMA) - RenderThread.");
+	ConsoleDebug::print_endl("InitVkManager[RenderThread] : Start init Vulkan Memory Allocator(VMA)");
 	InitVMA();
-	ConsoleDebug::print_endl("hBBr:Start init Command Pool. - RenderThread");
+	ConsoleDebug::print_endl("InitVkManager[RenderThread] : Start init Command Pool.");
 	CreateCommandPool();
-	ConsoleDebug::print_endl("hBBr:Start Create Descripotr Pool. - RenderThread");
+	ConsoleDebug::print_endl("InitVkManager[RenderThread] : Start Create Descripotr Pool.");
 	CreateDescripotrPool(_descriptorPool);
-	ConsoleDebug::print_endl("hBBr:Start Create Query Pool(256). - RenderThread");
+	ConsoleDebug::print_endl("InitVkManager[RenderThread] : Start Create Query Pool(256).");
 	CreateQueryPool(256, _queryTimeStamp);
 }
 
@@ -228,7 +227,7 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 				if (strcmp(availableLaters[i].layerName, "VK_LAYER_KHRONOS_validation") == 0)
 				{
 					layers.push_back("VK_LAYER_KHRONOS_validation");
-					layerLogs.push_back("hBBr:[Vulkan Instance layer] Add VK_LAYER_KHRONOS_validation layer.");
+					layerLogs.push_back("[Vulkan Instance Layer] Add VK_LAYER_KHRONOS_validation layer.");
 					bVK_LAYER_KHRONOS_validation = true;
 				}
 			}	
@@ -239,7 +238,7 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 			ConsoleDebug::print_endl("\t------------------");
 		}
 		ConsoleDebug::print_endl("\t---------End Enumerate Instance Layer Properties------");
-		ConsoleDebug::print_endl("Found Instance Layers number:" + StringTool::FromSize_t(availableLaters.size()));
+		ConsoleDebug::print_endl("Found Instance Layers Number:" + StringTool::FromSize_t(availableLaters.size()));
 		//
 		ConsoleDebug::print_endl("");
 		ConsoleDebug::print_endl("");
@@ -263,33 +262,33 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 			if (_bDebugEnable && strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_REPORT_EXTENSION_NAME) == 0)
 			{
 				extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_EXT_DEBUG_REPORT_EXTENSION_NAME ext.");
+				layerLogs.push_back("[Vulkan Instance Extension] Add VK_EXT_DEBUG_REPORT_EXTENSION_NAME ext.");
 
 			}
 			else if (_bDebugEnable && strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0)
 			{
 				extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_EXT_DEBUG_UTILS_EXTENSION_NAME ext.");
+				layerLogs.push_back("[Vulkan Instance Extension] Add VK_EXT_DEBUG_UTILS_EXTENSION_NAME ext.");
 			}
 			else if (strcmp(availableExts[i].extensionName, VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME) == 0)
 			{
 				extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
-				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME ext.");
+				layerLogs.push_back("[Vulkan Instance Extension] Add VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME ext.");
 			}
 			else if (strcmp(availableExts[i].extensionName, VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME) == 0)
 			{
 				extensions.push_back(VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME);
-				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME ext.");
+				layerLogs.push_back("[Vulkan Instance Extension] Add VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME ext.");
 			}
 			else if (strcmp(availableExts[i].extensionName, VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME) == 0)
 			{
 				extensions.push_back(VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME);
-				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME ext.");
+				layerLogs.push_back("[Vulkan Instance Extension] Add VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME ext.");
 			}
 			else if (strcmp(availableExts[i].extensionName, "VK_KHR_get_surface_capabilities2") == 0)
 			{
 				extensions.push_back("VK_KHR_get_surface_capabilities2");
-				layerLogs.push_back("hBBr:[Vulkan Instance extension] Add VK_KHR_get_surface_capabilities2 ext.");
+				layerLogs.push_back("[Vulkan Instance Extension] Add VK_KHR_get_surface_capabilities2 ext.");
 			}
 		}
 		ConsoleDebug::print_endl("\t---------End Enumerate Instance Extension Properties------");
@@ -324,30 +323,25 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 	appInfo.apiVersion = apiVersion;
 	appInfo.applicationVersion = 0;
 	appInfo.engineVersion = 0;
-
 	VkInstanceCreateInfo createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	createInfo.pNext = nullptr;
 	createInfo.pApplicationInfo = &appInfo;
-
-	ConsoleDebug::print_endl("hBBr:Enable Vulkan instance layer---------");
+	ConsoleDebug::print_endl("Enable Vulkan Instance Layer---------");
 	for (auto& i : layers)
 	{
 		ConsoleDebug::print_endl(i);
 	}
-	ConsoleDebug::print_endl("hBBr:-------------------------------------");
-
-	ConsoleDebug::print_endl("hBBr:Enable Vulkan instance layer extension---");
+	ConsoleDebug::print_endl("-------------------------------------");
+	ConsoleDebug::print_endl("Enable Vulkan Instance Layer extension---");
 	for (auto& i : extensions)
 	{
 		ConsoleDebug::print_endl(i);
 	}
-	ConsoleDebug::print_endl("hBBr:-------------------------------------");
-
+	ConsoleDebug::print_endl("-------------------------------------");
 	if (_bDebugEnable)
 	{
-		ConsoleDebug::print_endl("hBBr:Enable Vulkan Debug layer.");
-
+		ConsoleDebug::print_endl("Enable Vulkan Debug layer---------");
 		debugCallbackCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
 		debugCallbackCreateInfo.pfnCallback = VulkanDebugCallback;
 		debugCallbackCreateInfo.flags =
@@ -361,7 +355,6 @@ void VulkanManager::InitInstance(bool bEnableDebug)
 	createInfo.ppEnabledExtensionNames = extensions.data();
 	createInfo.enabledLayerCount = (uint32_t)layers.size();
 	createInfo.ppEnabledLayerNames = layers.data();
-
 	VkResult result = vkCreateInstance(&createInfo, VK_NULL_HANDLE, &_instance);
 	if (result == VK_ERROR_INCOMPATIBLE_DRIVER) {
 		MessageOut(GetInternationalizationText("Renderer", "A000000"), false, true);
@@ -469,7 +462,7 @@ void VulkanManager::InitDevice()
 				if (strcmp(availableLaters[i].layerName, "VK_LAYER_KHRONOS_validation") == 0 && _bDebugEnable)
 				{
 					layers.push_back("VK_LAYER_KHRONOS_validation");
-					layerLogs.push_back("hBBr:[Vulkan Device layer] Add VK_LAYER_KHRONOS_validation layer.");
+					layerLogs.push_back("[Vulkan Device Layer] Add VK_LAYER_KHRONOS_validation layer.");
 				}
 			}
 			ConsoleDebug::print_endl(availableLaters[i].layerName + std::string("  |  ") + availableLaters[i].description, "150,150,150");
@@ -494,122 +487,122 @@ void VulkanManager::InitDevice()
 				if (_bDebugEnable && strcmp(availableExts[i].extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_debug_marker ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_EXT_debug_marker ext.");
 					_deviceExtensionOptionals.HasKHRDebugMarker = 1;
 					debugMarkerActive = true;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SWAPCHAIN_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_KHR_SWAPCHAIN_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRSwapchain = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasExtendedDynamicState = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_MAINTENANCE1_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_MAINTENANCE1_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_KHR_MAINTENANCE1_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRMaintenance1 = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_MAINTENANCE2_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_MAINTENANCE2_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_MAINTENANCE2_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_KHR_MAINTENANCE2_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRMaintenance2 = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_EXT_MEMORY_BUDGET_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_MEMORY_BUDGET_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_EXT_MEMORY_BUDGET_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasMemoryBudget = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_EXT_MEMORY_PRIORITY_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_EXT_MEMORY_PRIORITY_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_MEMORY_PRIORITY_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_EXT_MEMORY_PRIORITY_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasMemoryPriority = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRDedicatedAllocation = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRDedicatedHostOperations = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRShaderFloatControls = 1;
 				}
 				else if (_deviceExtensionOptionals.HasKHRShaderFloatControls && strcmp(availableExts[i].extensionName, VK_KHR_SPIRV_1_4_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_SPIRV_1_4_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SPIRV_1_4_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_KHR_SPIRV_1_4_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRSpirv_1_4 = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRImageFormatList = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_EXT_VALIDATION_CACHE_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_EXT_VALIDATION_CACHE_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_VALIDATION_CACHE_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_EXT_VALIDATION_CACHE_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRImageFormatList = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_AMD_BUFFER_MARKER_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_AMD_BUFFER_MARKER_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_AMD_BUFFER_MARKER_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_AMD_BUFFER_MARKER_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasAMDBufferMarker = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_EXTERNAL_FENCE_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_EXTERNAL_FENCE_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_EXTERNAL_FENCE_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_KHR_EXTERNAL_FENCE_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRExternalFence = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRExternalSemaphore = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_HUAWEI_SUBPASS_SHADING_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_HUAWEI_SUBPASS_SHADING_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_HUAWEI_SUBPASS_SHADING_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_HUAWEI_SUBPASS_SHADING_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRHuaWeiSubpassShading = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, "VK_HUAWEI_smart_cache") == 0)
 				{
 					extensions.push_back("VK_HUAWEI_smart_cache");
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_HUAWEI_smart_cache ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_HUAWEI_smart_cache ext.");
 					_deviceExtensionOptionals.HasKHRHuaWeiSmartCache = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, "VK_HUAWEI_prerotation") == 0)
 				{
 					extensions.push_back("VK_HUAWEI_prerotation");
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_HUAWEI_prerotation ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_HUAWEI_prerotation ext.");
 					_deviceExtensionOptionals.HasKHRHuaWeiSmartCache = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_QCOM_RENDER_PASS_TRANSFORM_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_QCOM_RENDER_PASS_TRANSFORM_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_QCOM_RENDER_PASS_TRANSFORM_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_QCOM_RENDER_PASS_TRANSFORM_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasQcomRenderPassTransform = 1;
 				}
 
@@ -617,32 +610,31 @@ void VulkanManager::InitDevice()
 				{
 					bHasRenderPass2Ext = true;
 					extensions.push_back(VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRCreateRenderPass2 = 1;
 				}
 				else if (bHasRenderPass2Ext && strcmp(availableExts[i].extensionName, VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME) == 0)
 				{
 					//允许深度/模板图像的图像存储屏障仅设置了深度或模板位之一，而不是两者都设置。
 					extensions.push_back(VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasKHRSeparateDepthStencilLayouts = 1;
 				} 
 				else if (strcmp(availableExts[i].extensionName, VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME) == 0)
 				{
 					//全屏支持
 					extensions.push_back(VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME);		
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasEXTFullscreenExclusive = 1;
 				}
 				else if (strcmp(availableExts[i].extensionName, VK_EXT_FILTER_CUBIC_EXTENSION_NAME) == 0)
 				{
 					extensions.push_back(VK_EXT_FILTER_CUBIC_EXTENSION_NAME);
-					layerLogs.push_back("hBBr:[Vulkan Device extension] Add VK_EXT_FILTER_CUBIC_EXTENSION_NAME ext.");
+					layerLogs.push_back("[Vulkan Device Extension] Add VK_EXT_FILTER_CUBIC_EXTENSION_NAME ext.");
 					_deviceExtensionOptionals.HasExtFilter_Cubic = 1;
 				}
 			}
 		}
-
 		for (auto i : layerLogs)
 		{
 			ConsoleDebug::print_endl(i);
@@ -744,7 +736,7 @@ void VulkanManager::InitDebug()
 {
 	if (_bDebugEnable)
 	{
-		ConsoleDebug::print_endl("hBBr:Start Init Vulkan Debug.");
+		ConsoleDebug::print_endl("InitVkManager[MainThread] : Start Init Vulkan Debug.");
 		fvkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(_instance, "vkCreateDebugReportCallbackEXT");
 		fvkDestroyDebugReportCallbackEXT = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(_instance, "vkDestroyDebugReportCallbackEXT");
 		if (VK_NULL_HANDLE == fvkCreateDebugReportCallbackEXT || VK_NULL_HANDLE == fvkDestroyDebugReportCallbackEXT)
@@ -831,11 +823,10 @@ void VulkanManager::ReCreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSur
 		DestroySurface(newSurface);
 		newSurface = VK_NULL_HANDLE;
 	}
-	//SDL2
-	auto result = SDL_Vulkan_CreateSurface(handle, _instance, nullptr, &newSurface);
-	if (result != 0)
+	//SDL
+	if (!SDL_Vulkan_CreateSurface(handle, _instance, nullptr, &newSurface))
 	{
-		MessageOut("sdl Create Window Surface Failed.", false, true);
+		MessageOut("sdl Create Window Surface Failed.", true, true);
 	}
 }
 
@@ -1099,7 +1090,7 @@ VkExtent2D VulkanManager::CreateSwapchain(
 	std::vector<VkImage> tempSwapchainImages(numSwapchainImages);
 	vkGetSwapchainImagesKHR(_device, newSwapchain, &numSwapchainImages, tempSwapchainImages.data());
 	swapchainImages.resize(numSwapchainImages);
-	for (int i = 0 ;i < numSwapchainImages ; i++)
+	for (uint32_t i = 0 ;i < numSwapchainImages ; i++)
 	{
 		swapchainImages[i].Image = tempSwapchainImages[i];
 		CreateImageView(swapchainImages[i].Image, surfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT, swapchainImages[i].ImageView);
@@ -2331,7 +2322,7 @@ ImGuiContext* VulkanManager::InitImgui_SDL(SDL_Window* handle, VkRenderPass rend
 {
 #if ENABLE_IMGUI
 	//Imgui
-	ConsoleDebug::print_endl("hBBr:Start init imgui.");
+	ConsoleDebug::print_endl("InitVkManager[MainThread] : Start init imgui.");
 
 	IMGUI_CHECKVERSION();
 	auto newContent = ImGui::CreateContext();

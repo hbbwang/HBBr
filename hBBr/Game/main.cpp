@@ -10,7 +10,7 @@ int main()
 {	
 	//Initialize vulkan manager
 	VulkanApp::Get()->InitVulkanManager(true);
-	//Initialize vulkan window
+	//Initialize window with vulkan renderer
 	VulkanApp::Get()->CreateVulkanWindow(256, 256, "MainRenderer");
 	//Main loop
 	while (VulkanApp::Get()->MainLoop())

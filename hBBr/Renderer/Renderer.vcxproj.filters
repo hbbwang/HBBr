@@ -105,9 +105,6 @@
     <ClCompile Include="Core\VulkanWindow.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\VulkanSwapchain.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\ConsoleDebug.h">
@@ -192,9 +189,6 @@
       <Filter>ThirdParty\Imgui\backends</Filter>
     </ClInclude>
     <ClInclude Include="Core\VulkanWindow.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\VulkanSwapchain.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Common\blockingconcurrentqueue.h">
