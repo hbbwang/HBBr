@@ -23,7 +23,7 @@ void MessageOut(std::string msg, bool bExit, bool bMessageBox, const char* textC
 	ConsoleDebug::print_endl(msg, textColor);
     if (bMessageBox)
     {
-		#if IS_EDITOR
+		#if 1
 		const SDL_MessageBoxButtonData buttons[] = {
 			{ 0, 0, "继续" },
 			{ 0, 1, "中断" },

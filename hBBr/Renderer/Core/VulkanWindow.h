@@ -42,6 +42,7 @@ private:
 	VkExtent2D SurfaceSize{};
 	std::vector<VulkanImage> SwapchainImages;
 	uint32_t NumSwapchainImage = 0;
+	//Frame Index给信号用的，渲染对象尽量不要用这个
 	uint32_t CurrentFrameIndex = 0;
 	std::vector<VkFence> ExecuteFence;
 	//Render Thread Objects
@@ -49,7 +50,7 @@ private:
 	std::vector<VkSemaphore> AcquireSemaphore;
 	std::vector<VkCommandBuffer> CmdBuf;
 	//Functions
-	void InitSwapchain_MainThread();
+	void ResetSwapchain_MainThread();
 	void Update_MainThread();
 	void Update_RenderThead();
 	void ResetResources_MainThread();
@@ -58,6 +59,7 @@ private:
 	std::mutex RenderMutex;
 	bool bResetResources = false;
 	bool bInitialize = false;
+	bool bNeedResetSwapchain_RenderThread = false;
 };
 //std::memory_order_relaxed：最宽松的模式。只保证当前原子操作是原子的，不提供任何同步或顺序约束。适用于计数器等无需同步其他内存操作的场景。
 //std::memory_order_consume：较弱的依赖顺序。仅限制依赖于该原子值的读写不能重排到此操作之前。实际使用受限，多数编译器将其视为 acquire 处理。

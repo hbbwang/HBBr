@@ -25,7 +25,7 @@ VulkanWindow::VulkanWindow(int width, int height, const char* title)
 	}
 	WindowID = SDL_GetWindowID(WindowHandle);
 	//Init Swapchain
-	InitSwapchain_MainThread();
+	ResetSwapchain_MainThread();
 }
 
 VulkanWindow::~VulkanWindow()
@@ -47,14 +47,24 @@ void VulkanWindow::SetFocus()
 	SDL_RaiseWindow(WindowHandle);
 }
 
-void VulkanWindow::InitSwapchain_MainThread()
+void VulkanWindow::ResetSwapchain_MainThread()
 {
 	const auto& vkManager = VulkanManager::Get();
 	//Surface
-	ConsoleDebug::printf_endl("VulkanWindow[{}] : Start create vulkan surface...", GetTitle().c_str());
+	ConsoleDebug::printf_endl("VulkanWindow[{}] : Reset vulkan surface...", GetTitle().c_str());
 	vkManager->ReCreateSurface_SDL(WindowHandle, Surface);
 	vkManager->GetSurfaceCapabilities(Surface, &SurfaceCapabilities);
 	//Swapchain
+	if (Swapchain)
+	{
+		ConsoleDebug::printf_endl("VulkanWindow[{}] : Destroy out date swapchain.", GetTitle().c_str());
+		std::vector<VkImageView>swapchainViews;
+		for (auto& s: SwapchainImages)
+		{
+			swapchainViews.push_back(s.ImageView);
+		}
+		vkManager->DestroySwapchain(Swapchain, swapchainViews);
+	}
 	ConsoleDebug::printf_endl("VulkanWindow[{}] : Start create swapchain.", GetTitle().c_str());
 	vkManager->CheckSurfaceFormat(Surface, SurfaceFormat);
 	SurfaceSize = vkManager->CreateSwapchain(
@@ -95,23 +105,45 @@ void VulkanWindow::InitSwapchain_MainThread()
 
 void VulkanWindow::Update_MainThread()
 {
-
+	if (bNeedResetSwapchain_RenderThread)
+	{
+		const auto& vkManager = VulkanManager::Get();
+		vkManager->DeviceWaitIdle();
+		ResetSwapchain_MainThread();
+		bNeedResetSwapchain_RenderThread = false;
+	}
 }
 
 void VulkanWindow::Update_RenderThead()
 {
 	std::lock_guard<std::mutex> lock(RenderMutex);
-	if (bInitialize && SwapchainImages[0].bIsValid && !bResetResources)
+	if (bInitialize && SwapchainImages[0].bIsValid && !bResetResources &&!bNeedResetSwapchain_RenderThread)
 	{
 		const auto& vkManager = VulkanManager::Get();
+		//Wait for previous frame to finish.
+		vkManager->WaitForFences({ ExecuteFence[CurrentFrameIndex] });
 		//Get next swapchain image index.
 		if (!vkManager->GetNextSwapchainIndex(Swapchain, AcquireSemaphore[CurrentFrameIndex], nullptr, &CurrentFrameIndex))
 		{
+			bNeedResetSwapchain_RenderThread = true;
 			return;
 		}
+		//Begin command buffer recording.
+		vkManager->BeginCommandBuffer(CmdBuf[CurrentFrameIndex]);
+		//Record rendering commands here...
+
+		//Submit command buffer to queue.
+		vkManager->EndCommandBuffer(CmdBuf[CurrentFrameIndex]);
+		vkManager->SubmitQueueForPasses(
+			CmdBuf[CurrentFrameIndex],
+			AcquireSemaphore[CurrentFrameIndex],
+			QueueSemaphore[CurrentFrameIndex],
+			ExecuteFence[CurrentFrameIndex]
+		);
 		//Present swapchain.
 		if (!vkManager->Present(Swapchain, QueueSemaphore[CurrentFrameIndex], CurrentFrameIndex))
 		{
+			bNeedResetSwapchain_RenderThread = true;
 			return;
 		}
 		//Get next frame index.

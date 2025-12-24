@@ -124,7 +124,7 @@ void VulkanApp::InitVulkanManager(bool bEnableDebug)
     //Create Render Thread
     RenderThread = std::thread([this]()
     {
-        ConsoleDebug::printf_endl("Init RenderThread.");
+        //ConsoleDebug::printf_endl("Init RenderThread.");
         //Init Vulkan Manager (Render Thread)
         VulkanManager::Get()->InitManager_RenderThread();
         bIsRenderThread = true;

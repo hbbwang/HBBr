@@ -2256,9 +2256,7 @@ void VulkanManager::VMADestroyBufferAndFreeMemory(VkBuffer& buffer, VmaAllocatio
 	if (buffer != VK_NULL_HANDLE && allocation != VK_NULL_HANDLE)
 	{
 		vmaDestroyBuffer(_vma_allocator, buffer, allocation);
-		#if IS_EDITOR
 		ConsoleDebug::printf_endl(GetInternationalizationText("Renderer", "DestroyBuffer"), debugName.c_str(), debugSize, (double)debugSize / (double)1024.0 / (double)1024.0);
-		#endif
 	}
 	buffer = VK_NULL_HANDLE;
 	allocation = VK_NULL_HANDLE;

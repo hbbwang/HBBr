@@ -344,6 +344,11 @@ void ConsoleDebug::print_endl(std::string in, std::string color, std::string bac
 
         printf("%s\n", ((Data + in)).c_str());
         std::string nIn = (Data + in) + "\n";
+        
+#ifdef _WIN32
+		OutputDebugStringA(nIn.c_str());
+#endif
+
         WriteToLogFile(log_file, nIn);
 
         if (bConnectedConsole == true)

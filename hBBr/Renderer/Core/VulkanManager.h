@@ -271,7 +271,7 @@ public:
 	/* return the swapchain is normal (not out of data). */
 	HBBR_API bool GetNextSwapchainIndex(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, VkFence* fence , uint32_t* swapchainIndex);
 
-	HBBR_API bool Present(VkSwapchainKHR& swapchain, VkSemaphore& semaphore, uint32_t& swapchainImageIndex);
+	HBBR_API bool Present(VkSwapchainKHR& swapchain, VkSemaphore& wait, uint32_t& swapchainImageIndex);
 
 	HBBR_API bool Present(VkSwapchainKHR& swapchain, std::vector<VkSemaphore> semaphores, uint32_t& swapchainImageIndex);
 
