@@ -136,6 +136,14 @@ void VulkanApp::InitVulkanManager(bool bEnableDebug)
 
 VulkanWindow* VulkanApp::CreateVulkanWindow(int w, int h, const char* title)
 {
+    if (!bIsMianThread)
+    {
+        ConsoleDebug::printf_endl_error("VulkanApp::CreateVulkanWindow must be called in main thread.");
+        throw std::runtime_error("VulkanApp::CreateVulkanWindow must be called in main thread.");
+		return nullptr;
+    }
+	//等待非渲染时间才能进行创建窗口
+    std::lock_guard<std::mutex> lock(RenderMutex);
 	//Create Vulkan Window
     auto newWindow = new VulkanWindow(w, h, title);
     newWindow->SetFocus();
@@ -234,6 +242,7 @@ bool VulkanApp::MainLoop()
 
 bool VulkanApp::RenderLoop()
 {
+    std::lock_guard<std::mutex> lock(RenderMutex);
     bool bContinueLoop = true;
 	//Render code here
     {

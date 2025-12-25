@@ -816,13 +816,8 @@ bool VulkanManager::IsGPUDeviceSuitable(VkPhysicalDevice device)
 	return deviceFeatures.tessellationShader && deviceFeatures.geometryShader;
 }
 
-void VulkanManager::ReCreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurface)
+void VulkanManager::CreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurface)
 {
-	if (newSurface != VK_NULL_HANDLE)
-	{
-		DestroySurface(newSurface);
-		newSurface = VK_NULL_HANDLE;
-	}
 	//SDL
 	if (!SDL_Vulkan_CreateSurface(handle, _instance, nullptr, &newSurface))
 	{
@@ -2039,22 +2034,6 @@ void VulkanManager::CreateFence(VkFence& fence, VkFenceCreateFlags createFlags)
 	VkResult result = vkCreateFence(_device, &info, VK_NULL_HANDLE, &fence);
 	if (result != VK_SUCCESS) {
 		MessageOut("Create Fence Failed.", false, true);
-	}
-}
-
-void VulkanManager::RecreateFences(std::vector<VkFence>& fences, uint32_t number)
-{
-	for (int i = 0; i < fences.size(); i++)
-	{
-		if (fences[i] != VK_NULL_HANDLE)
-		{
-			DestroyFence(fences[i]);
-		}
-	}
-	fences.resize(_swapchainBufferCount);
-	for (int i = 0; i < (int)_swapchainBufferCount; i++)
-	{
-		CreateFence(fences[i]);
 	}
 }
 

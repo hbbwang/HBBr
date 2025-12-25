@@ -169,7 +169,7 @@ public:
 	HBBR_API void InitVMA();
 
 	/* 创建Surface */
-	HBBR_API void ReCreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurface);
+	HBBR_API void CreateSurface_SDL(SDL_Window* handle, VkSurfaceKHR& newSurface);
 
 	/* 释放Surface */
 	HBBR_API void DestroySurface(VkSurfaceKHR& surface);
@@ -324,8 +324,6 @@ public:
 	HBBR_API void DestroyRenderSemaphores(std::vector<VkSemaphore>& semaphore);
 
 	HBBR_API void CreateFence(VkFence& fence, VkFenceCreateFlags createFlags = VK_FENCE_CREATE_SIGNALED_BIT);
-
-	HBBR_API void RecreateFences(std::vector<VkFence>& fences , uint32_t number);
 
 	HBBR_API void DestroyFence(VkFence& fence);
 

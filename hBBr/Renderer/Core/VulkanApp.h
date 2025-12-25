@@ -24,6 +24,7 @@ public:
 	HBBR_API void EnqueueRenderFunc(std::function<void()>func);
 	bool RenderLoop();
 private:
+	std::mutex RenderMutex;
 	std::thread RenderThread;
 	static std::unique_ptr<VulkanApp> Instance;
 	std::vector<class VulkanWindow*> AllWindows;

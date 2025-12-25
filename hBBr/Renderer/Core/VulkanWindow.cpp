@@ -50,14 +50,10 @@ void VulkanWindow::SetFocus()
 void VulkanWindow::ResetSwapchain_MainThread()
 {
 	const auto& vkManager = VulkanManager::Get();
-	//Surface
-	ConsoleDebug::printf_endl("VulkanWindow[{}] : Reset vulkan surface...", GetTitle().c_str());
-	vkManager->ReCreateSurface_SDL(WindowHandle, Surface);
-	vkManager->GetSurfaceCapabilities(Surface, &SurfaceCapabilities);
-	//Swapchain
+	//Destroy out date swapchain
 	if (Swapchain)
 	{
-		ConsoleDebug::printf_endl("VulkanWindow[{}] : Destroy out date swapchain.", GetTitle().c_str());
+		//ConsoleDebug::printf_endl("VulkanWindow[{}] : Destroy out date swapchain.", GetTitle().c_str());
 		std::vector<VkImageView>swapchainViews;
 		for (auto& s: SwapchainImages)
 		{
@@ -65,8 +61,13 @@ void VulkanWindow::ResetSwapchain_MainThread()
 		}
 		vkManager->DestroySwapchain(Swapchain, swapchainViews);
 	}
-	ConsoleDebug::printf_endl("VulkanWindow[{}] : Start create swapchain.", GetTitle().c_str());
+	//Create Surface
+	//ConsoleDebug::printf_endl("VulkanWindow[{}] : Reset vulkan surface...", GetTitle().c_str());
+	vkManager->DestroySurface(Surface);
+	vkManager->CreateSurface_SDL(WindowHandle, Surface);
+	vkManager->GetSurfaceCapabilities(Surface, &SurfaceCapabilities);
 	vkManager->CheckSurfaceFormat(Surface, SurfaceFormat);
+	//ConsoleDebug::printf_endl("VulkanWindow[{}] : Create swapchain.", GetTitle().c_str());
 	SurfaceSize = vkManager->CreateSwapchain(
 		WindowHandle,
 		{ 1,1 },
@@ -91,7 +92,7 @@ void VulkanWindow::ResetSwapchain_MainThread()
 				},
 				[this]()
 				{
-					ConsoleDebug::printf_endl("VulkanWindow[{}] : Transition swapchain images layout finish.", GetTitle().c_str());
+					//ConsoleDebug::printf_endl("VulkanWindow[{}] : Transition swapchain images layout finish.", GetTitle().c_str());
 					//Transition Swapchain Images Layout
 					for (int i = 0; i < (int)SwapchainImages.size(); i++)
 					{
@@ -155,10 +156,9 @@ void VulkanWindow::ResetResources_MainThread()
 {
 	bResetResources = true;
 	std::lock_guard<std::mutex> lock(RenderMutex);
+	CurrentFrameIndex = 0;
 	const auto& vkManager = VulkanManager::Get();
-	if (ExecuteFence.size() != NumSwapchainImage)
 	{
-		//ConsoleDebug::print_endl("hBBr:Swapchain: image acquired fences.");
 		for (int i = 0; i < (int)ExecuteFence.size(); i++)
 		{
 			vkManager->DestroyFence(ExecuteFence.at(i));
@@ -175,7 +175,7 @@ void VulkanWindow::ResetResources_MainThread()
 		{
 			ResetResources_RenderThread();
 			bResetResources = false;
-			ConsoleDebug::printf_endl("VulkanWindow[{}] : Window reset resource finish.", GetTitle().c_str());
+			//ConsoleDebug::printf_endl("VulkanWindow[{}] : Window reset resource finish.", GetTitle().c_str());
 			if (!bInitialize)
 			{
 				bInitialize = true;
@@ -187,7 +187,6 @@ void VulkanWindow::ResetResources_MainThread()
 void VulkanWindow::ResetResources_RenderThread()
 {
 	const auto& vkManager = VulkanManager::Get();
-	if (AcquireSemaphore.size() != NumSwapchainImage)
 	{
 		//ConsoleDebug::print_endl("hBBr:Swapchain: Present Semaphore.");
 		for (int i = 0; i < (int)AcquireSemaphore.size(); i++)
@@ -201,7 +200,6 @@ void VulkanWindow::ResetResources_RenderThread()
 			vkManager->CreateVkSemaphore(AcquireSemaphore.at(i));
 		}
 	}
-	if (QueueSemaphore.size() != NumSwapchainImage)
 	{
 		//ConsoleDebug::print_endl("hBBr:Swapchain: Present Semaphore.");
 		for (int i = 0; i < (int)QueueSemaphore.size(); i++)

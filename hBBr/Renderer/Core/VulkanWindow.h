@@ -24,13 +24,14 @@ class VulkanWindow
 {
 	friend class VulkanApp;
 public:
-	VulkanWindow(int width, int height, const char* title);
-	~VulkanWindow();
 	struct SDL_Window* GetWindowHandle() const { return WindowHandle; }
 	SDL_WindowID GetWindowID() const { return WindowID; }
 	std::string GetTitle();
 	void SetTitle(const char* title);
 	void SetFocus();
+protected:
+	VulkanWindow(int width, int height, const char* title);
+	~VulkanWindow();
 private:
 	struct SDL_Window* WindowHandle = nullptr;
 	SDL_WindowID WindowID;
