@@ -33,34 +33,41 @@ protected:
 	VulkanWindow(int width, int height, const char* title);
 	~VulkanWindow();
 private:
-	struct SDL_Window* WindowHandle = nullptr;
-	SDL_WindowID WindowID;
+	struct SDL_Window*				WindowHandle = nullptr;
+	SDL_WindowID					WindowID;
+
 	//Main Thread Objects
-	VkSurfaceKHR Surface = VK_NULL_HANDLE;
-	VkSurfaceFormatKHR SurfaceFormat{};
-	VkSurfaceCapabilitiesKHR SurfaceCapabilities{};
-	VkSwapchainKHR Swapchain = VK_NULL_HANDLE;
-	VkExtent2D SurfaceSize{};
-	std::vector<VulkanImage> SwapchainImages;
-	uint32_t NumSwapchainImage = 0;
-	//Frame Index给信号用的，渲染对象尽量不要用这个
-	uint32_t CurrentFrameIndex = 0;
-	std::vector<VkFence> ExecuteFence;
+	VkSurfaceKHR					Surface = VK_NULL_HANDLE;
+	VkSwapchainKHR					Swapchain = VK_NULL_HANDLE;
+	std::vector<VulkanImage>		SwapchainImages;
+	std::vector<VkFence>			ExecuteFence;
+	VkSurfaceFormatKHR				SurfaceFormat{};
+	VkSurfaceCapabilitiesKHR		SurfaceCapabilities{};
+	VkExtent2D						SurfaceSize{};
+	uint32_t						NumSwapchainImage = 0;
+	uint32_t						CurrentFrameIndex = 0;
+
+
 	//Render Thread Objects
-	std::vector<VkSemaphore> QueueSemaphore;
-	std::vector<VkSemaphore> AcquireSemaphore;
-	std::vector<VkCommandBuffer> CmdBuf;
+	std::vector<VkSemaphore>		QueueSemaphore;
+	std::vector<VkSemaphore>		AcquireSemaphore;
+	std::vector<VkCommandBuffer>	CmdBuf;
+
 	//Functions
 	void ResetSwapchain_MainThread();
 	void Update_MainThread();
 	void Update_RenderThead();
-	void ResetResources_MainThread();
 	void ResetResources_RenderThread();
+	void Release_MainThread();
+	void Release_RenderThread();
+
 private:
-	std::mutex RenderMutex;
-	bool bResetResources = false;
-	bool bInitialize = false;
-	bool bNeedResetSwapchain_RenderThread = false;
+	std::mutex			RenderMutex;
+	bool				bResetResources = false;
+	bool				bInitialize = false;
+	bool				bRelease = false;
+	bool				bNeedResetSwapchain_RenderThread = false;
+	std::atomic<bool>	bRenderThreadReleaseFinish;
 };
 //std::memory_order_relaxed：最宽松的模式。只保证当前原子操作是原子的，不提供任何同步或顺序约束。适用于计数器等无需同步其他内存操作的场景。
 //std::memory_order_consume：较弱的依赖顺序。仅限制依赖于该原子值的读写不能重排到此操作之前。实际使用受限，多数编译器将其视为 acquire 处理。

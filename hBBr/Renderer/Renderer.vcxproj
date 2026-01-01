@@ -179,7 +179,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\ThirdParty\crossguid;$(VULKAN_SDK)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\ThirdParty\crossguid;$(VULKAN_SDK)\lib;$(SolutionDir)\ThirdParty\vld;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /c /f /y $(solutiondir)DependencyCopy\$(Configuration)\*.dll $(solutiondir)$(Platform)\$(Configuration)\</Command>
@@ -199,7 +199,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\ThirdParty\crossguid;$(VULKAN_SDK)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\ThirdParty\crossguid;$(VULKAN_SDK)\lib;$(SolutionDir)\ThirdParty\vld;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /c /f /y $(solutiondir)DependencyCopy\$(Configuration)\*.dll $(solutiondir)$(Platform)\$(Configuration)\</Command>

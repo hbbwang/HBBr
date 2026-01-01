@@ -26,10 +26,74 @@ VulkanWindow::VulkanWindow(int width, int height, const char* title)
 	WindowID = SDL_GetWindowID(WindowHandle);
 	//Init Swapchain
 	ResetSwapchain_MainThread();
+	bRenderThreadReleaseFinish = false;
 }
 
 VulkanWindow::~VulkanWindow()
 {
+	
+}
+
+void VulkanWindow::Release_MainThread()
+{
+	bRelease = true;
+	const auto& vkManager = VulkanManager::Get();
+	//Wait for device idle
+	vkManager->DeviceWaitIdle();
+	//Start release window resources.
+	{
+		std::vector<VkImageView>swapchainViews;
+		for (auto& s : SwapchainImages)
+			swapchainViews.push_back(s.ImageView);
+		vkManager->DestroySwapchain(Swapchain, swapchainViews);
+		vkManager->DestroySurface(Surface);
+		for (int i = 0; i < (int)ExecuteFence.size(); i++)
+		{
+			vkManager->DestroyFence(ExecuteFence.at(i));
+			ExecuteFence.at(i) = VK_NULL_HANDLE;
+		}
+	}
+
+	VulkanApp::Get()->EnqueueRenderFunc([this]()
+		{
+			Release_RenderThread();
+			bRenderThreadReleaseFinish.store(true, std::memory_order_release);
+		});
+	while (!bRenderThreadReleaseFinish.load(std::memory_order_acquire))
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(2));
+	}
+	delete this;
+}
+
+void VulkanWindow::Release_RenderThread()
+{
+	const auto& vkManager = VulkanManager::Get();
+	{
+		//ConsoleDebug::print_endl("hBBr:Swapchain: Present Semaphore.");
+		for (int i = 0; i < (int)AcquireSemaphore.size(); i++)
+		{
+			vkManager->DestroySemaphore(AcquireSemaphore.at(i));
+			AcquireSemaphore.at(i) = nullptr;
+		}
+	}
+	{
+		//ConsoleDebug::print_endl("hBBr:Swapchain: Present Semaphore.");
+		for (int i = 0; i < (int)QueueSemaphore.size(); i++)
+		{
+			vkManager->DestroySemaphore(QueueSemaphore.at(i));
+			QueueSemaphore.at(i) = nullptr;
+		}
+	}
+	if (CmdBuf.size() != NumSwapchainImage)
+	{
+		//ConsoleDebug::print_endl("hBBr:Swapchain: Allocate Main CommandBuffers.");
+		for (int i = 0; i < (int)CmdBuf.size(); i++)
+		{
+			vkManager->FreeCommandBuffer(vkManager->GetCommandPool(), CmdBuf.at(i));
+			CmdBuf.at(i) = nullptr;
+		}
+	}
 }
 
 std::string VulkanWindow::GetTitle()
@@ -49,6 +113,10 @@ void VulkanWindow::SetFocus()
 
 void VulkanWindow::ResetSwapchain_MainThread()
 {
+	std::lock_guard<std::mutex> lock(RenderMutex);
+	bResetResources = true;
+	CurrentFrameIndex = 0;
+
 	const auto& vkManager = VulkanManager::Get();
 	//Destroy out date swapchain
 	if (Swapchain)
@@ -77,6 +145,18 @@ void VulkanWindow::ResetSwapchain_MainThread()
 		SwapchainImages,
 		SurfaceCapabilities);
 	NumSwapchainImage = (uint32_t)SwapchainImages.size();
+	{
+		for (int i = 0; i < (int)ExecuteFence.size(); i++)
+		{
+			vkManager->DestroyFence(ExecuteFence.at(i));
+			ExecuteFence.at(i) = nullptr;
+		}
+		ExecuteFence.resize(NumSwapchainImage);
+		for (int i = 0; i < (int)NumSwapchainImage; i++)
+		{
+			vkManager->CreateFence(ExecuteFence.at(i));
+		}
+	}
 	//Swapchain Images Layout Transition (VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
 	VulkanApp::Get()->EnqueueRenderFunc([this]()
 		{
@@ -100,8 +180,15 @@ void VulkanWindow::ResetSwapchain_MainThread()
 					}
 				}
 			);
+			ResetResources_RenderThread();
+			bResetResources = false;
+			//ConsoleDebug::printf_endl("VulkanWindow[{}] : Window reset resource finish.", GetTitle().c_str());
+			if (!bInitialize)
+			{
+				bInitialize = true;
+				ConsoleDebug::printf_endl("VulkanWindow[{}] : Window initialize finish.", GetTitle().c_str());
+			}
 		});
-	ResetResources_MainThread();
 }
 
 void VulkanWindow::Update_MainThread()
@@ -118,7 +205,7 @@ void VulkanWindow::Update_MainThread()
 void VulkanWindow::Update_RenderThead()
 {
 	std::lock_guard<std::mutex> lock(RenderMutex);
-	if (bInitialize && SwapchainImages[0].bIsValid && !bResetResources &&!bNeedResetSwapchain_RenderThread)
+	if (bInitialize &&!bRelease && SwapchainImages[0].bIsValid && !bResetResources &&!bNeedResetSwapchain_RenderThread)
 	{
 		const auto& vkManager = VulkanManager::Get();
 		//Wait for previous frame to finish.
@@ -152,37 +239,6 @@ void VulkanWindow::Update_RenderThead()
 	}
 }
 
-void VulkanWindow::ResetResources_MainThread()
-{
-	bResetResources = true;
-	std::lock_guard<std::mutex> lock(RenderMutex);
-	CurrentFrameIndex = 0;
-	const auto& vkManager = VulkanManager::Get();
-	{
-		for (int i = 0; i < (int)ExecuteFence.size(); i++)
-		{
-			vkManager->DestroyFence(ExecuteFence.at(i));
-			ExecuteFence.at(i) = nullptr;
-		}
-		ExecuteFence.resize(NumSwapchainImage);
-		for (int i = 0; i < (int)NumSwapchainImage; i++)
-		{
-			vkManager->CreateFence(ExecuteFence.at(i));
-		}
-	}
-	//RenderThread Resources Reset
-	VulkanApp::Get()->EnqueueRenderFunc([this]()
-		{
-			ResetResources_RenderThread();
-			bResetResources = false;
-			//ConsoleDebug::printf_endl("VulkanWindow[{}] : Window reset resource finish.", GetTitle().c_str());
-			if (!bInitialize)
-			{
-				bInitialize = true;
-				ConsoleDebug::printf_endl("VulkanWindow[{}] : Window initialize finish.", GetTitle().c_str());
-			}
-		});
-}
 
 void VulkanWindow::ResetResources_RenderThread()
 {

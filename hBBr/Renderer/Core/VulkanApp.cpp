@@ -4,6 +4,11 @@
 #include "VulkanApp.h"
 #include "VulkanManager.h"
 
+#define ENABLE_VLD
+#ifdef ENABLE_VLD
+#include "vld/include/vld.h"
+#endif
+
 //CallStack 程序崩溃的时候跟踪堆栈
 #pragma region CallStack
 #ifdef _WIN32 // SetUnhandledExceptionFilter(ApplicationCrashHandler);
@@ -84,7 +89,7 @@ void CallStack()
 
 std::unique_ptr<VulkanApp> VulkanApp::Instance;
 
-thread_local bool bIsMianThread = false;
+thread_local bool bIsMainThread = false;
 thread_local bool bIsRenderThread = false;
 thread_local bool bInitialize = false;
 bool bSdlQuit = false;//只在主线程Set,其他线程只读
@@ -111,7 +116,7 @@ void VulkanApp::InitVulkanManager(bool bEnableDebug)
         MessageOut("Init sdl3 window failed.", true, true, "255,0,0");
         return;
     }
-    bIsMianThread = true;
+    bIsMainThread = true;
     if (!SDL_Vulkan_LoadLibrary(nullptr))
     {
         MessageOut(SDL_GetError(), true, true, "255,0,0");
@@ -136,7 +141,7 @@ void VulkanApp::InitVulkanManager(bool bEnableDebug)
 
 VulkanWindow* VulkanApp::CreateVulkanWindow(int w, int h, const char* title)
 {
-    if (!bIsMianThread)
+    if (!bIsMainThread)
     {
         ConsoleDebug::printf_endl_error("VulkanApp::CreateVulkanWindow must be called in main thread.");
         throw std::runtime_error("VulkanApp::CreateVulkanWindow must be called in main thread.");
@@ -158,12 +163,12 @@ bool VulkanApp::MainLoop()
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
-        auto window = GetWindowFromID(event.window.windowID);
+		auto window = GetWindowFromID(event.window.windowID);//window maybe nullptr
         switch (event.type)
         {
 		    case SDL_EVENT_WINDOW_CLOSE_REQUESTED: //窗口关闭事件
 		    { 
-                ConsoleDebug::printf_endl("Close window : {}", window->GetTitle().c_str());
+                DestroyWindow(window);
                 break;
 		    }
 		    case SDL_EVENT_WINDOW_FOCUS_GAINED:
@@ -272,6 +277,10 @@ bool VulkanApp::RenderLoop()
     return bContinueLoop;
 }
 
+VulkanApp::~VulkanApp()
+{
+}
+
 void VulkanApp::Release()
 {
     ConsoleDebug::printf_endl("Release VulkanApp.");
@@ -297,7 +306,7 @@ VulkanWindow* VulkanApp::GetFocusWindow()
 
 VulkanWindow* VulkanApp::GetWindowFromID(SDL_WindowID id)
 {
-    for (auto window : AllWindows)
+    for (auto& window : AllWindows)
     {
         if (window->GetWindowID() == id)
         {
@@ -305,6 +314,32 @@ VulkanWindow* VulkanApp::GetWindowFromID(SDL_WindowID id)
         }
 	}
     return nullptr;
+}
+
+void VulkanApp::DestroyWindow(VulkanWindow* window)
+{
+    if (!bIsMainThread)
+    {
+        ConsoleDebug::printf_endl_error("VulkanApp::DestroyWindow must be called in main thread.");
+        throw std::runtime_error("VulkanApp::DestroyWindow must be called in main thread.");
+		return;
+    }
+    if (window)
+    {
+        for (auto w : AllWindows)
+        {
+            if (w == window)
+            {
+                std::lock_guard<std::mutex> lock(RenderMutex);
+				AllWindows.erase(std::remove(AllWindows.begin(), AllWindows.end(), w), AllWindows.end());
+                break;
+            }
+        }
+        ConsoleDebug::printf_endl("Destroy window : {}", window->GetTitle().c_str());
+        window->Release_MainThread();
+        SDL_DestroyWindow(window->GetWindowHandle());
+    }
+    return;
 }
 
 void VulkanApp::EnqueueRenderFunc(std::function<void()> func)
