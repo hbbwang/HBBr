@@ -18,6 +18,6 @@ int main()
 
 	}
 	//Release vulkan app
-	VulkanApp::Get()->Release();
+	VulkanApp::Get()->ReleaseVulkanManager();
 	return 0;
 }

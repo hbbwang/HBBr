@@ -29,7 +29,6 @@ public:
 	std::string GetTitle();
 	void SetTitle(const char* title);
 	void SetFocus();
-protected:
 	VulkanWindow(int width, int height, const char* title);
 	~VulkanWindow();
 private:
@@ -62,11 +61,10 @@ private:
 	void Release_RenderThread();
 
 private:
-	std::mutex			RenderMutex;
-	bool				bResetResources = false;
+	std::atomic<bool>	bResetResources = false;
 	bool				bInitialize = false;
 	bool				bRelease = false;
-	bool				bNeedResetSwapchain_RenderThread = false;
+	std::atomic<bool>	bNeedResetSwapchain_RenderThread = false;
 	std::atomic<bool>	bRenderThreadReleaseFinish;
 };
 //std::memory_order_relaxed：最宽松的模式。只保证当前原子操作是原子的，不提供任何同步或顺序约束。适用于计数器等无需同步其他内存操作的场景。

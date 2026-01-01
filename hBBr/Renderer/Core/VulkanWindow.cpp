@@ -63,7 +63,6 @@ void VulkanWindow::Release_MainThread()
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(2));
 	}
-	delete this;
 }
 
 void VulkanWindow::Release_RenderThread()
@@ -113,7 +112,6 @@ void VulkanWindow::SetFocus()
 
 void VulkanWindow::ResetSwapchain_MainThread()
 {
-	std::lock_guard<std::mutex> lock(RenderMutex);
 	bResetResources = true;
 	CurrentFrameIndex = 0;
 
@@ -181,7 +179,7 @@ void VulkanWindow::ResetSwapchain_MainThread()
 				}
 			);
 			ResetResources_RenderThread();
-			bResetResources = false;
+			bResetResources.store(false, std::memory_order_release);
 			//ConsoleDebug::printf_endl("VulkanWindow[{}] : Window reset resource finish.", GetTitle().c_str());
 			if (!bInitialize)
 			{
@@ -189,23 +187,30 @@ void VulkanWindow::ResetSwapchain_MainThread()
 				ConsoleDebug::printf_endl("VulkanWindow[{}] : Window initialize finish.", GetTitle().c_str());
 			}
 		});
+	while (bResetResources.load(std::memory_order_acquire))
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(2));
+	}
 }
 
 void VulkanWindow::Update_MainThread()
 {
-	if (bNeedResetSwapchain_RenderThread)
+	if (bNeedResetSwapchain_RenderThread.load(std::memory_order_acquire))
 	{
 		const auto& vkManager = VulkanManager::Get();
 		vkManager->DeviceWaitIdle();
 		ResetSwapchain_MainThread();
-		bNeedResetSwapchain_RenderThread = false;
+		bNeedResetSwapchain_RenderThread.store(false, std::memory_order_release);
 	}
 }
 
 void VulkanWindow::Update_RenderThead()
 {
-	std::lock_guard<std::mutex> lock(RenderMutex);
-	if (bInitialize &&!bRelease && SwapchainImages[0].bIsValid && !bResetResources &&!bNeedResetSwapchain_RenderThread)
+	if (bInitialize 
+		&&!bRelease 
+		&& SwapchainImages[0].bIsValid 
+		&& !bResetResources 
+		&& !bNeedResetSwapchain_RenderThread.load(std::memory_order_acquire))
 	{
 		const auto& vkManager = VulkanManager::Get();
 		//Wait for previous frame to finish.
@@ -213,7 +218,7 @@ void VulkanWindow::Update_RenderThead()
 		//Get next swapchain image index.
 		if (!vkManager->GetNextSwapchainIndex(Swapchain, AcquireSemaphore[CurrentFrameIndex], nullptr, &CurrentFrameIndex))
 		{
-			bNeedResetSwapchain_RenderThread = true;
+			bNeedResetSwapchain_RenderThread.store(true, std::memory_order_release);
 			return;
 		}
 		//Begin command buffer recording.
@@ -231,7 +236,7 @@ void VulkanWindow::Update_RenderThead()
 		//Present swapchain.
 		if (!vkManager->Present(Swapchain, QueueSemaphore[CurrentFrameIndex], CurrentFrameIndex))
 		{
-			bNeedResetSwapchain_RenderThread = true;
+			bNeedResetSwapchain_RenderThread.store(true, std::memory_order_release);
 			return;
 		}
 		//Get next frame index.

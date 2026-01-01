@@ -124,6 +124,9 @@ void VulkanApp::InitVulkanManager(bool bEnableDebug)
     //Set sdl hints
     SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "0");
     bIsEnableDebug = bEnableDebug;
+    std::shared_ptr<std::vector<std::shared_ptr<VulkanWindow>>> newWindows;
+    newWindows.reset(new std::vector<std::shared_ptr<VulkanWindow>>());
+	AllWindows.store(newWindows, std::memory_order_release);
     //Init Vulkan Manager (Main Thread)
     VulkanManager::Get()->InitManager_MainThread(bIsEnableDebug);
     //Create Render Thread
@@ -147,18 +150,25 @@ VulkanWindow* VulkanApp::CreateVulkanWindow(int w, int h, const char* title)
         throw std::runtime_error("VulkanApp::CreateVulkanWindow must be called in main thread.");
 		return nullptr;
     }
-	//等待非渲染时间才能进行创建窗口
-    std::lock_guard<std::mutex> lock(RenderMutex);
 	//Create Vulkan Window
-    auto newWindow = new VulkanWindow(w, h, title);
+    std::shared_ptr<VulkanWindow> newWindow;
+    newWindow.reset(new VulkanWindow(w, h, title));
     newWindow->SetFocus();
-    //Create Renderer...
-    AllWindows.push_back(newWindow);
-    return newWindow;
+
+	//Build atomic shared_ptr vector
+	std::shared_ptr<std::vector<std::shared_ptr<VulkanWindow>>> newWindows;
+    newWindows = AllWindows.load(std::memory_order_acquire);
+	newWindows->push_back(newWindow);
+
+	//Overwrite atomic shared_ptr vector
+	AllWindows.store(newWindows, std::memory_order_release);
+
+    return newWindow.get();
 }
 
 bool VulkanApp::MainLoop()
 {
+    bHasMainLoop = true;
     bool bContinueLoop = true;
     SDL_Event event;
     while (SDL_PollEvent(&event))
@@ -236,7 +246,8 @@ bool VulkanApp::MainLoop()
         }
         else
         {
-            for (auto& w : AllWindows)
+            auto windows = AllWindows.load(std::memory_order_acquire);
+            for (auto& w : *windows)
             {
 				w->Update_MainThread();
             }
@@ -247,7 +258,6 @@ bool VulkanApp::MainLoop()
 
 bool VulkanApp::RenderLoop()
 {
-    std::lock_guard<std::mutex> lock(RenderMutex);
     bool bContinueLoop = true;
 	//Render code here
     {
@@ -263,7 +273,8 @@ bool VulkanApp::RenderLoop()
             {
                 func();
             }
-            for (auto& w : AllWindows)
+            auto windows = AllWindows.load(std::memory_order_acquire);
+            for (auto& w : *windows)
             {
                 w->Update_RenderThead();
             }
@@ -281,8 +292,13 @@ VulkanApp::~VulkanApp()
 {
 }
 
-void VulkanApp::Release()
+void VulkanApp::ReleaseVulkanManager()
 {
+    if (!bHasMainLoop)
+    {
+        //异常
+        throw std::runtime_error("VulkanApp::Do you forget to run MainLoop().");
+    }
     ConsoleDebug::printf_endl("Release VulkanApp.");
     VulkanManager::Get()->ReleaseManager();
     SDL_Vulkan_UnloadLibrary();
@@ -293,12 +309,13 @@ void VulkanApp::Release()
 
 VulkanWindow* VulkanApp::GetFocusWindow()
 {
-    for (auto window : AllWindows)
+    auto windows = AllWindows.load(std::memory_order_acquire);
+    for (auto& window : *windows)
     {
         SDL_WindowFlags windowFlags = SDL_GetWindowFlags(window->GetWindowHandle());
         if (windowFlags & SDL_WINDOW_INPUT_FOCUS)
         {
-            return window;
+            return window.get();
         }
     }
     return nullptr;
@@ -306,11 +323,12 @@ VulkanWindow* VulkanApp::GetFocusWindow()
 
 VulkanWindow* VulkanApp::GetWindowFromID(SDL_WindowID id)
 {
-    for (auto& window : AllWindows)
+    auto windows = AllWindows.load(std::memory_order_acquire);
+    for (auto& window : *windows)
     {
         if (window->GetWindowID() == id)
         {
-            return window;
+            return window.get();
         }
 	}
     return nullptr;
@@ -324,20 +342,24 @@ void VulkanApp::DestroyWindow(VulkanWindow* window)
         throw std::runtime_error("VulkanApp::DestroyWindow must be called in main thread.");
 		return;
     }
+    std::shared_ptr<VulkanWindow> temp;
     if (window)
     {
-        for (auto w : AllWindows)
-        {
-            if (w == window)
-            {
-                std::lock_guard<std::mutex> lock(RenderMutex);
-				AllWindows.erase(std::remove(AllWindows.begin(), AllWindows.end(), w), AllWindows.end());
-                break;
-            }
-        }
-        ConsoleDebug::printf_endl("Destroy window : {}", window->GetTitle().c_str());
-        window->Release_MainThread();
-        SDL_DestroyWindow(window->GetWindowHandle());
+        auto windows = AllWindows.load(std::memory_order_acquire);
+        auto it = std::remove_if(windows->begin(), windows->end(), [&](std::shared_ptr<VulkanWindow>& prt) {
+            return prt.get() == window;
+            });
+        temp = *it;
+		windows->erase(it);
+		//Overwrite atomic shared_ptr vector
+        AllWindows.store(windows, std::memory_order_release);
+    }
+    if (temp)
+    {
+        ConsoleDebug::printf_endl("Destroy window : {}", temp->GetTitle().c_str());
+        temp->Release_MainThread();
+        SDL_DestroyWindow(temp->GetWindowHandle());
+        temp.reset();
     }
     return;
 }
