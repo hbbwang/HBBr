@@ -380,7 +380,6 @@ void VulkanApp::DestroyWindow(VulkanWindow* window)
     {
         ConsoleDebug::printf_endl("Destroy window : {}", temp->GetTitle().c_str());
         temp->Release_MainThread();
-        SDL_DestroyWindow(temp->GetWindowHandle());
         temp.reset();
     }
     return;

@@ -31,7 +31,9 @@ VulkanWindow::VulkanWindow(int width, int height, const char* title)
 
 VulkanWindow::~VulkanWindow()
 {
-	
+	SDL_DestroyWindow(WindowHandle);
+	WindowHandle = nullptr;
+	WindowID = 0;
 }
 
 void VulkanWindow::Release_MainThread()
@@ -52,6 +54,7 @@ void VulkanWindow::Release_MainThread()
 			vkManager->DestroyFence(ExecuteFence.at(i));
 			ExecuteFence.at(i) = VK_NULL_HANDLE;
 		}
+		ExecuteFence.clear();
 	}
 
 	VulkanApp::Get()->EnqueueRenderFunc([this]()
@@ -84,7 +87,6 @@ void VulkanWindow::Release_RenderThread()
 			QueueSemaphore.at(i) = nullptr;
 		}
 	}
-	if (CmdBuf.size() != NumSwapchainImage)
 	{
 		//ConsoleDebug::print_endl("hBBr:Swapchain: Allocate Main CommandBuffers.");
 		for (int i = 0; i < (int)CmdBuf.size(); i++)
@@ -275,7 +277,6 @@ void VulkanWindow::ResetResources_RenderThread()
 			vkManager->CreateVkSemaphore(QueueSemaphore.at(i));
 		}
 	}
-	if (CmdBuf.size() != NumSwapchainImage)
 	{
 		//ConsoleDebug::print_endl("hBBr:Swapchain: Allocate Main CommandBuffers.");
 		for (int i = 0; i < (int)CmdBuf.size(); i++)
