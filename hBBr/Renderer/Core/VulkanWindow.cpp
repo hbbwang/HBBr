@@ -187,6 +187,7 @@ void VulkanWindow::ResetSwapchain_MainThread()
 				ConsoleDebug::printf_endl("VulkanWindow[{}] : Window initialize finish.", GetTitle().c_str());
 			}
 		});
+	//Wait for render thread reset finish
 	while (bResetResources.load(std::memory_order_acquire))
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(2));
