@@ -297,14 +297,36 @@ void VulkanApp::ReleaseVulkanManager()
     if (!bHasMainLoop)
     {
         //Òì³£
-        throw std::runtime_error("VulkanApp::Do you forget to run MainLoop().");
+        //throw std::runtime_error("VulkanApp::Do you forget to run MainLoop().");
+        MessageOut("VulkanApp::Do you forget to run MainLoop().", false, true, "255,255,0");
     }
+
+    //Stop render thread
+    if (!bSdlQuit)
+    {
+        bSdlQuit = true;
+        RenderThread.join();
+    }
+
+    //Clear windows
+    auto windows = AllWindows.load(std::memory_order_acquire);
+    if (windows)
+    {
+        for (auto& w : *windows)
+        {
+            DestroyWindow(w.get());
+        }
+        windows->clear();
+    }
+    AllWindows.store(nullptr, std::memory_order_release);
+
     ConsoleDebug::printf_endl("Release VulkanApp.");
     VulkanManager::Get()->ReleaseManager();
     SDL_Vulkan_UnloadLibrary();
     SDL_Quit();
     if (Instance)
-        Instance.reset();
+        Instance.reset(nullptr);
+    Instance = nullptr;
 }
 
 VulkanWindow* VulkanApp::GetFocusWindow()
